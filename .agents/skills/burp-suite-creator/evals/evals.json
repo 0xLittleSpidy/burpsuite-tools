@@ -1,0 +1,29 @@
+{
+  "skill_name": "burp-suite-creator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a Bambda to filter out image requests",
+      "expected_output": "Java code for a Bambda that filters image extensions/mime types",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Write a Python Burp extension that adds a custom header 'X-Hacked: true' to all outgoing requests.",
+      "expected_output": "Python script using Montoya API that modifies requests to add the header",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Create a BCheck that looks for a leaked AWS access key (AKIA...) in the response body.",
+      "expected_output": "A BCheck script with given/then block looking for AWS keys",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I need a Java Burp extension to log all requests to a file. Give me the jar structure.",
+      "expected_output": "A pom.xml file and a Java file using Montoya API to log requests, with instructions to run mvn package",
+      "files": []
+    }
+  ]
+}
