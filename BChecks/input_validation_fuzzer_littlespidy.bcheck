@@ -1,0 +1,56 @@
+# Created with the help of an AI Agent and littlespidy.
+
+metadata:
+    language: v1-beta
+    name: "Input Validation Log-Only Fuzzer"
+    description: "Injects bad characters, long strings, and edge cases. Logs every response as an Info-level issue for manual review."
+    author: "littlespidy"
+
+given any insertion point then
+    # Test 1: Empty Value
+    send payload:
+        replacing: ""
+    report issue:
+        severity: info
+        confidence: tentative
+        detail: "Test 1: Empty string payload injected. Review the attached request and response."
+
+    # Test 2: SQL / Command Injection / XSS Characters
+    send payload:
+        replacing: "'\"><;|\\][}{`$"
+    report issue:
+        severity: info
+        confidence: tentative
+        detail: "Test 2: Special characters ('\"><;|\\][}{`$) injected. Review the attached request and response."
+
+    # Test 3: Long String
+    send payload:
+        replacing: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    report issue:
+        severity: info
+        confidence: tentative
+        detail: "Test 3: Long string injected. Review the attached request and response."
+
+    # Test 4: Negative Integer Edge Case
+    send payload:
+        replacing: "-1"
+    report issue:
+        severity: info
+        confidence: tentative
+        detail: "Test 4: Negative integer (-1) injected. Review the attached request and response."
+
+    # Test 5: Large Integer Edge Case
+    send payload:
+        replacing: "99999999999999999999"
+    report issue:
+        severity: info
+        confidence: tentative
+        detail: "Test 5: Large integer (99999999999999999999) injected. Review the attached request and response."
+
+    # Test 6: Null Byte
+    send payload:
+        replacing: "%00"
+    report issue:
+        severity: info
+        confidence: tentative
+        detail: "Test 6: Null byte (%00) injected. Review the attached request and response."

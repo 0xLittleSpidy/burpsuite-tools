@@ -1,0 +1,301 @@
+id: f7e8d9c0-b1a2-3456-7890-abcdef012345
+name: Repeater Fuzzer — GET Request Edition
+function: CUSTOM_ACTION
+location: REPEATER
+source: |+
+  /**
+   * Repeater Fuzzer — GET Request Edition
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Targets GET requests, fuzzing URL query string parameters.
+   * Runs 8 test sections:
+   *   1. Value Fuzzing            - Injects bad values into each query param (others untouched).
+   *   2. Remove Required Params   - Removes ONE param at a time, keeps the rest.
+   *   3. Change Value Type        - Swaps values to numbers, booleans, nulls, special strings.
+   *   4. Duplicate Parameter      - Appends the same param key again with a different value.
+   *   5. Extra Param (no value)   - Injects extra_param= with no value.
+   *   6. Extra Param (with value) - Injects extra_param=fuzz_test_value and other variants.
+   *   7. Query String Injection   - Sends deliberately malformed/broken query strings.
+   *   8. Path Manipulation        - Tests variations on the URL path itself.
+   **/
+
+  import burp.api.montoya.http.message.params.HttpParameter;
+  import burp.api.montoya.http.message.params.HttpParameterType;
+
+  // ─── Helper: send a request and log the full response ─────────────────────
+  java.util.function.BiConsumer<burp.api.montoya.http.message.requests.HttpRequest, String> sendAndLog =
+      (req, label) -> {
+          try {
+              logging().logToOutput(">>> " + label);
+              var res = api().http().sendRequest(req).response();
+              logging().logToOutput("Status: " + res.statusCode());
+              logging().logToOutput("--- Complete Response ---");
+              logging().logToOutput(res.toString());
+              logging().logToOutput("-------------------------\n");
+          } catch (Exception ex) {
+              logging().logToError("Request failed [" + label + "]: " + ex.getMessage());
+          }
+      };
+
+  // ─── Helper: rebuild a raw URL path+query given an updated param value ────
+  // Needed for manipulations where the Montoya param API cannot be used directly.
+  java.util.function.BiFunction<String, String, String> replaceQueryString =
+      (originalUrl, newQuery) -> {
+          int q = originalUrl.indexOf('?');
+          return q >= 0 ? originalUrl.substring(0, q + 1) + newQuery : originalUrl + "?" + newQuery;
+      };
+
+  try {
+      var originalRequest = requestResponse.request();
+      String method = originalRequest.method();
+
+      // ─── Guard: only proceed for GET requests ─────────────────────────────
+      if (!method.equalsIgnoreCase("GET")) {
+          logging().logToError(
+              "Aborted: This fuzzer targets GET requests only.\n" +
+              "Detected method: " + method);
+          return;
+      }
+
+      // Collect QUERY (URL) parameters
+      var queryParams = new java.util.ArrayList<burp.api.montoya.http.message.params.ParsedHttpParameter>();
+      for (var p : originalRequest.parameters()) {
+          if (p.type() == HttpParameterType.URL) queryParams.add(p);
+      }
+
+      String originalPath = originalRequest.path(); // includes query string
+
+      logging().logToOutput("==============================================");
+      logging().logToOutput(" Repeater Fuzzer — GET Request Test Suite");
+      logging().logToOutput(" Query Parameters Found : " + queryParams.size());
+      logging().logToOutput(" Original Path+Query    : " + originalPath);
+      logging().logToOutput("==============================================\n");
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 1: Value Fuzzing
+      // For each query param: inject a bad value, leave all other params untouched.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 1: Value Fuzzing (one param at a time) ━━━\n");
+
+      // { raw URL-decoded value, human label }
+      String[][] valueFuzzPayloads = {
+          {"",                                    "empty string"},
+          {"'\"<>;|\\][}{`$",                     "special characters"},
+          {"A".repeat(200),                       "long string (200 A's)"},
+          {"-1",                                  "negative integer"},
+          {"999999999999999999",                   "large integer"},
+          {"0",                                    "zero"},
+          {"null",                                 "string 'null'"},
+          {"true",                                 "string 'true'"},
+          {"false",                                "string 'false'"},
+          {"%00",                                  "null byte (URL-encoded)"},
+          {"%0d%0a",                               "CRLF injection"},
+          {"../../../etc/passwd",                  "path traversal"},
+          {"' OR '1'='1",                          "SQL injection probe"},
+          {"<script>alert(1)</script>",            "XSS probe"},
+          {"${7*7}",                               "SSTI probe (dollar brace)"},
+          {"{{7*7}}",                              "SSTI probe (double curly braces)"},
+          {"1; DROP TABLE users--",               "SQL injection (statement terminator)"},
+          {"1 AND 1=1",                            "Boolean SQL injection"},
+          {"1 AND 1=2",                            "Boolean SQL injection (false condition)"},
+          {"1 UNION SELECT null--",               "UNION-based SQL injection probe"},
+          {"javascript:alert(1)",                  "JavaScript URI injection"},
+          {"\u200b",                              "zero-width space (unicode)"},
+          {"\\x00",                               "backslash x00 (literal)"},
+          {" ",                                   "single space"},
+          {"9".repeat(100),                       "100-digit numeric string"}
+      };
+
+      for (var param : queryParams) {
+          logging().logToOutput("--- Fuzzing param: '" + param.name() +
+                                "' | current value: " + param.value() + " ---");
+          for (String[] payload : valueFuzzPayloads) {
+              var newParam   = HttpParameter.parameter(param.name(), payload[0], HttpParameterType.URL);
+              var newRequest = originalRequest.withUpdatedParameters(newParam);
+              sendAndLog.accept(newRequest,
+                  "[Value Fuzz] " + param.name() + " = " + payload[1] + " → " + payload[0]);
+          }
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 2: Remove Required Parameters — ONE at a time
+      // N params → N requests, each dropping exactly one different param.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 2: Remove Required Parameters (one at a time) ━━━\n");
+      for (var param : queryParams) {
+          var removedRequest = originalRequest.withRemovedParameters(param);
+          sendAndLog.accept(removedRequest,
+              "[Remove] Dropped '" + param.name() + "' | Remaining params: " + (queryParams.size() - 1));
+      }
+
+      // Also send the request with NO query string at all
+      String barePathOnly = originalPath.contains("?")
+          ? originalPath.substring(0, originalPath.indexOf('?'))
+          : originalPath;
+      sendAndLog.accept(originalRequest.withPath(barePathOnly),
+          "[Remove All] Stripped entire query string — base path only: " + barePathOnly);
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 3: Change Parameter Value Type
+      // Swaps values to strings that look like other types, testing how the
+      // server-side parser or validator handles unexpected coercion.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 3: Change Parameter Value Type ━━━\n");
+
+      String[][] typeSwaps = {
+          {"0",           "swap to number zero"},
+          {"3.14",        "swap to float"},
+          {"true",        "swap to boolean true"},
+          {"false",       "swap to boolean false"},
+          {"null",        "swap to null-like string"},
+          {"[]",          "swap to array-like string"},
+          {"{}",          "swap to object-like string"},
+          {"undefined",   "swap to JS undefined string"},
+          {"NaN",         "swap to NaN string"},
+          {"Infinity",    "swap to Infinity string"}
+      };
+
+      for (var param : queryParams) {
+          logging().logToOutput("--- Param: '" + param.name() +
+                                "' | Original value: '" + param.value() + "' ---");
+          for (String[] swap : typeSwaps) {
+              var newParam   = HttpParameter.parameter(param.name(), swap[0], HttpParameterType.URL);
+              var newRequest = originalRequest.withUpdatedParameters(newParam);
+              sendAndLog.accept(newRequest, "[Type Change] " + param.name() + ": " + swap[1]);
+          }
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 4: Duplicate Parameter (send same key twice)
+      // Appended via raw path manipulation so both copies appear in the URL.
+      // Servers may pick the first or last — both behaviours are interesting.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 4: Duplicate Parameter ━━━\n");
+      for (var param : queryParams) {
+          String dupPath = originalPath + "&" + param.name() + "=DUPLICATE_FUZZ_VALUE";
+          sendAndLog.accept(originalRequest.withPath(dupPath),
+              "[Duplicate] '" + param.name() + "' sent twice — " +
+              "original value kept, appended with DUPLICATE_FUZZ_VALUE");
+
+          // Swap the order: duplicate first, then original
+          // Build query without original param, then prepend dup, then re-add original
+          var removedReq = originalRequest.withRemovedParameters(param);
+          String dupFirstPath = removedReq.path() +
+              (removedReq.path().contains("?") ? "&" : "?") +
+              param.name() + "=DUPLICATE_FUZZ_VALUE&" +
+              param.name() + "=" + param.value();
+          sendAndLog.accept(originalRequest.withPath(dupFirstPath),
+              "[Duplicate Reversed] '" + param.name() + "' — DUPLICATE_FUZZ_VALUE first, original second");
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 5: Extra Parameter Without Value
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 5: Extra Parameter Without Value ━━━\n");
+      var extraEmpty = HttpParameter.parameter("extra_param", "", HttpParameterType.URL);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraEmpty),
+          "[Extra Param] Added extra_param= (empty value)");
+
+      // Param with no '=' at all — raw path append
+      sendAndLog.accept(originalRequest.withPath(originalPath + "&extra_param"),
+          "[Extra Param] Added extra_param with no '=' sign");
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 6: Extra Parameter With Value
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 6: Extra Parameter With Value ━━━\n");
+      var extraFuzz = HttpParameter.parameter("extra_param", "fuzz_test_value", HttpParameterType.URL);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraFuzz),
+          "[Extra Param] Added extra_param=fuzz_test_value");
+
+      var extraNumeric = HttpParameter.parameter("extra_param", "9999", HttpParameterType.URL);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraNumeric),
+          "[Extra Param] Added extra_param=9999 (numeric)");
+
+      var extraAdmin = HttpParameter.parameter("role", "admin", HttpParameterType.URL);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraAdmin),
+          "[Extra Param] Added role=admin (privilege escalation probe)");
+
+      var extraDebug = HttpParameter.parameter("debug", "true", HttpParameterType.URL);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraDebug),
+          "[Extra Param] Added debug=true (debug flag probe)");
+
+      var extraCallback = HttpParameter.parameter("callback", "alert(1)", HttpParameterType.URL);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraCallback),
+          "[Extra Param] Added callback=alert(1) (JSONP/open redirect probe)");
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 7: Query String Injection / Malformed Query Strings
+      // Tests structurally broken or adversarial query strings.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 7: Query String Injection / Malformed ━━━\n");
+
+      // Base path without query for raw reconstruction
+      String basePath = originalPath.contains("?")
+          ? originalPath.substring(0, originalPath.indexOf('?'))
+          : originalPath;
+      String currentQuery = originalPath.contains("?")
+          ? originalPath.substring(originalPath.indexOf('?') + 1)
+          : "";
+
+      String[][] malformedQueries = {
+          {"",                                     "no query string at all"},
+          {"?",                                    "bare '?' with no params"},
+          {"=",                                    "only '='"},
+          {"&",                                    "only '&'"},
+          {"&&",                                   "double '&&'"},
+          {currentQuery + "&",                     "trailing '&' after last pair"},
+          {"&" + currentQuery,                     "leading '&' before first pair"},
+          {currentQuery + "=" + currentQuery,      "query string repeated as a value"},
+          {currentQuery + "#fragment",             "fragment identifier injected"},
+          {currentQuery + "%00",                   "null byte appended to query"},
+          {currentQuery + "%0d%0aX-Injected:true", "CRLF header injection via query"},
+          {"A".repeat(8000),                       "8000-char garbage query string"},
+          {currentQuery.replace("=", "=="),        "double '==' in query pairs"},
+          {currentQuery.replace("&", "&&"),        "double '&&' between pairs"}
+      };
+
+      for (String[] mq : malformedQueries) {
+          String rawPath = basePath + (mq[0].isEmpty() ? "" : "?" + mq[0]);
+          String preview = rawPath.length() > 80 ? rawPath.substring(0, 80) + "..." : rawPath;
+          sendAndLog.accept(originalRequest.withPath(rawPath),
+              "[Malformed Query] " + mq[1] + " → " + preview);
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 8: Path Manipulation
+      // Varies the URL path while keeping or removing the query string.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 8: Path Manipulation ━━━\n");
+
+      String queryPart = currentQuery.isEmpty() ? "" : "?" + currentQuery;
+      String[][] pathVariants = {
+          {basePath + "/../" + queryPart,                   "path traversal: /../"},
+          {basePath + "/." + queryPart,                     "dot segment: /."},
+          {basePath + "%2f" + queryPart,                    "URL-encoded slash in path"},
+          {basePath + "/;" + queryPart,                     "semicolon in path (parameter injection)"},
+          {basePath + "///" + queryPart,                    "triple slash"},
+          {basePath + "?." + queryPart.replace("?","&"),    "dot after first '?'"},
+          {basePath.toUpperCase() + queryPart,              "UPPERCASE path"},
+          {basePath.toLowerCase() + queryPart,              "lowercase path"},
+          {basePath + " " + queryPart,                      "space in path (should be 400)"},
+          {basePath + "\t" + queryPart,                     "tab in path"},
+          {"/nonexistent-endpoint-fuzz" + queryPart,       "completely different path"},
+          {basePath + "/nonexistent" + queryPart,           "appended nonexistent segment"}
+      };
+
+      for (String[] pv : pathVariants) {
+          String preview = pv[0].length() > 80 ? pv[0].substring(0, 80) + "..." : pv[0];
+          sendAndLog.accept(originalRequest.withPath(pv[0]),
+              "[Path Manipulation] " + pv[1] + " → " + preview);
+      }
+
+      logging().logToOutput("==============================================");
+      logging().logToOutput(" Fuzzing complete. Review all responses above.");
+      logging().logToOutput("==============================================");
+
+  } catch (Exception e) {
+      logging().logToError("Fatal error during fuzzing: " + e.getMessage());
+      e.printStackTrace();
+  }

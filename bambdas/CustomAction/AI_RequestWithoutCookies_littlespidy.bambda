@@ -1,0 +1,13 @@
+id: c30b0c18-6534-4e13-8648-80ab525045d0
+name: Request Without Cookies
+function: CUSTOM_ACTION
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+  * Request Without Cookies
+  * 
+  * Created with the help of an AI Agent and littlespidy.
+  **/
+  var req = requestResponse.request();
+  logging().logToOutput(api().http().sendRequest(req.withRemovedHeader("Authorization").withRemovedHeader("Cookie")).response().statusCode());
+  

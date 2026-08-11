@@ -1,0 +1,238 @@
+id: a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6
+name: Repeater Fuzzer — POST Form Edition
+function: CUSTOM_ACTION
+location: REPEATER
+source: |+
+  /**
+   * Repeater Fuzzer — POST Form Edition
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Targets POST requests with Content-Type: application/x-www-form-urlencoded.
+   * Runs 8 test sections:
+   *   1. Value Fuzzing            - Injects bad values into each form param (others untouched).
+   *   2. Empty Body Variants      - Sends empty body and body with only "=" or "&".
+   *   3. Remove Required Params   - Removes ONE param at a time, keeps the rest.
+   *   4. Change Value Type        - Swaps values to numbers, booleans, nulls, arrays.
+   *   5. Duplicate Parameter      - Sends the param twice with a different second value.
+   *   6. Extra Param (no value)   - Injects extra_param= with no value.
+   *   7. Extra Param (with value) - Injects extra_param=fuzz_test_value and numeric variants.
+   *   8. Malformed Body           - Sends structurally broken form bodies.
+   **/
+
+  import burp.api.montoya.http.message.params.HttpParameter;
+  import burp.api.montoya.http.message.params.HttpParameterType;
+
+  // ─── Helper: send a request and log the full response ─────────────────────
+  java.util.function.BiConsumer<burp.api.montoya.http.message.requests.HttpRequest, String> sendAndLog =
+      (req, label) -> {
+          try {
+              logging().logToOutput(">>> " + label);
+              var res = api().http().sendRequest(req).response();
+              logging().logToOutput("Status: " + res.statusCode());
+              logging().logToOutput("--- Complete Response ---");
+              logging().logToOutput(res.toString());
+              logging().logToOutput("-------------------------\n");
+          } catch (Exception ex) {
+              logging().logToError("Request failed [" + label + "]: " + ex.getMessage());
+          }
+      };
+
+  try {
+      var originalRequest = requestResponse.request();
+      String method = originalRequest.method();
+      boolean isForm = originalRequest.hasHeader("Content-Type") &&
+                       originalRequest.headerValue("Content-Type").toLowerCase()
+                           .contains("application/x-www-form-urlencoded");
+
+      // ─── Guard: only proceed for POST form-encoded requests ───────────────
+      if (!method.equalsIgnoreCase("POST") || !isForm) {
+          logging().logToError(
+              "Aborted: This fuzzer targets POST application/x-www-form-urlencoded requests only.\n" +
+              "Detected: " + method + " | Content-Type: " +
+              (originalRequest.hasHeader("Content-Type") ? originalRequest.headerValue("Content-Type") : "none"));
+          return;
+      }
+
+      String originalBody = originalRequest.bodyToString();
+
+      // Collect BODY parameters (URL-encoded form params)
+      var bodyParams = new java.util.ArrayList<burp.api.montoya.http.message.params.ParsedHttpParameter>();
+      for (var p : originalRequest.parameters()) {
+          if (p.type() == HttpParameterType.BODY) bodyParams.add(p);
+      }
+
+      logging().logToOutput("==============================================");
+      logging().logToOutput(" Repeater Fuzzer — POST Form Test Suite");
+      logging().logToOutput(" Form Parameters Found : " + bodyParams.size());
+      logging().logToOutput(" Original Body         : " + originalBody);
+      logging().logToOutput("==============================================\n");
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 1: Value Fuzzing
+      // For each form param: inject a bad value, leave all other params untouched.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 1: Value Fuzzing (one param at a time) ━━━\n");
+
+      // { raw value, human label }
+      String[][] valueFuzzPayloads = {
+          {"",                                   "empty string"},
+          {"'\"<>;|\\][}{`$",                    "special characters"},
+          {"A".repeat(200),                      "long string (200 A's)"},
+          {"-1",                                 "negative integer"},
+          {"999999999999999999",                  "large integer"},
+          {"0",                                   "zero"},
+          {"null",                                "string 'null'"},
+          {"true",                                "string 'true'"},
+          {"false",                               "string 'false'"},
+          {"%00",                                 "null byte (URL-encoded)"},
+          {"%0d%0a",                              "CRLF injection"},
+          {"../../../etc/passwd",                 "path traversal"},
+          {"' OR '1'='1",                         "SQL injection probe"},
+          {"<script>alert(1)</script>",           "XSS probe"},
+          {"${7*7}",                              "SSTI probe"},
+          {"{{7*7}}",                             "Jinja/Twig SSTI probe"},
+          {"%7B%7B7*7%7D%7D",                    "SSTI probe (URL-encoded curly braces)"}
+      };
+
+      for (var param : bodyParams) {
+          logging().logToOutput("--- Fuzzing param: '" + param.name() +
+                                "' | current value: " + param.value() + " ---");
+          for (String[] payload : valueFuzzPayloads) {
+              var newParam   = HttpParameter.parameter(param.name(), payload[0], HttpParameterType.BODY);
+              var newRequest = originalRequest.withUpdatedParameters(newParam);
+              sendAndLog.accept(newRequest,
+                  "[Value Fuzz] " + param.name() + " = " + payload[1] + " → " + payload[0]);
+          }
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 2: Empty / Minimal Body Variants
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 2: Empty / Minimal Body Variants ━━━\n");
+      sendAndLog.accept(originalRequest.withBody(""),        "[Empty Body] No content (empty string)");
+      sendAndLog.accept(originalRequest.withBody("="),       "[Empty Body] Single '=' only");
+      sendAndLog.accept(originalRequest.withBody("&"),       "[Empty Body] Single '&' only");
+      sendAndLog.accept(originalRequest.withBody("&&"),      "[Empty Body] Double '&&'");
+      sendAndLog.accept(originalRequest.withBody("null"),    "[Empty Body] Literal 'null'");
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 3: Remove Required Parameters — ONE at a time
+      // N params → N requests, each dropping exactly one different param.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 3: Remove Required Parameters (one at a time) ━━━\n");
+      for (var param : bodyParams) {
+          var removedRequest = originalRequest.withRemovedParameters(param);
+          sendAndLog.accept(removedRequest,
+              "[Remove] Dropped '" + param.name() + "' | Remaining params: " + (bodyParams.size() - 1));
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 4: Change Parameter Value Type
+      // Swaps the value to strings that look like other types, testing how the
+      // server-side deserializer or validator handles unexpected type coercion.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 4: Change Parameter Value Type ━━━\n");
+
+      String[][] typeSwaps = {
+          {"0",           "swap to number zero"},
+          {"3.14",        "swap to float"},
+          {"true",        "swap to boolean true"},
+          {"false",       "swap to boolean false"},
+          {"null",        "swap to null-like string"},
+          {"[]",          "swap to array-like string"},
+          {"{}",          "swap to object-like string"},
+          {"undefined",   "swap to JS undefined string"},
+          {"NaN",         "swap to NaN string"}
+      };
+
+      for (var param : bodyParams) {
+          logging().logToOutput("--- Param: '" + param.name() +
+                                "' | Original value: '" + param.value() + "' ---");
+          for (String[] swap : typeSwaps) {
+              var newParam   = HttpParameter.parameter(param.name(), swap[0], HttpParameterType.BODY);
+              var newRequest = originalRequest.withUpdatedParameters(newParam);
+              sendAndLog.accept(newRequest, "[Type Change] " + param.name() + ": " + swap[1]);
+          }
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 5: Duplicate Parameter (send same key twice)
+      // Appended as raw string so both keys appear in the body.
+      // Servers may pick the first or last — both behaviours are interesting.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 5: Duplicate Parameter ━━━\n");
+      for (var param : bodyParams) {
+          String dupBody = originalBody + "&" + param.name() + "=DUPLICATE_FUZZ_VALUE";
+          var dupRequest = originalRequest.withBody(dupBody);
+          sendAndLog.accept(dupRequest,
+              "[Duplicate Key] '" + param.name() + "' sent twice — " +
+              "original value kept, appended with DUPLICATE_FUZZ_VALUE");
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 6: Extra Parameter Without Value
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 6: Extra Parameter Without Value ━━━\n");
+      var extraEmpty = HttpParameter.parameter("extra_param", "", HttpParameterType.BODY);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraEmpty),
+          "[Extra Param] Added extra_param= (empty value)");
+
+      // Also send a param with no '=' at all (raw body append)
+      sendAndLog.accept(originalRequest.withBody(originalBody + "&extra_param"),
+          "[Extra Param] Added extra_param with no '=' sign (no value separator)");
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 7: Extra Parameter With Value
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 7: Extra Parameter With Value ━━━\n");
+      var extraFuzz = HttpParameter.parameter("extra_param", "fuzz_test_value", HttpParameterType.BODY);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraFuzz),
+          "[Extra Param] Added extra_param=fuzz_test_value");
+
+      var extraNumeric = HttpParameter.parameter("extra_param", "9999", HttpParameterType.BODY);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraNumeric),
+          "[Extra Param] Added extra_param=9999 (numeric)");
+
+      var extraAdmin = HttpParameter.parameter("role", "admin", HttpParameterType.BODY);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraAdmin),
+          "[Extra Param] Added role=admin (privilege escalation probe)");
+
+      var extraDebug = HttpParameter.parameter("debug", "true", HttpParameterType.BODY);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraDebug),
+          "[Extra Param] Added debug=true (debug flag probe)");
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 8: Malformed / Broken Form Bodies
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 8: Malformed / Broken Form Body ━━━\n");
+      String[][] brokenBodies = {
+          {"=",                                  "no key, only '='"},
+          {"key",                                "key with no '=' separator"},
+          {"key=value&",                         "trailing '&' after last pair"},
+          {"&key=value",                         "leading '&' before first pair"},
+          {"key==value",                         "double '==' in pair"},
+          {"key=val ue",                         "unencoded space in value"},
+          {"key=val%GGue",                       "invalid percent-encoding"},
+          {originalBody + "&" + originalBody,    "body sent twice (concatenated)"},
+          {"A".repeat(10000),                    "10,000-char garbage body"},
+          {"\r\n\r\n",                           "CRLF-only body"},
+          {"key\u0000=value",                    "null byte in param name"}
+      };
+
+      for (String[] broken : brokenBodies) {
+          String preview = broken[0].length() > 60
+              ? broken[0].substring(0, 60) + "..."
+              : broken[0];
+          sendAndLog.accept(originalRequest.withBody(broken[0]),
+              "[Broken Form] " + broken[1] + " → " + preview);
+      }
+
+      logging().logToOutput("==============================================");
+      logging().logToOutput(" Fuzzing complete. Review all responses above.");
+      logging().logToOutput("==============================================");
+
+  } catch (Exception e) {
+      logging().logToError("Fatal error during fuzzing: " + e.getMessage());
+      e.printStackTrace();
+  }

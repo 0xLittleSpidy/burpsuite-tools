@@ -1,0 +1,29 @@
+id: bdd7be2f-94fe-4cb1-b1c1-f9134417021d
+name: HTTP Method Access Control Bypass
+function: SCAN_CHECK_ACTIVE
+location: SCANNER
+source: |+
+  /**
+  * HTTP Method Access Control Bypass
+  * 
+  * Created with the help of an AI Agent and littlespidy.
+  **/
+  for (var i = 0; i < 1; i++)
+  {
+      
+      // Send HEAD request
+  	var headRequest = requestResponse.request().withMethod("HEAD");
+  	var headResponse = http.sendRequest(headRequest);
+      
+      // Send POST request
+  	var postRequest = requestResponse.request().withMethod("POST");
+  	var postResponse = http.sendRequest(postRequest);
+  
+  	// Send CUSTOM request
+  	var customRequest = requestResponse.request().withMethod("CUSTOM");
+  	var customResponse = http.sendRequest(customRequest);
+  }
+  
+  
+  return AuditResult.auditResult();
+  

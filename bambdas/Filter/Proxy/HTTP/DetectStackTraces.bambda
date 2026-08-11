@@ -1,0 +1,73 @@
+id: 0a170678-7c39-4433-8e73-0c2bbea8ce37
+name: Detect Stack Traces
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Detects stack traces and exception messages in error responses for Java, Python, PHP, .NET, Node.js, Ruby, and Go.
+   * @author whoamins
+   **/
+
+  if (!requestResponse.hasResponse()) {
+      return false;
+  }
+
+  var response = requestResponse.response();
+
+  if (response.statusCode() < 400) {
+      return false;
+  }
+
+  String body = response.bodyToString();
+
+  // Java stack traces
+  if (body.matches("(?s).*\\bat [a-zA-Z][a-zA-Z0-9_.]*\\.[a-zA-Z][a-zA-Z0-9_]*\\([^)]*\\.java:\\d+\\).*") ||
+      body.contains("Exception in thread") ||
+      body.matches("(?s).*(Exception|Error):\\s+.*\\n.*at .*")) {
+      return true;
+  }
+
+  // Python tracebacks
+  if (body.contains("Traceback (most recent call last)") ||
+      body.matches("(?s).*File \"[^\"]+\\.py\", line \\d+.*")) {
+      return true;
+  }
+
+  // PHP errors
+  if (body.matches("(?s).*Fatal error:.*in /.*\\.php.*line \\d+.*") ||
+      body.matches("(?s).*Warning:.*in /.*\\.php.*line \\d+.*") ||
+      body.matches("(?s).*Parse error:.*in /.*\\.php.*line \\d+.*") ||
+      body.matches("(?s).*in /[^ ]+\\.php on line \\d+.*")) {
+      return true;
+  }
+
+  // .NET stack traces
+  if (body.contains("System.") && 
+      body.matches("(?s).*Exception:.*") &&
+      (body.matches("(?s).*at [a-zA-Z][a-zA-Z0-9_.]*\\.[a-zA-Z][a-zA-Z0-9_]*\\(.*\\) in .*:\\d+.*") ||
+       body.matches("(?s).*at [a-zA-Z][a-zA-Z0-9_.]*\\.[a-zA-Z][a-zA-Z0-9_]*\\(.*\\).*"))) {
+      return true;
+  }
+
+  // Node.js/JavaScript stack traces
+  if (body.matches("(?s).*Error:.*\\n.*at .* \\([^)]*:\\d+:\\d+\\).*") ||
+      body.matches("(?s).*at .* \\(/[^)]+:\\d+:\\d+\\).*") ||
+      (body.contains("Error:") && body.matches("(?s).*at .*\\.js:\\d+:\\d+.*"))) {
+      return true;
+  }
+
+  // Ruby stack traces
+  if (body.matches("(?s).*from /[^ ]+\\.rb:\\d+:in `.*'.*") ||
+      body.matches("(?s).*Error.*:.*\\n.*\\.rb:\\d+.*") ||
+      body.contains("(backtrace)")) {
+      return true;
+  }
+
+  // Go panic stack traces
+  if (body.matches("(?s).*panic:.*\\n.*goroutine \\d+.*") ||
+      body.matches("(?s).*goroutine \\d+ \\[.*\\]:.*") ||
+      (body.contains("panic:") && body.matches("(?s).*/.*\\.go:\\d+.*"))) {
+      return true;
+  }
+
+  return false;

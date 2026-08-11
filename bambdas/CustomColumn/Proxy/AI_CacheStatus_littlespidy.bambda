@@ -1,0 +1,11 @@
+id: ea2c75a3-1247-41a1-a330-71c1dcb57d40
+name: Add Cf-Cache-Status header column
+function: CUSTOM_COLUMN
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+  * Add Cf-Cache-Status header column
+  * 
+  * Created with the help of an AI Agent and littlespidy.
+  **/
+  return requestResponse.response().headerValue("Cf-Cache-Status");

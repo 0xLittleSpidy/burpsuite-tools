@@ -1,0 +1,23 @@
+name: Run Bambda Checker on Pull Request
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'oracle'
+
+      - name: Validate Bambdas
+        run: |
+          [ $(sha256sum BambdaChecker-1.5.jar | awk '{ print $1 }') = '085787c80b9f70f431c6f5a329cf59385b67e69d74116b11e5c4ccbc021ec3d6' ]
+          java -jar BambdaChecker-1.5.jar validateonly

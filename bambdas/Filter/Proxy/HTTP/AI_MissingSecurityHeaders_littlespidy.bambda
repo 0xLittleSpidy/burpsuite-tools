@@ -1,0 +1,57 @@
+id: cee4371e-421d-4b83-8f1f-ac46a605b155
+name: Missing Security Headers
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+  * Missing Security Headers
+  * 
+  * Created with the help of an AI Agent and littlespidy.
+  **/
+  Set<String> requiredHeaders = Set.of(
+    "X-Content-Type-Options",
+    "X-Frame-Options",
+    "Content-Security-Policy",
+    "Content-Security-Policy-Report-Only",
+    "Strict-Transport-Security",
+    "Public-Key-Pins",
+    "X-Webkit-CSP",
+    "Referrer-Policy",
+    "Permissions-Policy"
+  );
+  
+  // Ensure response exists
+  if (!requestResponse.hasResponse()) {
+      return false;
+  }
+  
+  // Clear previous annotations
+  requestResponse.annotations().setNotes("");
+  requestResponse.annotations().setHighlightColor(HighlightColor.NONE);
+  
+  // Get response headers
+  var headers = requestResponse.response().headers();
+  
+  // Normalize header names
+  var headerNames = headers.stream()
+          .map(h -> h.name().toLowerCase())
+          .toList();
+  
+  // Find missing headers
+  var missing = requiredHeaders.stream()
+          .filter(h -> !headerNames.contains(h.toLowerCase()))
+          .toList();
+  
+  // If headers missing and request in scope → annotate
+  if (!missing.isEmpty() && requestResponse.request().isInScope()) {
+  
+      String note = "Missing Security Headers: " + String.join(", ", missing);
+  
+      requestResponse.annotations().setNotes(note);
+      requestResponse.annotations().setHighlightColor(HighlightColor.RED);
+  
+      return true;
+  }
+  
+  return false;
+  

@@ -1,0 +1,181 @@
+name: Run Bambda Checker on Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update_readmes:
+    runs-on: ubuntu-latest
+    if: github.event.repository.fork == false
+    outputs:
+      new_bambdas: ${{ steps.check_bambda_changes.outputs.new_bambdas }}
+      bambda_files: ${{ steps.check_bambda_changes.outputs.bambda_files }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          ssh-key: ${{secrets.ACTION_PRIVKEY}}
+          fetch-depth: 2
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'oracle'
+
+      - name: Check for Bambda file changes
+        id: check_bambda_changes
+        run: |
+          ALL_BAMBDA_CHANGES=$(git diff --name-only HEAD~1 HEAD | grep '\.bambda$' || true)
+
+          if [ -n "$ALL_BAMBDA_CHANGES" ]; then
+            echo "bambdas_changed=true" >> $GITHUB_OUTPUT
+
+            NEW_BAMBDAS=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep '\.bambda$' || true)
+            if [ -n "$NEW_BAMBDAS" ]; then
+              echo "new_bambdas=true" >> $GITHUB_OUTPUT
+              echo "bambda_files<<EOF" >> $GITHUB_OUTPUT
+              echo "$NEW_BAMBDAS" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "new_bambdas=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "bambdas_changed=false" >> $GITHUB_OUTPUT
+            echo "new_bambdas=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate Bambdas & update READMEs
+        if: steps.check_bambda_changes.outputs.bambdas_changed == 'true'
+        run: |
+          [ $(sha256sum BambdaChecker-1.5.jar | awk '{ print $1 }') = '085787c80b9f70f431c6f5a329cf59385b67e69d74116b11e5c4ccbc021ec3d6' ]
+          java -jar BambdaChecker-1.5.jar
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "Update README.md files" || true
+          git push || true
+
+  send_discord_webhooks:
+    runs-on: ubuntu-latest
+    needs: update_readmes
+    if: needs.update_readmes.outputs.new_bambdas == 'true' && github.event.repository.fork == false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Prepare webhook messages
+        env:
+          BAMBDA_LIST: ${{ needs.update_readmes.outputs.bambda_files }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          to_sentence_case() {
+            local str=$1
+            echo "$str" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1'
+          }
+
+          extract_metadata() {
+            local file=$1
+            local field=$2
+
+            case "$field" in
+              name)
+                grep '^name:' "$file" | head -1 | sed 's/^name: *//'
+                ;;
+              description)
+                sed -n '/\/\*\*/,/\*\*\//p' "$file" |
+                  grep -v '@author' | grep -v '/\*\*' | grep -v '\*\*/' |
+                  grep -v '^[[:space:]]*\*[[:space:]]*$' | head -1 |
+                  sed 's/^[[:space:]]*\*[[:space:]]*//'
+                ;;
+              author)
+                sed -n '/\/\*\*/,/\*\*\//p' "$file" |
+                  grep '@author' |
+                  sed 's/^[[:space:]]*\*[[:space:]]*@author[[:space:]]*//'
+                ;;
+              function)
+                local raw=$(grep '^function:' "$file" | head -1 | sed 's/^function: *//')
+                to_sentence_case "$raw"
+                ;;
+              location)
+                local raw=$(grep '^location:' "$file" | head -1 | sed 's/^location: *//')
+                to_sentence_case "$raw"
+                ;;
+            esac
+          }
+
+          build_payload() {
+            local name=$1
+            local description=$2
+            local author=$3
+            local function=$4
+            local location=$5
+            local url=$6
+
+            jq -n \
+              --arg name ":tada: $name" \
+              --arg description "$description" \
+              --arg author "$author" \
+              --arg function "$function" \
+              --arg location "$location" \
+              --arg url "$url" \
+              '{
+                embeds: [{
+                  type: "rich",
+                  title: $name,
+                  description: (
+                    $description + "\n\n" +
+                    "**Author:** " + $author + "\n" +
+                    "**Function:** " + $function + "\n" +
+                    "**Location:** " + $location
+                  ),
+                  color: 2123412,
+                  url: $url
+                }]
+              }'
+          }
+
+          mkdir -p webhook_payloads
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+
+            name=$(extract_metadata "$file" name)
+            description=$(extract_metadata "$file" description)
+            author=$(extract_metadata "$file" author)
+            function=$(extract_metadata "$file" function)
+            location=$(extract_metadata "$file" location)
+            url="https://github.com/${GITHUB_REPOSITORY}/blob/main/$file"
+
+            safe_name=$(echo "$file" | sed 's/[^a-zA-Z0-9._-]/_/g')
+            build_payload "$name" "$description" "$author" "$function" "$location" "$url" > "webhook_payloads/${safe_name}.json"
+            echo "$safe_name" >> webhook_payloads/file_list.txt
+          done <<< "$BAMBDA_LIST"
+
+      - name: Send webhook messages
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+
+          [ ! -f webhook_payloads/file_list.txt ] && { echo "No payloads to send"; exit 0; }
+
+          while IFS= read -r safe_name; do
+            [ -z "$safe_name" ] && continue
+
+            payload="webhook_payloads/${safe_name}.json"
+            [ ! -f "$payload" ] && continue
+
+            http_code=$(curl -sf -w "%{http_code}" -o /dev/null \
+              -H "Content-Type: application/json" \
+              -d @"$payload" "$DISCORD_WEBHOOK_URL")
+
+            if [ "$http_code" = "204" ]; then
+              echo "✓ Sent webhook for $safe_name"
+            else
+              echo "✗ Failed to send webhook for $safe_name (HTTP $http_code)" >&2
+            fi
+          done < webhook_payloads/file_list.txt

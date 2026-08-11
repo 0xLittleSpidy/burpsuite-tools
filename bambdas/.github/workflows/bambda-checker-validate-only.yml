@@ -1,0 +1,28 @@
+name: Validate Bambdas
+
+on: [workflow_dispatch]
+
+jobs:
+  validate_bambdas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'oracle'
+
+      - name: Validate Bambdas
+        run: |
+          set -e
+          echo "Verifying checksum..."
+          expected='085787c80b9f70f431c6f5a329cf59385b67e69d74116b11e5c4ccbc021ec3d6'
+          actual=$(sha256sum BambdaChecker-1.5.jar | awk '{ print $1 }')
+          if [ "$actual" != "$expected" ]; then
+            echo "Checksum mismatch: expected $expected, got $actual"
+            exit 1
+          fi
+          echo "Checksum verified, running validator..."
+          
+          java -jar BambdaChecker-1.5.jar validateonly

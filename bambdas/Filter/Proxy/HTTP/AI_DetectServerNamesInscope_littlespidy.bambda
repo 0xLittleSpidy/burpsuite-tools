@@ -1,0 +1,36 @@
+id: 27ad5a64-19e9-48d2-aab4-76811be38e07
+name: Detect Server Names Inscope
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+  * Detect Server Names Inscope
+  * 
+  * Created with the help of an AI Agent and littlespidy.
+  **/
+  /**
+   * Bambda Script to Detect Server Names in HTTP Response form Server Header.
+   * It identifies if the 'Server' header of the HTTP response contains any of the specified server names.
+   * Upon detection, responses are highlighted in red and notes are appended, if enabled.
+   **/
+  
+  // Configuration setting for manual annotations
+  boolean enableManualAnnotations = true;
+  
+  // Ensure there is a response
+  if (!requestResponse.hasResponse()) {
+      return false;
+  }
+  
+  // Get the 'Server' header value from the response
+  String serverHeader = requestResponse.response().headerValue("Server");
+  
+  // Check if the 'Server' header value .
+  boolean foundServerName = serverHeader != null  && requestResponse.request().isInScope();
+  if (foundServerName && enableManualAnnotations) {
+      requestResponse.annotations().setHighlightColor(HighlightColor.RED);
+      requestResponse.annotations().setNotes("Detected '" + serverHeader + "' in 'Server' header");
+  }
+  
+  return foundServerName;
+  

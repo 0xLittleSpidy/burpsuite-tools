@@ -1,0 +1,266 @@
+id: e3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e
+name: Repeater Fuzzer — POST JSON Edition
+function: CUSTOM_ACTION
+location: REPEATER
+source: |+
+  /**
+   * Repeater Fuzzer — POST JSON Edition
+   * 
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Runs 8 test sections against POST JSON requests:
+   *   1. Value Fuzzing            - Injects bad values into each param (others untouched).
+   *   2. Empty Body Variants      - Sends {}, [], null, and empty string body.
+   *   3. Remove Required Params   - Removes ONE param at a time, keeps the rest.
+   *   4. Change Value Type        - Detects type (string/number/bool/null) and swaps it.
+   *   5. Duplicate Parameter      - Sends original body + same key appended with a diff value.
+   *   6. Extra Param (no value)   - Injects an extra key with empty string value.
+   *   7. Extra Param (with value) - Injects an extra key with a fuzz value.
+   *   8. Broken / Malformed JSON  - Sends structurally malformed bodies.
+   **/
+  
+  import burp.api.montoya.http.message.params.HttpParameter;
+  import burp.api.montoya.http.message.params.HttpParameterType;
+  
+  // ─── Helper: send a request and log the full response ─────────────────────
+  java.util.function.BiConsumer<burp.api.montoya.http.message.requests.HttpRequest, String> sendAndLog =
+      (req, label) -> {
+          try {
+              logging().logToOutput(">>> " + label);
+              var res = api().http().sendRequest(req).response();
+              logging().logToOutput("Status: " + res.statusCode());
+              logging().logToOutput("--- Complete Response ---");
+              logging().logToOutput(res.toString());
+              logging().logToOutput("-------------------------\n");
+          } catch (Exception ex) {
+              logging().logToError("Request failed [" + label + "]: " + ex.getMessage());
+          }
+      };
+  
+  // ─── Helper: detect the JSON value type from the raw value string ──────────
+  java.util.function.Function<String, String> detectType = (val) -> {
+      if (val == null) return "null";
+      val = val.trim();
+      if (val.equals("null"))                          return "null";
+      if (val.equals("true") || val.equals("false"))  return "boolean";
+      if (val.startsWith("\"") && val.endsWith("\"")) return "string";
+      if (val.startsWith("{"))                         return "object";
+      if (val.startsWith("["))                         return "array";
+      try { Double.parseDouble(val); return "number"; } catch (Exception e) {}
+      return "unknown";
+  };
+  
+  try {
+      var originalRequest = requestResponse.request();
+      String method = originalRequest.method();
+      boolean isJson = originalRequest.hasHeader("Content-Type") &&
+                       originalRequest.headerValue("Content-Type").toLowerCase().contains("json");
+  
+      // ─── Guard: only proceed for POST JSON ────────────────────────────────
+      if (!method.equalsIgnoreCase("POST") || !isJson) {
+          logging().logToError(
+              "Aborted: This fuzzer targets POST JSON requests only.\n" +
+              "Detected: " + method + " | Content-Type: " +
+              (originalRequest.hasHeader("Content-Type") ? originalRequest.headerValue("Content-Type") : "none"));
+          return;
+      }
+  
+      String originalBody = originalRequest.bodyToString();
+  
+      // Collect top-level JSON parameters
+      var jsonParams = new java.util.ArrayList<burp.api.montoya.http.message.params.ParsedHttpParameter>();
+      for (var p : originalRequest.parameters()) {
+          if (p.type() == HttpParameterType.JSON) jsonParams.add(p);
+      }
+  
+      logging().logToOutput("==============================================");
+      logging().logToOutput(" Repeater Fuzzer — POST JSON Test Suite");
+      logging().logToOutput(" JSON Parameters Found : " + jsonParams.size());
+      logging().logToOutput(" Original Body         : " + originalBody);
+      logging().logToOutput("==============================================\n");
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 1: Value Fuzzing
+      // For each param: inject bad value, leave all other params untouched.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 1: Value Fuzzing (one param at a time) ━━━\n");
+  
+      // Each entry: { raw JSON value, human label }
+      String[][] valueFuzzPayloads = {
+          {"\"\"",                       "empty string"},
+          {"\"'\\\"<>;|\\\\][}{`$\"",   "special characters"},
+          {"\"" + "A".repeat(200) + "\"", "long string (200 A's)"},
+          {"-1",                         "negative integer"},
+          {"999999999999999999",          "large integer"},
+          {"0",                          "zero"},
+          {"null",                       "JSON null"},
+          {"true",                       "boolean true"},
+          {"false",                      "boolean false"},
+          {"[]",                         "empty array"},
+          {"{}",                         "empty object"},
+          {"\"\\u0000\"",               "unicode null char"},
+          {"\"%00\"",                   "null byte in string"}
+      };
+  
+      for (var param : jsonParams) {
+          logging().logToOutput("--- Fuzzing param: '" + param.name() +
+                                "' | current value: " + param.value() + " ---");
+          for (String[] payload : valueFuzzPayloads) {
+              var newParam   = HttpParameter.parameter(param.name(), payload[0], HttpParameterType.JSON);
+              var newRequest = originalRequest.withUpdatedParameters(newParam);
+              sendAndLog.accept(newRequest,
+                  "[Value Fuzz] " + param.name() + " = " + payload[1] + " → " + payload[0]);
+          }
+      }
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 2: Empty Body Variants
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 2: Empty Body Variants ━━━\n");
+      sendAndLog.accept(originalRequest.withBody(""),     "[Empty Body] No content (empty string)");
+      sendAndLog.accept(originalRequest.withBody("{}"),   "[Empty Body] Empty JSON object: {}");
+      sendAndLog.accept(originalRequest.withBody("[]"),   "[Empty Body] Empty JSON array: []");
+      sendAndLog.accept(originalRequest.withBody("null"), "[Empty Body] JSON null as entire body");
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 3: Remove Required Parameters — ONE at a time
+      // 5 params → 5 requests, each dropping exactly one different param.
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 3: Remove Required Parameters (one at a time) ━━━\n");
+      for (var param : jsonParams) {
+          // withRemovedParameters removes only this one param; all others remain.
+          var removedRequest = originalRequest.withRemovedParameters(param);
+          sendAndLog.accept(removedRequest,
+              "[Remove] Dropped '" + param.name() + "' | Remaining params: " + (jsonParams.size() - 1));
+      }
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 4: Change Parameter Value Type
+      // Detects the current value's JSON type and swaps it to other types.
+      // e.g., "admin" (string) → 0, true, null, [], {}
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 4: Change Parameter Value Type ━━━\n");
+      for (var param : jsonParams) {
+          String currentType = detectType.apply(param.value());
+          logging().logToOutput("--- Param: '" + param.name() +
+                                "' | Detected type: " + currentType + " ---");
+  
+          java.util.List<String[]> swaps = new java.util.ArrayList<>();
+          switch (currentType) {
+              case "string":
+                  swaps.add(new String[]{"0",          "string → number (0)"});
+                  swaps.add(new String[]{"3.14",       "string → float (3.14)"});
+                  swaps.add(new String[]{"true",       "string → boolean (true)"});
+                  swaps.add(new String[]{"null",       "string → null"});
+                  swaps.add(new String[]{"[]",         "string → array"});
+                  swaps.add(new String[]{"{}",         "string → object"});
+                  break;
+              case "number":
+                  swaps.add(new String[]{"\"0\"",        "number → string (\"0\")"});
+                  swaps.add(new String[]{"\"fuzz\"",     "number → string (\"fuzz\")"});
+                  swaps.add(new String[]{"true",         "number → boolean (true)"});
+                  swaps.add(new String[]{"null",         "number → null"});
+                  swaps.add(new String[]{"[]",           "number → array"});
+                  swaps.add(new String[]{"{}",           "number → object"});
+                  break;
+              case "boolean":
+                  swaps.add(new String[]{"\"true\"",   "boolean → string (\"true\")"});
+                  swaps.add(new String[]{"1",           "boolean → number (1)"});
+                  swaps.add(new String[]{"0",           "boolean → number (0)"});
+                  swaps.add(new String[]{"null",        "boolean → null"});
+                  swaps.add(new String[]{"[]",          "boolean → array"});
+                  break;
+              case "null":
+                  swaps.add(new String[]{"\"fuzz\"",   "null → string"});
+                  swaps.add(new String[]{"0",           "null → number"});
+                  swaps.add(new String[]{"true",        "null → boolean"});
+                  swaps.add(new String[]{"[]",          "null → array"});
+                  break;
+              default:
+                  swaps.add(new String[]{"\"fuzz\"",   "unknown → string"});
+                  swaps.add(new String[]{"0",           "unknown → number"});
+                  swaps.add(new String[]{"null",        "unknown → null"});
+                  break;
+          }
+  
+          for (String[] swap : swaps) {
+              var newParam   = HttpParameter.parameter(param.name(), swap[0], HttpParameterType.JSON);
+              var newRequest = originalRequest.withUpdatedParameters(newParam);
+              sendAndLog.accept(newRequest, "[Type Change] " + param.name() + ": " + swap[1]);
+          }
+      }
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 5: Add Same Parameter Twice
+      // For each param: keep the FULL original body + append that same key
+      // again with a different value via raw string injection (since JSON
+      // parsers reject duplicate keys at the object level, but servers often
+      // pick the first or last occurrence — both are interesting).
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 5: Add Same Parameter Twice ━━━\n");
+      for (var param : jsonParams) {
+          String dupEntry  = ", \"" + param.name() + "\": \"DUPLICATE_FUZZ_VALUE\"";
+          String trimmed   = originalBody.trim();
+          // Inject before the closing brace
+          String newBody   = trimmed.endsWith("}")
+              ? trimmed.substring(0, trimmed.length() - 1) + dupEntry + "}"
+              : trimmed + dupEntry;
+          var dupRequest = originalRequest.withBody(newBody);
+          sendAndLog.accept(dupRequest,
+              "[Duplicate Key] '" + param.name() + "' sent twice — " +
+              "original value kept, appended with DUPLICATE_FUZZ_VALUE");
+      }
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 6: Extra Parameter Without Value
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 6: Extra Parameter Without Value ━━━\n");
+      var extraEmpty = HttpParameter.parameter("extra_param", "\"\"", HttpParameterType.JSON);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraEmpty),
+          "[Extra Param] Added extra_param = \"\" (empty string)");
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 7: Extra Parameter With Value
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 7: Extra Parameter With Value ━━━\n");
+      var extraFuzz = HttpParameter.parameter("extra_param", "\"fuzz_test_value\"", HttpParameterType.JSON);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraFuzz),
+          "[Extra Param] Added extra_param = \"fuzz_test_value\"");
+  
+      var extraNumeric = HttpParameter.parameter("extra_param", "9999", HttpParameterType.JSON);
+      sendAndLog.accept(originalRequest.withAddedParameters(extraNumeric),
+          "[Extra Param] Added extra_param = 9999 (numeric)");
+  
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 8: Broken / Malformed JSON Bodies
+      // ══════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ SECTION 8: Broken / Malformed JSON Input ━━━\n");
+      String[][] brokenBodies = {
+          {"{",                                  "unclosed JSON object"},
+          {"{\"key\": }",                        "missing value"},
+          {"{\"key\": \"value\",}",              "trailing comma in object"},
+          {"[\"a\", \"b\",]",                    "trailing comma in array"},
+          {"{'key': 'value'}",                   "single quotes (not valid JSON)"},
+          {"{\"key\": undefined}",               "JS undefined value"},
+          {originalBody + originalBody,           "body sent twice (concatenated)"},
+          {"A".repeat(10000),                    "10,000-char garbage body"},
+          {"\r\n\r\n",                           "CRLF-only body"},
+          {"\\x00\\x01\\x02\\x03",             "raw control characters"}
+      };
+  
+      for (String[] broken : brokenBodies) {
+          String preview = broken[0].length() > 60
+              ? broken[0].substring(0, 60) + "..."
+              : broken[0];
+          sendAndLog.accept(originalRequest.withBody(broken[0]),
+              "[Broken JSON] " + broken[1] + " → " + preview);
+      }
+  
+      logging().logToOutput("==============================================");
+      logging().logToOutput(" Fuzzing complete. Review all responses above.");
+      logging().logToOutput("==============================================");
+  
+  } catch (Exception e) {
+      logging().logToError("Fatal error during fuzzing: " + e.getMessage());
+      e.printStackTrace();
+  }

@@ -1,0 +1,35 @@
+id: 78e44969-9071-4d5a-a5c4-a91c2302a417
+name: Filter by Host and Cacheable Responses
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+  * Returns requests for a user-specified host where the Cache-Control 
+  * value is not "no-store".
+  * 
+  * Created with the help of an AI Agent and littlespidy.
+  */
+  
+  // 1. Specify your target host here
+  String targetHost = "example.com";
+  
+  // 2. Filter out requests that don't match the target host
+  if (!requestResponse.request().httpService().host().toLowerCase().contains(targetHost.toLowerCase())) {
+      return false;
+  }
+  
+  // 3. Filter out items that don't have a response yet
+  if (!requestResponse.hasResponse()) {
+      return false;
+  }
+  
+  // 4. Check the Cache-Control header
+  String cacheControl = requestResponse.response().headerValue("Cache-Control");
+  
+  // If the header doesn't exist, it's technically not "no-store" (so it might be cached).
+  // If it does exist, we ensure it doesn't contain the string "no-store".
+  if (cacheControl == null) {
+      return true;
+  }
+  
+  return !cacheControl.toLowerCase().contains("no-store");
