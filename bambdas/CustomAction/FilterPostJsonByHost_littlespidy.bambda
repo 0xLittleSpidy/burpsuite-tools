@@ -1,0 +1,53 @@
+id: f92a5b0c-3d4e-5f6a-b7c8-9d0e1f2a3b4c
+name: Filter POST JSON Requests by Host
+function: CUSTOM_ACTION
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Filter POST JSON Requests by Host
+   *
+   * Custom Action that checks selected Proxy HTTP History items and highlights
+   * POST requests with JSON content-type (application/json) matching the
+   * specified target host.
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   */
+
+  // ── Configuration ─────────────────────────────────────────────
+  String targetHost = "example.com";
+  // ──────────────────────────────────────────────────────────────
+
+  var request = requestResponse.request();
+  String host = request.httpService().host().toLowerCase();
+
+  // 1. Verify host match (case-insensitive partial match)
+  if (!host.contains(targetHost.toLowerCase())) {
+      logging().logToOutput("[SKIPPED] Host '" + host + "' does not match target host '" + targetHost + "'");
+      return;
+  }
+
+  // 2. Verify HTTP method is POST
+  if (!request.method().equalsIgnoreCase("POST")) {
+      logging().logToOutput("[SKIPPED] " + host + " - Request method is " + request.method() + " (expected POST)");
+      return;
+  }
+
+  // 3. Verify Content-Type is JSON
+  String contentType = request.headerValue("Content-Type");
+  if (contentType == null) {
+      logging().logToOutput("[SKIPPED] " + host + " - Missing Content-Type header");
+      return;
+  }
+
+  boolean isJson = contentType.toLowerCase().contains("application/json");
+
+  if (!isJson) {
+      logging().logToOutput("[SKIPPED] " + host + " - Content-Type '" + contentType + "' is not application/json");
+      return;
+  }
+
+  // 4. Highlight & Annotate matching item
+  requestResponse.annotations().setHighlightColor(HighlightColor.MAGENTA);
+  requestResponse.annotations().setNotes("POST JSON Request [" + host + "]");
+
+  logging().logToOutput("[MATCHED] Highlighted POST JSON Request for " + host + " (" + request.path() + ")");
