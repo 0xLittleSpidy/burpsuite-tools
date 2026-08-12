@@ -29,7 +29,9 @@ source: |+
   // If the header doesn't exist, it's technically not "no-store" (so it might be cached).
   // If it does exist, we ensure it doesn't contain the string "no-store".
   if (cacheControl == null) {
+      requestResponse.annotations().setNotes("Cache-Control: Not Present");
       return true;
   }
   
+  requestResponse.annotations().setNotes("Cache-Control: " + cacheControl);
   return !cacheControl.toLowerCase().contains("no-store");
