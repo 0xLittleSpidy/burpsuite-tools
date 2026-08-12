@@ -1,0 +1,36 @@
+id: a3c91f2e-5b47-4d88-b1e6-72fa0c3d8e15
+name: Filter POST Requests by Host
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Filter POST Requests by Host
+   *
+   * Filters the Proxy HTTP History to show only POST requests
+   * that match the specified target host. Use this alongside the
+   * "Convert POST to GET" Custom Action Bambda to isolate and test
+   * POST-to-GET method conversion on a specific host.
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   */
+
+  // ── Configuration ─────────────────────────────────────────────
+  // Set this to the hostname you want to group POST requests for.
+  // Partial matches are supported (e.g. "example.com" matches "api.example.com").
+  String targetHost = "example.com";
+  // ──────────────────────────────────────────────────────────────
+
+  var request = requestResponse.request();
+
+  // 1. Only match the target host (case-insensitive, partial match)
+  String host = request.httpService().host().toLowerCase();
+  if (!host.contains(targetHost.toLowerCase())) {
+      return false;
+  }
+
+  // 2. Only show POST requests
+  if (!request.method().equalsIgnoreCase("POST")) {
+      return false;
+  }
+
+  return true;

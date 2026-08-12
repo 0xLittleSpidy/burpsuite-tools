@@ -1,0 +1,138 @@
+id: b7d42a1c-8f63-4e97-a0c3-91e58b6f2d44
+name: Convert POST to GET
+function: CUSTOM_ACTION
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Convert POST to GET
+   *
+   * Converts the selected POST request to a GET request by migrating
+   * the request body parameters into the URL query string. Supports:
+   *   - application/x-www-form-urlencoded  (standard form POST bodies)
+   *   - application/json                   (JSON object bodies, top-level keys only)
+   *
+   * After conversion, the GET request is sent and the full response
+   * (status line, headers, and body) is logged to the Output tab.
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   */
+
+  // ── Grab the original request ──────────────────────────────────
+  var originalRequest = requestResponse.request();
+  String method = originalRequest.method();
+
+  // Guard: only act on POST requests
+  if (!method.equalsIgnoreCase("POST")) {
+      logging().logToOutput("[Convert POST→GET] Skipped: request method is '" + method + "', not POST.");
+      return;
+  }
+
+  // ── Read body and Content-Type ─────────────────────────────────
+  String body = originalRequest.bodyToString().trim();
+  String contentType = originalRequest.headerValue("Content-Type");
+  if (contentType == null) contentType = "";
+  contentType = contentType.toLowerCase();
+
+  // ── Build the new query string from the body ───────────────────
+  String existingQuery = "";
+  String path = originalRequest.path();
+
+  // Split existing path and query string (if any)
+  int qIdx = path.indexOf('?');
+  String basePath = (qIdx >= 0) ? path.substring(0, qIdx) : path;
+  if (qIdx >= 0) {
+      existingQuery = path.substring(qIdx + 1);
+  }
+
+  String bodyParams = "";
+
+  if (contentType.contains("application/x-www-form-urlencoded")) {
+      // Body is already in key=value&key2=value2 format — use as-is
+      bodyParams = body;
+      logging().logToOutput("[Convert POST→GET] Content-Type: form-urlencoded");
+
+  } else if (contentType.contains("application/json")) {
+      // Parse top-level JSON key-value pairs into query params.
+      // Handles: {"key":"value","num":123,"bool":true}
+      logging().logToOutput("[Convert POST→GET] Content-Type: application/json");
+      StringBuilder sb = new StringBuilder();
+      String stripped = body;
+
+      // Strip surrounding braces
+      if (stripped.startsWith("{") && stripped.endsWith("}")) {
+          stripped = stripped.substring(1, stripped.length() - 1).trim();
+      }
+
+      // Tokenise by comma, then split each token on the first colon
+      String[] pairs = stripped.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+      for (String pair : pairs) {
+          pair = pair.trim();
+          int colonIdx = pair.indexOf(':');
+          if (colonIdx < 0) continue;
+
+          String key = pair.substring(0, colonIdx).trim()
+                  .replaceAll("^\"|\"$", "");   // remove surrounding quotes
+          String value = pair.substring(colonIdx + 1).trim()
+                  .replaceAll("^\"|\"$", "");   // remove surrounding quotes
+
+          if (sb.length() > 0) sb.append("&");
+          sb.append(utilities().urlUtils().encode(key))
+            .append("=")
+            .append(utilities().urlUtils().encode(value));
+      }
+      bodyParams = sb.toString();
+
+  } else if (!body.isEmpty()) {
+      // Unknown content-type but there is a body — append raw as a single param
+      logging().logToOutput("[Convert POST→GET] Unknown Content-Type (" + contentType + "), appending raw body.");
+      bodyParams = utilities().urlUtils().encode(body);
+  }
+
+  // ── Assemble the new path with query string ────────────────────
+  StringBuilder newPath = new StringBuilder(basePath);
+  if (!existingQuery.isEmpty() || !bodyParams.isEmpty()) {
+      newPath.append("?");
+      if (!existingQuery.isEmpty()) {
+          newPath.append(existingQuery);
+          if (!bodyParams.isEmpty()) newPath.append("&");
+      }
+      if (!bodyParams.isEmpty()) {
+          newPath.append(bodyParams);
+      }
+  }
+
+  // ── Build the converted GET request ───────────────────────────
+  var getRequest = originalRequest
+          .withMethod("GET")
+          .withPath(newPath.toString())
+          .withBody("");   // clear the body
+
+  // Remove body-related headers that are irrelevant for GET
+  if (getRequest.hasHeader("Content-Type"))   getRequest = getRequest.withRemovedHeader("Content-Type");
+  if (getRequest.hasHeader("Content-Length")) getRequest = getRequest.withRemovedHeader("Content-Length");
+
+  // ── Log request summary before sending ────────────────────────
+  logging().logToOutput("════════════════════════════════════════════════════");
+  logging().logToOutput("[Convert POST→GET] Original POST URL : " + originalRequest.url());
+  logging().logToOutput("[Convert POST→GET] Converted GET URL : " + getRequest.url());
+  logging().logToOutput("────────────────────────────────────────────────────");
+
+  // ── Send the GET request ───────────────────────────────────────
+  var result = api().http().sendRequest(getRequest);
+  if (result == null || !result.hasResponse()) {
+      logging().logToOutput("[Convert POST→GET] ERROR: No response received.");
+      return;
+  }
+
+  var response = result.response();
+
+  // ── Log the full response ──────────────────────────────────────
+  logging().logToOutput("[Convert POST→GET] Status      : " + response.statusCode() + " " + response.reasonPhrase());
+  logging().logToOutput("[Convert POST→GET] HTTP Version: " + response.httpVersion());
+  logging().logToOutput("── Response Headers ─────────────────────────────────");
+  for (var header : response.headers()) {
+      logging().logToOutput("  " + header.name() + ": " + header.value());
+  }
+  logging().logToOutput("── Response Body ────────────────────────────────────");
+  logging().logToOutput(response.bodyToString());
+  logging().logToOutput("════════════════════════════════════════════════════");

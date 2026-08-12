@@ -1,0 +1,204 @@
+id: d8f5a3b2-4c6e-5f0d-c9b8-2e3f4a5c6b7d
+name: POST Params Accepted as GET - JSON Body
+function: SCAN_CHECK_ACTIVE_PER_REQUEST
+location: SCANNER
+source: |
+  /**
+   * POST Parameters Accepted as GET Query String Parameters (application/json)
+   *
+   * Detects when a JSON API endpoint processes POST body parameters identically when
+   * those fields are re-submitted as URL query string parameters via a GET request.
+   * This can expose REST APIs to CSRF via GET links, WAF bypass, and log exposure of
+   * sensitive fields (tokens, passwords) in plaintext URLs.
+   *
+   * Detection strategy:
+   *   1. Confirm the request is a POST with an application/json body.
+   *   2. Parse flat top-level JSON key-value pairs using regex (strings, numbers, booleans).
+   *   3. URL-encode each field as a query string parameter and inject a unique canary.
+   *   4. Send a GET request with those params in the URL, body cleared.
+   *   5. Report if the GET response matches the original POST response (status + body length).
+   *   6. Escalate severity if the canary is reflected, confirming active parameter processing.
+   *
+   * Limitation: Handles flat (non-nested) JSON objects only.
+   *             Arrays and deeply nested objects are skipped.
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   **/
+
+  // Guard: need a base response to compare against
+  if (!requestResponse.hasResponse())
+  {
+      return AuditResult.auditResult();
+  }
+
+  var request = requestResponse.request();
+
+  // Only applicable to POST requests
+  if (!"POST".equalsIgnoreCase(request.method()))
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Only applicable to JSON bodies
+  var contentType = request.headerValue("Content-Type");
+  if (contentType == null || !contentType.toLowerCase().contains("application/json"))
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Need a non-empty body
+  var body = request.bodyToString();
+  if (body == null || body.isBlank())
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Only handle flat JSON objects: {"key":"value","key2":123,"key3":true}
+  var trimmed = body.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}"))
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Regex to match flat key-value pairs:
+  //   "key" : "string value"   -> groups 1, 3
+  //   "key" : 123              -> groups 1, 4
+  //   "key" : true/false/null  -> groups 1, 4
+  // Skips nested objects/arrays (they won't match this pattern cleanly)
+  var pattern = java.util.regex.Pattern.compile(
+      "\"([^\"]+)\"\\s*:\\s*(\"([^\"]*)\"|([\\w.+\\-]+))"
+  );
+  var matcher = pattern.matcher(trimmed);
+  var queryBuilder = new StringBuilder();
+  int matchCount = 0;
+
+  while (matcher.find())
+  {
+      var key = matcher.group(1);
+      // Use quoted string value (group 3) or unquoted primitive (group 4)
+      var value = matcher.group(3) != null ? matcher.group(3)
+                : matcher.group(4) != null ? matcher.group(4) : "";
+
+      if (matchCount > 0)
+      {
+          queryBuilder.append("&");
+      }
+      queryBuilder.append(java.net.URLEncoder.encode(key, java.nio.charset.StandardCharsets.UTF_8));
+      queryBuilder.append("=");
+      queryBuilder.append(java.net.URLEncoder.encode(value, java.nio.charset.StandardCharsets.UTF_8));
+      matchCount++;
+  }
+
+  // No parseable top-level fields found — skip (likely nested/array-only JSON)
+  if (matchCount == 0)
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Append a unique canary to confirm active parameter processing
+  var canary = api().utilities().randomUtils().randomString(12);
+  queryBuilder.append("&_cscan=").append(canary);
+  var queryString = queryBuilder.toString();
+
+  // Build the new GET path, preserving any existing query params on the original request
+  var rawPath = request.path();
+  var pathOnly = rawPath.contains("?") ? rawPath.substring(0, rawPath.indexOf("?")) : rawPath;
+  var existingQS = rawPath.contains("?") ? rawPath.substring(rawPath.indexOf("?") + 1) : "";
+  var newPath = pathOnly + "?" + (existingQS.isBlank() ? queryString : existingQS + "&" + queryString);
+
+  // Build and send the GET request with JSON fields migrated to the query string
+  var getRequest = request
+      .withMethod("GET")
+      .withPath(newPath)
+      .withBody("")
+      .withRemovedHeader("Content-Type")
+      .withRemovedHeader("Content-Length");
+
+  var getRR = http.sendRequest(getRequest);
+
+  if (!getRR.hasResponse())
+  {
+      return AuditResult.auditResult();
+  }
+
+  // --- Response Comparison ---
+  var originalStatus = requestResponse.response().statusCode();
+  var getStatus = getRR.response().statusCode();
+  var getBodyStr = getRR.response().bodyToString();
+
+  // Canary reflected = server actively processed the query string parameter
+  var canaryReflected = getBodyStr.contains(canary);
+
+  // Status codes must match (both 200, both 302, etc.)
+  var statusMatch = originalStatus == getStatus;
+
+  // Body length must be within 20% of the original (similar functional response)
+  var origLen = requestResponse.response().body().length();
+  var getLen = getRR.response().body().length();
+  var lenRatio = origLen == 0 ? 1.0 : Math.abs(origLen - getLen) / (double) origLen;
+  var bodyLenSimilar = lenRatio < 0.2;
+
+  if (statusMatch && bodyLenSimilar)
+  {
+      var severity = canaryReflected ? AuditIssueSeverity.HIGH : AuditIssueSeverity.MEDIUM;
+      var confidence = canaryReflected ? AuditIssueConfidence.CERTAIN : AuditIssueConfidence.FIRM;
+
+      var canaryNote = canaryReflected
+          ? "<p><b>Canary confirmed:</b> The injected value <code>" + canary + "</code> was reflected " +
+            "in the GET response body, proving the server actively processed the migrated JSON field.</p>"
+          : "<p><b>Note:</b> The canary was not reflected but the response closely mirrors the POST. " +
+            "Manual verification is recommended to rule out coincidental similarity.</p>";
+
+      var issueTitle = "POST JSON parameters accepted as GET query string parameters";
+
+      var issueDetail =
+          "<p>The server accepted JSON POST body parameters when re-submitted as URL query string " +
+          "parameters via a GET request.</p>" +
+          "<p><b>Original JSON body:</b> <code>" + api().utilities().htmlUtils().encode(body) + "</code></p>" +
+          "<p><b>Converted query string:</b> <code>" + api().utilities().htmlUtils().encode(queryString) + "</code></p>" +
+          "<p><b>GET response status:</b> " + getStatus + " (matches original POST status " + originalStatus + ")</p>" +
+          "<p><b>Body length similarity:</b> within 20% threshold " +
+          "(original: " + origLen + " bytes, GET: " + getLen + " bytes)</p>" +
+          canaryNote;
+
+      var remediation =
+          "<ul>" +
+          "<li>Enforce strict HTTP method routing: API endpoints expecting POST+JSON must reject GET requests with query-string parameters.</li>" +
+          "<li>Return <code>405 Method Not Allowed</code> for unexpected methods on API endpoints.</li>" +
+          "<li>Disable mixed parameter parsing in your framework (do not merge query string into JSON body resolution).</li>" +
+          "<li>Validate <code>Content-Type: application/json</code> before parsing the body; reject requests that omit it.</li>" +
+          "</ul>";
+
+      var background =
+          "<p>When a REST API or JSON endpoint accepts parameters via the URL query string in addition to the JSON body, " +
+          "the application is exposed to several risks:</p>" +
+          "<ul>" +
+          "<li><b>CSRF via GET links:</b> An attacker can craft a simple hyperlink to trigger state-changing API actions without needing a form or JavaScript.</li>" +
+          "<li><b>WAF bypass:</b> WAF rules inspecting POST body content do not apply to URL query strings.</li>" +
+          "<li><b>Log exposure:</b> Sensitive JSON fields (tokens, passwords, PII) appear in plaintext in server access logs, proxy logs, and browser history when submitted as query parameters.</li>" +
+          "<li><b>Cache poisoning:</b> GET requests with parameters may be served from a cache, exposing other users to stale or attacker-controlled responses.</li>" +
+          "</ul>";
+
+      var remediationBackground =
+          "<p>Many REST frameworks (e.g. Spring MVC, Express, FastAPI) bind query string parameters and body parameters " +
+          "into a unified model by default. This behavior should be explicitly disabled or restricted at the routing layer. " +
+          "Use strict method-level annotations (e.g. <code>@PostMapping</code> in Spring, <code>router.post()</code> in Express) " +
+          "and validate that parameter sources are enforced at the controller level, not just the route definition.</p>";
+
+      return AuditResult.auditResult(
+          AuditIssue.auditIssue(
+              issueTitle,
+              issueDetail,
+              remediation,
+              getRR.request().url(),
+              severity,
+              confidence,
+              background,
+              remediationBackground,
+              severity,
+              getRR
+          )
+      );
+  }
+
+  return AuditResult.auditResult();

@@ -1,0 +1,156 @@
+id: c7e4f2a1-3b5d-4e9c-b8a7-1d2e3f4c5b6a
+name: POST Params Accepted as GET - Form URL-Encoded
+function: SCAN_CHECK_ACTIVE_PER_REQUEST
+location: SCANNER
+source: |
+  /**
+   * POST Parameters Accepted as GET Query String Parameters (application/x-www-form-urlencoded)
+   *
+   * Detects when an endpoint processes POST body parameters identically when they are
+   * re-submitted as URL query string parameters via a GET request. This can expose the
+   * application to CSRF via GET links, WAF bypass, and access control relaxation.
+   *
+   * Detection strategy:
+   *   1. Confirm the request is a POST with an application/x-www-form-urlencoded body.
+   *   2. Inject a unique canary value alongside the existing params in the query string.
+   *   3. Send a GET request with those params in the URL.
+   *   4. Report if the GET response matches the original POST response (status + body length).
+   *   5. Escalate severity if the canary is reflected, confirming active parameter processing.
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   **/
+
+  // Guard: need a base response to compare against
+  if (!requestResponse.hasResponse())
+  {
+      return AuditResult.auditResult();
+  }
+
+  var request = requestResponse.request();
+
+  // Only applicable to POST requests
+  if (!"POST".equalsIgnoreCase(request.method()))
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Only applicable to form-encoded bodies
+  var contentType = request.headerValue("Content-Type");
+  if (contentType == null || !contentType.toLowerCase().contains("application/x-www-form-urlencoded"))
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Need a non-empty body to migrate to the query string
+  var body = request.bodyToString();
+  if (body == null || body.isBlank())
+  {
+      return AuditResult.auditResult();
+  }
+
+  // Generate a unique canary value to confirm active parameter processing
+  var canary = api().utilities().randomUtils().randomString(12);
+
+  // The body is already URL-encoded (key=value&key2=value2), append canary directly
+  var queryString = body + "&_cscan=" + canary;
+
+  // Build the new GET path, preserving any existing query params on the original request
+  var rawPath = request.path();
+  var pathOnly = rawPath.contains("?") ? rawPath.substring(0, rawPath.indexOf("?")) : rawPath;
+  var existingQS = rawPath.contains("?") ? rawPath.substring(rawPath.indexOf("?") + 1) : "";
+  var newPath = pathOnly + "?" + (existingQS.isBlank() ? queryString : existingQS + "&" + queryString);
+
+  // Build and send the GET request with params moved to the query string
+  var getRequest = request
+      .withMethod("GET")
+      .withPath(newPath)
+      .withBody("")
+      .withRemovedHeader("Content-Type")
+      .withRemovedHeader("Content-Length");
+
+  var getRR = http.sendRequest(getRequest);
+
+  if (!getRR.hasResponse())
+  {
+      return AuditResult.auditResult();
+  }
+
+  // --- Response Comparison ---
+  var originalStatus = requestResponse.response().statusCode();
+  var getStatus = getRR.response().statusCode();
+  var getBodyStr = getRR.response().bodyToString();
+
+  // Canary reflected = server actively processed the query string parameter
+  var canaryReflected = getBodyStr.contains(canary);
+
+  // Status codes must match (both 200, both 302, etc.)
+  var statusMatch = originalStatus == getStatus;
+
+  // Body length must be within 20% of the original (similar functional response)
+  var origLen = requestResponse.response().body().length();
+  var getLen = getRR.response().body().length();
+  var lenRatio = origLen == 0 ? 1.0 : Math.abs(origLen - getLen) / (double) origLen;
+  var bodyLenSimilar = lenRatio < 0.2;
+
+  if (statusMatch && bodyLenSimilar)
+  {
+      var severity = canaryReflected ? AuditIssueSeverity.HIGH : AuditIssueSeverity.MEDIUM;
+      var confidence = canaryReflected ? AuditIssueConfidence.CERTAIN : AuditIssueConfidence.FIRM;
+
+      var canaryNote = canaryReflected
+          ? "<p><b>Canary confirmed:</b> The injected value <code>" + canary + "</code> was reflected " +
+            "in the GET response body, proving the server actively processed the migrated parameter.</p>"
+          : "<p><b>Note:</b> The canary was not reflected but the response closely mirrors the POST. " +
+            "Manual verification is recommended to rule out coincidental similarity.</p>";
+
+      var issueTitle = "POST form parameters accepted as GET query string parameters";
+
+      var issueDetail =
+          "<p>The server accepted <code>application/x-www-form-urlencoded</code> POST body parameters " +
+          "when re-submitted as URL query string parameters via a GET request.</p>" +
+          "<p><b>Original POST body:</b> <code>" + api().utilities().htmlUtils().encode(body) + "</code></p>" +
+          "<p><b>GET response status:</b> " + getStatus + " (matches original POST status " + originalStatus + ")</p>" +
+          "<p><b>Body length similarity:</b> within 20% threshold " +
+          "(original: " + origLen + " bytes, GET: " + getLen + " bytes)</p>" +
+          canaryNote;
+
+      var remediation =
+          "<ul>" +
+          "<li>Validate the HTTP method server-side; reject requests that use an unexpected method for the endpoint.</li>" +
+          "<li>Do not process parameters from the URL query string in endpoints that expect POST body parameters.</li>" +
+          "<li>Enforce strict Content-Type checking and disable framework-level merging of query string and body parameters.</li>" +
+          "<li>Review framework configuration (e.g. Spring's <code>HiddenHttpMethodFilter</code>, Rails' <code>ActionDispatch</code> parameter merging) for mixed-source parameter binding.</li>" +
+          "</ul>";
+
+      var background =
+          "<p>When a server processes form POST parameters regardless of whether they arrive in the request body " +
+          "or the URL query string, the application is exposed to several risks:</p>" +
+          "<ul>" +
+          "<li><b>CSRF via GET links:</b> An attacker can craft a simple hyperlink to trigger state-changing actions without a form.</li>" +
+          "<li><b>WAF bypass:</b> POST body inspection rules do not apply to GET query strings.</li>" +
+          "<li><b>Access control relaxation:</b> Method-based access controls may not be enforced consistently.</li>" +
+          "<li><b>Log exposure:</b> Sensitive parameter values appear in plaintext server/proxy access logs and browser history.</li>" +
+          "</ul>";
+
+      var remediationBackground =
+          "<p>Most modern web frameworks merge query string and body parameters into a single parameter map by default. " +
+          "Disable this behavior or enforce strict source-based routing at the controller or middleware layer. " +
+          "Ensure CSRF protections are in place for all state-changing endpoints regardless of HTTP method.</p>";
+
+      return AuditResult.auditResult(
+          AuditIssue.auditIssue(
+              issueTitle,
+              issueDetail,
+              remediation,
+              getRR.request().url(),
+              severity,
+              confidence,
+              background,
+              remediationBackground,
+              severity,
+              getRR
+          )
+      );
+  }
+
+  return AuditResult.auditResult();
