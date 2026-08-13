@@ -1,0 +1,32 @@
+id: b8c4d29e-1f73-4e89-9a21-72f5bc930182
+name: Filter by Domain and HTML Content Type
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Filters Proxy HTTP history to display only responses from a specified domain
+   * that have an HTML content type (either matched via HTTP header or inferred MIME type).
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   */
+
+  // 1. Specify target domain here (matches host or subdomains)
+  String targetDomain = "example.com";
+
+  // 2. Filter out requests that don't match the target domain
+  String host = requestResponse.request().httpService().host().toLowerCase();
+  if (!host.contains(targetDomain.toLowerCase())) {
+      return false;
+  }
+
+  // 3. Ensure a response is present
+  if (!requestResponse.hasResponse()) {
+      return false;
+  }
+
+  // 4. Check Content-Type header and MIME type for HTML content
+  String contentType = requestResponse.response().headerValue("Content-Type");
+  boolean isHtmlHeader = contentType != null && contentType.toLowerCase().contains("text/html");
+  boolean isHtmlMime = requestResponse.response().mimeType() == MimeType.HTML;
+
+  return isHtmlHeader || isHtmlMime;
