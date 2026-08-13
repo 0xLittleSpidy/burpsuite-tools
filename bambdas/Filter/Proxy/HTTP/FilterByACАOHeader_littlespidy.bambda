@@ -1,0 +1,73 @@
+id: f3c9d1a7-82b4-4e5c-a901-7e3f6b2d4c18
+name: Filter by Access-Control-Allow-Origin Header
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Filters Proxy HTTP history to show only responses that contain an
+   * Access-Control-Allow-Origin (ACAO) header.
+   *
+   * Configuration:
+   *   TARGET_HOST  - Restrict to requests sent to this host only.
+   *                  Set to "*" to match all hosts.
+   *   ACAO_VALUE   - Filter by a specific ACAO header value, e.g. "https://evil.com".
+   *                  Set to "*" to match ANY value of the ACAO header (wildcard, null, or any origin).
+   *   ANNOTATE     - Highlight matching entries in yellow and append the ACAO value as a note.
+   **/
+
+  // ─── USER CONFIGURATION ───────────────────────────────────────────────────
+  String  TARGET_HOST = "*";   // "*" = all hosts, or e.g. "example.com"
+  String  ACAO_VALUE  = "*";   // "*" = any ACAO header present, or e.g. "https://attacker.com"
+  boolean ANNOTATE    = true;  // true = yellow highlight + ACAO value note
+  // ──────────────────────────────────────────────────────────────────────────
+
+  if (!requestResponse.hasResponse()) {
+      return false;
+  }
+
+  var response = requestResponse.response();
+
+  // Must have the ACAO header at all
+  if (!response.hasHeader("Access-Control-Allow-Origin")) {
+      return false;
+  }
+
+  // Host filter
+  if (!TARGET_HOST.equals("*")) {
+      String host = requestResponse.request().httpService().host();
+      if (!host.equalsIgnoreCase(TARGET_HOST) &&
+          !host.toLowerCase().endsWith("." + TARGET_HOST.toLowerCase())) {
+          return false;
+      }
+  }
+
+  String acaoValue = response.headerValue("Access-Control-Allow-Origin");
+
+  // ACAO value filter
+  boolean matched;
+  if (ACAO_VALUE.equals("*")) {
+      // Any ACAO header counts
+      matched = true;
+  } else {
+      matched = acaoValue != null && acaoValue.equalsIgnoreCase(ACAO_VALUE);
+  }
+
+  if (matched && ANNOTATE) {
+      requestResponse.annotations().setHighlightColor(HighlightColor.YELLOW);
+      String note = "ACAO: " + (acaoValue != null ? acaoValue : "(null)");
+      // Also surface Credentials header alongside for quick triage
+      if (response.hasHeader("Access-Control-Allow-Credentials")) {
+          note += " | Credentials: " + response.headerValue("Access-Control-Allow-Credentials");
+      }
+      String existing = requestResponse.annotations().notes();
+      if (existing == null || existing.isEmpty()) {
+          requestResponse.annotations().setNotes(note);
+      } else if (!existing.contains("ACAO:")) {
+          requestResponse.annotations().setNotes(existing + " | " + note);
+      }
+  }
+
+  return matched;
+
