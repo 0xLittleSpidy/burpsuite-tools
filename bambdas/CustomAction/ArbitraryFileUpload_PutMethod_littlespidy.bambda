@@ -1,0 +1,174 @@
+id: a3f2c1e0-d4b5-4789-a0b1-c2d3e4f56789
+name: Arbitrary File Upload — PUT Method Test
+function: CUSTOM_ACTION
+location: REPEATER
+source: |+
+  /**
+   * Arbitrary File Upload — PUT Method Test
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Tests the HTTP PUT method for arbitrary file upload vulnerabilities.
+   * From the current Repeater request this Bambda will:
+   *
+   *   STRATEGY A — Derived Path (replaces last path segment with test.txt):
+   *     1. PUT  → Upload test.txt to the derived path
+   *     2. GET  → Retrieve the uploaded file to verify it was stored
+   *     3. DELETE → Attempt to delete the uploaded file
+   *
+   *   STRATEGY B — Fallback Root Path (/test.txt):
+   *     4. PUT  → Upload test.txt to /test.txt
+   *     5. GET  → Retrieve /test.txt
+   *     6. DELETE → Attempt to delete /test.txt
+   *
+   * Results are logged to the Output tab. Any 2xx PUT response is flagged
+   * as a potential Arbitrary File Upload vulnerability.
+   **/
+
+  // ─── USER CONFIGURATION ──────────────────────────────────────────────────────
+  String FILE_NAME        = "test.txt";          // Filename to upload
+  String FILE_CONTENT     = "Hello World";       // Content written to the file
+  String FILE_CONTENT_TYPE = "text/plain";       // Content-Type header for PUT body
+  String FALLBACK_PATH    = "/test.txt";         // Root-level fallback path
+  boolean RUN_DELETE      = true;                // true = also attempt DELETE after GET
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── Helper: send a request and log the full response ────────────────────────
+  java.util.function.BiConsumer<burp.api.montoya.http.message.requests.HttpRequest, String> sendAndLog =
+      (req, label) -> {
+          try {
+              logging().logToOutput(">>> " + label);
+              logging().logToOutput("    " + req.method() + " " + req.path());
+              var rr  = api().http().sendRequest(req);
+              var res = rr.response();
+              int status = res.statusCode();
+
+              // ── Status line ────────────────────────────────────────────────
+              logging().logToOutput("\n┌─ RESPONSE ──────────────────────────────────────────");
+              logging().logToOutput("│ HTTP/" + res.httpVersion() + " " + status + " " + res.reasonPhrase());
+
+              // Flag interesting status codes
+              if (status >= 200 && status < 300) {
+                  logging().logToOutput("│ [!] 2xx — Possible vulnerability confirmed!");
+              } else if (status == 403) {
+                  logging().logToOutput("│ [i] 403 Forbidden — server rejected but method may exist");
+              } else if (status == 405) {
+                  logging().logToOutput("│ [i] 405 Method Not Allowed — method blocked");
+              } else if (status == 404) {
+                  logging().logToOutput("│ [i] 404 Not Found — file not present at this path");
+              }
+
+              // ── Response headers ───────────────────────────────────────────
+              logging().logToOutput("├─ HEADERS ───────────────────────────────────────────");
+              for (var header : res.headers().asList()) {
+                  logging().logToOutput("│  " + header.name() + ": " + header.value());
+              }
+
+              // ── Response body ──────────────────────────────────────────────
+              logging().logToOutput("├─ BODY ──────────────────────────────────────────────");
+              String body = res.bodyToString();
+              if (body == null || body.trim().isEmpty()) {
+                  logging().logToOutput("│  (empty body)");
+              } else {
+                  // Log each line of the body with a prefix so it's easy to read
+                  for (String line : body.split("\n", -1)) {
+                      logging().logToOutput("│  " + line);
+                  }
+              }
+              logging().logToOutput("└─────────────────────────────────────────────────────\n");
+
+          } catch (Exception ex) {
+              logging().logToError("Request failed [" + label + "]: " + ex.getMessage());
+          }
+      };
+
+  // ─── Helper: run PUT → GET → DELETE for a given upload path ─────────────────
+  java.util.function.Consumer<String> testUploadPath = (uploadPath) -> {
+      var baseRequest = requestResponse.request();
+      String host     = baseRequest.httpService().host();
+      int port        = baseRequest.httpService().port();
+      boolean isHttps = baseRequest.httpService().secure();
+
+      // ── PUT: Upload the file ────────────────────────────────────────────────
+      var putRequest = burp.api.montoya.http.message.requests.HttpRequest
+          .httpRequestFromUrl((isHttps ? "https" : "http") + "://" + host +
+              (port == 80 || port == 443 ? "" : ":" + port) + uploadPath)
+          .withMethod("PUT")
+          .withHeader("Content-Type", FILE_CONTENT_TYPE)
+          .withHeader("Content-Length", String.valueOf(FILE_CONTENT.getBytes().length))
+          .withBody(FILE_CONTENT);
+
+      sendAndLog.accept(putRequest, "[PUT] Uploading " + FILE_NAME + " → " + uploadPath);
+
+      // ── GET: Retrieve the uploaded file ────────────────────────────────────
+      var getRequest = burp.api.montoya.http.message.requests.HttpRequest
+          .httpRequestFromUrl((isHttps ? "https" : "http") + "://" + host +
+              (port == 80 || port == 443 ? "" : ":" + port) + uploadPath)
+          .withMethod("GET");
+
+      sendAndLog.accept(getRequest, "[GET] Retrieving " + FILE_NAME + " from → " + uploadPath);
+
+      // ── DELETE: Attempt to delete the uploaded file ────────────────────────
+      if (RUN_DELETE) {
+          var deleteRequest = burp.api.montoya.http.message.requests.HttpRequest
+              .httpRequestFromUrl((isHttps ? "https" : "http") + "://" + host +
+                  (port == 80 || port == 443 ? "" : ":" + port) + uploadPath)
+              .withMethod("DELETE");
+
+          sendAndLog.accept(deleteRequest, "[DELETE] Removing " + FILE_NAME + " from → " + uploadPath);
+      }
+  };
+
+  try {
+      var originalRequest = requestResponse.request();
+      String originalPath = originalRequest.path();
+
+      // Derive a clean base path (strip query string)
+      String basePath = originalPath.contains("?")
+          ? originalPath.substring(0, originalPath.indexOf('?'))
+          : originalPath;
+
+      // Build the derived upload path by replacing the last segment with FILE_NAME
+      String derivedUploadPath;
+      int lastSlash = basePath.lastIndexOf('/');
+      if (lastSlash >= 0) {
+          String parentDir = basePath.substring(0, lastSlash + 1); // e.g. "/images/"
+          derivedUploadPath = parentDir + FILE_NAME;
+      } else {
+          derivedUploadPath = "/" + FILE_NAME;
+      }
+
+      logging().logToOutput("=================================================");
+      logging().logToOutput("  Arbitrary File Upload — PUT Method Test Suite  ");
+      logging().logToOutput("  Target Host     : " + originalRequest.httpService().host());
+      logging().logToOutput("  Original Path   : " + originalPath);
+      logging().logToOutput("  Derived Path    : " + derivedUploadPath);
+      logging().logToOutput("  Fallback Path   : " + FALLBACK_PATH);
+      logging().logToOutput("  Upload Content  : " + FILE_CONTENT);
+      logging().logToOutput("  DELETE Enabled  : " + RUN_DELETE);
+      logging().logToOutput("=================================================\n");
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // STRATEGY A: Derived Path (directory of original request + test.txt)
+      // ══════════════════════════════════════════════════════════════════════════
+      logging().logToOutput("━━━ STRATEGY A: Derived Path ━━━\n");
+      testUploadPath.accept(derivedUploadPath);
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // STRATEGY B: Fallback Root Path (/test.txt)
+      // Only run if the derived path differs from the fallback
+      // ══════════════════════════════════════════════════════════════════════════
+      if (!derivedUploadPath.equals(FALLBACK_PATH)) {
+          logging().logToOutput("━━━ STRATEGY B: Fallback Root Path ━━━\n");
+          testUploadPath.accept(FALLBACK_PATH);
+      }
+
+      logging().logToOutput("=================================================");
+      logging().logToOutput("  Test complete. Review all responses above.     ");
+      logging().logToOutput("  Look for any 2xx responses on PUT requests!    ");
+      logging().logToOutput("=================================================");
+
+  } catch (Exception e) {
+      logging().logToError("Fatal error during PUT upload test: " + e.getMessage());
+      e.printStackTrace();
+  }

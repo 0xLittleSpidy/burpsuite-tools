@@ -1,0 +1,77 @@
+id: e7a1b2c3-f4d5-4e6f-7a8b-9c0d1e2f3a4b
+name: Filter JavaScript & TypeScript Endpoints
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Filter JavaScript & TypeScript Endpoints
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Shows only requests whose path ends with a JS/TS/SourceMap extension:
+   *   .js  .mjs  .cjs  .ts  .tsx  .map
+   *
+   * Useful for:
+   *   - Quickly reviewing all JS bundles served by the target
+   *   - Locating source maps that may expose original source code
+   *   - Auditing TypeScript compilation artifacts
+   *
+   * Matching entries are highlighted CYAN and annotated in the Proxy table.
+   **/
+
+  // ─── USER CONFIGURATION ──────────────────────────────────────────────────────
+  String  TARGET_HOST = "*";     // "*" = all hosts, or e.g. "example.com"
+  boolean ANNOTATE    = true;    // true = highlight + note matching entries
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── Host filter ─────────────────────────────────────────────────────────────
+  if (!TARGET_HOST.equals("*")) {
+      String host = requestResponse.request().httpService().host();
+      if (!host.equalsIgnoreCase(TARGET_HOST) &&
+          !host.toLowerCase().endsWith("." + TARGET_HOST.toLowerCase())) {
+          return false;
+      }
+  }
+
+  // ─── Extract path without query string ───────────────────────────────────────
+  String path = requestResponse.request().path();
+  int qIdx = path.indexOf('?');
+  String cleanPath = (qIdx >= 0) ? path.substring(0, qIdx) : path;
+  String lowerPath = cleanPath.toLowerCase();
+
+  // ─── Extension matching ───────────────────────────────────────────────────────
+  boolean matched =
+      lowerPath.endsWith(".js")   ||
+      lowerPath.endsWith(".mjs")  ||
+      lowerPath.endsWith(".cjs")  ||
+      lowerPath.endsWith(".ts")   ||
+      lowerPath.endsWith(".tsx")  ||
+      lowerPath.endsWith(".map");
+
+  if (!matched) {
+      return false;
+  }
+
+  // ─── Determine matched extension label ───────────────────────────────────────
+  String ext = "";
+  if      (lowerPath.endsWith(".map")) ext = ".map (Source Map)";
+  else if (lowerPath.endsWith(".mjs")) ext = ".mjs (ES Module)";
+  else if (lowerPath.endsWith(".cjs")) ext = ".cjs (CommonJS Module)";
+  else if (lowerPath.endsWith(".tsx")) ext = ".tsx (TypeScript JSX)";
+  else if (lowerPath.endsWith(".ts"))  ext = ".ts (TypeScript)";
+  else if (lowerPath.endsWith(".js"))  ext = ".js (JavaScript)";
+
+  // ─── Annotate matching entries ────────────────────────────────────────────────
+  if (ANNOTATE) {
+      requestResponse.annotations().setHighlightColor(HighlightColor.CYAN);
+
+      String existingNote = requestResponse.annotations().notes();
+      String newNote      = "JS/TS endpoint: " + ext;
+      if (existingNote == null || existingNote.isEmpty()) {
+          requestResponse.annotations().setNotes(newNote);
+      } else if (!existingNote.contains(newNote)) {
+          requestResponse.annotations().setNotes(existingNote + " | " + newNote);
+      }
+  }
+
+  return true;
