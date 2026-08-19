@@ -1,0 +1,91 @@
+id: c4a89d12-e5b6-4f7a-8b9c-0d1e2f3a4b5c
+name: Filter URLs in GET Request and POST Body
+function: VIEW_FILTER
+location: PROXY_HTTP_HISTORY
+source: |+
+  /**
+   * Filter URLs in GET Request and POST Body
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Finds requests where any parameter (GET query parameter, POST body,
+   * JSON, Multipart) or the raw body contains absolute or scheme-relative URLs:
+   *   http://  https://  //
+   *
+   * Useful for:
+   *   - Discovering SSRF (Server-Side Request Forgery) attack surfaces
+   *   - Identifying Open Redirect candidates
+   *   - Finding webhook, callback, proxy, or fetcher endpoints
+   *
+   * Matching entries can optionally be highlighted and annotated in the Proxy table.
+   **/
+
+  // ─── USER CONFIGURATION ──────────────────────────────────────────────────────
+  String  TARGET_HOST = "*";      // "*" = all hosts, or e.g. "example.com"
+  boolean ANNOTATE    = true;     // true = highlight + note matching entries
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── Host filter ─────────────────────────────────────────────────────────────
+  if (!TARGET_HOST.equals("*")) {
+      String host = requestResponse.request().httpService().host();
+      if (!host.equalsIgnoreCase(TARGET_HOST) &&
+          !host.toLowerCase().endsWith("." + TARGET_HOST.toLowerCase())) {
+          return false;
+      }
+  }
+
+  HttpRequest request = requestResponse.request();
+  boolean foundUrl = false;
+  String matchDetail = "";
+
+  // ─── Helper checking logic ───────────────────────────────────────────────────
+  // 1. Check parsed parameters (GET query, POST body, JSON, Multipart, etc.)
+  if (request.hasParameters()) {
+      for (ParsedHttpParameter parameter : request.parameters()) {
+          String val = parameter.value();
+          if (val == null || val.isEmpty()) {
+              continue;
+          }
+          String decodedVal = utilities().urlUtils().decode(val);
+
+          if (val.contains("http://") || val.contains("https://") ||
+              decodedVal.contains("http://") || decodedVal.contains("https://") ||
+              val.startsWith("//") || decodedVal.startsWith("//")) {
+              foundUrl = true;
+              matchDetail = "Param [" + parameter.type().name() + "]: " + parameter.name();
+              break;
+          }
+      }
+  }
+
+  // 2. Fallback check on raw body (for raw JSON, GraphQL, XML, or unstructured payloads)
+  if (!foundUrl && request.hasBody()) {
+      String body = request.bodyToString();
+      if (body != null && (
+          body.contains("http://") || body.contains("https://") ||
+          body.contains("http%3A%2F%2F") || body.contains("https%3A%2F%2F") ||
+          body.contains("http%3a%2f%2f") || body.contains("https%3a%2f%2f")
+      )) {
+          foundUrl = true;
+          matchDetail = "Raw Body Payload";
+      }
+  }
+
+  if (!foundUrl) {
+      return false;
+  }
+
+  // ─── Annotate matching entries ────────────────────────────────────────────────
+  if (ANNOTATE) {
+      requestResponse.annotations().setHighlightColor(HighlightColor.ORANGE);
+
+      String existingNote = requestResponse.annotations().notes();
+      String newNote      = "URL detected in " + matchDetail;
+      if (existingNote == null || existingNote.isEmpty()) {
+          requestResponse.annotations().setNotes(newNote);
+      } else if (!existingNote.contains(newNote)) {
+          requestResponse.annotations().setNotes(existingNote + " | " + newNote);
+      }
+  }
+
+  return true;
