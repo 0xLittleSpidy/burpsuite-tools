@@ -1,0 +1,159 @@
+id: d8b2e1f4-9a3c-4b5d-8e7f-0123456789ab
+name: Host & Header Injection with Collaborator
+function: CUSTOM_ACTION
+location: REPEATER
+source: |+
+  /**
+   * Host & Header Injection with Collaborator
+   *
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Replaces the Host header and tests related routing/forwarding headers with a 
+   * Burp Collaborator payload domain. Designed for use in Repeater.
+   *
+   * Tests executed:
+   *   1. Replaced Host header: Host: <collaborator>
+   *   2. X-Forwarded-Host: <collaborator>
+   *   3. X-Host: <collaborator>
+   *   4. X-Forwarded-Server: <collaborator>
+   *   5. X-HTTP-Host-Override: <collaborator>
+   *   6. Forwarded: host=<collaborator>;proto=https
+   *
+   * Logs the complete HTTP request and HTTP response for each test to the Output tab.
+   **/
+
+  // ─── USER CONFIGURATION ──────────────────────────────────────────────────────
+  String  CUSTOM_COLLABORATOR_DOMAIN = "";     // If set, uses this domain instead of auto-generating
+  boolean TEST_HOST_HEADER           = true;   // Test replacing the primary Host header
+  boolean TEST_FORWARDED_HEADERS     = true;   // Test X-Forwarded-Host, X-Host, etc.
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── Helper: Pretty-printer & Logger for Request + Response ─────────────────
+  java.util.function.BiConsumer<burp.api.montoya.http.message.requests.HttpRequest, String> sendAndLog =
+      (req, label) -> {
+          try {
+              logging().logToOutput("\n================================================================================");
+              logging().logToOutput(">>> TEST: " + label);
+              logging().logToOutput("================================================================================");
+              
+              // ── Print Request Details ─────────────────────────────────────────
+              logging().logToOutput("┌─── [SENT HTTP REQUEST] ──────────────────────────────────────────────────────");
+              logging().logToOutput("│ " + req.method() + " " + req.path() + " HTTP/1.1");
+              for (var h : req.headers().asList()) {
+                  logging().logToOutput("│ " + h.name() + ": " + h.value());
+              }
+              logging().logToOutput("│");
+              String reqBody = req.bodyToString();
+              if (reqBody != null && !reqBody.isEmpty()) {
+                  for (String line : reqBody.split("\n", -1)) {
+                      logging().logToOutput("│ " + line);
+                  }
+              } else {
+                  logging().logToOutput("│ (No request body)");
+              }
+              logging().logToOutput("└───────────────────────────────────────────────────────────────────────────────\n");
+
+              // ── Send Request ──────────────────────────────────────────────────
+              var rr = api().http().sendRequest(req);
+              var res = rr.response();
+              int status = res.statusCode();
+
+              // ── Print Response Details ────────────────────────────────────────
+              logging().logToOutput("┌─── [RECEIVED HTTP RESPONSE] ─────────────────────────────────────────────────");
+              logging().logToOutput("│ HTTP/" + res.httpVersion() + " " + status + " " + res.reasonPhrase());
+              
+              if (status >= 200 && status < 300) {
+                  logging().logToOutput("│ [i] Status 2xx Success");
+              } else if (status >= 300 && status < 400) {
+                  logging().logToOutput("│ [!] Status 3xx Redirect -> Location: " + res.headerValue("Location"));
+              } else if (status == 400) {
+                  logging().logToOutput("│ [i] Status 400 Bad Request (Host may be validated)");
+              } else if (status == 403 || status == 401) {
+                  logging().logToOutput("│ [i] Status " + status + " Forbidden/Unauthorized");
+              } else if (status >= 500) {
+                  logging().logToOutput("│ [!] Status " + status + " Server Error");
+              }
+
+              for (var h : res.headers().asList()) {
+                  logging().logToOutput("│ " + h.name() + ": " + h.value());
+              }
+              logging().logToOutput("│");
+              String resBody = res.bodyToString();
+              if (resBody != null && !resBody.isEmpty()) {
+                  // Truncate response body if excessively large to keep log readable
+                  if (resBody.length() > 3000) {
+                      resBody = resBody.substring(0, 3000) + "\n... [Body truncated: " + res.body().length() + " bytes total]";
+                  }
+                  for (String line : resBody.split("\n", -1)) {
+                      logging().logToOutput("│ " + line);
+                  }
+              } else {
+                  logging().logToOutput("│ (Empty response body)");
+              }
+              logging().logToOutput("└───────────────────────────────────────────────────────────────────────────────\n");
+
+          } catch (Exception ex) {
+              logging().logToError("[-] Request failed for [" + label + "]: " + ex.getMessage());
+          }
+      };
+
+  try {
+      var baseRequest = requestResponse.request();
+
+      // ── Obtain Collaborator Domain ──────────────────────────────────────────
+      String collabDomain = CUSTOM_COLLABORATOR_DOMAIN.trim();
+      if (collabDomain.isEmpty()) {
+          try {
+              var payload = api().collaborator().defaultPayloadGenerator().generatePayload();
+              collabDomain = payload.toString();
+          } catch (Exception e) {
+              logging().logToError("[-] Unable to auto-generate Collaborator payload: " + e.getMessage());
+              logging().logToError("[-] Please configure CUSTOM_COLLABORATOR_DOMAIN in the script.");
+              return;
+          }
+      }
+
+      logging().logToOutput("################################################################################");
+      logging().logToOutput("  Host & Header Injection with Collaborator Test Suite");
+      logging().logToOutput("  Target Host         : " + baseRequest.httpService().host());
+      logging().logToOutput("  Collaborator Domain : " + collabDomain);
+      logging().logToOutput("################################################################################\n");
+
+      // ── 1. Test Primary Host Header Replacement ─────────────────────────────
+      if (TEST_HOST_HEADER) {
+          var hostReq = baseRequest.withUpdatedHeader("Host", collabDomain);
+          sendAndLog.accept(hostReq, "Primary 'Host' Header Replacement -> Host: " + collabDomain);
+      }
+
+      // ── 2. Test Optional Forwarding / Routing Headers ───────────────────────
+      if (TEST_FORWARDED_HEADERS) {
+          // X-Forwarded-Host
+          var xfhReq = baseRequest.withUpdatedHeader("X-Forwarded-Host", collabDomain);
+          sendAndLog.accept(xfhReq, "X-Forwarded-Host Header -> " + collabDomain);
+
+          // X-Host
+          var xhReq = baseRequest.withUpdatedHeader("X-Host", collabDomain);
+          sendAndLog.accept(xhReq, "X-Host Header -> " + collabDomain);
+
+          // X-Forwarded-Server
+          var xfsReq = baseRequest.withUpdatedHeader("X-Forwarded-Server", collabDomain);
+          sendAndLog.accept(xfsReq, "X-Forwarded-Server Header -> " + collabDomain);
+
+          // X-HTTP-Host-Override
+          var xhhoReq = baseRequest.withUpdatedHeader("X-HTTP-Host-Override", collabDomain);
+          sendAndLog.accept(xhhoReq, "X-HTTP-Host-Override Header -> " + collabDomain);
+
+          // Forwarded (RFC 7239)
+          var fwdReq = baseRequest.withUpdatedHeader("Forwarded", "host=" + collabDomain + ";proto=https");
+          sendAndLog.accept(fwdReq, "RFC 7239 'Forwarded' Header -> host=" + collabDomain);
+      }
+
+      logging().logToOutput("################################################################################");
+      logging().logToOutput("  Tests finished. Check your Burp Collaborator tab for DNS / HTTP interactions!");
+      logging().logToOutput("  Collaborator Domain: " + collabDomain);
+      logging().logToOutput("################################################################################\n");
+
+  } catch (Exception e) {
+      logging().logToError("Fatal error during Host Header test execution: " + e.getMessage());
+      e.printStackTrace();
+  }
