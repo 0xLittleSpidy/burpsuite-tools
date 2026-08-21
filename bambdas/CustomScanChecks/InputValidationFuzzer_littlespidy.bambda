@@ -1,0 +1,205 @@
+id: f7a3c1e9-8b2d-4f5a-9e1c-3d7a6b8f2e4d
+name: Input Validation Fuzzer
+function: SCAN_CHECK_ACTIVE_PER_INSERTION_POINT
+location: SCANNER
+source: |
+  /**
+   * Created with the help of an AI Agent and littlespidy.
+   *
+   * Input Validation Fuzzer — Custom Scan Check
+   * Injects bad characters, long strings, and edge-case values into each
+   * insertion point. Reports ONLY when the response shows signs of improper
+   * input handling (server errors, error signatures, payload reflection,
+   * or anomalous status/size changes).
+   *
+   * Unlike the BCheck version, Burp's scanner engine handles deduplication —
+   * already-audited insertion points are not re-scanned.
+   *
+   * @author littlespidy
+   **/
+
+  if (insertionPoint == null)
+  {
+      return AuditResult.auditResult();
+  }
+
+  if (!requestResponse.hasResponse())
+  {
+      return AuditResult.auditResult();
+  }
+
+  // ─── USER CONFIGURATION ──────────────────────────────────────────
+  int SIZE_DIFF_PERCENT = 300;  // Report if body size triples vs baseline
+  // ─────────────────────────────────────────────────────────────────
+
+  // Error signatures that indicate improper input handling
+  var errorSignatures = new String[]{
+      "syntax error", "sql error", "mysql_", "pg_query", "ora-",
+      "unclosed quotation", "unterminated string", "parse error",
+      "stack trace", "stacktrace", "traceback", "exception in",
+      "fatal error", "internal server error", "segmentation fault",
+      "NullPointerException", "IndexOutOfBoundsException",
+      "ClassCastException", "NumberFormatException",
+      "TypeError", "ValueError", "SyntaxError", "ReferenceError",
+      "SQLSTATE", "sqlite3", "microsoft ole db", "odbc drivers",
+      "javax.servlet", "at java.", "at org.apache",
+      "warning:", "notice:", "deprecated:"
+  };
+
+  // Define fuzz payloads
+  record Payload(String name, String value, String detail) {}
+
+  var payloads = List.of(
+      new Payload("Empty string",
+          "",
+          "Empty string payload — server may fail to handle missing/empty values."),
+      new Payload("Special characters",
+          "'\\\"><;|\\\\][}{`$",
+          "SQL/Command/XSS special characters — may trigger injection flaws."),
+      new Payload("Long string (200 chars)",
+          "A".repeat(200),
+          "Long string (200 chars) — may trigger buffer or length-handling issues."),
+      new Payload("Negative integer",
+          "-1",
+          "Negative integer (-1) — may cause unexpected behavior in numeric fields."),
+      new Payload("Large integer",
+          "99999999999999999999",
+          "Large integer — may trigger integer overflow or parsing errors."),
+      new Payload("Null byte",
+          "%00",
+          "Null byte (%00) — may cause truncation or bypass validation filters.")
+  );
+
+  // Baseline metrics from the original response
+  var baseStatus  = requestResponse.response().statusCode();
+  var baseBodyLen = requestResponse.response().body().length();
+
+  List<AuditIssue> issues = new ArrayList<>();
+
+  for (var payload : payloads)
+  {
+      var rr = http.sendRequest(
+          insertionPoint.buildHttpRequestWithPayload(
+              ByteArray.byteArray(payload.value())
+          )
+      );
+
+      if (!rr.hasResponse())
+      {
+          continue;
+      }
+
+      var resp        = rr.response();
+      var respStatus  = resp.statusCode();
+      var respBody    = resp.bodyToString().toLowerCase();
+      var respBodyLen = resp.body().length();
+
+      // ── Detection: Server Error (5xx) ──
+      boolean serverError = (respStatus >= 500);
+
+      // ── Detection: Status Code Changed to 4xx+ ──
+      boolean statusChanged = (respStatus != baseStatus && respStatus >= 400);
+
+      // ── Detection: Error Signature in Response ──
+      boolean errorFound  = false;
+      String matchedError = "";
+      for (var sig : errorSignatures)
+      {
+          if (respBody.contains(sig.toLowerCase()))
+          {
+              errorFound  = true;
+              matchedError = sig;
+              break;
+          }
+      }
+
+      // ── Detection: Payload Reflected in Response ──
+      boolean payloadReflected = !payload.value().isEmpty()
+          && respBody.contains(payload.value().toLowerCase());
+
+      // ── Detection: Body Size Anomaly ──
+      boolean sizeDiff = baseBodyLen > 0
+          && ((double) respBodyLen / baseBodyLen) * 100 > SIZE_DIFF_PERCENT;
+
+      // ── Report: Server Error or Error Signature (High/Medium) ──
+      if (serverError || errorFound)
+      {
+          var severity   = serverError ? AuditIssueSeverity.HIGH : AuditIssueSeverity.MEDIUM;
+          var confidence = errorFound  ? AuditIssueConfidence.FIRM : AuditIssueConfidence.TENTATIVE;
+
+          var detail = "<p><b>Test:</b> " + payload.name() + "</p>"
+              + "<p>" + payload.detail() + "</p>"
+              + "<p><b>Evidence:</b></p><ul>"
+              + (serverError ? "<li>Server returned HTTP <b>" + respStatus + "</b> (baseline was " + baseStatus + ")</li>" : "")
+              + (errorFound  ? "<li>Error signature found: <code>" + api().utilities().htmlUtils().encode(matchedError) + "</code></li>" : "")
+              + "</ul>";
+
+          issues.add(AuditIssue.auditIssue(
+              "Input Validation Failure: " + payload.name(),
+              detail,
+              "Implement server-side input validation and sanitization. "
+                  + "Ensure error pages do not leak internal details (stack traces, SQL queries, file paths).",
+              rr.request().url(),
+              severity,
+              confidence,
+              "<p>Improper input validation can lead to injection attacks, denial of service, "
+                  + "or information disclosure through verbose error messages.</p>",
+              "<p>Validate and sanitize all user inputs on the server side. "
+                  + "Use parameterized queries for database operations. "
+                  + "Implement generic error pages that do not reveal internal state.</p>",
+              severity,
+              rr
+          ));
+      }
+      // ── Report: Payload Reflected (Medium) ──
+      else if (payloadReflected)
+      {
+          issues.add(AuditIssue.auditIssue(
+              "Input Reflection Detected: " + payload.name(),
+              "<p><b>Test:</b> " + payload.name() + "</p>"
+                  + "<p>The injected payload was reflected in the response body without encoding, "
+                  + "which may indicate a potential injection or XSS vulnerability.</p>"
+                  + "<p>" + payload.detail() + "</p>",
+              "Encode or sanitize user input before reflecting it in responses. "
+                  + "Apply context-appropriate output encoding (HTML, JS, URL).",
+              rr.request().url(),
+              AuditIssueSeverity.MEDIUM,
+              AuditIssueConfidence.TENTATIVE,
+              "<p>When user input is reflected without encoding, it can enable "
+                  + "cross-site scripting (XSS) or other injection attacks.</p>",
+              "<p>Apply context-appropriate output encoding before reflecting user input. "
+                  + "Use Content-Security-Policy headers as a defense-in-depth measure.</p>",
+              AuditIssueSeverity.MEDIUM,
+              rr
+          ));
+      }
+      // ── Report: Anomalous Response (Info) ──
+      else if (statusChanged || sizeDiff)
+      {
+          issues.add(AuditIssue.auditIssue(
+              "Anomalous Response to Fuzz Input: " + payload.name(),
+              "<p><b>Test:</b> " + payload.name() + "</p>"
+                  + "<p>" + payload.detail() + "</p>"
+                  + "<p><b>Anomaly detected:</b></p><ul>"
+                  + (statusChanged ? "<li>Status code changed from <b>" + baseStatus + "</b> to <b>" + respStatus + "</b></li>" : "")
+                  + (sizeDiff ? "<li>Response body size changed significantly (<b>" + baseBodyLen + "</b> → <b>" + respBodyLen + "</b> bytes)</li>" : "")
+                  + "</ul>",
+              "Review server-side handling of unexpected input values.",
+              rr.request().url(),
+              AuditIssueSeverity.INFORMATION,
+              AuditIssueConfidence.TENTATIVE,
+              "<p>Significant changes in response status or size when injecting unexpected values "
+                  + "may indicate improper input handling that warrants manual investigation.</p>",
+              "",
+              AuditIssueSeverity.INFORMATION,
+              rr
+          ));
+      }
+  }
+
+  if (!issues.isEmpty())
+  {
+      return AuditResult.auditResult(issues);
+  }
+
+  return AuditResult.auditResult();
