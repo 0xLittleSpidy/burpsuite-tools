@@ -24,19 +24,19 @@ source: |
   }
 
   // ── Only fuzz PARAMETERS — skip headers, URL paths, etc. ──
-  var pointType = insertionPoint.type();
+  var typeName = insertionPoint.type().name();
   var allowedTypes = Set.of(
-      InsertionPointType.PARAMETER_URL,
-      InsertionPointType.PARAMETER_BODY,
-      InsertionPointType.PARAMETER_COOKIE,
-      InsertionPointType.PARAMETER_JSON,
-      InsertionPointType.PARAMETER_XML,
-      InsertionPointType.PARAMETER_XML_ATTRIBUTE,
-      InsertionPointType.PARAMETER_MULTIPART_ATTRIBUTE,
-      InsertionPointType.PARAMETER_NAME_URL,
-      InsertionPointType.PARAMETER_NAME_BODY
+      "PARAMETER_URL",
+      "PARAMETER_BODY",
+      "PARAMETER_COOKIE",
+      "PARAMETER_JSON",
+      "PARAMETER_XML",
+      "PARAMETER_XML_ATTRIBUTE",
+      "PARAMETER_MULTIPART_ATTRIBUTE",
+      "PARAMETER_NAME_URL",
+      "PARAMETER_NAME_BODY"
   );
-  if (!allowedTypes.contains(pointType))
+  if (!allowedTypes.contains(typeName))
   {
       return AuditResult.auditResult();
   }
