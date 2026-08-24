@@ -1,1 +1,8 @@
 .agents/
+.gradle/
+**/build/
+**/.gradle/
+.idea/
+**/.idea/
+*.class
+BypassFuzzer-Burp/
