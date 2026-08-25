@@ -4,6 +4,19 @@ A curated collection of Burp Suite extensions, Bambdas, and custom scan checks (
 
 ---
 
+## 📦 Downloads (Pre-built JARs)
+
+Pre-compiled extension JARs are available for download from the [Latest Release (v1.0.0)](https://github.com/0xLittleSpidy/burpsuite-tools/releases/tag/v1.0.0):
+
+| Extension | Direct JAR Download | Description |
+| :--- | :--- | :--- |
+| **JS SourceMap Explorer** | [📥 `js-sourcemap-explorer-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/js-sourcemap-explorer-littlespidy-1.0.0.jar) | SourceMap reconstructor, hidden route miner, VS Code export |
+| **Cache Header Inspector** | [📥 `cache-header-inspector-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/cache-header-inspector-littlespidy-1.0.0.jar) | Passive CDN & cache header indexing and directive analysis |
+| **Convert POST to GET** | [📥 `convert-post-to-get-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/convert-post-to-get-littlespidy-1.0.0.jar) | Request body to GET query converter for auth bypass testing |
+| **Input Validation Fuzzer** | [📥 `input-validation-fuzzer-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/input-validation-fuzzer-littlespidy-1.0.0.jar) | Multi-point input validation and boundary fuzzer |
+
+---
+
 ## 🛠️ Included Extensions
 
 ### 1. [JS SourceMap Explorer](file:///home/littlespidy/myextra/burpsuite/JSSourceMapExplorer_littlespidy)
