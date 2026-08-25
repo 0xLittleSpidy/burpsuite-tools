@@ -15,35 +15,26 @@ It allows you to aggregate, search, and filter unique cache directive values (e.
 
 ## Key Features
 
-1. **Passive Real-Time Inspection**:
-   - Intercepts and indexes response headers across all Burp tools (Proxy, Repeater, Scanner).
-   - Tracks 12 essential caching headers:
-     - `Cache-Control`
-     - `Pragma`
-     - `Expires`
-     - `Age`
-     - `ETag`
-     - `Last-Modified`
-     - `Vary`
-     - `X-Cache`
-     - `X-Cache-Hits`
-     - `CDN-Cache-Control`
-     - `Surrogate-Control`
-     - `CF-Cache-Status`
+1. **On-Demand Proxy History Ingestion & Automatic Deduplication**:
+   - Ingests requests and responses directly from Burp Proxy history on demand via the **"Load Proxy History"** button.
+   - Automatically deduplicates entries by HTTP method + URL, collapsing repeat visits into unique endpoint records.
+   - Optional **In-Scope Only** filtering during or after import.
 
-2. **Directive Aggregation & URL Filtering**:
+2. **12 Indexed Caching & CDN Headers**:
+   - Tracks: `Cache-Control`, `Pragma`, `Expires`, `Age`, `ETag`, `Last-Modified`, `Vary`, `X-Cache`, `X-Cache-Hits`, `CDN-Cache-Control`, `Surrogate-Control`, and `CF-Cache-Status`.
+
+3. **Directive Aggregation & URL Grouping**:
    - Groups responses by unique directive values with live URL counts (e.g. `max-age=0`, `no-store`, `public`, `private`, `(not set)`).
    - **Clicking any row** in the summary table instantly filters and displays all associated URLs.
 
-3. **Built-in Master-Detail Viewer**:
-   - Select any URL row to view the full, raw HTTP request and response in Burp's native Pretty/Raw/Hex editors.
+4. **Multi-Faceted Triage Filtering**:
+   - **Status Code**: Filter by exact code or comma-separated lists (`200, 302, 404`) and status wildcards (`2xx`, `3xx`, `4xx`, `5xx`).
+   - **Content-Type**: Substring matching (`json`, `html`, `text`, `image`) to isolate APIs or static assets.
+   - **Directive Value**: Free-form text and preset chips (`no-store`, `no-cache`, `public`, `private`, `max-age=0`, `must-revalidate`, `stale-while-revalidate`, `HIT`, `MISS`, `(not set)`).
+   - **Scope**: Toggle in-scope targets dynamically.
 
-4. **One-Click Proxy History Ingestion**:
-   - `Load Proxy History` imports past traffic with optional **In-Scope Only** filtering.
-
-5. **Quick Filter Chips & Search**:
-   - Quick preset buttons for `no-store`, `no-cache`, `public`, `private`, `max-age=0`, `must-revalidate`, `stale-while-revalidate`, `HIT`, `MISS`, `(not set)`.
-   - Free-form text search across header values.
+5. **Built-in Master-Detail Viewer**:
+   - Select any URL row to view the full, raw HTTP request and response in Burp's native Pretty/Raw/Hex editors without leaving the tab.
 
 6. **Export Capabilities**:
    - Copy selected rows as TSV using `Ctrl+C` / `Cmd+C`.

@@ -1,8 +1,9 @@
 // Created with the help of an AI Agent and littlespidy.
-package com.littlespidy.cacheheaderinspector.ui;
+package com.littlespidy.cspinspector.ui;
 
-import com.littlespidy.cacheheaderinspector.model.CacheDataStore;
-import com.littlespidy.cacheheaderinspector.model.CacheEntry;
+import com.littlespidy.cspinspector.model.CSPDataStore;
+import com.littlespidy.cspinspector.model.CSPEntry;
+import com.littlespidy.cspinspector.model.CSPParser;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
@@ -21,38 +22,41 @@ import java.util.*;
 import java.util.List;
 
 /**
- * Top-level suite tab containing Welcome & Guide and the interactive Cache Header Inspector workspace.
+ * Top-level UI tab for CSP Inspector providing overview summaries, granular directive grouping,
+ * fast multi-faceted triage filtering, and built-in master-detail HTTP request/response editors.
  *
  * @author littlespidy
  */
-public class CacheInspectorTab extends JPanel {
+public class CSPInspectorTab extends JPanel {
 
-    public static final String[] TRACKED_HEADERS = {
-        "Cache-Control",
-        "Pragma",
-        "Expires",
-        "Age",
-        "ETag",
-        "Last-Modified",
-        "Vary",
-        "X-Cache",
-        "X-Cache-Hits",
-        "CDN-Cache-Control",
-        "Surrogate-Control",
-        "CF-Cache-Status"
+    public static final String[] INSPECT_MODES = {
+        "Full Policy",
+        "All Sources (Directives)",
+        "script-src",
+        "default-src",
+        "frame-ancestors",
+        "object-src",
+        "base-uri",
+        "form-action",
+        "style-src",
+        "connect-src",
+        "img-src",
+        "font-src",
+        "report-uri",
+        "CSP-Report-Only"
     };
 
     private final MontoyaApi api;
-    private final CacheDataStore dataStore;
+    private final CSPDataStore dataStore;
 
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
 
     // Summary Table Components
-    private final CacheSummaryTableModel summaryTableModel = new CacheSummaryTableModel();
+    private final CSPSummaryTableModel summaryTableModel = new CSPSummaryTableModel();
     private final JTable summaryTable = new JTable(summaryTableModel);
 
     // URL Entries Table Components
-    private final CacheEntryTableModel entryTableModel = new CacheEntryTableModel();
+    private final CSPEntryTableModel entryTableModel = new CSPEntryTableModel();
     private final JTable entryTable = new JTable(entryTableModel);
 
     // Montoya Request / Response Editors
@@ -87,22 +91,21 @@ public class CacheInspectorTab extends JPanel {
     };
 
     // Filter Controls
-    private final JComboBox<String> headerComboBox = new JComboBox<>(TRACKED_HEADERS);
+    private final JComboBox<String> inspectModeComboBox = new JComboBox<>(INSPECT_MODES);
     private final JTextField valueFilterField = new JTextField(14);
     private final JComboBox<String> statusCodeComboBox = new JComboBox<>(STATUS_CODE_OPTIONS);
     private final JComboBox<String> contentTypeComboBox = new JComboBox<>(CONTENT_TYPE_OPTIONS);
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
-    private final JLabel statsLabel = new JLabel("Total Unique URLs: 0 | Unique Directives: 0 | Displayed URLs: 0");
-    private final JLabel currentHeaderLabel = new JLabel("Directives for: Cache-Control");
+    private final JLabel statsLabel = new JLabel("Total Unique URLs: 0 | Patterns: 0 | Displayed URLs: 0");
 
     // UI Debounce Timer
     private final javax.swing.Timer refreshTimer;
     private volatile boolean needsRefresh = false;
 
-    // Currently selected directive filter from the summary table
-    private String selectedDirectiveValue = null;
+    // Selected summary pattern
+    private String selectedSummaryValue = null;
 
-    public CacheInspectorTab(MontoyaApi api, CacheDataStore dataStore) {
+    public CSPInspectorTab(MontoyaApi api, CSPDataStore dataStore) {
         this.api = api;
         this.dataStore = dataStore;
         this.requestEditor = api.userInterface().createHttpRequestEditor();
@@ -110,8 +113,8 @@ public class CacheInspectorTab extends JPanel {
 
         setLayout(new BorderLayout());
 
-        // Setup debounced UI refresh timer (400ms)
-        this.refreshTimer = new javax.swing.Timer(400, e -> {
+        // Debounce timer (350ms)
+        this.refreshTimer = new javax.swing.Timer(350, e -> {
             if (needsRefresh) {
                 needsRefresh = false;
                 refreshView();
@@ -120,16 +123,13 @@ public class CacheInspectorTab extends JPanel {
         this.refreshTimer.setRepeats(true);
         this.refreshTimer.start();
 
-        // Listen for new data arrivals
-        dataStore.addListener(() -> {
-            needsRefresh = true;
-        });
+        dataStore.addListener(() -> needsRefresh = true);
 
         // Tab 1: Welcome & Guide
         rootTabbedPane.addTab("Welcome & Guide", createWelcomePanel());
 
-        // Tab 2: Cache Header Inspector
-        rootTabbedPane.addTab("Cache Header Inspector", createInspectorPanel());
+        // Tab 2: CSP Inspector
+        rootTabbedPane.addTab("CSP Inspector", createInspectorPanel());
 
         add(rootTabbedPane, BorderLayout.CENTER);
     }
@@ -144,7 +144,7 @@ public class CacheInspectorTab extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(15, 15));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
 
-        JLabel titleLabel = new JLabel("Cache Header Inspector");
+        JLabel titleLabel = new JLabel("Content Security Policy (CSP) Inspector");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
 
         JTextArea descArea = new JTextArea();
@@ -154,36 +154,36 @@ public class CacheInspectorTab extends JPanel {
         descArea.setLineWrap(true);
         descArea.setWrapStyleWord(true);
         descArea.setText(
-            "Cache Header Inspector provides an interactive, on-demand overview of HTTP caching behavior "
-                + "and response headers across your target applications.\n\n"
-                + "Easily identify endpoints with missing cache controls, sensitive data cached in CDN/proxies, "
-                + "Web Cache Deception risks, or potential Web Cache Poisoning surfaces."
+            "CSP Inspector is an interactive analysis tool for Burp Suite designed to rapidly audit, group, "
+                + "and analyze Content Security Policy implementations across target applications.\n\n"
+                + "Identify missing CSP protection, dangerous source expressions ('unsafe-inline', 'unsafe-eval', wildcard domains), "
+                + "Clickjacking risks (missing frame-ancestors), plugin injection surfaces (missing object-src), "
+                + "and Report-Only test configurations in seconds."
         );
 
         JPanel headerPanel = new JPanel(new BorderLayout(5, 10));
         headerPanel.add(titleLabel, BorderLayout.NORTH);
         headerPanel.add(descArea, BorderLayout.CENTER);
 
-        // Feature cards
         JPanel cardsPanel = new JPanel(new GridLayout(0, 2, 20, 20));
         cardsPanel.add(createCard(
-            "1. On-Demand Target Ingestion & Deduplication",
-            "Click 'Load Proxy History' to instantly ingest and deduplicate past traffic from Burp Proxy history without unnecessary background polling."
+            "1. On-Demand Ingestion & Deduplication",
+            "Import target traffic from Burp Proxy history on-demand via 'Load Proxy History'. "
+                + "Endpoints are automatically deduplicated by Method + URL to prevent table clutter."
         ));
         cardsPanel.add(createCard(
-            "2. Directive Aggregation & URL Grouping",
-            "Groups all unique endpoints by directive values (e.g. max-age=0, public, no-store). "
-                + "Clicking any directive row instantly filters all matching URLs."
+            "2. Multi-Mode Directive Breakdown",
+            "Analyze policies by Full CSP string, by individual directives (script-src, frame-ancestors, object-src, etc.), "
+                + "or by specific source tokens ('unsafe-inline', 'unsafe-eval', data:, https://*)."
         ));
         cardsPanel.add(createCard(
-            "3. Multi-Faceted Triage Filtering",
-            "Simultaneously filter by Status Code (e.g. 200, 302, 4xx), Content-Type (e.g. json, html), "
-                + "Directive Values, and Target Scope."
+            "3. Rapid Triage Filters & Preset Chips",
+            "Filter instantly by Status Code (200, 302, 4xx), Content-Type (html, json), Scope, and Directive Keywords. "
+                + "Use one-click quick chips for immediate vulnerability identification."
         ));
         cardsPanel.add(createCard(
-            "4. Built-in Master-Detail Viewer",
-            "Select any URL to immediately inspect the raw HTTP request and response in Burp's native "
-                + "Pretty/Raw/Hex editors without leaving the tab."
+            "4. Integrated Master-Detail Viewer",
+            "Click any URL row to view the full, raw HTTP request and response in Burp's native Pretty/Raw/Hex editors."
         ));
 
         panel.add(headerPanel, BorderLayout.NORTH);
@@ -218,28 +218,29 @@ public class CacheInspectorTab extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // ── Top Control & Filter Toolbar ──
+        // Top Toolbars
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
         topContainer.add(createMainToolbar(), BorderLayout.NORTH);
         topContainer.add(createQuickFilterToolbar(), BorderLayout.SOUTH);
         panel.add(topContainer, BorderLayout.NORTH);
 
-        // ── Center Workspaces ──
+        // Center Workspaces
         // Top: Summary Table
         JPanel summaryPanel = new JPanel(new BorderLayout(5, 5));
         summaryPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "Cache Directive Values Overview",
+            BorderFactory.createEtchedBorder(), "CSP Value Overview & Assessment",
             TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 13)
         ));
 
         summaryTable.setRowSorter(new TableRowSorter<>(summaryTableModel));
         summaryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setupSummaryTableRendering();
         summaryTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = summaryTable.getSelectedRow();
                 if (row >= 0) {
                     int modelRow = summaryTable.convertRowIndexToModel(row);
-                    selectedDirectiveValue = summaryTableModel.getDirectiveValueAt(modelRow);
+                    selectedSummaryValue = summaryTableModel.getSummaryValueAt(modelRow);
                     updateEntryTableForSelection();
                 }
             }
@@ -247,10 +248,10 @@ public class CacheInspectorTab extends JPanel {
         setupTableKeyboardCopy(summaryTable);
         summaryPanel.add(new JScrollPane(summaryTable), BorderLayout.CENTER);
 
-        // Bottom: URLs Table + Montoya Editors (Master-Detail)
+        // Bottom: URL Entries Table + Montoya Editors (Master-Detail)
         JPanel detailsPanel = new JPanel(new BorderLayout(5, 5));
         detailsPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "Associated URLs",
+            BorderFactory.createEtchedBorder(), "Associated Endpoints",
             TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 13)
         ));
 
@@ -262,7 +263,7 @@ public class CacheInspectorTab extends JPanel {
                 int row = entryTable.getSelectedRow();
                 if (row >= 0) {
                     int modelRow = entryTable.convertRowIndexToModel(row);
-                    CacheEntry entry = entryTableModel.getEntryAt(modelRow);
+                    CSPEntry entry = entryTableModel.getEntryAt(modelRow);
                     if (entry != null) {
                         if (entry.request() != null) requestEditor.setRequest(entry.request());
                         if (entry.response() != null) responseEditor.setResponse(entry.response());
@@ -272,7 +273,6 @@ public class CacheInspectorTab extends JPanel {
         });
         setupTableKeyboardCopy(entryTable);
 
-        // Editors TabbedPane
         JTabbedPane editorTabs = new JTabbedPane();
         editorTabs.addTab("Request", requestEditor.uiComponent());
         editorTabs.addTab("Response", responseEditor.uiComponent());
@@ -285,13 +285,13 @@ public class CacheInspectorTab extends JPanel {
         masterDetailSplit.setResizeWeight(0.55);
         detailsPanel.add(masterDetailSplit, BorderLayout.CENTER);
 
-        // Main Split Pane: Summary (Top) vs Associated URLs & Editors (Bottom)
+        // Main Vertical Split
         JSplitPane mainSplit = new JSplitPane(
             JSplitPane.VERTICAL_SPLIT,
             summaryPanel,
             detailsPanel
         );
-        mainSplit.setResizeWeight(0.35);
+        mainSplit.setResizeWeight(0.38);
         panel.add(mainSplit, BorderLayout.CENTER);
 
         return panel;
@@ -304,16 +304,16 @@ public class CacheInspectorTab extends JPanel {
         loadHistoryBtn.setToolTipText("Import and deduplicate requests and responses from Burp Proxy history");
         loadHistoryBtn.addActionListener(e -> loadProxyHistory());
 
-        JLabel headerLbl = new JLabel("Inspect Header:");
-        headerLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        JLabel modeLbl = new JLabel("Inspect Mode:");
+        modeLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
 
-        headerComboBox.addActionListener(e -> {
-            selectedDirectiveValue = null;
+        inspectModeComboBox.addActionListener(e -> {
+            selectedSummaryValue = null;
             refreshView();
         });
 
-        JLabel filterLbl = new JLabel("Directive:");
-        valueFilterField.setToolTipText("Filter directive values (e.g. no-store, max-age, public, private)");
+        JLabel filterLbl = new JLabel("Keyword:");
+        valueFilterField.setToolTipText("Filter policy or directive values (e.g. unsafe-inline, data:, none, report-uri)");
         valueFilterField.addActionListener(e -> refreshView());
 
         JLabel statusLbl = new JLabel("Status:");
@@ -328,7 +328,7 @@ public class CacheInspectorTab extends JPanel {
         JLabel typeLbl = new JLabel("Content-Type:");
         typeLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         contentTypeComboBox.setEditable(true);
-        contentTypeComboBox.setToolTipText("Filter Content-Type (e.g. text/html, application/json, image)");
+        contentTypeComboBox.setToolTipText("Filter Content-Type (e.g. text/html, application/json, text)");
         contentTypeComboBox.addActionListener(e -> refreshView());
         if (contentTypeComboBox.getEditor().getEditorComponent() instanceof JTextField tf) {
             tf.addActionListener(e -> refreshView());
@@ -342,7 +342,7 @@ public class CacheInspectorTab extends JPanel {
             valueFilterField.setText("");
             statusCodeComboBox.setSelectedIndex(0);
             contentTypeComboBox.setSelectedIndex(0);
-            selectedDirectiveValue = null;
+            selectedSummaryValue = null;
             refreshView();
         });
 
@@ -356,21 +356,21 @@ public class CacheInspectorTab extends JPanel {
         clearDataBtn.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Are you sure you want to clear all captured cache entries?",
+                "Are you sure you want to clear all captured CSP entries?",
                 "Clear Data",
                 JOptionPane.YES_NO_OPTION
             );
             if (confirm == JOptionPane.YES_OPTION) {
                 dataStore.clear();
-                selectedDirectiveValue = null;
+                selectedSummaryValue = null;
                 refreshView();
             }
         });
 
         toolbar.add(loadHistoryBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
-        toolbar.add(headerLbl);
-        toolbar.add(headerComboBox);
+        toolbar.add(modeLbl);
+        toolbar.add(inspectModeComboBox);
         toolbar.add(filterLbl);
         toolbar.add(valueFilterField);
         toolbar.add(statusLbl);
@@ -391,13 +391,12 @@ public class CacheInspectorTab extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
 
         JPanel chipsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        JLabel quickLbl = new JLabel("Quick Filters:");
+        JLabel quickLbl = new JLabel("Quick Presets:");
         quickLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         chipsPanel.add(quickLbl);
 
         String[] quickPresets = {
-            "no-store", "no-cache", "public", "private", "max-age=0",
-            "must-revalidate", "stale-while-revalidate", "HIT", "MISS", "(not set)"
+            "'unsafe-inline'", "'unsafe-eval'", "data:", "*", "(missing CSP)", "CSP-Report-Only", "frame-ancestors 'none'", "object-src 'none'"
         };
 
         for (String preset : quickPresets) {
@@ -405,15 +404,20 @@ public class CacheInspectorTab extends JPanel {
             chip.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
             chip.setMargin(new Insets(1, 6, 1, 6));
             chip.addActionListener(e -> {
-                if (preset.equals("HIT") || preset.equals("MISS")) {
-                    headerComboBox.setSelectedItem("X-Cache");
-                } else if (preset.equals("(not set)")) {
-                    // Filter specifically for not set
+                if (preset.equals("CSP-Report-Only")) {
+                    inspectModeComboBox.setSelectedItem("CSP-Report-Only");
+                    valueFilterField.setText("");
+                } else if (preset.equals("frame-ancestors 'none'")) {
+                    inspectModeComboBox.setSelectedItem("frame-ancestors");
+                    valueFilterField.setText("'none'");
+                } else if (preset.equals("object-src 'none'")) {
+                    inspectModeComboBox.setSelectedItem("object-src");
+                    valueFilterField.setText("'none'");
                 } else {
-                    headerComboBox.setSelectedItem("Cache-Control");
+                    inspectModeComboBox.setSelectedItem("Full Policy");
+                    valueFilterField.setText(preset);
                 }
-                valueFilterField.setText(preset);
-                selectedDirectiveValue = null;
+                selectedSummaryValue = null;
                 refreshView();
             });
             chipsPanel.add(chip);
@@ -429,9 +433,39 @@ public class CacheInspectorTab extends JPanel {
         return panel;
     }
 
+    private void setupSummaryTableRendering() {
+        summaryTable.getColumnModel().getColumn(1).setMaxWidth(80); // Count
+
+        summaryTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column
+            ) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                int modelRow = table.convertRowIndexToModel(row);
+                Object assessmentObj = summaryTableModel.getValueAt(modelRow, 2);
+                String assessment = assessmentObj != null ? assessmentObj.toString() : "";
+
+                if (!isSelected) {
+                    if (assessment.startsWith("CRITICAL") || assessment.startsWith("HIGH")) {
+                        c.setBackground(new Color(255, 230, 230)); // light red
+                    } else if (assessment.startsWith("MEDIUM")) {
+                        c.setBackground(new Color(255, 245, 220)); // light yellow/orange
+                    } else if (assessment.startsWith("GOOD")) {
+                        c.setBackground(new Color(235, 255, 235)); // light green
+                    } else {
+                        c.setBackground(table.getBackground());
+                    }
+                }
+                return c;
+            }
+        });
+    }
+
     private void setupEntryTableRendering() {
         entryTable.getColumnModel().getColumn(0).setMaxWidth(50); // #
         entryTable.getColumnModel().getColumn(1).setMaxWidth(65); // Status
+        entryTable.getColumnModel().getColumn(2).setMaxWidth(65); // Method
 
         entryTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
@@ -440,7 +474,7 @@ public class CacheInspectorTab extends JPanel {
             ) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 int modelRow = table.convertRowIndexToModel(row);
-                CacheEntry entry = entryTableModel.getEntryAt(modelRow);
+                CSPEntry entry = entryTableModel.getEntryAt(modelRow);
 
                 if (entry != null && !isSelected) {
                     int status = entry.statusCode();
@@ -477,11 +511,9 @@ public class CacheInspectorTab extends JPanel {
         if (selectedRows.length == 0) return;
 
         StringBuilder sb = new StringBuilder();
-        // Header
         for (int col = 0; col < table.getColumnCount(); col++) {
             sb.append(table.getColumnName(col)).append(col == table.getColumnCount() - 1 ? "\n" : "\t");
         }
-        // Rows
         for (int row : selectedRows) {
             for (int col = 0; col < table.getColumnCount(); col++) {
                 Object val = table.getValueAt(row, col);
@@ -493,7 +525,7 @@ public class CacheInspectorTab extends JPanel {
     }
 
     private void exportCurrentEntriesToTsv() {
-        List<CacheEntry> entries = entryTableModel.getAllEntries();
+        List<CSPEntry> entries = entryTableModel.getAllEntries();
         if (entries.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No entries currently displayed to export.", "Export TSV", JOptionPane.INFORMATION_MESSAGE);
             return;
@@ -516,11 +548,11 @@ public class CacheInspectorTab extends JPanel {
     }
 
     private void loadProxyHistory() {
-        SwingWorker<List<CacheEntry>, Void> worker = new SwingWorker<>() {
+        SwingWorker<List<CSPEntry>, Void> worker = new SwingWorker<>() {
             @Override
-            protected List<CacheEntry> doInBackground() {
+            protected List<CSPEntry> doInBackground() {
                 List<ProxyHttpRequestResponse> history = api.proxy().history();
-                Map<String, CacheEntry> uniqueEntries = new LinkedHashMap<>();
+                Map<String, CSPEntry> uniqueEntries = new LinkedHashMap<>();
                 boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
 
                 for (ProxyHttpRequestResponse item : history) {
@@ -537,25 +569,27 @@ public class CacheInspectorTab extends JPanel {
                     String method = item.request().method() != null ? item.request().method().toUpperCase() : "GET";
                     String dedupeKey = method + " " + url;
 
-                    CacheEntry entry = new CacheEntry(
+                    String csp = resp.headerValue("Content-Security-Policy");
+                    String cspRo = resp.headerValue("Content-Security-Policy-Report-Only");
+                    String xCsp = resp.headerValue("X-Content-Security-Policy");
+                    String xWebKit = resp.headerValue("X-WebKit-CSP");
+
+                    String effectivePolicy = (csp != null && !csp.isEmpty()) ? csp : cspRo;
+                    Map<String, List<String>> parsedDirectives = CSPParser.parsePolicy(effectivePolicy);
+
+                    CSPEntry entry = new CSPEntry(
                         dataStore.nextId(),
                         url,
                         host,
                         path,
+                        method,
                         resp.statusCode(),
                         resp.headerValue("Content-Type") != null ? resp.headerValue("Content-Type") : "",
-                        resp.headerValue("Cache-Control") != null ? resp.headerValue("Cache-Control") : "",
-                        resp.headerValue("Pragma") != null ? resp.headerValue("Pragma") : "",
-                        resp.headerValue("Expires") != null ? resp.headerValue("Expires") : "",
-                        resp.headerValue("Age") != null ? resp.headerValue("Age") : "",
-                        resp.headerValue("ETag") != null ? resp.headerValue("ETag") : "",
-                        resp.headerValue("Last-Modified") != null ? resp.headerValue("Last-Modified") : "",
-                        resp.headerValue("Vary") != null ? resp.headerValue("Vary") : "",
-                        resp.headerValue("X-Cache") != null ? resp.headerValue("X-Cache") : "",
-                        resp.headerValue("X-Cache-Hits") != null ? resp.headerValue("X-Cache-Hits") : "",
-                        resp.headerValue("CDN-Cache-Control") != null ? resp.headerValue("CDN-Cache-Control") : "",
-                        resp.headerValue("Surrogate-Control") != null ? resp.headerValue("Surrogate-Control") : "",
-                        resp.headerValue("CF-Cache-Status") != null ? resp.headerValue("CF-Cache-Status") : "",
+                        csp != null ? csp : "",
+                        cspRo != null ? cspRo : "",
+                        xCsp != null ? xCsp : "",
+                        xWebKit != null ? xWebKit : "",
+                        parsedDirectives,
                         item.request(),
                         resp,
                         ZonedDateTime.now()
@@ -568,17 +602,17 @@ public class CacheInspectorTab extends JPanel {
             @Override
             protected void done() {
                 try {
-                    List<CacheEntry> result = get();
+                    List<CSPEntry> result = get();
                     dataStore.addEntries(result);
                     refreshView();
                     JOptionPane.showMessageDialog(
-                        CacheInspectorTab.this,
+                        CSPInspectorTab.this,
                         "Successfully imported " + result.size() + " unique URLs from Proxy history.",
                         "Import Complete",
                         JOptionPane.INFORMATION_MESSAGE
                     );
                 } catch (Exception ex) {
-                    api.logging().logToError("Error loading proxy history: " + ex.getMessage());
+                    api.logging().logToError("Error loading proxy history in CSPInspector: " + ex.getMessage());
                 }
             }
         };
@@ -598,8 +632,8 @@ public class CacheInspectorTab extends JPanel {
 
     public synchronized void refreshView() {
         SwingUtilities.invokeLater(() -> {
-            String selectedHeader = (String) headerComboBox.getSelectedItem();
-            if (selectedHeader == null) selectedHeader = "Cache-Control";
+            String selectedMode = (String) inspectModeComboBox.getSelectedItem();
+            if (selectedMode == null) selectedMode = "Full Policy";
 
             String filterText = valueFilterField.getText().trim();
             String statusText = getSelectedStatusCodeFilter();
@@ -610,31 +644,28 @@ public class CacheInspectorTab extends JPanel {
                 ? url -> api.scope().isInScope(url)
                 : null;
 
-            // 1. Group data filtered
-            Map<String, List<CacheEntry>> grouped = dataStore.groupByDirectiveFiltered(
-                selectedHeader, filterText, statusText, contentTypeText, inScopePredicate
+            Map<String, List<CSPEntry>> grouped = dataStore.groupByMode(
+                selectedMode, filterText, statusText, contentTypeText, inScopePredicate
             );
 
             summaryTableModel.updateData(grouped);
 
-            // 2. Update Entry table
             updateEntryTableForSelection();
 
-            // 3. Update stats
-            int totalUniqueUrls = dataStore.size();
-            int uniqueDirectives = summaryTableModel.getRowCount();
+            int totalUnique = dataStore.size();
+            int uniquePatterns = summaryTableModel.getRowCount();
             int displayedUrls = entryTableModel.getRowCount();
             statsLabel.setText(
-                "Total Unique URLs: " + totalUniqueUrls +
-                " | Unique Directives: " + uniqueDirectives +
+                "Total Unique URLs: " + totalUnique +
+                " | Patterns: " + uniquePatterns +
                 " | Displayed URLs: " + displayedUrls
             );
         });
     }
 
     private void updateEntryTableForSelection() {
-        String selectedHeader = (String) headerComboBox.getSelectedItem();
-        if (selectedHeader == null) selectedHeader = "Cache-Control";
+        String selectedMode = (String) inspectModeComboBox.getSelectedItem();
+        if (selectedMode == null) selectedMode = "Full Policy";
 
         String filterText = valueFilterField.getText().trim();
         String statusText = getSelectedStatusCodeFilter();
@@ -645,9 +676,9 @@ public class CacheInspectorTab extends JPanel {
             ? url -> api.scope().isInScope(url)
             : null;
 
-        List<CacheEntry> entriesToShow = dataStore.getFilteredEntries(
-            selectedHeader,
-            selectedDirectiveValue,
+        List<CSPEntry> entriesToShow = dataStore.getFilteredEntries(
+            selectedMode,
+            selectedSummaryValue,
             filterText,
             statusText,
             contentTypeText,
@@ -657,4 +688,3 @@ public class CacheInspectorTab extends JPanel {
         entryTableModel.updateData(entriesToShow);
     }
 }
-
