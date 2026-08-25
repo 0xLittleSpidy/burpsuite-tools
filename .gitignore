@@ -1,6 +1,8 @@
 .agents/
 .gradle/
-**/build/
+**/build/*
+!**/build/libs/
+!**/build/libs/*.jar
 **/.gradle/
 .idea/
 **/.idea/
