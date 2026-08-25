@@ -5,11 +5,6 @@ import com.littlespidy.jssourcemapexplorer.model.JsDataStore;
 import com.littlespidy.jssourcemapexplorer.ui.JSSourceMapExplorerTab;
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.http.handler.HttpHandler;
-import burp.api.montoya.http.handler.HttpRequestToBeSent;
-import burp.api.montoya.http.handler.HttpResponseReceived;
-import burp.api.montoya.http.handler.RequestToBeSentAction;
-import burp.api.montoya.http.handler.ResponseReceivedAction;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -59,34 +54,7 @@ public class JSSourceMapExplorerExtension implements BurpExtension {
             }
         });
 
-        // ── 3. Register Passive HTTP Handler ──
-        api.http().registerHttpHandler(new HttpHandler() {
-            @Override
-            public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent httpRequestToBeSent) {
-                return RequestToBeSentAction.continueWith(httpRequestToBeSent);
-            }
-
-            @Override
-            public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived httpResponseReceived) {
-                try {
-                    String path = httpResponseReceived.initiatingRequest().path();
-                    String ctype = httpResponseReceived.headerValue("Content-Type");
-
-                    boolean isJs = (ctype != null && (ctype.contains("javascript") || ctype.contains("ecmascript")))
-                        || (path != null && (path.endsWith(".js") || path.endsWith(".mjs") || path.contains(".js?")));
-
-                    if (isJs) {
-                        mainTab.addCandidate(httpResponseReceived.initiatingRequest(), httpResponseReceived);
-                    }
-                } catch (Exception ex) {
-                    api.logging().logToError("Error processing JS response: " + ex.getMessage());
-                }
-
-                return ResponseReceivedAction.continueWith(httpResponseReceived);
-            }
-        });
-
-        // ── 4. Register Unloading Handler ──
+        // ── 3. Register Unloading Handler ──
         api.extension().registerUnloadingHandler(() -> {
             if (mainTab != null) {
                 mainTab.cleanup();

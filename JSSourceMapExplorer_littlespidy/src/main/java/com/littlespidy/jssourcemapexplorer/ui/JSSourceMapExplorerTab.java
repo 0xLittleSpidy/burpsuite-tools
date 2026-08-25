@@ -62,6 +62,14 @@ public class JSSourceMapExplorerTab extends JPanel {
 
     // Filters
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
+    private final JComboBox<String> httpStatusFilter = new JComboBox<>(new String[]{
+        "200 OK Only",
+        "All Status Codes",
+        "2xx Success (200-299)",
+        "3xx Redirects (300-399)",
+        "4xx Client Errors (400-499)",
+        "5xx Server Errors (500-599)"
+    });
     private final JTextField searchField = new JTextField(15);
     private final JLabel statsLabel = new JLabel("Total: 0 | 1st Party: 0 | .map Exposed: 0 | Unpacked: 0");
 
@@ -382,7 +390,7 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         JPanel filtersPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 
-        JLabel filterLbl = new JLabel("Origin Filter:");
+        JLabel filterLbl = new JLabel("Origin:");
         filterLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         filtersPanel.add(filterLbl);
 
@@ -408,6 +416,15 @@ public class JSSourceMapExplorerTab extends JPanel {
         filtersPanel.add(exposedMapBtn);
 
         filtersPanel.add(new JSeparator(SwingConstants.VERTICAL));
+
+        JLabel statusLbl = new JLabel("Status:");
+        statusLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        filtersPanel.add(statusLbl);
+        httpStatusFilter.setSelectedIndex(0); // 200 OK Only by default
+        httpStatusFilter.addActionListener(e -> refreshView());
+        filtersPanel.add(httpStatusFilter);
+
+        filtersPanel.add(new JSeparator(SwingConstants.VERTICAL));
         filtersPanel.add(inScopeOnlyCheckBox);
         inScopeOnlyCheckBox.addActionListener(e -> refreshView());
 
@@ -419,6 +436,17 @@ public class JSSourceMapExplorerTab extends JPanel {
         JButton applyBtn = new JButton("Filter");
         applyBtn.addActionListener(e -> refreshView());
         filtersPanel.add(applyBtn);
+
+        JButton resetBtn = new JButton("Reset");
+        resetBtn.addActionListener(e -> {
+            allBtn.setSelected(true);
+            currentOriginFilter = OriginFilter.ALL;
+            httpStatusFilter.setSelectedIndex(0); // 200 OK Only
+            inScopeOnlyCheckBox.setSelected(false);
+            searchField.setText("");
+            refreshView();
+        });
+        filtersPanel.add(resetBtn);
 
         JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
         statsLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
@@ -731,17 +759,19 @@ public class JSSourceMapExplorerTab extends JPanel {
             protected void done() {
                 try {
                     List<JsFileEntry> result = get();
+                    int previousCount = dataStore.size();
                     dataStore.addEntries(result);
+                    int addedCount = dataStore.size() - previousCount;
                     refreshView();
                     reconMiningPanel.refreshFromDataStore();
                     JOptionPane.showMessageDialog(
                         JSSourceMapExplorerTab.this,
-                        "Discovered and deduplicated " + dataStore.size() + " unique JavaScript assets from Proxy history.",
-                        "History Scraped & Deduplicated",
+                        "Loaded and deduplicated " + dataStore.size() + " unique JavaScript assets (" + addedCount + " newly imported) from Proxy history.",
+                        "History Loaded & Deduplicated",
                         JOptionPane.INFORMATION_MESSAGE
                     );
                 } catch (Exception ex) {
-                    api.logging().logToError("Error scraping JS history: " + ex.getMessage());
+                    api.logging().logToError("Error loading JS proxy history: " + ex.getMessage());
                 }
             }
         };
@@ -753,6 +783,8 @@ public class JSSourceMapExplorerTab extends JPanel {
         SwingUtilities.invokeLater(() -> {
             boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
             String query = searchField.getText().trim().toLowerCase();
+            String selectedStatus = (String) httpStatusFilter.getSelectedItem();
+            if (selectedStatus == null) selectedStatus = "200 OK Only";
 
             List<JsFileEntry> all = dataStore.getEntries();
             List<JsFileEntry> filtered = new ArrayList<>();
@@ -774,6 +806,20 @@ public class JSSourceMapExplorerTab extends JPanel {
                 if (currentOriginFilter == OriginFilter.FIRST_PARTY_ONLY && !e.isFirstParty()) continue;
                 if (currentOriginFilter == OriginFilter.THIRD_PARTY_ONLY && e.isFirstParty()) continue;
                 if (currentOriginFilter == OriginFilter.EXPOSED_MAP_ONLY && !e.isMapExposed()) continue;
+
+                // HTTP Status filtering
+                int code = e.getStatusCode();
+                if ("200 OK Only".equals(selectedStatus)) {
+                    if (code != 200) continue;
+                } else if ("2xx Success (200-299)".equals(selectedStatus)) {
+                    if (code < 200 || code > 299) continue;
+                } else if ("3xx Redirects (300-399)".equals(selectedStatus)) {
+                    if (code < 300 || code > 399) continue;
+                } else if ("4xx Client Errors (400-499)".equals(selectedStatus)) {
+                    if (code < 400 || code > 499) continue;
+                } else if ("5xx Server Errors (500-599)".equals(selectedStatus)) {
+                    if (code < 500 || code > 599) continue;
+                }
 
                 // Search query
                 if (!query.isEmpty()) {

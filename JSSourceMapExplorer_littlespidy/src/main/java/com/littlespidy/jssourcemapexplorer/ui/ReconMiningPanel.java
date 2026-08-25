@@ -35,6 +35,14 @@ public class ReconMiningPanel extends JPanel {
     private final JTable secretsTable = new JTable(secretsTableModel);
 
     private final JComboBox<String> sourceTypeFilter = new JComboBox<>(new String[]{"All Sources", "JS Files Only", "SourceMap Files Only"});
+    private final JComboBox<String> httpStatusFilter = new JComboBox<>(new String[]{
+        "200 OK Only",
+        "All Status Codes",
+        "2xx Success (200-299)",
+        "3xx Redirects (300-399)",
+        "4xx Client Errors (400-499)",
+        "5xx Server Errors (500-599)"
+    });
     private final JTextField searchField = new JTextField(18);
     private final JLabel statsLabel = new JLabel("Endpoints: 0 | Secrets: 0");
 
@@ -56,6 +64,13 @@ public class ReconMiningPanel extends JPanel {
 
         sourceTypeFilter.addActionListener(e -> applyFilter());
 
+        JLabel statusLbl = new JLabel("Status:");
+        statusLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        topToolbar.add(statusLbl);
+        topToolbar.add(httpStatusFilter);
+
+        httpStatusFilter.addActionListener(e -> refreshFromDataStore());
+
         JLabel searchLbl = new JLabel(" Search: ");
         searchLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         topToolbar.add(searchLbl);
@@ -69,7 +84,8 @@ public class ReconMiningPanel extends JPanel {
         resetBtn.addActionListener(e -> {
             searchField.setText("");
             sourceTypeFilter.setSelectedIndex(0);
-            applyFilter();
+            httpStatusFilter.setSelectedIndex(0); // 200 OK Only
+            refreshFromDataStore();
         });
         topToolbar.add(resetBtn);
 
@@ -129,8 +145,24 @@ public class ReconMiningPanel extends JPanel {
         masterEndpoints.clear();
         masterSecrets.clear();
 
+        String selectedStatus = (String) httpStatusFilter.getSelectedItem();
+        if (selectedStatus == null) selectedStatus = "200 OK Only";
+
         if (dataStore != null) {
             for (JsFileEntry entry : dataStore.getEntries()) {
+                int code = entry.getStatusCode();
+                if ("200 OK Only".equals(selectedStatus)) {
+                    if (code != 200) continue;
+                } else if ("2xx Success (200-299)".equals(selectedStatus)) {
+                    if (code < 200 || code > 299) continue;
+                } else if ("3xx Redirects (300-399)".equals(selectedStatus)) {
+                    if (code < 300 || code > 399) continue;
+                } else if ("4xx Client Errors (400-499)".equals(selectedStatus)) {
+                    if (code < 400 || code > 499) continue;
+                } else if ("5xx Server Errors (500-599)".equals(selectedStatus)) {
+                    if (code < 500 || code > 599) continue;
+                }
+
                 // 1. Add JS findings
                 masterEndpoints.addAll(entry.getJsEndpoints());
                 masterSecrets.addAll(entry.getJsSecrets());
