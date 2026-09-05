@@ -1,4 +1,3 @@
-.agents/
 .gradle/
 **/build/*
 !**/build/libs/
@@ -7,4 +6,6 @@
 .idea/
 **/.idea/
 *.class
+bin/
+**/bin/
 BypassFuzzer-Burp/

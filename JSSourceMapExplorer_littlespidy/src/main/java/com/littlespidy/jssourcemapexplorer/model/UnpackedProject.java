@@ -5,7 +5,7 @@ import java.util.*;
 
 /**
  * Reconstructed source project tree holding all extracted source files,
- * aggregated endpoints, and discovered secrets.
+ * aggregated endpoints, secrets, cloud URLs, and dependencies.
  *
  * @author littlespidy
  */
@@ -14,6 +14,8 @@ public class UnpackedProject {
     private final Map<String, UnpackedSourceFile> filesByPath = new LinkedHashMap<>();
     private final List<DiscoveredSecret> allSecrets = new ArrayList<>();
     private final List<DiscoveredEndpoint> allEndpoints = new ArrayList<>();
+    private final List<DiscoveredCloudUrl> allCloudUrls = new ArrayList<>();
+    private final List<DiscoveredDependency> allDependencies = new ArrayList<>();
 
     public UnpackedProject(String sourceMapUrl) {
         this.sourceMapUrl = sourceMapUrl;
@@ -31,6 +33,12 @@ public class UnpackedProject {
         if (file.endpoints() != null) {
             allEndpoints.addAll(file.endpoints());
         }
+        if (file.cloudUrls() != null) {
+            allCloudUrls.addAll(file.cloudUrls());
+        }
+        if (file.dependencies() != null) {
+            allDependencies.addAll(file.dependencies());
+        }
     }
 
     public synchronized Map<String, UnpackedSourceFile> getFilesByPath() {
@@ -47,6 +55,14 @@ public class UnpackedProject {
 
     public synchronized List<DiscoveredEndpoint> getAllEndpoints() {
         return Collections.unmodifiableList(allEndpoints);
+    }
+
+    public synchronized List<DiscoveredCloudUrl> getAllCloudUrls() {
+        return Collections.unmodifiableList(allCloudUrls);
+    }
+
+    public synchronized List<DiscoveredDependency> getAllDependencies() {
+        return Collections.unmodifiableList(allDependencies);
     }
 
     public synchronized int getTotalFiles() {

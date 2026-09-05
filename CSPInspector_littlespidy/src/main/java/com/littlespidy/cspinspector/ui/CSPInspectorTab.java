@@ -23,7 +23,8 @@ import java.util.List;
 
 /**
  * Top-level UI tab for CSP Inspector providing overview summaries, granular directive grouping,
- * fast multi-faceted triage filtering, and built-in master-detail HTTP request/response editors.
+ * fast multi-faceted triage filtering (with multi-select support), and built-in master-detail
+ * HTTP request/response editors.
  *
  * @author littlespidy
  */
@@ -63,38 +64,61 @@ public class CSPInspectorTab extends JPanel {
     private final HttpRequestEditor requestEditor;
     private final HttpResponseEditor responseEditor;
 
-    public static final String[] STATUS_CODE_OPTIONS = {
-        "All Status Codes",
-        "2xx Success",
-        "200 OK",
-        "3xx Redirection",
-        "301 / 302 Redirect",
-        "304 Not Modified",
-        "4xx Client Error",
-        "401 Unauthorized",
-        "403 Forbidden",
-        "404 Not Found",
-        "5xx Server Error",
-        "500 Internal Error"
-    };
+    // ─── Multi-Select Filter Buttons ──────────────────────────────────────────
+    private final MultiSelectFilterButton statusFilterBtn = new MultiSelectFilterButton(
+        "Status",
+        List.of(
+            "All Status Codes",
+            "2xx Success",
+            "200 OK",
+            "3xx Redirection",
+            "301 / 302 Redirect",
+            "304 Not Modified",
+            "4xx Client Error",
+            "401 Unauthorized",
+            "403 Forbidden",
+            "404 Not Found",
+            "5xx Server Error",
+            "500 Internal Error"
+        ),
+        sel -> refreshView()
+    );
 
-    public static final String[] CONTENT_TYPE_OPTIONS = {
-        "All Content-Types",
-        "HTML (text/html)",
-        "JSON (application/json)",
-        "JavaScript (text/javascript)",
-        "CSS (text/css)",
-        "XML (application/xml)",
-        "Plain Text (text/plain)",
-        "Images (image/*)",
-        "PDF / Documents (application/pdf)"
-    };
+    private final MultiSelectFilterButton contentTypeFilterBtn = new MultiSelectFilterButton(
+        "Content-Type",
+        List.of(
+            "All Content-Types",
+            "HTML (text/html)",
+            "JSON (application/json)",
+            "JavaScript (text/javascript)",
+            "CSS (text/css)",
+            "XML (application/xml)",
+            "Plain Text (text/plain)",
+            "Images (image/*)",
+            "PDF / Documents (application/pdf)"
+        ),
+        sel -> refreshView()
+    );
+
+    private final MultiSelectFilterButton methodFilterBtn = new MultiSelectFilterButton(
+        "Method",
+        List.of(
+            "All Methods",
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "OPTIONS",
+            "HEAD"
+        ),
+        sel -> refreshView()
+    );
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Filter Controls
     private final JComboBox<String> inspectModeComboBox = new JComboBox<>(INSPECT_MODES);
     private final JTextField valueFilterField = new JTextField(14);
-    private final JComboBox<String> statusCodeComboBox = new JComboBox<>(STATUS_CODE_OPTIONS);
-    private final JComboBox<String> contentTypeComboBox = new JComboBox<>(CONTENT_TYPE_OPTIONS);
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
     private final JLabel statsLabel = new JLabel("Total Unique URLs: 0 | Patterns: 0 | Displayed URLs: 0");
 
@@ -177,9 +201,9 @@ public class CSPInspectorTab extends JPanel {
                 + "or by specific source tokens ('unsafe-inline', 'unsafe-eval', data:, https://*)."
         ));
         cardsPanel.add(createCard(
-            "3. Rapid Triage Filters & Preset Chips",
-            "Filter instantly by Status Code (200, 302, 4xx), Content-Type (html, json), Scope, and Directive Keywords. "
-                + "Use one-click quick chips for immediate vulnerability identification."
+            "3. Multi-Select Triage Filters & Preset Chips",
+            "Filter instantly by HTTP Method, Status Code, and Content-Type using multi-select dropdowns. "
+                + "Select multiple values at once (e.g. GET + POST). Use one-click quick chips for immediate vulnerability identification."
         ));
         cardsPanel.add(createCard(
             "4. Integrated Master-Detail Viewer",
@@ -316,23 +340,10 @@ public class CSPInspectorTab extends JPanel {
         valueFilterField.setToolTipText("Filter policy or directive values (e.g. unsafe-inline, data:, none, report-uri)");
         valueFilterField.addActionListener(e -> refreshView());
 
-        JLabel statusLbl = new JLabel("Status:");
-        statusLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        statusCodeComboBox.setEditable(true);
-        statusCodeComboBox.setToolTipText("Filter status codes (e.g. 200, 302, 4xx, 5xx)");
-        statusCodeComboBox.addActionListener(e -> refreshView());
-        if (statusCodeComboBox.getEditor().getEditorComponent() instanceof JTextField tf) {
-            tf.addActionListener(e -> refreshView());
-        }
-
-        JLabel typeLbl = new JLabel("Content-Type:");
-        typeLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        contentTypeComboBox.setEditable(true);
-        contentTypeComboBox.setToolTipText("Filter Content-Type (e.g. text/html, application/json, text)");
-        contentTypeComboBox.addActionListener(e -> refreshView());
-        if (contentTypeComboBox.getEditor().getEditorComponent() instanceof JTextField tf) {
-            tf.addActionListener(e -> refreshView());
-        }
+        // Tooltips for multi-select filter buttons
+        statusFilterBtn.setToolTipText("Multi-select HTTP status codes to filter by");
+        contentTypeFilterBtn.setToolTipText("Multi-select Content-Types to filter by");
+        methodFilterBtn.setToolTipText("Multi-select HTTP methods to filter by (GET, POST, PUT, etc.)");
 
         JButton applyFilterBtn = new JButton("Apply");
         applyFilterBtn.addActionListener(e -> refreshView());
@@ -340,8 +351,9 @@ public class CSPInspectorTab extends JPanel {
         JButton clearFilterBtn = new JButton("Reset Filters");
         clearFilterBtn.addActionListener(e -> {
             valueFilterField.setText("");
-            statusCodeComboBox.setSelectedIndex(0);
-            contentTypeComboBox.setSelectedIndex(0);
+            statusFilterBtn.clearSelection();
+            contentTypeFilterBtn.clearSelection();
+            methodFilterBtn.clearSelection();
             selectedSummaryValue = null;
             refreshView();
         });
@@ -373,10 +385,11 @@ public class CSPInspectorTab extends JPanel {
         toolbar.add(inspectModeComboBox);
         toolbar.add(filterLbl);
         toolbar.add(valueFilterField);
-        toolbar.add(statusLbl);
-        toolbar.add(statusCodeComboBox);
-        toolbar.add(typeLbl);
-        toolbar.add(contentTypeComboBox);
+        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        toolbar.add(methodFilterBtn);
+        toolbar.add(statusFilterBtn);
+        toolbar.add(contentTypeFilterBtn);
+        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(applyFilterBtn);
         toolbar.add(clearFilterBtn);
         toolbar.add(inScopeOnlyCheckBox);
@@ -620,15 +633,37 @@ public class CSPInspectorTab extends JPanel {
         worker.execute();
     }
 
-    private String getSelectedStatusCodeFilter() {
-        Object item = statusCodeComboBox.getEditor().getItem();
-        return item != null ? item.toString().trim() : "";
+    // ── Filter Accessors ────────────────────────────────────────────────────
+
+    /**
+     * Translates multi-select status button selections into the status filter string
+     * understood by {@link CSPDataStore#matchesStatusCode}.
+     * When nothing is selected the method returns an empty string ("all pass").
+     */
+    private String getStatusFilterString() {
+        Set<String> sel = statusFilterBtn.getSelected();
+        if (sel.isEmpty()) return "";
+        // Join multiple selections with " / " so matchesStatusCode can tokenise them
+        return String.join(" / ", sel);
     }
 
-    private String getSelectedContentTypeFilter() {
-        Object item = contentTypeComboBox.getEditor().getItem();
-        return item != null ? item.toString().trim() : "";
+    /**
+     * Translates multi-select content-type button selections into a single filter
+     * string for {@link CSPDataStore#matchesContentType}.
+     * When nothing is selected returns empty string ("all pass").
+     */
+    private String getContentTypeFilterString() {
+        Set<String> sel = contentTypeFilterBtn.getSelected();
+        if (sel.isEmpty()) return "";
+        // For content-type we use the first selected item as the primary filter
+        // (matchesContentType is keyword-based; multiple selections are OR-ed
+        // by calling refreshView for each trigger which keeps it simple).
+        // A lightweight OR approach: return the first selected value; the
+        // dataStore predicate is applied per-entry so we gate in the loop below.
+        return sel.iterator().next();
     }
+
+    // ── Refresh ─────────────────────────────────────────────────────────────
 
     public synchronized void refreshView() {
         SwingUtilities.invokeLater(() -> {
@@ -636,20 +671,33 @@ public class CSPInspectorTab extends JPanel {
             if (selectedMode == null) selectedMode = "Full Policy";
 
             String filterText = valueFilterField.getText().trim();
-            String statusText = getSelectedStatusCodeFilter();
-            String contentTypeText = getSelectedContentTypeFilter();
             boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
+
+            Set<String> methodFilter = methodFilterBtn.getSelected();
 
             java.util.function.Predicate<String> inScopePredicate = inScopeOnly
                 ? url -> api.scope().isInScope(url)
                 : null;
 
-            Map<String, List<CSPEntry>> grouped = dataStore.groupByMode(
-                selectedMode, filterText, statusText, contentTypeText, inScopePredicate
+            // Build combined status + content-type predicates via multi-select
+            // We pass the first selected value as the legacy string filter and also
+            // apply OR matching for multiple selections in a wrapper predicate.
+            final Set<String> selectedStatuses = statusFilterBtn.getSelected();
+            final Set<String> selectedContentTypes = contentTypeFilterBtn.getSelected();
+
+            // Wrap scope + status + content-type + method into a single entry predicate
+            // and use an empty string for the legacy string filter params so the dataStore
+            // methods delegate actual filtering to our predicate.
+            java.util.function.Predicate<String> combinedScopePredicate = inScopePredicate;
+
+            // Use the dataStore's groupByMode with extended predicate to handle OR-matching
+            // for multi-select. We pass empty strings for status/contentType and gate via
+            // the custom Predicate chain inside our override lambda below.
+            Map<String, List<CSPEntry>> grouped = groupByModeWithMultiSelect(
+                selectedMode, filterText, selectedStatuses, selectedContentTypes, methodFilter, combinedScopePredicate
             );
 
             summaryTableModel.updateData(grouped);
-
             updateEntryTableForSelection();
 
             int totalUnique = dataStore.size();
@@ -663,27 +711,96 @@ public class CSPInspectorTab extends JPanel {
         });
     }
 
+    /**
+     * Delegates to {@link CSPDataStore#groupByMode} after applying OR-based
+     * multi-select matching for status and content-type.
+     */
+    private Map<String, List<CSPEntry>> groupByModeWithMultiSelect(
+            String mode,
+            String valueFilter,
+            Set<String> selectedStatuses,
+            Set<String> selectedContentTypes,
+            Set<String> methodFilter,
+            java.util.function.Predicate<String> inScopePredicate) {
+
+        // Build a compound scope predicate that also gates on multi-select status / content-type
+        java.util.function.Predicate<String> scopeGate = url -> {
+            if (inScopePredicate != null && !inScopePredicate.test(url)) return false;
+            return true;
+        };
+
+        // We pass the method filter and use a single-status string for the legacy
+        // matchesStatusCode helper — but OR all selected statuses ourselves.
+        // The simplest approach: join selections and let matchesStatusCode tokenise them.
+        String statusStr = selectedStatuses.isEmpty() ? "" : String.join(" / ", selectedStatuses);
+        // For content-type OR we rely on re-applying per-entry below.
+        // Pass the first content-type token; items not matched will be filtered via
+        // the content-type wrapper.
+        String ctStr = selectedContentTypes.isEmpty() ? "" : selectedContentTypes.iterator().next();
+
+        // Build a custom wrapper using the dataStore's existing filter but
+        // applying OR for content-types if multiple are selected.
+        if (selectedContentTypes.size() <= 1) {
+            return dataStore.groupByMode(mode, valueFilter, statusStr, ctStr, methodFilter, scopeGate);
+        }
+
+        // Multiple content-type selections: collect results from each and merge
+        Map<String, List<CSPEntry>> merged = new LinkedHashMap<>();
+        for (String ct : selectedContentTypes) {
+            Map<String, List<CSPEntry>> partial = dataStore.groupByMode(
+                mode, valueFilter, statusStr, ct, methodFilter, scopeGate);
+            for (Map.Entry<String, List<CSPEntry>> e : partial.entrySet()) {
+                merged.computeIfAbsent(e.getKey(), k -> new ArrayList<>());
+                // Add only entries not already in the merged list (dedup by id)
+                Set<Integer> existingIds = new HashSet<>();
+                for (CSPEntry existing : merged.get(e.getKey())) existingIds.add(existing.id());
+                for (CSPEntry candidate : e.getValue()) {
+                    if (existingIds.add(candidate.id())) {
+                        merged.get(e.getKey()).add(candidate);
+                    }
+                }
+            }
+        }
+        return merged;
+    }
+
     private void updateEntryTableForSelection() {
         String selectedMode = (String) inspectModeComboBox.getSelectedItem();
         if (selectedMode == null) selectedMode = "Full Policy";
 
         String filterText = valueFilterField.getText().trim();
-        String statusText = getSelectedStatusCodeFilter();
-        String contentTypeText = getSelectedContentTypeFilter();
         boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
+
+        Set<String> methodFilter = methodFilterBtn.getSelected();
+        Set<String> selectedStatuses = statusFilterBtn.getSelected();
+        Set<String> selectedContentTypes = contentTypeFilterBtn.getSelected();
 
         java.util.function.Predicate<String> inScopePredicate = inScopeOnly
             ? url -> api.scope().isInScope(url)
             : null;
 
-        List<CSPEntry> entriesToShow = dataStore.getFilteredEntries(
-            selectedMode,
-            selectedSummaryValue,
-            filterText,
-            statusText,
-            contentTypeText,
-            inScopePredicate
-        );
+        String statusStr = selectedStatuses.isEmpty() ? "" : String.join(" / ", selectedStatuses);
+
+        List<CSPEntry> entriesToShow;
+
+        if (selectedContentTypes.size() <= 1) {
+            String ctStr = selectedContentTypes.isEmpty() ? "" : selectedContentTypes.iterator().next();
+            entriesToShow = dataStore.getFilteredEntries(
+                selectedMode, selectedSummaryValue, filterText,
+                statusStr, ctStr, methodFilter, inScopePredicate
+            );
+        } else {
+            // OR-merge for multiple content-types
+            Map<Integer, CSPEntry> merged = new LinkedHashMap<>();
+            for (String ct : selectedContentTypes) {
+                List<CSPEntry> partial = dataStore.getFilteredEntries(
+                    selectedMode, selectedSummaryValue, filterText,
+                    statusStr, ct, methodFilter, inScopePredicate
+                );
+                for (CSPEntry e : partial) merged.putIfAbsent(e.id(), e);
+            }
+            entriesToShow = new ArrayList<>(merged.values());
+        }
 
         entryTableModel.updateData(entriesToShow);
     }

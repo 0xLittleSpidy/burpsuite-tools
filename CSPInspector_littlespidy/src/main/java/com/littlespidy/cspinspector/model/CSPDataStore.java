@@ -51,6 +51,16 @@ public class CSPDataStore {
         return entriesByKey.size();
     }
 
+    /**
+     * Returns true when the entry's HTTP method is in the selected set,
+     * or when the set is null/empty (meaning "all methods").
+     */
+    public static boolean matchesMethod(String method, Set<String> selectedMethods) {
+        if (selectedMethods == null || selectedMethods.isEmpty()) return true;
+        if (method == null) return false;
+        return selectedMethods.contains(method.toUpperCase());
+    }
+
     public static boolean matchesStatusCode(int statusCode, String filter) {
         if (filter == null || filter.trim().isEmpty()
                 || filter.equalsIgnoreCase("All Status Codes") || filter.equalsIgnoreCase("All")) {
@@ -105,6 +115,7 @@ public class CSPDataStore {
             String valueFilter,
             String statusFilter,
             String contentTypeFilter,
+            Set<String> methodFilter,
             Predicate<String> inScopePredicate) {
 
         Map<String, List<CSPEntry>> groups = new LinkedHashMap<>();
@@ -114,6 +125,8 @@ public class CSPDataStore {
             if (inScopePredicate != null && !inScopePredicate.test(entry.url())) continue;
             if (!matchesStatusCode(entry.statusCode(), statusFilter)) continue;
             if (!matchesContentType(entry.contentType(), contentTypeFilter)) continue;
+            if (!matchesMethod(entry.method(), methodFilter)) continue;
+
 
             if (normalizedMode.equalsIgnoreCase("Full Policy")) {
                 String fullPolicy = entry.getPrimaryCsp();
@@ -166,6 +179,7 @@ public class CSPDataStore {
             String valueFilter,
             String statusFilter,
             String contentTypeFilter,
+            Set<String> methodFilter,
             Predicate<String> inScopePredicate) {
 
         List<CSPEntry> list = new ArrayList<>();
@@ -175,6 +189,7 @@ public class CSPDataStore {
             if (inScopePredicate != null && !inScopePredicate.test(entry.url())) continue;
             if (!matchesStatusCode(entry.statusCode(), statusFilter)) continue;
             if (!matchesContentType(entry.contentType(), contentTypeFilter)) continue;
+            if (!matchesMethod(entry.method(), methodFilter)) continue;
 
             if (selectedSummaryValue != null) {
                 // Exact row match from summary table

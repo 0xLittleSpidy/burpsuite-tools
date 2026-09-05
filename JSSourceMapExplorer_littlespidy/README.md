@@ -41,26 +41,48 @@
      - **`SourceMap Request`** & **`SourceMap Response`** when a source map is found, probed, or unpacked.
 
 6. **Dedicated Top-Level "Recon & Secret Mining" Suite Tab**:
-   - Dedicated full-page tab aggregating all discovered endpoints, API routes, GraphQL queries, JWTs, API keys, and developer flags across all discovered JS files and unpacked maps.
-   - Filter by source type: `All Sources`, `JS Files Only`, or `SourceMap Files Only`.
-   - Full-text search and one-click TSV clipboard export.
+   - Sequential request-first master-detail layout:
+     - **Master Table (Top)**: Lists requests sequentially with method, URL, status, origin, and counts of discovered paths, secrets, cloud URLs, and dependencies.
+     - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **Cloud URLs**, and **Dependencies** tabs on the right.
+   - **Multi-Select Technique & Category Filtering**:
+     - **Paths Tab**: Features `Method ▾` (GET, POST, etc.) and `Technique ▾` (Regex/Pattern, LinkFinder, etc.) multi-select buttons alongside search and TSV export.
+     - **Secrets Tab**: Features `Category ▾` (JWT, Google API Key, AWS Keys, Slack, etc.) and `Confidence ▾` multi-select buttons.
+     - **Cloud URLs Tab**: Features `Provider ▾` multi-select (AWS S3, Google Cloud Storage, Azure Blob, Firebase, etc.).
+     - **Dependencies Tab**: Features `Status ▾` multi-select (Internal/Private, Unregistered/Hijackable, Safe/Registered, Unchecked) with in-Burp NPM registry verification.
+   - Top-level toolbar with Source Type (`All Sources`, `JS Files Only`, `SourceMap Files Only`), HTTP Status filter, and full-text search.
 
-7. **Hover Cloud Tooltips**:
+7. **Download JavaScript File(s)**:
+   - Save individual JavaScript files or batch-download hundreds of selected files to a target directory.
+   - Automatic unique naming (`<cleanHost>_<id>_<filename>.js`) prevents overwriting scripts with identical names across different endpoints.
+   - Available via the workspace toolbar, right-click context menu on `Discovered JavaScript Scripts`, and right-click context menu in the `Recon & Secret Mining` requests table.
+
+8. **AI Security Analyst (Local LLM & Antigravity CLI)**:
+   - Dedicated **AI Security Analyst** tab with dual backend architecture:
+     - **Local LLM (OpenAI-compatible REST API)**: Direct, zero-dependency integration with **Ollama** (`http://127.0.0.1:11434`), **LM Studio** (`http://127.0.0.1:1234`), or custom endpoints. Configurable model selection (`qwen2.5-coder`, `deepseek-coder`, `llama3.3`, etc.).
+     - **Google Antigravity CLI (`agy`)**: Automated subprocess invocation of the `agy` CLI agent with local workspace directory context and real-time streaming output.
+   - **Audit Presets**: Comprehensive Audit, DOM XSS & Client Injection, API & Auth Flaws, Hardcoded Secrets & Leakage, or Custom Prompts.
+   - **One-Click Triggers**:
+     - `🤖 Analyze with AI...` in workspace toolbar and table context menu.
+     - `🤖 Analyze with AI...` in Recon Mining requests table context menu.
+     - `🤖 AI Review` button in Source Tree code viewer.
+   - Markdown report export (`.md`) and clipboard copying.
+
+9. **Hover Cloud Tooltips**:
    - Hovering over any truncated table cell (long URL, file path, secret token, or endpoint route) displays a formatted HTML cloud popup box showing the complete, untruncated value.
 
-8. **Right-Click Context Menu & Fast Copying**:
-   - Right-click any row or cell across all tables to immediately access:
-     - **`Copy Cell Value`**: Copies the exact string under the cursor.
-     - **`Copy Full JS URL`** / **`Copy SourceMap URL`** / **`Copy Route`** / **`Copy Secret`**.
-     - **`Copy Selected Row(s) as TSV`**.
-     - Quick shortcuts to trigger on-demand `.map` probing or unpacking.
+10. **Right-Click Context Menu & Fast Copying**:
+    - Right-click any row or cell across all tables to immediately access:
+      - **`Copy Cell Value`**: Copies the exact string under the cursor.
+      - **`Copy Full JS URL`** / **`Copy SourceMap URL`** / **`Copy Route`** / **`Copy Secret`**.
+      - **`Copy Selected Row(s) as TSV`**.
+      - Quick shortcuts to trigger on-demand `.map` probing, unpacking, JS download, or AI analysis.
 
-9. **In-Burp Source Tree Reconstructor & Code Viewer**:
-   - Parses SourceMap v3 JSON.
-   - Reconstructs the full original folder hierarchy (supporting Webpack, Vite, Turbopack, Rollup, etc.) inside an interactive `JTree`.
-   - Monospace code editor with line numbers, code copy, and individual file save tools.
+11. **In-Burp Source Tree Reconstructor & Code Viewer**:
+    - Parses SourceMap v3 JSON.
+    - Reconstructs the full original folder hierarchy (supporting Webpack, Vite, Turbopack, Rollup, etc.) inside an interactive `JTree`.
+    - Monospace code editor with line numbers, code copy, and individual file save tools.
 
-10. **Offline Export for VS Code**:
+12. **Offline Export for VS Code**:
     - **`Export Project Tree to Disk...`** writes the entire reconstructed source code directory structure to a folder on your local machine so you can open and analyze it in VS Code, WebStorm, or command-line grep tools.
 
 ---

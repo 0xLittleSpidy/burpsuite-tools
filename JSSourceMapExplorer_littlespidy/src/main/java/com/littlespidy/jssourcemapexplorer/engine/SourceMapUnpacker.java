@@ -63,7 +63,9 @@ public class SourceMapUnpacker {
                 lineCount,
                 sizeBytes,
                 miningResult.secrets(),
-                miningResult.endpoints()
+                miningResult.endpoints(),
+                miningResult.cloudUrls(),
+                miningResult.dependencies()
             );
 
             project.addFile(file);

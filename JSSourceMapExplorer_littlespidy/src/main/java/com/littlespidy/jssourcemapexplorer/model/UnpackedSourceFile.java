@@ -15,5 +15,7 @@ public record UnpackedSourceFile(
     int lineCount,
     int sizeBytes,
     List<DiscoveredSecret> secrets,
-    List<DiscoveredEndpoint> endpoints
+    List<DiscoveredEndpoint> endpoints,
+    List<DiscoveredCloudUrl> cloudUrls,
+    List<DiscoveredDependency> dependencies
 ) {}

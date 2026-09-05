@@ -24,6 +24,11 @@ public class SourceCodeViewerPanel extends JPanel {
     private final JTextArea lineNumbersArea = new JTextArea();
 
     private UnpackedSourceFile currentFile;
+    private java.util.function.Consumer<UnpackedSourceFile> aiReviewListener;
+
+    public void setAiReviewListener(java.util.function.Consumer<UnpackedSourceFile> listener) {
+        this.aiReviewListener = listener;
+    }
 
     public SourceCodeViewerPanel() {
         setLayout(new BorderLayout(5, 5));
@@ -40,12 +45,21 @@ public class SourceCodeViewerPanel extends JPanel {
         pathBox.add(fileStatsLabel);
 
         JPanel actionsBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
+        JButton aiReviewBtn = new JButton("🤖 AI Review");
+        aiReviewBtn.setToolTipText("Send this file to AI Security Analyst (Local LLM / Antigravity)");
+        aiReviewBtn.addActionListener(e -> {
+            if (currentFile != null && aiReviewListener != null) {
+                aiReviewListener.accept(currentFile);
+            }
+        });
+
         JButton copyBtn = new JButton("Copy Code");
         copyBtn.addActionListener(e -> copyCurrentCodeToClipboard());
 
         JButton saveBtn = new JButton("Save File As...");
         saveBtn.addActionListener(e -> saveCurrentFileToDisk());
 
+        actionsBox.add(aiReviewBtn);
         actionsBox.add(copyBtn);
         actionsBox.add(saveBtn);
 

@@ -19,6 +19,7 @@ public class CacheEntryTableModel extends AbstractTableModel {
     private static final String[] COLUMN_NAMES = {
         "#",
         "Status",
+        "Method",
         "URL",
         "Host",
         "Content-Type",
@@ -84,19 +85,20 @@ public class CacheEntryTableModel extends AbstractTableModel {
 
         CacheEntry entry = entries.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> entry.id();
-            case 1 -> entry.statusCode();
-            case 2 -> entry.url();
-            case 3 -> entry.host();
-            case 4 -> entry.contentType();
-            case 5 -> entry.cacheControl();
-            case 6 -> entry.pragma();
-            case 7 -> entry.expires();
-            case 8 -> entry.age();
-            case 9 -> entry.etag();
-            case 10 -> entry.vary();
-            case 11 -> entry.xCache();
-            case 12 -> entry.cfCacheStatus();
+            case 0  -> entry.id();
+            case 1  -> entry.statusCode();
+            case 2  -> entry.method();
+            case 3  -> entry.url();
+            case 4  -> entry.host();
+            case 5  -> entry.contentType();
+            case 6  -> entry.cacheControl();
+            case 7  -> entry.pragma();
+            case 8  -> entry.expires();
+            case 9  -> entry.age();
+            case 10 -> entry.etag();
+            case 11 -> entry.vary();
+            case 12 -> entry.xCache();
+            case 13 -> entry.cfCacheStatus();
             default -> null;
         };
     }

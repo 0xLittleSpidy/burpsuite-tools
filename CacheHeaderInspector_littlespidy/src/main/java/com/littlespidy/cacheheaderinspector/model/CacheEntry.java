@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 
 /**
  * Immutable record capturing a single HTTP response's cache header values along with
- * the underlying request and response objects for previewing in Montoya editors.
+ * the HTTP method, underlying request/response objects for previewing in Montoya editors.
  *
  * @author littlespidy
  */
@@ -17,6 +17,7 @@ public record CacheEntry(
     String url,
     String host,
     String path,
+    String method,          // ← added: HTTP request method (GET, POST, …)
     int statusCode,
     String contentType,
     String cacheControl,
@@ -40,18 +41,18 @@ public record CacheEntry(
      */
     public String getHeaderValue(String headerName) {
         return switch (headerName) {
-            case "Cache-Control" -> cacheControl != null ? cacheControl : "";
-            case "Pragma" -> pragma != null ? pragma : "";
-            case "Expires" -> expires != null ? expires : "";
-            case "Age" -> age != null ? age : "";
-            case "ETag" -> etag != null ? etag : "";
-            case "Last-Modified" -> lastModified != null ? lastModified : "";
-            case "Vary" -> vary != null ? vary : "";
-            case "X-Cache" -> xCache != null ? xCache : "";
-            case "X-Cache-Hits" -> xCacheHits != null ? xCacheHits : "";
-            case "CDN-Cache-Control" -> cdnCacheControl != null ? cdnCacheControl : "";
-            case "Surrogate-Control" -> surrogateControl != null ? surrogateControl : "";
-            case "CF-Cache-Status" -> cfCacheStatus != null ? cfCacheStatus : "";
+            case "Cache-Control"    -> cacheControl    != null ? cacheControl    : "";
+            case "Pragma"           -> pragma           != null ? pragma           : "";
+            case "Expires"          -> expires          != null ? expires          : "";
+            case "Age"              -> age              != null ? age              : "";
+            case "ETag"             -> etag             != null ? etag             : "";
+            case "Last-Modified"    -> lastModified     != null ? lastModified     : "";
+            case "Vary"             -> vary             != null ? vary             : "";
+            case "X-Cache"          -> xCache           != null ? xCache           : "";
+            case "X-Cache-Hits"     -> xCacheHits       != null ? xCacheHits       : "";
+            case "CDN-Cache-Control"-> cdnCacheControl  != null ? cdnCacheControl  : "";
+            case "Surrogate-Control"-> surrogateControl != null ? surrogateControl : "";
+            case "CF-Cache-Status"  -> cfCacheStatus    != null ? cfCacheStatus    : "";
             default -> "";
         };
     }

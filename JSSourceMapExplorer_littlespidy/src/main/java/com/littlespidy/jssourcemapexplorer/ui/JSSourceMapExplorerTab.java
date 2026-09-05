@@ -54,6 +54,9 @@ public class JSSourceMapExplorerTab extends JPanel {
     // Dedicated Top-Level Recon Mining Panel
     private final ReconMiningPanel reconMiningPanel;
 
+    // Dedicated Top-Level AI Security Analyst Panel (Local LLM & Antigravity CLI)
+    private final AiSecurityAnalystPanel aiSecurityPanel;
+
     // Raw Montoya Editors for JS and SourceMap
     private final HttpRequestEditor jsRequestEditor;
     private final HttpResponseEditor jsResponseEditor;
@@ -101,7 +104,16 @@ public class JSSourceMapExplorerTab extends JPanel {
         this.mapResponseEditor = api.userInterface().createHttpResponseEditor();
 
         this.sourceTreePanel = new SourceTreePanel(codeViewerPanel::displayFile);
-        this.reconMiningPanel = new ReconMiningPanel(dataStore);
+        this.reconMiningPanel = new ReconMiningPanel(api, dataStore);
+        this.aiSecurityPanel = new AiSecurityAnalystPanel(api);
+
+        this.codeViewerPanel.setAiReviewListener(file -> {
+            if (file != null) {
+                openAiAnalysisForFile(file.relativePath(), file.content());
+            }
+        });
+
+        this.reconMiningPanel.setAiAnalysisOpener((name, content) -> openAiAnalysisForFile(name, content));
 
         setLayout(new BorderLayout());
 
@@ -127,6 +139,9 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         // Tab 3: Dedicated Recon & Secret Mining Tab
         rootTabbedPane.addTab("Recon & Secret Mining", reconMiningPanel);
+
+        // Tab 4: AI Security Analyst (Local LLM / Antigravity CLI)
+        rootTabbedPane.addTab("AI Security Analyst", aiSecurityPanel);
 
         add(rootTabbedPane, BorderLayout.CENTER);
     }
@@ -168,9 +183,9 @@ public class JSSourceMapExplorerTab extends JPanel {
             ZonedDateTime.now()
         );
 
-        // Run Secret & Path discovery on raw JS file
+        // Run Secret, Path, Cloud URLs & Dependency discovery on raw JS file
         var jsMining = SecretAndEndpointMiner.mine(url, "JS File", resp.bodyToString());
-        entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints());
+        entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies());
 
         dataStore.addEntry(entry);
     }
@@ -356,6 +371,14 @@ public class JSSourceMapExplorerTab extends JPanel {
         exportBtn.setToolTipText("Export all reconstructed source code files to a local directory for VS Code");
         exportBtn.addActionListener(e -> exportCurrentProjectToDisk());
 
+        JButton downloadJsBtn = new JButton("Download JS File(s)...");
+        downloadJsBtn.setToolTipText("Download and save the selected JavaScript file(s) to local disk");
+        downloadJsBtn.addActionListener(e -> downloadSelectedJsFiles());
+
+        JButton aiAnalyzeBtn = new JButton("🤖 Analyze with AI...");
+        aiAnalyzeBtn.setToolTipText("Send selected JavaScript code to Local LLM (Ollama/LM Studio) or Antigravity CLI for security analysis");
+        aiAnalyzeBtn.addActionListener(e -> analyzeSelectedWithAi());
+
         JButton clearBtn = new JButton("Clear Data");
         clearBtn.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(
@@ -379,6 +402,8 @@ public class JSSourceMapExplorerTab extends JPanel {
         toolbar.add(probeAllBtn);
         toolbar.add(unpackBtn);
         toolbar.add(exportBtn);
+        toolbar.add(downloadJsBtn);
+        toolbar.add(aiAnalyzeBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(clearBtn);
 
@@ -696,6 +721,134 @@ public class JSSourceMapExplorerTab extends JPanel {
         }
     }
 
+    private void downloadSelectedJsFiles() {
+        int[] rows = jsTable.getSelectedRows();
+        if (rows.length == 0) {
+            JOptionPane.showMessageDialog(this, "Please select one or more JavaScript files to download.", "Download JS", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<JsFileEntry> selectedEntries = new ArrayList<>();
+        for (int r : rows) {
+            int modelRow = jsTable.convertRowIndexToModel(r);
+            JsFileEntry entry = jsTableModel.getEntryAt(modelRow);
+            if (entry != null && entry.getResponse() != null) {
+                selectedEntries.add(entry);
+            }
+        }
+
+        if (selectedEntries.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "The selected script(s) do not have a response body to download.", "Download JS", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (selectedEntries.size() == 1) {
+            JsFileEntry entry = selectedEntries.get(0);
+            String defaultName = extractFileNameFromUrl(entry.getUrl());
+            if (!defaultName.endsWith(".js")) defaultName += ".js";
+
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Save JavaScript File As");
+            chooser.setSelectedFile(new File(defaultName));
+
+            int result = chooser.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File target = chooser.getSelectedFile();
+                try {
+                    java.nio.file.Files.writeString(
+                        target.toPath(),
+                        entry.getResponse().bodyToString(),
+                        java.nio.charset.StandardCharsets.UTF_8
+                    );
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Saved JavaScript file to:\n" + target.getAbsolutePath(),
+                        "Download Complete",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Failed to save file: " + ex.getMessage(),
+                        "Download Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        } else {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Select Destination Folder for " + selectedEntries.size() + " JavaScript Files");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+            int result = chooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File destDir = chooser.getSelectedFile();
+                if (!destDir.exists()) destDir.mkdirs();
+
+                int savedCount = 0;
+                for (JsFileEntry entry : selectedEntries) {
+                    String cleanHost = entry.getHost().replaceAll("[^a-zA-Z0-9.-]", "_");
+                    String baseName = extractFileNameFromUrl(entry.getUrl());
+                    if (!baseName.endsWith(".js")) baseName += ".js";
+                    String uniqueName = cleanHost + "_" + entry.getId() + "_" + baseName;
+
+                    File target = new File(destDir, uniqueName);
+                    try {
+                        java.nio.file.Files.writeString(
+                            target.toPath(),
+                            entry.getResponse().bodyToString(),
+                            java.nio.charset.StandardCharsets.UTF_8
+                        );
+                        savedCount++;
+                    } catch (Exception ex) {
+                        api.logging().logToError("Error saving " + uniqueName + ": " + ex.getMessage());
+                    }
+                }
+
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Successfully downloaded " + savedCount + " JavaScript files to:\n" + destDir.getAbsolutePath(),
+                    "Batch Download Complete",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        }
+    }
+
+    private static String extractFileNameFromUrl(String url) {
+        if (url == null || url.isEmpty()) return "script.js";
+        try {
+            int qIdx = url.indexOf('?');
+            String clean = (qIdx != -1) ? url.substring(0, qIdx) : url;
+            int slashIdx = clean.lastIndexOf('/');
+            if (slashIdx != -1 && slashIdx < clean.length() - 1) {
+                String name = clean.substring(slashIdx + 1).replaceAll("[^a-zA-Z0-9._-]", "_");
+                return name.isEmpty() ? "script.js" : name;
+            }
+        } catch (Exception ignored) {}
+        return "script.js";
+    }
+
+    public void openAiAnalysisForFile(String name, String content) {
+        aiSecurityPanel.setTargetFile(name, content);
+        rootTabbedPane.setSelectedComponent(aiSecurityPanel);
+    }
+
+    private void analyzeSelectedWithAi() {
+        int row = jsTable.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Please select a JavaScript file from the table to analyze.", "AI Security Analysis", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        int modelRow = jsTable.convertRowIndexToModel(row);
+        JsFileEntry entry = jsTableModel.getEntryAt(modelRow);
+        if (entry == null || entry.getResponse() == null) {
+            JOptionPane.showMessageDialog(this, "Selected file has no response content.", "AI Security Analysis", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        openAiAnalysisForFile(entry.getUrl(), entry.getResponse().bodyToString());
+    }
+
     private void loadProxyHistory() {
         SwingWorker<List<JsFileEntry>, Void> worker = new SwingWorker<>() {
             @Override
@@ -745,9 +898,9 @@ public class JSSourceMapExplorerTab extends JPanel {
                         ZonedDateTime.now()
                     );
 
-                    // Mine secrets and endpoints from raw JS
+                    // Mine secrets, endpoints, cloud URLs, and dependencies from raw JS
                     var jsMining = SecretAndEndpointMiner.mine(url, "JS File", resp.bodyToString());
-                    entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints());
+                    entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies());
 
                     list.add(entry);
                 }
@@ -994,6 +1147,14 @@ public class JSSourceMapExplorerTab extends JPanel {
                         JMenuItem unpackItem = new JMenuItem("Unpack / Unmap Selected SourceMap");
                         unpackItem.addActionListener(ev -> unpackScript(entry));
                         menu.add(unpackItem);
+
+                        JMenuItem downloadItem = new JMenuItem("Download Selected JS File(s)...");
+                        downloadItem.addActionListener(ev -> downloadSelectedJsFiles());
+                        menu.add(downloadItem);
+
+                        JMenuItem aiItem = new JMenuItem("🤖 Analyze with AI...");
+                        aiItem.addActionListener(ev -> analyzeSelectedWithAi());
+                        menu.add(aiItem);
 
                         menu.show(jsTable, e.getX(), e.getY());
                     }

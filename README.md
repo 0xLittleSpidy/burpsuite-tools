@@ -14,6 +14,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **Cache Header Inspector** | [📥 `cache-header-inspector-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/cache-header-inspector-littlespidy-1.0.0.jar) | Passive CDN & cache header indexing and directive analysis |
 | **Convert POST to GET** | [📥 `convert-post-to-get-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/convert-post-to-get-littlespidy-1.0.0.jar) | Request body to GET query converter for auth bypass testing |
 | **Input Validation Fuzzer** | [📥 `input-validation-fuzzer-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/input-validation-fuzzer-littlespidy-1.0.0.jar) | Multi-point input validation and boundary fuzzer |
+| **Response Inspector** | [📥 `response-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/ResponseInspector_littlespidy/build/libs/response-inspector-littlespidy-1.0.0.jar) | Response analyzer for passwords, strict SSNs, internal IPs, OS server paths, errors, and secrets |
 
 ---
 
@@ -39,6 +40,17 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 ### 4. [Input Validation Fuzzer](file:///home/littlespidy/myextra/burpsuite/InputValidationFuzzer_littlespidy)
 - Multi-parameter input validation testing across URL query, body, and header insertion points.
 
+### 5. [Response Inspector](file:///home/littlespidy/myextra/burpsuite/ResponseInspector_littlespidy)
+- **5 Dedicated Tabs**: Welcome & Guide, Passwords, PII & Server Paths & Internal IPs, Errors & Exceptions, and Secrets & Tokens.
+- **Multi-Threaded Ingestion Pool**: High-speed parallel proxy history scanning via bounded thread pools (`ExecutorService`) with atomic progress tracking and non-blocking batch UI updates.
+- **Two-Stage Refiner Regex Engine**: Ported from `sensitive-discoverer` to eliminate regex backtracking: matches fast anchor suffixes and scans look-back windows to extract complete S3 buckets, Azure Blobs, Firebase DBs, Google OAuth IDs, and Teams webhooks.
+- **MIME Blacklisting & Size Guard**: Bypasses images, audio, video, flash, and fonts plus responses > 10MB to achieve ~80% scan speedup and zero binary false positives.
+- **Multi-Section Scanning & TSV Export**: Analyzes both `Response Headers` and `Response Body`; includes dedicated **`Export TSV`** toolbar button and clipboard TSV export (`Ctrl+C`).
+- **Granular In-Scope Domain Selection**: Multi-checkbox search dialog allowing users to pick specific in-scope target subdomains/hosts instead of an all-or-nothing scope gate.
+- **Target Password Prompting & Config**: Prominent `Configure Passwords...` modal dialog with text pasting, import from wordlists, and case sensitivity controls.
+- **Strict SSN & OS Server Path Extraction**: Validates US SSN area/group/serial formats and extracts real OS server filesystem paths (`/etc/`, `/var/log/`, `C:\inetpub\...`, UNC shares) while discarding normal web routes.
+- **Comprehensive Error & Token Signatures**: Database leaks, stack traces, cloud tokens (AWS, GCP, GitHub, Slack, Stripe, OpenAI, Square, Mailgun, NuGet, JWTs, .env) with 4-pillar deep-linking.
+
 ---
 
 ## 🧩 Bambdas & BChecks
@@ -46,6 +58,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **[`bambdas/`](file:///home/littlespidy/myextra/burpsuite/bambdas)**: Custom actions, scan checks, filter scripts, and match-and-replace rules.
 - **[`BChecks/`](file:///home/littlespidy/myextra/burpsuite/BChecks)**: Custom passive and active Burp Scanner checks.
 - **[`ExtensionTemplateProject/`](file:///home/littlespidy/myextra/burpsuite/ExtensionTemplateProject)**: Starter template for modern Java Montoya API extensions.
+
+---
+
+## 🧠 Custom Agent Skills
+
+- **[`burp-suite-creator`](file:///home/littlespidy/myextra/burpsuite/.agents/skills/burp-suite-creator/SKILL.md)**: Generates Burp Suite tools, Montoya API extensions, Bambdas, and BChecks based on security testing scenarios.
+- **[`sensitive-pattern-extractor`](file:///home/littlespidy/myextra/burpsuite/.agents/skills/sensitive-pattern-extractor/SKILL.md)**: Catalog and refiners for sensitive tokens, cloud storage URLs, credentials, and keywords stored in **[`patterns.md`](file:///home/littlespidy/myextra/burpsuite/.agents/skills/sensitive-pattern-extractor/patterns.md)**.
 
 ---
 

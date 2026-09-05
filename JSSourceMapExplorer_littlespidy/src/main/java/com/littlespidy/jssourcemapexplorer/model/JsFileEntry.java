@@ -32,9 +32,11 @@ public class JsFileEntry {
     private volatile String sourceMapLocation;
     private volatile UnpackedProject unpackedProject;
 
-    // Discovered Secrets & Endpoints from the JS file itself
+    // Discovered Secrets, Endpoints, Cloud URLs, and Dependencies from the JS file itself
     private final List<DiscoveredSecret> jsSecrets = new ArrayList<>();
     private final List<DiscoveredEndpoint> jsEndpoints = new ArrayList<>();
+    private final List<DiscoveredCloudUrl> jsCloudUrls = new ArrayList<>();
+    private final List<DiscoveredDependency> jsDependencies = new ArrayList<>();
 
     // Raw HTTP messages
     private final HttpRequest request;
@@ -85,13 +87,16 @@ public class JsFileEntry {
     public String getOriginLabel() { return originLabel; }
 
     public PassiveMapStatus getPassiveMapStatus() { return passiveMapStatus; }
-    public void setPassiveMapStatus(PassiveMapStatus passiveMapStatus) { this.passiveMapStatus = passiveMapStatus; }
+    public void setPassiveMapStatus(PassiveMapStatus status) { this.passiveMapStatus = status; }
 
     public ActiveProbeStatus getActiveProbeStatus() { return activeProbeStatus; }
-    public void setActiveProbeStatus(ActiveProbeStatus activeProbeStatus) { this.activeProbeStatus = activeProbeStatus; }
+    public void setActiveProbeStatus(ActiveProbeStatus status) { this.activeProbeStatus = status; }
 
     public boolean isUnpacked() { return unpacked; }
     public void setUnpacked(boolean unpacked) { this.unpacked = unpacked; }
+
+    public String getSourceMapLocation() { return sourceMapLocation; }
+    public void setSourceMapLocation(String location) { this.sourceMapLocation = location; }
 
     public boolean isMapExposed() {
         return (passiveMapStatus != null && passiveMapStatus.isFound())
@@ -99,22 +104,32 @@ public class JsFileEntry {
             || unpacked;
     }
 
-    public String getSourceMapLocation() { return sourceMapLocation; }
-    public void setSourceMapLocation(String sourceMapLocation) { this.sourceMapLocation = sourceMapLocation; }
-
     public UnpackedProject getUnpackedProject() { return unpackedProject; }
-    public void setUnpackedProject(UnpackedProject unpackedProject) {
-        this.unpackedProject = unpackedProject;
-        if (unpackedProject != null) {
+    public synchronized void setUnpackedProject(UnpackedProject project) {
+        this.unpackedProject = project;
+        if (project != null) {
             this.unpacked = true;
         }
     }
 
-    public synchronized void setJsReconFindings(List<DiscoveredSecret> secrets, List<DiscoveredEndpoint> endpoints) {
+    public synchronized void setJsReconFindings(
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies
+    ) {
         jsSecrets.clear();
         if (secrets != null) jsSecrets.addAll(secrets);
         jsEndpoints.clear();
         if (endpoints != null) jsEndpoints.addAll(endpoints);
+        jsCloudUrls.clear();
+        if (cloudUrls != null) jsCloudUrls.addAll(cloudUrls);
+        jsDependencies.clear();
+        if (dependencies != null) jsDependencies.addAll(dependencies);
+    }
+
+    public synchronized void setJsReconFindings(List<DiscoveredSecret> secrets, List<DiscoveredEndpoint> endpoints) {
+        setJsReconFindings(secrets, endpoints, Collections.emptyList(), Collections.emptyList());
     }
 
     public synchronized List<DiscoveredSecret> getJsSecrets() {
@@ -125,18 +140,29 @@ public class JsFileEntry {
         return Collections.unmodifiableList(jsEndpoints);
     }
 
+    public synchronized List<DiscoveredCloudUrl> getJsCloudUrls() {
+        return Collections.unmodifiableList(jsCloudUrls);
+    }
+
+    public synchronized List<DiscoveredDependency> getJsDependencies() {
+        return Collections.unmodifiableList(jsDependencies);
+    }
+
     public synchronized String getJsReconSummary() {
         int epCount = jsEndpoints.size();
         int secCount = jsSecrets.size();
-        if (epCount == 0 && secCount == 0) return "0 eps | 0 secrets";
-        return epCount + " eps | " + secCount + " secrets";
+        int cloudCount = jsCloudUrls.size();
+        int depCount = jsDependencies.size();
+        return String.format("%d eps | %d sec | %d cloud | %d dep", epCount, secCount, cloudCount, depCount);
     }
 
     public synchronized String getMapReconSummary() {
         if (unpackedProject == null) return "-";
         int epCount = unpackedProject.getAllEndpoints().size();
         int secCount = unpackedProject.getAllSecrets().size();
-        return epCount + " eps | " + secCount + " secrets";
+        int cloudCount = unpackedProject.getAllCloudUrls().size();
+        int depCount = unpackedProject.getAllDependencies().size();
+        return String.format("%d eps | %d sec | %d cloud | %d dep", epCount, secCount, cloudCount, depCount);
     }
 
     public HttpRequest getRequest() { return request; }
