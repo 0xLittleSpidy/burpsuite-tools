@@ -3,6 +3,8 @@ package com.littlespidy.jwtcomparator.ui;
 
 import burp.api.montoya.MontoyaApi;
 
+import com.littlespidy.jwtcomparator.attacker.ui.TokenAttackerPanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -15,6 +17,7 @@ public class JWTComparatorTab extends JPanel {
     private final JTabbedPane tabbedPane;
     private final ComparisonPanel comparisonPanel;
     private final WelcomeGuidePanel welcomeGuidePanel;
+    private final TokenAttackerPanel attackerPanel;
 
     public JWTComparatorTab(MontoyaApi api) {
         this.api = api;
@@ -24,9 +27,12 @@ public class JWTComparatorTab extends JPanel {
 
         comparisonPanel = new ComparisonPanel();
         welcomeGuidePanel = new WelcomeGuidePanel(this);
+        attackerPanel = new TokenAttackerPanel(api, comparisonPanel.getSlotsContainer());
+        comparisonPanel.getSlotsContainer().addSlotsChangeListener(attackerPanel);
 
         tabbedPane.addTab("Welcome & Guide", welcomeGuidePanel);
         tabbedPane.addTab("JWT Comparator", comparisonPanel);
+        tabbedPane.addTab("Token Attacker", attackerPanel);
 
         add(tabbedPane, BorderLayout.CENTER);
     }
@@ -35,11 +41,19 @@ public class JWTComparatorTab extends JPanel {
         return comparisonPanel;
     }
 
+    public TokenAttackerPanel getAttackerPanel() {
+        return attackerPanel;
+    }
+
     public void selectWelcomeTab() {
         tabbedPane.setSelectedIndex(0);
     }
 
     public void selectComparatorTab() {
         tabbedPane.setSelectedIndex(1);
+    }
+
+    public void selectAttackerTab() {
+        tabbedPane.setSelectedIndex(2);
     }
 }

@@ -29,18 +29,32 @@ public class WelcomeGuidePanel extends JPanel {
         JLabel titleLabel = new JLabel("JWT Comparator");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
 
-        JButton launchBtn = new JButton("🚀 Open JWT Comparator Tab");
+        JPanel headerButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+
+        JButton launchBtn = new JButton("🔍 Open Comparator");
         launchBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        launchBtn.setToolTipText("Switch to interactive comparison tab");
+        launchBtn.setToolTipText("Switch to interactive JWT comparison tab");
         launchBtn.addActionListener(e -> {
             if (this.mainTab != null) {
                 this.mainTab.selectComparatorTab();
             }
         });
 
+        JButton launchAttackerBtn = new JButton("⚔️ Open Token Attacker");
+        launchAttackerBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        launchAttackerBtn.setToolTipText("Switch to Token Attacker / Access Matrix replay tab");
+        launchAttackerBtn.addActionListener(e -> {
+            if (this.mainTab != null) {
+                this.mainTab.selectAttackerTab();
+            }
+        });
+
+        headerButtons.add(launchBtn);
+        headerButtons.add(launchAttackerBtn);
+
         titleAndAction.add(titleLabel, BorderLayout.WEST);
         if (this.mainTab != null) {
-            titleAndAction.add(launchBtn, BorderLayout.EAST);
+            titleAndAction.add(headerButtons, BorderLayout.EAST);
         }
 
         JTextArea descArea = new JTextArea();
@@ -121,6 +135,14 @@ public class WelcomeGuidePanel extends JPanel {
                 "Filter out expected noise such as timestamps ('exp', 'iat', 'nbf', 'auth_time') or dynamic IDs ('jti') "
                         + "from the 'Differences Only' view. Configure via the 'Ignore:' toolbar box, click '⚙️' for preset "
                         + "toggles, or right-click any row in the matrix to ignore/unignore that claim on demand."
+        ));
+
+        cardsPanel.add(createCard(
+                "10. Token Attacker (Replay & Access Matrix)",
+                "Send one or multiple HTTP requests directly to the 'Token Attacker' tab (via right-click '⚔️ Send Request to Token Attacker' "
+                        + "in Burp Proxy, Repeater, or Logger). Click '🚀 Start Attack' to replay all requests across all loaded JWT tokens "
+                        + "and an unauthenticated baseline. The extension maps the responses into a color-coded Access Matrix to detect "
+                        + "BOLA / IDOR, broken authorization boundaries, and unauthenticated endpoints."
         ));
 
         JPanel container = new JPanel(new BorderLayout(15, 15));

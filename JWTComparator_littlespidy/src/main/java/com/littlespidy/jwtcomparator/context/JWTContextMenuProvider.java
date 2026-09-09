@@ -136,6 +136,25 @@ public class JWTContextMenuProvider implements ContextMenuItemsProvider {
         }
 
         menuItems.add(sendMenu);
+
+        // 2. Token Attacker Replay Option
+        List<HttpRequestResponse> targetRequests = new ArrayList<>(event.selectedRequestResponses());
+        if (targetRequests.isEmpty() && event.messageEditorRequestResponse().isPresent()) {
+            targetRequests.add(event.messageEditorRequestResponse().get().requestResponse());
+        }
+
+        if (!targetRequests.isEmpty()) {
+            final List<HttpRequestResponse> requestsForAttacker = targetRequests;
+            int count = requestsForAttacker.size();
+            String title = count == 1 ? "⚔️ Send Request to Token Attacker" : "⚔️ Send " + count + " Requests to Token Attacker";
+            JMenuItem sendToAttackerItem = new JMenuItem(title);
+            sendToAttackerItem.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+                mainTab.getAttackerPanel().addRequests(requestsForAttacker);
+                mainTab.selectAttackerTab();
+            }));
+            menuItems.add(sendToAttackerItem);
+        }
+
         return menuItems;
     }
 }

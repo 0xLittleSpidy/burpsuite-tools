@@ -28,7 +28,29 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
     private final List<TokenCardPanel> cards = new ArrayList<>();
     private final JPanel cardsGridPanel;
     private final SlotsChangeListener listener;
+    private final List<SlotsChangeListener> additionalListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
     private boolean initializing = true;
+
+    public void addSlotsChangeListener(SlotsChangeListener l) {
+        if (l != null && !additionalListeners.contains(l)) {
+            additionalListeners.add(l);
+        }
+    }
+
+    public void removeSlotsChangeListener(SlotsChangeListener l) {
+        additionalListeners.remove(l);
+    }
+
+    private void notifySlotsChanged() {
+        if (listener != null && !initializing) {
+            listener.onSlotsChanged();
+        }
+        if (!initializing) {
+            for (SlotsChangeListener l : additionalListeners) {
+                l.onSlotsChanged();
+            }
+        }
+    }
 
     public TokenSlotsContainer(SlotsChangeListener listener) {
         this.listener = listener;
@@ -108,10 +130,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
         cards.add(card);
         rebuildCardsPanel();
 
-        if (listener != null && !initializing) {
-            listener.onSlotsChanged();
-        }
-
+        notifySlotsChanged();
         return card;
     }
 
@@ -124,9 +143,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
 
     @Override
     public void onTokenChanged(TokenCardPanel card) {
-        if (listener != null) {
-            listener.onSlotsChanged();
-        }
+        notifySlotsChanged();
     }
 
     @Override
@@ -141,9 +158,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
         cards.remove(card);
         rebuildCardsPanel();
 
-        if (listener != null) {
-            listener.onSlotsChanged();
-        }
+        notifySlotsChanged();
     }
 
     private void rebuildCardsPanel() {
@@ -167,9 +182,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
         for (TokenCardPanel card : cards) {
             card.clearToken();
         }
-        if (listener != null) {
-            listener.onSlotsChanged();
-        }
+        notifySlotsChanged();
     }
 
     public synchronized void exportJsonSession() {
@@ -280,9 +293,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
 
         rebuildCardsPanel();
 
-        if (listener != null) {
-            listener.onSlotsChanged();
-        }
+        notifySlotsChanged();
     }
 
     public synchronized List<JWTTokenModel> getTokens() {

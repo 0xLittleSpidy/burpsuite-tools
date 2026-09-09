@@ -65,11 +65,23 @@ JWT Comparator solves this by providing dynamic $N$-token side-by-side compariso
    - Ignored claims preferences are saved and restored with `💾 Export JSON` / `📂 Import JSON` sessions.
 
 10. **Epoch Timestamp & Validity Translation**:
-   - Automatically translates Unix epoch timestamps (`exp`, `iat`, `nbf`, `auth_time`, `updated_at`) into human-readable UTC and Local dates with relative duration (e.g. `Active (expires in 1h 45m)` or `Expired 3d ago`).
+    - Automatically translates Unix epoch timestamps (`exp`, `iat`, `nbf`, `auth_time`, `updated_at`) into human-readable UTC and Local dates with relative duration (e.g. `Active (expires in 1h 45m)` or `Expired 3d ago`).
 
 11. **Selected Claim Inspector & Decoded Viewers**:
     - Select any claim in the matrix to inspect raw and formatted JSON representations in per-token tabs.
     - Click `🔍 View Decoded` on any token card for complete pretty-printed Header and Payload JSON.
+
+12. **Token Attacker & Access Matrix (Active BOLA / IDOR Verification)**:
+    - Dedicated **Token Attacker** tab (Tab 2) designed to test authorization boundaries across multiple requests and tokens.
+    - Right-click any request or multiple selected requests in Burp (**Proxy**, **Repeater**, **Logger**) ➔ `⚔️ Send Request(s) to Token Attacker`.
+    - Click `🚀 Start Attack` to replay all queued requests substituting **all loaded JWT tokens** from Tab 1 (`Token 1..N`), plus an optional unauthenticated baseline probe.
+    - Automated detection & flagging:
+      - `🚨 BOLA / Access Bypass`: Highlighted in bright red when multiple tokens (e.g., lower-privileged user tokens) receive `200 OK` on privileged endpoints.
+      - `⚠️ Unauthenticated Access`: Flagged when endpoints allow unauthorized access without tokens.
+      - `✔ Access Enforced`: Properly segregated endpoints where primary tokens succeed and secondary tokens receive `401` / `403`.
+    - Real-time execution controls: Configurable worker threads (1–32), per-request throttle delay (0–5000 ms), pause/resume, and stop buttons.
+    - Side-by-side Montoya `HttpRequestEditor` and `HttpResponseEditor` inspection per token (`Baseline`, `Token 1`, `Token 2`, ..., `Unauthenticated`).
+    - Download or copy the entire Access Matrix as TSV (`💾 Download TSV` / `📋 Copy TSV`).
 
 ---
 
