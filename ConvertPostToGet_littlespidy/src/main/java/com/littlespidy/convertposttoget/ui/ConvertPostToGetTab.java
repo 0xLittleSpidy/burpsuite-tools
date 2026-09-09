@@ -1,23 +1,28 @@
+// Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.convertposttoget.ui;
 
 import com.littlespidy.convertposttoget.model.ConvertPostToGetConfig;
 import com.littlespidy.convertposttoget.model.PostCandidate;
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.http.message.params.HttpParameterType;
+import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with the help of an AI Agent and littlespidy.
  *
- * Top-level suite tab supporting welcome guide, POST Traffic Discovery,
- * and dynamically spawned conversion session tabs with close buttons.
+ * Top-level suite tab supporting welcome guide, POST Traffic Discovery with Core Four filters,
+ * and dynamically spawned conversion session tabs with close buttons and live ambient glyphs.
+ *
+ * Follows extension_architecture.md standards.
  *
  * @author littlespidy
  */
@@ -46,6 +51,31 @@ public class ConvertPostToGetTab extends JPanel {
         if (urlPath == null || urlPath.isEmpty()) urlPath = "/";
         String dedupeKey = request.method() + "|" + request.url();
 
+        Set<String> paramTypes = new HashSet<>();
+        List<String> paramNames = new ArrayList<>();
+        for (ParsedHttpParameter p : request.parameters()) {
+            if (p.type() != HttpParameterType.COOKIE) {
+                paramNames.add(p.name());
+                if (p.type() == HttpParameterType.BODY) paramTypes.add("BODY");
+                else if (p.type() == HttpParameterType.URL) paramTypes.add("URL");
+                else if (p.type() == HttpParameterType.JSON) paramTypes.add("JSON");
+                else if (p.type() == HttpParameterType.MULTIPART_ATTRIBUTE) paramTypes.add("MULTIPART");
+                else if (p.type() == HttpParameterType.XML || p.type() == HttpParameterType.XML_ATTRIBUTE) paramTypes.add("XML");
+            }
+        }
+
+        String cType = request.headerValue("Content-Type");
+        if (cType != null) {
+            String lower = cType.toLowerCase();
+            if (lower.contains("json")) paramTypes.add("JSON");
+            if (lower.contains("form-urlencoded")) paramTypes.add("BODY");
+            if (lower.contains("multipart")) paramTypes.add("MULTIPART");
+            if (lower.contains("xml")) paramTypes.add("XML");
+        }
+
+        boolean isAuth = request.headerValue("Authorization") != null || request.headerValue("Cookie") != null;
+        String authLabel = request.headerValue("Authorization") != null ? "Authorization Header" : (request.headerValue("Cookie") != null ? "Cookie" : "None");
+
         PostCandidate candidate = new PostCandidate(
             1,
             request.method(),
@@ -54,11 +84,12 @@ public class ConvertPostToGetTab extends JPanel {
             urlPath,
             response != null ? response.statusCode() : 0,
             response != null ? response.body().length() : 0,
-            response != null && response.headerValue("Content-Type") != null ? response.headerValue("Content-Type") : "",
-            request.parameters().size(),
-            Collections.emptyList(),
-            false,
-            "None",
+            response != null && response.headerValue("Content-Type") != null ? response.headerValue("Content-Type") : (cType != null ? cType : ""),
+            paramNames.size(),
+            paramNames,
+            paramTypes,
+            isAuth,
+            authLabel,
             dedupeKey,
             request,
             response,
@@ -71,14 +102,14 @@ public class ConvertPostToGetTab extends JPanel {
     public void addNewBatchSessionTab(List<PostCandidate> candidates) {
         if (candidates == null || candidates.isEmpty()) return;
 
-        String title;
+        String baseTitle;
         if (candidates.size() == 1) {
             PostCandidate single = candidates.get(0);
             String path = single.path();
             if (path == null || path.isEmpty()) path = "/";
-            title = single.method() + " " + (path.length() > 22 ? path.substring(0, 22) + "..." : path);
+            baseTitle = single.method() + " " + (path.length() > 22 ? path.substring(0, 22) + "..." : path);
         } else {
-            title = "Attack (" + candidates.size() + " targets)";
+            baseTitle = "Attack (" + candidates.size() + " targets)";
         }
 
         ConvertSessionPanel sessionPanel = new ConvertSessionPanel(
@@ -89,13 +120,21 @@ public class ConvertPostToGetTab extends JPanel {
         );
 
         activeSessions.add(sessionPanel);
-        rootTabbedPane.addTab(title, sessionPanel);
+        rootTabbedPane.addTab(baseTitle, sessionPanel);
         int tabIndex = rootTabbedPane.indexOfComponent(sessionPanel);
 
-        // ── Custom Tab Header with Close Button ──
+        // ── Custom Tab Header with Close Button and Live Ambient Status Glyphs ──
         JPanel tabHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         tabHeader.setOpaque(false);
-        JLabel titleLabel = new JLabel(title);
+        JLabel titleLabel = new JLabel(baseTitle);
+
+        // Wire ambient status glyph on session completion per extension_architecture.md
+        sessionPanel.setCompletionGlyphCallback(findingsCount -> {
+            SwingUtilities.invokeLater(() -> {
+                String glyph = findingsCount > 0 ? "⚠️" : "✔";
+                titleLabel.setText(glyph + " " + baseTitle);
+            });
+        });
 
         JButton closeBtn = new JButton("×");
         closeBtn.setMargin(new Insets(0, 4, 0, 4));
@@ -149,29 +188,29 @@ public class ConvertPostToGetTab extends JPanel {
             + "• Method Confusion: Many backend frameworks (PHP, Spring, Express, Django) automatically bind query parameters into controller handlers.\n\n"
             + "How to use:\n"
             + "1. Switch to 'POST Traffic Discovery' and click 'Load from Proxy History'.\n"
-            + "2. Filter endpoints by parameter names (e.g. action, csrf, id, token) or status codes.\n"
-            + "3. Select target candidates with checkboxes [x] and click 'Attack'.\n"
-            + "4. In the session tab, optionally inject fresh session cookies, Bearer tokens, or API keys using 'Custom Headers & Auth...'.\n"
-            + "5. Click 'Start Conversion Test' and inspect findings in the comparative results table."
+            + "2. Use the Core Triage Filters (Domain, Multi-Select Status, Content-Type, Param Types, In-Scope, and Regex Search) to isolate target endpoints.\n"
+            + "3. Select candidates with checkboxes [x] (or 'Pin Selected') and click '\u26A1 Attack'.\n"
+            + "4. In the session tab, inject fresh auth tokens via 'Custom Headers & Auth...' if needed, then run conversion tests.\n"
+            + "5. Leverage the Collapsible Smart Filter Sidebar (500px) and Deep-Linking Quad in Montoya editors to triage findings."
         );
 
         JPanel contentPanel = new JPanel(new GridLayout(0, 2, 16, 16));
 
         JPanel card1 = createFeatureCard(
-            "Body Parameter Migration",
-            "Converts URL-encoded form data, JSON top-level keys, and multipart bodies into URL query parameters."
+            "Core Four Triage Filtering",
+            "MultiSelectFilterButtons for Status, Content-Type, and Parameter Types, non-destructive In-Scope gating, and sanitized domain matching."
         );
         JPanel card2 = createFeatureCard(
-            "Fresh Auth / Session Injection",
-            "Easily inject updated session cookies, Bearer tokens, or API keys when testing captured traffic at the end of an assessment."
+            "Smart Pattern Suppression & Presets",
+            "Collapsible 500px results sidebar auto-suppresses repeated generic signatures and provides 1-click presets for bypasses and CSRF."
         );
         JPanel card3 = createFeatureCard(
-            "Signal & Bypass Detection",
-            "Flags 403->200 Authorization/WAF bypasses, 200->200 Method Permitted / CSRF risks, and 5xx crashes."
+            "4-Pillar Deep-Linking Quad",
+            "Auto-tab switching, native Montoya marker highlighting, search bar populating, and auto-scrolled viewports center directly on findings."
         );
         JPanel card4 = createFeatureCard(
-            "Burp Active Scanner Integration",
-            "Also registered as an active ScanCheck, automatically converting POST requests to GET during Burp active audits."
+            "Burp Suite Interoperability",
+            "Right-click context menu integration for Send to Repeater, Intruder, and Organizer, plus row pinning and live status glyphs (⚠️ / ✔)."
         );
 
         contentPanel.add(card1);

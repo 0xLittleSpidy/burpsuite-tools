@@ -2,17 +2,23 @@
 package com.littlespidy.jssourcemapexplorer.ui;
 
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.core.Marker;
+import burp.api.montoya.core.Range;
+import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
 import com.littlespidy.jssourcemapexplorer.engine.DependencyVerifier;
+import com.littlespidy.jssourcemapexplorer.engine.SecretAndEndpointMiner;
+import com.littlespidy.jssourcemapexplorer.engine.SecretVerifierService;
 import com.littlespidy.jssourcemapexplorer.model.*;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
@@ -22,6 +28,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Dedicated top-level panel for exploring and exporting discovered API endpoints,
@@ -59,6 +66,9 @@ public class ReconMiningPanel extends JPanel {
     private final DependenciesTableModel dependenciesTableModel = new DependenciesTableModel();
     private final JTable dependenciesTable = new JTable(dependenciesTableModel);
 
+    // ── Bottom Findings Tabbed Pane ──
+    private final JTabbedPane findingsTabs = new JTabbedPane();
+
     // ── Montoya HTTP Request/Response Editors ──
     private final HttpRequestEditor requestEditor;
     private final HttpResponseEditor responseEditor;
@@ -86,6 +96,7 @@ public class ReconMiningPanel extends JPanel {
     private final JLabel pathCountLabel = new JLabel("Paths: 0");
 
     private MultiSelectFilterButton secretCategoryFilterBtn;
+    private MultiSelectFilterButton secretSignatureFilterBtn;
     private MultiSelectFilterButton secretConfidenceFilterBtn;
     private final JTextField secretSearchField = new JTextField(10);
     private final JLabel secretCountLabel = new JLabel("Secrets: 0");
@@ -157,6 +168,7 @@ public class ReconMiningPanel extends JPanel {
             if (pathMethodFilterBtn != null) pathMethodFilterBtn.clearSelection();
             if (pathTechniqueFilterBtn != null) pathTechniqueFilterBtn.clearSelection();
             if (secretCategoryFilterBtn != null) secretCategoryFilterBtn.clearSelection();
+            if (secretSignatureFilterBtn != null) secretSignatureFilterBtn.clearSelection();
             if (secretConfidenceFilterBtn != null) secretConfidenceFilterBtn.clearSelection();
             if (cloudProviderFilterBtn != null) cloudProviderFilterBtn.clearSelection();
             if (depStatusFilterBtn != null) depStatusFilterBtn.clearSelection();
@@ -185,7 +197,7 @@ public class ReconMiningPanel extends JPanel {
         ));
 
         requestsTable.setRowSorter(new TableRowSorter<>(requestsTableModel));
-        requestsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        requestsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setupTableRendering(requestsTable);
         setupTableKeyboardCopy(requestsTable);
         setupRequestsContextMenu();
@@ -217,14 +229,13 @@ public class ReconMiningPanel extends JPanel {
         requestsPanel.add(new JScrollPane(requestsTable), BorderLayout.CENTER);
 
         // ── Bottom Section: Left (HTTP Request/Response) | Right (Findings Tabs) ──
-        httpEditorsTabs.addTab("Request", requestEditor.uiComponent());
-        httpEditorsTabs.addTab("Response", responseEditor.uiComponent());
+        httpEditorsTabs.addTab("📤 Request", requestEditor.uiComponent());
+        httpEditorsTabs.addTab("📥 Response", responseEditor.uiComponent());
 
-        JTabbedPane findingsTabs = new JTabbedPane();
-        findingsTabs.addTab("Paths", createPathsPanel());
-        findingsTabs.addTab("Secrets", createSecretsPanel());
-        findingsTabs.addTab("Cloud URLs", createCloudUrlsPanel());
-        findingsTabs.addTab("Dependencies", createDependenciesPanel());
+        findingsTabs.addTab("🛣️ Paths", createPathsPanel());
+        findingsTabs.addTab("🔑 Secrets", createSecretsPanel());
+        findingsTabs.addTab("☁️ Cloud URLs", createCloudUrlsPanel());
+        findingsTabs.addTab("📦 Dependencies", createDependenciesPanel());
 
         JSplitPane detailSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, httpEditorsTabs, findingsTabs);
         detailSplit.setResizeWeight(0.48);
@@ -294,7 +305,7 @@ public class ReconMiningPanel extends JPanel {
                     int modelRow = endpointsTable.convertRowIndexToModel(row);
                     DiscoveredEndpoint ep = endpointsTableModel.getEndpointAt(modelRow);
                     if (ep != null && ep.endpoint() != null) {
-                        locateInResponse(ep.endpoint());
+                        navigateToFinding(ep.endpoint(), true, ep.startOffset(), ep.endOffset());
                     }
                 }
             }
@@ -317,28 +328,25 @@ public class ReconMiningPanel extends JPanel {
         catLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         toolbar.add(catLbl);
 
-        List<String> secretCategories = List.of(
-            "All Categories",
-            "JSON Web Token (JWT)",
-            "Google API Key",
-            "Stripe Secret Key",
-            "GitHub Token",
-            "AWS Access Key ID",
-            "Private Key Header",
-            "Authorization Header",
-            "Generic API Secret Key",
-            "Firebase API Key",
-            "HTTP Basic Auth",
-            "Variable:",
-            "Developer Flag / Comment"
-        );
-
         secretCategoryFilterBtn = new MultiSelectFilterButton(
             "Category",
-            secretCategories,
+            SecretAndEndpointMiner.getAllCategories(),
             sel -> applySecretFilter()
         );
         toolbar.add(secretCategoryFilterBtn);
+
+        JLabel sigLbl = new JLabel("Signature:");
+        sigLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        toolbar.add(sigLbl);
+
+        secretSignatureFilterBtn = new MultiSelectFilterButton(
+            "Signature",
+            SecretAndEndpointMiner.getAllSignatureNames(),
+            sel -> applySecretFilter()
+        );
+        toolbar.add(secretSignatureFilterBtn);
+
+
 
         JLabel confLbl = new JLabel("Confidence:");
         confLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
@@ -363,6 +371,27 @@ public class ReconMiningPanel extends JPanel {
         exportBtn.addActionListener(e -> exportTableToTsv(secretsTable, "Secrets"));
         toolbar.add(exportBtn);
 
+        JButton catalogBtn = new JButton("📋 Signatures Catalog (" + SecretAndEndpointMiner.getCuratedSignatures().size() + ")");
+        catalogBtn.setToolTipText("View complete catalog of all curated secret signatures, match patterns, and categories");
+        catalogBtn.addActionListener(e -> showSignaturesCatalogDialog());
+        toolbar.add(catalogBtn);
+
+        JButton verifyBtn = new JButton("🧪 Verify Secret (Repeater)");
+        verifyBtn.setToolTipText("Send non-destructive verification request directly to Burp Repeater");
+        verifyBtn.addActionListener(e -> {
+            int row = secretsTable.getSelectedRow();
+            if (row >= 0) {
+                int modelRow = secretsTable.convertRowIndexToModel(row);
+                DiscoveredSecret sec = secretsTableModel.getSecretAt(modelRow);
+                if (sec != null) {
+                    verifySecret(sec);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a secret row to verify.", "No Secret Selected", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        toolbar.add(verifyBtn);
+
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(secretCountLabel);
 
@@ -370,6 +399,23 @@ public class ReconMiningPanel extends JPanel {
         setupTableRendering(secretsTable);
         setupTableKeyboardCopy(secretsTable);
         setupSecretsContextMenu();
+
+        // Double-click to verify secret
+        secretsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    int row = secretsTable.rowAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        int modelRow = secretsTable.convertRowIndexToModel(row);
+                        DiscoveredSecret sec = secretsTableModel.getSecretAt(modelRow);
+                        if (sec != null) {
+                            verifySecret(sec);
+                        }
+                    }
+                }
+            }
+        });
 
         // Click-to-locate navigation
         secretsTable.getSelectionModel().addListSelectionListener(e -> {
@@ -379,7 +425,7 @@ public class ReconMiningPanel extends JPanel {
                     int modelRow = secretsTable.convertRowIndexToModel(row);
                     DiscoveredSecret sec = secretsTableModel.getSecretAt(modelRow);
                     if (sec != null && sec.secretValue() != null) {
-                        locateInResponse(sec.secretValue());
+                        navigateToFinding(sec.secretValue(), true, sec.startOffset(), sec.endOffset());
                     }
                 }
             }
@@ -437,7 +483,7 @@ public class ReconMiningPanel extends JPanel {
                     int modelRow = cloudUrlsTable.convertRowIndexToModel(row);
                     DiscoveredCloudUrl cu = cloudUrlsTableModel.getCloudUrlAt(modelRow);
                     if (cu != null && cu.cloudUrl() != null) {
-                        locateInResponse(cu.cloudUrl());
+                        navigateToFinding(cu.cloudUrl(), true, cu.startOffset(), cu.endOffset());
                     }
                 }
             }
@@ -510,7 +556,7 @@ public class ReconMiningPanel extends JPanel {
                     int modelRow = dependenciesTable.convertRowIndexToModel(row);
                     DiscoveredDependency dep = dependenciesTableModel.getDependencyAt(modelRow);
                     if (dep != null && dep.packageName() != null) {
-                        locateInResponse(dep.packageName());
+                        navigateToFinding(dep.packageName(), true, dep.startOffset(), dep.endOffset());
                     }
                 }
             }
@@ -521,14 +567,156 @@ public class ReconMiningPanel extends JPanel {
         return panel;
     }
 
-    // ── Click-to-Locate Navigation in HTTP Response ──────────────────────────
+    /**
+     * Builds a real, fully-formed HTTP verification request with HttpService attached
+     * and sends it directly to Burp Repeater.
+     */
+    public void verifySecret(DiscoveredSecret sec) {
+        if (sec == null) return;
+        try {
+            HttpRequest req = SecretVerifierService.buildVerificationRequest(sec);
+            if (req != null) {
+                String ruleName = sec.technique() != null ? sec.technique() : "Secret";
+                String tabName = "Verify: " + truncate(ruleName, 16);
+                api.repeater().sendToRepeater(req, tabName);
+                api.logging().logToOutput("[Secret Verifier] Dispatched verification request for '" + ruleName + "' to Repeater tab '" + tabName + "'");
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Verification request for '" + ruleName + "' sent to Burp Repeater (Tab: " + tabName + ").",
+                    "Sent to Repeater",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Could not construct an HTTP verification request for this secret.",
+                    "Verification Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Failed to send to Repeater: " + ex.getMessage(),
+                "Repeater Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    // ── 4-Pillar Deep-Linking Quad Navigation in Montoya Editors ────────────
+
+    private void navigateToFinding(String matchedValue, boolean isResponseFinding, int startOffset, int endOffset) {
+        if (currentlySelectedEntry == null) return;
+
+        // Pillar 1: Active Tab Auto-Switching
+        httpEditorsTabs.setSelectedIndex(isResponseFinding ? 1 : 0);
+
+        if (isResponseFinding) {
+            HttpResponse response = currentlySelectedEntry.getResponse();
+            if (response == null) return;
+
+            int rawStart = startOffset;
+            int rawEnd = endOffset;
+            int bodyOffset = response.bodyOffset();
+
+            if (rawStart >= 0 && rawEnd > rawStart) {
+                // Offsets from miner are relative to body string
+                rawStart += bodyOffset;
+                rawEnd += bodyOffset;
+            } else if (matchedValue != null && !matchedValue.isEmpty()) {
+                String rawStr = response.toString();
+                int idx = rawStr.indexOf(matchedValue);
+                if (idx >= 0) {
+                    rawStart = idx;
+                    rawEnd = idx + matchedValue.length();
+                }
+            }
+
+            // Pillar 2: Apply Native Montoya Markers
+            if (rawStart >= 0 && rawEnd > rawStart && rawEnd <= response.toByteArray().length()) {
+                try {
+                    Marker marker = Marker.marker(Range.range(rawStart, rawEnd));
+                    response = response.withMarkers(marker);
+                } catch (Exception ignored) {}
+            }
+            responseEditor.setResponse(response);
+
+            // Pillar 3: Search Bar Expression Populating
+            if (matchedValue != null && !matchedValue.isEmpty()) {
+                try {
+                    responseEditor.setSearchExpression(matchedValue);
+                } catch (Exception ignored) {}
+            }
+
+            // Pillar 4: Caret Positioning & Viewport Auto-Scroll
+            if (rawStart >= 0) {
+                final int targetCaret = rawStart;
+                SwingUtilities.invokeLater(() -> scrollTextComponent(responseEditor.uiComponent(), targetCaret));
+            }
+        } else {
+            HttpRequest request = currentlySelectedEntry.getRequest();
+            if (request == null) return;
+
+            int rawStart = startOffset;
+            int rawEnd = endOffset;
+            int bodyOffset = request.bodyOffset();
+
+            if (rawStart >= 0 && rawEnd > rawStart) {
+                rawStart += bodyOffset;
+                rawEnd += bodyOffset;
+            } else if (matchedValue != null && !matchedValue.isEmpty()) {
+                String rawStr = request.toString();
+                int idx = rawStr.indexOf(matchedValue);
+                if (idx >= 0) {
+                    rawStart = idx;
+                    rawEnd = idx + matchedValue.length();
+                }
+            }
+
+            // Pillar 2: Apply Native Montoya Markers
+            if (rawStart >= 0 && rawEnd > rawStart && rawEnd <= request.toByteArray().length()) {
+                try {
+                    Marker marker = Marker.marker(Range.range(rawStart, rawEnd));
+                    request = request.withMarkers(marker);
+                } catch (Exception ignored) {}
+            }
+            requestEditor.setRequest(request);
+
+            // Pillar 3: Search Bar Expression Populating
+            if (matchedValue != null && !matchedValue.isEmpty()) {
+                try {
+                    requestEditor.setSearchExpression(matchedValue);
+                } catch (Exception ignored) {}
+            }
+
+            // Pillar 4: Caret Positioning & Viewport Auto-Scroll
+            if (rawStart >= 0) {
+                final int targetCaret = rawStart;
+                SwingUtilities.invokeLater(() -> scrollTextComponent(requestEditor.uiComponent(), targetCaret));
+            }
+        }
+    }
 
     private void locateInResponse(String searchTarget) {
-        if (searchTarget == null || searchTarget.trim().isEmpty()) return;
-        httpEditorsTabs.setSelectedIndex(1); // Switch to "Response" tab
-        try {
-            responseEditor.setSearchExpression(searchTarget.trim());
-        } catch (Exception ignored) {}
+        navigateToFinding(searchTarget, true, -1, -1);
+    }
+
+    private static void scrollTextComponent(Component root, int position) {
+        if (root == null) return;
+        if (root instanceof javax.swing.text.JTextComponent tc) {
+            try {
+                if (position >= 0 && position <= tc.getText().length()) {
+                    tc.setCaretPosition(position);
+                }
+            } catch (Exception ignored) {}
+            return;
+        }
+        if (root instanceof Container container) {
+            for (Component child : container.getComponents()) {
+                scrollTextComponent(child, position);
+            }
+        }
     }
 
     // ── Data Ingestion & Master Refresh ──────────────────────────────────────
@@ -714,6 +902,7 @@ public class ReconMiningPanel extends JPanel {
 
     private synchronized void applySecretFilter() {
         Set<String> selectedCategories = secretCategoryFilterBtn != null ? secretCategoryFilterBtn.getSelected() : Collections.emptySet();
+        Set<String> selectedSignatures = secretSignatureFilterBtn != null ? secretSignatureFilterBtn.getSelected() : Collections.emptySet();
         Set<String> selectedConfidences = secretConfidenceFilterBtn != null ? secretConfidenceFilterBtn.getSelected() : Collections.emptySet();
         String query = secretSearchField.getText().trim().toLowerCase();
 
@@ -722,15 +911,22 @@ public class ReconMiningPanel extends JPanel {
             if (!selectedCategories.isEmpty()) {
                 boolean catMatch = false;
                 for (String sel : selectedCategories) {
-                    if (sel.endsWith(":") && sec.category().startsWith(sel)) {
-                        catMatch = true;
-                        break;
-                    } else if (sec.category().equals(sel)) {
+                    if (sec.category() != null && (sec.category().equalsIgnoreCase(sel) || sec.category().startsWith(sel))) {
                         catMatch = true;
                         break;
                     }
                 }
                 if (!catMatch) continue;
+            }
+            if (!selectedSignatures.isEmpty()) {
+                boolean sigMatch = false;
+                for (String sel : selectedSignatures) {
+                    if (sec.technique() != null && sec.technique().equalsIgnoreCase(sel)) {
+                        sigMatch = true;
+                        break;
+                    }
+                }
+                if (!sigMatch) continue;
             }
             if (!selectedConfidences.isEmpty() && !selectedConfidences.contains(sec.confidence())) {
                 continue;
@@ -738,6 +934,7 @@ public class ReconMiningPanel extends JPanel {
             if (!query.isEmpty()) {
                 boolean match = (sec.secretValue() != null && sec.secretValue().toLowerCase().contains(query))
                     || (sec.category() != null && sec.category().toLowerCase().contains(query))
+                    || (sec.technique() != null && sec.technique().toLowerCase().contains(query))
                     || (sec.confidence() != null && sec.confidence().toLowerCase().contains(query))
                     || (sec.sourceLocation() != null && sec.sourceLocation().toLowerCase().contains(query))
                     || (sec.contextSnippet() != null && sec.contextSnippet().toLowerCase().contains(query));
@@ -816,23 +1013,27 @@ public class ReconMiningPanel extends JPanel {
             ) {
                 Component c = super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, column);
 
-                if (value != null && !value.toString().trim().isEmpty() && !value.toString().equals("-")) {
-                    String valStr = value.toString();
-                    ((JComponent) c).setToolTipText("<html><div style='max-width: 600px; padding: 4px; font-family: monospace; font-size: 11px; word-wrap: break-word;'>"
-                        + escapeHtml(valStr) + "<br><br><i>[Click row to jump to this finding in Response]</i></div></html>");
-                } else {
-                    ((JComponent) c).setToolTipText(null);
-                }
+                ((JComponent) c).setToolTipText(null);
 
                 if (!isSelected) {
                     String strVal = value != null ? value.toString() : "";
-                    if (strVal.startsWith("VULNERABLE")) {
-                        c.setBackground(new Color(255, 230, 230)); // light red highlight for vulnerable packages
+                    if (strVal.startsWith("VULNERABLE") || "Critical".equals(strVal)) {
+                        c.setBackground(new Color(255, 230, 230)); // light red
                         c.setForeground(new Color(180, 0, 0));
                         setFont(getFont().deriveFont(Font.BOLD));
-                    } else if ("High [Firm]".equals(strVal)) {
-                        c.setBackground(new Color(255, 245, 230)); // light orange for high confidence secrets
-                        c.setForeground(new Color(160, 80, 0));
+                    } else if ("High".equals(strVal) || "High [Firm]".equals(strVal)) {
+                        c.setBackground(new Color(255, 240, 225)); // light orange
+                        c.setForeground(new Color(200, 80, 0));
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else if ("Medium".equals(strVal)) {
+                        c.setBackground(new Color(255, 250, 225)); // warm amber
+                        c.setForeground(new Color(180, 140, 0));
+                    } else if ("Low".equals(strVal) || "Low [Tentative]".equals(strVal)) {
+                        c.setBackground(new Color(235, 245, 255)); // light blue
+                        c.setForeground(new Color(0, 100, 200));
+                    } else if ("Info".equals(strVal)) {
+                        c.setBackground(new Color(245, 245, 245)); // neutral gray
+                        c.setForeground(new Color(100, 100, 100));
                     } else if (row % 2 == 1) {
                         c.setBackground(new Color(250, 250, 252));
                         c.setForeground(tbl.getForeground());
@@ -885,6 +1086,48 @@ public class ReconMiningPanel extends JPanel {
                         JMenuItem copyUrlItem = new JMenuItem("Copy JS URL");
                         copyUrlItem.addActionListener(ev -> copyToClipboard(entry.getUrl()));
                         menu.add(copyUrlItem);
+
+                        menu.addSeparator();
+
+                        JMenuItem sendRepeaterItem = new JMenuItem("Send to Repeater");
+                        sendRepeaterItem.addActionListener(ev -> {
+                            for (int viewRow : requestsTable.getSelectedRows()) {
+                                int mRow = requestsTable.convertRowIndexToModel(viewRow);
+                                JsFileEntry eEntry = requestsTableModel.getEntryAt(mRow);
+                                if (eEntry != null && eEntry.getRequest() != null) {
+                                    String tabName = (eEntry.getRequest().method() != null ? eEntry.getRequest().method() : "GET")
+                                        + " " + eEntry.getHost() + eEntry.getPath();
+                                    api.repeater().sendToRepeater(eEntry.getRequest(), tabName);
+                                }
+                            }
+                        });
+                        menu.add(sendRepeaterItem);
+
+                        JMenuItem sendIntruderItem = new JMenuItem("Send to Intruder");
+                        sendIntruderItem.addActionListener(ev -> {
+                            for (int viewRow : requestsTable.getSelectedRows()) {
+                                int mRow = requestsTable.convertRowIndexToModel(viewRow);
+                                JsFileEntry eEntry = requestsTableModel.getEntryAt(mRow);
+                                if (eEntry != null && eEntry.getRequest() != null) {
+                                    api.intruder().sendToIntruder(eEntry.getRequest());
+                                }
+                            }
+                        });
+                        menu.add(sendIntruderItem);
+
+                        JMenuItem sendOrganizerItem = new JMenuItem("Send to Organizer");
+                        sendOrganizerItem.addActionListener(ev -> {
+                            for (int viewRow : requestsTable.getSelectedRows()) {
+                                int mRow = requestsTable.convertRowIndexToModel(viewRow);
+                                JsFileEntry eEntry = requestsTableModel.getEntryAt(mRow);
+                                if (eEntry != null && eEntry.getRequest() != null && eEntry.getResponse() != null) {
+                                    api.organizer().sendToOrganizer(HttpRequestResponse.httpRequestResponse(eEntry.getRequest(), eEntry.getResponse()));
+                                }
+                            }
+                        });
+                        menu.add(sendOrganizerItem);
+
+                        menu.addSeparator();
 
                         JMenuItem downloadItem = new JMenuItem("Download JS File...");
                         downloadItem.addActionListener(ev -> downloadJsFile(entry));
@@ -994,7 +1237,7 @@ public class ReconMiningPanel extends JPanel {
                         menu.add(copyEndpointItem);
 
                         JMenuItem locateItem = new JMenuItem("Jump to in Response");
-                        locateItem.addActionListener(ev -> locateInResponse(ep.endpoint()));
+                        locateItem.addActionListener(ev -> navigateToFinding(ep.endpoint(), true, ep.startOffset(), ep.endOffset()));
                         menu.add(locateItem);
 
                         JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
@@ -1035,8 +1278,12 @@ public class ReconMiningPanel extends JPanel {
                         copySecretItem.addActionListener(ev -> copyToClipboard(sec.secretValue()));
                         menu.add(copySecretItem);
 
+                        JMenuItem verifyItem = new JMenuItem("🧪 Verify Secret (Send to Repeater)");
+                        verifyItem.addActionListener(ev -> verifySecret(sec));
+                        menu.add(verifyItem);
+
                         JMenuItem locateItem = new JMenuItem("Jump to in Response");
-                        locateItem.addActionListener(ev -> locateInResponse(sec.secretValue()));
+                        locateItem.addActionListener(ev -> navigateToFinding(sec.secretValue(), true, sec.startOffset(), sec.endOffset()));
                         menu.add(locateItem);
 
                         JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
@@ -1078,7 +1325,7 @@ public class ReconMiningPanel extends JPanel {
                         menu.add(copyUrlItem);
 
                         JMenuItem locateItem = new JMenuItem("Jump to in Response");
-                        locateItem.addActionListener(ev -> locateInResponse(cu.cloudUrl()));
+                        locateItem.addActionListener(ev -> navigateToFinding(cu.cloudUrl(), true, cu.startOffset(), cu.endOffset()));
                         menu.add(locateItem);
 
                         JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
@@ -1127,7 +1374,7 @@ public class ReconMiningPanel extends JPanel {
                         menu.add(verifyItem);
 
                         JMenuItem locateItem = new JMenuItem("Jump to in Response");
-                        locateItem.addActionListener(ev -> locateInResponse(dep.packageName()));
+                        locateItem.addActionListener(ev -> navigateToFinding(dep.packageName(), true, dep.startOffset(), dep.endOffset()));
                         menu.add(locateItem);
 
                         JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
@@ -1166,6 +1413,113 @@ public class ReconMiningPanel extends JPanel {
 
         copyToClipboard(sb.toString());
         JOptionPane.showMessageDialog(this, "Copied " + rowCount + " rows to clipboard as TSV!", "Export Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showSignaturesCatalogDialog() {
+        Window parentWin = SwingUtilities.getWindowAncestor(this);
+        List<SecretAndEndpointMiner.SecretSignatureInfo> allSigs = SecretAndEndpointMiner.getCuratedSignatures();
+        JDialog dialog = new JDialog(parentWin, "📋 Curated Secret Signatures & Match Patterns Catalog (" + allSigs.size() + " Signatures)", Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(1050, 600);
+        dialog.setLocationRelativeTo(parentWin);
+
+        JPanel contentPanel = new JPanel(new BorderLayout(8, 8));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        // Top bar with search & info
+        JPanel topBar = new JPanel(new BorderLayout(8, 8));
+        JLabel headerLbl = new JLabel("TruffleHog, Kingfisher & Curated Secret Signatures Catalog (" + allSigs.size() + " signatures across categories with active regex match patterns and keyword pre-filtering)");
+        headerLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+
+        JPanel searchRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        searchRow.add(new JLabel("Quick Filter:"));
+        JTextField catalogSearchField = new JTextField(22);
+        searchRow.add(catalogSearchField);
+
+        topBar.add(headerLbl, BorderLayout.WEST);
+        topBar.add(searchRow, BorderLayout.EAST);
+        contentPanel.add(topBar, BorderLayout.NORTH);
+
+        // Table of signatures
+        String[] cols = {"#", "Signature / Rule Name", "Category", "Matching Regex Pattern", "Confidence", "Shannon Entropy Guard"};
+
+        DefaultTableModel catModel = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int row, int column) { return false; }
+            @Override public Class<?> getColumnClass(int columnIndex) {
+                return columnIndex == 0 ? Integer.class : String.class;
+            }
+        };
+
+        for (int i = 0; i < allSigs.size(); i++) {
+            SecretAndEndpointMiner.SecretSignatureInfo s = allSigs.get(i);
+            catModel.addRow(new Object[]{
+                i + 1,
+                s.name(),
+                s.category(),
+                s.pattern(),
+                s.confidence() + "%",
+                s.needsEntropy() ? "Yes (Entropy \u2265 3.0)" : "Exact Pattern Match"
+            });
+        }
+
+        JTable catTable = new JTable(catModel);
+        catTable.setRowHeight(24);
+        catTable.getColumnModel().getColumn(0).setPreferredWidth(35);
+        catTable.getColumnModel().getColumn(1).setPreferredWidth(200);
+        catTable.getColumnModel().getColumn(2).setPreferredWidth(160);
+        catTable.getColumnModel().getColumn(3).setPreferredWidth(400);
+        catTable.getColumnModel().getColumn(4).setPreferredWidth(85);
+        catTable.getColumnModel().getColumn(5).setPreferredWidth(170);
+
+        // Custom renderer for Pattern column to show monospace font without HTML tooltip
+        catTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            private final Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 11);
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object val, boolean isSel, boolean hasFoc, int row, int col) {
+                Component comp = super.getTableCellRendererComponent(tbl, val, isSel, hasFoc, row, col);
+                comp.setFont(monoFont);
+                ((JComponent) comp).setToolTipText(null);
+                return comp;
+            }
+        });
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(catModel);
+        catTable.setRowSorter(sorter);
+
+        JLabel countLbl = new JLabel(String.format("Showing %d of %d signatures", allSigs.size(), allSigs.size()));
+        countLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+
+        catalogSearchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private void filter() {
+                String q = catalogSearchField.getText().trim();
+                if (q.isEmpty()) {
+                    sorter.setRowFilter(null);
+                } else {
+                    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(q)));
+                }
+                countLbl.setText(String.format("Showing %d of %d signatures", catTable.getRowCount(), allSigs.size()));
+            }
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+        });
+
+        contentPanel.add(new JScrollPane(catTable), BorderLayout.CENTER);
+
+        // Bottom bar
+        JPanel bottomBar = new JPanel(new BorderLayout());
+        bottomBar.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+        bottomBar.add(countLbl, BorderLayout.WEST);
+
+        JButton closeBtn = new JButton("Close");
+        closeBtn.addActionListener(e -> dialog.dispose());
+        JPanel closePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        closePanel.add(closeBtn);
+        bottomBar.add(closePanel, BorderLayout.EAST);
+
+        contentPanel.add(bottomBar, BorderLayout.SOUTH);
+        dialog.setContentPane(contentPanel);
+        dialog.setVisible(true);
     }
 
     private static void copyToClipboard(String text) {
@@ -1293,7 +1647,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class SecretsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "Category", "Secret Value / Match", "Entropy", "Confidence", "Technique", "Source Type", "Location / File", "Line", "Context Snippet"
+            "Category", "Secret Value / Match", "Entropy", "Confidence", "Signature / Technique", "Source Type", "Location / File", "Line", "Context Snippet"
         };
         private final List<DiscoveredSecret> list = new ArrayList<>();
 

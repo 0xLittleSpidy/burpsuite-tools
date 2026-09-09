@@ -244,8 +244,8 @@ public class CSPInspectorTab extends JPanel {
 
         // Top Toolbars
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        topContainer.add(createMainToolbar(), BorderLayout.NORTH);
-        topContainer.add(createQuickFilterToolbar(), BorderLayout.SOUTH);
+        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
+        topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
         panel.add(topContainer, BorderLayout.NORTH);
 
         // Center Workspaces
@@ -400,54 +400,17 @@ public class CSPInspectorTab extends JPanel {
         return toolbar;
     }
 
-    private JPanel createQuickFilterToolbar() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-
-        JPanel chipsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        JLabel quickLbl = new JLabel("Quick Presets:");
-        quickLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        chipsPanel.add(quickLbl);
-
-        String[] quickPresets = {
-            "'unsafe-inline'", "'unsafe-eval'", "data:", "*", "(missing CSP)", "CSP-Report-Only", "frame-ancestors 'none'", "object-src 'none'"
-        };
-
-        for (String preset : quickPresets) {
-            JButton chip = new JButton(preset);
-            chip.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-            chip.setMargin(new Insets(1, 6, 1, 6));
-            chip.addActionListener(e -> {
-                if (preset.equals("CSP-Report-Only")) {
-                    inspectModeComboBox.setSelectedItem("CSP-Report-Only");
-                    valueFilterField.setText("");
-                } else if (preset.equals("frame-ancestors 'none'")) {
-                    inspectModeComboBox.setSelectedItem("frame-ancestors");
-                    valueFilterField.setText("'none'");
-                } else if (preset.equals("object-src 'none'")) {
-                    inspectModeComboBox.setSelectedItem("object-src");
-                    valueFilterField.setText("'none'");
-                } else {
-                    inspectModeComboBox.setSelectedItem("Full Policy");
-                    valueFilterField.setText(preset);
-                }
-                selectedSummaryValue = null;
-                refreshView();
-            });
-            chipsPanel.add(chip);
-        }
-
-        JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
+    private JPanel createStatusToolbar() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
         statsLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
-        statsPanel.add(statsLabel);
-
-        panel.add(chipsPanel, BorderLayout.WEST);
-        panel.add(statsPanel, BorderLayout.EAST);
-
+        panel.add(statsLabel);
         return panel;
     }
 
     private void setupSummaryTableRendering() {
-        summaryTable.getColumnModel().getColumn(1).setMaxWidth(80); // Count
+        // Column 0: Value, Column 1: Domains, Column 2: Count, Column 3: Assessment
+        summaryTable.getColumnModel().getColumn(1).setPreferredWidth(250);
+        summaryTable.getColumnModel().getColumn(2).setMaxWidth(80); // Count
 
         summaryTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
@@ -456,7 +419,7 @@ public class CSPInspectorTab extends JPanel {
             ) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 int modelRow = table.convertRowIndexToModel(row);
-                Object assessmentObj = summaryTableModel.getValueAt(modelRow, 2);
+                Object assessmentObj = summaryTableModel.getValueAt(modelRow, 3);
                 String assessment = assessmentObj != null ? assessmentObj.toString() : "";
 
                 if (!isSelected) {
@@ -470,6 +433,13 @@ public class CSPInspectorTab extends JPanel {
                         c.setBackground(table.getBackground());
                     }
                 }
+
+                if (column == 1) { // Domains tooltip
+                    setToolTipText(value != null ? value.toString() : null);
+                } else {
+                    setToolTipText(null);
+                }
+
                 return c;
             }
         });

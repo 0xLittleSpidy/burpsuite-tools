@@ -45,6 +45,10 @@ public class UnpackedProject {
         return Collections.unmodifiableMap(filesByPath);
     }
 
+    public synchronized Collection<UnpackedSourceFile> getFiles() {
+        return Collections.unmodifiableCollection(filesByPath.values());
+    }
+
     public synchronized UnpackedSourceFile getFile(String path) {
         return filesByPath.get(path);
     }

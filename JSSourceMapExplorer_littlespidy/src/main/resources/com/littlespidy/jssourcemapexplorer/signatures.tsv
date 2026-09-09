@@ -1,0 +1,1073 @@
+Abstract Token	SaaS Tokens	85	false	abstract	(?i:abstract)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Abuseipdb Token	Database Credentials	85	false	abuseipdb	(?i:abuseipdb)(?:.|[\n\r]){0,40}?\b([a-z0-9]{80})\b
+Abyssale Token	SaaS Tokens	85	false	abyssale	(?i:abyssale)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{40})\b
+Adafruitio Token	AI & ML Secrets	85	false	aio_	\b(aio\_[a-zA-Z0-9]{28})\b
+Adobeio Token	SaaS Tokens	85	false	adobe	(?i:adobe)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Adobeio Token	SaaS Tokens	85	false	adobe	(?i:adobe)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9.]{12})\b
+Adzuna Token	SaaS Tokens	85	false	adzuna	(?i:adzuna)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Adzuna Token	SaaS Tokens	85	false	adzuna	(?i:adzuna)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8})\b
+Aeroworkflow Token	SaaS Tokens	85	false	aeroworkflow	(?i:aeroworkflow)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9^!?#:*;]{20})
+Aeroworkflow Token	SaaS Tokens	85	false	aeroworkflow	(?i:aeroworkflow)(?:.|[\n\r]){0,40}?\b([0-9]{1,})\b
+Agora Token	SaaS Tokens	85	false	token,key,agora	(?i:agora|key|token)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Agora Token	SaaS Tokens	85	false	secret,agora	(?i:agora|secret)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Aha Token	SaaS Tokens	85	false	aha	(?i:aha)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Aha Token	SaaS Tokens	85	false	aha.io	\b([A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])\.aha\.io)
+Airbrakeprojectkey	AI & ML Secrets	85	false	airbrake	(?i:airbrake)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{32})\b
+Airbrakeprojectkey	AI & ML Secrets	85	false	airbrake	(?i:airbrake)(?:.|[\n\r]){0,40}?\b([0-9]{6})\b
+Airbrakeuserkey	AI & ML Secrets	85	false	airbrake	(?i:airbrake)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{40})\b
+Airship Token	AI & ML Secrets	85	false	airship	(?i:airship)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{91})\b
+Airtableoauth	AI & ML Secrets	85	false	airtable	\b([[:alnum:]]+\.v1\.[a-zA-Z0-9_-]+\.[a-f0-9]+)\b
+Airtablepersonalaccesstoken	AI & ML Secrets	85	false	airtable	(?i:airtable)(?:.|[\n\r]){0,40}?\b(pat[[:alnum:]]{14}\.[a-f0-9]{64})\b
+Airvisual Token	AI & ML Secrets	85	false	airvisual	(?i:airvisual)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Aiven Token	AI & ML Secrets	85	false	aiven	(?i:aiven)(?:.|[\n\r]){0,40}?([a-zA-Z0-9/+=]{372})
+Alchemy Token	SaaS Tokens	85	false	alchemy	(?i:alchemy)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z_]{32}|alcht_[0-9a-zA-Z]{30})\b
+Alconost Token	SaaS Tokens	85	false	alconost	(?i:alconost)(?:.|[\n\r]){0,40}?\b([0-9Aa-z]{32})\b
+Alegra Token	SaaS Tokens	85	false	alegra	(?i:alegra)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{20})\b
+Aletheiaapi Token	SaaS Tokens	85	false	aletheiaapi	(?i:aletheiaapi)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{32})\b
+Algoliaadminkey	SaaS Tokens	85	false	appid,docsearch,algolia	(?i:algolia|docsearch|appId)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{10})\b
+Algoliaadminkey	SaaS Tokens	85	false	apikey,docsearch,algolia	(?i:algolia|docsearch|apiKey)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Alibaba Token	Cloud Secrets	85	false	ltai	\b([a-zA-Z0-9]{30})\b
+Alibaba Token	Cloud Secrets	85	false	ltai	\b(LTAI[a-zA-Z0-9]{17,21})[\"';\s]*
+Alienvault Token	Cloud Secrets	85	false	alienvault	(?i:alienvault)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Allsports Token	SaaS Tokens	85	false	allsports	(?i:allsports)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Amadeus Token	SaaS Tokens	85	false	amadeus	(?i:amadeus)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{32})\b
+Amadeus Token	SaaS Tokens	85	false	amadeus	(?i:amadeus)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{16})\b
+Ambee Token	SaaS Tokens	85	false	ambee	(?i:ambee)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Amplitudeapikey	SaaS Tokens	85	false	amplitude	(?i:amplitude)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Anthropic Token	AI & ML Secrets	85	false	sk-ant-api03,sk-ant-admin01	\b(sk-ant-(?:admin01|api03)-[\w\-]{93}AA)\b
+Anypoint Token	SaaS Tokens	85	false	org	(?i:org)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Anypoint Token	SaaS Tokens	85	false	anypoint	\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Anypointoauth 2	SaaS Tokens	85	false	id,anypoint	(?i:anypoint|id)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Anypointoauth 2	SaaS Tokens	85	false	secret,anypoint	(?i:anypoint|secret)(?:.|[\n\r]){0,40}?\b([0-9a-fA-F]{32})\b
+Apacta Token	SaaS Tokens	85	false	apacta	(?i:apacta)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+API 2 Cart Token	SaaS Tokens	85	false	api2cart	(?i:api2cart)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Apideck Token	SaaS Tokens	85	false	apideck	(?i:apideck)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{40})\b
+Apideck Token	SaaS Tokens	85	false	apideck	\b(sk_live_[a-z0-9A-Z-]{93})\b
+Apiflash Token	SaaS Tokens	85	false	apiflash	(?i:apiflash)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Apifonica Token	SaaS Tokens	85	false	apifonica	(?i:apifonica)(?:.|[\n\r]){0,40}?\b([0-9a-z]{11}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Apify Token	SaaS Tokens	85	false	apify	\b(apify\_api\_[a-zA-Z-0-9]{36})\b
+Apilayer Token	SaaS Tokens	85	false	apilayer	(?i:apilayer)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Apimatic Token	SaaS Tokens	85	false	apimatic,apikey	(?i:apimatic|apikey)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{64})\b
+Apimetrics Token	Monitoring & Observability	85	false	apimetrics	(?i:apimetrics)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Apitemplate Token	SaaS Tokens	85	false	apitemplate	(?i:apitemplate)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{39})\b
+Apollo Token	SaaS Tokens	85	false	apollo	(?i:apollo)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{22})\b
+Appcues Token	SaaS Tokens	85	false	appcues	(?i:appcues)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Appcues Token	SaaS Tokens	85	false	appcues	(?i:appcues)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{39})\b
+Appcues Token	SaaS Tokens	85	false	appcues	(?i:appcues)(?:.|[\n\r]){0,40}?\b([0-9]{5})\b
+Appfollow Token	SaaS Tokens	85	false	appfollow	(?i:appfollow)(?:.|[\n\r]){0,40}?\b(eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\.[0-9A-Za-z]{74}\.[0-9A-Z-a-z\-_]{43})\b
+Appointedd Token	SaaS Tokens	85	false	appointedd	(?i:appointedd)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9=+]{88})
+Appsynergy Token	SaaS Tokens	85	false	appsynergy	(?i:appsynergy)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Apptivo Token	SaaS Tokens	85	false	apptivo	(?i:apptivo)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Apptivo Token	SaaS Tokens	85	false	apptivo	(?i:apptivo)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{32})\b
+Artifactory Token	CI/CD & DevOps Secrets	85	false	jfrog.io,artifactory,akcp	\b(AKCp[a-zA-Z0-9]{69})\b
+Artifactory Token	CI/CD & DevOps Secrets	85	false	jfrog.io,artifactory,akcp	\b([A-Za-z0-9][A-Za-z0-9\-]{0,61}[A-Za-z0-9]\.jfrog\.io)
+Artifactoryreferencetoken	CI/CD & DevOps Secrets	85	false	cmvmdgtu	\b(cmVmdGtu[A-Za-z0-9]{56})\b
+Artsy Token	SaaS Tokens	85	false	artsy	(?i:artsy)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Artsy Token	SaaS Tokens	85	false	artsy	(?i:artsy)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{20})\b
+Asanaoauth	SaaS Tokens	85	false	asana	(?i:asana)(?:.|[\n\r]){0,40}?\b([a-z\/:0-9]{51})\b
+Asanapersonalaccesstoken	SaaS Tokens	85	false	asana	(?i:asana)(?:.|[\n\r]){0,40}?\b([0-9]{1,}\/[0-9]{16,}(?:\/[0-9]{16,})?:[A-Za-z0-9]{32,})\b
+Assemblyai Token	AI & ML Secrets	85	false	assemblyai	(?i:assemblyai)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Atera Token	SaaS Tokens	85	false	atera	(?i:atera)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Audd Token	SaaS Tokens	85	false	audd	(?i:audd)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{32})\b
+Auth 0 Managementapitoken	SaaS Tokens	85	false	auth0	\b(ey[a-zA-Z0-9._-]+)\b
+Auth 0 Managementapitoken	SaaS Tokens	85	false	auth0	([a-zA-Z0-9\-]{2,16}\.[a-zA-Z0-9_-]{2,3}\.auth0\.com)
+Auth 0 Oauth	SaaS Tokens	85	false	auth0	(?i:auth0)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{32,60})\b
+Auth 0 Oauth	SaaS Tokens	85	false	auth0	\b([a-zA-Z0-9_-]{64,})\b
+Auth 0 Oauth	SaaS Tokens	85	false	auth0	\b([a-zA-Z0-9][a-zA-Z0-9._-]*auth0\.com)\b
+Autodesk Token	SaaS Tokens	85	false	autodesk	(?i:autodesk)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{32})\b
+Autodesk Token	SaaS Tokens	85	false	autodesk	(?i:autodesk)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{16})\b
+Autoklose Token	SaaS Tokens	85	false	autoklose	(?i:autoklose)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{32})\b
+Autopilot Token	SaaS Tokens	85	false	autopilot	(?i:autopilot)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Avazapersonalaccesstoken	SaaS Tokens	85	false	avaza	(?i:avaza)(?:.|[\n\r]){0,40}?\b([0-9]+-[0-9a-f]{40})\b
+Aviationstack Token	SaaS Tokens	85	false	aviationstack	(?i:aviationstack)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+AWS Token	Cloud Secrets	85	false	aws	[a-f0-9]{40}
+AWS Token	Cloud Secrets	85	false	aws	(?:[^A-Za-z0-9+/]|\A)([A-Za-z0-9+/]{40})(?:[^A-Za-z0-9+/]|\z)
+Axonaut Token	SaaS Tokens	85	false	axonaut	(?i:axonaut)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Aylien Token	SaaS Tokens	85	false	aylien	(?i:aylien)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Aylien Token	SaaS Tokens	85	false	aylien	(?i:aylien)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8})\b
+Ayrshare Token	SaaS Tokens	85	false	ayrshare	(?i:ayrshare)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8})\b
+Azure Batch Token	Cloud Secrets	85	false	.batch.azure.com	https://(.{1,50})\.(.{1,50})\.batch\.azure\.com
+Azure Batch Token	Cloud Secrets	85	false	.batch.azure.com	[A-Za-z0-9+/=]{88}
+Azure Cosmosdb Token	Cloud Secrets	85	false	.documents.azure.com,.table.cosmos.azure.com	([A-Za-z0-9]{86}==)
+Azure Cosmosdb Token	Cloud Secrets	85	false	.documents.azure.com,.table.cosmos.azure.com	([a-z0-9-]{3,44}\.(?:documents|table\.cosmos)\.azure\.com)
+Azure Entra Token	Cloud Secrets	85	false	azure_entra	([\w-]+\.onmicrosoft\.com)
+Azure Openai Token	Cloud Secrets	85	false	openai[_.-]?key,api[_.-]?key	(?i:api\[_\.\-\]\?key|openai\[_\.\-\]\?key)(?:.|[\n\r]){0,40}?\b(?-i:([a-f0-9]{32}))\b
+Azure Openai Token	Cloud Secrets	85	false	.openai.azure.com	(?i)([a-z0-9-]+\.openai\.azure\.com)
+Azure Storage Token	Cloud Secrets	85	false	core.windows.net,account-key,storage-account,accountname,storage.account,account_key,endpointsuffix,accountkey,defaultendpointsprotocol=http,account.name,account-name,account_name,storage_account,storageaccount,account.key	(?i:Account[_.-]?Name|Storage[_.-]?(?:Account|Name))(?:.|\s){0,20}?\b([a-z0-9]{3,24})\b|([a-z0-9]{3,24})(?i:\.blob\.core\.windows\.net)
+Azure Storage Token	Cloud Secrets	85	false	core.windows.net,account-key,storage-account,accountname,storage.account,account_key,endpointsuffix,accountkey,defaultendpointsprotocol=http,account.name,account-name,account_name,storage_account,storageaccount,account.key	(?i:(?:Access|Account|Storage)[_.-]?Key)(?:.|\s){0,25}?([a-zA-Z0-9+\/-]{86,88}={0,2})
+Azureapimanagementsubscriptionkey	Cloud Secrets	85	false	key,subscription,.azure-api.net,azure	(?i:azure|\.azure\-api\.net|subscription|key)(?:.|[\n\r]){0,40}?([a-zA-Z-0-9]{32})
+Azureapimanagementsubscriptionkey	Cloud Secrets	85	false	.azure-api.net	https://([a-z0-9][a-z0-9-]{0,48}[a-z0-9])\.azure-api\.net
+Azureappconfigconnectionstring Token	Cloud Secrets	85	false	.azconfig.io	Endpoint=(https:\/\/[a-zA-Z0-9-]+\.azconfig\.io);Id=([a-zA-Z0-9+\/=]+);Secret=([a-zA-Z0-9+\/=]+)
+Azurecontainerregistry Token	Cloud Secrets	85	false	.azurecr.io	([a-z0-9][a-z0-9-]{1,100}[a-z0-9])\.azurecr\.io
+Azurecontainerregistry Token	Cloud Secrets	85	false	.azurecr.io	\b[a-zA-Z0-9+/]{42}\+ACR[a-zA-Z0-9]{6}\b
+Azuredevopspersonalaccesstoken	Cloud Secrets	85	false	azure	(?i:azure)(?:.|[\n\r]){0,40}?\b([0-9a-z]{52})\b
+Azuredevopspersonalaccesstoken	Cloud Secrets	85	false	azure	(?i:azure)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z][0-9a-zA-Z-]{5,48}[0-9a-zA-Z])\b
+Azuredirectmanagementkey	Cloud Secrets	85	false	azure,.management.azure-api.net	(?i:azure|\.management\.azure\-api\.net)(?:.|[\n\r]){0,40}?([a-zA-Z0-9+\/]{83,85}[a-zA-Z0-9]==)
+Azuredirectmanagementkey	Cloud Secrets	85	false	.management.azure-api.net	https://([a-z0-9][a-z0-9-]{0,48}[a-z0-9])\.management\.azure-api\.net
+Azurefunctionkey	Cloud Secrets	85	false	azure	(?i:azure)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{20,56})\b={0,2}
+Azurefunctionkey	Cloud Secrets	85	false	azure	\bhttps:\/\/([a-zA-Z0-9-]{2,30})\.azurewebsites\.net\/api\/([a-zA-Z0-9-]{2,30})\b
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	https://([a-zA-Z0-9][a-z0-9_-]{1,22}[a-zA-Z0-9])\.blob\.core\.windows\.net/[a-z0-9]([a-z0-9-]{1,61}[a-z0-9])?(?:/[a-zA-Z0-9._-]+)*
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	[a-z]{2,4}=[^&=\s"'<>]+(?:&[a-z]{2,4}=[^&=\s"'<>]+)+
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	^[racwdli]+$
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	^\d{4}-\d{2}-\d{2}$
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	^[bcfso]$
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	^\d{4}-\d{2}-\d{2}T\d{2}(?::|%3[Aa])\d{2}(?::|%3[Aa])\d{2}Z$
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	^[a-zA-Z0-9%+/=]{10,}$
+Azuresastoken	Cloud Secrets	85	false	.blob.core.windows.net,azure	^\d{1,3}(?:\.\d{1,3}){3}(?:-\d{1,3}(?:\.\d{1,3}){3})?$
+Azuresearchadminkey	Cloud Secrets	85	false	azure	(?i:azure)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{52})\b
+Azuresearchadminkey	Cloud Secrets	85	false	azure	(?i:azure)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{7,40})\b
+Azuresearchquerykey	Cloud Secrets	85	false	azure	(?i:azure)(?:.|[\n\r]){0,40}?https:\/\/([0-9a-z]{5,40})\.search\.windows\.net\/indexes\/([0-9a-z]{5,40})\b
+Baremetrics Token	Monitoring & Observability	85	false	baremetrics	(?i:baremetrics)(?:.|[\n\r]){0,40}?\b((?:sk|lk)_[a-zA-Z0-9]{18,25})\b
+Beamer Token	SaaS Tokens	85	false	beamer	(?i:beamer)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_+/]{45}=)
+Beebole Token	SaaS Tokens	85	false	beebole	(?i:beebole)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Besnappy Token	SaaS Tokens	85	false	besnappy	(?i:besnappy)(?:.|[\n\r]){0,40}?\b([a-f0-9]{64})\b
+Besttime Token	SaaS Tokens	85	false	besttime	(?i:besttime)(?:.|[\n\r]){0,40}?\b(pri_[a-f0-9]{32})\b
+Betterstack Token	SaaS Tokens	85	false	betterstack	(?i:betterstack)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{24})\b
+Billomat Token	SaaS Tokens	85	false	billomat	(?i:billomat)(?:.|[\n\r]){0,40}?\b([0-9a-z]{4,20})\b
+Billomat Token	SaaS Tokens	85	false	billomat	(?i:billomat)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Bitbar Token	SaaS Tokens	85	false	bitbar	(?i:bitbar)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Bitbucketapppassword	Source Control Tokens	85	false	atbb,bitbucket	(?:^|[^A-Za-z0-9-_])(?<username>[A-Za-z0-9-_]{1,30}):(?<password>ATBB[A-Za-z0-9_=.-]+)\b
+Bitbucketapppassword	Source Control Tokens	85	false	atbb,bitbucket	https://(?<username>[A-Za-z0-9-_]{1,30}):(?<password>ATBB[A-Za-z0-9_=.-]+)@bitbucket\.org
+Bitbucketapppassword	Source Control Tokens	85	false	atbb,bitbucket	"(?<username>[A-Za-z0-9-_]{1,30})",\s*"(?<password>ATBB[A-Za-z0-9_=.-]+)"
+Bitcoinaverage Token	SaaS Tokens	85	false	bitcoinaverage	(?i:bitcoinaverage)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{43})\b
+Bitfinex Token	SaaS Tokens	85	false	bitfinex	(?i:bitfinex)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{43})\b
+Bitlyaccesstoken	SaaS Tokens	85	false	bitly	(?i:bitly)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{40})\b
+Bitmex Token	SaaS Tokens	85	false	bitmex	(?i:bitmex)(?:.|[\n\r]){0,40}?([ \r\n]{1}[0-9a-zA-Z\-\_]{24}[ \r\n]{1})
+Bitmex Token	SaaS Tokens	85	false	bitmex	(?i:bitmex)(?:.|[\n\r]){0,40}?([ \r\n]{1}[0-9a-zA-Z\-\_]{48}[ \r\n]{1})
+Blazemeter Token	SaaS Tokens	85	false	runscope,blazemeter	(?i:blazemeter|runscope)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Blitapp Token	SaaS Tokens	85	false	blitapp	(?i:blitapp)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{39})\b
+Blocknative Token	SaaS Tokens	85	false	blocknative	(?i:blocknative)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Blogger Token	Monitoring & Observability	85	false	blogger	(?i:blogger)(?:.|[\n\r]){0,40}?\b(AIzaSy[0-9A-Za-z_-]{33})
+Boostnote Token	SaaS Tokens	85	false	boostnote	(?i:boostnote)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Borgbase Token	SaaS Tokens	85	false	borgbase	(?i:borgbase)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9/_.-]{148,152})\b
+Box Token	SaaS Tokens	85	false	box	(?i:box)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Boxoauth	SaaS Tokens	85	false	id	(?i:id)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Boxoauth	SaaS Tokens	85	false	secret	(?i:secret)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Boxoauth	SaaS Tokens	85	false	user_id,subject,user,box_subject,enterprise_id,enterprise	(?i:enterprise|enterprise_id|user|user_id|subject|box_subject)(?:.|[\n\r]){0,40}?\b([0-9]{6,20})\b
+Braintreepayments Token	Payment & Financial Secrets	85	false	braintree	(?i:braintree)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Braintreepayments Token	Payment & Financial Secrets	85	false	braintree	(?i:braintree)(?:.|[\n\r]){0,40}?\b([0-9a-z]{16})\b
+Browserstack Token	SaaS Tokens	85	false	key,browserstack_access_key,browserstackkey,\"access_key\":,bs_authkey,accesskey,hub-cloud.browserstack.com,access_key	(?i:hub\-cloud\.browserstack\.com|accessKey|\\"access_Key\\":|ACCESS_KEY|key|browserstackKey|BS_AUTHKEY|BROWSERSTACK_ACCESS_KEY)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{20})\b
+Browserstack Token	SaaS Tokens	85	false	username,browserstackuser,user_name,bs_username,hub-cloud.browserstack.com,browserstack_username,user,\"username\":	(?i:hub\-cloud\.browserstack\.com|userName|\\"username\\":|USER_NAME|user|browserstackUser|BS_USERNAME|BROWSERSTACK_USERNAME)(?:.|[\n\r]){0,40}?\b([a-zA-Z\d]{3,18}[._-]*[a-zA-Z\d]{6,11})\b
+Browshot Token	SaaS Tokens	85	false	browshot	(?i:browshot)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{28})\b
+Bscscan Token	SaaS Tokens	85	false	bscscan	(?i:bscscan)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{34})\b
+Buddyns Token	SaaS Tokens	85	false	buddyns	(?i:buddyns)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Budibase Token	SaaS Tokens	85	false	budibase	(?i:budibase)(?:.|[\n\r]){0,40}?\b([a-f0-9]{32}-[a-f0-9]{78,80})\b
+Bugherd Token	SaaS Tokens	85	false	bugherd	(?i:bugherd)(?:.|[\n\r]){0,40}?\b([0-9a-z]{22})\b
+Bugsnag Token	SaaS Tokens	85	false	bugsnag	(?i:bugsnag)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Bulbul Token	SaaS Tokens	85	false	bulbul	(?i:bulbul)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Bulksms Token	Email & Messaging Secrets	85	false	bulksms	(?i:bulksms)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9!@#$%^&*()]{29})\b
+Bulksms Token	Email & Messaging Secrets	85	false	bulksms	(?i:bulksms)(?:.|[\n\r]){0,40}?\b([A-F0-9-]{37})\b
+Buttercms Token	SaaS Tokens	85	false	buttercms	(?i:buttercms)(?:.|[\n\r]){0,40}?\b([a-z0-9]{40})\b
+Caflou Token	SaaS Tokens	85	false	caflou	\b(eyJhbGciOiJIUzI1NiJ9[a-zA-Z0-9._-]{135})\b
+Calendarific Token	SaaS Tokens	85	false	calendarific	(?i:calendarific)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Calendlyapikey	SaaS Tokens	85	false	calendly	(?i:calendly)(?:.|[\n\r]){0,40}?\b(eyJ[A-Za-z0-9-_]{100,300}\.eyJ[A-Za-z0-9-_]{100,300}\.[A-Za-z0-9-_]+)\b
+Calorieninja Token	SaaS Tokens	85	false	calorieninja	(?i:calorieninja)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{40})\b
+Campayn Token	SaaS Tokens	85	false	campayn	(?i:campayn)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Cannyio Token	SaaS Tokens	85	false	canny	(?i:canny)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Capsulecrm Token	SaaS Tokens	85	false	capsulecrm	(?i:capsulecrm)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-._+=]{64})\b
+Carboninterface Token	SaaS Tokens	85	false	carboninterface	(?i:carboninterface)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{21})\b
+Cashboard Token	SaaS Tokens	85	false	cashboard	(?i:cashboard)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{3}-[0-9A-Z]{3}-[0-9A-Z]{3}-[0-9A-Z]{3})\b
+Cashboard Token	SaaS Tokens	85	false	cashboard	(?i:cashboard)(?:.|[\n\r]){0,40}?\b([0-9a-z]{1,})\b
+Caspio Token	SaaS Tokens	85	false	caspio	(?i:caspio)(?:.|[\n\r]){0,40}?\b([a-z0-9]{50})\b
+Caspio Token	SaaS Tokens	85	false	caspio	(?i:caspio)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8})\b
+Censys Token	SaaS Tokens	85	false	censys	(?i:censys)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Censys Token	SaaS Tokens	85	false	censys	(?i:censys)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Centralstationcrm Token	SaaS Tokens	85	false	centralstation	(?i:centralstation)(?:.|[\n\r]){0,40}?\b([a-z0-9]{30})\b
+Cexio Token	SaaS Tokens	85	false	cex.io,cexio	(?i:cexio|cex\.io)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{24,27})\b
+Cexio Token	SaaS Tokens	85	false	cex.io,cexio	(?i:cexio|cex\.io)(?:.|[\n\r]){0,40}?\b([a-z]{2}[0-9]{9})\b
+Chartmogul Token	SaaS Tokens	85	false	chartmogul	(?i:chartmogul)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Chatbot Token	SaaS Tokens	85	false	chatbot	(?i:chatbot)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{32})\b
+Chatfule Token	SaaS Tokens	85	false	chatfuel	(?i:chatfuel)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{128})\b
+Checio Token	CI/CD & DevOps Secrets	85	false	checio	(?i:checio)(?:.|[\n\r]){0,40}?\b(pk_[a-z0-9]{45})\b
+Checklyhq Token	SaaS Tokens	85	false	checklyhq	(?i:checklyhq)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Checkout Token	SaaS Tokens	85	false	checkout	(?i:checkout)(?:.|[\n\r]){0,40}?\b((sk_|sk_test_)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b
+Checkout Token	SaaS Tokens	85	false	checkout	(?i:checkout)(?:.|[\n\r]){0,40}?\b(cus_[0-9a-zA-Z]{26})\b
+Checkvist Token	SaaS Tokens	85	false	checkvist	(?i:checkvist)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{14})\b
+Cicero Token	CI/CD & DevOps Secrets	85	false	cicero	(?i:cicero)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Clarifai Token	AI & ML Secrets	85	false	clarifai	(?i:clarifai)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Clearbit Token	SaaS Tokens	85	false	clearbit	(?i:clearbit)(?:.|[\n\r]){0,40}?\b([0-9a-z_]{35})\b
+Clickhelp Token	SaaS Tokens	85	false	key,secret,clickhelp,token,api	(?i:clickhelp|key|token|api|secret)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{24})\b
+Clickhelp Token	SaaS Tokens	85	false	clickhelp.co	\b([0-9A-Za-z-]{3,20}\.(?:try\.)?clickhelp\.co)\b
+Clickuppersonaltoken	SaaS Tokens	85	false	clickup	(?i:clickup)(?:.|[\n\r]){0,40}?\b(pk_[0-9]{7,9}_[0-9A-Z]{32})\b
+Cliengo Token	SaaS Tokens	85	false	cliengo	(?i:cliengo)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})\b
+Clientary Token	SaaS Tokens	85	false	clientary,ronin	(?i:ronin|clientary)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{24,26})\b
+Clientary Token	SaaS Tokens	85	false	clientary,ronin	(?i:ronin|clientary)(?:.|[\n\r]){0,40}?\b([0-9Aa-zA-Z-]{4,25})\b
+Clinchpad Token	SaaS Tokens	85	false	clinchpad	(?i:clinchpad)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Clockify Token	SaaS Tokens	85	false	clockify	(?i:clockify)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{48})\b
+Clockworksms Token	Email & Messaging Secrets	85	false	clockwork,textanywhere	(?i:clockwork|textanywhere)(?:.|[\n\r]){0,40}?\b([0-9]{5})\b
+Clockworksms Token	Email & Messaging Secrets	85	false	clockwork,textanywhere	(?i:clockwork|textanywhere)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{24})\b
+Closecrm Token	SaaS Tokens	85	false	close	\b(api_[a-z0-9A-Z.]{45})\b
+Cloudelements Token	Cloud Secrets	85	false	cloudelements	(?i:cloudelements)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{43})\b
+Cloudelements Token	Cloud Secrets	85	false	cloudelements	(?i:cloudelements)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Cloudflarecakey	Cloud Secrets	85	false	cloudflare	\b(v1\.0-[A-Za-z0-9-]{171})\b
+Cloudimage Token	Cloud Secrets	85	false	cloudimage	(?i:cloudimage)(?:.|[\n\r]){0,40}?\b([a-z0-9_]{30})\b
+Cloudinary Token	Cloud Secrets	85	false	cloudinary	(?i:cloudinary)(?:.|[\n\r]){0,40}?\b(\d{15})\b
+Cloudinary Token	Cloud Secrets	85	false	cloudinary	(?i:cloudinary)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{27})\b
+Cloudmersive Token	Cloud Secrets	85	false	cloudmersive	(?i:cloudmersive)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Cloudplan Token	Cloud Secrets	85	false	cloudplan	(?i:cloudplan)(?:.|[\n\r]){0,40}?\b([A-Z0-9-]{32})\b
+Cloudsmith Token	Cloud Secrets	85	false	cloudsmith	(?i:cloudsmith)(?:.|[\n\r]){0,40}?\b([0-9a-f]{40})\b
+Cloverly Token	SaaS Tokens	85	false	cloverly	(?i:cloverly)(?:.|[\n\r]){0,40}?\b([a-z0-9:_]{28})\b
+Cloze Token	SaaS Tokens	85	false	cloze	(?i:cloze)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Clustdoc Token	SaaS Tokens	85	false	clustdoc	(?i:clustdoc)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{60})\b
+Coda Token	SaaS Tokens	85	false	coda	(?i:coda)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Codacy Token	SaaS Tokens	85	false	codacy	(?i:codacy)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{20})\b
+Codeclimate Token	SaaS Tokens	85	false	codeclimate	(?i:codeclimate)(?:.|[\n\r]){0,40}?\b([a-f0-9]{40})\b
+Codequiry Token	SaaS Tokens	85	false	codequiry	(?i:codequiry)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{64})\b
+Coinapi Token	SaaS Tokens	85	false	coinapi	(?i:coinapi)(?:.|[\n\r]){0,40}?\b([A-Z0-9-]{36})\b
+Coinbase Token	Payment & Financial Secrets	85	false	begin ec	\b(organizations\\*/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\\*/apiKeys\\*/\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\b
+Coinbase Token	Payment & Financial Secrets	85	false	begin ec	(-----BEGIN EC(?:DSA)? PRIVATE KEY-----(?:\r|\n|\\+r|\\+n)(?:[a-zA-Z0-9+/]+={0,2}(?:\r|\n|\\+r|\\+n))+-----END EC(?:DSA)? PRIVATE KEY-----(?:\r|\n|\\+r|\\+n)?)
+Coinlayer Token	SaaS Tokens	85	false	coinlayer	(?i:coinlayer)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Coinlib Token	SaaS Tokens	85	false	coinlib	(?i:coinlib)(?:.|[\n\r]){0,40}?\b([a-z0-9]{16})\b
+Collect 2 Token	SaaS Tokens	85	false	collect2	(?i:collect2)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Column Token	SaaS Tokens	85	false	column	(?i:column)(?:.|[\n\r]){0,40}?\b((?:test|live)_[a-zA-Z0-9]{27})\b
+Commercejs Token	SaaS Tokens	85	false	commercejs	(?i:commercejs)(?:.|[\n\r]){0,40}?\b([a-z0-9_]{48})\b
+Commodities Token	SaaS Tokens	85	false	commodities	(?i:commodities)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{60})\b
+Companyhub Token	SaaS Tokens	85	false	companyhub	(?i:companyhub)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{20})\b
+Companyhub Token	SaaS Tokens	85	false	companyhub	(?i:companyhub)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9$%^=-]{4,32})\b
+Confluent Token	SaaS Tokens	85	false	confluent	(?i:confluent)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{16})\b
+Confluent Token	SaaS Tokens	85	false	confluent	(?i:confluent)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\+\/]{64})\b
+Contentfulpersonalaccesstoken	SaaS Tokens	85	false	cfpat-	\b(CFPAT-[a-zA-Z0-9_\-]{43})\b
+Conversiontools Token	SaaS Tokens	85	false	conversiontools	(?i:conversiontools)(?:.|[\n\r]){0,40}?\b(ey[a-zA-Z0-9_.]{157,165})\b
+Convertapi Token	SaaS Tokens	85	false	convertapi	(?i:convertapi)(?:.|[\n\r]){0,40}?\b(secret_[0-9a-zA-Z]{16})\b
+Convertkit Token	SaaS Tokens	85	false	convertkit	(?i:convertkit)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z_]{22})\b
+Convier Token	SaaS Tokens	85	false	convier	(?i:convier)(?:.|[\n\r]){0,40}?\b([0-9]{2}\|[a-zA-Z0-9]{40})\b
+Copper Token	SaaS Tokens	85	false	copper	(?i:copper)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Copper Token	SaaS Tokens	85	false	copper	\b([a-z0-9]{4,25}@[a-zA-Z0-9]{2,12}.[a-zA-Z0-9]{2,6})\b
+Couchbase Token	SaaS Tokens	85	false	couchbases://,couchbase://	\b(cb\.[a-z0-9]+\.cloud\.couchbase\.com)\b
+Countrylayer Token	SaaS Tokens	85	false	countrylayer	(?i:countrylayer)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Courier Token	SaaS Tokens	85	false	courier	(?i:courier)(?:.|[\n\r]){0,40}?\b(pk\_[a-zA-Z0-9]{1,}\_[a-zA-Z0-9]{28})\b
+Coveralls Token	SaaS Tokens	85	false	coveralls	(?i:coveralls)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{37})\b
+Craftmypdf Token	SaaS Tokens	85	false	craftmypdf	(?i:craftmypdf)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{35})\b
+Crowdin Token	SaaS Tokens	85	false	crowdin	(?i:crowdin)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{80})\b
+Cryptocompare Token	SaaS Tokens	85	false	cryptocompare	(?i:cryptocompare)(?:.|[\n\r]){0,40}?\b([a-z-0-9]{64})\b
+Currencycloud Token	Cloud Secrets	85	false	currencycloud	(?i:currencycloud)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Currencyfreaks Token	SaaS Tokens	85	false	currencyfreaks	(?i:currencyfreaks)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Currencylayer Token	SaaS Tokens	85	false	currencylayer	(?i:currencylayer)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Currencyscoop Token	SaaS Tokens	85	false	currencyscoop	(?i:currencyscoop)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Currentsapi Token	SaaS Tokens	85	false	currentsapi	(?i:currentsapi)(?:.|[\n\r]){0,40}?([a-zA-Z0-9_-]{48})
+Customerguru Token	SaaS Tokens	85	false	guru	(?i:guru)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{30})\b
+Customerguru Token	SaaS Tokens	85	false	guru	(?i:guru)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{50})\b
+Customerio Token	SaaS Tokens	85	false	customer	(?i:customer)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{20})\b
+D 7 Network Token	SaaS Tokens	85	false	d7network	(?i:d7network)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\W\S]{23}\=)
+Dailyco Token	AI & ML Secrets	85	false	daily	(?i:daily)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Dandelion Token	SaaS Tokens	85	false	dandelion	(?i:dandelion)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Dareboost Token	SaaS Tokens	85	false	dareboost	(?i:dareboost)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{60})\b
+Databrickstoken	SaaS Tokens	85	false	dapi,databricks	\b([a-z0-9-]+(?:\.[a-z0-9-]+)*\.(cloud\.databricks\.com|gcp\.databricks\.com|azuredatabricks\.net))\b
+Databrickstoken	SaaS Tokens	85	false	dapi,databricks	\b(dapi[0-9a-f]{32}(-\d)?)\b
+Datadogapikey	Monitoring & Observability	85	false	datadog,dd	(?i:datadog|dd)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{32})\b
+Datadogapikey	Monitoring & Observability	85	false	ddog-gov,datadog	\b(api(?:\.[a-z0-9-]+)?\.(?:datadoghq|ddog-gov)\.(com|eu))\b
+Datadogtoken	Monitoring & Observability	85	false	datadog,dd	(?i:datadog|dd)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{40})\b
+Datadogtoken	Monitoring & Observability	85	false	datadog,dd	(?i:datadog|dd)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{32})\b
+Datagov Token	SaaS Tokens	85	false	data.gov	(?i:data\.gov)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Debounce Token	SaaS Tokens	85	false	debounce	(?i:debounce)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{13})\b
+Deepai Token	AI & ML Secrets	85	false	deepai	(?i:deepai)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Deepgram Token	SaaS Tokens	85	false	deepgram	(?i:deepgram)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Deepseek Token	SaaS Tokens	85	false	deepseek	(?i:deepseek)(?:.|[\n\r]){0,40}?\b(sk-[a-z0-9]{32})\b
+Delighted Token	SaaS Tokens	85	false	delighted	(?i:delighted)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Demio Token	SaaS Tokens	85	false	demio	(?i:demio)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Demio Token	SaaS Tokens	85	false	demio	(?i:demio)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{10,20})\b
+Deno Token	SaaS Tokens	85	false	ddp_,ddw_	\b(dd[pw]_[a-zA-Z0-9]{36})\b
+Deputy Token	SaaS Tokens	85	false	deputy	(?i:deputy)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Deputy Token	SaaS Tokens	85	false	deputy	\b([0-9a-z]{1,}\.as\.deputy\.com)\b
+Detectify Token	SaaS Tokens	85	false	detectify	(?i:detectify)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Detectlanguage Token	SaaS Tokens	85	false	detectlanguage	(?i:detectlanguage)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Dfuse Token	SaaS Tokens	85	false	dfuse	\b(web\_[0-9a-z]{32})\b
+Diffbot Token	SaaS Tokens	85	false	diffbot	(?i:diffbot)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Diggernaut Token	SaaS Tokens	85	false	diggernaut	(?i:diggernaut)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Digitaloceantoken	Cloud Secrets	85	false	ocean,do	(?i:ocean|do)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{64})\b
+Digitaloceanv 2 Token	Cloud Secrets	85	false	dop_v1_,doo_v1_,dor_v1_	\b((?:dop|doo|dor)_v1_[a-f0-9]{64})\b
+Discordbottoken	Email & Messaging Secrets	85	false	discord	(?i:discord)(?:.|[\n\r]){0,40}?\b([0-9]{17})\b
+Discordbottoken	Email & Messaging Secrets	85	false	discord	(?i:discord)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{24}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27})\b
+Discordwebhook	Email & Messaging Secrets	85	false	https://discord.com/api/webhooks/	(https:\/\/discord\.com\/api\/webhooks\/[0-9]{18,19}\/[0-9a-zA-Z-]{68})
+Disqus Token	SaaS Tokens	85	false	disqus	(?i:disqus)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Ditto Token	SaaS Tokens	85	false	ditto	(?i:ditto)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}\.[a-z0-9]{40})\b
+Dnscheck Token	SaaS Tokens	85	false	dnscheck	(?i:dnscheck)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Dnscheck Token	SaaS Tokens	85	false	dnscheck	(?i:dnscheck)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z-]{36})\b
+Docparser Token	SaaS Tokens	85	false	docparser	(?i:docparser)(?:.|[\n\r]){0,40}?\b([a-f0-9]{40})\b
+Documo Token	SaaS Tokens	85	false	documo	\b(ey[a-zA-Z0-9]{34}.ey[a-zA-Z0-9]{154}.[a-zA-Z0-9_-]{43})\b
+Doppler Token	Cloud Secrets	85	false	dp.pt.,dp.audit.,dp.ct.,dp.st,dp.scim.,dp.sa.	\b(dp\.pt\.[a-zA-Z0-9]{43})\b
+Doppler Token	Cloud Secrets	85	false	dp.pt.,dp.audit.,dp.ct.,dp.st,dp.scim.,dp.sa.	\b(dp\.(?:ct|pt|st(?:\.[a-z0-9\-_]{2,35})?|sa|scim|audit)\.[a-zA-Z0-9]{40,44})\b
+Dotdigital Token	Source Control Tokens	85	false	pw,pass	(?i:pw|pass)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\S]{8,24})\b
+Dotdigital Token	Source Control Tokens	85	false	@apiconnector.com	\b(apiuser-[a-z0-9]{12}@apiconnector.com)\b
+Dovico Token	SaaS Tokens	85	false	dovico	(?i:dovico)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32}\.[0-9a-z]{1,}\b)
+Dronahq Token	SaaS Tokens	85	false	dronahq	(?i:dronahq)(?:.|[\n\r]){0,40}?\b([a-z0-9]{50})\b
+Droneci Token	CI/CD & DevOps Secrets	85	false	droneci	(?i:droneci)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Dropbox Token	SaaS Tokens	85	false	dropbox	(?i:dropbox)(?:.|[\n\r]){0,40}?\b(sl\.(u\.)?[A-Za-z0-9\-\_]{130,})\b
+Duo Token	SaaS Tokens	85	false	duo	(?i:duo)(?:.|[\n\r]){0,40}?\b(DI[A-Z0-9]{18})\b
+Duo Token	SaaS Tokens	85	false	duo	(?i:duo)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{40})\b
+Duo Token	SaaS Tokens	85	false	duosecurity	\b([a-z0-9-]{6,}\.duosecurity\.com)\b
+Duply Token	SaaS Tokens	85	false	duply	(?i:duply)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Duply Token	SaaS Tokens	85	false	duply	(?i:duply)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{7}-[0-9A-Z]{7}-[0-9A-Z]{7}-[0-9A-Z]{7})\b
+Dwolla Token	SaaS Tokens	85	false	dwolla	(?i:dwolla)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{50})\b
+Dynalist Token	SaaS Tokens	85	false	dynalist	(?i:dynalist)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-_]{128})\b
+Dyspatch Token	SaaS Tokens	85	false	dyspatch	(?i:dyspatch)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{52})\b
+Eagleeyenetworks Token	SaaS Tokens	85	false	eagleeyenetworks	(?i:eagleeyenetworks)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{15})\b
+Eagleeyenetworks Token	SaaS Tokens	85	false	eagleeyenetworks	(?i:eagleeyenetworks)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{3,20}@[a-zA-Z0-9]{2,12}.[a-zA-Z0-9]{2,5})\b
+Easyinsight Token	SaaS Tokens	85	false	key,easyinsight,easy-insight	(?i:easyinsight|easy\-insight|key)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{20})\b
+Easyinsight Token	SaaS Tokens	85	false	id,easyinsight,easy-insight	(?i:easyinsight|easy\-insight|id)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{20})\b
+Ecostruxureit Token	SaaS Tokens	85	false	ecostruxureit	(?i:ecostruxureit)(?:.|[\n\r]){0,40}?\b(AK1[0-9a-zA-Z\/]{50,55})\b
+Edamam Token	SaaS Tokens	85	false	edamam	(?i:edamam)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Edamam Token	SaaS Tokens	85	false	edamam	(?i:edamam)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8})\b
+Edenai Token	AI & ML Secrets	85	false	edenai	(?i:edenai)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{36}.[a-zA-Z0-9]{92}.[a-zA-Z0-9_]{43})\b
+Eightxeight Token	SaaS Tokens	85	false	8x8	(?i:8x8)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{43})\b
+Eightxeight Token	SaaS Tokens	85	false	8x8	(?i:8x8)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{18,30})\b
+Elasticemail Token	AI & ML Secrets	85	false	elastic	(?i:elastic)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{96})\b
+Enablex Token	SaaS Tokens	85	false	enablex	(?i:enablex)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{36})\b
+Enablex Token	SaaS Tokens	85	false	enablex	(?i:enablex)(?:.|[\n\r]){0,40}?\b([a-z0-9]{24})\b
+Endorlabs Token	SaaS Tokens	85	false	endr+	\b(endr\+[a-zA-Z0-9-]{16})\b
+Enigma Token	SaaS Tokens	85	false	enigma	(?i:enigma)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Envoyapikey	SaaS Tokens	85	false	envoy	(?i:envoy)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{220})\b
+Eraser Token	SaaS Tokens	85	false	eraser	(?i:eraser)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{20})\b
+Etherscan Token	SaaS Tokens	85	false	etherscan	(?i:etherscan)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{34})\b
+Ethplorer Token	SaaS Tokens	85	false	ethplorer	(?i:ethplorer)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z-]{22})\b
+Eventbrite Token	SaaS Tokens	85	false	eventbrite	(?i:eventbrite)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{20})\b
+Everhour Token	SaaS Tokens	85	false	everhour	(?i:everhour)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{4}-[0-9a-f]{4}-[0-9a-f]{6}-[0-9a-f]{6}-[0-9a-f]{8})\b
+Exchangerateapi Token	SaaS Tokens	85	false	exchange-rate,exchangerate	(?i:exchangerate|exchange\-rate)(?:.|[\n\r]){0,40}?\b([a-f0-9]{24})\b
+Exchangeratesapi Token	SaaS Tokens	85	false	exchangerates	(?i:exchangerates)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Exportsdk Token	SaaS Tokens	85	false	exportsdk	(?i:exportsdk)(?:.|[\n\r]){0,40}?\b([0-9a-z]{5,15}_[0-9a-z-]{36})\b
+Exportsdk Token	SaaS Tokens	85	false	exportsdk	(?i:exportsdk)(?:.|[\n\r]){0,40}?\b([0-9a-z-]{36})\b
+Extractorapi Token	SaaS Tokens	85	false	extractorapi	(?i:extractorapi)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{40})\b
+Facebookoauth	SaaS Tokens	85	false	facebook	(?i:facebook)(?:.|[\n\r]){0,40}?\b([0-9]{15,18})\b
+Facebookoauth	SaaS Tokens	85	false	facebook	(?i:facebook)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{32})\b
+Faceplusplus Token	SaaS Tokens	85	false	faceplusplus	(?i:faceplusplus)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z_-]{32})\b
+Fastforex Token	SaaS Tokens	85	false	fastforex	(?i:fastforex)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{28})\b
+Fastlypersonaltoken	SaaS Tokens	85	false	fastly	(?i:fastly)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{32})\b
+Feedier Token	SaaS Tokens	85	false	feedier	(?i:feedier)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Fetchrss Token	SaaS Tokens	85	false	fetchrss	(?i:fetchrss)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9.]{40})\b
+Fibery Token	SaaS Tokens	85	false	fibery	(?i:fibery)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}\.[0-9a-f]{35})\b
+Fibery Token	SaaS Tokens	85	false	.fibery.io	(?:https?:\/\/)?([a-zA-Z0-9-]{1,63})\.fibery\.io(?:\/.*)?
+Fileio Token	SaaS Tokens	85	false	fileio	(?i:fileio)(?:.|[\n\r]){0,40}?\b([A-Z0-9.-]{39})\b
+Finage Token	SaaS Tokens	85	false	finage	\b(API_KEY[0-9A-Z]{32})\b
+Financialmodelingprep Token	CI/CD & DevOps Secrets	85	false	financialmodelingprep	(?i:financialmodelingprep)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Findl Token	SaaS Tokens	85	false	findl	(?i:findl)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12})\b
+Finnhub Token	SaaS Tokens	85	false	finnhub	(?i:finnhub)(?:.|[\n\r]){0,40}?\b([0-9a-z]{20})\b
+Fixerio Token	SaaS Tokens	85	false	fixer	(?i:fixer)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{32})\b
+Flatio Token	SaaS Tokens	85	false	flat	(?i:flat)(?:.|[\n\r]){0,40}?\b([0-9a-z]{128})\b
+Fleetbase Token	SaaS Tokens	85	false	fleetbase	\b(flb_live_[0-9a-zA-Z]{20})\b
+Flexport Token	SaaS Tokens	85	false	shltm_	\b(shltm_[0-9a-zA-Z-_]{40})
+Flickr Token	SaaS Tokens	85	false	flickr	(?i:flickr)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Flightapi Token	SaaS Tokens	85	false	flightapi	(?i:flightapi)(?:.|[\n\r]){0,40}?\b([a-z0-9]{24})\b
+Flightlabs Token	AI & ML Secrets	85	false	eyj0exaioijkv1qilcjhbgcioijsuzi1nij9	\b(eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9\.ey[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]{86})\b
+Flightstats Token	SaaS Tokens	85	false	flightstats	(?i:flightstats)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8})\b
+Flightstats Token	SaaS Tokens	85	false	flightstats	(?i:flightstats)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Float Token	SaaS Tokens	85	false	float	(?i:float)(?:.|[\n\r]){0,40}?\b([a-f0-9]{16}[A-Za-z0-9+/]{42,43}=)
+Flowflu Token	SaaS Tokens	85	false	flowflu	(?i:flowflu)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{51})\b
+Flowflu Token	SaaS Tokens	85	false	flowflu,account	(?i:flowflu|account)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{4,30})\b
+Flutterwave Token	SaaS Tokens	85	false	flwseck-	\b(FLWSECK-[0-9a-z]{32}-X)\b
+Flyio Token	SaaS Tokens	85	false	flyv1	\b(FlyV1 fm\d+_[A-Za-z0-9+\/=,_-]{500,700})\b
+Fmfw Token	SaaS Tokens	85	false	fmfw	(?i:fmfw)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{32})\b
+Fmfw Token	SaaS Tokens	85	false	fmfw	(?i:fmfw)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{32})\b
+Formbucket Token	SaaS Tokens	85	false	formbucket	(?i:formbucket)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{1,}.[0-9A-Za-z]{1,}\.[0-9A-Z-a-z\-_]{1,})
+Formcraft Token	SaaS Tokens	85	false	formcraft	(?i:formcraft)(?:.|[\n\r]){0,40}?\b([0-9a-z]{16})\b
+Formio Token	SaaS Tokens	85	false	formio	(?i:formio)(?:.|[\n\r]){0,40}?\b(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[0-9A-Za-z]{220,310}\.[0-9A-Z-a-z\-_]{43}[ \r\n]{1})
+Formsite Token	SaaS Tokens	85	false	formsite	(?i:formsite)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Formsite Token	SaaS Tokens	85	false	formsite	(?i:formsite)(?:.|[\n\r]){0,40}?\b(fs[0-9]{1,4})\b
+Formsite Token	SaaS Tokens	85	false	formsite	(?i:formsite)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{6})\b
+Foursquare Token	Payment & Financial Secrets	85	false	foursquare	(?i:foursquare)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{48})\b
+Frameio Token	SaaS Tokens	85	false	fio-u-	\b(fio-u-[0-9a-zA-Z_-]{64})\b
+Freshbooks Token	SaaS Tokens	85	false	freshbooks	(?i:freshbooks)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Freshbooks Token	SaaS Tokens	85	false	freshbooks	(?i:freshbooks)(?:.|[\n\r]){0,40}?\b(https://www.[0-9A-Za-z_-]{1,}.com)\b
+Freshdesk Token	SaaS Tokens	85	false	freshdesk	(?i:freshdesk)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{20})\b
+Freshdesk Token	SaaS Tokens	85	false	freshdesk	\b([0-9a-z-]{1,}\.freshdesk\.com)\b
+Front Token	SaaS Tokens	85	false	front	(?i:front)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{36}.[0-9a-zA-Z\.\-\_]{188,244})\b
+Ftp Token	SaaS Tokens	85	false	ftp://	\bftp://[\S]{3,50}:([\S]{3,50})@[-.%\w\/:]+\b
+Fulcrum Token	SaaS Tokens	85	false	fulcrum	(?i:fulcrum)(?:.|[\n\r]){0,40}?\b([a-z0-9]{80})\b
+Fxmarket Token	SaaS Tokens	85	false	fxmarket	(?i:fxmarket)(?:.|[\n\r]){0,40}?\b([0-9Aa-zA-Z-_=]{20})\b
+GCP Token	Cloud Secrets	85	false	provider_x509	\{[^{]+auth_provider_x509_cert_url[^}]+\}
+Gcpapplicationdefaultcredentials	Cloud Secrets	85	false	.apps.googleusercontent.com	\{[^{]+client_secret[^}]+\}
+Geckoboard Token	SaaS Tokens	85	false	geckoboard	(?i:geckoboard)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{44})\b
+Gemini Token	SaaS Tokens	85	false	master-,account-	\b((?:master-|account-)[0-9A-Za-z]{20})\b
+Gemini Token	SaaS Tokens	85	false	master-,account-	[A-Za-z0-9]{27,28}
+Gengo Token	SaaS Tokens	85	false	gengo	(?i:gengo)(?:.|[\n\r]){0,40}?([ ]{0,1}[0-9a-zA-Z\[\]\-\(\)\{\}|_^@$=~]{64}[ \r\n]{1})
+Geoapify Token	SaaS Tokens	85	false	geoapify	(?i:geoapify)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Geocode Token	SaaS Tokens	85	false	geocode	(?i:geocode)(?:.|[\n\r]){0,40}?\b([a-z0-9]{28})\b
+Geocodify Token	SaaS Tokens	85	false	geocodify	(?i:geocodify)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Geocodio Token	SaaS Tokens	85	false	geocod	(?i:geocod)(?:.|[\n\r]){0,40}?\b([a-z0-9]{39})\b
+Geocodio Token	SaaS Tokens	85	false	geocod	(?i:geocod)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\S]{7,30})\b
+Geoipifi Token	SaaS Tokens	85	false	ipifi	(?i:ipifi)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z_]{32})\b
+Getemail Token	AI & ML Secrets	85	false	getemail	(?i:getemail)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{20})\b
+Getemails Token	AI & ML Secrets	85	false	getemails	(?i:getemails)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{26})\b
+Getemails Token	AI & ML Secrets	85	false	getemails	(?i:getemails)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{18})\b
+Getgeoapi Token	SaaS Tokens	85	false	getgeoapi	(?i:getgeoapi)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Getgist Token	SaaS Tokens	85	false	getgist	(?i:getgist)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z+=]{68})
+Getresponse Token	SaaS Tokens	85	false	getresponse	(?i:getresponse)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Getsandbox Token	Database Credentials	85	false	getsandbox	(?i:getsandbox)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{40})\b
+Getsandbox Token	Database Credentials	85	false	getsandbox	(?i:getsandbox)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{15,30})\b
+Github Oauth 2	Source Control Tokens	85	false	github	(?i:github)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{20})\b
+Github Oauth 2	Source Control Tokens	85	false	github	(?i:github)(?:.|[\n\r]){0,40}?\b([a-f0-9]{40})\b
+Githubapp Token	Source Control Tokens	85	false	github	(?i:github)(?:.|[\n\r]){0,40}?\b([0-9]{6})\b
+Githubapp Token	Source Control Tokens	85	false	github	(?i:github)(?:.|[\n\r]){0,40}?(-----BEGIN RSA PRIVATE KEY-----\s[A-Za-z0-9+\/\s]*\s-----END RSA PRIVATE KEY-----)
+Gitlaboauth 2	Source Control Tokens	85	false	application_id,app_id,client_id,id	(?i:application_id|client_id|app_id|id)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Gitlaboauth 2	Source Control Tokens	85	false	gloas-	\b(gloas-[0-9a-f]{64})\b
+Gitter Token	Source Control Tokens	85	false	gitter	(?i:gitter)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{40})\b
+Glassnode Token	SaaS Tokens	85	false	glassnode	(?i:glassnode)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{27})\b
+Gocanvas Token	SaaS Tokens	85	false	gocanvas	(?i:gocanvas)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z/+]{43}=[ \r\n]{1})
+Gocardless Token	SaaS Tokens	85	false	gocardless	\b(live_[0-9A-Za-z\_\-]{40}[ "'\r\n]{1})
+Goodday Token	SaaS Tokens	85	false	goodday	(?i:goodday)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Googlegemini Token	Cloud Secrets	85	false	aizasy	\b(AIzaSy[A-Za-z0-9_-]{33})
+Googleoauth 2	Cloud Secrets	85	false	ya29.	\b(ya29\.(?i:[a-z0-9_-]{10,}))(?:[^a-z0-9_-]|\z)
+Grafana Token	Monitoring & Observability	85	false	glc_eyj	\b(glc_eyJ[A-Za-z0-9+\/=]{60,160})
+Grafanaserviceaccount Token	Monitoring & Observability	85	false	glsa_	\b(glsa_[0-9a-zA-Z_]{41})\b
+Grafanaserviceaccount Token	Monitoring & Observability	85	false	glsa_	\b([a-zA-Z0-9-]+\.grafana\.net)\b
+Graphcms Token	SaaS Tokens	85	false	graph	(?i:graph)(?:.|[\n\r]){0,40}?\b([a-z0-9]{25})\b
+Graphcms Token	SaaS Tokens	85	false	graphcms	\b(ey[a-zA-Z0-9]{73}.ey[a-zA-Z0-9]{365}.[a-zA-Z0-9_-]{683})\b
+Graphhopper Token	SaaS Tokens	85	false	graphhopper	(?i:graphhopper)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Groovehq Token	SaaS Tokens	85	false	groove	(?i:groove)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{64})
+Groq Token	SaaS Tokens	85	false	gsk_	\b(gsk_[a-zA-Z0-9]{52})\b
+Gtmetrix Token	SaaS Tokens	85	false	gtmetrix	(?i:gtmetrix)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Guardianapi Token	SaaS Tokens	85	false	guardian	(?i:guardian)(?:.|[\n\r]){0,40}?\b([0-9Aa-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Gumroad Token	SaaS Tokens	85	false	gumroad	(?i:gumroad)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z-]{43})\b
+Guru Token	SaaS Tokens	85	false	guru	(?i:guru)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{3,20}@[a-zA-Z0-9]{2,12}.[a-zA-Z0-9]{2,5})\b
+Guru Token	SaaS Tokens	85	false	guru	(?i:guru)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Gyazo Token	SaaS Tokens	85	false	gyazo	(?i:gyazo)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z-]{43})\b
+Happyscribe Token	SaaS Tokens	85	false	happyscribe	(?i:happyscribe)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{24})\b
+Harness Token	SaaS Tokens	85	false	harness	(?i:harness)(?:.|[\n\r]){0,40}?\b(pat\.[A-Za-z0-9_]{22}\.[0-9a-f]{24}\.[A-Za-z0-9]{20})\b
+Harvest Token	SaaS Tokens	85	false	harvest	(?i:harvest)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z._]{97})\b
+Harvest Token	SaaS Tokens	85	false	harvest	(?i:harvest)(?:.|[\n\r]){0,40}?\b([0-9]{4,9})\b
+Hashicorpvaultauth	Cloud Secrets	85	false	role	(?i:role)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Hashicorpvaultauth	Cloud Secrets	85	false	secret	(?i:secret)(?:.|[\n\r]){0,40}?\b([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b
+Hashicorpvaultauth	Cloud Secrets	85	false	hashicorp	(https?:\/\/[^\s\/]*\.hashicorp\.cloud(?::\d+)?)(?:\/[^\s]*)?
+Hasura Token	SaaS Tokens	85	false	hasura	(?i:hasura)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Hasura Token	SaaS Tokens	85	false	hasura	\b([a-zA-Z0-9-]+\.hasura\.app)\b
+Hellosign Token	SaaS Tokens	85	false	hellosign	(?i:hellosign)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9/+]{64})\b
+Helpcrunch Token	SaaS Tokens	85	false	helpcrunch	(?i:helpcrunch)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9+/=]{328})
+Helpscout Token	SaaS Tokens	85	false	helpscout	(?i:helpscout)(?:.|[\n\r]){0,40}?\b([a-z0-9]{40})\b
+Hereapi Token	SaaS Tokens	85	false	hereapi	(?i:hereapi)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\S]{43})\b
+Hive Token	SaaS Tokens	85	false	hive	(?i:hive)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{17})\b
+Hive Token	SaaS Tokens	85	false	hive	(?i:hive)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Hiveage Token	SaaS Tokens	85	false	hiveage	(?i:hiveage)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z\_\-]{20})\b
+Holidayapi Token	SaaS Tokens	85	false	holidayapi	(?i:holidayapi)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Holistic Token	SaaS Tokens	85	false	holistic	(?i:holistic)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Honeycomb Token	SaaS Tokens	85	false	honeycomb	(?i:Honeycomb)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32}|[0-9a-zA-Z]{22})\b
+Host Token	SaaS Tokens	85	false	host	(?i:host)(?:.|[\n\r]){0,40}?\b([a-z0-9]{14})\b
+Html 2 Pdf Token	SaaS Tokens	85	false	html2pdf	(?i:html2pdf)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Huggingface Token	AI & ML Secrets	85	false	hf_,api_org_	\b(?:hf_|api_org_)[a-zA-Z0-9]{34}\b
+Humanity Token	SaaS Tokens	85	false	humanity	(?i:humanity)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Hunter Token	SaaS Tokens	85	false	hunter	(?i:hunter)(?:.|[\n\r]){0,40}?\b([a-z0-9_-]{40})\b
+Hybiscus Token	SaaS Tokens	85	false	hybiscus	(?i:hybiscus)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{43})\b
+Hypertrack Token	SaaS Tokens	85	false	hypertrack	(?i:hypertrack)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z\_\-]{27})\b
+Hypertrack Token	SaaS Tokens	85	false	hypertrack	(?i:hypertrack)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z\_\-]{54})\b
+Ibmclouduserkey	Cloud Secrets	85	false	ibm	(?i:ibm)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{44})\b
+Iconfinder Token	SaaS Tokens	85	false	iconfinder	(?i:iconfinder)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Iexapis Token	SaaS Tokens	85	false	iexapis	(?i:iexapis)(?:.|[\n\r]){0,40}?\b(sk_[a-z0-9]{32})\b
+Iexcloud Token	Cloud Secrets	85	false	iexcloud	(?i:iexcloud)(?:.|[\n\r]){0,40}?\b([a-z0-9_]{35})\b
+Imagekit Token	SaaS Tokens	85	false	imagekit	(?i:imagekit)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_=]{36})
+Imagga Token	SaaS Tokens	85	false	imagga	(?i:imagga)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z=]{72})
+Impala Token	SaaS Tokens	85	false	impala	(?i:impala)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z_]{46})\b
+Infura Token	SaaS Tokens	85	false	infura	(?i:infura)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Insightly Token	SaaS Tokens	85	false	insightly	(?i:insightly)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Instabot Token	SaaS Tokens	85	false	instabot	(?i:instabot)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z=+\/]{43}[0-9a-zA-Z+\/=]{1})
+Instamojo Token	SaaS Tokens	85	false	instamojo	(?i:instamojo)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{40})\b
+Instamojo Token	SaaS Tokens	85	false	instamojo	(?i:instamojo)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{128})\b
+Intercom Token	SaaS Tokens	85	false	intercom	(?i:intercom)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\W\S]{59}\=)
+Interseller Token	SaaS Tokens	85	false	interseller	(?i:interseller)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Intra 42 Token	SaaS Tokens	85	false	s-s4t2ud-,s-s4t2af-	\b(s-s4t2(?:ud|af)-[a-f0-9]{64})\b
+Intra 42 Token	SaaS Tokens	85	false	s-s4t2ud-,s-s4t2af-	\b(u-s4t2(?:ud|af)-[a-f0-9]{64})\b
+Intrinio Token	SaaS Tokens	85	false	intrinio	(?i:intrinio)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{44})\b
+Invoiceocean Token	SaaS Tokens	85	false	invoiceocean	(?i:invoiceocean)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{20})\b
+Invoiceocean Token	SaaS Tokens	85	false	invoiceocean	\b([0-9a-z]{1,}\.invoiceocean\.com)\b
+Ip 2 Location Token	SaaS Tokens	85	false	ip2location	(?i:ip2location)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{32})\b
+Ipapi Token	SaaS Tokens	85	false	ipapi	(?i:ipapi)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Ipgeolocation Token	SaaS Tokens	85	false	ipgeolocation	(?i:ipgeolocation)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Ipinfo Token	SaaS Tokens	85	false	ipinfo	(?i:ipinfo)(?:.|[\n\r]){0,40}?\b([a-f0-9]{14})\b
+Ipinfodb Token	Database Credentials	85	false	ipinfodb	(?i:ipinfodb)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Ipquality Token	SaaS Tokens	85	false	ipquality	(?i:ipquality)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Ipstack Token	SaaS Tokens	85	false	ipstack	(?i:ipstack)(?:.|[\n\r]){0,40}?\b([a-fA-F0-9]{32})\b
+Jdbc Token	Database Credentials	85	false	jdbc	(?i)pass.*?=(.+?)\b
+Jotform Token	SaaS Tokens	85	false	jotform	(?i:jotform)(?:.|[\n\r]){0,40}?\b([0-9Aa-z]{32})\b
+Jumpcloud Token	Cloud Secrets	85	false	jumpcloud	(?i:jumpcloud)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Jupiterone Token	SaaS Tokens	85	false	jupiterone	(?i:jupiterone)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{76})\b
+Juro Token	SaaS Tokens	85	false	juro	(?i:juro)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+JWT Token	SaaS Tokens	85	false	ewogic,ewoid,eyj	\b((?:eyJ|ewogIC|ewoid)[A-Za-z0-9_-]{12,}={0,2}\.(?:eyJ|ewo)[A-Za-z0-9_-]{12,}={0,2}\.[A-Za-z0-9_-]{12,})\b
+Kanban Token	SaaS Tokens	85	false	kanban	(?i:kanban)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{12})\b
+Kanban Token	SaaS Tokens	85	false	kanban	\b([0-9a-z]{1,}\.kanbantool\.com)\b
+Kanbantool Token	SaaS Tokens	85	false	kanbantool	(?i:kanbantool)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{12})\b
+Kanbantool Token	SaaS Tokens	85	false	kanbantool	(?i:kanbantool)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{2,22})\b
+Karmacrm Token	SaaS Tokens	85	false	karma	(?i:karma)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{20})\b
+Keenio Token	SaaS Tokens	85	false	keen	(?i:keen)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{64})\b
+Keenio Token	SaaS Tokens	85	false	keen	(?i:keen)(?:.|[\n\r]){0,40}?\b([0-9a-z]{24})\b
+Kickbox Token	SaaS Tokens	85	false	kickbox	(?i:kickbox)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]+[a-zA-Z0-9]{64})\b
+Klaviyo Token	SaaS Tokens	85	false	pk_	\b(pk_([0-9a-f]{34}|[A-Za-z0-9]{6}_[0-9a-f]{34}))\b
+Klipfolio Token	SaaS Tokens	85	false	klipfolio	(?i:klipfolio)(?:.|[\n\r]){0,40}?\b([0-9a-f]{40})\b
+Knapsackpro Token	SaaS Tokens	85	false	knapsackpro	(?i:knapsackpro)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Kraken Token	SaaS Tokens	85	false	kraken	(?i:kraken)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z\/\+=]{56}[ "'\r\n]{1})
+Kraken Token	SaaS Tokens	85	false	kraken	(?i:kraken)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z\/\+=]{86,88}[ "'\r\n]{1})
+Kucoin Token	SaaS Tokens	85	false	kucoin	(?i:kucoin)(?:.|[\n\r]){0,40}?\b([0-9a-f]{24})\b
+Kucoin Token	SaaS Tokens	85	false	kucoin	(?i:kucoin)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Kucoin Token	SaaS Tokens	85	false	kucoin	(?i:kucoin)(?:.|[\n\r]){0,40}?([ \r\n]{1}[!-~]{7,32}[ \r\n]{1})
+Kylas Token	SaaS Tokens	85	false	kylas	(?i:kylas)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Langfuse Token	SaaS Tokens	85	false	langfuse	(?i:langfuse)(?:.|[\n\r]){0,40}?\b(pk-lf-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Langfuse Token	SaaS Tokens	85	false	langfuse	(?i:langfuse)(?:.|[\n\r]){0,40}?\b(sk-lf-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Langsmith Token	SaaS Tokens	85	false	lsv2_pt_,lsv2_sk_	\b(lsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10})\b
+Languagelayer Token	SaaS Tokens	85	false	languagelayer	(?i:languagelayer)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Larksuite Token	SaaS Tokens	85	false	lark,larksuite,tenant	(?i:lark|larksuite|tenant)(?:.|[\n\r]){0,40}?(?:^|[^-])\b(t-[a-z0-9A-Z_.]{14,50})\b(?:[^-]|$)
+Larksuite Token	SaaS Tokens	85	false	lark,user,larksuite	(?i:lark|larksuite|user)(?:.|[\n\r]){0,40}?(?:^|[^-])\b(u-[a-z0-9A-Z_.]{14,50})\b(?:[^-]|$)
+Larksuite Token	SaaS Tokens	85	false	lark,app,larksuite	(?i:lark|larksuite|app)(?:.|[\n\r]){0,40}?(?:^|[^-])\b(a-[a-z0-9A-Z_.]{14,50})\b(?:[^-]|$)
+Larksuiteapikey	SaaS Tokens	85	false	lark,larksuite	(?i:lark|larksuite)(?:.|[\n\r]){0,40}?\b(cli_[a-z0-9A-Z]{16})\b
+Larksuiteapikey	SaaS Tokens	85	false	lark,larksuite	(?i:lark|larksuite)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Launchdarkly Token	SaaS Tokens	85	false	api-,sdk-	\b((?:api|sdk)-[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Ldap Token	SaaS Tokens	85	false	bind,user	(?i:user|bind)(?:.|[\n\r]){0,40}?["']([a-zA-Z=,]{4,150})["']
+Ldap Token	SaaS Tokens	85	false	pass	(?i:pass)(?:.|[\n\r]){0,40}?["']([\S]{4,48})["']
+Ldap Token	SaaS Tokens	85	false	ldaps://,ldap://	\b(?i)ldaps?://[\S]+\b
+Ldap Token	SaaS Tokens	85	false	ldaps://,ldap://	OpenDSObject\(\"(?i)(ldaps?://[\S]+)\", ?\"([\S]+)\", ?\"([\S]+)\",[ \d]+\)
+Leadfeeder Token	SaaS Tokens	85	false	leadfeeder	(?i:leadfeeder)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{43})\b
+Lemlist Token	SaaS Tokens	85	false	lemlist	(?i:lemlist)(?:.|[\n\r]){0,40}?\b([a-f0-9]{32})\b
+Lemonsqueezy Token	SaaS Tokens	85	false	lemonsqueezy	(?i:lemonsqueezy)(?:.|[\n\r]){0,40}?\b(eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9\.[0-9A-Za-z]{314}\.[0-9A-Za-z-_]{512})\b
+Lendflow Token	SaaS Tokens	85	false	lendflow	(?i:lendflow)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{36}\.[a-zA-Z0-9]{235}\.[a-zA-Z0-9]{32}\-[a-zA-Z0-9]{47}\-[a-zA-Z0-9_]{162}\-[a-zA-Z0-9]{42}\-[a-zA-Z0-9_]{40}\-[a-zA-Z0-9_]{66}\-[a-zA-Z0-9_]{59}\-[a-zA-Z0-9]{7}\-[a-zA-Z0-9_]{220})\b
+Lessannoyingcrm Token	SaaS Tokens	85	false	less	(?i:less)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{57})\b
+Lexigram Token	SaaS Tokens	85	false	lexigram	(?i:lexigram)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\S]{301})\b
+Linearapi Token	SaaS Tokens	85	false	lin_api_	\b(lin_api_[0-9A-Za-z]{40})\b
+Linemessaging Token	SaaS Tokens	85	false	line	(?i:line)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9+/]{171,172})\b
+Linenotify Token	SaaS Tokens	85	false	linenotify	(?i:linenotify)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{43})\b
+Linkpreview Token	SaaS Tokens	85	false	linkpreview	(?i:linkpreview)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Liveagent Token	SaaS Tokens	85	false	apikey,liveagent	(?i:liveagent|apikey)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Liveagent Token	SaaS Tokens	85	false	ladesk,liveagent	\b(https?://[A-Za-z0-9-]+\.ladesk\.com)\b
+Livestorm Token	SaaS Tokens	85	false	livestorm	(?i:livestorm)(?:.|[\n\r]){0,40}?\b(eyJhbGciOiJIUzI1NiJ9\.eyJhdWQiOiJhcGkubGl2ZXN0b3JtLmNvIiwianRpIjoi[0-9A-Z-a-z]{134}\.[0-9A-Za-z\-\_]{43}[ \r\n]{1})
+Loadmill Token	SaaS Tokens	85	false	loadmill	(?i:loadmill)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{40})\b
+Lob Token	SaaS Tokens	85	false	live_,test_	\b((live|test)_[a-f0-9]{35})\b
+Locationiq Token	SaaS Tokens	85	false	locationiq	\b(pk\.[a-zA-Z-0-9]{32})\b
+Loggly Token	Monitoring & Observability	85	false	loggly	(?i:loggly)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Loggly Token	Monitoring & Observability	85	false	loggly	\b([a-zA-Z0-9-]+\.loggly\.com)\b
+Loginradius Token	Monitoring & Observability	85	false	loginradius	(?i:loginradius)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Logzio Token	Monitoring & Observability	85	false	logz	(?i:logz)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Lokalisetoken	SaaS Tokens	85	false	lokalise	(?i:lokalise)(?:.|[\n\r]){0,40}?\b([a-z0-9]{40})\b
+Loyverse Token	SaaS Tokens	85	false	loyverse	(?i:loyverse)(?:.|[\n\r]){0,40}?\b([0-9-a-z]{32})\b
+Lunchmoney Token	SaaS Tokens	85	false	lunchmoney	(?i:lunchmoney)(?:.|[\n\r]){0,40}?\b([a-f0-9]{50})\b
+Luno Token	SaaS Tokens	85	false	luno	(?i:luno)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{43})\b
+Luno Token	SaaS Tokens	85	false	luno	(?i:luno)(?:.|[\n\r]){0,40}?\b([a-z0-9]{13})\b
+M 3 O Token	SaaS Tokens	85	false	m3o	(?i:m3o)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{48})\b
+Madkudu Token	SaaS Tokens	85	false	madkudu	(?i:madkudu)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Magicbell Token	SaaS Tokens	85	false	magicbell	(?i:magicbell)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{40})\b
+Magnetic Token	SaaS Tokens	85	false	magnetic	(?i:magnetic)(?:.|[\n\r]){0,40}?\b([0-9Aa-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Mailboxlayer Token	AI & ML Secrets	85	false	mailboxlayer	(?i:mailboxlayer)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Mailchimp Token	AI & ML Secrets	85	false	-us	[0-9a-f]{32}-us[0-9]{1,2}
+Mailerlite Token	AI & ML Secrets	85	false	mailerlite	(?i:mailerlite)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Mailgun Token	AI & ML Secrets	85	false	mailgun	(?i:mailgun)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{72})\b
+Mailgun Token	AI & ML Secrets	85	false	key-,mailgun	\b(key-[a-z0-9]{32})\b
+Mailgun Token	AI & ML Secrets	85	false	key-,mailgun	\b([a-f0-9]{32}-[a-f0-9]{8}-[a-f0-9]{8})\b
+Mailjetbasicauth	AI & ML Secrets	85	false	mailjet	(?i:mailjet)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{87}\=)
+Mailjetsms Token	AI & ML Secrets	85	false	mailjet	(?i:mailjet)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{32})\b
+Mailmodo Token	AI & ML Secrets	85	false	mailmodo	(?i:mailmodo)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{7}-[A-Z0-9]{7}-[A-Z0-9]{7}-[A-Z0-9]{7})\b
+Mailsac Token	AI & ML Secrets	85	false	mailsac	(?i:mailsac)(?:.|[\n\r]){0,40}?\b(k_[0-9A-Za-z]{36,})\b
+Mandrill Token	SaaS Tokens	85	false	mandrill	(?i:mandrill)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{22})\b
+Manifest Token	SaaS Tokens	85	false	manifest	(?i:manifest)(?:.|[\n\r]){0,40}?\b([a-zA-z0-9]{32})\b
+Mapbox Token	SaaS Tokens	85	false	mapbox	([a-zA-Z-0-9]{4,32})
+Mapbox Token	SaaS Tokens	85	false	mapbox	\b(sk\.[a-zA-Z-0-9\.]{80,240})\b
+Mapquest Token	SaaS Tokens	85	false	mapquest	(?i:mapquest)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{32})\b
+Marketstack Token	SaaS Tokens	85	false	marketstack	(?i:marketstack)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Mattermostpersonaltoken	SaaS Tokens	85	false	mattermost	(?i:mattermost)(?:.|[\n\r]){0,40}?\b([a-z0-9]{26})\b
+Mattermostpersonaltoken	SaaS Tokens	85	false	mattermost	(?i:mattermost)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9-_]{1,}.cloud.mattermost.com)\b
+Mavenlink Token	SaaS Tokens	85	false	mavenlink	(?i:mavenlink)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Meaningcloud Token	Cloud Secrets	85	false	meaningcloud	(?i:meaningcloud)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Mediastack Token	SaaS Tokens	85	false	mediastack	(?i:mediastack)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Meistertask Token	SaaS Tokens	85	false	meistertask	(?i:meistertask)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{43})\b
+Meraki Token	SaaS Tokens	85	false	meraki	(?i:meraki)(?:.|[\n\r]){0,40}?([0-9a-f]{40})
+Mesibo Token	SaaS Tokens	85	false	mesibo	(?i:mesibo)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{64})\b
+Messagebird Token	Email & Messaging Secrets	85	false	messagebird	(?i:messagebird)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{25})\b
+Metaapi Token	SaaS Tokens	85	false	metaapi,meta-api	(?i:metaapi|meta\-api)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Metaapi Token	SaaS Tokens	85	false	metaapi,meta-api	(?i:metaapi|meta\-api)(?:.|[\n\r]){0,40}?\b([0-9a-f]{24})\b
+Metabase Token	SaaS Tokens	85	false	metabase	(?i:metabase)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{36})\b
+Metabase Token	SaaS Tokens	85	false	metabase	(?i:metabase)(?:.|[\n\r]){0,40}?\b(https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{7,256})\b
+Metrilo Token	SaaS Tokens	85	false	metrilo	(?i:metrilo)(?:.|[\n\r]){0,40}?\b([a-z0-9]{16})\b
+Mindmeister Token	SaaS Tokens	85	false	mindmeister	(?i:mindmeister)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{43})\b
+Miro Token	SaaS Tokens	85	false	miro	(?i:miro)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{27})\b
+Mite Token	SaaS Tokens	85	false	mite	(?i:mite)(?:.|[\n\r]){0,40}?\b([0-9a-z]{16})\b
+Mite Token	SaaS Tokens	85	false	mite	\b([0-9a-z-]{1,}.mite.yo.lk)\b
+Mixmax Token	SaaS Tokens	85	false	mixmax	(?i:mixmax)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{36})\b
+Mixpanel Token	SaaS Tokens	85	false	mixpanel	(?i:mixpanel)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{32})\b
+Mixpanel Token	SaaS Tokens	85	false	mixpanel	(?i:mixpanel)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9.-]{30,40})\b
+Mockaroo Token	SaaS Tokens	85	false	mockaroo	(?i:mockaroo)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8})\b
+Moderation Token	SaaS Tokens	85	false	moderation	(?i:moderation)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{36}\.[a-zA-Z0-9]{115}\.[a-zA-Z0-9_]{43})\b
+Monday Token	SaaS Tokens	85	false	monday	(?i:monday)(?:.|[\n\r]){0,40}?\b(eyJ[A-Za-z0-9-_]{15,100}\.eyJ[A-Za-z0-9-_]{100,300}\.[A-Za-z0-9-_]{25,100})\b
+Mongodb Token	Database Credentials	85	false	mongodb	\b(mongodb(?:\+srv)?://(?<username>\S{3,50}):(?<password>\S{3,88})@(?<host>[-.%\w]+(?::\d{1,5})?(?:,[-.%\w]+(?::\d{1,5})?)*)(?:/(?<authdb>[\w-]+)?(?<options>\?\w+=[\w@/.$-]+(?:&(?:amp;)?\w+=[\w@/.$-]+)*)?)?)(?:\b|$)
+Mongodb Token	Database Credentials	85	false	mongodb	^[xX]+|\*+$
+Monkeylearn	SaaS Tokens	85	false	monkeylearn	(?i:monkeylearn)(?:.|[\n\r]){0,40}?\b([0-9a-f]{40})\b
+Moonclerk Token	SaaS Tokens	85	false	moonclerk	(?i:moonclerk)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Moosend Token	SaaS Tokens	85	false	moosend	(?i:moosend)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Moralis Token	SaaS Tokens	85	false	moralis	(?i:moralis)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{64})\b
+Mrticktock Token	SaaS Tokens	85	false	mrticktock	(?i:mrticktock)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9!=@#$%()_^]{1,50})
+Mux Token	SaaS Tokens	85	false	mux	(?i:mux)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Mux Token	SaaS Tokens	85	false	mux	(?i:mux)(?:.|[\n\r]){0,40}?([ \r\n]{0,1}[0-9A-Za-z\/\+]{75}[ \r\n]{1})
+Myfreshworks Token	SaaS Tokens	85	false	freshworks	(?i:freshworks)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z-_]{22})\b
+Myfreshworks Token	SaaS Tokens	85	false	freshworks	(?i:freshworks)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-_]{2,20})\b
+Myintervals Token	SaaS Tokens	85	false	myintervals	(?i:myintervals)(?:.|[\n\r]){0,40}?\b([0-9a-z]{11})\b
+Nasdaqdatalink Token	SaaS Tokens	85	false	nasdaq	(?i:nasdaq)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{20})\b
+Nethunt Token	SaaS Tokens	85	false	nethunt	(?i:nethunt)(?:.|[\n\r]){0,40}?\b([a-z0-9-\S]{36})\b
+Nethunt Token	SaaS Tokens	85	false	nethunt	(?i:nethunt)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9.-@]{25,30})\b
+Netsuite Token	SaaS Tokens	85	false	consumer,netsuite,key	(?i:netsuite|consumer|key)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Netsuite Token	SaaS Tokens	85	false	consumer,netsuite,secret	(?i:netsuite|consumer|secret)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Netsuite Token	SaaS Tokens	85	false	netsuite,key,token	(?i:netsuite|token|key)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Netsuite Token	SaaS Tokens	85	false	netsuite,token,secret	(?i:netsuite|token|secret)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Netsuite Token	SaaS Tokens	85	false	id,netsuite,account	(?i:netsuite|account|id)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-_]{6,15})\b
+Neutrinoapi Token	SaaS Tokens	85	false	neutrinoapi	(?i:neutrinoapi)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{48})\b
+Neutrinoapi Token	SaaS Tokens	85	false	neutrinoapi	(?i:neutrinoapi)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{6,24})\b
+Newrelicbrowserkey	Monitoring & Observability	85	false	nrbr-	\b(NRBR-[0-9a-f]{19})\b
+Newrelicinsightsinsertkey	CI/CD & DevOps Secrets	85	false	nrii-	\b(NRII-[a-zA-Z0-9-_]{25})
+Newrelicinsightsquerykey	CI/CD & DevOps Secrets	85	false	id,relic,account	(?i:relic|account|id)(?:.|[\n\r]){0,40}?\b(\d{4,10})\b
+Newrelicinsightsquerykey	CI/CD & DevOps Secrets	85	false	nriq-	\b(NRIQ-[a-zA-Z0-9-_]{25})
+Newreliclicensekey	Monitoring & Observability	85	false	ffffnral	\b(([0-9a-f]{32}|eu01xx[0-9a-f]{26})FFFFNRAL)\b
+Newrelicmobileapptoken	Monitoring & Observability	85	false	-nrma	\b((AA[0-9a-f]{40}|eu01xx[0-9a-f]{36})-NRMA)\b
+Newrelicpersonalapikey	Monitoring & Observability	85	false	newrelic	(?i:newrelic)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_\.]{4}-[A-Za-z0-9_\.]{42})\b
+Newrelicuserkey	Monitoring & Observability	85	false	nrak-	\b(NRAK-[A-Z0-9]{27})\b
+Newsapi Token	SaaS Tokens	85	false	newsapi	(?i:newsapi)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})
+Newscatcher Token	SaaS Tokens	85	false	newscatcher	(?i:newscatcher)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z_]{43})\b
+Nexmoapikey	SaaS Tokens	85	false	nexmo	(?i:nexmo)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{8})\b
+Nexmoapikey	SaaS Tokens	85	false	nexmo	(?i:nexmo)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{16})\b
+Nftport Token	SaaS Tokens	85	false	nftport	(?i:nftport)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Ngc Token	SaaS Tokens	85	false	ngc	(?i:ngc)(?:.|[\n\r]){0,40}?\b([[:alnum:]]{26}:[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12})\b
+Ngc Token	SaaS Tokens	85	false	ngc	\b([[:alnum:]]{84})\b
+Ngc Token	SaaS Tokens	85	false	ngc	\b([[:alnum:]]{26}:[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12})\b
+Ngrok Token	AI & ML Secrets	85	false	ngrok	(?i:ngrok)(?:.|[\n\r]){0,40}?\b(2[a-zA-Z0-9]{26}_\d[a-zA-Z0-9]{20})\b
+Nicereply Token	SaaS Tokens	85	false	nicereply	(?i:nicereply)(?:.|[\n\r]){0,40}?\b([0-9a-f]{40})\b
+Nightfall Token	SaaS Tokens	85	false	nightfall	\b(NF\-[a-zA-Z0-9]{32})\b
+Nimble Token	SaaS Tokens	85	false	nimble	(?i:nimble)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{30})\b
+Noticeable Token	SaaS Tokens	85	false	noticeable	(?i:noticeable)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{20})\b
+Notion Token	SaaS Tokens	85	false	notion	\b(secret_[A-Za-z0-9]{43})\b
+Nozbeteams Token	SaaS Tokens	85	false	nozbe,nozbeteams	(?i:nozbe|nozbeteams)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{16}_[0-9A-Za-z\-_]{64}[ \r\n]{1})
+Npmtoken	CI/CD & DevOps Secrets	85	false	npm	(?i:npm)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Npmtokenv 2	CI/CD & DevOps Secrets	85	false	npm_	(npm_[0-9a-zA-Z]{36})
+Nugetapikey	SaaS Tokens	85	false	nuget	(?i:nuget)(?:.|[\n\r]){0,40}?\b([a-z0-9]{46})\b
+Numverify Token	SaaS Tokens	85	false	numverify	(?i:numverify)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Nutritionix Token	SaaS Tokens	85	false	nutritionix	(?i:nutritionix)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Nutritionix Token	SaaS Tokens	85	false	nutritionix	(?i:nutritionix)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8})\b
+Nvapi Token	SaaS Tokens	85	false	nvapi-	\b(nvapi-[a-zA-Z0-9_-]{64})\b
+Nylas Token	SaaS Tokens	85	false	nylas	(?i:nylas)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{30})\b
+Oanda Token	SaaS Tokens	85	false	oanda	(?i:oanda)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{24})\b
+Octopusdeploy Token	SaaS Tokens	85	false	octopus	\b([a-z0-9-]+\.octopus\.app)\b
+Okta Token	SaaS Tokens	85	false	.okta	\b[a-z0-9-]{1,40}\.okta(?:preview|-emea){0,1}\.com\b
+Okta Token	SaaS Tokens	85	false	.okta	\b00[a-zA-Z0-9_-]{40}\b
+Omnisend Token	SaaS Tokens	85	false	omnisend	(?i:omnisend)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z-]{75})\b
+Onedesk Token	SaaS Tokens	85	false	onedesk	(?i:onedesk)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9!=@#$%^]{8,64})
+Onelogin Token	Monitoring & Observability	85	false	onelogin	(?i)id[a-zA-Z0-9_' "=]{0,20}([a-z0-9]{64})
+Onelogin Token	Monitoring & Observability	85	false	onelogin	(?i)secret[a-zA-Z0-9_' "=]{0,20}([a-z0-9]{64})
+Onepagecrm Token	SaaS Tokens	85	false	onepagecrm	(?i:onepagecrm)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9=]{44})
+Onepagecrm Token	SaaS Tokens	85	false	onepagecrm	(?i:onepagecrm)(?:.|[\n\r]){0,40}?\b([a-z0-9]{24})\b
+Onfleet Token	SaaS Tokens	85	false	onfleet	(?i:onfleet)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Oopspam Token	SaaS Tokens	85	false	oopspam	(?i:oopspam)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Openai Token	AI & ML Secrets	85	false	t3blbkfj	\b(sk-(?:(?:proj|svcacct|service)-[A-Za-z0-9_-]+|[a-zA-Z0-9]+)T3BlbkFJ[A-Za-z0-9_-]+)\b
+Openaiadmin Token	AI & ML Secrets	85	false	sk-admin-	\b(sk-admin-[A-Za-z0-9_-]{58}T3BlbkFJ[A-Za-z0-9_-]{58})\b
+Opencagedata Token	SaaS Tokens	85	false	opencagedata	(?i:opencagedata)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Openrouter Token	AI & ML Secrets	85	false	sk-or-v1-	\b(sk-or-v1-[0-9a-f]{64})\b
+Openuv Token	SaaS Tokens	85	false	openuv	(?i:openuv)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Openvpn Token	SaaS Tokens	85	false	openvpn	(?i:openvpn)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9-]{3,40}\.[A-Za-z0-9-]{3,40})\b
+Openvpn Token	SaaS Tokens	85	false	openvpn	\b(https?://[A-Za-z0-9-]+\.api\.openvpn\.com)\b
+Openweather Token	SaaS Tokens	85	false	openweather	(?i:openweather)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Opsgenie Token	SaaS Tokens	85	false	opsgenie	(?i:opsgenie)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Optimizely Token	SaaS Tokens	85	false	optimizely	(?i:optimizely)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z-:]{54})\b
+Overloop Token	SaaS Tokens	85	false	overloop	(?i:overloop)(?:.|[\n\r]){0,40}?\b([a-zA-Z\_\-0-9]{50})\b
+Owlbot Token	SaaS Tokens	85	false	owlbot	(?i:owlbot)(?:.|[\n\r]){0,40}?\b([a-z0-9]{40})\b
+Packagecloud Token	Cloud Secrets	85	false	packagecloud	(?i:packagecloud)(?:.|[\n\r]){0,40}?\b([0-9a-f]{48})\b
+Pagarme Token	SaaS Tokens	85	false	ak_live_	\b(ak_live_[a-zA-Z0-9]{30})\b
+Pagerdutyapikey	SaaS Tokens	85	false	pager_duty,pd-,pagerduty,pd_	(?i:pagerduty|pager_duty|pd_|pd\-)(?:.|[\n\r]){0,40}?\b(u\+[a-zA-Z0-9_+-]{18})\b
+Pandadoc Token	SaaS Tokens	85	false	pandadoc	(?i:pandadoc)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Pandascore Token	SaaS Tokens	85	false	pandascore	(?i:pandascore)(?:.|[\n\r]){0,40}?([ \r\n]{0,1}[0-9A-Za-z\-\_]{51}[ \r\n]{1})
+Paperform Token	SaaS Tokens	85	false	paperform	(?i:paperform)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z-._]{850,1000})\b
+Paralleldots Token	SaaS Tokens	85	false	paralleldots	(?i:paralleldots)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{43})\b
+Parsehub Token	SaaS Tokens	85	false	parsehub	(?i:parsehub)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{12})\b
+Parsers Token	SaaS Tokens	85	false	parsers	(?i:parsers)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Parseur Token	SaaS Tokens	85	false	parseur[^il]	(?i:parseur\[\^il\])(?:.|[\n\r]){0,40}?\b([a-f0-9]{40})\b
+Partnerstack Token	SaaS Tokens	85	false	partnerstack	(?i:partnerstack)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{64})\b
+Pastebin Token	SaaS Tokens	85	false	pastebin	(?i:pastebin)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{32})\b
+Paydirtapp Token	SaaS Tokens	85	false	paydirtapp	(?i:paydirtapp)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Paymoapp Token	SaaS Tokens	85	false	paymoapp	(?i:paymoapp)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{44})\b
+Paymongo Token	Database Credentials	85	false	paymongo	(?i:paymongo)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{32})\b
+Paypaloauth	Payment & Financial Secrets	85	false	paypal	\b([A-Za-z0-9_\.]{7}-[A-Za-z0-9_\.]{72}|[A-Za-z0-9_\.]{5}-[A-Za-z0-9_\.]{38})\b
+Paypaloauth	Payment & Financial Secrets	85	false	paypal	\b([A-Za-z0-9_\.\-]{44,80})\b
+Paystack Token	SaaS Tokens	85	false	paystack	\b(sk\_[a-z]{1,}\_[A-Za-z0-9]{40})\b
+Pdflayer Token	SaaS Tokens	85	false	pdflayer	(?i:pdflayer)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Pdfshift Token	SaaS Tokens	85	false	pdfshift	(?i:pdfshift)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Peopledatalabs Token	SaaS Tokens	85	false	peopledatalabs	(?i:peopledatalabs)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Pepipost Token	SaaS Tokens	85	false	netcore,pepipost	(?i:pepipost|netcore)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{32})\b
+Percy Token	SaaS Tokens	85	false	percy	(?i:percy)(?:.|[\n\r]){0,40}?\bPERCY_TOKEN=([0-9Aa-f]{64})\b
+Photoroom Token	SaaS Tokens	85	false	photoroom	(?i:photoroom)(?:.|[\n\r]){0,40}?\b(?:sandbox_)?(sk_pr_[a-zA-Z0-9]{1,64}_[a-fA-F0-9]{40})\b
+Phraseaccesstoken	SaaS Tokens	85	false	access_token,accesstoken,phrase	(?i:phrase|accessToken|access_token)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Pinata Token	SaaS Tokens	85	false	pinata	(?i:pinata)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Pinata Token	SaaS Tokens	85	false	pinata	(?i:pinata)(?:.|[\n\r]){0,40}?\b([0-9a-z]{20})\b
+Pinecone Token	SaaS Tokens	85	false	pcsk_	\b(pcsk_([A-Za-z0-9]{5,6})_[A-Za-z0-9]{63})\b
+Pipedream Token	SaaS Tokens	85	false	pipedream	(?i:pipedream)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Pipedrive Token	SaaS Tokens	85	false	pipedrive	(?i:pipedrive)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Pivotaltracker Token	SaaS Tokens	85	false	pivotal	(?i:pivotal)(?:.|[\n\r]){0,40}?([a-z0-9]{32})
+Pixabay Token	SaaS Tokens	85	false	pixabay	(?i:pixabay)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{34})\b
+Plaidkey	AI & ML Secrets	85	false	plaid	(?i:plaid)(?:.|[\n\r]){0,40}?\b([a-f0-9]{30})\b
+Plaidkey	AI & ML Secrets	85	false	plaid	(?i:plaid)(?:.|[\n\r]){0,40}?\b([a-f0-9]{24})\b
+Plaidkey	AI & ML Secrets	85	false	plaid	(?i:plaid)(?:.|[\n\r]){0,40}?\b(access-(sandbox|production)-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\b
+Planetscale Token	SaaS Tokens	85	false	pscale_tkn_	\b[a-z0-9]{12}\b
+Planetscale Token	SaaS Tokens	85	false	pscale_tkn_	\bpscale_tkn_[A-Za-z0-9_]{43}\b
+Planetscaledb Token	Database Credentials	85	false	pscale_pw_	\b[a-z0-9]{20}\b
+Planetscaledb Token	Database Credentials	85	false	pscale_pw_	\bpscale_pw_[A-Za-z0-9_]{43}\b
+Planetscaledb Token	Database Credentials	85	false	pscale_pw_	\b(aws|gcp)\.connect\.psdb\.cloud\b
+Planviewleankit Token	SaaS Tokens	85	false	planview,planviewleankit	(?i:planviewleankit|planview)(?:.|[\n\r]){0,40}?\b([0-9a-f]{128})\b
+Planviewleankit Token	SaaS Tokens	85	false	planview,planviewleankit	(?i:planviewleankit|planview)(?:.|[\n\r]){0,40}?(?:subdomain).\b([a-zA-Z][a-zA-Z0-9.-]{1,23}[a-zA-Z0-9])\b
+Planyo Token	SaaS Tokens	85	false	planyo	(?i:planyo)(?:.|[\n\r]){0,40}?\b([0-9a-z]{62})\b
+Plivo Token	SaaS Tokens	85	false	plivo	(?i:plivo)(?:.|[\n\r]){0,40}?\b([A-Z]{20})\b
+Plivo Token	SaaS Tokens	85	false	plivo	(?i:plivo)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{40})\b
+Podio Token	SaaS Tokens	85	false	podio	(?i:podio)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Pollsapi Token	SaaS Tokens	85	false	pollsapi	(?i:pollsapi)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{28})\b
+Poloniex Token	SaaS Tokens	85	false	poloniex	(?i:poloniex)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{8}-[0-9A-Z]{8}-[0-9A-Z]{8}-[0-9A-Z]{8})\b
+Poloniex Token	SaaS Tokens	85	false	poloniex	(?i:poloniex)(?:.|[\n\r]){0,40}?\b([0-9a-f]{128})\b
+Polygon Token	SaaS Tokens	85	false	polygon	(?i:polygon)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Portainer Token	AI & ML Secrets	85	false	portainer	(?i:portainer)(?:.|[\n\r]){0,40}?\b(https?:\/\/\S+(:[0-9]{4,5})?)\b
+Portainer Token	AI & ML Secrets	85	false	portainer	(?i:portainer)(?:.|[\n\r]){0,40}?\b(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[0-9A-Za-z]{50,310}\.[0-9A-Z-a-z\-_]{43})\b
+Portainertoken	AI & ML Secrets	85	false	portainertoken	(?i:portainertoken)(?:.|[\n\r]){0,40}?\b(ptr_[A-Za-z0-9\/_\-+=]{20,60})
+Positionstack Token	SaaS Tokens	85	false	positionstack	(?i:positionstack)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{32})\b
+Postageapp Token	SaaS Tokens	85	false	postageapp	(?i:postageapp)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{32})\b
+Postbacks Token	SaaS Tokens	85	false	postbacks	(?i:postbacks)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Postgres Token	Database Credentials	85	false	postgres	\b(?i)(postgres(?:ql)?)://\S+\b
+Postgres Token	Database Credentials	85	false	postgres	([[:alpha:]]+)='(.+?)' ?
+Posthog Token	SaaS Tokens	85	false	phx_	\b(phx_[a-zA-Z0-9_]{43,48})\b
+Postman Token	SaaS Tokens	85	false	pmak-	\b(PMAK-[a-zA-Z-0-9]{59})\b
+Postmark Token	Email & Messaging Secrets	85	false	postmark	(?i:postmark)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Powrbot Token	SaaS Tokens	85	false	powrbot	(?i:powrbot)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{40})\b
+Prefect Token	SaaS Tokens	85	false	pnu_	\b(pnu_[a-zA-Z0-9]{36})\b
+Privacy Token	SaaS Tokens	85	false	privacy	(?i:privacy)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Privatekey	Private Keys	85	false	private key	(?i)-----\s*?BEGIN[ A-Z0-9_-]*?PRIVATE KEY\s*?-----[\s\S]*?----\s*?END[ A-Z0-9_-]*? PRIVATE KEY\s*?-----
+Prodpad Token	SaaS Tokens	85	false	prodpad	(?i:prodpad)(?:.|[\n\r]){0,40}?\b([a-f0-9]{64})\b
+Prospectcrm Token	SaaS Tokens	85	false	prospect	(?i:prospect)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{32})\b
+Protocolsio Token	SaaS Tokens	85	false	protocols	(?i:protocols)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Proxycrawl Token	SaaS Tokens	85	false	proxycrawl	(?i:proxycrawl)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{22})\b
+Pubnubpublishkey	SaaS Tokens	85	false	sub-c-	\b(pub-c-[0-9a-z]{8}-[0-9a-z]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Pubnubpublishkey	SaaS Tokens	85	false	sub-c-	\b(sub-c-[0-9a-z]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})\b
+Pulumi Token	SaaS Tokens	85	false	pul-	\b(pul-[a-z0-9]{40})\b
+Purestake Token	SaaS Tokens	85	false	purestake	(?i:purestake)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Pushbulletapikey	SaaS Tokens	85	false	pushbullet	(?i:pushbullet)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_\.]{34})\b
+Pusherchannelkey	SaaS Tokens	85	false	pusher	(?i:pusher)(?:.|[\n\r]){0,40}?\b([0-9]{7})\b
+Pusherchannelkey	SaaS Tokens	85	false	key	(?i:key)(?:.|[\n\r]){0,40}?\b([a-z0-9]{20})\b
+Pusherchannelkey	SaaS Tokens	85	false	pusher	(?i:pusher)(?:.|[\n\r]){0,40}?\b([a-z0-9]{20})\b
+Qase Token	SaaS Tokens	85	false	qase	(?i:qase)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{40})\b
+Qualaroo Token	SaaS Tokens	85	false	qualaroo	(?i:qualaroo)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z=]{64})
+Qubole Token	SaaS Tokens	85	false	qubole	(?i:qubole)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Rabbitmq Token	SaaS Tokens	85	false	amqp	\b(?:amqps?):\/\/[\S]{3,50}:([\S]{3,50})@[-.%\w\/:]+\b
+Railwayapp Token	AI & ML Secrets	85	false	railway	(?i:railway)(?:.|[\n\r]){0,40}?\b([a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})\b
+Ramp Token	SaaS Tokens	85	false	ramp_	\b(ramp_id_[[:alnum:]]{40})\b
+Ramp Token	SaaS Tokens	85	false	ramp_	\b(ramp_sec_[[:alnum:]]{48})\b
+Rapidapi Token	SaaS Tokens	85	false	rapidapi	(?i:rapidapi)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_-]{50})\b
+Raven Token	SaaS Tokens	85	false	raven	(?i:raven)(?:.|[\n\r]){0,40}?\b([A-Z0-9-]{16})\b
+Rawg Token	SaaS Tokens	85	false	rawg	(?i:rawg)(?:.|[\n\r]){0,40}?\b([0-9Aa-z]{32})\b
+Razorpay Token	Payment & Financial Secrets	85	false	rzp_live_	(?i)\brzp_live_[A-Za-z0-9]{14}\b
+Razorpay Token	Payment & Financial Secrets	85	false	rzp_live_	\b[A-Za-z0-9]{24}\b
+Reachmail Token	AI & ML Secrets	85	false	reachmail	(?i:reachmail)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-_]{64})\b
+Readme Token	SaaS Tokens	85	false	rdme_	(rdme_[a-z0-9]{70})
+Reallysimplesystems Token	SaaS Tokens	85	false	reallysimplesystems	\b(ey[a-zA-Z0-9-._]{153}.ey[a-zA-Z0-9-._]{916,1000})\b
+Rebrandly Token	SaaS Tokens	85	false	rebrandly	(?i:rebrandly)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{32})\b
+Rechargepayments Token	Payment & Financial Secrets	85	false	sk_test_2x2,sk_1x1,sk_test_2x1,sk_2x1,sk_2x2,x-recharge-access-token,sk_10x3,sk_3x3,sk_test_1x1,sk_1x3,sk_test_3x3,sk_test_5x3,sk_test_10x3,sk_test_1x3,sk_5x3	\bsk(_test)?_(1|2|3|5|10)x[123]_[0-9a-fA-F]{64}\b
+Rechargepayments Token	Payment & Financial Secrets	85	false	sk_test_2x2,sk_1x1,sk_test_2x1,sk_2x1,sk_2x2,x-recharge-access-token,sk_10x3,sk_3x3,sk_test_1x1,sk_1x3,sk_test_3x3,sk_test_5x3,sk_test_10x3,sk_test_1x3,sk_5x3	\b[0-9a-fA-F]{56}\b
+Rechargepayments Token	Payment & Financial Secrets	85	false	sk_test_2x2,sk_1x1,sk_test_2x1,sk_2x1,sk_2x2,x-recharge-access-token,sk_10x3,sk_3x3,sk_test_1x1,sk_1x3,sk_test_3x3,sk_test_5x3,sk_test_10x3,sk_test_1x3,sk_5x3	\b[0-9a-fA-F]{32}\b
+Redhatpyxis Token	SaaS Tokens	85	false	redhat,pyxis	(?i:redhat|pyxis)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Redis Token	Database Credentials	85	false	redis	\bredi[s]{1,2}://[\S]{3,50}:([\S]{3,50})@[-.%\w\/:]+\b
+Redis Token	Database Credentials	85	false	redis	\b([\w\d.-]{1,100}\.redis\.cache\.windows\.net:6380),password=([^,]{44}),ssl=True,abortConnect=False\b
+Refiner Token	SaaS Tokens	85	false	refiner	(?i:refiner)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Rentman Token	SaaS Tokens	85	false	rentman	(?i:rentman)(?:.|[\n\r]){0,40}?\b(ey[a-zA-Z0-9]{34}.ey[a-zA-Z0-9._-]{250,300})\b
+Repairshopr Token	AI & ML Secrets	85	false	repairshopr	(?i:repairshopr)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{51})\b
+Repairshopr Token	AI & ML Secrets	85	false	repairshopr	(?i:repairshopr)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_.!+$#^*]{3,32})\b
+Replicate Token	AI & ML Secrets	85	false	r8_,replicate	\b(r8_[0-9A-Za-z-_]{37})\b
+Replyio Token	SaaS Tokens	85	false	replyio	(?i:replyio)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{24})\b
+Requestfinance Token	SaaS Tokens	85	false	requestfinance	(?i:requestfinance)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{7}-[0-9A-Z]{7}-[0-9A-Z]{7}-[0-9A-Z]{7})\b
+Restpackhtmltopdfapi Token	SaaS Tokens	85	false	restpack	(?i:restpack)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{48})\b
+Rev Token	SaaS Tokens	85	false	rev	(?i:rev)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z\/\+]{27}\=[ \r\n]{1})
+Rev Token	SaaS Tokens	85	false	rev	(?i:rev)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z\-]{27}[ \r\n]{1})
+Revampcrm Token	SaaS Tokens	85	false	revamp	(?i:revamp)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40}\b)
+Revampcrm Token	SaaS Tokens	85	false	revamp	(?i:revamp)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9.-@]{25,30})\b
+Ringcentral Token	SaaS Tokens	85	false	ringcentral	(?i:ringcentral)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z_-]{22})\b
+Ringcentral Token	SaaS Tokens	85	false	ringcentral	(?i:ringcentral)(?:.|[\n\r]){0,40}?\b(https://www.[0-9A-Za-z_-]{1,}.com)\b
+Ritekit Token	SaaS Tokens	85	false	ritekit	(?i:ritekit)(?:.|[\n\r]){0,40}?\b([0-9a-f]{44})\b
+Roaring Token	SaaS Tokens	85	false	roaring	(?i:roaring)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z_-]{28})\b
+Robinhoodcrypto Token	SaaS Tokens	85	false	rh-api-	\b(rh-api-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b
+Robinhoodcrypto Token	SaaS Tokens	85	false	rh-api-	(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)
+Rocketreach Token	SaaS Tokens	85	false	rocketreach	(?i:rocketreach)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{39})\b
+Rootly Token	SaaS Tokens	85	false	rootly_	\b(rootly_[a-f0-9]{64})\b
+Route 4 Me Token	SaaS Tokens	85	false	route4me	(?i:route4me)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{32})\b
+Rownd Token	SaaS Tokens	85	false	rownd	(?i:rownd)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12})\b
+Rownd Token	SaaS Tokens	85	false	rownd	(?i:rownd)(?:.|[\n\r]){0,40}?\b([a-z0-9]{48})\b
+Rownd Token	SaaS Tokens	85	false	rownd	(?i:rownd)(?:.|[\n\r]){0,40}?\b([0-9]{18})\b
+Rubygems Token	SaaS Tokens	85	false	rubygems	\b(rubygems_[a-zA0-9]{48})\b
+Runrunit Token	SaaS Tokens	85	false	runrunit	(?i:runrunit)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Runrunit Token	SaaS Tokens	85	false	runrunit	(?i:runrunit)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{18,20})\b
+Saladcloudapikey	Cloud Secrets	85	false	salad_cloud_	\b(salad_cloud_[0-9A-Za-z]{1,7}_[0-9A-Za-z]{7,235})\b
+Salesblink Token	SaaS Tokens	85	false	salesblink	(?i:salesblink)(?:.|[\n\r]){0,40}?\b(key-[a-zA-Z0-9]{64})\b
+Salescookie Token	SaaS Tokens	85	false	salescookie	(?i:salescookie)(?:.|[\n\r]){0,40}?\b([a-zA-z0-9]{32})\b
+Salesflare Token	SaaS Tokens	85	false	salesflare	(?i:salesflare)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{45})\b
+Salesforce Token	SaaS Tokens	85	false	salesforce	\b00[a-zA-Z0-9]{13}![a-zA-Z0-9_.]{96}\b
+Salesforce Token	SaaS Tokens	85	false	salesforce	\bhttps://[0-9a-zA-Z-\.]{1,100}\.my\.salesforce\.com\b
+Salesforceoauth 2	SaaS Tokens	85	false	consumer,salesforce,secret	(?i:salesforce|consumer|secret)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9+/=.]{64}|[0-9]{19})\b
+Salesforceoauth 2	SaaS Tokens	85	false	salesforce,3mvg9	\b(?:https?://)?([0-9a-zA-Z\-\.]{1,100}\.my\.salesforce\.com)\b
+Salesforceoauth 2	SaaS Tokens	85	false	salesforce,3mvg9	\b(3MVG9[0-9a-zA-Z._+/=]{80,251})
+Salesforcerefreshtoken	SaaS Tokens	85	false	salesforce,5aep861,3mvg9	(?i)\b(5AEP861[a-zA-Z0-9._=]{80,})\b
+Salesmate Token	SaaS Tokens	85	false	salesmate	(?i:salesmate)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Salesmate Token	SaaS Tokens	85	false	salesmate	(?i:salesmate)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{3,22})\b
+Sanity Token	SaaS Tokens	85	false	sanity	(?i:sanity)(?:.|[\n\r]){0,40}?\b(sk[A-Za-z0-9]{79})\b
+Satismeterprojectkey	SaaS Tokens	85	false	satismeter	(?i:satismeter)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{24})\b
+Satismeterprojectkey	SaaS Tokens	85	false	satismeter	(?i:satismeter)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{32})\b
+Satismeterwritekey	SaaS Tokens	85	false	satismeter	(?i:satismeter)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Saucelabs Token	SaaS Tokens	85	false	username,saucelabs	(?i:saucelabs|username)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_\.-]{2,70})
+Saucelabs Token	SaaS Tokens	85	false	saucelabs	(?i:saucelabs)(?:.|[\n\r]){0,40}?\b([a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12})\b
+Saucelabs Token	SaaS Tokens	85	false	saucelabs	\b(api\.(?:us|eu)-(?:west|east|central)-[0-9].saucelabs\.com)\b
+Scalewaykey	SaaS Tokens	85	false	scaleway	(?i:scaleway)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Scalr Token	SaaS Tokens	85	false	scalr	(?i:scalr)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z._]{136})
+Scalr Token	SaaS Tokens	85	false	scalr	(?i:scalr)(?:.|[\n\r]){0,40}?\b([0-9a-z]{4,50})\b
+Scrapeowl Token	SaaS Tokens	85	false	scrapeowl	(?i:scrapeowl)(?:.|[\n\r]){0,40}?\b([0-9a-z]{30})\b
+Scraperapi Token	SaaS Tokens	85	false	scraperapi	(?i:scraperapi)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Scraperbox Token	SaaS Tokens	85	false	scraperbox	(?i:scraperbox)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{32})\b
+Scrapestack Token	SaaS Tokens	85	false	scrapestack	(?i:scrapestack)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Scrapfly Token	SaaS Tokens	85	false	scrapfly	(?i:scrapfly)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32}|scp-(?:live|test)-[a-z0-9]{32})\b
+Scrapingant Token	SaaS Tokens	85	false	scrapingant	(?i:scrapingant)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Scrapingbee Token	SaaS Tokens	85	false	scraping[ _-]?bee	(?i:scraping\[\ _\-\]\?bee)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{80})\b
+Screenshotapi Token	SaaS Tokens	85	false	screenshotapi	(?i:screenshotapi)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{7}\-[0-9A-Z]{7}\-[0-9A-Z]{7}\-[0-9A-Z]{7})\b
+Screenshotlayer Token	SaaS Tokens	85	false	screenshotlayer	(?i:screenshotlayer)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_]{32})\b
+Scrutinizerci Token	CI/CD & DevOps Secrets	85	false	scrutinizer	(?i:scrutinizer)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Securitytrails Token	AI & ML Secrets	85	false	securitytrails	(?i:securitytrails)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Segmentapikey	SaaS Tokens	85	false	segment	(?i:segment)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9_\-a-zA-Z]{43}\.[A-Za-z0-9_\-a-zA-Z]{43})\b
+Selectpdf Token	SaaS Tokens	85	false	selectpdf	(?i:selectpdf)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Semaphore Token	SaaS Tokens	85	false	semaphore	(?i:semaphore)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Sendbird Token	Database Credentials	85	false	sendbird	(?i:sendbird)(?:.|[\n\r]){0,40}?\b([0-9a-f]{40})\b
+Sendbird Token	Database Credentials	85	false	sendbird	(?i:sendbird)(?:.|[\n\r]){0,40}?\b([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})\b
+Sendbirdorganizationapi Token	Database Credentials	85	false	sendbird	(?i:sendbird)(?:.|[\n\r]){0,40}?\b([0-9a-f]{24})\b
+Sendgrid Token	Email & Messaging Secrets	85	false	sg.	\bSG\.[\w\-]{20,24}\.[\w\-]{39,50}\b
+Sendinbluev 2 Token	SaaS Tokens	85	false	xkeysib	\b(xkeysib\-[A-Za-z0-9_-]{81})\b
+Sentryorgtoken	Monitoring & Observability	85	false	sntrys_eyj	\b(sntrys_eyJ[a-zA-Z0-9=_+/]{197})\b
+Serphouse Token	SaaS Tokens	85	false	serphouse	(?i:serphouse)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{60})\b
+Serpstack Token	SaaS Tokens	85	false	serpstack	(?i:serpstack)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Sheety Token	SaaS Tokens	85	false	sheety	(?i:sheety)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Sheety Token	SaaS Tokens	85	false	sheety	(?i:sheety)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Sherpadesk Token	SaaS Tokens	85	false	sherpadesk	(?i:sherpadesk)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Shipday Token	SaaS Tokens	85	false	shipday	(?i:shipday)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9.]{11}[a-zA-Z0-9]{20})\b
+Shodankey	SaaS Tokens	85	false	shodan	(?i:shodan)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Shopify Token	Payment & Financial Secrets	85	false	shppa_,shpat_	\b(shppa_|shpat_)([0-9A-Fa-f]{32})\b
+Shopify Token	Payment & Financial Secrets	85	false	shppa_,shpat_	[a-zA-Z0-9-]+\.myshopify\.com
+Shopifyoauth	Payment & Financial Secrets	85	false	id,client,shopify	(?i:shopify|client|id)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Shopifyoauth	Payment & Financial Secrets	85	false	shpss_,myshopify.com	\b(shpss_[a-fA-F0-9]{32})\b
+Shopifyoauth	Payment & Financial Secrets	85	false	shpss_,myshopify.com	\b([a-zA-Z0-9][-a-zA-Z0-9]*\.myshopify\.com)\b
+Shortcut Token	SaaS Tokens	85	false	shortcut	(?i:shortcut)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Shotstack Token	SaaS Tokens	85	false	shotstack	(?i:shotstack)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{40})\b
+Shutterstock Token	SaaS Tokens	85	false	shutterstock	(?i:shutterstock)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Shutterstock Token	SaaS Tokens	85	false	shutterstock	(?i:shutterstock)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{16})\b
+Shutterstockoauth	SaaS Tokens	85	false	shutterstock	(?i:shutterstock)(?:.|[\n\r]){0,40}?\b(v2/[0-9A-Za-z]{388})\b
+Signable Token	SaaS Tokens	85	false	signable	(?i)([a-z]{2})signable
+Signalwire Token	SaaS Tokens	85	false	signalwire	(?i:signalwire)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{50})\b
+Signalwire Token	SaaS Tokens	85	false	signalwire	(?i:signalwire)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Signalwire Token	SaaS Tokens	85	false	signalwire	\b([0-9a-z-]{3,64}\.signalwire\.com)\b
+Signaturit Token	SaaS Tokens	85	false	signaturit	(?i:signaturit)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{86})\b
+Signupgenius Token	SaaS Tokens	85	false	signupgenius	(?i:signupgenius)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{32})\b
+Sigopt Token	SaaS Tokens	85	false	sigopt	(?i:sigopt)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{48})\b
+Simfin Token	SaaS Tokens	85	false	simfin	(?i:simfin)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Simplesat Token	SaaS Tokens	85	false	simplesat	(?i:simplesat)(?:.|[\n\r]){0,40}?\b([a-z0-9]{40})
+Simplynoted Token	SaaS Tokens	85	false	simplynoted	(?i:simplynoted)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\S]{340,360})\b
+Simvoly Token	SaaS Tokens	85	false	simvoly	(?i:simvoly)(?:.|[\n\r]){0,40}?\b([a-z0-9]{33})\b
+Sinchmessage Token	Email & Messaging Secrets	85	false	sinch	(?i:sinch)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Sirv Token	SaaS Tokens	85	false	sirv	(?i:sirv)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9\S]{88})
+Sirv Token	SaaS Tokens	85	false	sirv	(?i:sirv)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{26})\b
+Siteleaf Token	SaaS Tokens	85	false	siteleaf	(?i:siteleaf)(?:.|[\n\r]){0,40}?\b([0-9Aa-z]{32})\b
+Skrappio Token	SaaS Tokens	85	false	skrapp	(?i:skrapp)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{42})\b
+Skybiometry Token	SaaS Tokens	85	false	skybiometry	(?i:skybiometry)(?:.|[\n\r]){0,40}?\b([0-9a-z]{25,26})\b
+Slack Token	Email & Messaging Secrets	85	false	xoxa-,xoxr-,xoxb-,xoxp-	xoxb\-[0-9]{10,13}\-[0-9]{10,13}[a-zA-Z0-9\-]*
+Slack Token	Email & Messaging Secrets	85	false	xoxa-,xoxr-,xoxb-,xoxp-	xoxp\-[0-9]{10,13}\-[0-9]{10,13}[a-zA-Z0-9\-]*
+Slack Token	Email & Messaging Secrets	85	false	xoxa-,xoxr-,xoxb-,xoxp-	xoxa\-[0-9]{10,13}\-[0-9]{10,13}[a-zA-Z0-9\-]*
+Slack Token	Email & Messaging Secrets	85	false	xoxa-,xoxr-,xoxb-,xoxp-	xoxr\-[0-9]{10,13}\-[0-9]{10,13}[a-zA-Z0-9\-]*
+Slackwebhook	Email & Messaging Secrets	85	false	hooks.slack.com	(https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]{23,25})
+Slackwebhook	Email & Messaging Secrets	85	false	hooks.slack.com	(https://hooks\.slack\.com/workflows/T[A-Z0-9]+/A[A-Z0-9]+/[0-9]{17,19}/[A-Za-z0-9]{23,25})
+Smartsheets Token	SaaS Tokens	85	false	sheet	(?i:sheet)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{26}|[a-zA-Z0-9]{37})\b
+Smartystreets Token	SaaS Tokens	85	false	smartystreets	(?i:smartystreets)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{20})\b
+Smartystreets Token	SaaS Tokens	85	false	smartystreets	(?i:smartystreets)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Smooch Token	SaaS Tokens	85	false	smooch	(?i:smooch)(?:.|[\n\r]){0,40}?\b(act_[0-9a-z]{24})\b
+Smooch Token	SaaS Tokens	85	false	smooch	(?i:smooch)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z_-]{86})\b
+Snipcart Token	SaaS Tokens	85	false	snipcart	(?i:snipcart)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z_]{75})\b
+Snowflake Token	SaaS Tokens	85	false	account	(?i:account)(?:.|[\n\r]){0,40}?\b([a-zA-Z]{7}-[0-9a-zA-Z-_]{1,255}(.privatelink)?)\b
+Snykkey	SaaS Tokens	85	false	snyk	(?i:snyk)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Solarwindsobservability Token	Monitoring & Observability	85	false	solarwinds	(?i:solarwinds)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z_-]{71})\b
+Sourcegraph Token	SaaS Tokens	85	false	sgp_	\b(sgp_(?:[a-fA-F0-9]{16}|local)_[a-fA-F0-9]{40}|sgp_[a-fA-F0-9]{40}|[a-fA-F0-9]{40})\b
+Sourcegraphcody Token	SaaS Tokens	85	false	slk_	\b(slk_[a-f0-9]{64})\b
+Sparkpost Token	SaaS Tokens	85	false	sparkpost	\b([a-zA-Z0-9]{40})\b
+Splunkobservabilitytoken	Monitoring & Observability	85	false	splunk	(?i:splunk)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{22})\b
+Spoonacular Token	SaaS Tokens	85	false	spoonacular	(?i:spoonacular)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Sportsmonk Token	SaaS Tokens	85	false	sportsmonk	(?i:sportsmonk)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{60})\b
+Spotifykey	SaaS Tokens	85	false	secret,key	(?i:key|secret)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{32})\b
+Spotifykey	SaaS Tokens	85	false	id	(?i:id)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{32})\b
+Square Token	Payment & Financial Secrets	85	false	square	(?i:square)(?:.|[\n\r]){0,40}?(EAAA[a-zA-Z0-9\-_+=]{60})
+Squareapp Token	Payment & Financial Secrets	85	false	sq0i	(?:sandbox-)?sq0i[a-z]{2}-[0-9A-Za-z_-]{22,43}
+Squareapp Token	Payment & Financial Secrets	85	false	sq0i	(?:sandbox-)?sq0c[a-z]{2}-[0-9A-Za-z_-]{40,50}
+Squarespace Token	Payment & Financial Secrets	85	false	squarespace	(?i:squarespace)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Sslmate Token	SaaS Tokens	85	false	sslmate	(?i:sslmate)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{36})\b
+Statuscake Token	SaaS Tokens	85	false	statuscake	(?i:statuscake)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{20})\b
+Statuspage Token	SaaS Tokens	85	false	statuspage	(?i:statuspage)(?:.|[\n\r]){0,40}?\b([0-9a-z-]{36})\b
+Statuspal Token	SaaS Tokens	85	false	statuspal	(?i:statuspal)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Stitchdata Token	SaaS Tokens	85	false	stitchdata	(?i:stitchdata)(?:.|[\n\r]){0,40}?\b([0-9a-z_]{35})\b
+Stockdata Token	SaaS Tokens	85	false	stockdata	(?i:stockdata)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{40})\b
+Storecove Token	SaaS Tokens	85	false	storecove	(?i:storecove)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_-]{43})\b
+Stormboard Token	SaaS Tokens	85	false	stormboard	(?i:stormboard)(?:.|[\n\r]){0,40}?\b([a-f0-9]{40})\b
+Stormglass Token	SaaS Tokens	85	false	stormglass	(?i:stormglass)(?:.|[\n\r]){0,40}?\b([0-9Aa-z-]{73})\b
+Storyblok Token	SaaS Tokens	85	false	storyblok	(?i:storyblok)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{22}tt)\b
+Storyblokpersonalaccesstoken	SaaS Tokens	85	false	storyblok	(?i:storyblok)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{22}tt-[0-9]{6}-[A-Za-z0-9_-]{20})\b
+Storychief Token	SaaS Tokens	85	false	storychief	(?i:storychief)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_\-.]{940,1000})
+Strava Token	SaaS Tokens	85	false	strava	(?i:strava)(?:.|[\n\r]){0,40}?\b([0-9]{5})\b
+Strava Token	SaaS Tokens	85	false	strava	(?i:strava)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Streak Token	SaaS Tokens	85	false	streak	(?i:streak)(?:.|[\n\r]){0,40}?\b([0-9Aa-f]{32})\b
+Stripe Token	Payment & Financial Secrets	85	false	k_live	[rs]k_live_[a-zA-Z0-9]{20,247}
+Stripepaymentintent Token	Payment & Financial Secrets	85	false	_secret_	\b(pi_[a-zA-Z0-9]{24}_secret_[a-zA-Z0-9]{25})\b
+Stripepaymentintent Token	Payment & Financial Secrets	85	false	_secret_	\b([rs]k_live_[a-zA-Z0-9]{20,247})\b
+Stripepaymentintent Token	Payment & Financial Secrets	85	false	_secret_	\b(pk_live_[a-zA-Z0-9]{20,247})\b
+Stripo Token	SaaS Tokens	85	false	stripo	(?i:stripo)(?:.|[\n\r]){0,40}?\b(eyJhbGciOiJIUzI1NiJ9\.[0-9A-Za-z]{130}\.[0-9A-Za-z_-]{43})\b
+Stytch Token	SaaS Tokens	85	false	stytch	(?i:stytch)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-_]{47}=)
+Stytch Token	SaaS Tokens	85	false	stytch	(?i:stytch)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{49})\b
+Sugester Token	SaaS Tokens	85	false	sugester	(?i:sugester)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Sugester Token	SaaS Tokens	85	false	sugester	(?i:sugester)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_.!+$#^*%]{3,32})\b
+Sumologickey	Monitoring & Observability	85	false	accessid,sumo	(?i:sumo|accessId)(?:.|[\n\r]){0,40}?\b(su[A-Za-z0-9]{12})\b
+Sumologickey	Monitoring & Observability	85	false	sumo,accesskey	(?i:sumo|accessKey)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{64})\b
+Sumologickey	Monitoring & Observability	85	false	accessid,sumo,accesskey	(?i)api\.(?:au|ca|de|eu|fed|jp|kr|in|us2)\.sumologic\.com
+Supabasetoken	Cloud Secrets	85	false	sbp_	\b(sbp_[a-z0-9]{40})\b
+Supernotesapi Token	SaaS Tokens	85	false	supernotes	(?i:supernotes)(?:.|[\n\r]){0,40}?([ \r\n]{0,1}[0-9A-Za-z\-_]{43}[ \r\n]{1})
+Surveyanyplace Token	SaaS Tokens	85	false	survey	(?i:survey)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Surveyanyplace Token	SaaS Tokens	85	false	survey	(?i:survey)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z-]{36})\b
+Surveybot Token	SaaS Tokens	85	false	surveybot	(?i:surveybot)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9-]{80})\b
+Surveysparrow Token	SaaS Tokens	85	false	surveysparrow	(?i:surveysparrow)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-_]{88})\b
+Survicate Token	SaaS Tokens	85	false	survicate	(?i:survicate)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Swell Token	SaaS Tokens	85	false	swell	(?i:swell)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Swell Token	SaaS Tokens	85	false	swell	(?i:swell)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{6,24})\b
+Swiftype Token	SaaS Tokens	85	false	swiftype	(?i:swiftype)(?:.|[\n\r]){0,40}?\b([a-zA-z-0-9]{6}\_[a-zA-z-0-9]{6}\-[a-zA-z-0-9]{6})\b
+Tableau Token	SaaS Tokens	85	false	pat,token,tableau,name	(?i:pat|token|name|tableau)(?:.|[\n\r]){0,40}?([a-zA-Z][a-zA-Z0-9_-]{2,50})
+Tableau Token	SaaS Tokens	85	false	online.tableau.com,tableau	\b([A-Za-z0-9+/]{22}==:[A-Za-z0-9]{32})\b
+Tableau Token	SaaS Tokens	85	false	online.tableau.com,tableau	\b([a-zA-Z0-9\-]+\.online\.tableau\.com)\b
+Tailscale Token	AI & ML Secrets	85	false	tskey-api-,tskey-,tskey-oauth-	\btskey-[a-z]+-[0-9A-Za-z_]+-[0-9A-Za-z_]+\b
+Tallyfy Token	SaaS Tokens	85	false	tallyfy	(?i:tallyfy)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{36}\.[0-9A-Za-z]{264}\.[0-9A-Za-z\-\_]{683})\b
+Tatumio Token	SaaS Tokens	85	false	tatum	(?i:tatum)(?:.|[\n\r]){0,40}?\b([0-9a-z-]{36})\b
+Taxjar Token	SaaS Tokens	85	false	taxjar	(?i:taxjar)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Teamgate Token	SaaS Tokens	85	false	teamgate	(?i:teamgate)(?:.|[\n\r]){0,40}?\b([a-z0-9]{40})\b
+Teamgate Token	SaaS Tokens	85	false	teamgate	(?i:teamgate)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{80})\b
+Teamworkcrm Token	SaaS Tokens	85	false	teamworkcrm,teamwork	(?i:teamwork|teamworkcrm)(?:.|[\n\r]){0,40}?\b(tkn\.v1_[0-9A-Za-z]{71}=[ \r\n]{1})
+Teamworkdesk Token	SaaS Tokens	85	false	teamwork,teamworkdesk	(?i:teamwork|teamworkdesk)(?:.|[\n\r]){0,40}?\b(tkn\.v1_[0-9A-Za-z]{71}=[ \r\n]{1})
+Teamworkspaces Token	SaaS Tokens	85	false	teamwork,teamworkspaces	(?i:teamwork|teamworkspaces)(?:.|[\n\r]){0,40}?\b(tkn\.v1_[0-9A-Za-z]{71}=[ \r\n]{1})
+Technicalanalysisapi Token	SaaS Tokens	85	false	technicalanalysisapi	(?i:technicalanalysisapi)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{48})\b
+Tefter Token	SaaS Tokens	85	false	tefter	(?i:tefter)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{20})\b
+Telegrambottoken	Email & Messaging Secrets	85	false	telegram,tgram://	(?i:telegram|tgram://)(?:.|[\n\r]){0,40}?\b([0-9]{8,10}:[a-zA-Z0-9_-]{35})\b
+Teletype Token	SaaS Tokens	85	false	teletype	(?i:teletype)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z-]{64})\b
+Telnyx Token	SaaS Tokens	85	false	telnyx	(?i:telnyx)(?:.|[\n\r]){0,40}?\b(KEY[0-9A-Za-z_-]{55})\b
+Terraformcloudpersonaltoken	Cloud Secrets	85	false	.atlasv1.	\b([A-Za-z0-9]{14}.atlasv1.[A-Za-z0-9]{67})\b
+Testingbot Token	SaaS Tokens	85	false	testingbot	(?i:testingbot)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Textmagic Token	SaaS Tokens	85	false	textmagic	(?i:textmagic)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{30})\b
+Textmagic Token	SaaS Tokens	85	false	textmagic	(?i:textmagic)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{1,25})\b
+Theoddsapi Token	SaaS Tokens	85	false	the-odds-api,theoddsapi	(?i:theoddsapi|the\-odds\-api)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Thinkific Token	SaaS Tokens	85	false	thinkific	(?i:thinkific)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Thinkific Token	SaaS Tokens	85	false	thinkific	(?i:thinkific)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{4,40})\b
+Thousandeyes Token	SaaS Tokens	85	false	thousandeyes	(?i:thousandeyes)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Thousandeyes Token	SaaS Tokens	85	false	thousandeyes	(?i:thousandeyes)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{3,20}@[a-zA-Z0-9]{2,12}.[a-zA-Z0-9]{2,5})\b
+Ticketmaster Token	SaaS Tokens	85	false	ticketmaster	(?i:ticketmaster)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Tickettailor Token	AI & ML Secrets	85	false	tickettailor	(?i:tickettailor)(?:.|[\n\r]){0,40}?\b(sk_[0-9]{4}_[0-9]{6}_[a-f0-9]{32})
+Tiingo Token	SaaS Tokens	85	false	tiingo	(?i:tiingo)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Timecamp Token	SaaS Tokens	85	false	timecamp	(?i:timecamp)(?:.|[\n\r]){0,40}?\b([0-9a-z]{26})\b
+Timezoneapi Token	SaaS Tokens	85	false	timezoneapi	(?i:timezoneapi)(?:.|[\n\r]){0,40}?\b([a-zA-Z]{20})\b
+Tineswebhook	SaaS Tokens	85	false	tines.com	(https://[\w-]+\.tines\.com/webhook/[a-z0-9]{32}/[a-z0-9]{32})
+Tly Token	SaaS Tokens	85	false	tly	(?i:tly)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{60})\b
+Tmetric Token	SaaS Tokens	85	false	tmetric	(?i:tmetric)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{64})\b
+Todoist Token	SaaS Tokens	85	false	todoist	(?i:todoist)(?:.|[\n\r]){0,40}?\b([0-9a-z]{40})\b
+Toggltrack Token	SaaS Tokens	85	false	toggl	(?i:toggl)(?:.|[\n\r]){0,40}?\b([0-9Aa-z]{32})\b
+Tokeet Token	SaaS Tokens	85	false	tokeet	(?i:tokeet)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Tokeet Token	SaaS Tokens	85	false	tokeet	(?i:tokeet)(?:.|[\n\r]){0,40}?\b([0-9]{10}.[0-9]{4})\b
+Tomorrowio Token	SaaS Tokens	85	false	tomorrow	(?i:tomorrow)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Tomtom Token	SaaS Tokens	85	false	tomtom	(?i:tomtom)(?:.|[\n\r]){0,40}?\b([0-9Aa-zA-Z]{32})\b
+Tradier Token	SaaS Tokens	85	false	tradier	(?i:tradier)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{28})\b
+Transferwise Token	SaaS Tokens	85	false	transferwise	(?i:transferwise)(?:.|[\n\r]){0,40}?\b([0-9a-f-]{8}-[0-9a-f-]{4}-[0-9a-f-]{4}-[0-9a-f-]{4}-[0-9a-f-]{12})\b
+Travelpayouts Token	SaaS Tokens	85	false	travelpayouts	(?i:travelpayouts)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Travisci Token	CI/CD & DevOps Secrets	85	false	travis	(?i:travis)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9A-Z_]{22})\b
+Trelloapikey	SaaS Tokens	85	false	trello	(?i:trello)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{32})\b
+Trelloapikey	SaaS Tokens	85	false	trello	\b([a-zA-Z-0-9]{64})\b
+Tru Token	SaaS Tokens	85	false	tru	(?i:tru)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
+Tru Token	SaaS Tokens	85	false	tru	(?i:tru)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z.-_]{26})\b
+Trufflehogenterprise Token	SaaS Tokens	85	false	thog	\bthog-key-[0-9a-f]{16}\b
+Trufflehogenterprise Token	SaaS Tokens	85	false	thog	\bthog-secret-[0-9a-f]{32}\b
+Trufflehogenterprise Token	SaaS Tokens	85	false	thog	\b[a-z]+-[a-z]+-[a-z]+\.[a-z][0-9]\.[a-z]+\.trufflehog\.org\b
+Twelvedata Token	SaaS Tokens	85	false	twelvedata	(?i:twelvedata)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Twilio Token	Email & Messaging Secrets	85	false	twilio,sid	\bAC[0-9a-f]{32}\b
+Twilio Token	Email & Messaging Secrets	85	false	twilio,sid	\b[0-9a-f]{32}\b
+Twilioapikey	Email & Messaging Secrets	85	false	twilio	\bSK[a-zA-Z0-9]{32}\b
+Twilioapikey	Email & Messaging Secrets	85	false	twilio	\b[0-9a-zA-Z]{32}\b
+Twist Token	SaaS Tokens	85	false	twist	(?i:twist)(?:.|[\n\r]){0,40}?\b(?:oauth2:)?([0-9a-f]{40})\b
+Twitch Token	SaaS Tokens	85	false	twitch	(?i:twitch)(?:.|[\n\r]){0,40}?\b([0-9a-z]{30})\b
+Twitterconsumerkey	SaaS Tokens	85	false	consumer,twitter,key	(?i:twitter|consumer|key)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{25})\b
+Twitterconsumerkey	SaaS Tokens	85	false	consumer,twitter,secret	(?i:twitter|consumer|secret)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{50})\b
+Tyntec Token	SaaS Tokens	85	false	tyntec	(?i:tyntec)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{32})\b
+Typetalk Token	SaaS Tokens	85	false	typetalk	(?i:typetalk)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{64})\b
+Typetalk Token	SaaS Tokens	85	false	typetalk	(?i:typetalk)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Ubidots Token	SaaS Tokens	85	false	bbff-	\b(BBFF-[0-9a-zA-Z]{30})\b
+Uclassify Token	SaaS Tokens	85	false	uclassify	(?i:uclassify)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{12})\b
+Unifyid Token	SaaS Tokens	85	false	unify	(?i:unify)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z_=-]{44})
+Unplugg Token	SaaS Tokens	85	false	unplu	(?i:unplu)(?:.|[\n\r]){0,40}?\b([a-z0-9]{64})\b
+Unsplash Token	SaaS Tokens	85	false	unsplash	(?i:unsplash)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z_]{43})\b
+Upcdatabase Token	CI/CD & DevOps Secrets	85	false	upcdatabase	(?i:upcdatabase)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{32})\b
+Uplead Token	SaaS Tokens	85	false	uplead	(?i:uplead)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{32})\b
+Uploadcare Token	SaaS Tokens	85	false	uploadcare	(?i:uploadcare)(?:.|[\n\r]){0,40}?\b([a-z0-9]{20})\b
+Uptimerobot Token	SaaS Tokens	85	false	uptimerobot	(?i:uptimerobot)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{9}-[a-zA-Z0-9]{24})\b
+Upwave Token	SaaS Tokens	85	false	upwave	(?i:upwave)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Urlscan	SaaS Tokens	85	false	urlscan	(?i:urlscan)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+User Token	SaaS Tokens	85	false	user	(?i:user)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{64})\b
+User Token	SaaS Tokens	85	false	user.com	\b([a-z0-9-]+\.user\.com)\b
+Userflow Token	SaaS Tokens	85	false	userflow	(?i:userflow)(?:.|[\n\r]){0,40}?\b([0-9a-z_]{29})\b
+Userstack Token	SaaS Tokens	85	false	userstack	(?i:userstack)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Vagrantcloudpersonaltoken	Cloud Secrets	85	false	vagrant	(?i:vagrant)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{14}.atlasv1.[A-Za-z0-9]{67})\b
+Vatlayer Token	SaaS Tokens	85	false	vatlayer	(?i:vatlayer)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Vbout Token	SaaS Tokens	85	false	vbout	(?i:vbout)(?:.|[\n\r]){0,40}?\b([0-9]{25})\b
+Vercel Token	CI/CD & DevOps Secrets	85	false	vercel	(?i:vercel)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{24})\b
+Verifier Token	SaaS Tokens	85	false	verifier	(?i:verifier)(?:.|[\n\r]){0,40}?\b([a-z0-9]{96})\b
+Verimail Token	AI & ML Secrets	85	false	verimail	(?i:verimail)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{32})\b
+Veriphone Token	SaaS Tokens	85	false	veriphone	(?i:veriphone)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{32})\b
+Versioneye Token	SaaS Tokens	85	false	versioneye	(?i:versioneye)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-]{40})\b
+Viewneo Token	SaaS Tokens	85	false	viewneo	(?i:viewneo)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{120,300}.[a-z0-9A-Z]{150,300}.[a-z0-9A-Z-_]{600,800})
+Virustotal Token	SaaS Tokens	85	false	virustotal	(?i:virustotal)(?:.|[\n\r]){0,40}?\b([a-f0-9]{64})\b
+Visualcrossing Token	SaaS Tokens	85	false	visualcrossing	(?i:visualcrossing)(?:.|[\n\r]){0,40}?\b([0-9A-Z]{25})\b
+Voiceflow Token	SaaS Tokens	85	false	vf,dm	\b(VF\.(?:(?:DM|WS)\.)?[a-fA-F0-9]{24}\.[a-zA-Z0-9]{16})\b
+Voicegain Token	AI & ML Secrets	85	false	voicegain	(?i:voicegain)(?:.|[\n\r]){0,40}?\b(ey[0-9a-zA-Z_-]{34}.ey[0-9a-zA-Z_-]{108}.[0-9a-zA-Z_-]{43})\b
+Voodoosms Token	Email & Messaging Secrets	85	false	voodoosms	(?i:voodoosms)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{46})\b
+Vouchery Token	SaaS Tokens	85	false	vouchery	(?i:vouchery)(?:.|[\n\r]){0,40}?\b([a-z0-9-]{36})\b
+Vouchery Token	SaaS Tokens	85	false	vouchery	(?i:vouchery)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-\S]{2,20})\b
+Vpnapi Token	SaaS Tokens	85	false	vpnapi	(?i:vpnapi)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z]{32})\b
+Vultrapikey	SaaS Tokens	85	false	vultr	(?i:vultr)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{36})\b
+Vyte Token	SaaS Tokens	85	false	vyte	(?i:vyte)(?:.|[\n\r]){0,40}?\b([0-9a-z]{50})\b
+Walkscore Token	SaaS Tokens	85	false	walkscore	(?i:walkscore)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Weatherbit Token	SaaS Tokens	85	false	weatherbit	(?i:weatherbit)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Weatherstack Token	SaaS Tokens	85	false	weatherstack	(?i:weatherstack)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Web 3 Storage Token	SaaS Tokens	85	false	web3	(?i:web3)(?:.|[\n\r]){0,40}?\b(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJ[A-Za-z0-9-_]{100,300}\.[A-Za-z0-9-_]{25,100})\b
+Webex Token	SaaS Tokens	85	false	webex	(?i:webex)(?:.|[\n\r]){0,40}?\b([a-f0-9]{64})\b
+Webex Token	SaaS Tokens	85	false	webex	(?i:webex)(?:.|[\n\r]){0,40}?\b(C[a-f0-9]{64})\b
+Webex Token	SaaS Tokens	85	false	error	(?i:error)(?:.|[\n\r]){0,40}?(redirect_uri_mismatch)
+Webexbot Token	SaaS Tokens	85	false	spark,webex	([a-zA-Z0-9]{64}_[a-zA-Z0-9]{4}_[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12})
+Webflow Token	SaaS Tokens	85	false	webflow	(?i:webflow)(?:.|[\n\r]){0,40}?\b([a-zA0-9]{64})\b
+Webscraper Token	SaaS Tokens	85	false	webscraper	(?i:webscraper)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{60})\b
+Webscraping Token	SaaS Tokens	85	false	webscraping	(?i:webscraping)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{32})\b
+Websitepulse Token	SaaS Tokens	85	false	websitepulse	(?i:websitepulse)(?:.|[\n\r]){0,40}?\b([0-9a-f]{32})\b
+Websitepulse Token	SaaS Tokens	85	false	websitepulse	(?i:websitepulse)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z._]{4,22})\b
+Wepay Token	SaaS Tokens	85	false	wepay	(?i:wepay)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_?]{62})\b
+Wepay Token	SaaS Tokens	85	false	wepay	\b(\d{6})\b
+Whoxy Token	SaaS Tokens	85	false	whoxy	(?i:whoxy)(?:.|[\n\r]){0,40}?\b([0-9a-z]{33})\b
+Wistia Token	SaaS Tokens	85	false	wistia	(?i:wistia)(?:.|[\n\r]){0,40}?\b([0-9a-z]{64})\b
+Wit Token	SaaS Tokens	85	false	wit	(?i:wit)(?:.|[\n\r]){0,40}?\b([A-Z0-9]{32})\b
+Wiz Token	SaaS Tokens	85	false	wiz	(?i:wiz)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{53})\b
+Wiz Token	SaaS Tokens	85	false	wiz	(?i:wiz)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Worksnaps Token	SaaS Tokens	85	false	worksnaps	(?i:worksnaps)(?:.|[\n\r]){0,40}?\b([0-9A-Za-z]{40})\b
+Workstack Token	SaaS Tokens	85	false	workstack	(?i:workstack)(?:.|[\n\r]){0,40}?\b([0-9Aa-zA-Z]{60})\b
+Worldcoinindex Token	SaaS Tokens	85	false	worldcoinindex	(?i:worldcoinindex)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{35})\b
+Worldweather Token	SaaS Tokens	85	false	worldweather	(?i:worldweather)(?:.|[\n\r]){0,40}?\b([0-9a-z]{31})\b
+Wrike Token	SaaS Tokens	85	false	wrike	(?i:wrike)(?:.|[\n\r]){0,40}?\b(ey[a-zA-Z0-9-._]{333})\b
+Xai Token	AI & ML Secrets	85	false	xai-	\b(xai-[0-9a-zA-Z_]{80})\b
+Yandex Token	SaaS Tokens	85	false	yandex	(?i:yandex)(?:.|[\n\r]){0,40}?\b([a-z0-9A-Z.]{83})\b
+Yelp Token	SaaS Tokens	85	false	yelp	(?i:yelp)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9_\\=\.\-]{128})\b
+Youneedabudget Token	SaaS Tokens	85	false	youneedabudget	(?i:youneedabudget)(?:.|[\n\r]){0,40}?\b([0-9a-f]{64})\b
+Yousign Token	SaaS Tokens	85	false	yousign	(?i:yousign)(?:.|[\n\r]){0,40}?\b([0-9a-z]{32})\b
+Youtubeapikey	SaaS Tokens	85	false	youtube	(?i:youtube)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9_]{39})\b
+Youtubeapikey	SaaS Tokens	85	false	youtube	(?i:youtube)(?:.|[\n\r]){0,40}?\b([a-zA-Z-0-9]{24})\b
+Zapierwebhook	SaaS Tokens	85	false	hooks.zapier.com/hooks/catch/	(https:\/\/hooks\.zapier\.com\/hooks\/catch\/[A-Za-z0-9\/]{16})
+Zendeskapi Token	SaaS Tokens	85	false	zendesk	(?i:zendesk)(?:.|[\n\r]){0,40}?([A-Za-z0-9_-]{40})
+Zendeskapi Token	SaaS Tokens	85	false	zendesk	\b([a-zA-Z-0-9-]{5,16}\@[a-zA-Z-0-9]{4,16}\.[a-zA-Z-0-9]{3,6})\b
+Zendeskapi Token	SaaS Tokens	85	false	zendesk	\b([a-zA-Z-0-9]{3,25}\.zendesk\.com)\b
+Zenkitapi Token	SaaS Tokens	85	false	zenkit	(?i:zenkit)(?:.|[\n\r]){0,40}?\b([0-9a-z]{8}\-[0-9A-Za-z]{32})\b
+Zenrows Token	SaaS Tokens	85	false	zenrows	(?i:zenrows)(?:.|[\n\r]){0,40}?\b([0-9a-f]{40})\b
+Zenscrape Token	SaaS Tokens	85	false	zenscrape	(?i:zenscrape)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Zenserp Token	SaaS Tokens	85	false	zenserp	(?i:zenserp)(?:.|[\n\r]){0,40}?\b([0-9a-z-]{36})\b
+Zeplin Token	SaaS Tokens	85	false	zeplin	(?i:zeplin)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9-.]{350,400})\b
+Zerobounce Token	SaaS Tokens	85	false	zerobounce	(?i:zerobounce)(?:.|[\n\r]){0,40}?\b([a-z0-9]{32})\b
+Zerotier Token	SaaS Tokens	85	false	zerotier	(?i:zerotier)(?:.|[\n\r]){0,40}?\b([0-9a-zA-Z]{32})\b
+Zipapi Token	SaaS Tokens	85	false	zipapi	(?i:zipapi)(?:.|[\n\r]){0,40}?\b([A-Z0-9a-z]{32})\b
+Zipapi Token	SaaS Tokens	85	false	zipapi	(?i:zipapi)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9!=@#$%^]{7,})
+Zipbooks Token	SaaS Tokens	85	false	password,zipbooks	(?i:zipbooks|password)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9!=@#$%^]{8,})
+Zipcodeapi Token	SaaS Tokens	85	false	zipcodeapi	(?i:zipcodeapi)(?:.|[\n\r]){0,40}?\b([a-zA-Z0-9]{64})\b
+Zipcodebase Token	SaaS Tokens	85	false	zipcodebase	(?i:zipcodebase)(?:.|[\n\r]){0,40}?\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b
+Zohocrm Token	SaaS Tokens	85	false	1000.	\b(1000\.[a-f0-9]{32}\.[a-f0-9]{32})\b
+Zonkafeedback Token	Database Credentials	85	false	zonka	(?i:zonka)(?:.|[\n\r]){0,40}?\b([A-Za-z0-9]{36})\b
+Zulipchat Token	SaaS Tokens	85	false	zulip	\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b
+Zulipchat Token	SaaS Tokens	85	false	zulip	(?i)\b([a-z0-9-]+\.zulip(?:chat)?\.com|chat\.zulip\.org)\b

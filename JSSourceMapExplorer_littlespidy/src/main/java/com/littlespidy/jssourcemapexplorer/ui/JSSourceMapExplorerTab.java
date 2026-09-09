@@ -4,6 +4,7 @@ package com.littlespidy.jssourcemapexplorer.ui;
 import com.littlespidy.jssourcemapexplorer.engine.*;
 import com.littlespidy.jssourcemapexplorer.model.*;
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
@@ -63,7 +64,7 @@ public class JSSourceMapExplorerTab extends JPanel {
     private final HttpRequestEditor mapRequestEditor;
     private final HttpResponseEditor mapResponseEditor;
 
-    // Filters
+    // Filters & Status Strip
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
     private final JComboBox<String> httpStatusFilter = new JComboBox<>(new String[]{
         "200 OK Only",
@@ -75,6 +76,20 @@ public class JSSourceMapExplorerTab extends JPanel {
     });
     private final JTextField searchField = new JTextField(15);
     private final JLabel statsLabel = new JLabel("Total: 0 | 1st Party: 0 | .map Exposed: 0 | Unpacked: 0");
+
+    // Status Strip & Progress Bar
+    private final JLabel liveStatusLabel = new JLabel("Ready. Click 'Load Proxy History' to begin.");
+    private final JProgressBar progressBar = new JProgressBar();
+    private JButton loadHistoryBtn;
+
+    // Manual Row Pinning
+    private final Set<Integer> pinnedIds = new LinkedHashSet<>();
+
+    public boolean isPinned(int id) { return pinnedIds.contains(id); }
+    public void pin(int id) { pinnedIds.add(id); }
+    public void unpin(int id) { pinnedIds.remove(id); }
+    public void clearPins() { pinnedIds.clear(); }
+    public boolean hasPins() { return !pinnedIds.isEmpty(); }
 
     private OriginFilter currentOriginFilter = OriginFilter.ALL;
 
@@ -132,16 +147,16 @@ public class JSSourceMapExplorerTab extends JPanel {
         });
 
         // Tab 1: Welcome & Guide
-        rootTabbedPane.addTab("Welcome & Guide", createWelcomePanel());
+        rootTabbedPane.addTab("📖 Welcome & Guide", createWelcomePanel());
 
         // Tab 2: JS & SourceMap Workspace
-        rootTabbedPane.addTab("JS & SourceMap Workspace", createWorkspacePanel());
+        rootTabbedPane.addTab("🗺️ JS & SourceMap Workspace", createWorkspacePanel());
 
         // Tab 3: Dedicated Recon & Secret Mining Tab
-        rootTabbedPane.addTab("Recon & Secret Mining", reconMiningPanel);
+        rootTabbedPane.addTab("🔍 Recon & Secret Mining", reconMiningPanel);
 
         // Tab 4: AI Security Analyst (Local LLM / Antigravity CLI)
-        rootTabbedPane.addTab("AI Security Analyst", aiSecurityPanel);
+        rootTabbedPane.addTab("✨ AI Security Analyst", aiSecurityPanel);
 
         add(rootTabbedPane, BorderLayout.CENTER);
     }
@@ -183,8 +198,11 @@ public class JSSourceMapExplorerTab extends JPanel {
             ZonedDateTime.now()
         );
 
+        String bodyStr = resp.bodyToString();
+        entry.setFramework(JsFrameworkDetector.detectFramework(url, bodyStr));
+
         // Run Secret, Path, Cloud URLs & Dependency discovery on raw JS file
-        var jsMining = SecretAndEndpointMiner.mine(url, "JS File", resp.bodyToString());
+        var jsMining = SecretAndEndpointMiner.mine(url, "JS File", bodyStr);
         entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies());
 
         dataStore.addEntry(entry);
@@ -272,7 +290,17 @@ public class JSSourceMapExplorerTab extends JPanel {
         // ── Top Toolbar ──
         JPanel topContainer = new JPanel(new BorderLayout(4, 4));
         topContainer.add(createMainToolbar(), BorderLayout.NORTH);
-        topContainer.add(createFilterToolbar(), BorderLayout.SOUTH);
+        topContainer.add(createFilterToolbar(), BorderLayout.CENTER);
+
+        // ── Status Strip ──
+        progressBar.setPreferredSize(new Dimension(220, 16));
+        progressBar.setVisible(false);
+        JPanel statusRow = new JPanel(new BorderLayout(5, 5));
+        statusRow.setBorder(BorderFactory.createEmptyBorder(2, 6, 4, 6));
+        statusRow.add(liveStatusLabel, BorderLayout.WEST);
+        statusRow.add(progressBar, BorderLayout.EAST);
+        topContainer.add(statusRow, BorderLayout.SOUTH);
+
         panel.add(topContainer, BorderLayout.NORTH);
 
         // ── Top Section: Discovered Scripts Table ──
@@ -312,19 +340,19 @@ public class JSSourceMapExplorerTab extends JPanel {
             codeViewerPanel
         );
         treeSplit.setResizeWeight(0.30);
-        bottomTabs.addTab("Reconstructed Source Tree", treeSplit);
+        bottomTabs.addTab("🌲 Reconstructed Source Tree", treeSplit);
 
         // Sub-Tab 2: Raw JS HTTP Messages
         JTabbedPane jsHttpTabs = new JTabbedPane();
-        jsHttpTabs.addTab("JS Request", jsRequestEditor.uiComponent());
-        jsHttpTabs.addTab("JS Response", jsResponseEditor.uiComponent());
-        bottomTabs.addTab("JS HTTP Message", jsHttpTabs);
+        jsHttpTabs.addTab("📤 JS Request", jsRequestEditor.uiComponent());
+        jsHttpTabs.addTab("📥 JS Response", jsResponseEditor.uiComponent());
+        bottomTabs.addTab("📄 JS HTTP Message", jsHttpTabs);
 
         // Sub-Tab 3: Raw SourceMap (.map) HTTP Messages
         JTabbedPane mapHttpTabs = new JTabbedPane();
-        mapHttpTabs.addTab("SourceMap Request", mapRequestEditor.uiComponent());
-        mapHttpTabs.addTab("SourceMap Response", mapResponseEditor.uiComponent());
-        bottomTabs.addTab("SourceMap (.map) HTTP Message", mapHttpTabs);
+        mapHttpTabs.addTab("📤 SourceMap Request", mapRequestEditor.uiComponent());
+        mapHttpTabs.addTab("📥 SourceMap Response", mapResponseEditor.uiComponent());
+        bottomTabs.addTab("🗺️ SourceMap (.map) HTTP Message", mapHttpTabs);
 
         // Master Vertical Split: Scripts Table (Top) vs Project Details & Editors (Bottom)
         JSplitPane mainSplit = new JSplitPane(
@@ -341,7 +369,7 @@ public class JSSourceMapExplorerTab extends JPanel {
     private JPanel createMainToolbar() {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
 
-        JButton loadHistoryBtn = new JButton("Load Proxy History");
+        loadHistoryBtn = new JButton("Load Proxy History");
         loadHistoryBtn.setToolTipText("Scrape and deduplicate all JavaScript responses from Burp Proxy history");
         loadHistoryBtn.addActionListener(e -> loadProxyHistory());
 
@@ -354,6 +382,24 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         JButton deselectAllBtn = new JButton("Deselect All");
         deselectAllBtn.addActionListener(e -> jsTable.clearSelection());
+
+        JButton pinSelectedBtn = new JButton("📌 Pin Selected");
+        pinSelectedBtn.setToolTipText("Show only the selected rows (bypasses all other filters)");
+        pinSelectedBtn.addActionListener(e -> {
+            for (int viewRow : jsTable.getSelectedRows()) {
+                int modelRow = jsTable.convertRowIndexToModel(viewRow);
+                JsFileEntry entry = jsTableModel.getEntryAt(modelRow);
+                if (entry != null) pinnedIds.add(entry.getId());
+            }
+            refreshView();
+        });
+
+        JButton clearPinsBtn = new JButton("Clear Pins");
+        clearPinsBtn.setToolTipText("Clear pinned rows and restore filtered view");
+        clearPinsBtn.addActionListener(e -> {
+            pinnedIds.clear();
+            refreshView();
+        });
 
         JButton probeSelectedBtn = new JButton("Probe Selected .map");
         probeSelectedBtn.setToolTipText("Actively probe selected rows for exposed .js.map files");
@@ -385,6 +431,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                 this, "Clear all discovered JavaScript entries?", "Clear Data", JOptionPane.YES_NO_OPTION
             );
             if (confirm == JOptionPane.YES_OPTION) {
+                pinnedIds.clear();
                 dataStore.clear();
                 sourceTreePanel.setProject(null);
                 codeViewerPanel.displayFile(null);
@@ -397,6 +444,8 @@ public class JSSourceMapExplorerTab extends JPanel {
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(selectAllBtn);
         toolbar.add(deselectAllBtn);
+        toolbar.add(pinSelectedBtn);
+        toolbar.add(clearPinsBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(probeSelectedBtn);
         toolbar.add(probeAllBtn);
@@ -850,22 +899,34 @@ public class JSSourceMapExplorerTab extends JPanel {
     }
 
     private void loadProxyHistory() {
-        SwingWorker<List<JsFileEntry>, Void> worker = new SwingWorker<>() {
+        if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(false);
+        progressBar.setVisible(true);
+        progressBar.setIndeterminate(true);
+        liveStatusLabel.setText("Stage 1: Scanning Proxy history for JavaScript assets...");
+
+        SwingWorker<List<JsFileEntry>, String> worker = new SwingWorker<>() {
             @Override
             protected List<JsFileEntry> doInBackground() {
                 List<ProxyHttpRequestResponse> history = api.proxy().history();
-                List<JsFileEntry> list = new ArrayList<>();
+                List<JsFileEntry> stage1Entries = new ArrayList<>();
                 boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
 
+                // Stage 1: Fast Scrape & Deduplication + Framework Detection
                 for (ProxyHttpRequestResponse item : history) {
+                    if (isCancelled()) break;
                     if (!item.hasResponse()) continue;
 
+                    var resp = item.response();
+                    // 5MB safety ceiling to prevent OutOfMemoryError on gigantic bundles
+                    if (resp.body().length() > 5 * 1024 * 1024) continue;
+
                     String url = item.request().url();
+                    if (dataStore.isKnownUrl(url)) continue; // Instant deduplication!
+
                     if (inScopeOnly && !api.scope().isInScope(url)) {
                         continue;
                     }
 
-                    var resp = item.response();
                     String ctype = resp.headerValue("Content-Type");
                     String path = item.request().path() != null ? item.request().path() : "/";
 
@@ -898,33 +959,97 @@ public class JSSourceMapExplorerTab extends JPanel {
                         ZonedDateTime.now()
                     );
 
-                    // Mine secrets, endpoints, cloud URLs, and dependencies from raw JS
-                    var jsMining = SecretAndEndpointMiner.mine(url, "JS File", resp.bodyToString());
-                    entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies());
+                    // Framework detection
+                    String bodyStr = resp.bodyToString();
+                    entry.setFramework(JsFrameworkDetector.detectFramework(url, bodyStr));
 
-                    list.add(entry);
+                    stage1Entries.add(entry);
                 }
 
-                return list;
+                if (stage1Entries.isEmpty()) {
+                    return stage1Entries;
+                }
+
+                // Immediately register Stage 1 entries into dataStore so UI displays them
+                dataStore.addEntries(stage1Entries);
+                SwingUtilities.invokeLater(() -> {
+                    refreshView();
+                    reconMiningPanel.refreshFromDataStore();
+                });
+
+                // Stage 2: Background Bounded Executor Pool for Deep Recon Mining
+                int totalToMine = stage1Entries.size();
+                publish("Stage 2: Mining secrets & endpoints across " + totalToMine + " scripts...");
+
+                int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
+                ExecutorService miningPool = Executors.newFixedThreadPool(numThreads);
+                AtomicInteger processed = new AtomicInteger(0);
+
+                try {
+                    List<java.util.concurrent.Future<?>> futures = new ArrayList<>(totalToMine);
+                    for (JsFileEntry entry : stage1Entries) {
+                        if (isCancelled()) break;
+                        futures.add(miningPool.submit(() -> {
+                            if (isCancelled()) return;
+                            try {
+                                if (entry.getResponse() != null) {
+                                    var jsMining = SecretAndEndpointMiner.mine(entry.getUrl(), "JS File", entry.getResponse().bodyToString());
+                                    entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies());
+                                }
+                            } catch (Exception ignored) {}
+
+                            int cur = processed.incrementAndGet();
+                            if (cur % 5 == 0 || cur == totalToMine) {
+                                SwingUtilities.invokeLater(() -> {
+                                    progressBar.setIndeterminate(false);
+                                    progressBar.setMaximum(totalToMine);
+                                    progressBar.setValue(cur);
+                                    liveStatusLabel.setText(String.format("Stage 2: Mining secrets & endpoints (%d / %d)...", cur, totalToMine));
+                                    jsTableModel.fireTableDataChanged();
+                                });
+                            }
+                        }));
+                    }
+
+                    for (var f : futures) {
+                        if (isCancelled()) break;
+                        try {
+                            f.get();
+                        } catch (Exception ignored) {}
+                    }
+                } finally {
+                    miningPool.shutdownNow();
+                }
+
+                return stage1Entries;
+            }
+
+            @Override
+            protected void process(List<String> chunks) {
+                if (!chunks.isEmpty()) {
+                    liveStatusLabel.setText(chunks.get(chunks.size() - 1));
+                }
             }
 
             @Override
             protected void done() {
                 try {
                     List<JsFileEntry> result = get();
-                    int previousCount = dataStore.size();
-                    dataStore.addEntries(result);
-                    int addedCount = dataStore.size() - previousCount;
                     refreshView();
                     reconMiningPanel.refreshFromDataStore();
+                    liveStatusLabel.setText(String.format("Loaded & mined %d new JS assets from Proxy history.", result.size()));
                     JOptionPane.showMessageDialog(
                         JSSourceMapExplorerTab.this,
-                        "Loaded and deduplicated " + dataStore.size() + " unique JavaScript assets (" + addedCount + " newly imported) from Proxy history.",
-                        "History Loaded & Deduplicated",
+                        "Proxy history ingestion complete!\nImported and analyzed " + result.size() + " new JavaScript assets.",
+                        "History Loaded & Mined",
                         JOptionPane.INFORMATION_MESSAGE
                     );
                 } catch (Exception ex) {
                     api.logging().logToError("Error loading JS proxy history: " + ex.getMessage());
+                    liveStatusLabel.setText("Error loading Proxy history: " + ex.getMessage());
+                } finally {
+                    progressBar.setVisible(false);
+                    if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(true);
                 }
             }
         };
@@ -950,6 +1075,14 @@ public class JSSourceMapExplorerTab extends JPanel {
                 if (e.isFirstParty()) count1st++;
                 if (e.isMapExposed()) countExposed++;
                 if (e.isUnpacked()) countUnpacked++;
+
+                // Pin gate fires first: if hasPins(), only show pinned rows
+                if (hasPins()) {
+                    if (pinnedIds.contains(e.getId())) {
+                        filtered.add(e);
+                    }
+                    continue;
+                }
 
                 if (inScopeOnly && !api.scope().isInScope(e.getUrl())) {
                     continue;
@@ -979,6 +1112,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                     boolean match = e.getUrl().toLowerCase().contains(query)
                         || e.getHost().toLowerCase().contains(query)
                         || e.getPath().toLowerCase().contains(query)
+                        || (e.getFramework() != null && e.getFramework().toLowerCase().contains(query))
                         || (e.getSourceMapLocation() != null && e.getSourceMapLocation().toLowerCase().contains(query));
                     if (!match) continue;
                 }
@@ -988,13 +1122,17 @@ public class JSSourceMapExplorerTab extends JPanel {
 
             jsTableModel.updateData(filtered);
 
+            String modeLabel = hasPins()
+                ? "Pinned: " + pinnedIds.size()
+                : "Displayed: " + filtered.size();
+
             statsLabel.setText(String.format(
-                "Total: %d | 1st Party: %d | .map Exposed: %d | Unpacked: %d | Displayed: %d",
+                "Total: %d | 1st Party: %d | .map Exposed: %d | Unpacked: %d | %s",
                 all.size(),
                 count1st,
                 countExposed,
                 countUnpacked,
-                filtered.size()
+                modeLabel
             ));
         });
     }
@@ -1002,13 +1140,17 @@ public class JSSourceMapExplorerTab extends JPanel {
     private void setupJsTableRendering() {
         jsTable.getColumnModel().getColumn(0).setMaxWidth(45);  // #
         jsTable.getColumnModel().getColumn(1).setMaxWidth(130); // Origin
-        jsTable.getColumnModel().getColumn(2).setMaxWidth(55);  // Status
-        jsTable.getColumnModel().getColumn(5).setPreferredWidth(125); // Passive .map
-        jsTable.getColumnModel().getColumn(6).setPreferredWidth(120); // On-Demand Probe
-        jsTable.getColumnModel().getColumn(7).setPreferredWidth(130); // JS Recon
-        jsTable.getColumnModel().getColumn(8).setPreferredWidth(130); // Map Recon
-        jsTable.getColumnModel().getColumn(10).setMaxWidth(95); // Unpacked Files
-        jsTable.getColumnModel().getColumn(11).setMaxWidth(80); // Size
+        jsTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Framework
+        jsTable.getColumnModel().getColumn(3).setMaxWidth(55);  // Status
+        jsTable.getColumnModel().getColumn(4).setPreferredWidth(140); // Host
+        jsTable.getColumnModel().getColumn(5).setPreferredWidth(250); // JS Path
+        jsTable.getColumnModel().getColumn(6).setPreferredWidth(125); // Passive .map
+        jsTable.getColumnModel().getColumn(7).setPreferredWidth(120); // On-Demand Probe
+        jsTable.getColumnModel().getColumn(8).setPreferredWidth(130); // JS Recon
+        jsTable.getColumnModel().getColumn(9).setPreferredWidth(130); // Map Recon
+        jsTable.getColumnModel().getColumn(10).setPreferredWidth(200); // SourceMap Location
+        jsTable.getColumnModel().getColumn(11).setMaxWidth(95); // Unpacked Files
+        jsTable.getColumnModel().getColumn(12).setMaxWidth(80); // Size
 
         // Custom renderer for whole row background and hover cloud tooltip
         jsTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -1021,35 +1163,13 @@ public class JSSourceMapExplorerTab extends JPanel {
                 JsFileEntry entry = jsTableModel.getEntryAt(modelRow);
 
                 if (entry != null) {
-                    // 1. Tooltip logic (cloud box)
-                    String tooltipHtml;
-                    if (column == 4) { // JS Path
-                        tooltipHtml = "<html><div style='max-width: 600px; padding: 4px; font-family: monospace; font-size: 11px;'>"
-                            + "<b>URL:</b> " + escapeHtml(entry.getUrl()) + "<br>"
-                            + "<b>Host:</b> " + escapeHtml(entry.getHost()) + "<br>"
-                            + "<b>Path:</b> " + escapeHtml(entry.getPath()) + "</div></html>";
-                    } else if (column == 9) { // SourceMap Location
-                        tooltipHtml = "<html><div style='max-width: 600px; padding: 4px; font-family: monospace; font-size: 11px;'>"
-                            + "<b>SourceMap Location:</b> " + escapeHtml(entry.getSourceMapLocation() != null ? entry.getSourceMapLocation() : "None") + "</div></html>";
-                    } else if (column == 7) { // JS Recon
-                        tooltipHtml = "<html><div style='max-width: 400px; padding: 4px; font-size: 11px;'>"
-                            + "<b>JS Endpoints Found:</b> " + entry.getJsEndpoints().size() + "<br>"
-                            + "<b>JS Secrets Found:</b> " + entry.getJsSecrets().size() + "</div></html>";
-                    } else if (column == 8) { // Map Recon
-                        tooltipHtml = "<html><div style='max-width: 400px; padding: 4px; font-size: 11px;'>"
-                            + "<b>Map Endpoints Found:</b> " + (entry.getUnpackedProject() != null ? entry.getUnpackedProject().getAllEndpoints().size() : 0) + "<br>"
-                            + "<b>Map Secrets Found:</b> " + (entry.getUnpackedProject() != null ? entry.getUnpackedProject().getAllSecrets().size() : 0) + "</div></html>";
-                    } else if (value != null && !value.toString().equals("-")) {
-                        tooltipHtml = "<html><div style='max-width: 500px; padding: 4px; font-size: 11px;'>"
-                            + escapeHtml(value.toString()) + "</div></html>";
-                    } else {
-                        tooltipHtml = null;
-                    }
-                    ((JComponent) c).setToolTipText(tooltipHtml);
+                    ((JComponent) c).setToolTipText(null);
 
                     // 2. Row background coloring
                     if (!isSelected) {
-                        if (entry.isUnpacked()) {
+                        if (isPinned(entry.getId())) {
+                            c.setBackground(new Color(255, 250, 205)); // soft yellow highlight for pinned
+                        } else if (entry.isUnpacked()) {
                             c.setBackground(new Color(230, 255, 230)); // light green
                         } else if (entry.isMapExposed()) {
                             c.setBackground(new Color(255, 245, 220)); // warm amber
@@ -1060,13 +1180,13 @@ public class JSSourceMapExplorerTab extends JPanel {
                         }
 
                         // Column-specific text colors
-                        if (column == 5) { // Passive .map column
+                        if (column == 6) { // Passive .map column
                             if (entry.getPassiveMapStatus() != null && entry.getPassiveMapStatus().isFound()) {
                                 c.setForeground(new Color(180, 100, 0)); // dark amber
                             } else {
                                 c.setForeground(Color.GRAY);
                             }
-                        } else if (column == 6) { // On-Demand Probe column
+                        } else if (column == 7) { // On-Demand Probe column
                             if (entry.getActiveProbeStatus() == ActiveProbeStatus.PASS) {
                                 c.setForeground(new Color(0, 140, 0)); // dark green
                             } else if (entry.getActiveProbeStatus() == ActiveProbeStatus.FAIL) {
@@ -1076,8 +1196,11 @@ public class JSSourceMapExplorerTab extends JPanel {
                             } else {
                                 c.setForeground(Color.GRAY);
                             }
-                        } else if (column == 7 || column == 8) { // Recon columns
+                        } else if (column == 8 || column == 9) { // Recon columns
                             c.setForeground(new Color(40, 70, 130)); // navy blue
+                        } else if (column == 2 && !"-".equals(entry.getFramework())) {
+                            c.setForeground(new Color(110, 40, 150)); // purple for framework
+                            setFont(getFont().deriveFont(Font.BOLD));
                         } else {
                             c.setForeground(table.getForeground());
                         }
@@ -1137,6 +1260,66 @@ public class JSSourceMapExplorerTab extends JPanel {
                         JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
                         copyRowsItem.addActionListener(ev -> copySelectedRowsToClipboard(jsTable));
                         menu.add(copyRowsItem);
+
+                        menu.addSeparator();
+
+                        JMenuItem pinItem = new JMenuItem("📌 Pin Selected Row(s)");
+                        pinItem.addActionListener(ev -> {
+                            for (int viewRow : jsTable.getSelectedRows()) {
+                                int mRow = jsTable.convertRowIndexToModel(viewRow);
+                                JsFileEntry eEntry = jsTableModel.getEntryAt(mRow);
+                                if (eEntry != null) pinnedIds.add(eEntry.getId());
+                            }
+                            refreshView();
+                        });
+                        menu.add(pinItem);
+
+                        JMenuItem clearPinsItem = new JMenuItem("Clear Pins");
+                        clearPinsItem.addActionListener(ev -> {
+                            pinnedIds.clear();
+                            refreshView();
+                        });
+                        menu.add(clearPinsItem);
+
+                        menu.addSeparator();
+
+                        JMenuItem sendRepeater = new JMenuItem("Send to Repeater");
+                        sendRepeater.addActionListener(ev -> {
+                            for (int viewRow : jsTable.getSelectedRows()) {
+                                int mRow = jsTable.convertRowIndexToModel(viewRow);
+                                JsFileEntry eEntry = jsTableModel.getEntryAt(mRow);
+                                if (eEntry != null && eEntry.getRequest() != null) {
+                                    String tabName = (eEntry.getRequest().method() != null ? eEntry.getRequest().method() : "GET")
+                                        + " " + eEntry.getHost() + eEntry.getPath();
+                                    api.repeater().sendToRepeater(eEntry.getRequest(), tabName);
+                                }
+                            }
+                        });
+                        menu.add(sendRepeater);
+
+                        JMenuItem sendIntruder = new JMenuItem("Send to Intruder");
+                        sendIntruder.addActionListener(ev -> {
+                            for (int viewRow : jsTable.getSelectedRows()) {
+                                int mRow = jsTable.convertRowIndexToModel(viewRow);
+                                JsFileEntry eEntry = jsTableModel.getEntryAt(mRow);
+                                if (eEntry != null && eEntry.getRequest() != null) {
+                                    api.intruder().sendToIntruder(eEntry.getRequest());
+                                }
+                            }
+                        });
+                        menu.add(sendIntruder);
+
+                        JMenuItem sendOrganizer = new JMenuItem("Send to Organizer");
+                        sendOrganizer.addActionListener(ev -> {
+                            for (int viewRow : jsTable.getSelectedRows()) {
+                                int mRow = jsTable.convertRowIndexToModel(viewRow);
+                                JsFileEntry eEntry = jsTableModel.getEntryAt(mRow);
+                                if (eEntry != null && eEntry.getRequest() != null && eEntry.getResponse() != null) {
+                                    api.organizer().sendToOrganizer(HttpRequestResponse.httpRequestResponse(eEntry.getRequest(), eEntry.getResponse()));
+                                }
+                            }
+                        });
+                        menu.add(sendOrganizer);
 
                         menu.addSeparator();
 

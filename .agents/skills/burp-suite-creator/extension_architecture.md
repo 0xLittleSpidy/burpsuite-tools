@@ -26,13 +26,7 @@ into any new Burp extension.
 - [Design Philosophy](#design-philosophy)
 - [Montoya API Integration Patterns](#montoya-api-integration-patterns)
 - [UI Architecture Patterns](#ui-architecture-patterns)
-  - [Tab Hierarchy (Multi-Session Model)](#tab-hierarchy-multi-session-model)
-  - [Tab Visual Styling & Symbol Prefixes](#tab-visual-styling--symbol-prefixes-icons--emojis)
-  - [Progress Bar & Live Ingestion Status](#progress-bar--live-ingestion-status-proxy-history-loading)
-  - [Auto-Navigation & Deep-Linking to Findings](#auto-navigation--deep-linking-to-findings-in-requestresponse-editors)
-  - [Sending Requests to Other Burp Tools](#sending-requests-to-other-burp-tools-repeater-intruder-organizer)
-  - [Manual Item Selection — Row Pinning](#manual-item-selection-row-pinning--complement-to-in-scope-filter)
-- [Swing Patterns & Layout Reference](#swing-patterns--layout-reference)
+  - [Core Toolbar Triage Filters (Status Code, Method, In-Scope, Domain)](#core-toolbar-triage-filters-status-code-method-in-scope-domain)
 - [Workflow Methodology](#workflow-methodology)
   - [External Tool Feature Extraction & Integration](#3-external-tool-feature-extraction--integration-porting-methodology)
 - [Results Presentation & Filtering](#results-presentation--filtering)
@@ -300,6 +294,247 @@ SwingUtilities.invokeLater(() -> {
 **When to use:** Any extension that displays a results table with >50 rows should include
 a collapsible filter sidebar. It is the difference between useful and overwhelming.
 
+### Core Toolbar Triage Filters (Status Code, Method, In-Scope, Domain)
+
+When an extension ingests Burp Proxy history or collects automated findings, real-world targets easily produce thousands of requests. Presenting these without rapid filtering creates overwhelming noise (third-party trackers, uninteresting status codes, irrelevant HTTP verbs, and out-of-scope analytics).
+
+Every extension displaying captured HTTP messages, candidate endpoints, or attack results must incorporate the **Core Four Triage Filters** on its primary toolbar or filter panel:
+1. **Status Code Filter**
+2. **Method Filter**
+3. **In-Scope Filter**
+4. **Domain Filter**
+
+```
++-------------------------------------------------------------------------------------------------------------------+
+| [Load Proxy History] | Domain: [api.target.com        ] | Method: [All Methods v] | Status: [2xx, 3xx v]          |
+| [x] In-Scope Only    | [Apply]  [Reset Filters]        | Total: 1,420 | Displayed: 86                              |
++-------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 1. Filter Specifications & UI Components
+
+| Filter | UI Component | Default State | Behavior & Purpose |
+|---|---|---|---|
+| **Status Code** | `MultiSelectFilterButton` or editable `JComboBox<String>` | "All Statuses" | Filters responses by status code, range (`2xx`, `3xx`, `4xx`, `5xx`), or comma-separated lists (`200, 302, 403`). Isolates bypasses and server errors. |
+| **Method** | `MultiSelectFilterButton` (`"Method"`) | "All Methods" | Multi-select popup for standard HTTP verbs (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`, `HEAD`). Empty set or "All" passes all verbs. |
+| **In-Scope** | `JCheckBox` (`"In-Scope Only"`) | `false` (or `true`) | Non-destructive view filter evaluated live against Burp's target scope via `api.scope().isInScope(url)`. Eliminates third-party noise. |
+| **Domain** | `JTextField` (or dynamic `JComboBox<String>`) | Empty / `"All"` | Isolates traffic to a specific target host or subdomain pattern. Auto-sanitizes pasted URLs and supports exact, subdomain, and substring matches. |
+
+#### 2. Detailed Filter Mechanics
+
+##### A. Status Code Filter
+- **Workflow Value**: In vulnerability research, isolating status codes is critical for identifying transitions (e.g., `403 Forbidden -> 200 OK` bypasses), monitoring server-side crashes (`500 Internal Server Error`), or filtering out uninteresting redirection chains (`301`/`302`) and cached responses (`304 Not Modified`).
+- **Input Modes**:
+  - Exact status codes: `200`, `401`, `403`, `500`
+  - Range masks: `2xx` (200–299), `3xx` (300–399), `4xx` (400–499), `5xx` (500–599)
+  - Delimited sets: Comma, slash, or space-separated values (`200, 302`, `401 / 403`)
+- **Missing Response Guard**: Requests awaiting response or failing at the socket layer have status code 0 or -1; guard against them safely.
+- **Parsing & Matching Logic**:
+```java
+public static boolean matchesStatusCode(int statusCode, String filter) {
+    if (filter == null || filter.trim().isEmpty() || filter.equalsIgnoreCase("All") || filter.equalsIgnoreCase("All Statuses")) {
+        return true;
+    }
+    if (statusCode <= 0) return false;
+
+    // Split on commas, slashes, or whitespace
+    String[] tokens = filter.split("[,/\\s]+");
+    for (String rawToken : tokens) {
+        String token = rawToken.trim();
+        if (token.isEmpty()) continue;
+
+        // Range checks: 2xx, 3xx, 4xx, 5xx
+        if (token.equalsIgnoreCase("2xx") && statusCode >= 200 && statusCode < 300) return true;
+        if (token.equalsIgnoreCase("3xx") && statusCode >= 300 && statusCode < 400) return true;
+        if (token.equalsIgnoreCase("4xx") && statusCode >= 400 && statusCode < 500) return true;
+        if (token.equalsIgnoreCase("5xx") && statusCode >= 500 && statusCode < 600) return true;
+
+        // Exact numeric match
+        try {
+            int targetCode = Integer.parseInt(token);
+            if (statusCode == targetCode) return true;
+        } catch (NumberFormatException ignored) {}
+    }
+    return false;
+}
+```
+
+##### B. Method Filter
+- **Workflow Value**: Web applications and REST/GraphQL APIs expose radically different attack surfaces per HTTP method. Testers frequently isolate state-changing requests (`POST`, `PUT`, `PATCH`, `DELETE`) when testing for CSRF, mass assignment, or authorization flaws, isolate `GET` requests for caching and reflection issues, or isolate `OPTIONS` for CORS misconfigurations.
+- **Multi-Select Preference**: Use `MultiSelectFilterButton` over single-selection dropdowns so testers can inspect multiple methods concurrently (e.g., viewing both `POST` and `PUT` simultaneously).
+- **Matching Logic**:
+```java
+public static boolean matchesMethod(String method, Set<String> selectedMethods) {
+    if (selectedMethods == null || selectedMethods.isEmpty() || selectedMethods.contains("All Methods")) {
+        return true;
+    }
+    if (method == null) return false;
+    return selectedMethods.contains(method.toUpperCase());
+}
+```
+
+##### C. In-Scope Filter
+- **Workflow Value**: Modern web apps load assets from dozens of third-party domains (analytics, CDNs, ad networks, chat widgets). Without an in-scope filter, thousands of irrelevant requests flood the extension. Burp Suite's Target Scope (`api.scope().isInScope(url)`) provides the authoritative boundary.
+- **Dual-Stage Architecture**:
+  1. **Optional Ingestion Pre-Filter**: During heavy proxy history loading (`Load Proxy History`), skipping out-of-scope items inside the background `SwingWorker` prevents unnecessary heap memory allocation.
+  2. **Non-Destructive View Filter**: Stored items in the extension's data store remain intact. Toggling the `In-Scope Only` checkbox simply re-evaluates the view predicate, allowing the tester to review out-of-scope traffic without re-importing.
+- **Composition with Row Pinning**: Manual item pinning (`hasPins()`) takes precedence over scope gating. If a row is pinned, it remains visible even if outside project scope.
+- **Matching Logic**:
+```java
+public static boolean matchesScope(MontoyaApi api, String url, boolean inScopeOnly) {
+    if (!inScopeOnly) return true;
+    if (url == null || api == null) return false;
+    return api.scope().isInScope(url);
+}
+```
+
+##### D. Domain Filter
+- **Workflow Value**: Large scopes often contain multiple target microservices or sister domains (`api.example.com`, `auth.example.com`, `admin.example.com`, `partner.net`). Testers need to focus analysis on one specific host or subdomain tier.
+- **URL Sanitization**: Testers frequently copy and paste full URLs into the filter field (e.g. `https://api.target.com:8443/v1/users`). The domain filter must automatically sanitize the input by stripping protocol prefixes (`http://`, `https://`), port numbers (`:8443`), and path segments (`/v1/...`).
+- **Flexible Matching Modes**:
+  - **Exact Host Match**: `host.equalsIgnoreCase(cleanDomain)`
+  - **Subdomain / Suffix Match**: Supports wildcard prefixes (`*.example.com`) and subdomains (`api.target.com` matches `target.com`)
+  - **Substring Contains Match**: Case-insensitive substring matching for quick fuzzy filtering
+- **Matching Logic**:
+```java
+public static boolean matchesDomain(String entryHost, String domainFilter) {
+    if (domainFilter == null || domainFilter.trim().isEmpty() || domainFilter.equalsIgnoreCase("All")) {
+        return true;
+    }
+    if (entryHost == null) return false;
+
+    // 1. Sanitize user input (strips protocol, port, paths, and wildcard prefixes)
+    String cleanFilter = domainFilter.trim().toLowerCase();
+    if (cleanFilter.startsWith("http://")) cleanFilter = cleanFilter.substring(7);
+    if (cleanFilter.startsWith("https://")) cleanFilter = cleanFilter.substring(8);
+    int slashIdx = cleanFilter.indexOf('/');
+    if (slashIdx != -1) cleanFilter = cleanFilter.substring(0, slashIdx);
+    int colonIdx = cleanFilter.indexOf(':');
+    if (colonIdx != -1) cleanFilter = cleanFilter.substring(0, colonIdx);
+    if (cleanFilter.startsWith("*.")) cleanFilter = cleanFilter.substring(2);
+
+    // 2. Sanitize entry host (strips port if present)
+    String host = entryHost.toLowerCase();
+    int hostColon = host.indexOf(':');
+    if (hostColon != -1) host = host.substring(0, hostColon);
+
+    // 3. Match: Exact host, subdomain suffix, or contains
+    return host.equalsIgnoreCase(cleanFilter)
+        || host.endsWith("." + cleanFilter)
+        || host.contains(cleanFilter);
+}
+```
+
+#### 3. Integrated Filtering Pipeline (DataStore / TableModel)
+
+Combine all four filters into a clean, unified predicate chain. The evaluation pipeline executes sequentially on the in-memory dataset:
+
+```java
+public List<TrafficEntry> getFilteredEntries(
+    String domainFilter,
+    Set<String> selectedMethods,
+    String statusFilter,
+    boolean inScopeOnly,
+    Set<Integer> pinnedIds
+) {
+    // 1. Row Pinning Gate: If pins are active, show pinned items only
+    if (pinnedIds != null && !pinnedIds.isEmpty()) {
+        return allEntries.stream()
+            .filter(e -> pinnedIds.contains(e.id()))
+            .collect(Collectors.toList());
+    }
+
+    // 2. Core Four Triage Pipeline
+    return allEntries.stream()
+        .filter(entry -> matchesDomain(entry.host(), domainFilter))
+        .filter(entry -> matchesMethod(entry.method(), selectedMethods))
+        .filter(entry -> matchesStatusCode(entry.statusCode(), statusFilter))
+        .filter(entry -> matchesScope(api, entry.url(), inScopeOnly))
+        .collect(Collectors.toList());
+}
+```
+
+#### 4. UI Toolbar Construction with Debouncing & One-Click Reset
+
+When combining text inputs (`JTextField`) with selection controls (`MultiSelectFilterButton`, `JCheckBox`), wire them through a **300ms debounce timer**. This prevents CPU thrashing and EDT freezes during rapid typing:
+
+```java
+// ─── Debounce Timer (Prevents EDT congestion during typing) ────────
+private final javax.swing.Timer filterDebounceTimer = new javax.swing.Timer(300, e -> refreshView());
+{
+    filterDebounceTimer.setRepeats(false);
+}
+
+private void triggerDebouncedFilter() {
+    filterDebounceTimer.restart();
+}
+
+// ─── Toolbar Construction ──────────────────────────────────────────
+private JPanel createFilterToolbar() {
+    JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+
+    // 1. Domain Filter Input
+    JTextField domainField = new JTextField(14);
+    domainField.setToolTipText("Filter by domain or host (e.g. api.target.com, *.target.com)");
+    domainField.getDocument().addDocumentListener(new SimpleDocumentListener(this::triggerDebouncedFilter));
+
+    // 2. Method Multi-Select Button
+    MultiSelectFilterButton methodBtn = new MultiSelectFilterButton(
+        "Method",
+        List.of("All Methods", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"),
+        sel -> refreshView()
+    );
+
+    // 3. Status Code Dropdown (Editable for custom code input)
+    JComboBox<String> statusCombo = new JComboBox<>(new String[]{
+        "All Statuses", "2xx Success", "200 OK", "3xx Redirection",
+        "4xx Client Error", "401 Unauthorized", "403 Forbidden", "404 Not Found", "5xx Server Error"
+    });
+    statusCombo.setEditable(true);
+    statusCombo.addActionListener(e -> triggerDebouncedFilter());
+
+    // 4. In-Scope Only Checkbox
+    JCheckBox inScopeCheckBox = new JCheckBox("In-Scope Only", false);
+    inScopeCheckBox.addActionListener(e -> refreshView());
+
+    // 5. One-Click Reset Button
+    JButton resetBtn = new JButton("Reset Filters");
+    resetBtn.setToolTipText("Clear all filters and restore full dataset view");
+    resetBtn.addActionListener(e -> {
+        domainField.setText("");
+        methodBtn.clearSelection();
+        statusCombo.setSelectedIndex(0);
+        inScopeCheckBox.setSelected(false);
+        refreshView();
+    });
+
+    // 6. Live Metrics Counter Label
+    JLabel statsLabel = new JLabel("Total: 0 | Displayed: 0");
+    statsLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
+
+    // Assemble components into toolbar
+    toolbar.add(new JLabel("Domain:"));
+    toolbar.add(domainField);
+    toolbar.add(methodBtn);
+    toolbar.add(new JLabel("Status:"));
+    toolbar.add(statusCombo);
+    toolbar.add(inScopeCheckBox);
+    toolbar.add(resetBtn);
+    toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+    toolbar.add(statsLabel);
+
+    return toolbar;
+}
+```
+
+#### 5. Best Practices & Pitfalls to Avoid
+
+1. **Always Normalize Casing:** Normalize HTTP methods to uppercase (`method.toUpperCase()`) and domain names to lowercase (`domain.toLowerCase()`) before comparison to prevent false misses on mixed-case headers or URLs.
+2. **Non-Destructive View Filtering:** Never delete entries from the master `allEntries` list when filters are applied. Keep the master cache intact and filter into a `displayedEntries` list so clearing filters is instantaneous and lossless.
+3. **Handle Missing Responses Safely:** Captured requests without a response (e.g. pending requests, timed-out connections) return `null` or code `0` from `response.statusCode()`. Ensure `matchesStatusCode()` guards against non-positive integers.
+4. **Scope Cache in High-Volume Loops:** For large datasets (>10,000 items), evaluating `api.scope().isInScope(url)` repeatedly can introduce overhead. Cache evaluated URLs or host prefixes in a temporary `Map<String, Boolean>` during each `getFilteredEntries()` pass.
+5. **Debounce Interactive Text Inputs:** Always attach a `javax.swing.Timer` debounce listener (250–350ms) to text fields like Domain and Status. Firing full table rebuilds on every individual keystroke freezes the Swing EDT.
+6. **Synchronize Live Counter Feedback:** Always update the count label (`"Total: " + allEntries.size() + " | Displayed: " + displayed.size()`) at the conclusion of `refreshView()` so the tester immediately knows whether the active filter set is too broad or too restrictive.
 
 ### Pre-Execution Preview Probe Button
 
@@ -343,45 +578,6 @@ target selection controls rather than forcing one-by-one testing:
     - Single target checked: `METHOD /path... x`
     - Multiple targets checked: `Run (N targets) x`
   - The session tab engine processes all N targets sequentially or concurrently, streaming findings into a unified results table with live progress tracking (`"Target 2/5 (POST /profile) | 18/48 probes"`).
-
-### Comma-Separated Parameter Filtering
-
-When discovering endpoints from Proxy history, testers often target specific high-value
-parameter names (e.g. `id, user, token, search, action, redirect, url`):
-
-**Pattern:**
-- Add a **`Param Names (comma-separated):`** text field in the discovery filter toolbar.
-- Split the input on commas/whitespace (`[,\s]+`) into a search set.
-- Filter the candidate table in real-time so that only endpoints possessing at least one matching parameter name are displayed.
-
-
-
-### Master-Detail Split (Results + Request/Response Viewer)
-
-```
-+--------------------------------+
-|        Results Table           |
-|  (sortable, filterable)        |
-+--------------------------------+
-|  [Request] [Response] [Orig]   |
-|  +---------------------------+ |
-|  |  Pretty | Raw | Hex       | |
-|  |  (Montoya HttpEditor)     | |
-|  +---------------------------+ |
-+--------------------------------+
-```
-
-**How it works:**
-- `ResultsPanel` uses `JSplitPane(VERTICAL_SPLIT)` (or `HORIZONTAL_SPLIT` for
-  side-by-side mode).
-- Top: `JTable` in `JScrollPane`. Bottom: `JTabbedPane` with Montoya
-  `HttpRequestEditor` / `HttpResponseEditor` tabs.
-- Add viewer tabs as needed for the extension's use case (e.g. Original Request,
-  Original Response, Verified Request, Verified Response).
-- Clicking a table row updates the editors via `setRequest()` / `setResponse()`.
-
-**Why this matters:** Using Montoya's built-in editors gives you Pretty/Raw/Hex views
-for free, consistent with the rest of Burp's UI. Never build your own request viewer.
 
 ### Auto-Navigation & Deep-Linking to Findings in Request/Response Editors
 
@@ -667,7 +863,7 @@ entryTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 **Why this matters:** Without Send To, testers must manually copy-paste URLs or hunt for
 the request back in the Proxy history — a workflow break that costs time and context.
 
-### 6. Manual Item Selection (Row Pinning) — Complement to In-Scope Filter
+### Manual Item Selection (Row Pinning) — Complement to In-Scope Filter
 
 `api.scope().isInScope(url)` is coarse-grained: it gates on entire host/path prefixes defined in Burp's Target Scope settings. Users frequently want to **narrow down further within the filtered results** without changing the project scope — for example, picking three specific endpoints from a list of 200 in-scope URLs.
 

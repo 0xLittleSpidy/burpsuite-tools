@@ -1,16 +1,17 @@
+// Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.convertposttoget.ui;
 
 import com.littlespidy.convertposttoget.model.ConversionResult;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
  * Created with the help of an AI Agent and littlespidy.
  *
- * Thread-safe table model maintaining both complete and filtered POST to GET conversion results.
+ * Thread-safe table model maintaining complete and filtered POST to GET conversion results.
+ * Supports row pinning, streaming updates, and non-destructive view filtering per extension_architecture.md.
  *
  * @author littlespidy
  */
@@ -25,6 +26,7 @@ public class ConversionResultsTableModel extends AbstractTableModel {
 
     private final List<ConversionResult> allResults = new ArrayList<>();
     private final List<ConversionResult> filteredResults = new ArrayList<>();
+    private final Set<Integer> pinnedIds = new LinkedHashSet<>();
     private Predicate<ConversionResult> currentFilter = r -> true;
 
     @Override
@@ -79,19 +81,69 @@ public class ConversionResultsTableModel extends AbstractTableModel {
 
     public synchronized void addResult(ConversionResult result) {
         allResults.add(result);
-        if (currentFilter.test(result)) {
+        boolean passes;
+        if (!pinnedIds.isEmpty()) {
+            passes = pinnedIds.contains(result.id());
+        } else {
+            passes = currentFilter.test(result);
+        }
+
+        if (passes) {
             filteredResults.add(result);
             int row = filteredResults.size() - 1;
             fireTableRowsInserted(row, row);
         }
     }
 
+    // ── Row Pinning ──────────────────────────────────────────────────────────
+
+    public synchronized boolean isPinned(int resultId) {
+        return pinnedIds.contains(resultId);
+    }
+
+    public synchronized void pin(int resultId) {
+        pinnedIds.add(resultId);
+        applyCurrentFilter();
+    }
+
+    public synchronized void unpin(int resultId) {
+        pinnedIds.remove(resultId);
+        applyCurrentFilter();
+    }
+
+    public synchronized void clearPins() {
+        pinnedIds.clear();
+        applyCurrentFilter();
+    }
+
+    public synchronized boolean hasPins() {
+        return !pinnedIds.isEmpty();
+    }
+
+    public synchronized int getPinnedCount() {
+        return pinnedIds.size();
+    }
+
+    // ── Filtering Pipeline ───────────────────────────────────────────────────
+
     public synchronized void setFilter(Predicate<ConversionResult> filter) {
         this.currentFilter = (filter != null) ? filter : r -> true;
+        applyCurrentFilter();
+    }
+
+    private void applyCurrentFilter() {
         filteredResults.clear();
-        for (ConversionResult res : allResults) {
-            if (currentFilter.test(res)) {
-                filteredResults.add(res);
+        if (!pinnedIds.isEmpty()) {
+            for (ConversionResult res : allResults) {
+                if (pinnedIds.contains(res.id())) {
+                    filteredResults.add(res);
+                }
+            }
+        } else {
+            for (ConversionResult res : allResults) {
+                if (currentFilter.test(res)) {
+                    filteredResults.add(res);
+                }
             }
         }
         fireTableDataChanged();
@@ -100,6 +152,7 @@ public class ConversionResultsTableModel extends AbstractTableModel {
     public synchronized void clear() {
         allResults.clear();
         filteredResults.clear();
+        pinnedIds.clear();
         fireTableDataChanged();
     }
 

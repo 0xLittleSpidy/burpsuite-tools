@@ -38,7 +38,7 @@ public class JSSourceMapExplorerExtension implements BurpExtension {
 
         // ── 1. Create and Register Suite Tab ──
         this.mainTab = new JSSourceMapExplorerTab(api, dataStore);
-        api.userInterface().registerSuiteTab("JS Explorer", mainTab);
+        api.userInterface().registerSuiteTab("🗺️ JS Explorer", mainTab);
 
         // ── 2. Register Context Menu Provider ──
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {

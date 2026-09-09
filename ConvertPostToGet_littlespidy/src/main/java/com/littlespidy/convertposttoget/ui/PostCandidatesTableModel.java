@@ -1,3 +1,4 @@
+// Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.convertposttoget.ui;
 
 import com.littlespidy.convertposttoget.model.PostCandidate;
@@ -10,21 +11,23 @@ import java.util.function.Predicate;
  * Created with the help of an AI Agent and littlespidy.
  *
  * Thread-safe table model for POST traffic candidates.
+ * Supports row pinning, non-destructive filtering, and multi-selection per extension_architecture.md.
  *
  * @author littlespidy
  */
 public class PostCandidatesTableModel extends AbstractTableModel {
     private final String[] columnNames = {
-        "Select", "#", "Method", "Host", "Path", "Params", "Param Names", "POST Status", "Length", "Auth Detected"
+        "Select", "#", "Method", "Host", "Path", "Content-Type", "Params", "Param Names", "POST Status", "Length", "Auth Detected"
     };
 
     private final Class<?>[] columnClasses = {
-        Boolean.class, Integer.class, String.class, String.class, String.class, Integer.class, String.class, Integer.class, Integer.class, String.class
+        Boolean.class, Integer.class, String.class, String.class, String.class, String.class, Integer.class, String.class, Integer.class, Integer.class, String.class
     };
 
     private final List<PostCandidate> allCandidates = new ArrayList<>();
     private final List<PostCandidate> filteredCandidates = new ArrayList<>();
     private final Set<Integer> selectedCandidateIds = new HashSet<>();
+    private final Set<Integer> pinnedIds = new LinkedHashSet<>();
     private Predicate<PostCandidate> currentFilter = c -> true;
 
     @Override
@@ -78,11 +81,12 @@ public class PostCandidatesTableModel extends AbstractTableModel {
             case 2 -> c.method();
             case 3 -> c.host();
             case 4 -> c.path();
-            case 5 -> c.parameterCount();
-            case 6 -> String.join(", ", c.parameterNames());
-            case 7 -> c.statusCode();
-            case 8 -> c.contentLength();
-            case 9 -> c.authIndicator();
+            case 5 -> c.contentType();
+            case 6 -> c.parameterCount();
+            case 7 -> String.join(", ", c.parameterNames());
+            case 8 -> c.statusCode();
+            case 9 -> c.contentLength();
+            case 10 -> c.authIndicator();
             default -> null;
         };
     }
@@ -115,6 +119,37 @@ public class PostCandidatesTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    // ── Row Pinning ──────────────────────────────────────────────────────────
+
+    public synchronized boolean isPinned(int candidateId) {
+        return pinnedIds.contains(candidateId);
+    }
+
+    public synchronized void pin(int candidateId) {
+        pinnedIds.add(candidateId);
+        applyCurrentFilter();
+    }
+
+    public synchronized void unpin(int candidateId) {
+        pinnedIds.remove(candidateId);
+        applyCurrentFilter();
+    }
+
+    public synchronized void clearPins() {
+        pinnedIds.clear();
+        applyCurrentFilter();
+    }
+
+    public synchronized boolean hasPins() {
+        return !pinnedIds.isEmpty();
+    }
+
+    public synchronized int getPinnedCount() {
+        return pinnedIds.size();
+    }
+
+    // ── Filtering Pipeline ───────────────────────────────────────────────────
+
     public synchronized void setCandidates(List<PostCandidate> candidates) {
         this.allCandidates.clear();
         this.allCandidates.addAll(candidates);
@@ -128,9 +163,18 @@ public class PostCandidatesTableModel extends AbstractTableModel {
 
     private void applyCurrentFilter() {
         filteredCandidates.clear();
-        for (PostCandidate c : allCandidates) {
-            if (currentFilter.test(c)) {
-                filteredCandidates.add(c);
+        // Pinning Gate: If rows are pinned, show only pinned rows
+        if (!pinnedIds.isEmpty()) {
+            for (PostCandidate c : allCandidates) {
+                if (pinnedIds.contains(c.id())) {
+                    filteredCandidates.add(c);
+                }
+            }
+        } else {
+            for (PostCandidate c : allCandidates) {
+                if (currentFilter.test(c)) {
+                    filteredCandidates.add(c);
+                }
             }
         }
         fireTableDataChanged();
@@ -140,6 +184,7 @@ public class PostCandidatesTableModel extends AbstractTableModel {
         allCandidates.clear();
         filteredCandidates.clear();
         selectedCandidateIds.clear();
+        pinnedIds.clear();
         fireTableDataChanged();
     }
 

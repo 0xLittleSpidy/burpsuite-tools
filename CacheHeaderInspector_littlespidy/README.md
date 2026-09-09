@@ -29,8 +29,7 @@ It allows you to aggregate, search, and filter unique cache directive values (e.
 
 4. **Multi-Faceted Triage Filtering**:
    - **Status Code**: Filter by exact code or comma-separated lists (`200, 302, 404`) and status wildcards (`2xx`, `3xx`, `4xx`, `5xx`).
-   - **Content-Type**: Substring matching (`json`, `html`, `text`, `image`) to isolate APIs or static assets.
-   - **Directive Value**: Free-form text and preset chips (`no-store`, `no-cache`, `public`, `private`, `max-age=0`, `must-revalidate`, `stale-while-revalidate`, `HIT`, `MISS`, `(not set)`).
+   - **Directive Value**: Free-form text matching across cached headers and values.
    - **Scope**: Toggle in-scope targets dynamically.
 
 5. **Built-in Master-Detail Viewer**:

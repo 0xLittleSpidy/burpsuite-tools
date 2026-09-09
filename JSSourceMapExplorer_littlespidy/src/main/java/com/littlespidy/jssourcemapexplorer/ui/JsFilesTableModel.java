@@ -5,13 +5,12 @@ import com.littlespidy.jssourcemapexplorer.model.JsFileEntry;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Table model displaying discovered JavaScript scripts, their origin classifications,
- * passive source map findings, active probe results, and recon/secret metrics for both
- * the JS file and the Source Map.
+ * detected framework (Next.js, Vue, React, Angular, Svelte, Nuxt), passive source map findings,
+ * active probe results, and recon/secret metrics for both the JS file and the Source Map.
  *
  * @author littlespidy
  */
@@ -20,6 +19,7 @@ public class JsFilesTableModel extends AbstractTableModel {
     private static final String[] COLUMN_NAMES = {
         "#",
         "Origin",
+        "Framework",
         "Status",
         "Host",
         "JS Path",
@@ -71,7 +71,7 @@ public class JsFilesTableModel extends AbstractTableModel {
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         return switch (columnIndex) {
-            case 0, 2 -> Integer.class;
+            case 0, 3 -> Integer.class;
             default -> String.class;
         };
     }
@@ -86,16 +86,17 @@ public class JsFilesTableModel extends AbstractTableModel {
         return switch (columnIndex) {
             case 0 -> entry.getId();
             case 1 -> entry.getOriginLabel();
-            case 2 -> entry.getStatusCode();
-            case 3 -> entry.getHost();
-            case 4 -> entry.getPath();
-            case 5 -> entry.getPassiveMapStatus() != null ? entry.getPassiveMapStatus().getLabel() : "Not Found";
-            case 6 -> entry.getActiveProbeStatus() != null ? entry.getActiveProbeStatus().getLabel() : "-";
-            case 7 -> entry.getJsReconSummary();
-            case 8 -> entry.getMapReconSummary();
-            case 9 -> entry.getSourceMapLocation() != null ? entry.getSourceMapLocation() : "-";
-            case 10 -> entry.getUnpackedProject() != null ? entry.getUnpackedProject().getTotalFiles() + " files" : "-";
-            case 11 -> formatSize(entry.getContentLength());
+            case 2 -> entry.getFramework();
+            case 3 -> entry.getStatusCode();
+            case 4 -> entry.getHost();
+            case 5 -> entry.getPath();
+            case 6 -> entry.getPassiveMapStatus() != null ? entry.getPassiveMapStatus().getLabel() : "Not Found";
+            case 7 -> entry.getActiveProbeStatus() != null ? entry.getActiveProbeStatus().getLabel() : "-";
+            case 8 -> entry.getJsReconSummary();
+            case 9 -> entry.getMapReconSummary();
+            case 10 -> entry.getSourceMapLocation() != null ? entry.getSourceMapLocation() : "-";
+            case 11 -> entry.getUnpackedProject() != null ? entry.getUnpackedProject().getTotalFiles() + " files" : "-";
+            case 12 -> formatSize(entry.getContentLength());
             default -> null;
         };
     }

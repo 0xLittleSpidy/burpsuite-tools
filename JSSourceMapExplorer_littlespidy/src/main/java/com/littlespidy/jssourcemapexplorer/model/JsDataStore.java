@@ -21,6 +21,11 @@ public class JsDataStore {
         return idCounter.getAndIncrement();
     }
 
+    public synchronized boolean isKnownUrl(String url) {
+        if (url == null) return false;
+        return knownUrls.contains(normalizeUrl(url));
+    }
+
     public synchronized boolean addEntry(JsFileEntry entry) {
         if (entry == null || entry.getUrl() == null) {
             return false;

@@ -17,7 +17,35 @@ public class DiscoveredDependency {
     private volatile String status;      // "Unverified", "Checking...", "Registered (OK)", "VULNERABLE: 404 Unclaimed", "Org Not Found"
     private volatile String verificationDetail;
     private final int line;
+    private final int startOffset;
+    private final int endOffset;
     private final String contextSnippet;
+
+    public DiscoveredDependency(
+        String sourceLocation,
+        String sourceType,
+        String packageName,
+        String version,
+        String dependencyType,
+        String status,
+        String verificationDetail,
+        int line,
+        int startOffset,
+        int endOffset,
+        String contextSnippet
+    ) {
+        this.sourceLocation = sourceLocation;
+        this.sourceType = sourceType;
+        this.packageName = packageName;
+        this.version = (version != null && !version.trim().isEmpty()) ? version : "-";
+        this.dependencyType = dependencyType;
+        this.status = (status != null) ? status : "Unverified";
+        this.verificationDetail = (verificationDetail != null) ? verificationDetail : "-";
+        this.line = line;
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
+        this.contextSnippet = contextSnippet;
+    }
 
     public DiscoveredDependency(
         String sourceLocation,
@@ -30,15 +58,7 @@ public class DiscoveredDependency {
         int line,
         String contextSnippet
     ) {
-        this.sourceLocation = sourceLocation;
-        this.sourceType = sourceType;
-        this.packageName = packageName;
-        this.version = (version != null && !version.trim().isEmpty()) ? version : "-";
-        this.dependencyType = dependencyType;
-        this.status = (status != null) ? status : "Unverified";
-        this.verificationDetail = (verificationDetail != null) ? verificationDetail : "-";
-        this.line = line;
-        this.contextSnippet = contextSnippet;
+        this(sourceLocation, sourceType, packageName, version, dependencyType, status, verificationDetail, line, 0, 0, contextSnippet);
     }
 
     public String sourceLocation() { return sourceLocation; }
@@ -49,6 +69,8 @@ public class DiscoveredDependency {
     public String status() { return status; }
     public String verificationDetail() { return verificationDetail; }
     public int line() { return line; }
+    public int startOffset() { return startOffset; }
+    public int endOffset() { return endOffset; }
     public String contextSnippet() { return contextSnippet; }
 
     public void setStatus(String status, String detail) {

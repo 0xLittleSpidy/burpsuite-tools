@@ -45,6 +45,9 @@ public class JsFileEntry {
     private volatile HttpResponse sourceMapResponse;
     private final ZonedDateTime timestamp;
 
+    // Framework detection (Next.js, Nuxt.js, React, Vue.js, Svelte, Angular)
+    private volatile String framework = "-";
+
     public JsFileEntry(
         int id,
         String url,
@@ -85,6 +88,8 @@ public class JsFileEntry {
     public int getContentLength() { return contentLength; }
     public boolean isFirstParty() { return firstParty; }
     public String getOriginLabel() { return originLabel; }
+    public String getFramework() { return framework != null ? framework : "-"; }
+    public void setFramework(String framework) { this.framework = framework; }
 
     public PassiveMapStatus getPassiveMapStatus() { return passiveMapStatus; }
     public void setPassiveMapStatus(PassiveMapStatus status) { this.passiveMapStatus = status; }

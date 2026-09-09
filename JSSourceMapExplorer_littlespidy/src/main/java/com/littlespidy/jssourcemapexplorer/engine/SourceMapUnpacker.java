@@ -4,15 +4,15 @@ package com.littlespidy.jssourcemapexplorer.engine;
 import com.littlespidy.jssourcemapexplorer.model.UnpackedProject;
 import com.littlespidy.jssourcemapexplorer.model.UnpackedSourceFile;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses SourceMap v3 JSON documents and inline base64 data URIs,
- * normalizes source file paths, and reconstructs the full source code project.
+ * Parses SourceMap v3 JSON documents and inline data URIs (base64 and percent-encoded),
+ * normalizes source file paths safely without directory traversal, and reconstructs
+ * the full source code project. Ported techniques from js-recon.
  *
  * @author littlespidy
  */
@@ -24,6 +24,14 @@ public class SourceMapUnpacker {
         }
 
         String rawJson = mapJsonContent.trim();
+
+        // If it's a data: URI, decode it via SourceMapDetector
+        if (rawJson.startsWith("data:")) {
+            String decoded = SourceMapDetector.decodeInlineSourceMapDataUri(rawJson);
+            if (decoded != null) {
+                rawJson = decoded;
+            }
+        }
 
         // If Base64 string, decode it
         if (!rawJson.startsWith("{") && !rawJson.startsWith("[")) {
@@ -74,6 +82,10 @@ public class SourceMapUnpacker {
         return project;
     }
 
+    /**
+     * Traversal-safe source path normalizer ported from js-recon.
+     * Removes webpack/bundler prefixes and normalizes ../ sequences to prevent traversal.
+     */
     public static String normalizeSourcePath(String rawPath) {
         if (rawPath == null || rawPath.trim().isEmpty()) return "unnamed_source.js";
 
@@ -102,9 +114,6 @@ public class SourceMapUnpacker {
             }
         }
 
-        // Clean relative dots and leading slashes
-        path = path.replaceAll("^\\.+/", "");
-        path = path.replaceAll("^/+", "");
         path = path.replace('\\', '/');
 
         // Clean query strings or webpack hash suffixes (e.g. ?a1b2 or ?[hash])
@@ -113,11 +122,25 @@ public class SourceMapUnpacker {
             path = path.substring(0, qIdx);
         }
 
-        if (path.isEmpty()) {
+        // Clean ../ sequences safely (js-recon traversal prevention)
+        String[] parts = path.split("/");
+        List<String> cleanParts = new ArrayList<>();
+        for (String part : parts) {
+            if ("..".equals(part)) {
+                if (!cleanParts.isEmpty()) {
+                    cleanParts.remove(cleanParts.size() - 1);
+                }
+            } else if (!".".equals(part) && !part.isEmpty()) {
+                cleanParts.add(part);
+            }
+        }
+
+        String normalized = String.join("/", cleanParts);
+        if (normalized.isEmpty()) {
             return "root_source.js";
         }
 
-        return path;
+        return normalized;
     }
 
     private static String extractFileName(String path) {

@@ -8,33 +8,74 @@ import java.util.*;
 
 /**
  * Table model for the top "HSTS Value Overview & Assessment" summary table.
- * Each row represents a unique header pattern/value and its occurrence count.
+ * Each row represents a unique header pattern/value, associated domains, and occurrence count.
  *
  * @author littlespidy
  */
 public class HSTSSummaryTableModel extends AbstractTableModel {
 
-    private static final String[] COLUMNS = { "HSTS Value / Pattern", "Count", "Assessment" };
+    private static final String[] COLUMNS = { "Value", "Domains", "Count", "Assessment" };
 
-    // Ordered list of (value, count, assessment) rows
-    private final List<String[]> rows = new ArrayList<>();
+    public static class SummaryRow {
+        private final String value;
+        private final String domains;
+        private final int count;
+        private final String assessment;
+        private final String groupKey;
+
+        public SummaryRow(String value, String domains, int count, String assessment, String groupKey) {
+            this.value = value;
+            this.domains = domains;
+            this.count = count;
+            this.assessment = assessment;
+            this.groupKey = groupKey;
+        }
+
+        public String getValue() { return value; }
+        public String getDomains() { return domains; }
+        public int getCount() { return count; }
+        public String getAssessment() { return assessment; }
+        public String getGroupKey() { return groupKey; }
+    }
+
+    private final List<SummaryRow> rows = new ArrayList<>();
 
     public synchronized void updateData(Map<String, List<HSTSEntry>> grouped) {
         rows.clear();
         for (Map.Entry<String, List<HSTSEntry>> e : grouped.entrySet()) {
-            String pattern    = e.getKey();
-            int count         = e.getValue().size();
-            String assessment = e.getValue().isEmpty() ? "" : e.getValue().get(0).assessment();
-            rows.add(new String[]{ pattern, String.valueOf(count), assessment });
+            String groupKey   = e.getKey();
+            List<HSTSEntry> entries = e.getValue();
+            int count         = entries.size();
+
+            // Collect distinct domains (hosts)
+            Set<String> domainSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            for (HSTSEntry entry : entries) {
+                if (entry.host() != null && !entry.host().isBlank()) {
+                    domainSet.add(entry.host());
+                }
+            }
+            String domains = String.join(", ", domainSet);
+
+            // Raw header value
+            String rawValue;
+            if (entries.isEmpty()) {
+                rawValue = groupKey;
+            } else {
+                HSTSEntry first = entries.get(0);
+                rawValue = first.isMissingHsts() ? "(missing HSTS)" : first.hstsHeader().trim();
+            }
+
+            String assessment = entries.isEmpty() ? "" : entries.get(0).assessment();
+            rows.add(new SummaryRow(rawValue, domains, count, assessment, groupKey));
         }
         // Sort: CRITICAL → HIGH → MEDIUM → GOOD → others
-        rows.sort(Comparator.comparingInt(r -> severityOrder(r[2])));
+        rows.sort(Comparator.comparingInt(r -> severityOrder(r.getAssessment())));
         fireTableDataChanged();
     }
 
     public synchronized String getSummaryValueAt(int modelRow) {
         if (modelRow < 0 || modelRow >= rows.size()) return null;
-        return rows.get(modelRow)[0];
+        return rows.get(modelRow).getGroupKey();
     }
 
     @Override public synchronized int getRowCount()  { return rows.size(); }
@@ -43,13 +84,20 @@ public class HSTSSummaryTableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int col) {
-        return col == 1 ? Integer.class : String.class;
+        return col == 2 ? Integer.class : String.class;
     }
 
     @Override
     public synchronized Object getValueAt(int row, int col) {
         if (row < 0 || row >= rows.size()) return null;
-        return col == 1 ? Integer.parseInt(rows.get(row)[1]) : rows.get(row)[col];
+        SummaryRow r = rows.get(row);
+        return switch (col) {
+            case 0 -> r.getValue();
+            case 1 -> r.getDomains();
+            case 2 -> r.getCount();
+            case 3 -> r.getAssessment();
+            default -> null;
+        };
     }
 
     private static int severityOrder(String assessment) {

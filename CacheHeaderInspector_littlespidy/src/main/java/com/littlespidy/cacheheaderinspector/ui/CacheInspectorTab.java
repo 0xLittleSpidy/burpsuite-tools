@@ -191,8 +191,8 @@ public class CacheInspectorTab extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        topContainer.add(createMainToolbar(),        BorderLayout.NORTH);
-        topContainer.add(createQuickFilterToolbar(), BorderLayout.SOUTH);
+        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
+        topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
         panel.add(topContainer, BorderLayout.NORTH);
 
         // Summary table
@@ -328,45 +328,11 @@ public class CacheInspectorTab extends JPanel {
         return toolbar;
     }
 
-    private JPanel createQuickFilterToolbar() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-
-        JPanel chipsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        JLabel quickLbl = new JLabel("Quick Filters:");
-        quickLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        chipsPanel.add(quickLbl);
-
-        addChip(chipsPanel, "no-store",             "Cache-Control", "no-store");
-        addChip(chipsPanel, "no-cache",             "Cache-Control", "no-cache");
-        addChip(chipsPanel, "public",               "Cache-Control", "public");
-        addChip(chipsPanel, "private",              "Cache-Control", "private");
-        addChip(chipsPanel, "max-age=0",            "Cache-Control", "max-age=0");
-        addChip(chipsPanel, "must-revalidate",      "Cache-Control", "must-revalidate");
-        addChip(chipsPanel, "stale-while-revalidate","Cache-Control","stale-while-revalidate");
-        addChip(chipsPanel, "HIT",                  "X-Cache",       "HIT");
-        addChip(chipsPanel, "MISS",                 "X-Cache",       "MISS");
-        addChip(chipsPanel, "(not set)",             null,            "(not set)");
-
-        JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
+    private JPanel createStatusToolbar() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
         statsLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
-        statsPanel.add(statsLabel);
-
-        panel.add(chipsPanel, BorderLayout.WEST);
-        panel.add(statsPanel, BorderLayout.EAST);
+        panel.add(statsLabel);
         return panel;
-    }
-
-    private void addChip(JPanel parent, String label, String header, String keyword) {
-        JButton chip = new JButton(label);
-        chip.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-        chip.setMargin(new Insets(1, 6, 1, 6));
-        chip.addActionListener(e -> {
-            if (header != null) headerComboBox.setSelectedItem(header);
-            valueFilterField.setText(keyword);
-            selectedDirectiveValue = null;
-            refreshView();
-        });
-        parent.add(chip);
     }
 
     // ── Table rendering ───────────────────────────────────────────────────────

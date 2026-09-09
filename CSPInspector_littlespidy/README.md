@@ -32,18 +32,16 @@ It empowers penetration testers and security researchers to rapidly identify:
    - **CSP-Report-Only View**: Inspects report-only headers.
 
 3. **Multi-Faceted Triage Filtering**:
-   - **Status Code**: Exact codes, comma-separated lists (`200, 302, 404`), or status wildcards (`2xx`, `3xx`, `4xx`, `5xx`).
-   - **Content-Type**: Substring matching (`html`, `json`, `text`, `javascript`) to isolate web pages from API endpoints.
+   - **Method / Status / Content-Type Multi-Select**: MultiSelectFilterButton popups for rapid scoping.
    - **Keyword Filter**: Free-form text matching across policy strings and directive values.
-   - **Quick Presets**: One-click chips for `'unsafe-inline'`, `'unsafe-eval'`, `data:`, `*`, `(missing CSP)`, `CSP-Report-Only`, `frame-ancestors 'none'`, and `object-src 'none'`.
    - **Reset Filters**: Instant one-click restoration of unconstrained views.
 
-4. **Security Assessment & Visual Badging**:
-   - The summary table automatically classifies findings with severity highlights:
-     - `CRITICAL`: Missing CSP protection entirely.
-     - `HIGH`: Directives permitting `'unsafe-inline'` script execution.
-     - `MEDIUM`: Directives permitting `'unsafe-eval'`, wildcards (`*`), or `data:` / `blob:` schemes.
-     - `GOOD`: Directives enforcing strict clickjacking defense (`frame-ancestors 'none'` / `'self'`) and restricted plugins (`object-src 'none'`).
+4. **Security Assessment & Visual Badging (Summary Table)**:
+   - The summary table displays:
+     - **Value**: The actual raw CSP header or directive value.
+     - **Domains**: Comma-separated distinct hostnames with hover tooltip showing all domains.
+     - **Count**: Number of endpoints enforcing this policy.
+     - **Assessment**: Severity highlights (`CRITICAL`, `HIGH`, `MEDIUM`, `GOOD`, `STANDARD`).
 
 5. **Integrated Master-Detail Viewer**:
    - Select any URL row to view the full, raw HTTP request and response in Burp's native Pretty/Raw/Hex editors without leaving the tab.

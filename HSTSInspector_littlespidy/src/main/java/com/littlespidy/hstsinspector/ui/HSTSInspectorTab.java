@@ -192,8 +192,8 @@ public class HSTSInspectorTab extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        topContainer.add(createMainToolbar(),        BorderLayout.NORTH);
-        topContainer.add(createQuickFilterToolbar(), BorderLayout.SOUTH);
+        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
+        topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
         panel.add(topContainer, BorderLayout.NORTH);
 
         // Summary table
@@ -328,47 +328,19 @@ public class HSTSInspectorTab extends JPanel {
         return bar;
     }
 
-    private JPanel createQuickFilterToolbar() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-
-        JPanel chips = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        JLabel lbl = new JLabel("Quick Presets:");
-        lbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        chips.add(lbl);
-
-        addChip(chips, "(missing HSTS)",     () -> { setMode(HSTSDataStore.MODE_MISSING);     setKeyword(""); });
-        addChip(chips, "max-age=0 (opt-out)",() -> { setMode(HSTSDataStore.MODE_MAX_AGE);    setKeyword("max-age=0"); });
-        addChip(chips, "Short max-age",      () -> { setMode(HSTSDataStore.MODE_ASSESSMENT);  setKeyword("HIGH"); });
-        addChip(chips, "No includeSubDomains",() ->{ setMode(HSTSDataStore.MODE_SUBDOMAINS);  setKeyword("absent"); });
-        addChip(chips, "No preload",         () -> { setMode(HSTSDataStore.MODE_PRELOAD);     setKeyword("absent"); });
-        addChip(chips, "Preload ready",      () -> { setMode(HSTSDataStore.MODE_PRELOAD);     setKeyword("present"); });
-        addChip(chips, "CRITICAL",           () -> { setMode(HSTSDataStore.MODE_ASSESSMENT);  setKeyword("CRITICAL"); });
-        addChip(chips, "GOOD",               () -> { setMode(HSTSDataStore.MODE_ASSESSMENT);  setKeyword("GOOD"); });
-
-        JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
+    private JPanel createStatusToolbar() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
         statsLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
-        statsPanel.add(statsLabel);
-
-        panel.add(chips,     BorderLayout.WEST);
-        panel.add(statsPanel, BorderLayout.EAST);
+        panel.add(statsLabel);
         return panel;
     }
-
-    private void addChip(JPanel parent, String label, Runnable action) {
-        JButton btn = new JButton(label);
-        btn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-        btn.setMargin(new Insets(1, 6, 1, 6));
-        btn.addActionListener(e -> { action.run(); selectedSummaryValue = null; refreshView(); });
-        parent.add(btn);
-    }
-
-    private void setMode(String mode)    { inspectModeComboBox.setSelectedItem(mode); }
-    private void setKeyword(String kw)   { valueFilterField.setText(kw); }
 
     // ── Table rendering ───────────────────────────────────────────────────────
 
     private void setupSummaryRendering() {
-        summaryTable.getColumnModel().getColumn(1).setMaxWidth(65); // Count
+        // Column 0: Value, Column 1: Domains, Column 2: Count, Column 3: Assessment
+        summaryTable.getColumnModel().getColumn(1).setPreferredWidth(250);
+        summaryTable.getColumnModel().getColumn(2).setMaxWidth(65); // Count
 
         summaryTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
@@ -377,7 +349,7 @@ public class HSTSInspectorTab extends JPanel {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
                 if (!isSelected) {
                     int mr = table.convertRowIndexToModel(row);
-                    Object a = summaryTableModel.getValueAt(mr, 2);
+                    Object a = summaryTableModel.getValueAt(mr, 3);
                     String assessment = a != null ? a.toString().toUpperCase() : "";
                     if (assessment.startsWith("CRITICAL")) c.setBackground(new Color(255, 220, 220));
                     else if (assessment.startsWith("HIGH")) c.setBackground(new Color(255, 235, 210));
@@ -385,6 +357,13 @@ public class HSTSInspectorTab extends JPanel {
                     else if (assessment.startsWith("GOOD")) c.setBackground(new Color(230, 255, 230));
                     else c.setBackground(table.getBackground());
                 }
+
+                if (col == 1) { // Domains column tooltip
+                    setToolTipText(value != null ? value.toString() : null);
+                } else {
+                    setToolTipText(null);
+                }
+
                 return c;
             }
         });
