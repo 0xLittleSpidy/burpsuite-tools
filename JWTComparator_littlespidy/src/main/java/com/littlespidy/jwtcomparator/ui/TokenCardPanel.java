@@ -24,6 +24,7 @@ public class TokenCardPanel extends JPanel {
     private final JWTTokenModel model;
     private final TokenCardListener listener;
 
+    private final JLabel tokenTitle;
     private final JTextField labelField;
     private final JTextArea rawTextArea;
     private final JLabel statusBadge;
@@ -36,22 +37,57 @@ public class TokenCardPanel extends JPanel {
         this.model = model;
         this.listener = listener;
 
-        setLayout(new BorderLayout(8, 8));
+        setLayout(new BorderLayout(6, 6));
+        setPreferredSize(new Dimension(320, 250));
+        setMinimumSize(new Dimension(280, 220));
+        setMaximumSize(new Dimension(420, 320));
+
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground") != null ?
                         UIManager.getColor("Separator.foreground") : Color.GRAY, 1, true),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)
         ));
 
-        // ── Header Bar ──
-        JPanel headerPanel = new JPanel(new BorderLayout(8, 5));
+        // ── Header Section (Vertical Stack) ──
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 
-        JPanel labelContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        JLabel tokenTitle = new JLabel("Token " + model.getSlotIndex() + ":");
-        tokenTitle.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        // Row 1: Token title, status badge, remove button
+        JPanel row1 = new JPanel(new BorderLayout(6, 0));
 
-        labelField = new JTextField(model.getLabel(), 18);
-        labelField.setToolTipText("Domain or description (e.g. api.domain-a.com, Admin Token)");
+        tokenTitle = new JLabel("Token " + model.getSlotIndex());
+        tokenTitle.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
+
+        statusBadge = new JLabel("Empty");
+        statusBadge.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        statusBadge.setForeground(Color.GRAY);
+
+        JPanel titleAndBadge = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        titleAndBadge.add(tokenTitle);
+        titleAndBadge.add(statusBadge);
+        row1.add(titleAndBadge, BorderLayout.WEST);
+
+        removeButton = new JButton("✕");
+        removeButton.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        removeButton.setForeground(new Color(180, 40, 40));
+        removeButton.setToolTipText("Remove this token slot");
+        removeButton.setMargin(new Insets(1, 4, 1, 4));
+        removeButton.addActionListener(e -> {
+            if (listener != null) listener.onRemoveRequested(TokenCardPanel.this);
+        });
+        row1.add(removeButton, BorderLayout.EAST);
+        headerPanel.add(row1);
+        headerPanel.add(Box.createVerticalStrut(4));
+
+        // Row 2: Token Name / Label Input Field
+        JPanel namePanel = new JPanel(new BorderLayout(5, 0));
+        JLabel nameLbl = new JLabel("Name:");
+        nameLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        nameLbl.setToolTipText("Custom identifier for this token (e.g. Admin Prod, Staging User, Domain A)");
+
+        labelField = new JTextField(model.getLabel());
+        labelField.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        labelField.setToolTipText("Enter token name or environment label (updates matrix columns live)");
         labelField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { updateLabel(); }
             @Override public void removeUpdate(DocumentEvent e) { updateLabel(); }
@@ -63,50 +99,41 @@ public class TokenCardPanel extends JPanel {
                 }
             }
         });
+        namePanel.add(nameLbl, BorderLayout.WEST);
+        namePanel.add(labelField, BorderLayout.CENTER);
+        headerPanel.add(namePanel);
+        headerPanel.add(Box.createVerticalStrut(4));
 
-        labelContainer.add(tokenTitle);
-        labelContainer.add(labelField);
-
-        statusBadge = new JLabel("Empty");
-        statusBadge.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        statusBadge.setForeground(Color.GRAY);
-        labelContainer.add(statusBadge);
-
-        headerPanel.add(labelContainer, BorderLayout.WEST);
-
-        // Actions on header right
-        JPanel headerActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        // Row 3: Action Buttons
+        JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
         JButton pasteBtn = new JButton("📋 Paste");
         pasteBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        pasteBtn.setMargin(new Insets(2, 6, 2, 6));
+        pasteBtn.setToolTipText("Paste JWT from clipboard");
         pasteBtn.addActionListener(e -> handlePaste());
 
         JButton viewJsonBtn = new JButton("🔍 View Decoded");
         viewJsonBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        viewJsonBtn.setMargin(new Insets(2, 6, 2, 6));
+        viewJsonBtn.setToolTipText("Inspect pretty-printed header and payload claims");
         viewJsonBtn.addActionListener(e -> showDecodedDialog());
 
         JButton clearBtn = new JButton("🧹 Clear");
         clearBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        clearBtn.setMargin(new Insets(2, 6, 2, 6));
+        clearBtn.setToolTipText("Clear token input and reset model");
         clearBtn.addActionListener(e -> clearToken());
 
-        removeButton = new JButton("✕");
-        removeButton.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        removeButton.setForeground(new Color(180, 40, 40));
-        removeButton.setToolTipText("Remove this token slot");
-        removeButton.addActionListener(e -> {
-            if (listener != null) listener.onRemoveRequested(TokenCardPanel.this);
-        });
+        actionRow.add(pasteBtn);
+        actionRow.add(viewJsonBtn);
+        actionRow.add(clearBtn);
+        headerPanel.add(actionRow);
 
-        headerActions.add(pasteBtn);
-        headerActions.add(viewJsonBtn);
-        headerActions.add(clearBtn);
-        headerActions.add(removeButton);
-
-        headerPanel.add(headerActions, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
 
-        // ── Raw JWT Input Area ──
-        rawTextArea = new JTextArea(3, 30);
+        // ── Center: Raw JWT Input Area ──
+        rawTextArea = new JTextArea(4, 20);
         rawTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         rawTextArea.setLineWrap(true);
         rawTextArea.setWrapStyleWord(false);
@@ -123,7 +150,7 @@ public class TokenCardPanel extends JPanel {
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll, BorderLayout.CENTER);
 
-        // ── Metadata Footer ──
+        // ── South: Metadata Footer ──
         infoLabel = new JLabel("Ready - paste or send a token");
         infoLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         infoLabel.setForeground(Color.GRAY);
@@ -196,6 +223,10 @@ public class TokenCardPanel extends JPanel {
     public void setRemoveEnabled(boolean enabled) {
         removeButton.setEnabled(enabled);
         removeButton.setVisible(enabled);
+    }
+
+    public void updateSlotIndexHeader() {
+        tokenTitle.setText("Token " + model.getSlotIndex());
     }
 
     public void refreshView() {

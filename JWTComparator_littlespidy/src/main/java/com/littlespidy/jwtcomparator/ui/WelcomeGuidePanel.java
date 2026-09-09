@@ -6,19 +6,42 @@ import java.awt.*;
 
 /**
  * Onboarding dashboard and documentation tab presenting the workflow methodology,
- * dynamic N-token comparison, context menu usage, and triage guidelines.
+ * dynamic N-token side-by-side comparison, context menu usage, and triage guidelines.
  */
 public class WelcomeGuidePanel extends JPanel {
 
+    private final JWTComparatorTab mainTab;
+
     public WelcomeGuidePanel() {
+        this(null);
+    }
+
+    public WelcomeGuidePanel(JWTComparatorTab mainTab) {
+        this.mainTab = mainTab;
+
         setLayout(new BorderLayout(15, 15));
         setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
 
         // Header Panel
-        JPanel headerPanel = new JPanel(new BorderLayout(5, 10));
+        JPanel headerPanel = new JPanel(new BorderLayout(10, 10));
 
+        JPanel titleAndAction = new JPanel(new BorderLayout(10, 5));
         JLabel titleLabel = new JLabel("JWT Comparator");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
+
+        JButton launchBtn = new JButton("🚀 Open JWT Comparator Tab");
+        launchBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        launchBtn.setToolTipText("Switch to interactive comparison tab");
+        launchBtn.addActionListener(e -> {
+            if (this.mainTab != null) {
+                this.mainTab.selectComparatorTab();
+            }
+        });
+
+        titleAndAction.add(titleLabel, BorderLayout.WEST);
+        if (this.mainTab != null) {
+            titleAndAction.add(launchBtn, BorderLayout.EAST);
+        }
 
         JTextArea descArea = new JTextArea();
         descArea.setEditable(false);
@@ -30,10 +53,11 @@ public class WelcomeGuidePanel extends JPanel {
                 "JWT Comparator is an interactive multi-token diffing and comparison extension for Burp Suite. "
                         + "Designed specifically for modern web application testing and microservice architectures, it lets you "
                         + "seamlessly compare JSON Web Tokens across different domains, services, user roles, and authorization boundaries.\n\n"
-                        + "Built on the modern Montoya API with support for dynamic N tokens, on-demand context menu extraction, and color-coded claim diffing."
+                        + "Built on the modern Montoya API with support for dynamic N tokens (side-by-side vertical columns), "
+                        + "custom token naming, JSON session export/import, TSV download, on-demand context menu extraction, and color-coded claim diffing."
         );
 
-        headerPanel.add(titleLabel, BorderLayout.NORTH);
+        headerPanel.add(titleAndAction, BorderLayout.NORTH);
         headerPanel.add(descArea, BorderLayout.CENTER);
 
         // Modular Tutorial Cards
@@ -47,20 +71,33 @@ public class WelcomeGuidePanel extends JPanel {
         ));
 
         cardsPanel.add(createCard(
-                "2. Dynamic N-Token Comparison Matrix",
-                "Compare 2, 3, 4, or more tokens simultaneously. Click '➕ Add Another Token Slot' to add dynamic token cards. "
-                        + "Customize domain labels (e.g. 'Prod Admin', 'Staging User') directly on the card to keep track of environments and roles."
+                "2. Side-by-Side Vertical Columns (Left to Right)",
+                "Compare 2, 3, 4, or more tokens simultaneously. Token slots are structured as side-by-side vertical "
+                        + "columns arranged from left to right with smooth horizontal scrolling. Click '➕ Add Another Token Slot' "
+                        + "to dynamically append additional token columns."
         ));
 
         cardsPanel.add(createCard(
-                "3. Right-Click 'Send to JWT Comparator'",
+                "3. Custom Token Naming",
+                "Explicitly name each token slot using the 'Name:' input field (e.g. 'Admin Prod', 'Staging User', 'Domain A'). "
+                        + "Token names update the comparison matrix columns, selected claim inspector tabs, and TSV reports in real time."
+        ));
+
+        cardsPanel.add(createCard(
+                "4. Session JSON Save & Import",
+                "Save your entire working token set and labels with '💾 Export JSON' to a structured JSON file. "
+                        + "Load saved sessions anytime using '📂 Import JSON' to resume multi-environment security reviews without re-pasting."
+        ));
+
+        cardsPanel.add(createCard(
+                "5. Right-Click 'Send to JWT Comparator'",
                 "Right-click any HTTP request or response in Burp (Proxy, Repeater, Logger) to instantly send tokens to the comparator. "
                         + "The extension automatically detects and extracts JWTs from 'Authorization: Bearer', cookie headers, "
-                        + "request/response bodies, or text selections, and pre-populates the host domain as the label."
+                        + "request/response bodies, or text selections, pre-populating host domains and opening the comparator tab."
         ));
 
         cardsPanel.add(createCard(
-                "4. Instant Claims Diffing & Status Highlights",
+                "6. Instant Claims Diffing & Status Highlights",
                 "All header parameters and payload claims are unified into a color-coded matrix:\n"
                         + " • Amber: Value Mismatches (values differ across tokens).\n"
                         + " • Soft Red: Partially Missing (claims present in some tokens but absent in others).\n"
@@ -68,27 +105,15 @@ public class WelcomeGuidePanel extends JPanel {
         ));
 
         cardsPanel.add(createCard(
-                "5. 'Differences Only' Focused Auditing",
-                "Toggle the View filter from 'All Claims' to 'Differences Only' to immediately eliminate noise and "
-                        + "isolate divergence in user roles, scopes, permissions, tenants, or algorithms."
-        ));
-
-        cardsPanel.add(createCard(
-                "6. Epoch Timestamp & Expiration Inspector",
+                "7. Epoch Timestamp & Expiration Inspector",
                 "Automatically translates Unix epoch timestamps ('exp', 'iat', 'nbf', 'auth_time') into human-readable UTC "
                         + "and Local dates, calculating remaining lifetime or elapsed expiration time."
         ));
 
         cardsPanel.add(createCard(
-                "7. Detailed Claim Inspector & Decoded Viewers",
-                "Select any claim row in the matrix to inspect complex nested JSON objects or arrays in dedicated per-token tabs. "
-                        + "Click '🔍 View Decoded' on any token card for full pretty-printed JSON of Header and Payload."
-        ));
-
-        cardsPanel.add(createCard(
-                "8. One-Click TSV Export & Reporting",
-                "Click '📋 Copy TSV Diff' to copy the entire comparison matrix to the clipboard for fast reporting, "
-                        + "documentation, and bug bounty proof-of-concept sharing."
+                "8. TSV Download & Clipboard Export",
+                "Download the entire comparison matrix directly as a file ('💾 Download TSV') or copy it to the clipboard "
+                        + "('📋 Copy TSV') for fast reporting, team documentation, and bug bounty proof-of-concept sharing."
         ));
 
         JPanel container = new JPanel(new BorderLayout(15, 15));

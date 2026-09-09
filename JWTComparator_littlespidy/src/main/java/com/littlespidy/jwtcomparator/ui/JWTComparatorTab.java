@@ -23,10 +23,10 @@ public class JWTComparatorTab extends JPanel {
         tabbedPane = new JTabbedPane();
 
         comparisonPanel = new ComparisonPanel();
-        welcomeGuidePanel = new WelcomeGuidePanel();
+        welcomeGuidePanel = new WelcomeGuidePanel(this);
 
-        tabbedPane.addTab("JWT Comparator", comparisonPanel);
         tabbedPane.addTab("Welcome & Guide", welcomeGuidePanel);
+        tabbedPane.addTab("JWT Comparator", comparisonPanel);
 
         add(tabbedPane, BorderLayout.CENTER);
     }
@@ -35,7 +35,11 @@ public class JWTComparatorTab extends JPanel {
         return comparisonPanel;
     }
 
-    public void selectComparatorTab() {
+    public void selectWelcomeTab() {
         tabbedPane.setSelectedIndex(0);
+    }
+
+    public void selectComparatorTab() {
+        tabbedPane.setSelectedIndex(1);
     }
 }

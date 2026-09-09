@@ -18,7 +18,7 @@ public class JWTTokenModel {
     private static final DateTimeFormatter LOCAL_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
-    private final int slotIndex;
+    private int slotIndex;
     private String label;
     private String rawToken;
     private boolean valid;
@@ -44,6 +44,10 @@ public class JWTTokenModel {
 
     public int getSlotIndex() {
         return slotIndex;
+    }
+
+    public void setSlotIndex(int slotIndex) {
+        this.slotIndex = slotIndex;
     }
 
     public String getLabel() {

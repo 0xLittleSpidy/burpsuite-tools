@@ -94,4 +94,98 @@ public class ComparisonTest {
         com.littlespidy.jwtcomparator.ui.ComparisonPanel panel = new com.littlespidy.jwtcomparator.ui.ComparisonPanel();
         assertNotNull(panel);
     }
+
+    @Test
+    public void testTabOrderingWelcomeGuideFirst() {
+        System.setProperty("java.awt.headless", "true");
+        com.littlespidy.jwtcomparator.ui.JWTComparatorTab tab = new com.littlespidy.jwtcomparator.ui.JWTComparatorTab(null);
+        javax.swing.JTabbedPane pane = (javax.swing.JTabbedPane) tab.getComponent(0);
+        assertEquals("Welcome & Guide", pane.getTitleAt(0));
+        assertEquals("JWT Comparator", pane.getTitleAt(1));
+        assertEquals(0, pane.getSelectedIndex()); // Welcome Guide is first and selected by default
+
+        tab.selectComparatorTab();
+        assertEquals(1, pane.getSelectedIndex());
+
+        tab.selectWelcomeTab();
+        assertEquals(0, pane.getSelectedIndex());
+    }
+
+    @Test
+    public void testTokenSessionJsonExportAndImport() {
+        String h1 = "{\"alg\":\"HS256\"}";
+        String p1 = "{\"role\":\"admin\",\"sub\":\"123\"}";
+        String jwt1 = createTestJwt(h1, p1);
+
+        String h2 = "{\"alg\":\"RS256\"}";
+        String p2 = "{\"role\":\"user\",\"sub\":\"456\"}";
+        String jwt2 = createTestJwt(h2, p2);
+
+        JWTTokenModel t1 = new JWTTokenModel(1, "Prod Admin");
+        JWTParser.parseToken(jwt1, t1);
+
+        JWTTokenModel t2 = new JWTTokenModel(2, "Staging User");
+        JWTParser.parseToken(jwt2, t2);
+
+        String json = TokenSessionManager.exportToJson(List.of(t1, t2));
+        assertNotNull(json);
+        assertTrue(json.contains("Prod Admin"));
+        assertTrue(json.contains("Staging User"));
+        assertTrue(json.contains("jwt-comparator") || json.contains("JWT Comparator"));
+
+        List<TokenSessionManager.ExportedToken> imported = TokenSessionManager.importFromJson(json);
+        assertEquals(2, imported.size());
+        assertEquals("Prod Admin", imported.get(0).getName());
+        assertEquals(jwt1, imported.get(0).getRawToken());
+        assertEquals("Staging User", imported.get(1).getName());
+        assertEquals(jwt2, imported.get(1).getRawToken());
+    }
+
+    @Test
+    public void testTokenSessionImportVariousJsonFormats() {
+        // Format 1: Direct array of token objects
+        String arrJson = "[{\"name\":\"Gateway Service\",\"rawToken\":\"dummy.jwt.token1\"},"
+                + "{\"name\":\"Auth Server\",\"token\":\"dummy.jwt.token2\"}]";
+        List<TokenSessionManager.ExportedToken> res1 = TokenSessionManager.importFromJson(arrJson);
+        assertEquals(2, res1.size());
+        assertEquals("Gateway Service", res1.get(0).getName());
+        assertEquals("dummy.jwt.token1", res1.get(0).getRawToken());
+        assertEquals("Auth Server", res1.get(1).getName());
+        assertEquals("dummy.jwt.token2", res1.get(1).getRawToken());
+
+        // Format 2: Map of Name -> Token
+        String mapJson = "{\"Microservice A\": \"dummy.map.token1\", \"Microservice B\": \"dummy.map.token2\"}";
+        List<TokenSessionManager.ExportedToken> res2 = TokenSessionManager.importFromJson(mapJson);
+        assertEquals(2, res2.size());
+        assertTrue(res2.stream().anyMatch(t -> t.getName().equals("Microservice A") && t.getRawToken().equals("dummy.map.token1")));
+        assertTrue(res2.stream().anyMatch(t -> t.getName().equals("Microservice B") && t.getRawToken().equals("dummy.map.token2")));
+    }
+
+    @Test
+    public void testTsvGenerationAndTokenRenaming() {
+        System.setProperty("java.awt.headless", "true");
+        com.littlespidy.jwtcomparator.ui.ComparisonPanel panel = new com.littlespidy.jwtcomparator.ui.ComparisonPanel();
+        com.littlespidy.jwtcomparator.ui.TokenSlotsContainer slots = panel.getSlotsContainer();
+
+        String h1 = "{\"alg\":\"HS256\"}";
+        String p1 = "{\"role\":\"admin\",\"scope\":\"read write\"}";
+        String jwt1 = createTestJwt(h1, p1);
+
+        String h2 = "{\"alg\":\"HS256\"}";
+        String p2 = "{\"role\":\"guest\",\"scope\":\"read\"}";
+        String jwt2 = createTestJwt(h2, p2);
+
+        slots.loadIntoSlot(1, jwt1, "Admin Role");
+        slots.loadIntoSlot(2, jwt2, "Guest Role");
+
+        String tsv = panel.generateTsvContent();
+        assertNotNull(tsv);
+        assertTrue(tsv.contains("Section\tClaim Key"));
+        assertTrue(tsv.contains("Token 1 (Admin Role)"));
+        assertTrue(tsv.contains("Token 2 (Guest Role)"));
+        assertTrue(tsv.contains("Diff Status"));
+        assertTrue(tsv.contains("role"));
+        assertTrue(tsv.contains("admin"));
+        assertTrue(tsv.contains("guest"));
+    }
 }

@@ -17,12 +17,28 @@ JWT Comparator solves this by providing dynamic $N$-token side-by-side compariso
 
 ## Key Features
 
-1. **Dynamic $N$-Token Comparison Matrix**:
-   - Compare 2, 3, 4, or more JWT tokens simultaneously across different domains or user roles.
-   - Click `➕ Add Another Token Slot` to dynamically add more comparison columns.
-   - Customizable domain labels on each card (e.g., `api.domain-a.com (Admin)`, `auth.domain-b.com (User)`).
+1. **Welcome & Guide Dashboard (Initial View)**:
+   - Onboarding tab loaded first upon opening Burp Suite, offering interactive workflow guides and a 1-click launcher to switch directly to the comparator tab.
 
-2. **On-Demand Context Menu Extraction (`Send to JWT Comparator`)**:
+2. **Side-by-Side Vertical Columns (Left to Right)**:
+   - Compare 2, 3, 4, or dynamic $N$ tokens side-by-side in vertical column cards arranged horizontally from left to right.
+   - Smooth horizontal scrolling for unlimited simultaneous token comparisons.
+   - Click `➕ Add Another Token Slot` to append new comparison columns.
+
+3. **Custom Token Naming**:
+   - Explicit `Name:` input field on every column card (e.g., `Admin Prod`, `Staging User`, `Microservice Gateway`).
+   - Editing names live-syncs immediately across matrix table column headers, detail inspector tabs, and TSV exports.
+
+4. **Session JSON Save & Import**:
+   - Save your entire working token set, custom labels, and slot configurations to a JSON file via `💾 Export JSON`.
+   - Restore saved sessions anytime via `📂 Import JSON` to resume multi-environment security audits without re-pasting tokens.
+   - Flexible parser supporting standard exports, object arrays, key-value maps, and raw token lists.
+
+5. **TSV File Download & Clipboard Export**:
+   - Download the full claims comparison matrix directly to disk as a `.tsv` file (`💾 Download TSV`).
+   - One-click copy to clipboard (`📋 Copy TSV`) for rapid reporting, spreadsheet analysis, and bug bounty proof-of-concept sharing.
+
+6. **On-Demand Context Menu Extraction (`Send to JWT Comparator`)**:
    - Right-click any HTTP request or response in Burp (**Proxy**, **Repeater**, **Logger**, or **Scanner**).
    - Automatically detects and extracts JWTs from:
      - `Authorization: Bearer <JWT>` headers
@@ -30,36 +46,24 @@ JWT Comparator solves this by providing dynamic $N$-token side-by-side compariso
      - Custom auth headers (`X-Access-Token`, `Token`, `JWT`)
      - JSON request / response bodies
      - User-selected text highlighted in the message editor
-   - Direct the token into a specific existing slot (`Token 1`, `Token 2`, etc.) or append as a new slot.
-   - Automatically pre-populates the host domain as the token's label.
+   - Direct the token into a specific existing slot or append as a new slot. Automatically switches to the comparator tab.
 
-3. **Color-Coded Claims Diffing & Status Tracking**:
+7. **Color-Coded Claims Diffing & Status Tracking**:
    - Compares all Header parameters and Payload claims in a unified matrix:
      - **Amber / Orange**: Value Mismatch (claim present in tokens but with different values).
      - **Soft Red / Italics**: Partially Missing (claim present in some tokens but absent in others).
      - **Neutral**: Identical (same claim and value across all tokens).
 
-4. **"Differences Only" Focused Triage**:
-   - Toggle the View filter between:
-     - `All Claims`
-     - `Differences Only` (hides identical claims to immediately focus on divergences)
-     - `Missing Only` (isolates claims that are absent in some tokens)
-     - `Matches Only`
+8. **"Differences Only" Focused Triage**:
+   - Toggle the View filter between `All Claims`, `Differences Only` (hides identical claims to immediately focus on divergences), `Missing Only`, and `Matches Only`.
    - Filter by section (`All`, `Header`, `Payload`) and instant text search across keys and values.
 
-5. **Epoch Timestamp & Validity Translation**:
-   - Automatically translates Unix epoch timestamps (`exp`, `iat`, `nbf`, `auth_time`, `updated_at`) into human-readable UTC and Local dates.
-   - Real-time relative duration calculation (e.g. `Active (expires in 1h 45m)` or `Expired 3d 2h ago`).
+9. **Epoch Timestamp & Validity Translation**:
+   - Automatically translates Unix epoch timestamps (`exp`, `iat`, `nbf`, `auth_time`, `updated_at`) into human-readable UTC and Local dates with relative duration (e.g. `Active (expires in 1h 45m)` or `Expired 3d ago`).
 
-6. **Selected Claim Inspector & Decoded Viewers**:
-   - Select any claim in the matrix to inspect raw and formatted JSON representations in per-token tabs.
-   - Click `🔍 View Decoded` on any token card for complete pretty-printed Header and Payload JSON.
-
-7. **One-Click TSV Export**:
-   - Export the entire comparison matrix to your clipboard with `📋 Copy TSV Diff` for bug bounty writeups, compliance reports, and audit logs.
-
-8. **Welcome & Guide Dashboard**:
-   - Built-in onboarding tab with modular tutorial cards and workflow best practices.
+10. **Selected Claim Inspector & Decoded Viewers**:
+    - Select any claim in the matrix to inspect raw and formatted JSON representations in per-token tabs.
+    - Click `🔍 View Decoded` on any token card for complete pretty-printed Header and Payload JSON.
 
 ---
 

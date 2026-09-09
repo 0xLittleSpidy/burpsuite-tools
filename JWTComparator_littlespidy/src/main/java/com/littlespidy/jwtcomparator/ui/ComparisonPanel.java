@@ -6,8 +6,12 @@ import com.littlespidy.jwtcomparator.model.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 
 /**
@@ -33,11 +37,10 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
     public ComparisonPanel() {
         setLayout(new BorderLayout(0, 5));
 
-        // 1. Top Section: Token Slots in a scrollable panel
+        // 1. Top Section: Token Slots in horizontal columns (left to right)
         slotsContainer = new TokenSlotsContainer(this);
-        JScrollPane slotsScroll = new JScrollPane(slotsContainer);
-        slotsScroll.setBorder(BorderFactory.createTitledBorder("Token Slots (N Tokens)"));
-        slotsScroll.setPreferredSize(new Dimension(800, 260));
+        slotsContainer.setBorder(BorderFactory.createTitledBorder("Token Comparison Slots (Columns Left to Right)"));
+        slotsContainer.setPreferredSize(new Dimension(800, 270));
 
         // 2. Middle: Matrix Toolbar
         JPanel matrixToolbar = new JPanel(new BorderLayout(8, 4));
@@ -78,14 +81,30 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
         matrixToolbar.add(filterControls, BorderLayout.WEST);
 
         JPanel actionControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
-        JButton copyTsvBtn = new JButton("📋 Copy TSV Diff");
+
+        JButton downloadTsvBtn = new JButton("💾 Download TSV");
+        downloadTsvBtn.setToolTipText("Download comparison matrix to a .tsv file");
+        downloadTsvBtn.addActionListener(e -> downloadTsvReport());
+
+        JButton copyTsvBtn = new JButton("📋 Copy TSV");
         copyTsvBtn.setToolTipText("Copy comparison table to clipboard as TSV");
         copyTsvBtn.addActionListener(e -> copyTsvReport());
+
+        JButton exportJsonBtn = new JButton("💾 Export JSON");
+        exportJsonBtn.setToolTipText("Save token slots and names to a JSON file");
+        exportJsonBtn.addActionListener(e -> slotsContainer.exportJsonSession());
+
+        JButton importJsonBtn = new JButton("📂 Import JSON");
+        importJsonBtn.setToolTipText("Load tokens and slot names from a saved JSON file");
+        importJsonBtn.addActionListener(e -> slotsContainer.importJsonSession());
 
         JButton refreshBtn = new JButton("🔄 Refresh");
         refreshBtn.addActionListener(e -> refreshComparison());
 
+        actionControls.add(downloadTsvBtn);
         actionControls.add(copyTsvBtn);
+        actionControls.add(exportJsonBtn);
+        actionControls.add(importJsonBtn);
         actionControls.add(refreshBtn);
         matrixToolbar.add(actionControls, BorderLayout.EAST);
 
@@ -129,7 +148,7 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
         centerPanel.add(tableDetailSplit, BorderLayout.CENTER);
 
         // Master Vertical Split: Slots on Top, Center Panel on Bottom
-        JSplitPane masterSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, slotsScroll, centerPanel);
+        JSplitPane masterSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, slotsContainer, centerPanel);
         masterSplit.setResizeWeight(0.35);
         masterSplit.setContinuousLayout(true);
 
@@ -226,7 +245,7 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
         }
     }
 
-    private void copyTsvReport() {
+    public String generateTsvContent() {
         StringBuilder sb = new StringBuilder();
         int colCount = tableModel.getColumnCount();
 
@@ -246,11 +265,49 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
             }
             sb.append("\n");
         }
+        return sb.toString();
+    }
 
-        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(sb.toString()), null);
+    public void copyTsvReport() {
+        String tsv = generateTsvContent();
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(tsv), null);
         JOptionPane.showMessageDialog(this,
                 "Comparison TSV successfully copied to clipboard!",
                 "TSV Copied", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void downloadTsvReport() {
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Download Comparison Matrix as TSV");
+        chooser.setSelectedFile(new File("jwt-comparison-diff.tsv"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Tab-Separated Values (*.tsv)", "tsv"));
+
+        int res = chooser.showSaveDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            if (!file.getName().toLowerCase().endsWith(".tsv")) {
+                file = new File(file.getAbsolutePath() + ".tsv");
+            }
+            try {
+                String tsv = generateTsvContent();
+                Files.writeString(file.toPath(), tsv, StandardCharsets.UTF_8);
+                JOptionPane.showMessageDialog(this,
+                        "Comparison TSV report saved to:\n" + file.getAbsolutePath(),
+                        "TSV Saved", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Error saving TSV file: " + ex.getMessage(),
+                        "Save Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     public TokenSlotsContainer getSlotsContainer() {
