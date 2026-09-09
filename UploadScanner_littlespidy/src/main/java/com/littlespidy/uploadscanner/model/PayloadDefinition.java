@@ -16,6 +16,8 @@ public class PayloadDefinition {
     private final String contentType;
     private final byte[] content;
     private final String executionMarker;
+    private final String collaboratorSubdomain;
+    private final boolean isOob;
 
     public PayloadDefinition(String name,
                              String category,
@@ -23,12 +25,7 @@ public class PayloadDefinition {
                              String contentType,
                              byte[] content,
                              String executionMarker) {
-        this.name = name;
-        this.category = category;
-        this.filename = filename;
-        this.contentType = contentType;
-        this.content = content != null ? content : new byte[0];
-        this.executionMarker = executionMarker != null ? executionMarker : "";
+        this(name, category, filename, contentType, content, executionMarker, "", false);
     }
 
     public PayloadDefinition(String name,
@@ -39,7 +36,38 @@ public class PayloadDefinition {
                              String executionMarker) {
         this(name, category, filename, contentType,
                 contentString != null ? contentString.getBytes(StandardCharsets.UTF_8) : new byte[0],
-                executionMarker);
+                executionMarker, "", false);
+    }
+
+    public PayloadDefinition(String name,
+                             String category,
+                             String filename,
+                             String contentType,
+                             byte[] content,
+                             String executionMarker,
+                             String collaboratorSubdomain,
+                             boolean isOob) {
+        this.name = name;
+        this.category = category;
+        this.filename = filename;
+        this.contentType = contentType;
+        this.content = content != null ? content : new byte[0];
+        this.executionMarker = executionMarker != null ? executionMarker : "";
+        this.collaboratorSubdomain = collaboratorSubdomain != null ? collaboratorSubdomain : "";
+        this.isOob = isOob;
+    }
+
+    public PayloadDefinition(String name,
+                             String category,
+                             String filename,
+                             String contentType,
+                             String contentString,
+                             String executionMarker,
+                             String collaboratorSubdomain,
+                             boolean isOob) {
+        this(name, category, filename, contentType,
+                contentString != null ? contentString.getBytes(StandardCharsets.UTF_8) : new byte[0],
+                executionMarker, collaboratorSubdomain, isOob);
     }
 
     public String getName() {
@@ -64,5 +92,13 @@ public class PayloadDefinition {
 
     public String getExecutionMarker() {
         return executionMarker;
+    }
+
+    public String getCollaboratorSubdomain() {
+        return collaboratorSubdomain;
+    }
+
+    public boolean isOob() {
+        return isOob;
     }
 }

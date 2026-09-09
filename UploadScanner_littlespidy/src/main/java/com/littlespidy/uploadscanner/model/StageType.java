@@ -10,7 +10,8 @@ package com.littlespidy.uploadscanner.model;
 public enum StageType {
     UPLOAD("Upload"),
     PREFLIGHT("Preflight"),
-    REDOWNLOAD("ReDownload");
+    REDOWNLOAD("ReDownload"),
+    VERIFICATION("Verification");
 
     private final String displayName;
 

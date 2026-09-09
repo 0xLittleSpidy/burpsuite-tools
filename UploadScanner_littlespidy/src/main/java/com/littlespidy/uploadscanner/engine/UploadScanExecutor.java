@@ -1,6 +1,8 @@
 package com.littlespidy.uploadscanner.engine;
 
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.collaborator.CollaboratorClient;
+import burp.api.montoya.collaborator.Interaction;
 import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.core.Marker;
 import burp.api.montoya.http.message.HttpRequestResponse;
@@ -98,7 +100,21 @@ public class UploadScanExecutor {
     private void executeScan(HttpRequest baseRequest) {
         ReDownloaderEngine redlEngine = new ReDownloaderEngine(api, config.getRedownloaderConfig());
         String originalFilename = extractFilenameFromRequest(baseRequest);
-        List<PayloadDefinition> payloads = UploadPayloadGenerator.generatePayloads(config, originalFilename);
+
+        CollaboratorClient collaboratorClient = null;
+        String collaboratorDomain = "";
+        try {
+            if (api.collaborator() != null) {
+                collaboratorClient = api.collaborator().createClient();
+                if (collaboratorClient != null) {
+                    collaboratorDomain = collaboratorClient.generatePayload().toString();
+                }
+            }
+        } catch (Throwable t) {
+            collaboratorDomain = "collab-test.burpcollaborator.net";
+        }
+
+        List<PayloadDefinition> payloads = UploadPayloadGenerator.generatePayloads(config, originalFilename, collaboratorDomain);
 
         int total = payloads.size();
         for (int i = 0; i < total; i++) {
@@ -155,6 +171,16 @@ public class UploadScanExecutor {
 
             if (!extraction.isFound() && preflightPair != null && preflightPair.hasResponse()) {
                 extraction = redlEngine.parseDownloadUrl(preflightPair.response().bodyToString(), payload.getFilename());
+            }
+
+            // Fallback: Smart Auto-Detect from response if not matched by custom markers
+            if (!extraction.isFound() && uploadPair.hasResponse()) {
+                ReDownloaderEngine.DetectionResult autoDet =
+                        redlEngine.autoDetectDownloadUrl(uploadPair.response(), payload.getFilename());
+                if (autoDet.isFound()) {
+                    extraction = new MarkerHighlighter.ExtractionResult(
+                            true, autoDet.getDetectedUrl(), 0, 0, 0, autoDet.getDetectedUrl().length());
+                }
             }
 
             List<Marker> uploadMarkers = new ArrayList<>();
@@ -226,6 +252,34 @@ public class UploadScanExecutor {
                     break;
                 }
             }
+        }
+
+        // ── Step 4: Poll Out-of-Band Collaborator Interactions ──
+        if (collaboratorClient != null) {
+            try {
+                // Brief pause to allow DNS/HTTP propagation
+                Thread.sleep(600);
+                List<Interaction> interactions = collaboratorClient.getAllInteractions();
+                for (Interaction interaction : interactions) {
+                    int oobId = sequenceCounter.getAndIncrement();
+                    String clientIp = (interaction.clientIp() != null) ? interaction.clientIp().getHostAddress() : "unknown";
+                    String desc = "🔥 Collaborator OOB: " + interaction.type().name() + " callback from " + clientIp;
+                    UploadEntry oobEntry = new UploadEntry(
+                            oobId,
+                            StageType.VERIFICATION,
+                            interaction.type().name(),
+                            (short) 200,
+                            desc,
+                            0,
+                            "http://" + collaboratorDomain,
+                            null,
+                            interaction.type().name() + " callback received",
+                            null,
+                            null
+                    );
+                    publishEntry(oobEntry);
+                }
+            } catch (Throwable ignored) {}
         }
     }
 

@@ -18,7 +18,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **JWT Comparator** | [📥 `jwt-comparator-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/JWTComparator_littlespidy/build/libs/jwt-comparator-littlespidy-1.0.0.jar) | Dynamic N-token JWT side-by-side comparator, claim diff matrix, timestamp translator |
 | **CSP Inspector** | [📥 `csp-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/CSPInspector_littlespidy/build/libs/csp-inspector-littlespidy-1.0.0.jar) | Content Security Policy auditor, raw value and affected domain indexer |
 | **HSTS Inspector** | [📥 `hsts-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/HSTSInspector_littlespidy/build/libs/hsts-inspector-littlespidy-1.0.0.jar) | HTTP Strict Transport Security auditor, raw value and affected domain indexer |
-| **Upload Scanner** | [📥 `upload-scanner-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy/build/libs/upload-scanner-littlespidy-1.0.0.jar) | Automated file upload fuzzer, visual ReDownloader markers, and triage activity log |
+| **Upload Scanner** | [📥 `upload-scanner-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy/build/libs/upload-scanner-littlespidy-1.0.0.jar) | 24-module file upload fuzzer, simplified 4-mode ReDownloader, Burp Collaborator OOB, and triage log |
 
 ---
 
@@ -82,9 +82,10 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Master-Detail Request/Response Viewer**: Embedded native Montoya editors for selected endpoints.
 
 ### 9. [Upload Scanner (Montoya Edition)](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy)
-- **ReDownloader with Visual Editor Markers**: Extracts dynamic file download URLs using Start/End delimiter markers and template tokens (`${FILENAME}`, `${FILENAME_NO_EXT}`, `${ORIG_EXT}`, `${RANDOMIZE}`). Attaches native Montoya markers and automatically synchronizes visual search highlighting (`setSearchExpression`) in response and request viewers.
-- **Enhanced "Done Uploads" Activity Log**: Master-detail triage interface with `MultiSelectFilterButton`s for Stage (`Upload`, `Preflight`, `ReDownload`), Status (`2xx`, `3xx`, `4xx`, `5xx`), and Method (`POST`, `GET`), live search across payloads and URLs, one-click `Clear Log`, and TSV file export.
-- **Native Java Attack Payloads**: Web shells (PHP, JSP, ASPX), Image Polyglots (GIF89a, PNG IHDR), Path Traversal (`../../`), Extension & MIME bypasses (`.php.jpg`, `.PhP`, `%00`), SVG XSS, and EICAR antivirus filter testing without external binary dependencies.
+- **Simplified 4-Mode ReDownloader**: 1-click **✨ Magic Auto-Detect** (Location headers, filename reflections, JSON keys, HTML media tags), 1-click **🎯 Highlight Selection** helper (derives start/end markers from response selection with zero regex math), **📁 Common Directory Presets** (`/uploads/`, `/wp-content/uploads/`, `/storage/`, etc.), and **⚙️ Advanced Custom Markers**.
+- **Complete 24-Module Attack Suite**: All scanning methods ported natively from `UploadScanner.py` across 5 categories: Server RCE (PHP shells, JSP/JSPX, ASP/ASPX, `.htaccess`, `web.config`, CGI, SSI/ESI), Image Libs (ImageTragick CVE-2016-3714, Bad Manners CVE-2018-16323, MSL delegates, Ghostscript CVE-2016-7977/CVE-2017-8291, LibAVFormat SSRF), XML/Docs (SVG XXE, XML XXE, in-memory Office DOCX XXE ZIP, XMP metadata XXE, PDF injections, CSV formulas), Client & Polyglots (HTML XSS, SVG XSS, SWF, PortSwigger JPEG+JS CSP polyglot, ThinkFu GIF89a+JS CSP polyglot), and Archives/Quirks/DoS (in-memory Zip Slip, TAR symlink to `/etc/passwd`, upload quirks, EICAR AV test, 65535x65535 Pixel Flood PNG, XML Billion Laughs bomb).
+- **Integrated Burp Collaborator**: Automatic OOB callback token generation and polling for blind SSRF, XXE, NTLM/SMB theft, and command execution callbacks.
+- **Enhanced Triage Activity Log**: Master-detail triage interface with `MultiSelectFilterButton`s for Stage (`Upload`, `Preflight`, `ReDownload`, `Verification`), Status (`2xx`, `3xx`, `4xx`, `5xx`), and Method (`POST`, `GET`), live search across payloads and URLs, one-click `Clear Log`, and TSV file export.
 - **Dynamic Multi-Session Architecture**: Context menu `Send to Upload Scanner` spawning independent closeable session tabs (`×`) with safe non-blocking background execution (`SwingWorker`).
 
 ---
