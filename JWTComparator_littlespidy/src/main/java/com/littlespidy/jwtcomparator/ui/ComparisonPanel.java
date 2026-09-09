@@ -144,13 +144,16 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
     }
 
     public synchronized void refreshComparison() {
+        if (slotsContainer == null) {
+            return;
+        }
         List<JWTTokenModel> tokens = slotsContainer.getTokens();
         currentResult = ComparisonResult.compute(tokens);
         applyFilter();
     }
 
     private synchronized void applyFilter() {
-        if (currentResult == null) {
+        if (currentResult == null || searchField == null || diffFilterCombo == null || sectionFilterCombo == null || tableModel == null || summaryLabel == null) {
             return;
         }
 

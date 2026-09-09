@@ -20,6 +20,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
     private final List<TokenCardPanel> cards = new ArrayList<>();
     private final JPanel cardsGridPanel;
     private final SlotsChangeListener listener;
+    private boolean initializing = true;
 
     public TokenSlotsContainer(SlotsChangeListener listener) {
         this.listener = listener;
@@ -50,6 +51,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
         // Initialize with 2 default token slots
         addTokenSlot(null, "Domain A");
         addTokenSlot(null, "Domain B");
+        initializing = false;
     }
 
     public synchronized TokenCardPanel addTokenSlot(String token, String label) {
@@ -71,7 +73,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
         revalidate();
         repaint();
 
-        if (listener != null) {
+        if (listener != null && !initializing) {
             listener.onSlotsChanged();
         }
 

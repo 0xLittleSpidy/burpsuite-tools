@@ -87,4 +87,11 @@ public class ComparisonTest {
         assertNotNull(iatStr);
         assertTrue(iatStr.contains("Issued"));
     }
+
+    @Test
+    public void testComparisonPanelInitialization() {
+        System.setProperty("java.awt.headless", "true");
+        com.littlespidy.jwtcomparator.ui.ComparisonPanel panel = new com.littlespidy.jwtcomparator.ui.ComparisonPanel();
+        assertNotNull(panel);
+    }
 }
