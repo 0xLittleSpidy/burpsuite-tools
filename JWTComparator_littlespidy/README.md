@@ -58,10 +58,16 @@ JWT Comparator solves this by providing dynamic $N$-token side-by-side compariso
    - Toggle the View filter between `All Claims`, `Differences Only` (hides identical claims to immediately focus on divergences), `Missing Only`, and `Matches Only`.
    - Filter by section (`All`, `Header`, `Payload`) and instant text search across keys and values.
 
-9. **Epoch Timestamp & Validity Translation**:
+9. **Ignored Claims in Differences View**:
+   - Eliminate expected drift and noise (e.g., `exp`, `iat`, `nbf`, `jti`, `auth_time`) from the `Differences Only` view.
+   - Configure via the `Ignore:` toolbar field, click `⚙️` to access presets (Timestamps, Nonces), or right-click any row directly in the Claims Comparison Matrix to ignore or unignore that claim on demand.
+   - Summary label automatically reports how many differences are currently hidden by the ignore filter.
+   - Ignored claims preferences are saved and restored with `💾 Export JSON` / `📂 Import JSON` sessions.
+
+10. **Epoch Timestamp & Validity Translation**:
    - Automatically translates Unix epoch timestamps (`exp`, `iat`, `nbf`, `auth_time`, `updated_at`) into human-readable UTC and Local dates with relative duration (e.g. `Active (expires in 1h 45m)` or `Expired 3d ago`).
 
-10. **Selected Claim Inspector & Decoded Viewers**:
+11. **Selected Claim Inspector & Decoded Viewers**:
     - Select any claim in the matrix to inspect raw and formatted JSON representations in per-token tabs.
     - Click `🔍 View Decoded` on any token card for complete pretty-printed Header and Payload JSON.
 

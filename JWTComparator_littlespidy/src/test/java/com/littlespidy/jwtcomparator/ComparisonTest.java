@@ -188,4 +188,94 @@ public class ComparisonTest {
         assertTrue(tsv.contains("admin"));
         assertTrue(tsv.contains("guest"));
     }
+
+    @Test
+    public void testIgnoredClaimsFilterExcludesExpAndIatInDifferencesOnly() {
+        String h = "{\"alg\":\"HS256\"}";
+        // Token 1: exp=1000, iat=500, role=admin, aud=my-app
+        String p1 = "{\"aud\":\"my-app\",\"role\":\"admin\",\"exp\":1000,\"iat\":500}";
+        // Token 2: exp=2000, iat=600, role=user, aud=my-app
+        String p2 = "{\"aud\":\"my-app\",\"role\":\"user\",\"exp\":2000,\"iat\":600}";
+
+        JWTTokenModel t1 = new JWTTokenModel(1, "Token 1");
+        JWTParser.parseToken(createTestJwt(h, p1), t1);
+
+        JWTTokenModel t2 = new JWTTokenModel(2, "Token 2");
+        JWTParser.parseToken(createTestJwt(h, p2), t2);
+
+        ComparisonResult result = ComparisonResult.compute(List.of(t1, t2));
+        // Total differences without filter: exp, iat, role (3 differences)
+        assertEquals(3, result.getDifferencesCount());
+
+        // 1. Unfiltered Differences Only: should return 3 rows (exp, iat, role)
+        List<ComparisonRow> unignoredDiffs = result.filter("All", "Differences Only", "");
+        assertEquals(3, unignoredDiffs.size());
+
+        // 2. Filter with ignored: exp, iat
+        java.util.Set<String> ignored = java.util.Set.of("exp", "iat");
+        List<ComparisonRow> filteredDiffs = result.filter("All", "Differences Only", "", ignored);
+        assertEquals(1, filteredDiffs.size());
+        assertEquals("role", filteredDiffs.get(0).getClaimKey());
+
+        // Verify count of ignored differences
+        assertEquals(2, result.countIgnoredDifferences(ignored));
+
+        // 3. In "All Claims" view, exp and iat should still be visible even if in the ignore set
+        List<ComparisonRow> allClaims = result.filter("All", "All Claims", "", ignored);
+        assertTrue(allClaims.stream().anyMatch(r -> r.getClaimKey().equals("exp")));
+        assertTrue(allClaims.stream().anyMatch(r -> r.getClaimKey().equals("iat")));
+        assertTrue(allClaims.stream().anyMatch(r -> r.getClaimKey().equals("role")));
+        assertTrue(allClaims.stream().anyMatch(r -> r.getClaimKey().equals("aud")));
+    }
+
+    @Test
+    public void testComparisonPanelIgnoreClaimsFieldAndMethods() {
+        System.setProperty("java.awt.headless", "true");
+        com.littlespidy.jwtcomparator.ui.ComparisonPanel panel = new com.littlespidy.jwtcomparator.ui.ComparisonPanel();
+
+        // Default ignored keys should be "exp" and "iat"
+        java.util.Set<String> initialIgnored = panel.getIgnoredClaimKeys();
+        assertTrue(initialIgnored.contains("exp"));
+        assertTrue(initialIgnored.contains("iat"));
+
+        // Test addIgnoredClaim
+        panel.addIgnoredClaim("jti");
+        assertTrue(panel.getIgnoredClaimKeys().contains("jti"));
+
+        // Test removeIgnoredClaim
+        panel.removeIgnoredClaim("exp");
+        assertFalse(panel.getIgnoredClaimKeys().contains("exp"));
+        assertTrue(panel.getIgnoredClaimKeys().contains("iat"));
+        assertTrue(panel.getIgnoredClaimKeys().contains("jti"));
+
+        // Test setIgnoredClaims
+        panel.setIgnoredClaims(List.of("auth_time", "nbf"));
+        assertEquals(2, panel.getIgnoredClaimKeys().size());
+        assertTrue(panel.getIgnoredClaimKeys().contains("auth_time"));
+        assertTrue(panel.getIgnoredClaimKeys().contains("nbf"));
+    }
+
+    @Test
+    public void testTokenSessionPreservesIgnoredClaims() {
+        String h = "{\"alg\":\"HS256\"}";
+        String p = "{\"sub\":\"123\",\"role\":\"tester\"}";
+        JWTTokenModel t = new JWTTokenModel(1, "Test Token");
+        JWTParser.parseToken(createTestJwt(h, p), t);
+
+        List<String> ignored = List.of("exp", "iat", "jti");
+        String json = TokenSessionManager.exportToJson(List.of(t), ignored);
+
+        assertNotNull(json);
+        assertTrue(json.contains("ignoredClaims"));
+        assertTrue(json.contains("exp"));
+        assertTrue(json.contains("iat"));
+        assertTrue(json.contains("jti"));
+
+        TokenSessionManager.SessionData sessionData = TokenSessionManager.importSessionFromJson(json);
+        assertEquals(1, sessionData.getTokens().size());
+        assertEquals(3, sessionData.getIgnoredClaims().size());
+        assertTrue(sessionData.getIgnoredClaims().contains("exp"));
+        assertTrue(sessionData.getIgnoredClaims().contains("iat"));
+        assertTrue(sessionData.getIgnoredClaims().contains("jti"));
+    }
 }

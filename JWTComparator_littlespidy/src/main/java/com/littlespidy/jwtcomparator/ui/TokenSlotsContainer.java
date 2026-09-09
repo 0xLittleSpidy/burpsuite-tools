@@ -21,6 +21,8 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
 
     public interface SlotsChangeListener {
         void onSlotsChanged();
+        default void onIgnoredClaimsImported(List<String> ignoredClaims) {}
+        default java.util.Set<String> getIgnoredClaimsForExport() { return java.util.Collections.emptySet(); }
     }
 
     private final List<TokenCardPanel> cards = new ArrayList<>();
@@ -176,6 +178,8 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
         }
 
         List<JWTTokenModel> tokens = getTokens();
+        java.util.Set<String> ignoredClaims = (listener != null) ? listener.getIgnoredClaimsForExport() : java.util.Collections.emptySet();
+
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Save Tokens Configuration as JSON");
         chooser.setSelectedFile(new File("jwt-tokens.json"));
@@ -188,7 +192,7 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
                 file = new File(file.getAbsolutePath() + ".json");
             }
             try {
-                String json = TokenSessionManager.exportToJson(tokens);
+                String json = TokenSessionManager.exportToJson(tokens, ignoredClaims);
                 Files.writeString(file.toPath(), json, StandardCharsets.UTF_8);
                 JOptionPane.showMessageDialog(this,
                         "Successfully exported " + tokens.size() + " tokens to:\n" + file.getAbsolutePath(),
@@ -215,7 +219,8 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
             File file = chooser.getSelectedFile();
             try {
                 String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
-                List<TokenSessionManager.ExportedToken> imported = TokenSessionManager.importFromJson(content);
+                TokenSessionManager.SessionData sessionData = TokenSessionManager.importSessionFromJson(content);
+                List<TokenSessionManager.ExportedToken> imported = sessionData.getTokens();
                 if (imported.isEmpty()) {
                     JOptionPane.showMessageDialog(this,
                             "No valid tokens found in the selected JSON file.",
@@ -231,6 +236,10 @@ public class TokenSlotsContainer extends JPanel implements TokenCardPanel.TokenC
                 }
 
                 importTokens(imported);
+                if (listener != null && !sessionData.getIgnoredClaims().isEmpty()) {
+                    listener.onIgnoredClaimsImported(sessionData.getIgnoredClaims());
+                }
+
                 JOptionPane.showMessageDialog(this,
                         "Successfully imported " + imported.size() + " tokens from:\n" + file.getName(),
                         "Tokens Imported", JOptionPane.INFORMATION_MESSAGE);

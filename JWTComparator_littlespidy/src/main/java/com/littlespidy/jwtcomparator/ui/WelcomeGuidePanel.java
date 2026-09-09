@@ -116,6 +116,13 @@ public class WelcomeGuidePanel extends JPanel {
                         + "('📋 Copy TSV') for fast reporting, team documentation, and bug bounty proof-of-concept sharing."
         ));
 
+        cardsPanel.add(createCard(
+                "9. Ignore Claims in Differences View",
+                "Filter out expected noise such as timestamps ('exp', 'iat', 'nbf', 'auth_time') or dynamic IDs ('jti') "
+                        + "from the 'Differences Only' view. Configure via the 'Ignore:' toolbar box, click '⚙️' for preset "
+                        + "toggles, or right-click any row in the matrix to ignore/unignore that claim on demand."
+        ));
+
         JPanel container = new JPanel(new BorderLayout(15, 15));
         container.add(headerPanel, BorderLayout.NORTH);
         container.add(cardsPanel, BorderLayout.CENTER);

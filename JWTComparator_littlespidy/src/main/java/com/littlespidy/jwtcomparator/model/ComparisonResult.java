@@ -153,7 +153,24 @@ public class ComparisonResult {
      * Filters rows based on section, diff filter mode, and search text.
      */
     public List<ComparisonRow> filter(String sectionFilter, String diffFilter, String search) {
+        return filter(sectionFilter, diffFilter, search, Collections.emptySet());
+    }
+
+    /**
+     * Filters rows based on section, diff filter mode, search text, and ignored claim keys.
+     * When diffFilter is "Differences Only", any row matching an ignored claim key will be excluded.
+     */
+    public List<ComparisonRow> filter(String sectionFilter, String diffFilter, String search, Set<String> ignoredClaimKeys) {
         List<ComparisonRow> filtered = new ArrayList<>();
+        Set<String> normalizedIgnored = new HashSet<>();
+        if (ignoredClaimKeys != null) {
+            for (String k : ignoredClaimKeys) {
+                if (k != null && !k.trim().isEmpty()) {
+                    normalizedIgnored.add(k.trim().toLowerCase());
+                }
+            }
+        }
+
         for (ComparisonRow row : allRows) {
             // 1. Section filter
             if (!"All".equalsIgnoreCase(sectionFilter) && !row.getSection().equalsIgnoreCase(sectionFilter)) {
@@ -161,14 +178,21 @@ public class ComparisonResult {
             }
 
             // 2. Diff filter
-            if ("Differences Only".equalsIgnoreCase(diffFilter) && row.getDiffType() == DiffType.IDENTICAL) {
-                continue;
-            }
-            if ("Missing Only".equalsIgnoreCase(diffFilter) && row.getDiffType() != DiffType.PARTIAL_ABSENT) {
-                continue;
-            }
-            if ("Matches Only".equalsIgnoreCase(diffFilter) && row.getDiffType() != DiffType.IDENTICAL) {
-                continue;
+            if ("Differences Only".equalsIgnoreCase(diffFilter)) {
+                if (row.getDiffType() == DiffType.IDENTICAL) {
+                    continue;
+                }
+                if (normalizedIgnored.contains(row.getClaimKey().toLowerCase())) {
+                    continue;
+                }
+            } else if ("Missing Only".equalsIgnoreCase(diffFilter)) {
+                if (row.getDiffType() != DiffType.PARTIAL_ABSENT) {
+                    continue;
+                }
+            } else if ("Matches Only".equalsIgnoreCase(diffFilter)) {
+                if (row.getDiffType() != DiffType.IDENTICAL) {
+                    continue;
+                }
             }
 
             // 3. Search query
@@ -179,5 +203,27 @@ public class ComparisonResult {
             filtered.add(row);
         }
         return filtered;
+    }
+
+    /**
+     * Counts how many non-identical claims are currently ignored.
+     */
+    public int countIgnoredDifferences(Set<String> ignoredClaimKeys) {
+        if (ignoredClaimKeys == null || ignoredClaimKeys.isEmpty()) {
+            return 0;
+        }
+        Set<String> normalized = new HashSet<>();
+        for (String k : ignoredClaimKeys) {
+            if (k != null && !k.trim().isEmpty()) {
+                normalized.add(k.trim().toLowerCase());
+            }
+        }
+        int count = 0;
+        for (ComparisonRow row : allRows) {
+            if (row.getDiffType() != DiffType.IDENTICAL && normalized.contains(row.getClaimKey().toLowerCase())) {
+                count++;
+            }
+        }
+        return count;
     }
 }

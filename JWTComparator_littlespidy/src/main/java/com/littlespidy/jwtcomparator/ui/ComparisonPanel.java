@@ -12,7 +12,11 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Main interactive comparison panel housing dynamic token slots, diff matrix, and claim inspector.
@@ -26,6 +30,7 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
     private final JTextField searchField;
     private final JComboBox<String> diffFilterCombo;
     private final JComboBox<String> sectionFilterCombo;
+    private final JTextField ignoreClaimsField;
     private final JLabel summaryLabel;
 
     private final JPanel detailContainer;
@@ -49,7 +54,7 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
         JPanel filterControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
 
         filterControls.add(new JLabel("Search:"));
-        searchField = new JTextField(15);
+        searchField = new JTextField(12);
         searchField.setToolTipText("Filter by claim key or value");
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
@@ -73,6 +78,22 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
         sectionFilterCombo = new JComboBox<>(new String[]{"All", "Payload", "Header"});
         sectionFilterCombo.addActionListener(e -> applyFilter());
         filterControls.add(sectionFilterCombo);
+
+        filterControls.add(new JLabel("Ignore:"));
+        ignoreClaimsField = new JTextField("exp, iat", 10);
+        ignoreClaimsField.setToolTipText("Comma-separated claim keys to exclude from 'Differences Only' view (e.g. exp, iat, jti)");
+        ignoreClaimsField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
+            @Override public void removeUpdate(DocumentEvent e) { applyFilter(); }
+            @Override public void changedUpdate(DocumentEvent e) { applyFilter(); }
+        });
+        filterControls.add(ignoreClaimsField);
+
+        JButton configIgnoreBtn = new JButton("⚙️");
+        configIgnoreBtn.setToolTipText("Configure Ignored Claims with presets (exp, iat, nbf, jti, auth_time)");
+        configIgnoreBtn.setMargin(new Insets(2, 5, 2, 5));
+        configIgnoreBtn.addActionListener(e -> showIgnoreConfigDialog());
+        filterControls.add(configIgnoreBtn);
 
         summaryLabel = new JLabel("Claims: 0 total | 0 differences");
         summaryLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
@@ -118,6 +139,26 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
         comparisonTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 updateDetailInspector();
+            }
+        });
+
+        comparisonTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                handleTablePopup(e);
+            }
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                handleTablePopup(e);
+            }
+            private void handleTablePopup(java.awt.event.MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int r = comparisonTable.rowAtPoint(e.getPoint());
+                    if (r >= 0 && !comparisonTable.isRowSelected(r)) {
+                        comparisonTable.setRowSelectionInterval(r, r);
+                    }
+                    showTableContextMenu(e);
+                }
             }
         });
 
@@ -172,28 +213,248 @@ public class ComparisonPanel extends JPanel implements TokenSlotsContainer.Slots
     }
 
     private synchronized void applyFilter() {
-        if (currentResult == null || searchField == null || diffFilterCombo == null || sectionFilterCombo == null || tableModel == null || summaryLabel == null) {
+        if (currentResult == null || searchField == null || diffFilterCombo == null || sectionFilterCombo == null || tableModel == null || summaryLabel == null || ignoreClaimsField == null) {
             return;
         }
 
         String search = searchField.getText().trim();
         String diffMode = (String) diffFilterCombo.getSelectedItem();
         String sectionMode = (String) sectionFilterCombo.getSelectedItem();
+        java.util.Set<String> ignored = getIgnoredClaimKeys();
 
-        List<ComparisonRow> filtered = currentResult.filter(sectionMode, diffMode, search);
+        List<ComparisonRow> filtered = currentResult.filter(sectionMode, diffMode, search, ignored);
         List<JWTTokenModel> tokens = slotsContainer.getTokens();
 
         tableModel.setData(tokens, filtered);
 
-        summaryLabel.setText(String.format("Claims: %d total | %d differences (%d mismatches, %d missing) | %d matches",
-                currentResult.getTotalCount(),
-                currentResult.getDifferencesCount(),
-                currentResult.getMismatchCount(),
-                currentResult.getPartialCount(),
-                currentResult.getIdenticalCount()
-        ));
+        int ignoredDiffCount = currentResult.countIgnoredDifferences(ignored);
+        if ("Differences Only".equalsIgnoreCase(diffMode) && ignoredDiffCount > 0) {
+            summaryLabel.setText(String.format("Claims: %d total | %d differences shown (%d ignored: %s) | %d matches",
+                    currentResult.getTotalCount(),
+                    filtered.size(),
+                    ignoredDiffCount,
+                    String.join(", ", ignored),
+                    currentResult.getIdenticalCount()
+            ));
+        } else {
+            summaryLabel.setText(String.format("Claims: %d total | %d differences (%d mismatches, %d missing) | %d matches",
+                    currentResult.getTotalCount(),
+                    currentResult.getDifferencesCount(),
+                    currentResult.getMismatchCount(),
+                    currentResult.getPartialCount(),
+                    currentResult.getIdenticalCount()
+            ));
+        }
 
         updateDetailInspector();
+    }
+
+    public java.util.Set<String> getIgnoredClaimKeys() {
+        java.util.Set<String> set = new java.util.LinkedHashSet<>();
+        if (ignoreClaimsField != null) {
+            String text = ignoreClaimsField.getText();
+            if (text != null && !text.trim().isEmpty()) {
+                String[] parts = text.split("[,;\\s]+");
+                for (String p : parts) {
+                    if (!p.trim().isEmpty()) {
+                        set.add(p.trim().toLowerCase());
+                    }
+                }
+            }
+        }
+        return set;
+    }
+
+    public void setIgnoredClaims(java.util.Collection<String> keys) {
+        if (ignoreClaimsField != null) {
+            if (keys != null) {
+                ignoreClaimsField.setText(String.join(", ", keys));
+            } else {
+                ignoreClaimsField.setText("");
+            }
+        }
+        applyFilter();
+    }
+
+    public void addIgnoredClaim(String claimKey) {
+        if (claimKey == null || claimKey.trim().isEmpty()) return;
+        java.util.Set<String> set = getIgnoredClaimKeys();
+        set.add(claimKey.trim().toLowerCase());
+        if (ignoreClaimsField != null) {
+            ignoreClaimsField.setText(String.join(", ", set));
+        }
+        applyFilter();
+    }
+
+    public void removeIgnoredClaim(String claimKey) {
+        if (claimKey == null || claimKey.trim().isEmpty()) return;
+        java.util.Set<String> set = getIgnoredClaimKeys();
+        set.remove(claimKey.trim().toLowerCase());
+        if (ignoreClaimsField != null) {
+            ignoreClaimsField.setText(String.join(", ", set));
+        }
+        applyFilter();
+    }
+
+    @Override
+    public void onIgnoredClaimsImported(List<String> ignoredClaims) {
+        if (ignoredClaims != null && !ignoredClaims.isEmpty()) {
+            setIgnoredClaims(ignoredClaims);
+        }
+    }
+
+    @Override
+    public java.util.Set<String> getIgnoredClaimsForExport() {
+        return getIgnoredClaimKeys();
+    }
+
+    private void showTableContextMenu(java.awt.event.MouseEvent e) {
+        int selectedRow = comparisonTable.getSelectedRow();
+        if (selectedRow < 0) return;
+        int modelRow = comparisonTable.convertRowIndexToModel(selectedRow);
+        ComparisonRow row = tableModel.getRowAt(modelRow);
+        if (row == null) return;
+
+        String claimKey = row.getClaimKey();
+        java.util.Set<String> currentIgnored = getIgnoredClaimKeys();
+        boolean isIgnored = currentIgnored.contains(claimKey.toLowerCase());
+
+        JPopupMenu menu = new JPopupMenu();
+
+        if (isIgnored) {
+            JMenuItem unignoreItem = new JMenuItem("✔ Unignore Claim '" + claimKey + "'");
+            unignoreItem.setToolTipText("Show '" + claimKey + "' again in 'Differences Only' view");
+            unignoreItem.addActionListener(ev -> removeIgnoredClaim(claimKey));
+            menu.add(unignoreItem);
+        } else {
+            JMenuItem ignoreItem = new JMenuItem("🚫 Ignore Claim '" + claimKey + "' in Differences");
+            ignoreItem.setToolTipText("Exclude '" + claimKey + "' when 'Differences Only' filter is active");
+            ignoreItem.addActionListener(ev -> addIgnoredClaim(claimKey));
+            menu.add(ignoreItem);
+        }
+
+        menu.addSeparator();
+
+        JMenuItem configItem = new JMenuItem("⚙️ Configure Ignored Claims...");
+        configItem.addActionListener(ev -> showIgnoreConfigDialog());
+        menu.add(configItem);
+
+        JMenuItem copyClaimItem = new JMenuItem("📋 Copy Claim Key (" + claimKey + ")");
+        copyClaimItem.addActionListener(ev -> {
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(claimKey), null);
+        });
+        menu.add(copyClaimItem);
+
+        menu.show(comparisonTable, e.getX(), e.getY());
+    }
+
+    public void showIgnoreConfigDialog() {
+        if (GraphicsEnvironment.isHeadless()) return;
+
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this),
+                "Configure Ignored Claims for Differences View",
+                Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(500, 360);
+        dialog.setLocationRelativeTo(this);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(12, 14, 12, 14));
+
+        JLabel info = new JLabel("<html>Ignored claims are hidden when the <b>Differences Only</b> filter is selected.<br>"
+                + "Use this to eliminate noise from expected timestamp drift or dynamic nonces.</html>");
+        info.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        content.add(info);
+        content.add(Box.createVerticalStrut(10));
+
+        java.util.Set<String> activeIgnored = getIgnoredClaimKeys();
+        JCheckBox cbExp = new JCheckBox("exp (Expiration Time)", activeIgnored.contains("exp"));
+        JCheckBox cbIat = new JCheckBox("iat (Issued At Time)", activeIgnored.contains("iat"));
+        JCheckBox cbNbf = new JCheckBox("nbf (Not Before Time)", activeIgnored.contains("nbf"));
+        JCheckBox cbJti = new JCheckBox("jti (JWT Unique ID / Nonce)", activeIgnored.contains("jti"));
+        JCheckBox cbAuthTime = new JCheckBox("auth_time (Authentication Time)", activeIgnored.contains("auth_time"));
+
+        JPanel presetPanel = new JPanel(new GridLayout(0, 2, 6, 4));
+        presetPanel.setBorder(BorderFactory.createTitledBorder("Common Noisy Claims"));
+        presetPanel.add(cbExp);
+        presetPanel.add(cbIat);
+        presetPanel.add(cbNbf);
+        presetPanel.add(cbJti);
+        presetPanel.add(cbAuthTime);
+        content.add(presetPanel);
+        content.add(Box.createVerticalStrut(10));
+
+        java.util.Set<String> standardKeys = java.util.Set.of("exp", "iat", "nbf", "jti", "auth_time");
+        List<String> customList = new ArrayList<>();
+        for (String k : activeIgnored) {
+            if (!standardKeys.contains(k)) {
+                customList.add(k);
+            }
+        }
+        JTextField customField = new JTextField(String.join(", ", customList), 25);
+        JPanel customPanel = new JPanel(new BorderLayout(5, 4));
+        customPanel.setBorder(BorderFactory.createTitledBorder("Additional Custom Claim Keys"));
+        customPanel.add(new JLabel("Keys (comma-separated):"), BorderLayout.NORTH);
+        customPanel.add(customField, BorderLayout.CENTER);
+        content.add(customPanel);
+
+        dialog.add(content, BorderLayout.CENTER);
+
+        JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        JButton allTimestampsBtn = new JButton("⏱️ Check Timestamps");
+        allTimestampsBtn.addActionListener(e -> {
+            cbExp.setSelected(true);
+            cbIat.setSelected(true);
+            cbNbf.setSelected(true);
+            cbAuthTime.setSelected(true);
+        });
+
+        JButton clearAllBtn = new JButton("Clear All");
+        clearAllBtn.addActionListener(e -> {
+            cbExp.setSelected(false);
+            cbIat.setSelected(false);
+            cbNbf.setSelected(false);
+            cbJti.setSelected(false);
+            cbAuthTime.setSelected(false);
+            customField.setText("");
+        });
+
+        JButton saveBtn = new JButton("Save & Apply");
+        saveBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        saveBtn.addActionListener(e -> {
+            java.util.Set<String> newSet = new java.util.LinkedHashSet<>();
+            if (cbExp.isSelected()) newSet.add("exp");
+            if (cbIat.isSelected()) newSet.add("iat");
+            if (cbNbf.isSelected()) newSet.add("nbf");
+            if (cbJti.isSelected()) newSet.add("jti");
+            if (cbAuthTime.isSelected()) newSet.add("auth_time");
+
+            String customText = customField.getText().trim();
+            if (!customText.isEmpty()) {
+                String[] parts = customText.split("[,;\\s]+");
+                for (String p : parts) {
+                    if (!p.trim().isEmpty()) {
+                        newSet.add(p.trim().toLowerCase());
+                    }
+                }
+            }
+
+            ignoreClaimsField.setText(String.join(", ", newSet));
+            applyFilter();
+            dialog.dispose();
+        });
+
+        JButton cancelBtn = new JButton("Cancel");
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        btnBar.add(allTimestampsBtn);
+        btnBar.add(clearAllBtn);
+        btnBar.add(saveBtn);
+        btnBar.add(cancelBtn);
+        dialog.add(btnBar, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
     }
 
     private void updateDetailInspector() {
