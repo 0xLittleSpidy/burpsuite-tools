@@ -18,6 +18,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **JWT Comparator** | [📥 `jwt-comparator-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/JWTComparator_littlespidy/build/libs/jwt-comparator-littlespidy-1.0.0.jar) | Dynamic N-token JWT side-by-side comparator, claim diff matrix, timestamp translator |
 | **CSP Inspector** | [📥 `csp-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/CSPInspector_littlespidy/build/libs/csp-inspector-littlespidy-1.0.0.jar) | Content Security Policy auditor, raw value and affected domain indexer |
 | **HSTS Inspector** | [📥 `hsts-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/HSTSInspector_littlespidy/build/libs/hsts-inspector-littlespidy-1.0.0.jar) | HTTP Strict Transport Security auditor, raw value and affected domain indexer |
+| **Upload Scanner** | [📥 `upload-scanner-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy/build/libs/upload-scanner-littlespidy-1.0.0.jar) | Automated file upload fuzzer, visual ReDownloader markers, and triage activity log |
 
 ---
 
@@ -79,6 +80,12 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Raw HSTS Header & Affected Domain Overview**: Aggregates endpoints by raw Strict-Transport-Security header value, listing distinct affected hostnames, occurrence counts, and color-coded security assessments.
 - **Inspection Modes**: Filter by full header, max-age thresholds, `includeSubDomains`, `preload` readiness, or completely missing HSTS.
 - **Master-Detail Request/Response Viewer**: Embedded native Montoya editors for selected endpoints.
+
+### 9. [Upload Scanner (Montoya Edition)](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy)
+- **ReDownloader with Visual Editor Markers**: Extracts dynamic file download URLs using Start/End delimiter markers and template tokens (`${FILENAME}`, `${FILENAME_NO_EXT}`, `${ORIG_EXT}`, `${RANDOMIZE}`). Attaches native Montoya markers and automatically synchronizes visual search highlighting (`setSearchExpression`) in response and request viewers.
+- **Enhanced "Done Uploads" Activity Log**: Master-detail triage interface with `MultiSelectFilterButton`s for Stage (`Upload`, `Preflight`, `ReDownload`), Status (`2xx`, `3xx`, `4xx`, `5xx`), and Method (`POST`, `GET`), live search across payloads and URLs, one-click `Clear Log`, and TSV file export.
+- **Native Java Attack Payloads**: Web shells (PHP, JSP, ASPX), Image Polyglots (GIF89a, PNG IHDR), Path Traversal (`../../`), Extension & MIME bypasses (`.php.jpg`, `.PhP`, `%00`), SVG XSS, and EICAR antivirus filter testing without external binary dependencies.
+- **Dynamic Multi-Session Architecture**: Context menu `Send to Upload Scanner` spawning independent closeable session tabs (`×`) with safe non-blocking background execution (`SwingWorker`).
 
 ---
 
