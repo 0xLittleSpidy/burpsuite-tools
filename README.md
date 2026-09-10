@@ -19,6 +19,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **CSP Inspector** | [📥 `csp-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/CSPInspector_littlespidy/build/libs/csp-inspector-littlespidy-1.0.0.jar) | Content Security Policy auditor, raw value and affected domain indexer |
 | **HSTS Inspector** | [📥 `hsts-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/HSTSInspector_littlespidy/build/libs/hsts-inspector-littlespidy-1.0.0.jar) | HTTP Strict Transport Security auditor, raw value and affected domain indexer |
 | **Upload Scanner** | [📥 `upload-scanner-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy/build/libs/upload-scanner-littlespidy-1.0.0.jar) | 24-module file upload fuzzer, simplified 4-mode ReDownloader, Burp Collaborator OOB, and triage log |
+| **Session Expiration Checker** | [📥 `session-expiration-checker-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy/build/libs/session-expiration-checker-littlespidy-1.0.0.jar) | Automated session timeout and token expiration tester with staged milestone timers and baseline matching |
 
 ---
 
@@ -87,6 +88,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Integrated Burp Collaborator**: Automatic OOB callback token generation and polling for blind SSRF, XXE, NTLM/SMB theft, and command execution callbacks.
 - **Enhanced Triage Activity Log**: Master-detail triage interface with `MultiSelectFilterButton`s for Stage (`Upload`, `Preflight`, `ReDownload`, `Verification`), Status (`2xx`, `3xx`, `4xx`, `5xx`), and Method (`POST`, `GET`), live search across payloads and URLs, one-click `Clear Log`, and TSV file export.
 - **Dynamic Multi-Session Architecture**: Context menu `Send to Upload Scanner` spawning independent closeable session tabs (`×`) with safe non-blocking background execution (`SwingWorker`).
+
+### 10. [Session Expiration Checker](file:///home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy)
+- **Automated Milestone Probing**: Schedule multiple custom milestone timers (e.g., 30m, 1h, 3h, 8h) relative to start time ($T_0$) to test idle and absolute session expiration.
+- **Baseline Matching & Verification Engine**: Captures initial authenticated baseline response and inspects probe responses for HTTP status shifts (200 $\rightarrow$ 401/403), login redirects (`/login`, `/signin`, `auth`), `Set-Cookie` invalidations (`Max-Age=0`), and response body termination signatures.
+- **Auto-Cancellation on Expiry**: Automatically halts remaining scheduled timers for a request once expiration is confirmed.
+- **Master-Detail Workspace**: Real-time ticking countdown timers, milestone history table, and native Montoya Pretty/Raw/Hex request and response editors.
+- **Burp Suite Interoperability**: Context menu ingestion (`⏱️ Send to Session Expiration Checker`) and dispatch to Repeater, Intruder, and Organizer.
 
 ---
 
