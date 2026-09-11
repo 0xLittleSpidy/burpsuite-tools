@@ -20,6 +20,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **HSTS Inspector** | [📥 `hsts-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/HSTSInspector_littlespidy/build/libs/hsts-inspector-littlespidy-1.0.0.jar) | HTTP Strict Transport Security auditor, raw value and affected domain indexer |
 | **Upload Scanner** | [📥 `upload-scanner-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy/build/libs/upload-scanner-littlespidy-1.0.0.jar) | 24-module file upload fuzzer, simplified 4-mode ReDownloader, Burp Collaborator OOB, and triage log |
 | **Session Expiration Checker** | [📥 `session-expiration-checker-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy/build/libs/session-expiration-checker-littlespidy-1.0.0.jar) | Automated session timeout and token expiration tester with staged milestone timers and baseline matching |
+| **Param Payload Injector** | [📥 `param-payload-injector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/ParamPayloadInjector_littlespidy/build/libs/param-payload-injector-littlespidy-1.0.0.jar) | Parameter-attributed payload injector (XSS & Angular CSTI) with reflection monitoring and context attribution |
 
 ---
 
@@ -95,6 +96,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Auto-Cancellation on Expiry**: Automatically halts remaining scheduled timers for a request once expiration is confirmed.
 - **Master-Detail Workspace**: Real-time ticking countdown timers, milestone history table, and native Montoya Pretty/Raw/Hex request and response editors.
 - **Burp Suite Interoperability**: Context menu ingestion (`⏱️ Send to Session Expiration Checker`) and dispatch to Repeater, Intruder, and Organizer.
+
+### 11. [Param Payload Injector](file:///home/littlespidy/myextra/burpsuite/ParamPayloadInjector_littlespidy)
+- **Parameter Name Binding & Attribution**: Solves multi-parameter attribution ambiguity by dynamically injecting parameter names into security payloads (e.g. `alert('username')`, `"><img src=x onerror=alert('redirect')>`, `{{constructor.constructor('alert(\\'param\\')')()}}`).
+- **XSS & Angular CSTI Payload Suites**: Built-in, editable templates for unescaped HTML, attribute breakouts, event handlers, JavaScript URIs, Angular string interpolation, math evaluation canaries, and AngularJS 1.4 - 1.6+ sandbox escapes.
+- **Context Menu Integration**: One-click right-click actions across Repeater, Proxy History, and Logger: `Send to Repeater with Armed Payloads`, `Inject into All Parameters (In-Place)`, and `Inject into Selected Text / Range`.
+- **Passive Reflection Monitor & Burp Annotations**: Passively checks responses for reflected payloads, determines reflection context (HTML tag, attribute, script block, Angular template), applies color highlights (**Red** for unencoded HTML/scripts, **Yellow** for attributes), and safe-appends notes to Burp Proxy/Logger history.
+- **Master-Detail Suite Tab**: Dedicated "Param Injector" tab with reflection findings table, live search & scope gating, and native Montoya split-view HTTP request/response editors with search term auto-highlighting.
 
 ---
 
