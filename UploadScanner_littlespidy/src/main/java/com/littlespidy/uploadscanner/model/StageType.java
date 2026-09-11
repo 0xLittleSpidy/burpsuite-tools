@@ -11,7 +11,8 @@ public enum StageType {
     UPLOAD("Upload"),
     PREFLIGHT("Preflight"),
     REDOWNLOAD("ReDownload"),
-    VERIFICATION("Verification");
+    VERIFICATION("Verification"),
+    EXTENSION_PROBE("Probe");
 
     private final String displayName;
 

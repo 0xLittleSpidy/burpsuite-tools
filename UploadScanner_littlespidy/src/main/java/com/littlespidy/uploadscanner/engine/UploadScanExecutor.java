@@ -5,6 +5,7 @@ import burp.api.montoya.collaborator.CollaboratorClient;
 import burp.api.montoya.collaborator.Interaction;
 import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.core.Marker;
+import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -17,6 +18,8 @@ import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -65,19 +68,27 @@ public class UploadScanExecutor {
     }
 
     public void startScan(HttpRequest baseRequest) {
+        startInternal(baseRequest, false);
+    }
+
+    public void startAllowedExtensionsProbe(HttpRequest baseRequest) {
+        startInternal(baseRequest, true);
+    }
+
+    private void startInternal(HttpRequest baseRequest, boolean probeOnly) {
         if (running.get()) {
             return;
         }
 
         running.set(true);
         paused.set(false);
-        statusConsumer.accept("Starting scan...");
+        statusConsumer.accept(probeOnly ? "Starting allowed extensions probe..." : "Starting scan...");
 
         worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 try {
-                    executeScan(baseRequest);
+                    executeScan(baseRequest, probeOnly);
                 } catch (Exception e) {
                     api.logging().logToError("Error during upload scan: " + e.getMessage());
                 }
@@ -87,7 +98,7 @@ public class UploadScanExecutor {
             @Override
             protected void done() {
                 running.set(false);
-                statusConsumer.accept("Scan finished.");
+                statusConsumer.accept(probeOnly ? "Allowed extensions probe finished." : "Scan finished.");
                 if (completionCallback != null) {
                     completionCallback.run();
                 }
@@ -97,24 +108,28 @@ public class UploadScanExecutor {
         worker.execute();
     }
 
-    private void executeScan(HttpRequest baseRequest) {
+    private void executeScan(HttpRequest baseRequest, boolean probeOnly) {
         ReDownloaderEngine redlEngine = new ReDownloaderEngine(api, config.getRedownloaderConfig());
         String originalFilename = extractFilenameFromRequest(baseRequest);
 
         CollaboratorClient collaboratorClient = null;
         String collaboratorDomain = "";
-        try {
-            if (api.collaborator() != null) {
-                collaboratorClient = api.collaborator().createClient();
-                if (collaboratorClient != null) {
-                    collaboratorDomain = collaboratorClient.generatePayload().toString();
+        if (!probeOnly) {
+            try {
+                if (api.collaborator() != null) {
+                    collaboratorClient = api.collaborator().createClient();
+                    if (collaboratorClient != null) {
+                        collaboratorDomain = collaboratorClient.generatePayload().toString();
+                    }
                 }
+            } catch (Throwable t) {
+                collaboratorDomain = "collab-test.burpcollaborator.net";
             }
-        } catch (Throwable t) {
-            collaboratorDomain = "collab-test.burpcollaborator.net";
         }
 
-        List<PayloadDefinition> payloads = UploadPayloadGenerator.generatePayloads(config, originalFilename, collaboratorDomain);
+        List<PayloadDefinition> payloads = probeOnly
+                ? UploadPayloadGenerator.generateAllowedExtensionPayloadsOnly(config, originalFilename)
+                : UploadPayloadGenerator.generatePayloads(config, originalFilename, collaboratorDomain);
 
         int total = payloads.size();
         for (int i = 0; i < total; i++) {
@@ -194,9 +209,12 @@ public class UploadScanExecutor {
             }
 
             int uploadId = sequenceCounter.getAndIncrement();
+            StageType entryStage = (probeOnly || "Allowed Extensions".equalsIgnoreCase(payload.getCategory()))
+                    ? StageType.EXTENSION_PROBE
+                    : StageType.UPLOAD;
             UploadEntry uploadEntry = new UploadEntry(
                     uploadId,
-                    StageType.UPLOAD,
+                    entryStage,
                     uploadReq.method(),
                     uploadStatus,
                     payload.getName() + " (" + payload.getFilename() + ")",
@@ -287,29 +305,87 @@ public class UploadScanExecutor {
         SwingUtilities.invokeLater(() -> entryConsumer.accept(entry));
     }
 
-    private String extractFilenameFromRequest(HttpRequest request) {
+    public static String extractFilenameFromRequest(HttpRequest request) {
+        if (request == null) return "upload.jpg";
+
+        // 1. Check if §...§ marker exists in path
+        String path = request.path();
+        Matcher pm = Pattern.compile("§([^§]+)§").matcher(path);
+        if (pm.find()) {
+            String val = pm.group(1).trim();
+            if (!val.isEmpty() && !val.equalsIgnoreCase("filename") && !val.equalsIgnoreCase("file")) {
+                return val;
+            }
+        }
+
+        // 2. Check if §...§ marker exists in body
         String body = request.bodyToString();
+        Matcher bm = Pattern.compile("§([^§]+)§").matcher(body);
+        if (bm.find()) {
+            String val = bm.group(1).trim();
+            if (!val.isEmpty() && !val.equalsIgnoreCase("filename") && !val.equalsIgnoreCase("file")) {
+                return val;
+            }
+        }
+
+        // 3. Fallback: filename="..."
         int idx = body.indexOf("filename=\"");
         if (idx != -1) {
             int end = body.indexOf("\"", idx + 10);
             if (end != -1) {
-                return body.substring(idx + 10, end);
+                return body.substring(idx + 10, end).replace("§", "").trim();
             }
         }
         return "upload.jpg";
     }
 
-    private HttpRequest injectPayload(HttpRequest baseRequest, PayloadDefinition payload) {
-        String body = baseRequest.bodyToString();
-        int fnIdx = body.indexOf("filename=\"");
+    public static HttpRequest injectPayload(HttpRequest baseRequest, PayloadDefinition payload) {
+        if (baseRequest == null) return null;
 
+        String payloadFilename = payload.getFilename();
+        HttpRequest modifiedReq = baseRequest;
+
+        // 1. Check and replace §...§ markers in Path / Query String
+        String path = modifiedReq.path();
+        if (path.contains("§") || path.contains("${FILENAME}")) {
+            String newPath = path.replaceAll("§[^§]*§", Matcher.quoteReplacement(payloadFilename))
+                                 .replace("${FILENAME}", payloadFilename);
+            modifiedReq = modifiedReq.withPath(newPath);
+        }
+
+        // 2. Check and replace §...§ markers in Headers
+        List<HttpHeader> headers = modifiedReq.headers();
+        for (HttpHeader h : headers) {
+            String hVal = h.value();
+            if (hVal.contains("§") || hVal.contains("${FILENAME}")) {
+                String newHVal = hVal.replaceAll("§[^§]*§", Matcher.quoteReplacement(payloadFilename))
+                                     .replace("${FILENAME}", payloadFilename);
+                modifiedReq = modifiedReq.withHeader(h.name(), newHVal);
+            }
+        }
+
+        // 3. Check and replace in Body
+        String body = modifiedReq.bodyToString();
+        boolean hasBodyMarkers = body.contains("§") || body.contains("${FILENAME}");
+
+        if (hasBodyMarkers) {
+            body = body.replaceAll("§[^§]*§", Matcher.quoteReplacement(payloadFilename))
+                       .replace("${FILENAME}", payloadFilename);
+        }
+
+        // 4. Handle multipart file content and Content-Type injection
+        int fnIdx = body.indexOf("filename=\"");
         if (fnIdx != -1) {
             int fnEnd = body.indexOf("\"", fnIdx + 10);
             if (fnEnd != -1) {
-                // Replace filename
-                String newBody = body.substring(0, fnIdx + 10) + payload.getFilename() + body.substring(fnEnd);
+                String newBody;
+                if (!hasBodyMarkers) {
+                    newBody = body.substring(0, fnIdx + 10) + payloadFilename + body.substring(fnEnd);
+                } else {
+                    newBody = body;
+                }
 
-                // Look for Content-Type within multipart part
+                // Look for Content-Type within this multipart part
                 int ctIdx = newBody.indexOf("Content-Type: ", fnIdx);
                 if (ctIdx != -1 && ctIdx < fnIdx + 200) {
                     int ctEnd = newBody.indexOf("\r\n", ctIdx);
@@ -329,11 +405,15 @@ public class UploadScanExecutor {
                     }
                 }
 
-                return baseRequest.withBody(newBody);
+                return modifiedReq.withBody(newBody);
             }
         }
 
-        // Fallback: replace body directly
-        return baseRequest.withBody(ByteArray.byteArray(payload.getContent()));
+        if (hasBodyMarkers) {
+            return modifiedReq.withBody(body);
+        }
+
+        // Fallback: replace body directly with binary payload
+        return modifiedReq.withBody(ByteArray.byteArray(payload.getContent()));
     }
 }

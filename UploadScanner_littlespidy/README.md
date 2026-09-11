@@ -6,7 +6,8 @@ A modern, high-performance Burp Suite extension written in **Java** using PortSw
 
 This project is a modernized, standalone rewrite of the legacy Python *Upload Scanner* extension, featuring:
 - **Simplified ReDownloader** with 1-click magic auto-detection, highlight marker derivation, custom directory preset patterns, and automated cookie/auth header propagation.
-- **Complete 24-Module Attack Matrix** across 5 categories (Server RCE, Image Libraries, XML/Documents, Client-Side/Polyglots, Archives/Quirks/DoS).
+- **Allowed Extensions Probe & Matrix** for probing accepted file formats across Images, Documents, Web/Data, Archives, Media, and custom extensions with authentic magic bytes & MIME types.
+- **Complete Attack Matrix** across 6 categories (Server RCE, Image Libraries, XML/Documents, Client-Side/Polyglots, Archives/Quirks/DoS, Allowed Extensions).
 - **Integrated Burp Collaborator** for automated Out-Of-Band (OOB) blind interaction tracking.
 - **100% Native Java Engine** (in-memory ZIP and TAR builders, zero Perl or `exiftool` dependencies).
 - **Interactive Triage Activity Log** with multi-select filtering, live search, and synchronized editor marker highlighting.
@@ -76,10 +77,34 @@ Upload Scanner implements all 24 scanning methods across 5 categories:
 | | EICAR AV Test | Industry-standard Anti-Virus test string to evaluate AV scanner controls | Token reflection |
 | | Pixel Flood DoS | PNG IHDR dimension bomb modified to 65535×65535 pixels | Resource exhaustion |
 | | XML Billion Laughs Bomb | Nested entity expansion XML bomb (`lol1`, `lol2`, ... `lol9`) | Resource exhaustion |
+| **Allowed Extensions** | Images | `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.bmp`, `.svg`, `.ico`, `.tiff`, `.avif` with authentic magic bytes & MIME types | HTTP Status / Allowance |
+| | Documents | `.txt`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, `.csv`, `.rtf`, `.odt` | HTTP Status / Allowance |
+| | Web & Data | `.json`, `.xml`, `.html`, `.js`, `.css`, `.yaml` | HTTP Status / Allowance |
+| | Archives | `.zip`, `.tar`, `.gz`, `.7z`, `.rar` (valid native headers/archives) | HTTP Status / Allowance |
+| | Media | `.mp3`, `.wav`, `.mp4`, `.avi`, `.mov`, `.mkv`, `.ogg` (valid audio/video headers) | HTTP Status / Allowance |
+| | Custom Extensions | User-specified comma-separated extension list | HTTP Status / Allowance |
 
 ---
 
-### 3. 🌐 Integrated Burp Collaborator Tracking
+### 3. 🎯 Intruder-Style Markers (`§...§`) & Multi-Location Replacement
+- **Preserved Baseline Request & Response**: The original request and response sent by the user stay permanently preserved in the top editors as your baseline reference. Scan requests and responses are recorded in the **Done Uploads** log table below without overwriting your baseline editors.
+- **Editable Baseline Editor**: The request editor is fully interactive. You can modify URLs, headers, or body parameters before scanning.
+- **Multi-Location Filename Substitution**: Upload APIs often require the filename in multiple places at once (e.g., query param `/api/upload?filename=§photo.jpg§`, custom header `X-File-Name: §photo.jpg§`, and multipart body `filename="§photo.jpg§"`).
+- **1-Click Marker Toolbar**:
+  - Click **`§ Add Marker`**: Wraps the highlighted selection with `§...§`. If no text is highlighted, it automatically finds and wraps the `filename="..."` attribute.
+  - Click **`§ Clear Markers`**: Removes all `§` characters to revert to normal text.
+- **Simultaneous Replacement**: During scanning, every payload filename replaces all `§...§` markers across URL path, query string, headers, and body simultaneously, while preserving multipart binary boundary structures.
+
+---
+
+### 4. 🧪 1-Click "Probe Allowed Extensions" Quick Test
+- Click **🧪 Probe Allowed Extensions** on any upload session tab to immediately test which file extensions the server accepts without running heavier exploit checks.
+- Automatically generates valid minimal magic bytes and matching `Content-Type` headers so server-side MIME and magic-byte checks pass legitimately.
+- Results appear labeled under the **Probe** stage in the activity log, allowing instant identification of allowed vs blocked formats (e.g. 200 OK vs 415 Unsupported Media Type / 403 Forbidden).
+
+---
+
+### 5. 🌐 Integrated Burp Collaborator Tracking
 - Automatically generates unique collaborator subdomains for each scan.
 - Embeds subdomains into blind OOB vectors:
   - ImageTragick MVG / SVG SSRF callbacks
@@ -94,9 +119,9 @@ Upload Scanner implements all 24 scanning methods across 5 categories:
 
 ---
 
-### 4. 📋 Enhanced "Done Uploads" Activity Log
+### 6. 📋 Enhanced "Done Uploads" Activity Log
 - **Multi-Select Triage Toolbars**:
-  - **Stage**: Filter by `Upload`, `Preflight`, `ReDownload`, or `Verification`.
+  - **Stage**: Filter by `Upload`, `Probe`, `Preflight`, `ReDownload`, or `Verification`.
   - **Status**: Filter by HTTP status code groups (`2xx`, `3xx`, `4xx`, `5xx`).
   - **Method**: Filter by HTTP method (`POST`, `GET`, `PUT`, `DELETE`).
 - **Live Search**: Instant multi-field text search across URLs, filenames, status codes, and stages.

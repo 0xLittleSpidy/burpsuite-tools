@@ -50,6 +50,15 @@ public class UploadScannerConfig {
     private boolean testPixelFlood = false; // DoS off by default
     private boolean testBillionLaughs = false; // DoS off by default
 
+    // Category 6: Allowed Extensions Matrix
+    private boolean testAllowedExtensions = true;
+    private boolean testExtImages = true;
+    private boolean testExtDocuments = true;
+    private boolean testExtWebData = true;
+    private boolean testExtArchives = true;
+    private boolean testExtMedia = true;
+    private String customExtensions = "";
+
     public ReDownloaderConfig getRedownloaderConfig() {
         return redownloaderConfig;
     }
@@ -159,6 +168,28 @@ public class UploadScannerConfig {
     public boolean isTestBillionLaughs() { return testBillionLaughs; }
     public void setTestBillionLaughs(boolean testBillionLaughs) { this.testBillionLaughs = testBillionLaughs; }
 
+    // Category 6: Allowed Extensions Getters & Setters
+    public boolean isTestAllowedExtensions() { return testAllowedExtensions; }
+    public void setTestAllowedExtensions(boolean testAllowedExtensions) { this.testAllowedExtensions = testAllowedExtensions; }
+
+    public boolean isTestExtImages() { return testExtImages; }
+    public void setTestExtImages(boolean testExtImages) { this.testExtImages = testExtImages; }
+
+    public boolean isTestExtDocuments() { return testExtDocuments; }
+    public void setTestExtDocuments(boolean testExtDocuments) { this.testExtDocuments = testExtDocuments; }
+
+    public boolean isTestExtWebData() { return testExtWebData; }
+    public void setTestExtWebData(boolean testExtWebData) { this.testExtWebData = testExtWebData; }
+
+    public boolean isTestExtArchives() { return testExtArchives; }
+    public void setTestExtArchives(boolean testExtArchives) { this.testExtArchives = testExtArchives; }
+
+    public boolean isTestExtMedia() { return testExtMedia; }
+    public void setTestExtMedia(boolean testExtMedia) { this.testExtMedia = testExtMedia; }
+
+    public String getCustomExtensions() { return customExtensions; }
+    public void setCustomExtensions(String customExtensions) { this.customExtensions = customExtensions != null ? customExtensions.trim() : ""; }
+
     // Category Bulk Selectors
     public void selectCategory(String category, boolean selected) {
         if ("Server RCE".equalsIgnoreCase(category)) {
@@ -194,6 +225,13 @@ public class UploadScannerConfig {
             setTestEicar(selected);
             setTestPixelFlood(selected);
             setTestBillionLaughs(selected);
+        } else if ("Allowed Extensions".equalsIgnoreCase(category) || "Allowed Extensions Matrix".equalsIgnoreCase(category)) {
+            setTestAllowedExtensions(selected);
+            setTestExtImages(selected);
+            setTestExtDocuments(selected);
+            setTestExtWebData(selected);
+            setTestExtArchives(selected);
+            setTestExtMedia(selected);
         }
     }
 
@@ -203,6 +241,7 @@ public class UploadScannerConfig {
         selectCategory("XML & Documents", selected);
         selectCategory("Client & Polyglots", selected);
         selectCategory("Archives & Quirks", selected);
+        selectCategory("Allowed Extensions", selected);
     }
 
     // Backwards-Compatible Aliases

@@ -1,6 +1,7 @@
 package com.littlespidy.uploadscanner.ui;
 
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.core.Marker;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
@@ -9,6 +10,9 @@ import burp.api.montoya.ui.Selection;
 import burp.api.montoya.ui.editor.EditorOptions;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.littlespidy.uploadscanner.engine.MarkerHighlighter;
 import com.littlespidy.uploadscanner.engine.ReDownloaderEngine;
 import com.littlespidy.uploadscanner.engine.UploadScanExecutor;
@@ -95,8 +99,17 @@ public class UploadSessionPanel extends JPanel {
     private JCheckBox pixelFloodCb;
     private JCheckBox billionLaughsCb;
 
+    // Category 6: Allowed Extensions Matrix
+    private JCheckBox extImagesCb;
+    private JCheckBox extDocsCb;
+    private JCheckBox extWebDataCb;
+    private JCheckBox extArchivesCb;
+    private JCheckBox extMediaCb;
+    private JTextField customExtField;
+
     private JSpinner throttleSpinner;
     private JButton testRedlBtn;
+    private JButton probeExtBtn;
     private JButton startScanBtn;
     private JButton stopScanBtn;
     private JLabel statusLabel;
@@ -359,12 +372,43 @@ public class UploadSessionPanel extends JPanel {
         archPanel.add(archActions, BorderLayout.EAST);
         attackTabs.addTab("⚙️ Archives, Quirks & DoS", archPanel);
 
+        // Tab 6: Allowed Extensions Matrix
+        JPanel extPanel = new JPanel(new BorderLayout(4, 4));
+        JPanel extChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        extImagesCb = new JCheckBox("Images (jpg, png, gif, webp, svg, bmp, ico, tiff, avif)", true);
+        extDocsCb = new JCheckBox("Documents (txt, pdf, doc, docx, xls, xlsx, csv, rtf, odt)", true);
+        extWebDataCb = new JCheckBox("Web & Data (json, xml, html, js, css, yaml)", true);
+        extArchivesCb = new JCheckBox("Archives (zip, tar, gz, 7z, rar)", true);
+        extMediaCb = new JCheckBox("Media (mp3, wav, mp4, avi, mov, mkv, ogg)", true);
+
+        customExtField = new JTextField(12);
+        customExtField.setToolTipText("Comma-separated custom extensions (e.g. bak, log, sql, ini)");
+
+        extChecks.add(extImagesCb);
+        extChecks.add(extDocsCb);
+        extChecks.add(extWebDataCb);
+        extChecks.add(extArchivesCb);
+        extChecks.add(extMediaCb);
+        extChecks.add(new JLabel("Custom:"));
+        extChecks.add(customExtField);
+
+        JPanel extActions = createCategoryActionToolbar(List.of(extImagesCb, extDocsCb, extWebDataCb, extArchivesCb, extMediaCb));
+        extPanel.add(extChecks, BorderLayout.CENTER);
+        extPanel.add(extActions, BorderLayout.EAST);
+        attackTabs.addTab("📁 Allowed Extensions", extPanel);
+
         // ── 4. Live Action & Status Toolbar ──
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
         testRedlBtn = new JButton("🧪 Test ReDownloader Now");
         testRedlBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         testRedlBtn.setToolTipText("Verify URL extraction and test downloading the file from the server");
         testRedlBtn.addActionListener(e -> testReDownloader());
+
+        probeExtBtn = new JButton("🧪 Probe Allowed Extensions");
+        probeExtBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        probeExtBtn.setForeground(new Color(0, 100, 180));
+        probeExtBtn.setToolTipText("Probe which file extensions (jpg, png, txt, etc.) are accepted by the upload endpoint");
+        probeExtBtn.addActionListener(e -> probeAllowedExtensions());
 
         startScanBtn = new JButton("▶ Start Scan");
         startScanBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
@@ -383,6 +427,7 @@ public class UploadSessionPanel extends JPanel {
         previewResultLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
 
         actionsPanel.add(testRedlBtn);
+        actionsPanel.add(probeExtBtn);
         actionsPanel.add(startScanBtn);
         actionsPanel.add(stopScanBtn);
         actionsPanel.add(new JLabel("Delay (ms):"));
@@ -405,7 +450,7 @@ public class UploadSessionPanel extends JPanel {
         add(configContainer, BorderLayout.NORTH);
 
         // ── 5. Lower Message Editors (Split Pane) ──
-        uploadReqEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
+        uploadReqEditor = api.userInterface().createHttpRequestEditor();
         uploadRespEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
         redlReqEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
         redlRespEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
@@ -415,9 +460,34 @@ public class UploadSessionPanel extends JPanel {
             uploadRespEditor.setResponse(baseResponse);
         }
 
+        JPanel reqTabPanel = new JPanel(new BorderLayout());
+        JPanel markerToolbar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
+        JButton addMarkerBtn = new JButton("§ Add Marker");
+        addMarkerBtn.setToolTipText("Wrap highlighted text in §...§ (or auto-wrap filename=\"...\") to replace filename across multiple locations");
+        addMarkerBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        addMarkerBtn.setForeground(new Color(0, 100, 180));
+
+        JButton clearMarkersBtn = new JButton("§ Clear Markers");
+        clearMarkersBtn.setToolTipText("Remove all § markers from the baseline request");
+        clearMarkersBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+
+        JLabel markerTipLabel = new JLabel("💡 Baseline Request (Editable) — Highlight filename & click '§ Add Marker' to replace in multiple locations");
+        markerTipLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        markerTipLabel.setForeground(Color.DARK_GRAY);
+
+        addMarkerBtn.addActionListener(e -> addFilenameMarker());
+        clearMarkersBtn.addActionListener(e -> clearFilenameMarkers());
+
+        markerToolbar.add(markerTipLabel);
+        markerToolbar.add(addMarkerBtn);
+        markerToolbar.add(clearMarkersBtn);
+
+        reqTabPanel.add(markerToolbar, BorderLayout.NORTH);
+        reqTabPanel.add(uploadReqEditor.uiComponent(), BorderLayout.CENTER);
+
         JTabbedPane editorsTab = new JTabbedPane();
-        editorsTab.addTab("📤 Upload Request", uploadReqEditor.uiComponent());
-        editorsTab.addTab("📥 Upload Response", uploadRespEditor.uiComponent());
+        editorsTab.addTab("📤 Baseline Upload Request", reqTabPanel);
+        editorsTab.addTab("📥 Baseline Upload Response", uploadRespEditor.uiComponent());
         editorsTab.addTab("🎯 ReDownload Request", redlReqEditor.uiComponent());
         editorsTab.addTab("🔍 ReDownload Response", redlRespEditor.uiComponent());
 
@@ -531,6 +601,51 @@ public class UploadSessionPanel extends JPanel {
         }
     }
 
+    private void addFilenameMarker() {
+        HttpRequest req = uploadReqEditor.getRequest();
+        if (req == null) return;
+
+        Optional<Selection> selOpt = uploadReqEditor.selection();
+        if (selOpt.isPresent() && !selOpt.get().contents().toString().isEmpty()) {
+            Selection sel = selOpt.get();
+            int start = sel.offsets().startIndexInclusive();
+            int end = sel.offsets().endIndexExclusive();
+            byte[] reqBytes = req.toByteArray().getBytes();
+            if (start >= 0 && end <= reqBytes.length && start < end) {
+                String reqStr = new String(reqBytes, StandardCharsets.ISO_8859_1);
+                String before = reqStr.substring(0, start);
+                String selected = reqStr.substring(start, end);
+                String after = reqStr.substring(end);
+                String newReqStr = before + "§" + selected + "§" + after;
+                uploadReqEditor.setRequest(HttpRequest.httpRequest(req.httpService(), ByteArray.byteArray(newReqStr.getBytes(StandardCharsets.ISO_8859_1))));
+                return;
+            }
+        }
+
+        // If no selection, check if filename="..." exists in body and wrap it automatically!
+        String body = req.bodyToString();
+        int fnIdx = body.indexOf("filename=\"");
+        if (fnIdx != -1) {
+            int fnEnd = body.indexOf("\"", fnIdx + 10);
+            if (fnEnd != -1) {
+                String fn = body.substring(fnIdx + 10, fnEnd);
+                if (!fn.startsWith("§") && !fn.endsWith("§")) {
+                    String newBody = body.substring(0, fnIdx + 10) + "§" + fn + "§" + body.substring(fnEnd);
+                    uploadReqEditor.setRequest(req.withBody(newBody));
+                }
+            }
+        }
+    }
+
+    private void clearFilenameMarkers() {
+        HttpRequest req = uploadReqEditor.getRequest();
+        if (req == null) return;
+        byte[] reqBytes = req.toByteArray().getBytes();
+        String reqStr = new String(reqBytes, StandardCharsets.ISO_8859_1);
+        String clearedStr = reqStr.replace("§", "");
+        uploadReqEditor.setRequest(HttpRequest.httpRequest(req.httpService(), ByteArray.byteArray(clearedStr.getBytes(StandardCharsets.ISO_8859_1))));
+    }
+
     private void syncConfigFromUI() {
         ReDownloaderConfig rConfig = config.getRedownloaderConfig();
         rConfig.setPreflightUrl(preflightUrlField.getText().trim());
@@ -579,6 +694,19 @@ public class UploadSessionPanel extends JPanel {
         config.setTestPixelFlood(pixelFloodCb.isSelected());
         config.setTestBillionLaughs(billionLaughsCb.isSelected());
 
+        // Category 6: Allowed Extensions Matrix
+        config.setTestExtImages(extImagesCb.isSelected());
+        config.setTestExtDocuments(extDocsCb.isSelected());
+        config.setTestExtWebData(extWebDataCb.isSelected());
+        config.setTestExtArchives(extArchivesCb.isSelected());
+        config.setTestExtMedia(extMediaCb.isSelected());
+        config.setTestAllowedExtensions(extImagesCb.isSelected() || extDocsCb.isSelected() ||
+                extWebDataCb.isSelected() || extArchivesCb.isSelected() || extMediaCb.isSelected() ||
+                (customExtField != null && !customExtField.getText().trim().isEmpty()));
+        if (customExtField != null) {
+            config.setCustomExtensions(customExtField.getText());
+        }
+
         config.setThrottleMs((Integer) throttleSpinner.getValue());
     }
 
@@ -590,9 +718,13 @@ public class UploadSessionPanel extends JPanel {
             return;
         }
 
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
+
         ReDownloaderEngine engine = new ReDownloaderEngine(api, config.getRedownloaderConfig());
         String responseStr = baseResponse.bodyToString();
-        String testFilename = extractFilename(baseRequest);
+        String testFilename = extractFilename(activeReq);
         MarkerHighlighter.ExtractionResult extraction = engine.parseDownloadUrl(responseStr, testFilename);
 
         if (!extraction.isFound()) {
@@ -609,7 +741,7 @@ public class UploadSessionPanel extends JPanel {
 
             uploadRespEditor.setSearchExpression(targetUrl);
 
-            HttpRequest redlReq = engine.buildRedownloadRequest(baseRequest, targetUrl);
+            HttpRequest redlReq = engine.buildRedownloadRequest(activeReq, targetUrl);
             if (redlReq != null) {
                 redlReqEditor.setRequest(redlReq);
                 new Thread(() -> {
@@ -634,23 +766,19 @@ public class UploadSessionPanel extends JPanel {
     }
 
     private String extractFilename(HttpRequest request) {
-        if (request == null) return "test.png";
-        String body = request.bodyToString();
-        int idx = body.indexOf("filename=\"");
-        if (idx != -1) {
-            int end = body.indexOf("\"", idx + 10);
-            if (end != -1) {
-                return body.substring(idx + 10, end);
-            }
-        }
-        return "test.png";
+        return UploadScanExecutor.extractFilenameFromRequest(request);
     }
 
-    private void startScan() {
+    private void probeAllowedExtensions() {
         syncConfigFromUI();
         startScanBtn.setEnabled(false);
+        probeExtBtn.setEnabled(false);
         stopScanBtn.setEnabled(true);
         testRedlBtn.setEnabled(false);
+
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
 
         currentExecutor = new UploadScanExecutor(
                 api,
@@ -658,15 +786,7 @@ public class UploadSessionPanel extends JPanel {
                 entry -> {
                     logEntryConsumer.accept(entry);
 
-                    if (entry.getStage() == StageType.UPLOAD) {
-                        uploadReqEditor.setRequest(entry.getRequestResponse().request());
-                        if (entry.getRequestResponse().hasResponse()) {
-                            uploadRespEditor.setResponse(entry.getRequestResponse().response());
-                            if (!entry.getExtractedMarkerText().isEmpty()) {
-                                uploadRespEditor.setSearchExpression(entry.getExtractedMarkerText());
-                            }
-                        }
-                    } else if (entry.getStage() == StageType.REDOWNLOAD) {
+                    if (entry.getStage() == StageType.REDOWNLOAD) {
                         redlReqEditor.setRequest(entry.getRequestResponse().request());
                         if (entry.getRequestResponse().hasResponse()) {
                             redlRespEditor.setResponse(entry.getRequestResponse().response());
@@ -679,6 +799,49 @@ public class UploadSessionPanel extends JPanel {
                 status -> SwingUtilities.invokeLater(() -> statusLabel.setText("● " + status)),
                 () -> SwingUtilities.invokeLater(() -> {
                     startScanBtn.setEnabled(true);
+                    probeExtBtn.setEnabled(true);
+                    stopScanBtn.setEnabled(false);
+                    testRedlBtn.setEnabled(true);
+                    statusLabel.setText("● Probe Completed");
+                    statusLabel.setForeground(new Color(0, 140, 50));
+                })
+        );
+
+        statusLabel.setForeground(new Color(0, 100, 200));
+        currentExecutor.startAllowedExtensionsProbe(activeReq);
+    }
+
+    private void startScan() {
+        syncConfigFromUI();
+        startScanBtn.setEnabled(false);
+        probeExtBtn.setEnabled(false);
+        stopScanBtn.setEnabled(true);
+        testRedlBtn.setEnabled(false);
+
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
+
+        currentExecutor = new UploadScanExecutor(
+                api,
+                config,
+                entry -> {
+                    logEntryConsumer.accept(entry);
+
+                    if (entry.getStage() == StageType.REDOWNLOAD) {
+                        redlReqEditor.setRequest(entry.getRequestResponse().request());
+                        if (entry.getRequestResponse().hasResponse()) {
+                            redlRespEditor.setResponse(entry.getRequestResponse().response());
+                            if (!entry.getExtractedMarkerText().isEmpty()) {
+                                redlRespEditor.setSearchExpression(entry.getExtractedMarkerText());
+                            }
+                        }
+                    }
+                },
+                status -> SwingUtilities.invokeLater(() -> statusLabel.setText("● " + status)),
+                () -> SwingUtilities.invokeLater(() -> {
+                    startScanBtn.setEnabled(true);
+                    probeExtBtn.setEnabled(true);
                     stopScanBtn.setEnabled(false);
                     testRedlBtn.setEnabled(true);
                     statusLabel.setText("● Completed");
@@ -687,7 +850,7 @@ public class UploadSessionPanel extends JPanel {
         );
 
         statusLabel.setForeground(new Color(0, 100, 200));
-        currentExecutor.startScan(baseRequest);
+        currentExecutor.startScan(activeReq);
     }
 
     private void stopScan() {
@@ -696,6 +859,7 @@ public class UploadSessionPanel extends JPanel {
             statusLabel.setText("● Stopped");
             statusLabel.setForeground(Color.RED);
             startScanBtn.setEnabled(true);
+            probeExtBtn.setEnabled(true);
             stopScanBtn.setEnabled(false);
             testRedlBtn.setEnabled(true);
         }
