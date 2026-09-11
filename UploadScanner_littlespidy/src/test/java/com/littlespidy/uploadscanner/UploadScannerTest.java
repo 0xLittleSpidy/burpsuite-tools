@@ -422,4 +422,29 @@ class UploadScannerTest {
         assertTrue(hasXmlBomb, "XML Bomb payloads present");
         assertTrue(hasOobPayload, "OOB Collaborator payloads flagged properly");
     }
+
+    @Test
+    @DisplayName("ReDownloaderEngine: Cookie and Auth Header Detection")
+    void testCookieAndAuthHeaderDetection() {
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("Cookie"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("cookie"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("Authorization"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("authorization"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("Proxy-Authorization"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("X-Auth-Token"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("X-API-Key"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("ApiKey"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("Session-Id"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("X-Access-Token"));
+        assertTrue(ReDownloaderEngine.isCookieOrAuthHeader("Bearer-Token"));
+
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader("Host"));
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader("Content-Type"));
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader("Content-Length"));
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader("User-Agent"));
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader("Accept"));
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader("Connection"));
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader(""));
+        assertFalse(ReDownloaderEngine.isCookieOrAuthHeader(null));
+    }
 }

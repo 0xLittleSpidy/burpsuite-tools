@@ -3,6 +3,7 @@ package com.littlespidy.uploadscanner.engine;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.Marker;
 import burp.api.montoya.http.HttpService;
+import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -119,25 +120,79 @@ public class ReDownloaderEngine {
     }
 
     /**
-     * Constructs a GET redownload request targeting the parsed URL.
+     * Constructs a GET redownload request targeting the parsed URL,
+     * preserving Cookie and Authorization headers from the original upload request.
      */
     public HttpRequest buildRedownloadRequest(HttpRequest baseRequest, String parsedUrl) {
         if (parsedUrl == null || parsedUrl.isEmpty()) {
             return null;
         }
 
+        HttpRequest req;
         if (parsedUrl.startsWith("http://") || parsedUrl.startsWith("https://")) {
-            return HttpRequest.httpRequestFromUrl(parsedUrl);
+            req = HttpRequest.httpRequestFromUrl(parsedUrl);
+        } else {
+            HttpService service = (baseRequest != null && baseRequest.httpService() != null) ? baseRequest.httpService() : null;
+            String normalizedPath = parsedUrl.startsWith("/") ? parsedUrl : "/" + parsedUrl;
+
+            String userAgent = (baseRequest != null && baseRequest.hasHeader("User-Agent"))
+                    ? baseRequest.headerValue("User-Agent")
+                    : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+            if (service != null) {
+                req = HttpRequest.httpRequest(service, "GET " + normalizedPath + " HTTP/1.1\r\n" +
+                        "Host: " + service.host() + "\r\n" +
+                        "User-Agent: " + userAgent + "\r\n" +
+                        "Accept: */*\r\n" +
+                        "Connection: close\r\n\r\n");
+            } else {
+                req = HttpRequest.httpRequest("GET " + normalizedPath + " HTTP/1.1\r\n" +
+                        "User-Agent: " + userAgent + "\r\n" +
+                        "Accept: */*\r\n" +
+                        "Connection: close\r\n\r\n");
+            }
         }
 
-        HttpService service = baseRequest.httpService();
-        String normalizedPath = parsedUrl.startsWith("/") ? parsedUrl : "/" + parsedUrl;
+        // Attach Cookie, Authorization, and authentication/token headers present in upload request
+        if (baseRequest != null && baseRequest.headers() != null) {
+            for (HttpHeader header : baseRequest.headers()) {
+                if (isCookieOrAuthHeader(header.name())) {
+                    if (header.name().equalsIgnoreCase("cookie") && req.hasHeader("cookie")) {
+                        String existing = req.headerValue("cookie");
+                        if (!existing.contains(header.value())) {
+                            req = req.withUpdatedHeader("Cookie", existing + "; " + header.value());
+                        }
+                    } else if (req.hasHeader(header.name())) {
+                        req = req.withUpdatedHeader(header.name(), header.value());
+                    } else {
+                        req = req.withAddedHeader(header.name(), header.value());
+                    }
+                }
+            }
+        }
 
-        return HttpRequest.httpRequest(service, "GET " + normalizedPath + " HTTP/1.1\r\n" +
-                "Host: " + service.host() + "\r\n" +
-                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\r\n" +
-                "Accept: */*\r\n" +
-                "Connection: close\r\n\r\n");
+        return req;
+    }
+
+    /**
+     * Determines whether a header name corresponds to a cookie, authorization, or token header.
+     */
+    public static boolean isCookieOrAuthHeader(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+        String lower = name.toLowerCase().trim();
+        return lower.equals("cookie") ||
+                lower.equals("authorization") ||
+                lower.equals("proxy-authorization") ||
+                lower.startsWith("x-auth") ||
+                lower.startsWith("auth") ||
+                lower.contains("token") ||
+                lower.contains("api-key") ||
+                lower.contains("apikey") ||
+                lower.contains("jwt") ||
+                lower.contains("bearer") ||
+                lower.contains("session");
     }
 
     /**

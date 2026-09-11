@@ -189,43 +189,25 @@ public class UploadSessionPanel extends JPanel {
         selectionPanel.add(useSelectionResultLabel, BorderLayout.CENTER);
         redlTabs.addTab("🎯 2. 1-Click Highlight Helper", selectionPanel);
 
-        // Mode 3: 📁 Common Directory Presets
-        JPanel presetsPanel = new JPanel(new BorderLayout(6, 6));
-        presetsPanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+        // Mode 3: 📁 Directory Preset
+        JPanel presetsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        presetsPanel.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
 
-        JPanel presetButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        presetButtons.add(new JLabel("Quick Presets:"));
+        staticUrlField = new JTextField("/uploads/${FILENAME}", 30);
+        staticUrlField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { syncConfigFromUI(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { syncConfigFromUI(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { syncConfigFromUI(); }
+        });
 
-        String[] samplePresets = {
-                "/uploads/${FILENAME}",
-                "/static/${FILENAME}",
-                "/media/${FILENAME}",
-                "/files/${FILENAME}",
-                "/images/${FILENAME}",
-                "/upload/${FILENAME}"
-        };
+        presetsPanel.add(new JLabel("Target Directory Preset / URL Pattern:"));
+        presetsPanel.add(staticUrlField);
+        presetsPanel.add(new JLabel("(supports ${FILENAME}, ${FILENAME_NO_EXT}, ${ORIG_EXT}, ${RANDOMIZE})"));
 
-        staticUrlField = new JTextField("/uploads/${FILENAME}", 25);
-        for (String preset : samplePresets) {
-            JButton pb = new JButton(preset);
-            pb.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-            pb.addActionListener(e -> {
-                staticUrlField.setText(preset);
-                syncConfigFromUI();
-                previewResultLabel.setText("Target set: " + preset);
-                previewResultLabel.setForeground(new Color(0, 120, 40));
-            });
-            presetButtons.add(pb);
-        }
-
-        JPanel staticInputRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        staticInputRow.add(new JLabel("Target Static URL Pattern:"));
-        staticInputRow.add(staticUrlField);
-        staticInputRow.add(new JLabel("(supports ${FILENAME}, ${FILENAME_NO_EXT}, ${RANDOMIZE})"));
-
-        presetsPanel.add(presetButtons, BorderLayout.NORTH);
-        presetsPanel.add(staticInputRow, BorderLayout.CENTER);
-        redlTabs.addTab("📁 3. Directory Presets", presetsPanel);
+        redlTabs.addTab("📁 3. Directory Preset", presetsPanel);
 
         // Mode 4: ⚙️ Advanced Custom Markers
         JPanel advancedPanel = new JPanel(new GridBagLayout());
@@ -494,7 +476,7 @@ public class UploadSessionPanel extends JPanel {
                 redlReqEditor.setRequest(testReq);
             }
         } else {
-            autoDetectResultLabel.setText("❌ " + result.getReason() + " (Use 1-Click Highlight or Directory Presets)");
+            autoDetectResultLabel.setText("❌ " + result.getReason() + " (Use 1-Click Highlight or Directory Preset)");
             autoDetectResultLabel.setForeground(Color.RED);
         }
     }
@@ -646,7 +628,7 @@ public class UploadSessionPanel extends JPanel {
                 }).start();
             }
         } else {
-            previewResultLabel.setText("❌ Delimiters not found. Use Auto-Detect or Preset buttons!");
+            previewResultLabel.setText("❌ Delimiters not found. Use Auto-Detect, 1-Click Highlight, or Directory Preset!");
             previewResultLabel.setForeground(Color.RED);
         }
     }

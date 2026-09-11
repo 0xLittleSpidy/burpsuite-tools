@@ -5,7 +5,7 @@
 A modern, high-performance Burp Suite extension written in **Java** using PortSwigger's **Montoya API** (`burp.api.montoya.*`). 
 
 This project is a modernized, standalone rewrite of the legacy Python *Upload Scanner* extension, featuring:
-- **Simplified ReDownloader** with 1-click magic auto-detection, highlight marker derivation, and common CMS presets.
+- **Simplified ReDownloader** with 1-click magic auto-detection, highlight marker derivation, custom directory preset patterns, and automated cookie/auth header propagation.
 - **Complete 24-Module Attack Matrix** across 5 categories (Server RCE, Image Libraries, XML/Documents, Client-Side/Polyglots, Archives/Quirks/DoS).
 - **Integrated Burp Collaborator** for automated Out-Of-Band (OOB) blind interaction tracking.
 - **100% Native Java Engine** (in-memory ZIP and TAR builders, zero Perl or `exiftool` dependencies).
@@ -25,14 +25,8 @@ The ReDownloader verifies whether uploaded files are stored, publicly accessible
 2. **🎯 1-Click Highlight Selection**:
    - Simply select/highlight the file URL or path in Burp's native response viewer.
    - Click **🎯 Use Highlighted Selection** — the engine instantly derives the exact start and end markers around your selection with zero regex math.
-3. **📁 Common Directory Presets**:
-   - 1-click buttons for popular frameworks and CMS setups:
-     - `📁 /uploads/${FILENAME}`
-     - `📁 /wp-content/uploads/${FILENAME}`
-     - `📁 /storage/${FILENAME}`
-     - `📁 /media/${FILENAME}`
-     - `📁 /static/${FILENAME}`
-     - `📁 /files/${FILENAME}`
+3. **📁 Directory Preset**:
+   - Easily provide any target directory or static URL pattern (e.g. `/uploads/${FILENAME}`, `/storage/${FILENAME}`, `/media/${FILENAME_NO_EXT}/${FILENAME}`) with live automatic synchronization.
 4. **⚙️ Advanced Custom Markers & Templates**:
    - Custom Start/End markers with full placeholder support:
      - `${FILENAME}`: Injected filename (e.g. `shell.php`)
@@ -40,7 +34,9 @@ The ReDownloader verifies whether uploaded files are stored, publicly accessible
      - `${FILENAME_NO_EXT}`: Filename without extension (e.g. `shell`)
      - `${ORIG_EXT}`: File extension (e.g. `php`)
      - `${RANDOMIZE}`: Unique 12-digit random number for cache busting
-5. **🧪 Live ReDownloader Verification**:
+5. **🔐 Cookie & Auth Header Propagation**:
+   - Automatically forwards `Cookie`, `Authorization`, `Proxy-Authorization`, and custom session/token headers (`X-Auth-Token`, `X-API-Key`, `Bearer`, etc.) from the upload request onto all ReDownloader verification requests.
+6. **🧪 Live ReDownloader Verification**:
    - Click **🧪 Test ReDownloader Now** to test parsing and dispatch a live background GET request to verify download headers and content in real-time.
 
 ---
@@ -151,7 +147,7 @@ build/libs/upload-scanner-littlespidy-1.0.0.jar
 2. **Setup ReDownloader in Seconds**:
    - **Option A**: Click **✨ Auto-Detect Magic** to automatically discover the download URL from the response.
    - **Option B**: Highlight the returned file path in the response editor and click **🎯 Use Highlighted Selection**.
-   - **Option C**: Click any **Common Directory Preset** (e.g. `/uploads/${FILENAME}`).
+   - **Option C**: Specify a **Directory Preset** path pattern (e.g. `/uploads/${FILENAME}`).
 3. **Verify Download**: Click **🧪 Test ReDownloader Now** to inspect the live response in the test viewer.
 4. **Choose Attack Vectors**: Use the category tabs to select desired modules or click **Select All (24 Modules)**.
 5. **Run Scan**: Click **▶ Start Scan**.
