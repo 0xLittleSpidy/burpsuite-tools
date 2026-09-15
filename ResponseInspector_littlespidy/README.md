@@ -2,48 +2,44 @@
 
 <!-- Created with the help of an AI Agent and littlespidy. -->
 
-A high-performance Burp Suite extension built on the modern **Montoya API** to passively analyze and triage sensitive data exposures in HTTP responses across five tabs:
+A high-performance Burp Suite extension built on the modern **Montoya API** to passively analyze and triage sensitive data exposures in HTTP responses across six functional tabs:
 
-1. **📖 Welcome & Guide**: Static onboarding dashboard with modular tutorial cards explaining the audit methodology, zero-overhead philosophy, and triage tools.
+1. **📖 Welcome & Guide**: Onboarding dashboard with modular tutorial cards explaining the audit methodology, zero-overhead philosophy, JS exclusion policy, and triage shortcuts.
 2. **🔑 Passwords**: Targeted scanning for user-configured passwords leaked in response bodies, headers, and cookies.
 3. **🛡️ PII, Network & Server Paths**: Strict Social Security Numbers (SSNs), RFC 1918 / loopback internal IP addresses, and real OS filesystem paths (Linux & Windows).
 4. **⚠️ Errors & Exceptions**: Comprehensive database leaks, stack traces, and verbose server error disclosures ported from `DetectHTTPResponseErrors_littlespidy.bambda`.
-5. **🔐 Secrets & Tokens**: Cloud API keys, auth tokens, private keys, JWTs, and environment configurations ported from `sensitive-discoverer`.
+5. **🔐 Secrets**: Cloud API keys, auth tokens, private keys, JWTs, and cloud storage buckets upgraded with 40+ curated patterns, Shannon entropy scoring, Signatures Catalog dialog, and one-click KeyHacks credential verification in Burp Repeater.
+6. **💬 Comments**: Developer comments extracted from HTTP responses (single-line `//`, multi-line `/* */`, and HTML `<!-- -->`), categorized into `TODO / FIXME`, `Credentials / Auth`, `Debug / Config`, and `General`.
 
 ---
 
-## 🚀 Key Features
+## 🚀 Key Features & Architectural Upgrades
 
-- **Multi-Threaded Ingestion Pool**: Rapid parallel scanning of Proxy HTTP history powered by a bounded `ExecutorService` (`Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()))`) with atomic progress counters and non-blocking batch UI updates.
-- **Two-Stage Refiner Regex Engine**: Ported from `sensitive-discoverer` to eliminate regex backtracking: matches fast anchor suffixes (e.g. `s3.amazonaws.com`, `blob.core.windows.net`, `firebaseio.com`, `apps.googleusercontent.com`, `webhook.office.com`) and then applies a backward look-back window refiner regex to capture complete bucket, storage, and client prefixes without false positives.
-- **MIME-Type Blacklisting & Max Size Guard**: Automatically bypasses non-textual binary assets (`IMAGE_*`, `VIDEO`, `SOUND`, `FONT_*`, `APPLICATION_FLASH`) and oversized bodies (>10MB), accelerating history scans by ~80% and preventing memory bloat.
-- **Multi-Section Scanning (Headers + Body)**: Scans both `Response Headers` (detecting leaked tokens in `Set-Cookie`, redirects in `Location`, internal IPs in `X-Forwarded-For` / `X-Backend-Server`) and `Response Body` with accurate byte alignment.
-- **TSV Findings Export**: Dedicated **`Export TSV`** toolbar button and right-click context menu item to save currently displayed or filtered findings to a clean Tab-Separated Values (`.tsv`) file for rapid spreadsheets or reporting.
-- **Welcome & Onboarding Dashboard**: A dedicated first tab featuring structured playbook cards outlining discovery rules, threading design, and workflow integrations.
-- **Granular In-Scope Domain Selection**: Rather than forcing a coarse all-or-nothing scope filter, the **`In-Scope Domains... (N/M)`** button opens a multi-checkbox search modal to select or deselect specific target subdomains/hosts.
-- **On-Demand Processing (Zero Overhead)**: Analyzes captured responses via a dedicated **Load Proxy History** button backed by asynchronous `SwingWorker` threads. Does not add continuous background overhead to Proxy/Repeater operations.
-- **Dedicated Target Password Management**: Prominent **`Configure Passwords... (N active)`** toolbar action opens a modal editor allowing testers to enter, paste, or import wordlists from disk, with optional case-sensitivity toggles.
-- **Strict SSN & False-Positive Suppression**: Enforces standard US SSN format (`\b\d{3}-\d{2}-\d{4}\b`) and verifies area, group, and serial number validity (excluding `000-`, `666-`, `900-999-`, `00`, `0000`, and sequential dummy sequences like `111-11-1111`).
-- **OS Filesystem Paths vs Web Routes**: Specifically isolates real server filesystem paths (e.g. `/etc/passwd`, `/var/log/...`, `/home/...`, `C:\inetpub\...`, `\\server\share\...`) rather than standard client-side URLs or web routes.
-- **Master-Detail Layout**: Top sortable table with status-code color-coding; bottom native Montoya `HttpRequestEditor` and `HttpResponseEditor` (Pretty / Raw / Hex) with zero UI lag.
-- **Multi-Select Filter Buttons (`MultiSelectFilterButton`)**: Popover checkbox controls allowing multi-value filtering across HTTP Methods (`GET`, `POST`, etc.), Status Codes (`2xx`, `3xx`, `4xx`, `5xx`, `200`, `302`, `401`, `403`, `404`, `500`), and Content-Types (`JSON`, `HTML`, `JavaScript`, `XML`, `Plain`).
-- **Secret Type Multi-Select Filter**: The Secrets & Tokens tab features a dedicated **`Secret Type ▾`** filter button allowing testers to isolate specific secret patterns (e.g. `AWS S3 Bucket`, `OpenAI API Key`, `JSON Web Token (JWT)`, `Google API Key`, `Stripe Webhook Secret`) or view all by default (`All Secret Types`).
-- **Live Ingestion Progress Bar**: Dedicated status strip below the toolbar displays real-time item and finding counts (`Scanning Proxy history: 450 / 2100 items...`) alongside an auto-hiding determinate `JProgressBar` with guaranteed `try-finally` fail-safe recovery.
-- **Auto-Navigation & Deep-Linking Quad**: Selecting any finding row immediately:
+- **💬 Dedicated Developer Comments Tab**: Extracts inline, block, and HTML comments from response bodies, filtering by comment syntax and semantic category with zero EDT lag and automatic 500-item safeguard against response flooding.
+- **🔐 Upgraded Secrets Tab with KeyHacks Verification**:
+  - **40+ Curated Signatures**: Patterns covering Cloud (AWS, GCP, Azure, Firebase, DigitalOcean, Cloudflare), Payments (Stripe, PayPal, Square), Source Control & CI/CD (GitHub, GitLab, Bitbucket, Vercel, Netlify, npm), AI/ML (OpenAI, Anthropic, HuggingFace, Cohere), and SaaS (Slack, Discord, Algolia, SendGrid, Twilio).
+  - **Shannon Entropy Guard & False-Positive Suppression**: Automatically suppresses dummy tutorial keys, template variables (`${...}`), and repetitive low-entropy sequences.
+  - **Signatures Catalog Dialog**: Click **`📋 Signatures Catalog (N)`** to review active detection regexes, confidence levels, and entropy guards in a filterable modal dialog.
+  - **KeyHacks Credential Verification**: Click **`🧪 Verify Secret (Repeater)`** or right-click any secret row to construct an authentic, non-destructive identity query request and dispatch it directly to Burp Repeater.
+- **🔎 Universal "Finding Type" Filter**: Every tab features a dedicated **`Finding Type ▾`** `MultiSelectFilterButton` popup tailored to that tab (e.g. SSN / Internal IP / OS Path on PII tab; DB & runtime exception names on Errors tab; Secret Signatures on Secrets tab; Comment Types on Comments tab).
+- **🚫 Strict JavaScript File Exclusion**: JavaScript files (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.tsx`, `.map`) and script MIME responses are intentionally excluded from loading and scanning in Response Inspector to eliminate tool overlap, as full JavaScript intelligence and Source Map extraction are provided by the companion [JS SourceMap Explorer](file:///home/littlespidy/myextra/burpsuite/JSSourceMapExplorer_littlespidy).
+- **📌 Clean Non-Destructive Triage (Pinning Removed)**: Row pinning has been completely removed in favor of clean live non-destructive view filtering, ensuring dataset integrity and immediate filter resetting.
+- **🌐 In-Scope Dual-Stage Strategy (`extension_architecture.md`)**: Live target scope evaluation (`api.scope().isInScope(url)`) combined with an optional ingestion pre-filter and a granular **`In-Scope Domains...`** dialog to isolate specific target subdomains without re-importing history.
+- **⚡ Multi-Threaded Ingestion Pool**: Rapid parallel scanning of Proxy HTTP history powered by a bounded `ExecutorService` (`Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()))`) with atomic progress counters and non-blocking batch UI updates.
+- **📊 TSV Findings Export**: Dedicated **`Export TSV`** toolbar button and right-click context menu item to save currently displayed or filtered findings to a clean Tab-Separated Values (`.tsv`) file for reporting.
+- **🎯 Auto-Navigation & Deep-Linking Quad**: Selecting any finding row immediately:
   1. *Tab Auto-Switching*: Flips the editor to the **Response** (or Request) sub-tab automatically.
   2. *Native Marker Highlighting*: Paints native Burp yellow/orange markers over the match range across Pretty, Raw, and Hex editors.
   3. *Search Expression Populating*: Populates Burp's search bar with the finding value to enable immediate `Enter` / `Shift+Enter` keyboard jumping.
-  4. *Viewport Auto-Scroll*: Automatically scrolls the text component vertically and horizontally to center the finding on-screen (handling header offsets vs body offsets accurately).
-- **Row Pinning**: Isolate high-value findings using **Pin Selected** and **Clear Pins** to bypass general filters during deep analysis.
-- **Inter-Tool Integration**: Right-click context menu on all tables to **Send to Repeater** (with clean `METHOD host/path` tab naming), **Send to Intruder**, **Send to Organizer**, and **Copy Match Excerpt**.
-- **Clipboard TSV Export**: Standard `Ctrl+C` / `Cmd+C` hotkey exports selected rows directly to clipboard in tab-separated format for reporting.
+  4. *Viewport Auto-Scroll*: Automatically scrolls the text component vertically and horizontally to center the finding on-screen.
+- **🔄 Inter-Tool Integration**: Right-click context menu on all tables to **Send to Repeater** (with clean `METHOD host/path` tab naming), **Send to Intruder**, **Send to Organizer**, and **Copy Match Excerpt**.
 
 ---
 
 ## 🛠️ Tabs & Coverage
 
 ### 0. 📖 Welcome & Guide Tab
-- Overview of architecture, zero-EDT-freeze guidelines, domain selection walkthrough, and triage shortcuts.
+- Overview of architecture, zero-EDT-freeze guidelines, domain selection walkthrough, JS exclusion notice, and triage shortcuts.
 
 ### 1. 🔑 Passwords Tab
 - Prompts or opens via **`Configure Passwords... (N active)`**.
@@ -52,51 +48,40 @@ A high-performance Burp Suite extension built on the modern **Montoya API** to p
 
 ### 2. 🛡️ PII, Network & Server Paths Tab
 - **Strict SSN**: Validates valid area, group, and serial numbers. Masks output (`***-**-1234`) for safe viewing.
-- **Internal IPs**: Matches RFC 1918 Class A (`10.0.0.0/8`), Class B (`172.16.0.0/12`), Class C (`192.168.0.0/16`), Loopback (`127.0.0.0/8`), and Link-Local (`169.254.0.0/16`) across both Response Headers (`X-Forwarded-For`, `X-Backend-Server`, `Via`) and Response Bodies.
+- **Internal IPs**: Matches RFC 1918 Class A (`10.0.0.0/8`), Class B (`172.16.0.0/12`), Class C (`192.168.0.0/16`), Loopback (`127.0.0.0/8`), and Link-Local (`169.254.0.0/16`).
 - **OS Server Paths**: Detects Linux root and service directories (`/etc/`, `/var/log/`, `/var/www/`, `/opt/`, `/root/`, `/home/<user>/`, `/proc/`, `/sys/`) and Windows filesystem paths (`C:\inetpub\...`, `C:\Windows\...`, `C:\Users\...`, drive letters, and UNC network shares).
+- **Finding Type Filter**: Multi-select between SSN, Internal IP, and Server File Path.
 
 ### 3. ⚠️ Errors & Exceptions Tab
 Ported from `DetectHTTPResponseErrors_littlespidy.bambda`:
-- **Web Servers**: Apache (`AH\d{5}:`, `mod_\w+:`), NGINX, JBoss/WildFly (`JBWEB\d{6}:`, `WFLY\w+:`), Waitress, WebSEAL.
+- **Web Servers**: Apache, NGINX, JBoss/WildFly, Waitress, WebSEAL.
 - **ASP.NET & IIS**: .NET exceptions, OLE DB providers, `System.*Exception`, C# source line references.
-- **Databases**: MySQL/MariaDB, PostgreSQL, Oracle DB (`ORA-\d{5}`), Microsoft SQL Server, SQLite, IBM DB2, MongoDB, LDAP directory leakage.
-- **Languages & Runtimes**: PHP fatal/warning traces, Java stack traces (`java.lang.*Exception`, `.java:\d+`), Python tracebacks, Ruby/ActiveRecord errors, Go panics, Node.js/JavaScript errors.
+- **Databases**: MySQL/MariaDB, PostgreSQL, Oracle DB, Microsoft SQL Server, SQLite, IBM DB2, MongoDB, LDAP directory leakage.
+- **Languages & Runtimes**: PHP fatal/warning traces, Java stack traces, Python tracebacks, Ruby/ActiveRecord errors, Go panics, Node.js/JavaScript errors.
 - **Frameworks**: Django ORM, Hibernate / JPA.
+- **Finding Type Filter**: Multi-select filter across all 22 supported error signatures.
 
-### 4. 🔐 Secrets & Tokens Tab
-Comprehensive patterns ported from `sensitive-discoverer` using the Two-Stage Refiner Engine:
-- **Cloud Storage & Infrastructure**:
-  - AWS S3 Buckets (`*.s3.amazonaws.com`, `.s3.dualstack...`)
-  - Azure Blob Storage (`*.blob.core.windows.net`)
-  - Firebase Realtime Database (`*.firebaseio.com`, `*.firebasedatabase.app`)
-  - Google Cloud Storage (`gs://...`)
-  - Amazon ARN (`arn:aws:...`)
-  - Microsoft Teams / Office 365 Incoming Webhooks (`outlook.office.com/webhook/...`, `*.webhook.office.com`)
-- **API Keys & Credentials**:
-  - OpenAI API Keys (`sk-...`)
-  - AWS Access Key ID (`AKIA...`, `ASIA...`, `ABIA...`, `AROA...`)
-  - AWS Secret Access Key
-  - Amazon MWS Auth Tokens
-  - Google API Keys (`AIza...`)
-  - Google OAuth Access Tokens (`ya29...`)
-  - Google OAuth Client ID (`*.apps.googleusercontent.com`) & Client Secret (`GOCSPX-...`)
-  - GitHub Personal Access Tokens (`ghp_...`, `gho_...`, `ghu_...`, `ghs_...`) & Fine-Grained PATs (`github_pat_...`)
-  - Slack Incoming Webhooks & Bot/User Tokens (`xoxb-...`, `xoxp-...`, `xoxa-...`, `xoxe-...`)
-  - Square Tokens (`sq0atp-...`, `sq0csp-...`, `sq0idp-...`)
-  - MailGun API Keys (`key-...`)
-  - NuGet API Keys (`oy2...`)
-  - Stripe API Secret Keys (`sk_live_...`, `rk_live_...`) & Webhook Signing Secrets (`whsec_...`)
-  - Twilio API Key / SID (`SK...`)
-  - SendGrid API Keys (`SG....`)
-  - Generic API Key & Secret assignments (`api_key: '...'`, `secret: '...'`)
+### 4. 🔐 Secrets Tab
+Curated pattern mining engine with Shannon entropy scoring and KeyHacks verification:
+- **Cloud Infrastructure**: AWS S3 Buckets, Azure Blob Storage, Firebase Realtime Database, Google Cloud Storage, Amazon ARN.
+- **Cloud Credentials**: AWS Access Key (`AKIA...`), AWS Secret Key, AWS Session Token (`ASIA...`), Google API Key, Google OAuth Client Secret, Azure Storage Connection String, Azure SharedAccessKey, DigitalOcean Token, Cloudflare Token, Heroku API Key.
+- **Financial & Payment**: Stripe Live/Restricted Keys, PayPal Secret, Square Access/OAuth Tokens.
+- **Source Control & CI/CD**: GitHub PAT & Fine-Grained Tokens, GitLab PAT, Bitbucket Token, Vercel, Netlify, npm Access Tokens.
+- **AI & ML**: OpenAI Project & Classic Keys, Anthropic API Keys, HuggingFace Tokens, Cohere API Keys.
+- **Messaging & SaaS**: Slack Tokens, Discord Bot Tokens, Algolia Admin Keys, SendGrid, Mailgun, Twilio Auth Tokens.
+- **API & Auth**: JSON Web Tokens (JWT), Hardcoded Bearer Tokens, Authorization Headers, OAuth Refresh Tokens, Generic API Secrets.
+- **Cryptographic Keys**: PEM Private Keys (`-----BEGIN RSA/EC PRIVATE KEY-----`), Encrypted Private Keys.
+- **KeyHacks Repeater Verification**: Dispatch non-destructive identity checks to Burp Repeater.
+- **Finding Type Filter**: Multi-select filter across all secret signature rules.
 
----
-
-## 📚 Pattern Reference & Skill
-
-For the concise catalog of all regex patterns, two-stage refiners, and extraction rules, see:
-- [Pattern Reference (`patterns.md`)](file:///home/littlespidy/myextra/burpsuite/ResponseInspector_littlespidy/patterns.md)
-- Custom Skill: `sensitive-pattern-extractor` at [`.agents/skills/sensitive-pattern-extractor/SKILL.md`](file:///home/littlespidy/myextra/burpsuite/.agents/skills/sensitive-pattern-extractor/SKILL.md)
+### 5. 💬 Comments Tab
+- **Syntax Types**: Single-line (`//`), multi-line (`/* */`), and HTML (`<!-- -->`).
+- **Semantic Categories**:
+  - `TODO / FIXME`: Technical debt, temporary code, bug tags (`TODO`, `FIXME`, `HACK`, `BUG`, `WORKAROUND`).
+  - `Credentials / Auth`: Passwords, auth keys, tokens, admin notes (`password`, `secret`, `token`, `apikey`, `admin`, `root`).
+  - `Debug / Config`: Development endpoints, testing flags, localhost configurations (`debug`, `test`, `dev`, `staging`, `internal`).
+  - `General`: Informational and developer documentation comments.
+- **Toolbar Controls**: Independent multi-select filters for **Comment Type** and **Category**, combined with text search and TSV export.
 
 ---
 

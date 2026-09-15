@@ -32,6 +32,28 @@ public class ReflectionDetector implements HttpHandler {
     private final AtomicLong idCounter = new AtomicLong(1);
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+    /** Known database error strings used for passive error-based SQL injection detection. */
+    private static final String[] SQL_ERROR_PATTERNS = {
+        "you have an error in your sql syntax",
+        "unclosed quotation mark",
+        "quoted string not properly terminated",
+        "ora-",                                         // Oracle
+        "pg_query()",                                   // PostgreSQL function name in errors
+        "psql error",
+        "sqlstate",
+        "microsoft ole db provider for sql server",
+        "odbc sql server driver",
+        "mysql_fetch",
+        "warning: mysql",
+        "supplied argument is not a valid mysql",
+        "sqlite_",
+        "sqlite error",
+        "db2 sql error",
+        "com.mysql.jdbc",
+        "org.postgresql",
+        "invalid sql statement",
+    };
+
     public ReflectionDetector(MontoyaApi api, InjectionConfig config, Consumer<ReflectionFinding> findingConsumer) {
         this.api = api;
         this.config = config;
@@ -87,13 +109,18 @@ public class ReflectionDetector implements HttpHandler {
                 matchedSignature = paramValue;
             } else if (isAngularPayload(decodedValue) && matchesAngularCanary(decodedValue, responseBody)) {
                 matchedSignature = "{{...}} or eval result";
+            } else if (isSqlPayload(decodedValue.toLowerCase()) && isSqlErrorResponse(responseBodyLower)) {
+                // SQL error-based detection: probe sent + DB error string found in response
+                matchedSignature = "<SQL Error in Response>";
             }
 
             if (matchedSignature != null) {
                 findingCreated = true;
                 String category = categorizePayload(decodedValue);
                 String context = analyzeReflectionContext(responseBody, matchedSignature);
-                String evidence = extractEvidenceSnippet(responseBody, matchedSignature);
+                String evidence = matchedSignature.equals("<SQL Error in Response>")
+                        ? extractSqlErrorEvidence(responseBodyLower)
+                        : extractEvidenceSnippet(responseBody, matchedSignature);
 
                 // Safe-append note according to coding standards
                 if (config.isAnnotateBurpHistory()) {
@@ -105,12 +132,14 @@ public class ReflectionDetector implements HttpHandler {
                         annotations.setNotes(existingNote + " | " + newNote);
                     }
 
-                    if (context.contains("HTML Tag Body") || context.contains("Script Block")) {
+                    if (context.contains("HTML Tag Body") || context.contains("Script Block")
+                            || "SQL Injection".equals(category)) {
                         annotations.setHighlightColor(HighlightColor.RED);
                     } else {
                         annotations.setHighlightColor(HighlightColor.YELLOW);
                     }
                 }
+
 
                 HttpRequestResponse rr = HttpRequestResponse.httpRequestResponse(
                         request,
@@ -163,6 +192,11 @@ public class ReflectionDetector implements HttpHandler {
             return true;
         }
 
+        // 4. SQL injection probes — recognised by structural SQL syntax (no param name needed)
+        if (isSqlPayload(testVal)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -179,13 +213,18 @@ public class ReflectionDetector implements HttpHandler {
     }
 
     private String categorizePayload(String payload) {
-        if (payload.contains("{{") || payload.contains("$eval") || payload.contains("$on")) {
+        String p = payload.toLowerCase();
+        if (p.contains("{{") || p.contains("$eval") || p.contains("$on")) {
             return "Angular CSTI";
         }
-        if (payload.contains("<script") || payload.contains("alert(") || payload.contains("onerror=") || payload.contains("onload=")) {
+        if (p.contains("<script") || p.contains("alert(") || p.contains("onerror=") || p.contains("onload=")) {
             return "XSS";
         }
+        if (isSqlPayload(p)) {
+            return "SQL Injection";
+        }
         return "Custom";
+
     }
 
     private String analyzeReflectionContext(String body, String signature) {
@@ -241,5 +280,50 @@ public class ReflectionDetector implements HttpHandler {
         } catch (Exception e) {
             return value;
         }
+    }
+
+    /**
+     * Returns true when the (already lowercased) payload matches known SQL injection probe patterns.
+     * SQL probes are value-only; no parameter name attribution is required.
+     */
+    private boolean isSqlPayload(String payloadLower) {
+        return payloadLower.endsWith("'")
+                || payloadLower.endsWith("'--")
+                || payloadLower.endsWith("'#")
+                || payloadLower.contains("or '1'='1")
+                || payloadLower.contains("or 1=1")
+                || payloadLower.contains("union select")
+                || payloadLower.contains("sleep(")
+                || payloadLower.contains("waitfor delay")
+                || payloadLower.contains("pg_sleep");
+    }
+
+    /**
+     * Returns true when the (already lowercased) response body contains a known database error string.
+     */
+    private boolean isSqlErrorResponse(String responseBodyLower) {
+        for (String pattern : SQL_ERROR_PATTERNS) {
+            if (responseBodyLower.contains(pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Extracts and returns a short snippet around the first matching SQL error pattern in the response body.
+     * Used as the evidence string for SQL error-based findings.
+     */
+    private String extractSqlErrorEvidence(String responseBodyLower) {
+        for (String pattern : SQL_ERROR_PATTERNS) {
+            int idx = responseBodyLower.indexOf(pattern);
+            if (idx != -1) {
+                int start = Math.max(0, idx - 20);
+                int end   = Math.min(responseBodyLower.length(), idx + pattern.length() + 60);
+                String snippet = responseBodyLower.substring(start, end).replace('\r', ' ').replace('\n', ' ');
+                return (start > 0 ? "..." : "") + snippet + (end < responseBodyLower.length() ? "..." : "");
+            }
+        }
+        return "<SQL error string detected>";
     }
 }

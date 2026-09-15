@@ -12,7 +12,10 @@ public enum StageType {
     PREFLIGHT("Preflight"),
     REDOWNLOAD("ReDownload"),
     VERIFICATION("Verification"),
-    EXTENSION_PROBE("Probe");
+    EXTENSION_PROBE("Probe"),
+    CONTENT_TYPE_PROBE("Content-Type"),
+    FILE_SIZE_PROBE("File-Size"),
+    EXIF_PROBE("EXIF");
 
     private final String displayName;
 

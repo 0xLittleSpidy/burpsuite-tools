@@ -5,7 +5,7 @@ import java.util.*;
 
 /**
  * Reconstructed source project tree holding all extracted source files,
- * aggregated endpoints, secrets, cloud URLs, and dependencies.
+ * aggregated endpoints, secrets, comments, cloud URLs, and dependencies.
  *
  * @author littlespidy
  */
@@ -14,8 +14,10 @@ public class UnpackedProject {
     private final Map<String, UnpackedSourceFile> filesByPath = new LinkedHashMap<>();
     private final List<DiscoveredSecret> allSecrets = new ArrayList<>();
     private final List<DiscoveredEndpoint> allEndpoints = new ArrayList<>();
+    private final List<DiscoveredComment> allComments = new ArrayList<>();
     private final List<DiscoveredCloudUrl> allCloudUrls = new ArrayList<>();
     private final List<DiscoveredDependency> allDependencies = new ArrayList<>();
+    private final List<DiscoveredSecurityBypass> allSecurityBypasses = new ArrayList<>();
 
     public UnpackedProject(String sourceMapUrl) {
         this.sourceMapUrl = sourceMapUrl;
@@ -32,6 +34,12 @@ public class UnpackedProject {
         }
         if (file.endpoints() != null) {
             allEndpoints.addAll(file.endpoints());
+        }
+        if (file.comments() != null) {
+            allComments.addAll(file.comments());
+        }
+        if (file.securityBypasses() != null) {
+            allSecurityBypasses.addAll(file.securityBypasses());
         }
         if (file.cloudUrls() != null) {
             allCloudUrls.addAll(file.cloudUrls());
@@ -59,6 +67,14 @@ public class UnpackedProject {
 
     public synchronized List<DiscoveredEndpoint> getAllEndpoints() {
         return Collections.unmodifiableList(allEndpoints);
+    }
+
+    public synchronized List<DiscoveredComment> getAllComments() {
+        return Collections.unmodifiableList(allComments);
+    }
+
+    public synchronized List<DiscoveredSecurityBypass> getAllSecurityBypasses() {
+        return Collections.unmodifiableList(allSecurityBypasses);
     }
 
     public synchronized List<DiscoveredCloudUrl> getAllCloudUrls() {

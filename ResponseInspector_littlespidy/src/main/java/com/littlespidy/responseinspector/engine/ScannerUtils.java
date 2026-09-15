@@ -3,6 +3,7 @@ package com.littlespidy.responseinspector.engine;
 
 import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.http.message.MimeType;
+import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 
 import java.nio.charset.StandardCharsets;
@@ -38,7 +39,8 @@ public final class ScannerUtils {
             MimeType.LEGACY_SER_AMF,
             MimeType.RTF,
             MimeType.SOUND,
-            MimeType.VIDEO
+            MimeType.VIDEO,
+            MimeType.SCRIPT
     );
 
     private ScannerUtils() {}
@@ -69,6 +71,58 @@ public final class ScannerUtils {
         MimeType inferred = response.inferredMimeType();
         if ((stated == null || stated == MimeType.NONE) && inferred != null && BLACKLISTED_MIME_TYPES.contains(inferred)) {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a URL path or filename corresponds to JavaScript source or source map.
+     */
+    public static boolean isJsPath(String path) {
+        if (path == null || path.isEmpty()) return false;
+        int qIdx = path.indexOf('?');
+        String clean = qIdx != -1 ? path.substring(0, qIdx) : path;
+        int hIdx = clean.indexOf('#');
+        if (hIdx != -1) clean = clean.substring(0, hIdx);
+        String lower = clean.toLowerCase();
+        return lower.endsWith(".js") || lower.endsWith(".mjs") || lower.endsWith(".cjs")
+                || lower.endsWith(".jsx") || lower.endsWith(".ts") || lower.endsWith(".tsx")
+                || lower.endsWith(".map") || lower.endsWith(".js.map");
+    }
+
+    /**
+     * Checks if a Content-Type header string indicates JavaScript MIME types.
+     */
+    public static boolean isJsContentType(String contentType) {
+        if (contentType == null) return false;
+        String lower = contentType.toLowerCase();
+        return lower.contains("javascript") || lower.contains("ecmascript") || lower.contains("/x-javascript");
+    }
+
+    /**
+     * Identifies JavaScript files, scripts, and source maps that must be skipped in Response Inspector,
+     * as dedicated JavaScript analysis is handled by the JS SourceMap Explorer extension.
+     */
+    public static boolean isJsFile(HttpRequest request, HttpResponse response) {
+        if (request != null) {
+            String path = request.path();
+            if (path == null || path.isEmpty()) {
+                path = request.url();
+            }
+            if (isJsPath(path)) {
+                return true;
+            }
+        }
+        if (response != null) {
+            MimeType stated = response.statedMimeType();
+            if (stated == MimeType.SCRIPT) return true;
+            MimeType inferred = response.inferredMimeType();
+            if (inferred == MimeType.SCRIPT) return true;
+
+            String contentType = response.headerValue("Content-Type");
+            if (isJsContentType(contentType)) {
+                return true;
+            }
         }
         return false;
     }

@@ -2,7 +2,7 @@
 
 *Created with the help of an AI Agent and littlespidy.*
 
-A modern Montoya API Burp Suite extension that dynamically binds parameter names into security test payloads (such as Cross-Site Scripting (XSS) and AngularJS / Angular Client-Side Template Injection (CSTI)). 
+A modern Montoya API Burp Suite extension that dynamically binds parameter names into security test payloads (such as Cross-Site Scripting (XSS), AngularJS / Angular Client-Side Template Injection (CSTI), and SQL Injection). 
 
 When testing applications with dozens of parameters, generic payloads like `<script>alert(1)</script>` or `{{7*7}}` make it nearly impossible to determine which parameter reflected or executed in the DOM or response. **Param Payload Injector** solves this attribution problem by dynamically generating parameter-attributed payloads (e.g., `alert('username')`, `"><img src=x onerror=alert('redirect_url')>`, or `{{constructor.constructor('alert(\'param_name\')')()}}`) directly inside your Burp testing workflow.
 
@@ -14,7 +14,10 @@ When testing applications with dozens of parameters, generic payloads like `<scr
 Right-click inside any HTTP request (Repeater, Proxy History, Logger, Target):
 - **Send to Repeater with Armed Payloads**:
   - Clones the target request directly to a new Repeater tab with all parameters pre-populated with your chosen payload template.
-  - Submenus categorized by **XSS Payloads**, **Angular CSTI Payloads**, and **Custom Payloads**.
+  - Automatically formats the Repeater tab title using a clear naming convention:
+    `{method} {shortPath} [{category}: {template}]`
+    *(e.g., `GET /search [XSS: Script Tag (Direct)]` or `POST /api/user [XSS: IMG OnError]`)*.
+  - Dynamically populates submenus for all template categories (**XSS**, **Angular CSTI**, **SQL Injection**, and any custom user-added categories).
 - **Inject into All Parameters (In-Place)**:
   - Modifies the active request in the message editor in-place across all URL Query, Form Body, and JSON parameters.
 - **Inject into Selected Text / Range**:
@@ -37,12 +40,25 @@ Ships with out-of-the-box templates supporting `{param}`, `{value}`, and `{rand}
   - `Angular 1.6+ $on Escape`: `{{$on.constructor('alert(\'{param}\')')()}}`
   - `AngularJS 1.5.8 Escape`: `{{x={'a':1};constructor.constructor('alert(\'{param}\')')()}}`
   - `AngularJS 1.4 $eval Escape`: `{{'a'.constructor.prototype.charAt=[].join;$eval('x=1} } };alert(\'{param}\');//');}}`
+* **SQL Injection Payloads** *(value-only probes — no `{param}` attribution needed)*:
+  - `Single Quote Probe`: `{value}'` — breaks SQL string context *(enabled)*
+  - `Comment Breakout (--)`: `{value}'--` — MySQL/MSSQL line comment *(enabled)*
+  - `Comment Breakout (#)`: `{value}'#` — MySQL hash comment *(enabled)*
+  - `Boolean True (OR '1'='1')`: `{value}' OR '1'='1` — always-true condition *(enabled)*
+  - `Boolean True + Comment`: `{value}' OR 1=1--` — boolean true with comment *(enabled)*
+  - `Double Quote Probe`: `{value}"` — double-quoted identifier breakout *(enabled)*
+  - `Time-Based Blind (MySQL)`: `{value}' AND SLEEP(5)--` *(disabled by default)*
+  - `Time-Based Blind (MSSQL)`: `{value}'; WAITFOR DELAY '0:0:5'--` *(disabled by default)*
+  - `Time-Based Blind (PostgreSQL)`: `{value}'; SELECT pg_sleep(5)--` *(disabled by default)*
+  - `UNION SELECT Canary`: `{value}' UNION SELECT NULL--` *(disabled by default)*
+  - `Stacked Query Probe`: `{value}'; SELECT 1--` *(disabled by default)*
 
 ### 3. Dedicated Suite Tab: "Param Injector"
 - **Reflection Monitor Tab**:
   - Live inspection table capturing reflections of injected parameter payloads in HTTP responses.
   - Automatically classifies reflection context: `HTML Tag Body`, `HTML Attribute`, `Script Block`, `Angular Template`, or `Raw Body`.
-  - Filters: Scope filter (`In-Scope Only`), Category filter (`XSS`, `Angular CSTI`), and live search bar.
+  - **SQL error-based passive detection**: when a SQL Injection probe is present in a parameter and the response contains a known database error string (MySQL, Oracle, PostgreSQL, MSSQL, SQLite, DB2), a `SQL Injection` finding is raised automatically — no verbatim payload reflection required.
+  - Filters: Scope filter (`In-Scope Only`), Category filter (`XSS`, `Angular CSTI`, `SQL Injection`), and live search bar.
   - Native Montoya side-by-side HTTP Request and Response editors with automatic search expression highlighting of the reflecting parameter.
 - **Payload Templates & Settings Tab**:
   - Value insertion modes: **Replace**, **Append**, or **Prepend**.

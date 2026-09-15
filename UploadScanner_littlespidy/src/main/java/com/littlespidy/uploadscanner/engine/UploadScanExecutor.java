@@ -67,28 +67,58 @@ public class UploadScanExecutor {
         }
     }
 
+    public enum ScanMode {
+        FULL_SCAN,
+        ALLOWED_EXTENSIONS_PROBE,
+        CONTENT_TYPE_PROBE,
+        FILE_SIZE_PROBE,
+        EXIF_PROBE
+    }
+
     public void startScan(HttpRequest baseRequest) {
-        startInternal(baseRequest, false);
+        startInternal(baseRequest, ScanMode.FULL_SCAN);
     }
 
     public void startAllowedExtensionsProbe(HttpRequest baseRequest) {
-        startInternal(baseRequest, true);
+        startInternal(baseRequest, ScanMode.ALLOWED_EXTENSIONS_PROBE);
     }
 
-    private void startInternal(HttpRequest baseRequest, boolean probeOnly) {
+    public void startContentTypeProbe(HttpRequest baseRequest) {
+        startInternal(baseRequest, ScanMode.CONTENT_TYPE_PROBE);
+    }
+
+    public void startFileSizeProbe(HttpRequest baseRequest) {
+        startInternal(baseRequest, ScanMode.FILE_SIZE_PROBE);
+    }
+
+    public void startExifProbe(HttpRequest baseRequest) {
+        startInternal(baseRequest, ScanMode.EXIF_PROBE);
+    }
+
+    private void startInternal(HttpRequest baseRequest, ScanMode mode) {
         if (running.get()) {
             return;
         }
 
         running.set(true);
         paused.set(false);
-        statusConsumer.accept(probeOnly ? "Starting allowed extensions probe..." : "Starting scan...");
+
+        String startMsg;
+        switch (mode) {
+            case ALLOWED_EXTENSIONS_PROBE: startMsg = "Starting allowed extensions probe..."; break;
+            case CONTENT_TYPE_PROBE:       startMsg = "Starting Content-Type probe..."; break;
+            case FILE_SIZE_PROBE:          startMsg = "Starting file size limit tests..."; break;
+            case EXIF_PROBE:               startMsg = "Starting EXIF metadata & leakage tests..."; break;
+            case FULL_SCAN:
+            default:                       startMsg = "Starting full scan..."; break;
+        }
+        statusConsumer.accept(startMsg);
 
         worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 try {
-                    executeScan(baseRequest, probeOnly);
+                    executeScan(baseRequest, mode);
                 } catch (Exception e) {
                     api.logging().logToError("Error during upload scan: " + e.getMessage());
                 }
@@ -98,7 +128,16 @@ public class UploadScanExecutor {
             @Override
             protected void done() {
                 running.set(false);
-                statusConsumer.accept(probeOnly ? "Allowed extensions probe finished." : "Scan finished.");
+                String finishMsg;
+                switch (mode) {
+                    case ALLOWED_EXTENSIONS_PROBE: finishMsg = "Allowed extensions probe finished."; break;
+                    case CONTENT_TYPE_PROBE:       finishMsg = "Content-Type probe finished."; break;
+                    case FILE_SIZE_PROBE:          finishMsg = "File size limit tests finished."; break;
+                    case EXIF_PROBE:               finishMsg = "EXIF metadata & leakage tests finished."; break;
+                    case FULL_SCAN:
+                    default:                       finishMsg = "Scan finished."; break;
+                }
+                statusConsumer.accept(finishMsg);
                 if (completionCallback != null) {
                     completionCallback.run();
                 }
@@ -108,13 +147,13 @@ public class UploadScanExecutor {
         worker.execute();
     }
 
-    private void executeScan(HttpRequest baseRequest, boolean probeOnly) {
+    private void executeScan(HttpRequest baseRequest, ScanMode mode) {
         ReDownloaderEngine redlEngine = new ReDownloaderEngine(api, config.getRedownloaderConfig());
         String originalFilename = extractFilenameFromRequest(baseRequest);
 
         CollaboratorClient collaboratorClient = null;
         String collaboratorDomain = "";
-        if (!probeOnly) {
+        if (mode == ScanMode.FULL_SCAN || mode == ScanMode.EXIF_PROBE) {
             try {
                 if (api.collaborator() != null) {
                     collaboratorClient = api.collaborator().createClient();
@@ -127,9 +166,25 @@ public class UploadScanExecutor {
             }
         }
 
-        List<PayloadDefinition> payloads = probeOnly
-                ? UploadPayloadGenerator.generateAllowedExtensionPayloadsOnly(config, originalFilename)
-                : UploadPayloadGenerator.generatePayloads(config, originalFilename, collaboratorDomain);
+        List<PayloadDefinition> payloads;
+        switch (mode) {
+            case ALLOWED_EXTENSIONS_PROBE:
+                payloads = UploadPayloadGenerator.generateAllowedExtensionPayloadsOnly(config, originalFilename);
+                break;
+            case CONTENT_TYPE_PROBE:
+                payloads = UploadPayloadGenerator.generateContentTypePayloadsOnly(config, originalFilename);
+                break;
+            case FILE_SIZE_PROBE:
+                payloads = UploadPayloadGenerator.generateFileSizePayloadsOnly(config, originalFilename);
+                break;
+            case EXIF_PROBE:
+                payloads = UploadPayloadGenerator.generateExifPayloadsOnly(config, originalFilename, collaboratorDomain);
+                break;
+            case FULL_SCAN:
+            default:
+                payloads = UploadPayloadGenerator.generatePayloads(config, originalFilename, collaboratorDomain);
+                break;
+        }
 
         int total = payloads.size();
         for (int i = 0; i < total; i++) {
@@ -209,9 +264,18 @@ public class UploadScanExecutor {
             }
 
             int uploadId = sequenceCounter.getAndIncrement();
-            StageType entryStage = (probeOnly || "Allowed Extensions".equalsIgnoreCase(payload.getCategory()))
-                    ? StageType.EXTENSION_PROBE
-                    : StageType.UPLOAD;
+            StageType entryStage = StageType.UPLOAD;
+            String cat = payload.getCategory();
+            if (mode == ScanMode.ALLOWED_EXTENSIONS_PROBE || "Allowed Extensions".equalsIgnoreCase(cat)) {
+                entryStage = StageType.EXTENSION_PROBE;
+            } else if (mode == ScanMode.CONTENT_TYPE_PROBE || "Content-Type".equalsIgnoreCase(cat)) {
+                entryStage = StageType.CONTENT_TYPE_PROBE;
+            } else if (mode == ScanMode.FILE_SIZE_PROBE || "File-Size".equalsIgnoreCase(cat)) {
+                entryStage = StageType.FILE_SIZE_PROBE;
+            } else if (mode == ScanMode.EXIF_PROBE || "EXIF".equalsIgnoreCase(cat)) {
+                entryStage = StageType.EXIF_PROBE;
+            }
+
             UploadEntry uploadEntry = new UploadEntry(
                     uploadId,
                     entryStage,
@@ -226,6 +290,28 @@ public class UploadScanExecutor {
                     null
             );
             publishEntry(uploadEntry);
+
+            // Immediate reflection check in upload response for EXIF XSS
+            if (uploadPair.hasResponse() && "EXIF".equalsIgnoreCase(cat)) {
+                String upBody = uploadPair.response().bodyToString();
+                if (payload.getName().contains("XSS") && upBody.contains("><script>alert(")) {
+                    int verifId = sequenceCounter.getAndIncrement();
+                    UploadEntry verifEntry = new UploadEntry(
+                            verifId,
+                            StageType.VERIFICATION,
+                            uploadReq.method(),
+                            (short) 200,
+                            "🔥 CRITICAL: Stored EXIF XSS reflection in upload response!",
+                            uploadLen,
+                            uploadReq.url(),
+                            uploadPair,
+                            "EXIF XSS REFLECTED",
+                            null,
+                            null
+                    );
+                    publishEntry(verifEntry);
+                }
+            }
 
             // ── Step 3: ReDownloader Request (if URL was extracted or static URL is active) ──
             if (config.getRedownloaderConfig().isEnabled() && extraction.isFound()) {
@@ -257,6 +343,52 @@ public class UploadScanExecutor {
                                 null
                         );
                         publishEntry(redlEntry);
+
+                        // ── EXIF Leakage & Stripping Verification in ReDownloaded Content ──
+                        if (redlPair.hasResponse() && "EXIF".equalsIgnoreCase(payload.getCategory())) {
+                            String redlBody = redlPair.response().bodyToString();
+                            boolean canaryFound = redlBody.contains("LittleSpidy Security Canary") ||
+                                    redlBody.contains("AuditProbe") ||
+                                    redlBody.contains("37.7749") ||
+                                    (!payload.getExecutionMarker().isEmpty() && redlBody.contains(payload.getExecutionMarker()));
+
+                            if (payload.getName().contains("Leakage") || payload.getName().contains("Canary") || payload.getName().contains("GPS")) {
+                                int verifId = sequenceCounter.getAndIncrement();
+                                String verifDesc = canaryFound
+                                        ? "⚠️ VULNERABILITY: EXIF PII Leakage (GPS / Metadata Preserved on Server!)"
+                                        : "✔ EXIF Stripped: Server sanitized metadata (" + payload.getFilename() + ")";
+                                UploadEntry verifEntry = new UploadEntry(
+                                        verifId,
+                                        StageType.VERIFICATION,
+                                        redlReq.method(),
+                                        (short) (canaryFound ? 200 : 0),
+                                        verifDesc,
+                                        redlLen,
+                                        redlReq.url(),
+                                        redlPair,
+                                        canaryFound ? "PII LEAKED" : "STRIPPED",
+                                        redlMarkers,
+                                        null
+                                );
+                                publishEntry(verifEntry);
+                            } else if (payload.getName().contains("XSS") && redlBody.contains("><script>alert(")) {
+                                int verifId = sequenceCounter.getAndIncrement();
+                                UploadEntry verifEntry = new UploadEntry(
+                                        verifId,
+                                        StageType.VERIFICATION,
+                                        redlReq.method(),
+                                        (short) 200,
+                                        "🔥 CRITICAL: Stored EXIF XSS reflection in downloaded image (" + payload.getFilename() + ")",
+                                        redlLen,
+                                        redlReq.url(),
+                                        redlPair,
+                                        "EXIF XSS REFLECTED",
+                                        redlMarkers,
+                                        null
+                                );
+                                publishEntry(verifEntry);
+                            }
+                        }
                     }
                 }
             }

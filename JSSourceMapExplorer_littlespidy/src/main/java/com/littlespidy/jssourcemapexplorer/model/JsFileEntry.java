@@ -32,11 +32,13 @@ public class JsFileEntry {
     private volatile String sourceMapLocation;
     private volatile UnpackedProject unpackedProject;
 
-    // Discovered Secrets, Endpoints, Cloud URLs, and Dependencies from the JS file itself
+    // Discovered Secrets, Endpoints, Cloud URLs, Dependencies, and Comments from the JS file itself
     private final List<DiscoveredSecret> jsSecrets = new ArrayList<>();
     private final List<DiscoveredEndpoint> jsEndpoints = new ArrayList<>();
     private final List<DiscoveredCloudUrl> jsCloudUrls = new ArrayList<>();
     private final List<DiscoveredDependency> jsDependencies = new ArrayList<>();
+    private final List<DiscoveredComment> jsComments = new ArrayList<>();
+    private final List<DiscoveredSecurityBypass> jsSecurityBypasses = new ArrayList<>();
 
     // Raw HTTP messages
     private final HttpRequest request;
@@ -121,7 +123,9 @@ public class JsFileEntry {
         List<DiscoveredSecret> secrets,
         List<DiscoveredEndpoint> endpoints,
         List<DiscoveredCloudUrl> cloudUrls,
-        List<DiscoveredDependency> dependencies
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments,
+        List<DiscoveredSecurityBypass> securityBypasses
     ) {
         jsSecrets.clear();
         if (secrets != null) jsSecrets.addAll(secrets);
@@ -131,10 +135,33 @@ public class JsFileEntry {
         if (cloudUrls != null) jsCloudUrls.addAll(cloudUrls);
         jsDependencies.clear();
         if (dependencies != null) jsDependencies.addAll(dependencies);
+        jsComments.clear();
+        if (comments != null) jsComments.addAll(comments);
+        jsSecurityBypasses.clear();
+        if (securityBypasses != null) jsSecurityBypasses.addAll(securityBypasses);
+    }
+
+    public synchronized void setJsReconFindings(
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments
+    ) {
+        setJsReconFindings(secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList());
+    }
+
+    public synchronized void setJsReconFindings(
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies
+    ) {
+        setJsReconFindings(secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList());
     }
 
     public synchronized void setJsReconFindings(List<DiscoveredSecret> secrets, List<DiscoveredEndpoint> endpoints) {
-        setJsReconFindings(secrets, endpoints, Collections.emptyList(), Collections.emptyList());
+        setJsReconFindings(secrets, endpoints, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     }
 
     public synchronized List<DiscoveredSecret> getJsSecrets() {
@@ -151,6 +178,14 @@ public class JsFileEntry {
 
     public synchronized List<DiscoveredDependency> getJsDependencies() {
         return Collections.unmodifiableList(jsDependencies);
+    }
+
+    public synchronized List<DiscoveredComment> getJsComments() {
+        return Collections.unmodifiableList(jsComments);
+    }
+
+    public synchronized List<DiscoveredSecurityBypass> getJsSecurityBypasses() {
+        return Collections.unmodifiableList(jsSecurityBypasses);
     }
 
     public synchronized String getJsReconSummary() {

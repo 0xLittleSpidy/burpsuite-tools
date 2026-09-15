@@ -1,7 +1,7 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.jssourcemapexplorer.engine;
 
-import com.littlespidy.jssourcemapexplorer.model.DiscoveredSecret;
+import com.littlespidy.jssourcemapexplorer.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -353,6 +353,136 @@ public class JsReconEngineTest {
         assertFalse(awsReq.host().contains("{"));
         assertFalse(fallbackReq.host().contains("<"));
         assertFalse(fallbackReq.host().contains("{"));
+    }
+
+    @Test
+    public void testCommentExtractionAndCategorization() {
+        String jsContent = """
+            // ----------------------------------------------------
+            // TODO: Fix authentication bypass on admin route
+            // FIXME: Remove hardcoded debug token before release
+            /*
+             * Danger: test password is admin123
+             */
+            <!-- Inline template comment: staging server config -->
+            const api = "https://api.example.com";
+            // Normal developer remark explaining the function
+            //# sourceMappingURL=bundle.js.map
+            """;
+
+        var result = SecretAndEndpointMiner.mine("https://example.com/app.js", "JS File", jsContent);
+        assertNotNull(result.comments());
+        assertFalse(result.comments().isEmpty());
+
+        // Verify sourceMappingURL comment is suppressed
+        boolean hasSourceMapComment = result.comments().stream()
+            .anyMatch(c -> c.commentText().contains("sourceMappingURL"));
+        assertFalse(hasSourceMapComment, "sourceMappingURL comment should be filtered from comments list");
+
+        // Verify categories
+        boolean hasTodo = result.comments().stream()
+            .anyMatch(c -> "TODO / FIXME".equals(c.category()) && c.commentText().contains("authentication bypass"));
+        assertTrue(hasTodo, "Should identify TODO / FIXME comment");
+
+        boolean hasFixme = result.comments().stream()
+            .anyMatch(c -> "TODO / FIXME".equals(c.category()) && c.commentText().contains("Remove hardcoded debug token"));
+        assertTrue(hasFixme, "Should identify FIXME comment");
+
+        boolean hasCred = result.comments().stream()
+            .anyMatch(c -> "Credentials / Auth".equals(c.category()) && c.commentText().contains("password is admin123"));
+        assertTrue(hasCred, "Should identify Credentials / Auth comment");
+
+        boolean hasDebug = result.comments().stream()
+            .anyMatch(c -> "Debug / Config".equals(c.category()) && c.commentText().contains("staging server config"));
+        assertTrue(hasDebug, "Should identify Debug / Config comment");
+
+        boolean hasGeneral = result.comments().stream()
+            .anyMatch(c -> "General".equals(c.category()) && c.commentText().contains("Normal developer remark"));
+        assertTrue(hasGeneral, "Should identify General comment");
+
+        // Verify comment types
+        boolean hasSingle = result.comments().stream().anyMatch(c -> "Single-Line (//)".equals(c.commentType()));
+        boolean hasMulti = result.comments().stream().anyMatch(c -> "Multi-Line (/* */)".equals(c.commentType()));
+        boolean hasHtml = result.comments().stream().anyMatch(c -> "HTML (<!-- -->)".equals(c.commentType()));
+        assertTrue(hasSingle, "Should detect single-line comment");
+        assertTrue(hasMulti, "Should detect multi-line comment");
+        assertTrue(hasHtml, "Should detect HTML comment");
+    }
+
+    @Test
+    public void testJsFilesTableModelColumns() {
+        var model = new com.littlespidy.jssourcemapexplorer.ui.JsFilesTableModel();
+        assertEquals(12, model.getColumnCount());
+        for (int i = 0; i < model.getColumnCount(); i++) {
+            assertNotEquals("JS Recon (Paths / Keys)", model.getColumnName(i));
+        }
+        assertEquals("Map Recon (Paths / Keys)", model.getColumnName(8));
+    }
+
+    @Test
+    public void testSecurityBypassDetection() {
+        String js = """
+            function renderContent(sanitizer, userParam) {
+                // Angular DomSanitizer bypasses
+                const trustedHtml = sanitizer.bypassSecurityTrustHtml(userParam);
+                const trustedScript = sanitizer.bypassSecurityTrustScript("alert(1)");
+                const trustedStyle = sanitizer.bypassSecurityTrustStyle(userParam.style);
+                const trustedUrl = sanitizer.bypassSecurityTrustUrl("javascript:evil()");
+                const trustedResource = sanitizer.bypassSecurityTrustResourceUrl(userParam.url);
+
+                // React dangerouslySetInnerHTML
+                const element = <div dangerouslySetInnerHTML={{ __html: userParam.rawContent }} />;
+
+                // Vue v-html
+                const template = '<div v-html="userParam.bio"></div>';
+
+                // Svelte {@html}
+                const svelteCode = '{@html userParam.profile}';
+
+                // Trusted Types Passthrough Policy
+                const policy = trustedTypes.createPolicy('pass', {
+                    createHTML: (s) => s
+                });
+
+                // Vanilla DOM sinks
+                document.getElementById('output').innerHTML = userParam.htmlData;
+                eval(userParam.scriptCode);
+
+                // Safe innerHTML reset should be suppressed
+                const clearEl = document.getElementById('reset');
+                clearEl.innerHTML = "";
+            }
+            """;
+
+        var result = SecretAndEndpointMiner.mine("https://example.com/bundle.js", "JS File", js);
+        List<DiscoveredSecurityBypass> bypasses = result.securityBypasses();
+        assertFalse(bypasses.isEmpty(), "Should discover security bypasses");
+
+        // Verify Angular bypasses
+        assertTrue(bypasses.stream().anyMatch(b -> "Angular".equals(b.framework()) && "bypassSecurityTrustHtml".equals(b.method()) && "Critical".equals(b.risk())));
+        assertTrue(bypasses.stream().anyMatch(b -> "Angular".equals(b.framework()) && "bypassSecurityTrustScript".equals(b.method()) && "Critical".equals(b.risk())));
+        assertTrue(bypasses.stream().anyMatch(b -> "Angular".equals(b.framework()) && "bypassSecurityTrustStyle".equals(b.method()) && "High".equals(b.risk())));
+        assertTrue(bypasses.stream().anyMatch(b -> "Angular".equals(b.framework()) && "bypassSecurityTrustUrl".equals(b.method()) && "High".equals(b.risk())));
+        assertTrue(bypasses.stream().anyMatch(b -> "Angular".equals(b.framework()) && "bypassSecurityTrustResourceUrl".equals(b.method()) && "Critical".equals(b.risk())));
+
+        // Verify React
+        assertTrue(bypasses.stream().anyMatch(b -> "React".equals(b.framework()) && b.method().startsWith("dangerouslySetInnerHTML")));
+
+        // Verify Vue
+        assertTrue(bypasses.stream().anyMatch(b -> "Vue".equals(b.framework()) && "v-html".equals(b.method())));
+
+        // Verify Svelte
+        assertTrue(bypasses.stream().anyMatch(b -> "Svelte".equals(b.framework()) && "{@html ...}".equals(b.method())));
+
+        // Verify Trusted Types
+        assertTrue(bypasses.stream().anyMatch(b -> "Sanitizer / Policy Bypass".equals(b.framework()) && b.method().contains("trustedTypes.createPolicy")));
+
+        // Verify Vanilla DOM sinks
+        assertTrue(bypasses.stream().anyMatch(b -> "Vanilla DOM Sink".equals(b.framework()) && "innerHTML assignment".equals(b.method())));
+        assertTrue(bypasses.stream().anyMatch(b -> "Vanilla DOM Sink".equals(b.framework()) && "eval()".equals(b.method())));
+
+        // Verify safe innerHTML = "" is NOT reported
+        assertFalse(bypasses.stream().anyMatch(b -> b.contextSnippet() != null && b.contextSnippet().contains("clearEl.innerHTML = \"\"")));
     }
 }
 

@@ -66,6 +66,7 @@ public class JSSourceMapExplorerTab extends JPanel {
 
     // Filters & Status Strip
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
+    private final JCheckBox loadInScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
     private final JComboBox<String> httpStatusFilter = new JComboBox<>(new String[]{
         "200 OK Only",
         "All Status Codes",
@@ -201,9 +202,9 @@ public class JSSourceMapExplorerTab extends JPanel {
         String bodyStr = resp.bodyToString();
         entry.setFramework(JsFrameworkDetector.detectFramework(url, bodyStr));
 
-        // Run Secret, Path, Cloud URLs & Dependency discovery on raw JS file
+        // Run Secret, Path, Cloud URLs, Dependency, Comment & Security Bypass discovery on raw JS file
         var jsMining = SecretAndEndpointMiner.mine(url, "JS File", bodyStr);
-        entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies());
+        entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies(), jsMining.comments(), jsMining.securityBypasses());
 
         dataStore.addEntry(entry);
     }
@@ -373,6 +374,8 @@ public class JSSourceMapExplorerTab extends JPanel {
         loadHistoryBtn.setToolTipText("Scrape and deduplicate all JavaScript responses from Burp Proxy history");
         loadHistoryBtn.addActionListener(e -> loadProxyHistory());
 
+        loadInScopeOnlyCheckBox.setToolTipText("When checked, only in-scope JavaScript requests will be loaded from Proxy history (prevents hanging on large scopes)");
+
         JButton selectAllBtn = new JButton("Select All");
         selectAllBtn.addActionListener(e -> {
             if (jsTable.getRowCount() > 0) {
@@ -382,24 +385,6 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         JButton deselectAllBtn = new JButton("Deselect All");
         deselectAllBtn.addActionListener(e -> jsTable.clearSelection());
-
-        JButton pinSelectedBtn = new JButton("📌 Pin Selected");
-        pinSelectedBtn.setToolTipText("Show only the selected rows (bypasses all other filters)");
-        pinSelectedBtn.addActionListener(e -> {
-            for (int viewRow : jsTable.getSelectedRows()) {
-                int modelRow = jsTable.convertRowIndexToModel(viewRow);
-                JsFileEntry entry = jsTableModel.getEntryAt(modelRow);
-                if (entry != null) pinnedIds.add(entry.getId());
-            }
-            refreshView();
-        });
-
-        JButton clearPinsBtn = new JButton("Clear Pins");
-        clearPinsBtn.setToolTipText("Clear pinned rows and restore filtered view");
-        clearPinsBtn.addActionListener(e -> {
-            pinnedIds.clear();
-            refreshView();
-        });
 
         JButton probeSelectedBtn = new JButton("Probe Selected .map");
         probeSelectedBtn.setToolTipText("Actively probe selected rows for exposed .js.map files");
@@ -441,11 +426,10 @@ public class JSSourceMapExplorerTab extends JPanel {
         });
 
         toolbar.add(loadHistoryBtn);
+        toolbar.add(loadInScopeOnlyCheckBox);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(selectAllBtn);
         toolbar.add(deselectAllBtn);
-        toolbar.add(pinSelectedBtn);
-        toolbar.add(clearPinsBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(probeSelectedBtn);
         toolbar.add(probeAllBtn);
@@ -909,23 +893,22 @@ public class JSSourceMapExplorerTab extends JPanel {
             protected List<JsFileEntry> doInBackground() {
                 List<ProxyHttpRequestResponse> history = api.proxy().history();
                 List<JsFileEntry> stage1Entries = new ArrayList<>();
-                boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
+                boolean inScopeOnly = loadInScopeOnlyCheckBox.isSelected();
 
                 // Stage 1: Fast Scrape & Deduplication + Framework Detection
                 for (ProxyHttpRequestResponse item : history) {
                     if (isCancelled()) break;
                     if (!item.hasResponse()) continue;
 
-                    var resp = item.response();
-                    // 5MB safety ceiling to prevent OutOfMemoryError on gigantic bundles
-                    if (resp.body().length() > 5 * 1024 * 1024) continue;
-
                     String url = item.request().url();
-                    if (dataStore.isKnownUrl(url)) continue; // Instant deduplication!
-
                     if (inScopeOnly && !api.scope().isInScope(url)) {
                         continue;
                     }
+                    if (dataStore.isKnownUrl(url)) continue; // Instant deduplication!
+
+                    var resp = item.response();
+                    // 5MB safety ceiling to prevent OutOfMemoryError on gigantic bundles
+                    if (resp.body().length() > 5 * 1024 * 1024) continue;
 
                     String ctype = resp.headerValue("Content-Type");
                     String path = item.request().path() != null ? item.request().path() : "/";
@@ -994,7 +977,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                             try {
                                 if (entry.getResponse() != null) {
                                     var jsMining = SecretAndEndpointMiner.mine(entry.getUrl(), "JS File", entry.getResponse().bodyToString());
-                                    entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies());
+                                    entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies(), jsMining.comments(), jsMining.securityBypasses());
                                 }
                             } catch (Exception ignored) {}
 
@@ -1146,11 +1129,10 @@ public class JSSourceMapExplorerTab extends JPanel {
         jsTable.getColumnModel().getColumn(5).setPreferredWidth(250); // JS Path
         jsTable.getColumnModel().getColumn(6).setPreferredWidth(125); // Passive .map
         jsTable.getColumnModel().getColumn(7).setPreferredWidth(120); // On-Demand Probe
-        jsTable.getColumnModel().getColumn(8).setPreferredWidth(130); // JS Recon
-        jsTable.getColumnModel().getColumn(9).setPreferredWidth(130); // Map Recon
-        jsTable.getColumnModel().getColumn(10).setPreferredWidth(200); // SourceMap Location
-        jsTable.getColumnModel().getColumn(11).setMaxWidth(95); // Unpacked Files
-        jsTable.getColumnModel().getColumn(12).setMaxWidth(80); // Size
+        jsTable.getColumnModel().getColumn(8).setPreferredWidth(130); // Map Recon
+        jsTable.getColumnModel().getColumn(9).setPreferredWidth(200); // SourceMap Location
+        jsTable.getColumnModel().getColumn(10).setMaxWidth(95); // Unpacked Files
+        jsTable.getColumnModel().getColumn(11).setMaxWidth(80); // Size
 
         // Custom renderer for whole row background and hover cloud tooltip
         jsTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -1260,26 +1242,6 @@ public class JSSourceMapExplorerTab extends JPanel {
                         JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
                         copyRowsItem.addActionListener(ev -> copySelectedRowsToClipboard(jsTable));
                         menu.add(copyRowsItem);
-
-                        menu.addSeparator();
-
-                        JMenuItem pinItem = new JMenuItem("📌 Pin Selected Row(s)");
-                        pinItem.addActionListener(ev -> {
-                            for (int viewRow : jsTable.getSelectedRows()) {
-                                int mRow = jsTable.convertRowIndexToModel(viewRow);
-                                JsFileEntry eEntry = jsTableModel.getEntryAt(mRow);
-                                if (eEntry != null) pinnedIds.add(eEntry.getId());
-                            }
-                            refreshView();
-                        });
-                        menu.add(pinItem);
-
-                        JMenuItem clearPinsItem = new JMenuItem("Clear Pins");
-                        clearPinsItem.addActionListener(ev -> {
-                            pinnedIds.clear();
-                            refreshView();
-                        });
-                        menu.add(clearPinsItem);
 
                         menu.addSeparator();
 

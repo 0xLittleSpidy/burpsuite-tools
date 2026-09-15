@@ -14,12 +14,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **Cache Header Inspector** | [📥 `cache-header-inspector-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/cache-header-inspector-littlespidy-1.0.0.jar) | Passive CDN & cache header indexing and directive analysis |
 | **Convert POST to GET** | [📥 `convert-post-to-get-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/convert-post-to-get-littlespidy-1.0.0.jar) | Request body to GET query converter for auth bypass testing |
 | **Input Validation Fuzzer** | [📥 `input-validation-fuzzer-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/input-validation-fuzzer-littlespidy-1.0.0.jar) | Multi-point input validation and boundary fuzzer |
-| **Response Inspector** | [📥 `response-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/ResponseInspector_littlespidy/build/libs/response-inspector-littlespidy-1.0.0.jar) | Response analyzer for passwords, strict SSNs, internal IPs, OS server paths, errors, and secrets |
+| **Response Inspector** | [📥 `response-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/ResponseInspector_littlespidy/build/libs/response-inspector-littlespidy-1.0.0.jar) | Response analyzer for passwords, strict SSNs, internal IPs, OS server paths, errors, secrets (KeyHacks), and comments |
 | **JWT Comparator** | [📥 `jwt-comparator-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/JWTComparator_littlespidy/build/libs/jwt-comparator-littlespidy-1.0.0.jar) | Dynamic N-token JWT side-by-side comparator, claim diff matrix, timestamp translator |
 | **CSP Inspector** | [📥 `csp-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/CSPInspector_littlespidy/build/libs/csp-inspector-littlespidy-1.0.0.jar) | Content Security Policy auditor, raw value and affected domain indexer |
 | **HSTS Inspector** | [📥 `hsts-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/HSTSInspector_littlespidy/build/libs/hsts-inspector-littlespidy-1.0.0.jar) | HTTP Strict Transport Security auditor, raw value and affected domain indexer |
 | **Upload Scanner** | [📥 `upload-scanner-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy/build/libs/upload-scanner-littlespidy-1.0.0.jar) | 24-module file upload fuzzer, simplified 4-mode ReDownloader, Burp Collaborator OOB, and triage log |
 | **Session Expiration Checker** | [📥 `session-expiration-checker-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy/build/libs/session-expiration-checker-littlespidy-1.0.0.jar) | Automated session timeout and token expiration tester with staged milestone timers and baseline matching |
+| **Header Inspector** | [📥 `header-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/HeaderInspector_littlespidy/build/libs/header-inspector-littlespidy-1.0.0.jar) | Consolidated Protocol Suite: Header Collector, Method Collector, Status Collector, Cache Inspector, CSP Inspector, and HSTS Inspector with synchronized proxy ingestion |
 | **Param Payload Injector** | [📥 `param-payload-injector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/ParamPayloadInjector_littlespidy/build/libs/param-payload-injector-littlespidy-1.0.0.jar) | Parameter-attributed payload injector (XSS & Angular CSTI) with reflection monitoring and context attribution |
 
 ---
@@ -54,7 +55,12 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - Multi-parameter input validation testing across URL query, body, and header insertion points.
 
 ### 5. [Response Inspector](file:///home/littlespidy/myextra/burpsuite/ResponseInspector_littlespidy)
-- **5 Dedicated Tabs**: Welcome & Guide, Passwords, PII & Server Paths & Internal IPs, Errors & Exceptions, and Secrets & Tokens.
+- **6 Dedicated Tabs**: Welcome & Guide, Passwords, PII & Server Paths & Internal IPs, Errors & Exceptions, Secrets (KeyHacks Repeater verification), and Comments.
+- **Developer Comments Tab**: Mining of single-line (`//`), multi-line (`/* */`), and HTML (`<!-- -->`) comments categorized into `TODO/FIXME`, `Credentials/Auth`, `Debug/Config`, and `General`.
+- **Upgraded Secrets Tab & KeyHacks Verification**: 40+ curated patterns across Cloud, Payment, CI/CD, AI/ML, and SaaS with Shannon entropy false-positive suppression, Signatures Catalog modal, and one-click `Verify Secret (Repeater)` dispatch.
+- **Universal Finding Type Filter**: Tab-specific multi-select filters on every category for rapid isolation of specific vulnerability classes.
+- **JavaScript File Exclusion**: Automatically bypasses JS files (`.js`, `.mjs`, `.cjs`, script MIME responses) to prevent tool overlap with JS SourceMap Explorer.
+- **Clean Triage (No Pinning)**: Pinning controls removed in favor of clean non-destructive live view filtering and instant debounced table resets.
 - **Multi-Threaded Ingestion Pool**: High-speed parallel proxy history scanning via bounded thread pools (`ExecutorService`) with atomic progress tracking and non-blocking batch UI updates.
 - **Two-Stage Refiner Regex Engine**: Ported from `sensitive-discoverer` to eliminate regex backtracking: matches fast anchor suffixes and scans look-back windows to extract complete S3 buckets, Azure Blobs, Firebase DBs, Google OAuth IDs, and Teams webhooks.
 - **MIME Blacklisting & Size Guard**: Bypasses images, audio, video, flash, and fonts plus responses > 10MB to achieve ~80% scan speedup and zero binary false positives.
@@ -62,7 +68,6 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Granular In-Scope Domain Selection**: Multi-checkbox search dialog allowing users to pick specific in-scope target subdomains/hosts instead of an all-or-nothing scope gate.
 - **Target Password Prompting & Config**: Prominent `Configure Passwords...` modal dialog with text pasting, import from wordlists, and case sensitivity controls.
 - **Strict SSN & OS Server Path Extraction**: Validates US SSN area/group/serial formats and extracts real OS server filesystem paths (`/etc/`, `/var/log/`, `C:\inetpub\...`, UNC shares) while discarding normal web routes.
-- **Comprehensive Error & Token Signatures**: Database leaks, stack traces, cloud tokens (AWS, GCP, GitHub, Slack, Stripe, OpenAI, Square, Mailgun, NuGet, JWTs, .env) with 4-pillar deep-linking.
 
 ### 6. [JWT Comparator](file:///home/littlespidy/myextra/burpsuite/JWTComparator_littlespidy)
 - **Dynamic $N$-Token Comparison Matrix**: Compare 2, 3, 4, or more JWT tokens simultaneously across different domains or user roles with color-coded diff statuses (Amber: value mismatch, Soft Red: partially missing, Neutral: identical).
@@ -84,10 +89,14 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Master-Detail Request/Response Viewer**: Embedded native Montoya editors for selected endpoints.
 
 ### 9. [Upload Scanner (Montoya Edition)](file:///home/littlespidy/myextra/burpsuite/UploadScanner_littlespidy)
+- **Side-by-Side Split Workspace**: Results view and live detail viewer integrated directly into the right side of each session tab, removing separate completed-uploads tabs for a unified triage experience.
+- **SecLists Content-Type Validation**: Native integration with the SecLists `web-all-content-types.txt` wordlist (2,387 MIME types), MIME spoofing (e.g. PHP/JSP scripts with image MIME types), and header mutation testing (`🧪 Probe Content-Types`).
+- **File Size Limit Checking**: Stepped boundary probe suite (0B to 20MB+) with valid image structure and configurable max size (`📏 Test File Sizes`).
+- **EXIF Metadata & Leakage Testing**: Native pure Java JPEG APP1 and PNG tEXt generation with GPS/PII canaries, automated ReDownloader stripping verification, and stored EXIF XSS detection (`📷 Test EXIF Leakage`).
 - **Simplified 4-Mode ReDownloader**: 1-click **✨ Magic Auto-Detect** (Location headers, filename reflections, JSON keys, HTML media tags), 1-click **🎯 Highlight Selection** helper (derives start/end markers from response selection with zero regex math), **📁 Common Directory Presets** (`/uploads/`, `/wp-content/uploads/`, `/storage/`, etc.), and **⚙️ Advanced Custom Markers**.
-- **Complete 24-Module Attack Suite**: All scanning methods ported natively from `UploadScanner.py` across 5 categories: Server RCE (PHP shells, JSP/JSPX, ASP/ASPX, `.htaccess`, `web.config`, CGI, SSI/ESI), Image Libs (ImageTragick CVE-2016-3714, Bad Manners CVE-2018-16323, MSL delegates, Ghostscript CVE-2016-7977/CVE-2017-8291, LibAVFormat SSRF), XML/Docs (SVG XXE, XML XXE, in-memory Office DOCX XXE ZIP, XMP metadata XXE, PDF injections, CSV formulas), Client & Polyglots (HTML XSS, SVG XSS, SWF, PortSwigger JPEG+JS CSP polyglot, ThinkFu GIF89a+JS CSP polyglot), and Archives/Quirks/DoS (in-memory Zip Slip, TAR symlink to `/etc/passwd`, upload quirks, EICAR AV test, 65535x65535 Pixel Flood PNG, XML Billion Laughs bomb).
+- **Complete Attack Suite across 7 Categories**: Server RCE, Image Libraries, XML/Documents, Client-Side/Polyglots, Archives/Quirks/DoS, Allowed Extensions, and Validation/EXIF.
 - **Integrated Burp Collaborator**: Automatic OOB callback token generation and polling for blind SSRF, XXE, NTLM/SMB theft, and command execution callbacks.
-- **Enhanced Triage Activity Log**: Master-detail triage interface with `MultiSelectFilterButton`s for Stage (`Upload`, `Preflight`, `ReDownload`, `Verification`), Status (`2xx`, `3xx`, `4xx`, `5xx`), and Method (`POST`, `GET`), live search across payloads and URLs, one-click `Clear Log`, and TSV file export.
+- **Enhanced Triage Activity Log**: Master-detail triage interface with `MultiSelectFilterButton`s for Stage (`Upload`, `Probe`, `Content-Type`, `File-Size`, `EXIF`, `Preflight`, `ReDownload`, `Verification`), Status (`2xx`, `3xx`, `4xx`, `5xx`), and Method (`POST`, `GET`), live search across payloads and URLs, one-click `Clear Log`, and TSV file export.
 - **Dynamic Multi-Session Architecture**: Context menu `Send to Upload Scanner` spawning independent closeable session tabs (`×`) with safe non-blocking background execution (`SwingWorker`).
 
 ### 10. [Session Expiration Checker](file:///home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy)
@@ -103,6 +112,16 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Context Menu Integration**: One-click right-click actions across Repeater, Proxy History, and Logger: `Send to Repeater with Armed Payloads`, `Inject into All Parameters (In-Place)`, and `Inject into Selected Text / Range`.
 - **Passive Reflection Monitor & Burp Annotations**: Passively checks responses for reflected payloads, determines reflection context (HTML tag, attribute, script block, Angular template), applies color highlights (**Red** for unencoded HTML/scripts, **Yellow** for attributes), and safe-appends notes to Burp Proxy/Logger history.
 - **Master-Detail Suite Tab**: Dedicated "Param Injector" tab with reflection findings table, live search & scope gating, and native Montoya split-view HTTP request/response editors with search term auto-highlighting.
+
+### 12. [Header Inspector](file:///home/littlespidy/myextra/burpsuite/HeaderInspector_littlespidy)
+- **Consolidated 6-Inspector Protocol Suite**: Combines **Header Collector**, **Method Collector**, **Status Collector**, **Cache Inspector**, **CSP Inspector**, and **HSTS Inspector** into a unified, high-performance interface.
+- **Header Collector**: Dual-direction (Request & Response) header indexer grouping multiple distinct values under their respective header names, attributing every unique header name-value pair to its observed domains.
+- **Method Collector (New)**: Aggregates all HTTP request methods (`GET`, `POST`, `PUT`, `DELETE`, etc.), correlates endpoints and domains, and classifies RFC 9110 Safe, Idempotent, and Cacheability properties with an offline `http.dev` reference panel.
+- **Status Collector (New)**: Aggregates all HTTP response status codes (standard 1xx-5xx plus Cloudflare, Nginx, Akamai, and Edgio vendor codes), surfaces immediate client actions and SEO impact, and embeds an offline `http.dev` status reference panel.
+- **4-Pillar Deep-Linking**: Selecting any unique header, method, or status value automatically switches editors (`📤 Request` / `📥 Response`), marks yellow/orange native highlight markers directly on the target item, and populates the search bar.
+- **Synchronized On-Demand Ingestion**: Clicking `Load Proxy History` in any tab executes a single non-blocking background pass with early in-scope gating (`[x] In-Scope Only`) to ingest traffic across all six inspectors simultaneously without UI lag.
+- **Zero Passive Overhead**: Purely on-demand architecture with no background passive listeners during normal proxy usage.
+- **Interoperability & TSV Export**: Multi-row selection, `Send to Repeater / Intruder / Organizer`, and instant clipboard TSV export.
 
 ---
 

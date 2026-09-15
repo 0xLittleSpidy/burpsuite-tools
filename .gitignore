@@ -16,3 +16,5 @@ kingfisher/
 trufflehog/
 google-homepage.png
 upload-scanner/
+.playwright-mcp/
+csp-evaluator/

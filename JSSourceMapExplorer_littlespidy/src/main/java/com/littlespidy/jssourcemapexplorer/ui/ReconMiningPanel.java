@@ -66,6 +66,12 @@ public class ReconMiningPanel extends JPanel {
     private final DependenciesTableModel dependenciesTableModel = new DependenciesTableModel();
     private final JTable dependenciesTable = new JTable(dependenciesTableModel);
 
+    private final CommentsTableModel commentsTableModel = new CommentsTableModel();
+    private final JTable commentsTable = new JTable(commentsTableModel);
+
+    private final SecurityBypassesTableModel securityBypassesTableModel = new SecurityBypassesTableModel();
+    private final JTable securityBypassesTable = new JTable(securityBypassesTableModel);
+
     // ── Bottom Findings Tabbed Pane ──
     private final JTabbedPane findingsTabs = new JTabbedPane();
 
@@ -75,19 +81,15 @@ public class ReconMiningPanel extends JPanel {
     private final JTabbedPane httpEditorsTabs = new JTabbedPane();
 
     // ── Top Toolbar Controls ──
+    private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
+    private MultiSelectFilterButton methodFilterBtn;
+    private MultiSelectFilterButton statusFilterBtn;
+    private MultiSelectFilterButton originFilterBtn;
     private final JComboBox<String> sourceTypeFilter = new JComboBox<>(new String[]{
         "All Sources", "JS Files Only", "SourceMap Files Only"
     });
-    private final JComboBox<String> httpStatusFilter = new JComboBox<>(new String[]{
-        "All Status Codes",
-        "200 OK Only",
-        "2xx Success (200-299)",
-        "3xx Redirects (300-399)",
-        "4xx Client Errors (400-499)",
-        "5xx Server Errors (500-599)"
-    });
     private final JTextField searchField = new JTextField(16);
-    private final JLabel statsLabel = new JLabel("Requests: 0 | Paths: 0 | Secrets: 0 | Cloud: 0 | Deps: 0");
+    private final JLabel statsLabel = new JLabel("Requests: 0 | Paths: 0 | Secrets: 0 | Comments: 0 | Bypasses: 0 | Cloud: 0 | Deps: 0");
 
     // ── Bottom Detail Filters ──
     private MultiSelectFilterButton pathMethodFilterBtn;
@@ -100,6 +102,16 @@ public class ReconMiningPanel extends JPanel {
     private MultiSelectFilterButton secretConfidenceFilterBtn;
     private final JTextField secretSearchField = new JTextField(10);
     private final JLabel secretCountLabel = new JLabel("Secrets: 0");
+
+    private MultiSelectFilterButton commentTypeFilterBtn;
+    private MultiSelectFilterButton commentCategoryFilterBtn;
+    private final JTextField commentSearchField = new JTextField(10);
+    private final JLabel commentCountLabel = new JLabel("Comments: 0");
+
+    private MultiSelectFilterButton bypassFrameworkFilterBtn;
+    private MultiSelectFilterButton bypassRiskFilterBtn;
+    private final JTextField bypassSearchField = new JTextField(10);
+    private final JLabel bypassCountLabel = new JLabel("Bypasses: 0");
 
     private MultiSelectFilterButton cloudProviderFilterBtn;
     private final JTextField cloudSearchField = new JTextField(10);
@@ -114,6 +126,8 @@ public class ReconMiningPanel extends JPanel {
     private JsFileEntry currentlySelectedEntry = null;
     private final List<DiscoveredEndpoint> currentEntryEndpoints = new ArrayList<>();
     private final List<DiscoveredSecret> currentEntrySecrets = new ArrayList<>();
+    private final List<DiscoveredComment> currentEntryComments = new ArrayList<>();
+    private final List<DiscoveredSecurityBypass> currentEntrySecurityBypasses = new ArrayList<>();
     private final List<DiscoveredCloudUrl> currentEntryCloudUrls = new ArrayList<>();
     private final List<DiscoveredDependency> currentEntryDependencies = new ArrayList<>();
 
@@ -134,20 +148,76 @@ public class ReconMiningPanel extends JPanel {
         setLayout(new BorderLayout(5, 5));
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
+        methodFilterBtn = new MultiSelectFilterButton(
+            "Method",
+            List.of("All Methods", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"),
+            sel -> applyRequestFilter()
+        );
+
+        statusFilterBtn = new MultiSelectFilterButton(
+            "Status",
+            List.of(
+                "All Status Codes",
+                "2xx Success",
+                "200 OK",
+                "3xx Redirection",
+                "301 / 302 Redirect",
+                "304 Not Modified",
+                "4xx Client Error",
+                "401 Unauthorized",
+                "403 Forbidden",
+                "404 Not Found",
+                "5xx Server Error",
+                "500 Internal Error"
+            ),
+            sel -> applyRequestFilter()
+        );
+
+        originFilterBtn = new MultiSelectFilterButton(
+            "Origin",
+            List.of("All Origins", "1st Party (App)", "3rd Party (CDN/Trackers)"),
+            sel -> applyRequestFilter()
+        );
+
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private final javax.swing.Timer timer = new javax.swing.Timer(300, ev -> applyRequestFilter());
+            { timer.setRepeats(false); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { timer.restart(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { timer.restart(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { timer.restart(); }
+        });
+
         // ── Top Master Toolbar ──
         JPanel topToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
 
-        JLabel filterLbl = new JLabel("Source Type:");
+        topToolbar.add(inScopeOnlyCheckBox);
+        inScopeOnlyCheckBox.setToolTipText("Show only requests targeting hosts in Burp target scope");
+        inScopeOnlyCheckBox.addActionListener(e -> applyRequestFilter());
+
+        topToolbar.add(new JSeparator(SwingConstants.VERTICAL));
+
+        JLabel mthdLbl = new JLabel("Method:");
+        mthdLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        topToolbar.add(mthdLbl);
+        topToolbar.add(methodFilterBtn);
+
+        JLabel statusLbl = new JLabel("Status:");
+        statusLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        topToolbar.add(statusLbl);
+        topToolbar.add(statusFilterBtn);
+
+        JLabel originLbl = new JLabel("Origin:");
+        originLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        topToolbar.add(originLbl);
+        topToolbar.add(originFilterBtn);
+
+        JLabel filterLbl = new JLabel("Source:");
         filterLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         topToolbar.add(filterLbl);
         topToolbar.add(sourceTypeFilter);
         sourceTypeFilter.addActionListener(e -> applyRequestFilter());
 
-        JLabel statusLbl = new JLabel("Status:");
-        statusLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        topToolbar.add(statusLbl);
-        topToolbar.add(httpStatusFilter);
-        httpStatusFilter.addActionListener(e -> applyRequestFilter());
+        topToolbar.add(new JSeparator(SwingConstants.VERTICAL));
 
         JLabel searchLbl = new JLabel("Search:");
         searchLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
@@ -162,18 +232,27 @@ public class ReconMiningPanel extends JPanel {
 
         JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> {
+            inScopeOnlyCheckBox.setSelected(false);
+            if (methodFilterBtn != null) methodFilterBtn.clearSelection();
+            if (statusFilterBtn != null) statusFilterBtn.clearSelection();
+            if (originFilterBtn != null) originFilterBtn.clearSelection();
             sourceTypeFilter.setSelectedIndex(0);
-            httpStatusFilter.setSelectedIndex(0);
             searchField.setText("");
             if (pathMethodFilterBtn != null) pathMethodFilterBtn.clearSelection();
             if (pathTechniqueFilterBtn != null) pathTechniqueFilterBtn.clearSelection();
             if (secretCategoryFilterBtn != null) secretCategoryFilterBtn.clearSelection();
             if (secretSignatureFilterBtn != null) secretSignatureFilterBtn.clearSelection();
             if (secretConfidenceFilterBtn != null) secretConfidenceFilterBtn.clearSelection();
+            if (commentTypeFilterBtn != null) commentTypeFilterBtn.clearSelection();
+            if (commentCategoryFilterBtn != null) commentCategoryFilterBtn.clearSelection();
+            if (bypassFrameworkFilterBtn != null) bypassFrameworkFilterBtn.clearSelection();
+            if (bypassRiskFilterBtn != null) bypassRiskFilterBtn.clearSelection();
             if (cloudProviderFilterBtn != null) cloudProviderFilterBtn.clearSelection();
             if (depStatusFilterBtn != null) depStatusFilterBtn.clearSelection();
             pathSearchField.setText("");
             secretSearchField.setText("");
+            commentSearchField.setText("");
+            bypassSearchField.setText("");
             cloudSearchField.setText("");
             depSearchField.setText("");
             refreshFromDataStore();
@@ -210,8 +289,10 @@ public class ReconMiningPanel extends JPanel {
         requestsTable.getColumnModel().getColumn(4).setPreferredWidth(70);  // Origin
         requestsTable.getColumnModel().getColumn(5).setPreferredWidth(70);  // Paths
         requestsTable.getColumnModel().getColumn(6).setPreferredWidth(70);  // Secrets
-        requestsTable.getColumnModel().getColumn(7).setPreferredWidth(70);  // Cloud
-        requestsTable.getColumnModel().getColumn(8).setPreferredWidth(70);  // Deps
+        requestsTable.getColumnModel().getColumn(7).setPreferredWidth(75);  // Comments
+        requestsTable.getColumnModel().getColumn(8).setPreferredWidth(75);  // Bypasses
+        requestsTable.getColumnModel().getColumn(9).setPreferredWidth(70);  // Cloud
+        requestsTable.getColumnModel().getColumn(10).setPreferredWidth(70); // Deps
 
         requestsTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -234,6 +315,8 @@ public class ReconMiningPanel extends JPanel {
 
         findingsTabs.addTab("🛣️ Paths", createPathsPanel());
         findingsTabs.addTab("🔑 Secrets", createSecretsPanel());
+        findingsTabs.addTab("💬 Comments", createCommentsPanel());
+        findingsTabs.addTab("🛡️ Security Bypasses", createSecurityBypassesPanel());
         findingsTabs.addTab("☁️ Cloud URLs", createCloudUrlsPanel());
         findingsTabs.addTab("📦 Dependencies", createDependenciesPanel());
 
@@ -433,6 +516,164 @@ public class ReconMiningPanel extends JPanel {
 
         panel.add(toolbar, BorderLayout.NORTH);
         panel.add(new JScrollPane(secretsTable), BorderLayout.CENTER);
+        return panel;
+    }
+
+    // ── Sub-panel: Comments ──────────────────────────────────────────────────
+
+    private JPanel createCommentsPanel() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+
+        JLabel typeLbl = new JLabel("Type:");
+        typeLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        toolbar.add(typeLbl);
+
+        commentTypeFilterBtn = new MultiSelectFilterButton(
+            "Type",
+            List.of("All Types", "Single-Line (//)", "Multi-Line (/* */)", "HTML (<!-- -->)"),
+            sel -> applyCommentFilter()
+        );
+        toolbar.add(commentTypeFilterBtn);
+
+        JLabel catLbl = new JLabel("Category:");
+        catLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        toolbar.add(catLbl);
+
+        commentCategoryFilterBtn = new MultiSelectFilterButton(
+            "Category",
+            List.of("All Categories", "TODO / FIXME", "Credentials / Auth", "Debug / Config", "General"),
+            sel -> applyCommentFilter()
+        );
+        toolbar.add(commentCategoryFilterBtn);
+
+        toolbar.add(new JLabel(" Search: "));
+        commentSearchField.addActionListener(e -> applyCommentFilter());
+        toolbar.add(commentSearchField);
+
+        JButton filterBtn = new JButton("Filter");
+        filterBtn.addActionListener(e -> applyCommentFilter());
+        toolbar.add(filterBtn);
+
+        JButton exportBtn = new JButton("Export Comments TSV");
+        exportBtn.addActionListener(e -> exportTableToTsv(commentsTable, "Comments"));
+        toolbar.add(exportBtn);
+
+        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        toolbar.add(commentCountLabel);
+
+        commentsTable.setRowSorter(new TableRowSorter<>(commentsTableModel));
+        setupTableRendering(commentsTable);
+        setupTableKeyboardCopy(commentsTable);
+        setupCommentsContextMenu();
+
+        // Configure column widths
+        commentsTable.getColumnModel().getColumn(0).setPreferredWidth(110); // Type
+        commentsTable.getColumnModel().getColumn(1).setPreferredWidth(120); // Category
+        commentsTable.getColumnModel().getColumn(2).setPreferredWidth(50);  // Line
+        commentsTable.getColumnModel().getColumn(3).setPreferredWidth(450); // Comment Content
+        commentsTable.getColumnModel().getColumn(4).setPreferredWidth(90);  // Source Type
+        commentsTable.getColumnModel().getColumn(5).setPreferredWidth(250); // Location / File
+
+        // Click-to-locate navigation
+        commentsTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = commentsTable.getSelectedRow();
+                if (row >= 0) {
+                    int modelRow = commentsTable.convertRowIndexToModel(row);
+                    DiscoveredComment comm = commentsTableModel.getCommentAt(modelRow);
+                    if (comm != null && comm.commentText() != null) {
+                        navigateToFinding(comm.commentText(), true, comm.startOffset(), comm.endOffset());
+                    }
+                }
+            }
+        });
+
+        panel.add(toolbar, BorderLayout.NORTH);
+        panel.add(new JScrollPane(commentsTable), BorderLayout.CENTER);
+        return panel;
+    }
+
+    // ── Sub-panel: Security Bypasses & DOM Sinks ─────────────────────────────
+
+    private JPanel createSecurityBypassesPanel() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+
+        JLabel fwkLbl = new JLabel("Framework:");
+        fwkLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        toolbar.add(fwkLbl);
+
+        bypassFrameworkFilterBtn = new MultiSelectFilterButton(
+            "Framework",
+            List.of("All Frameworks", "Angular", "React", "Vue", "Svelte", "Sanitizer / Policy Bypass", "Vanilla DOM Sink", "jQuery"),
+            sel -> applySecurityBypassFilter()
+        );
+        toolbar.add(bypassFrameworkFilterBtn);
+
+        JLabel riskLbl = new JLabel("Risk:");
+        riskLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        toolbar.add(riskLbl);
+
+        bypassRiskFilterBtn = new MultiSelectFilterButton(
+            "Risk",
+            List.of("All Risks", "Critical", "High", "Medium"),
+            sel -> applySecurityBypassFilter()
+        );
+        toolbar.add(bypassRiskFilterBtn);
+
+        toolbar.add(new JLabel(" Search: "));
+        bypassSearchField.addActionListener(e -> applySecurityBypassFilter());
+        toolbar.add(bypassSearchField);
+
+        JButton filterBtn = new JButton("Filter");
+        filterBtn.addActionListener(e -> applySecurityBypassFilter());
+        toolbar.add(filterBtn);
+
+        JButton exportBtn = new JButton("Export Bypasses TSV");
+        exportBtn.addActionListener(e -> exportTableToTsv(securityBypassesTable, "Security Bypasses"));
+        toolbar.add(exportBtn);
+
+        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        toolbar.add(bypassCountLabel);
+
+        securityBypassesTable.setRowSorter(new TableRowSorter<>(securityBypassesTableModel));
+        setupTableRendering(securityBypassesTable);
+        setupTableKeyboardCopy(securityBypassesTable);
+        setupSecurityBypassesContextMenu();
+
+        // Configure column widths
+        securityBypassesTable.getColumnModel().getColumn(0).setPreferredWidth(120); // Framework
+        securityBypassesTable.getColumnModel().getColumn(1).setPreferredWidth(170); // Method / Sink
+        securityBypassesTable.getColumnModel().getColumn(2).setPreferredWidth(70);  // Risk
+        securityBypassesTable.getColumnModel().getColumn(3).setPreferredWidth(50);  // Line
+        securityBypassesTable.getColumnModel().getColumn(4).setPreferredWidth(320); // Context Snippet
+        securityBypassesTable.getColumnModel().getColumn(5).setPreferredWidth(260); // Description
+        securityBypassesTable.getColumnModel().getColumn(6).setPreferredWidth(90);  // Source Type
+        securityBypassesTable.getColumnModel().getColumn(7).setPreferredWidth(220); // Location / File
+
+        // Click-to-locate navigation
+        securityBypassesTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = securityBypassesTable.getSelectedRow();
+                if (row >= 0) {
+                    int modelRow = securityBypassesTable.convertRowIndexToModel(row);
+                    DiscoveredSecurityBypass bypass = securityBypassesTableModel.getBypassAt(modelRow);
+                    if (bypass != null) {
+                        String target = bypass.contextSnippet() != null && !bypass.contextSnippet().isEmpty()
+                            ? bypass.contextSnippet() : bypass.method();
+                        navigateToFinding(target, true, bypass.startOffset(), bypass.endOffset());
+                    }
+                }
+            }
+        });
+
+        panel.add(toolbar, BorderLayout.NORTH);
+        panel.add(new JScrollPane(securityBypassesTable), BorderLayout.CENTER);
         return panel;
     }
 
@@ -730,48 +971,52 @@ public class ReconMiningPanel extends JPanel {
     }
 
     private synchronized void applyRequestFilter() {
+        boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
+        Set<String> selectedMethods = methodFilterBtn != null ? methodFilterBtn.getSelected() : Collections.emptySet();
+        Set<String> selectedStatuses = statusFilterBtn != null ? statusFilterBtn.getSelected() : Collections.emptySet();
+        Set<String> selectedOrigins = originFilterBtn != null ? originFilterBtn.getSelected() : Collections.emptySet();
         String filterSource = (String) sourceTypeFilter.getSelectedItem();
-        String filterStatus = (String) httpStatusFilter.getSelectedItem();
         if (filterSource == null) filterSource = "All Sources";
-        if (filterStatus == null) filterStatus = "All Status Codes";
         String query = searchField.getText().trim().toLowerCase();
 
         List<JsFileEntry> filtered = new ArrayList<>();
         int totalEndpoints = 0;
         int totalSecrets = 0;
+        int totalComments = 0;
+        int totalBypasses = 0;
         int totalCloud = 0;
         int totalDeps = 0;
 
         for (JsFileEntry entry : masterEntries) {
-            int code = entry.getStatusCode();
-            if ("200 OK Only".equals(filterStatus)) {
-                if (code != 200) continue;
-            } else if ("2xx Success (200-299)".equals(filterStatus)) {
-                if (code < 200 || code > 299) continue;
-            } else if ("3xx Redirects (300-399)".equals(filterStatus)) {
-                if (code < 300 || code > 399) continue;
-            } else if ("4xx Client Errors (400-499)".equals(filterStatus)) {
-                if (code < 400 || code > 499) continue;
-            } else if ("5xx Server Errors (500-599)".equals(filterStatus)) {
-                if (code < 500 || code > 599) continue;
+            // 1. In-Scope Filter
+            if (inScopeOnly && !api.scope().isInScope(entry.getUrl())) {
+                continue;
             }
 
-            int epCount = entry.getJsEndpoints().size();
-            int secCount = entry.getJsSecrets().size();
-            int cloudCount = entry.getJsCloudUrls().size();
-            int depCount = entry.getJsDependencies().size();
-
-            if (entry.getUnpackedProject() != null) {
-                epCount += entry.getUnpackedProject().getAllEndpoints().size();
-                secCount += entry.getUnpackedProject().getAllSecrets().size();
-                cloudCount += entry.getUnpackedProject().getAllCloudUrls().size();
-                depCount += entry.getUnpackedProject().getAllDependencies().size();
+            // 2. HTTP Method Filter
+            String method = entry.getRequest() != null ? entry.getRequest().method() : "GET";
+            if (!matchesMethod(method, selectedMethods)) {
+                continue;
             }
 
+            // 3. HTTP Status Filter
+            if (!matchesStatus(entry.getStatusCode(), selectedStatuses)) {
+                continue;
+            }
+
+            // 4. Origin Filter
+            if (!matchesOrigin(entry.isFirstParty(), selectedOrigins)) {
+                continue;
+            }
+
+            // 5. Source Type Filter
             if ("SourceMap Files Only".equals(filterSource)) {
                 if (!entry.isMapExposed() && entry.getUnpackedProject() == null) continue;
+            } else if ("JS Files Only".equals(filterSource)) {
+                if (entry.getResponse() == null) continue;
             }
 
+            // 6. Search query
             if (!query.isEmpty()) {
                 boolean match = (entry.getUrl() != null && entry.getUrl().toLowerCase().contains(query))
                     || (entry.getHost() != null && entry.getHost().toLowerCase().contains(query))
@@ -779,17 +1024,35 @@ public class ReconMiningPanel extends JPanel {
                 if (!match) continue;
             }
 
+            int epCount = entry.getJsEndpoints().size();
+            int secCount = entry.getJsSecrets().size();
+            int commCount = entry.getJsComments().size();
+            int bypassCount = entry.getJsSecurityBypasses().size();
+            int cloudCount = entry.getJsCloudUrls().size();
+            int depCount = entry.getJsDependencies().size();
+
+            if (entry.getUnpackedProject() != null) {
+                epCount += entry.getUnpackedProject().getAllEndpoints().size();
+                secCount += entry.getUnpackedProject().getAllSecrets().size();
+                commCount += entry.getUnpackedProject().getAllComments().size();
+                bypassCount += entry.getUnpackedProject().getAllSecurityBypasses().size();
+                cloudCount += entry.getUnpackedProject().getAllCloudUrls().size();
+                depCount += entry.getUnpackedProject().getAllDependencies().size();
+            }
+
             filtered.add(entry);
             totalEndpoints += epCount;
             totalSecrets += secCount;
+            totalComments += commCount;
+            totalBypasses += bypassCount;
             totalCloud += cloudCount;
             totalDeps += depCount;
         }
 
         requestsTableModel.updateData(filtered);
         statsLabel.setText(String.format(
-            "Requests: %d / %d | Paths: %d | Secrets: %d | Cloud: %d | Deps: %d",
-            filtered.size(), masterEntries.size(), totalEndpoints, totalSecrets, totalCloud, totalDeps
+            "Requests: %d / %d | Paths: %d | Secrets: %d | Comments: %d | Bypasses: %d | Cloud: %d | Deps: %d",
+            filtered.size(), masterEntries.size(), totalEndpoints, totalSecrets, totalComments, totalBypasses, totalCloud, totalDeps
         ));
 
         // Keep selection or select first row if available
@@ -814,10 +1077,50 @@ public class ReconMiningPanel extends JPanel {
         }
     }
 
+    public static boolean matchesMethod(String method, Set<String> selectedMethods) {
+        if (selectedMethods == null || selectedMethods.isEmpty()) return true;
+        if (method == null) return false;
+        return selectedMethods.contains(method.toUpperCase());
+    }
+
+    public static boolean matchesStatus(int statusCode, Set<String> selectedStatuses) {
+        if (selectedStatuses == null || selectedStatuses.isEmpty()) return true;
+        for (String sel : selectedStatuses) {
+            if ("All Status Codes".equalsIgnoreCase(sel)) return true;
+            if (sel.startsWith("2xx") && statusCode >= 200 && statusCode <= 299) return true;
+            if (sel.startsWith("200") && statusCode == 200) return true;
+            if (sel.startsWith("3xx") && statusCode >= 300 && statusCode <= 399) return true;
+            if (sel.contains("301") && (statusCode == 301 || statusCode == 302)) return true;
+            if (sel.contains("304") && statusCode == 304) return true;
+            if (sel.startsWith("4xx") && statusCode >= 400 && statusCode <= 499) return true;
+            if (sel.contains("401") && statusCode == 401) return true;
+            if (sel.contains("403") && statusCode == 403) return true;
+            if (sel.contains("404") && statusCode == 404) return true;
+            if (sel.startsWith("5xx") && statusCode >= 500 && statusCode <= 599) return true;
+            if (sel.contains("500") && statusCode == 500) return true;
+            try {
+                if (Integer.parseInt(sel.trim()) == statusCode) return true;
+            } catch (NumberFormatException ignored) {}
+        }
+        return false;
+    }
+
+    public static boolean matchesOrigin(boolean is1stParty, Set<String> selectedOrigins) {
+        if (selectedOrigins == null || selectedOrigins.isEmpty()) return true;
+        for (String sel : selectedOrigins) {
+            if ("All Origins".equalsIgnoreCase(sel)) return true;
+            if (sel.contains("1st") && is1stParty) return true;
+            if (sel.contains("3rd") && !is1stParty) return true;
+        }
+        return false;
+    }
+
     private synchronized void handleRequestSelected(JsFileEntry entry) {
         currentlySelectedEntry = entry;
         currentEntryEndpoints.clear();
         currentEntrySecrets.clear();
+        currentEntryComments.clear();
+        currentEntrySecurityBypasses.clear();
         currentEntryCloudUrls.clear();
         currentEntryDependencies.clear();
 
@@ -826,10 +1129,14 @@ public class ReconMiningPanel extends JPanel {
             responseEditor.setResponse(HttpResponse.httpResponse(""));
             endpointsTableModel.updateData(Collections.emptyList());
             secretsTableModel.updateData(Collections.emptyList());
+            commentsTableModel.updateData(Collections.emptyList());
+            securityBypassesTableModel.updateData(Collections.emptyList());
             cloudUrlsTableModel.updateData(Collections.emptyList());
             dependenciesTableModel.updateData(Collections.emptyList());
             pathCountLabel.setText("Paths: 0");
             secretCountLabel.setText("Secrets: 0");
+            commentCountLabel.setText("Comments: 0");
+            bypassCountLabel.setText("Bypasses: 0");
             cloudCountLabel.setText("Cloud: 0");
             depCountLabel.setText("Dependencies: 0");
             return;
@@ -855,6 +1162,8 @@ public class ReconMiningPanel extends JPanel {
         if (!"SourceMap Files Only".equals(filterSource)) {
             currentEntryEndpoints.addAll(entry.getJsEndpoints());
             currentEntrySecrets.addAll(entry.getJsSecrets());
+            currentEntryComments.addAll(entry.getJsComments());
+            currentEntrySecurityBypasses.addAll(entry.getJsSecurityBypasses());
             currentEntryCloudUrls.addAll(entry.getJsCloudUrls());
             currentEntryDependencies.addAll(entry.getJsDependencies());
         }
@@ -862,12 +1171,16 @@ public class ReconMiningPanel extends JPanel {
         if (!"JS Files Only".equals(filterSource) && entry.getUnpackedProject() != null) {
             currentEntryEndpoints.addAll(entry.getUnpackedProject().getAllEndpoints());
             currentEntrySecrets.addAll(entry.getUnpackedProject().getAllSecrets());
+            currentEntryComments.addAll(entry.getUnpackedProject().getAllComments());
+            currentEntrySecurityBypasses.addAll(entry.getUnpackedProject().getAllSecurityBypasses());
             currentEntryCloudUrls.addAll(entry.getUnpackedProject().getAllCloudUrls());
             currentEntryDependencies.addAll(entry.getUnpackedProject().getAllDependencies());
         }
 
         applyPathFilter();
         applySecretFilter();
+        applyCommentFilter();
+        applySecurityBypassFilter();
         applyCloudFilter();
         applyDependencyFilter();
     }
@@ -945,6 +1258,62 @@ public class ReconMiningPanel extends JPanel {
 
         secretsTableModel.updateData(filtered);
         secretCountLabel.setText(String.format("Secrets: %d / %d", filtered.size(), currentEntrySecrets.size()));
+    }
+
+    private synchronized void applyCommentFilter() {
+        Set<String> selectedTypes = commentTypeFilterBtn != null ? commentTypeFilterBtn.getSelected() : Collections.emptySet();
+        Set<String> selectedCats = commentCategoryFilterBtn != null ? commentCategoryFilterBtn.getSelected() : Collections.emptySet();
+        String query = commentSearchField.getText().trim().toLowerCase();
+
+        List<DiscoveredComment> filtered = new ArrayList<>();
+        for (DiscoveredComment comm : currentEntryComments) {
+            if (!selectedTypes.isEmpty() && !selectedTypes.contains(comm.commentType())) {
+                continue;
+            }
+            if (!selectedCats.isEmpty() && !selectedCats.contains(comm.category())) {
+                continue;
+            }
+            if (!query.isEmpty()) {
+                boolean match = (comm.commentText() != null && comm.commentText().toLowerCase().contains(query))
+                    || (comm.sourceLocation() != null && comm.sourceLocation().toLowerCase().contains(query))
+                    || (comm.category() != null && comm.category().toLowerCase().contains(query))
+                    || (comm.commentType() != null && comm.commentType().toLowerCase().contains(query));
+                if (!match) continue;
+            }
+            filtered.add(comm);
+        }
+
+        commentsTableModel.updateData(filtered);
+        commentCountLabel.setText(String.format("Comments: %d / %d", filtered.size(), currentEntryComments.size()));
+    }
+
+    private synchronized void applySecurityBypassFilter() {
+        Set<String> selectedFwks = bypassFrameworkFilterBtn != null ? bypassFrameworkFilterBtn.getSelected() : Collections.emptySet();
+        Set<String> selectedRisks = bypassRiskFilterBtn != null ? bypassRiskFilterBtn.getSelected() : Collections.emptySet();
+        String query = bypassSearchField.getText().trim().toLowerCase();
+
+        List<DiscoveredSecurityBypass> filtered = new ArrayList<>();
+        for (DiscoveredSecurityBypass bypass : currentEntrySecurityBypasses) {
+            if (!selectedFwks.isEmpty() && !selectedFwks.contains(bypass.framework())) {
+                continue;
+            }
+            if (!selectedRisks.isEmpty() && !selectedRisks.contains(bypass.risk())) {
+                continue;
+            }
+            if (!query.isEmpty()) {
+                boolean match = (bypass.method() != null && bypass.method().toLowerCase().contains(query))
+                    || (bypass.framework() != null && bypass.framework().toLowerCase().contains(query))
+                    || (bypass.contextSnippet() != null && bypass.contextSnippet().toLowerCase().contains(query))
+                    || (bypass.description() != null && bypass.description().toLowerCase().contains(query))
+                    || (bypass.sourceLocation() != null && bypass.sourceLocation().toLowerCase().contains(query))
+                    || (bypass.risk() != null && bypass.risk().toLowerCase().contains(query));
+                if (!match) continue;
+            }
+            filtered.add(bypass);
+        }
+
+        securityBypassesTableModel.updateData(filtered);
+        bypassCountLabel.setText(String.format("Bypasses: %d / %d", filtered.size(), currentEntrySecurityBypasses.size()));
     }
 
     private synchronized void applyCloudFilter() {
@@ -1297,6 +1666,127 @@ public class ReconMiningPanel extends JPanel {
         });
     }
 
+    private void setupCommentsContextMenu() {
+        commentsTable.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { handlePopup(e); }
+            @Override public void mouseReleased(MouseEvent e) { handlePopup(e); }
+
+            private void handlePopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int row = commentsTable.rowAtPoint(e.getPoint());
+                    int col = commentsTable.columnAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        if (!commentsTable.isRowSelected(row)) commentsTable.setRowSelectionInterval(row, row);
+                        int modelRow = commentsTable.convertRowIndexToModel(row);
+                        DiscoveredComment comm = commentsTableModel.getCommentAt(modelRow);
+                        if (comm == null) return;
+
+                        Object cellVal = commentsTable.getValueAt(row, col);
+                        String cellStr = cellVal != null ? cellVal.toString() : "";
+
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem copyCellItem = new JMenuItem("Copy Cell Value (\"" + truncate(cellStr, 30) + "\")");
+                        copyCellItem.addActionListener(ev -> copyToClipboard(cellStr));
+                        menu.add(copyCellItem);
+
+                        JMenuItem copyCommentItem = new JMenuItem("Copy Comment Content");
+                        copyCommentItem.addActionListener(ev -> copyToClipboard(comm.commentText()));
+                        menu.add(copyCommentItem);
+
+                        JMenuItem copyLocationItem = new JMenuItem("Copy Location / File");
+                        copyLocationItem.addActionListener(ev -> copyToClipboard(comm.sourceLocation()));
+                        menu.add(copyLocationItem);
+
+                        JMenuItem locateItem = new JMenuItem("Jump to in Response");
+                        locateItem.addActionListener(ev -> navigateToFinding(comm.commentText(), true, comm.startOffset(), comm.endOffset()));
+                        menu.add(locateItem);
+
+                        if (aiAnalysisOpener != null) {
+                            JMenuItem aiItem = new JMenuItem("🤖 Analyze Comment with AI...");
+                            aiItem.addActionListener(ev -> aiAnalysisOpener.accept(comm.sourceLocation(), comm.commentText()));
+                            menu.add(aiItem);
+                        }
+
+                        JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
+                        copyRowsItem.addActionListener(ev -> exportTableToTsv(commentsTable, "Comments Selection"));
+                        menu.add(copyRowsItem);
+
+                        menu.show(commentsTable, e.getX(), e.getY());
+                    }
+                }
+            }
+        });
+    }
+
+    private void setupSecurityBypassesContextMenu() {
+        securityBypassesTable.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { handlePopup(e); }
+            @Override public void mouseReleased(MouseEvent e) { handlePopup(e); }
+
+            private void handlePopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int row = securityBypassesTable.rowAtPoint(e.getPoint());
+                    int col = securityBypassesTable.columnAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        if (!securityBypassesTable.isRowSelected(row)) securityBypassesTable.setRowSelectionInterval(row, row);
+                        int modelRow = securityBypassesTable.convertRowIndexToModel(row);
+                        DiscoveredSecurityBypass bypass = securityBypassesTableModel.getBypassAt(modelRow);
+                        if (bypass == null) return;
+
+                        Object cellVal = securityBypassesTable.getValueAt(row, col);
+                        String cellStr = cellVal != null ? cellVal.toString() : "";
+
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem copyCellItem = new JMenuItem("Copy Cell Value (\"" + truncate(cellStr, 30) + "\")");
+                        copyCellItem.addActionListener(ev -> copyToClipboard(cellStr));
+                        menu.add(copyCellItem);
+
+                        JMenuItem copyMethodItem = new JMenuItem("Copy Method / Sink");
+                        copyMethodItem.addActionListener(ev -> copyToClipboard(bypass.method()));
+                        menu.add(copyMethodItem);
+
+                        JMenuItem copySnippetItem = new JMenuItem("Copy Context Snippet");
+                        copySnippetItem.addActionListener(ev -> copyToClipboard(bypass.contextSnippet()));
+                        menu.add(copySnippetItem);
+
+                        JMenuItem copyDescItem = new JMenuItem("Copy Description");
+                        copyDescItem.addActionListener(ev -> copyToClipboard(bypass.description()));
+                        menu.add(copyDescItem);
+
+                        JMenuItem copyLocationItem = new JMenuItem("Copy Location / File");
+                        copyLocationItem.addActionListener(ev -> copyToClipboard(bypass.sourceLocation()));
+                        menu.add(copyLocationItem);
+
+                        JMenuItem locateItem = new JMenuItem("Jump to in Response");
+                        locateItem.addActionListener(ev -> {
+                            String target = bypass.contextSnippet() != null && !bypass.contextSnippet().isEmpty()
+                                ? bypass.contextSnippet() : bypass.method();
+                            navigateToFinding(target, true, bypass.startOffset(), bypass.endOffset());
+                        });
+                        menu.add(locateItem);
+
+                        if (aiAnalysisOpener != null) {
+                            JMenuItem aiItem = new JMenuItem("🤖 Analyze Bypass with AI...");
+                            aiItem.addActionListener(ev -> {
+                                String context = "Security Bypass Sink: " + bypass.method() + " (" + bypass.framework() + " - " + bypass.risk() + ")\n"
+                                    + "Description: " + bypass.description() + "\n"
+                                    + "Context:\n" + bypass.contextSnippet();
+                                aiAnalysisOpener.accept(bypass.sourceLocation(), context);
+                            });
+                            menu.add(aiItem);
+                        }
+
+                        JMenuItem copyRowsItem = new JMenuItem("Copy Selected Row(s) as TSV");
+                        copyRowsItem.addActionListener(ev -> exportTableToTsv(securityBypassesTable, "Security Bypasses Selection"));
+                        menu.add(copyRowsItem);
+
+                        menu.show(securityBypassesTable, e.getX(), e.getY());
+                    }
+                }
+            }
+        });
+    }
+
     private void setupCloudUrlsContextMenu() {
         cloudUrlsTable.addMouseListener(new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) { handlePopup(e); }
@@ -1546,7 +2036,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class RequestsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Method", "URL", "Status", "Origin", "Paths", "Secrets", "Cloud URLs", "Dependencies"
+            "#", "Method", "URL", "Status", "Origin", "Paths", "Secrets", "Comments", "Bypasses", "Cloud URLs", "Dependencies"
         };
         private final List<JsFileEntry> list = new ArrayList<>();
 
@@ -1566,7 +2056,7 @@ public class ReconMiningPanel extends JPanel {
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
             return switch (c) {
-                case 0, 3, 5, 6, 7, 8 -> Integer.class;
+                case 0, 3, 5, 6, 7, 8, 9, 10 -> Integer.class;
                 default -> String.class;
             };
         }
@@ -1592,15 +2082,113 @@ public class ReconMiningPanel extends JPanel {
                     yield count;
                 }
                 case 7 -> {
+                    int count = item.getJsComments().size();
+                    if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllComments().size();
+                    yield count;
+                }
+                case 8 -> {
+                    int count = item.getJsSecurityBypasses().size();
+                    if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllSecurityBypasses().size();
+                    yield count;
+                }
+                case 9 -> {
                     int count = item.getJsCloudUrls().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllCloudUrls().size();
                     yield count;
                 }
-                case 8 -> {
+                case 10 -> {
                     int count = item.getJsDependencies().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllDependencies().size();
                     yield count;
                 }
+                default -> null;
+            };
+        }
+    }
+
+    private static class SecurityBypassesTableModel extends AbstractTableModel {
+        private static final String[] COLS = {
+            "Framework", "Method / Sink", "Risk", "Line", "Context Snippet", "Description", "Source Type", "Location / File"
+        };
+        private final List<DiscoveredSecurityBypass> list = new ArrayList<>();
+
+        public synchronized void updateData(List<DiscoveredSecurityBypass> data) {
+            list.clear();
+            if (data != null) list.addAll(data);
+            fireTableDataChanged();
+        }
+
+        public synchronized DiscoveredSecurityBypass getBypassAt(int row) {
+            if (row >= 0 && row < list.size()) return list.get(row);
+            return null;
+        }
+
+        @Override public int getRowCount() { return list.size(); }
+        @Override public int getColumnCount() { return COLS.length; }
+        @Override public String getColumnName(int c) { return COLS[c]; }
+        @Override public Class<?> getColumnClass(int c) {
+            return switch (c) {
+                case 3 -> Integer.class;
+                default -> String.class;
+            };
+        }
+
+        @Override
+        public synchronized Object getValueAt(int r, int c) {
+            if (r < 0 || r >= list.size()) return null;
+            DiscoveredSecurityBypass item = list.get(r);
+            return switch (c) {
+                case 0 -> item.framework();
+                case 1 -> item.method();
+                case 2 -> item.risk();
+                case 3 -> item.line();
+                case 4 -> item.contextSnippet();
+                case 5 -> item.description();
+                case 6 -> item.sourceType();
+                case 7 -> item.sourceLocation();
+                default -> null;
+            };
+        }
+    }
+
+    private static class CommentsTableModel extends AbstractTableModel {
+        private static final String[] COLS = {
+            "Type", "Category", "Line", "Comment Content", "Source Type", "Location / File"
+        };
+        private final List<DiscoveredComment> list = new ArrayList<>();
+
+        public synchronized void updateData(List<DiscoveredComment> data) {
+            list.clear();
+            if (data != null) list.addAll(data);
+            fireTableDataChanged();
+        }
+
+        public synchronized DiscoveredComment getCommentAt(int row) {
+            if (row >= 0 && row < list.size()) return list.get(row);
+            return null;
+        }
+
+        @Override public int getRowCount() { return list.size(); }
+        @Override public int getColumnCount() { return COLS.length; }
+        @Override public String getColumnName(int c) { return COLS[c]; }
+        @Override public Class<?> getColumnClass(int c) {
+            return switch (c) {
+                case 2 -> Integer.class;
+                default -> String.class;
+            };
+        }
+
+        @Override
+        public synchronized Object getValueAt(int r, int c) {
+            if (r < 0 || r >= list.size()) return null;
+            DiscoveredComment item = list.get(r);
+            return switch (c) {
+                case 0 -> item.commentType();
+                case 1 -> item.category();
+                case 2 -> item.line();
+                case 3 -> item.commentText();
+                case 4 -> item.sourceType();
+                case 5 -> item.sourceLocation();
                 default -> null;
             };
         }

@@ -59,7 +59,7 @@ public class ExecutionLogPanel extends JPanel {
 
         stageFilterBtn = new MultiSelectFilterButton(
                 "Stage",
-                List.of("All Stages", "Upload", "Probe", "Preflight", "ReDownload", "Verification"),
+                List.of("All Stages", "Upload", "Probe", "Content-Type", "File-Size", "EXIF", "Preflight", "ReDownload", "Verification"),
                 sel -> refreshFilter()
         );
 
@@ -157,6 +157,14 @@ public class ExecutionLogPanel extends JPanel {
                             c.setForeground(new Color(0, 130, 80));
                         } else if (stageStr.equalsIgnoreCase("Preflight")) {
                             c.setForeground(new Color(110, 50, 160));
+                        } else if (stageStr.equalsIgnoreCase("Content-Type")) {
+                            c.setForeground(new Color(130, 40, 130));
+                        } else if (stageStr.equalsIgnoreCase("File-Size")) {
+                            c.setForeground(new Color(0, 100, 160));
+                        } else if (stageStr.equalsIgnoreCase("EXIF")) {
+                            c.setForeground(new Color(180, 80, 0));
+                        } else if (stageStr.equalsIgnoreCase("Verification")) {
+                            c.setForeground(new Color(200, 30, 30));
                         } else {
                             c.setForeground(tbl.getForeground());
                         }

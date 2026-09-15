@@ -23,7 +23,6 @@ public class UploadScannerTab extends JPanel {
 
     private final MontoyaApi api;
     private final JTabbedPane rootTabbedPane;
-    private final ExecutionLogPanel executionLogPanel;
     private final List<UploadSessionPanel> activeSessions = new ArrayList<>();
 
     public UploadScannerTab(MontoyaApi api) {
@@ -31,16 +30,10 @@ public class UploadScannerTab extends JPanel {
         this.api = api;
 
         this.rootTabbedPane = new JTabbedPane();
-        this.executionLogPanel = new ExecutionLogPanel(api);
 
         rootTabbedPane.addTab("📖 Welcome & Guide", new WelcomeGuidePanel());
-        rootTabbedPane.addTab("📋 Done Uploads", executionLogPanel);
 
         add(rootTabbedPane, BorderLayout.CENTER);
-    }
-
-    public ExecutionLogPanel getExecutionLogPanel() {
-        return executionLogPanel;
     }
 
     public void addNewSessionTab(HttpRequest request, HttpResponse response) {
@@ -57,7 +50,7 @@ public class UploadScannerTab extends JPanel {
                 api,
                 request,
                 response,
-                executionLogPanel::addLogEntry
+                null
         );
 
         activeSessions.add(sessionPanel);

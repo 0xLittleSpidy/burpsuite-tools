@@ -10,15 +10,16 @@ import java.util.List;
 
 /**
  * Thread-safe table model for displaying finding entries.
+ * Pin column has been removed from the table view.
  */
 public class FindingsTableModel extends AbstractTableModel {
 
     private static final String[] COLUMN_NAMES = {
-            "#", "Pin", "Method", "Status", "Finding Type", "Match Excerpt", "Location", "Length", "Content-Type", "URL", "Time"
+            "#", "Method", "Status", "Finding Type", "Match Excerpt", "Location", "Length", "Content-Type", "URL", "Time"
     };
 
     private static final Class<?>[] COLUMN_CLASSES = {
-            Integer.class, String.class, String.class, Integer.class, String.class, String.class, String.class, Integer.class, String.class, String.class, String.class
+            Integer.class, String.class, Integer.class, String.class, String.class, String.class, Integer.class, String.class, String.class, String.class
     };
 
     private final InspectorDataStore dataStore;
@@ -69,20 +70,18 @@ public class FindingsTableModel extends AbstractTableModel {
             return null;
         }
         FindingEntry entry = entries.get(rowIndex);
-        boolean pinned = dataStore.isPinned(entry.id());
 
         return switch (columnIndex) {
             case 0 -> entry.id();
-            case 1 -> pinned ? "\uD83D\uDCCC" : "";
-            case 2 -> entry.method();
-            case 3 -> (int) entry.statusCode();
-            case 4 -> entry.patternName();
-            case 5 -> entry.matchValue();
-            case 6 -> entry.matchLocation();
-            case 7 -> entry.contentLength();
-            case 8 -> entry.contentType();
-            case 9 -> entry.url();
-            case 10 -> entry.timeString();
+            case 1 -> entry.method();
+            case 2 -> (int) entry.statusCode();
+            case 3 -> entry.patternName();
+            case 4 -> entry.matchValue();
+            case 5 -> entry.matchLocation();
+            case 6 -> entry.contentLength();
+            case 7 -> entry.contentType();
+            case 8 -> entry.url();
+            case 9 -> entry.timeString();
             default -> "";
         };
     }

@@ -107,9 +107,20 @@ public class UploadSessionPanel extends JPanel {
     private JCheckBox extMediaCb;
     private JTextField customExtField;
 
+    // Category 7: Content-Type, File Size & EXIF
+    private JCheckBox contentTypeValidationCb;
+    private JCheckBox mimeSpoofingCb;
+    private JCheckBox fileSizeLimitsCb;
+    private JSpinner maxFileSizeSpinner;
+    private JCheckBox exifLeakageCb;
+    private JCheckBox exifXssCb;
+
     private JSpinner throttleSpinner;
     private JButton testRedlBtn;
     private JButton probeExtBtn;
+    private JButton probeContentTypeBtn;
+    private JButton testFileSizeBtn;
+    private JButton testExifBtn;
     private JButton startScanBtn;
     private JButton stopScanBtn;
     private JLabel statusLabel;
@@ -120,6 +131,7 @@ public class UploadSessionPanel extends JPanel {
     private HttpRequestEditor redlReqEditor;
     private HttpResponseEditor redlRespEditor;
 
+    private final ExecutionLogPanel sessionLogPanel;
     private UploadScanExecutor currentExecutor;
 
     public UploadSessionPanel(MontoyaApi api,
@@ -132,6 +144,7 @@ public class UploadSessionPanel extends JPanel {
         this.baseResponse = baseResponse;
         this.config = new UploadScannerConfig();
         this.logEntryConsumer = logEntryConsumer;
+        this.sessionLogPanel = new ExecutionLogPanel(api);
 
         initUI();
     }
@@ -397,21 +410,70 @@ public class UploadSessionPanel extends JPanel {
         extPanel.add(extActions, BorderLayout.EAST);
         attackTabs.addTab("📁 Allowed Extensions", extPanel);
 
+        // Tab 7: Validation, File Sizes & EXIF Metadata
+        JPanel valPanel = new JPanel(new BorderLayout(4, 4));
+        JPanel valChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+
+        contentTypeValidationCb = new JCheckBox("SecLists Content-Types (2,387 types)", false);
+        contentTypeValidationCb.setToolTipText("Run all 2,387 MIME types from SecLists web-all-content-types.txt (or click '🧪 Probe Content-Types' button)");
+        mimeSpoofingCb = new JCheckBox("MIME Spoofing & Header Mutation", true);
+        mimeSpoofingCb.setToolTipText("Test PHP/JSP scripts with image MIME types, and header tamperings");
+        fileSizeLimitsCb = new JCheckBox("File Size Limits (0B-20MB)", true);
+        fileSizeLimitsCb.setToolTipText("Boundary test file sizes from 0 bytes up to max MB");
+        maxFileSizeSpinner = new JSpinner(new SpinnerNumberModel(20, 1, 500, 5));
+        maxFileSizeSpinner.setToolTipText("Max file size to test in MB");
+        exifLeakageCb = new JCheckBox("EXIF GPS/PII Leakage", true);
+        exifLeakageCb.setToolTipText("Test if GPS and author metadata are stripped upon upload/redownload");
+        exifXssCb = new JCheckBox("EXIF Stored XSS & Injections", true);
+        exifXssCb.setToolTipText("Embed Stored XSS and command injection vectors inside EXIF metadata tags");
+
+        valChecks.add(contentTypeValidationCb);
+        valChecks.add(mimeSpoofingCb);
+        valChecks.add(fileSizeLimitsCb);
+        valChecks.add(new JLabel("Max MB:"));
+        valChecks.add(maxFileSizeSpinner);
+        valChecks.add(exifLeakageCb);
+        valChecks.add(exifXssCb);
+
+        JPanel valActions = createCategoryActionToolbar(List.of(
+                contentTypeValidationCb, mimeSpoofingCb, fileSizeLimitsCb, exifLeakageCb, exifXssCb));
+        valPanel.add(valChecks, BorderLayout.CENTER);
+        valPanel.add(valActions, BorderLayout.EAST);
+        attackTabs.addTab("🛡️ Validation & EXIF", valPanel);
+
         // ── 4. Live Action & Status Toolbar ──
-        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
         testRedlBtn = new JButton("🧪 Test ReDownloader Now");
-        testRedlBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        testRedlBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         testRedlBtn.setToolTipText("Verify URL extraction and test downloading the file from the server");
         testRedlBtn.addActionListener(e -> testReDownloader());
 
-        probeExtBtn = new JButton("🧪 Probe Allowed Extensions");
-        probeExtBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        probeExtBtn = new JButton("🧪 Probe Extensions");
+        probeExtBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         probeExtBtn.setForeground(new Color(0, 100, 180));
         probeExtBtn.setToolTipText("Probe which file extensions (jpg, png, txt, etc.) are accepted by the upload endpoint");
         probeExtBtn.addActionListener(e -> probeAllowedExtensions());
 
+        probeContentTypeBtn = new JButton("🧪 Probe Content-Types");
+        probeContentTypeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        probeContentTypeBtn.setForeground(new Color(130, 40, 130));
+        probeContentTypeBtn.setToolTipText("Probe endpoint with all 2,387 MIME types from SecLists wordlist & MIME spoofing");
+        probeContentTypeBtn.addActionListener(e -> probeContentTypes());
+
+        testFileSizeBtn = new JButton("📏 Test File Sizes");
+        testFileSizeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        testFileSizeBtn.setForeground(new Color(0, 120, 140));
+        testFileSizeBtn.setToolTipText("Test file size limits with stepped probes (0B, 1KB, 10KB, 100KB, 500KB, 1MB, 2MB, 5MB, 10MB, 20MB)");
+        testFileSizeBtn.addActionListener(e -> testFileSizes());
+
+        testExifBtn = new JButton("📷 Test EXIF Leakage");
+        testExifBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        testExifBtn.setForeground(new Color(180, 80, 0));
+        testExifBtn.setToolTipText("Upload image with GPS & PII canary and verify whether metadata is stripped upon re-download");
+        testExifBtn.addActionListener(e -> testExifLeakage());
+
         startScanBtn = new JButton("▶ Start Scan");
-        startScanBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        startScanBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         startScanBtn.setForeground(new Color(0, 120, 50));
         startScanBtn.addActionListener(e -> startScan());
 
@@ -428,14 +490,17 @@ public class UploadSessionPanel extends JPanel {
 
         actionsPanel.add(testRedlBtn);
         actionsPanel.add(probeExtBtn);
+        actionsPanel.add(probeContentTypeBtn);
+        actionsPanel.add(testFileSizeBtn);
+        actionsPanel.add(testExifBtn);
         actionsPanel.add(startScanBtn);
         actionsPanel.add(stopScanBtn);
-        actionsPanel.add(new JLabel("Delay (ms):"));
+        actionsPanel.add(new JLabel("Delay:"));
         throttleSpinner = new JSpinner(new SpinnerNumberModel(50, 0, 5000, 50));
         actionsPanel.add(throttleSpinner);
-        actionsPanel.add(Box.createHorizontalStrut(10));
+        actionsPanel.add(Box.createHorizontalStrut(6));
         actionsPanel.add(statusLabel);
-        actionsPanel.add(Box.createHorizontalStrut(10));
+        actionsPanel.add(Box.createHorizontalStrut(6));
         actionsPanel.add(previewResultLabel);
 
         // Assemble Top
@@ -447,9 +512,7 @@ public class UploadSessionPanel extends JPanel {
         configContainer.add(midPanel, BorderLayout.CENTER);
         configContainer.add(actionsPanel, BorderLayout.SOUTH);
 
-        add(configContainer, BorderLayout.NORTH);
-
-        // ── 5. Lower Message Editors (Split Pane) ──
+        // ── 5. Lower Message Editors ──
         uploadReqEditor = api.userInterface().createHttpRequestEditor();
         uploadRespEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
         redlReqEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
@@ -471,7 +534,7 @@ public class UploadSessionPanel extends JPanel {
         clearMarkersBtn.setToolTipText("Remove all § markers from the baseline request");
         clearMarkersBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
 
-        JLabel markerTipLabel = new JLabel("💡 Baseline Request (Editable) — Highlight filename & click '§ Add Marker' to replace in multiple locations");
+        JLabel markerTipLabel = new JLabel("💡 Baseline Request (Editable) — Highlight filename & click '§ Add Marker'");
         markerTipLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         markerTipLabel.setForeground(Color.DARK_GRAY);
 
@@ -491,7 +554,18 @@ public class UploadSessionPanel extends JPanel {
         editorsTab.addTab("🎯 ReDownload Request", redlReqEditor.uiComponent());
         editorsTab.addTab("🔍 ReDownload Response", redlRespEditor.uiComponent());
 
-        add(editorsTab, BorderLayout.CENTER);
+        // ── 6. Integrated Split View: Left (Setup & Baseline) | Right (Activity Log & Detail Viewer) ──
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        JSplitPane leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                new JScrollPane(configContainer), editorsTab);
+        leftSplit.setResizeWeight(0.55);
+        leftPanel.add(leftSplit, BorderLayout.CENTER);
+
+        JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                leftPanel, sessionLogPanel);
+        mainSplit.setResizeWeight(0.48);
+
+        add(mainSplit, BorderLayout.CENTER);
 
         // Auto-run detection at initial load if response exists
         if (baseResponse != null) {
@@ -707,6 +781,28 @@ public class UploadSessionPanel extends JPanel {
             config.setCustomExtensions(customExtField.getText());
         }
 
+        // Category 7: Validation, File Size & EXIF Metadata
+        if (contentTypeValidationCb != null) {
+            config.setTestContentTypeValidation(contentTypeValidationCb.isSelected());
+            config.setTestSecListsWordlist(contentTypeValidationCb.isSelected());
+        }
+        if (mimeSpoofingCb != null) {
+            config.setTestMimeSpoofing(mimeSpoofingCb.isSelected());
+        }
+        if (fileSizeLimitsCb != null) {
+            config.setTestFileSizeLimits(fileSizeLimitsCb.isSelected());
+        }
+        if (maxFileSizeSpinner != null) {
+            config.setMaxFileSizeMb((Integer) maxFileSizeSpinner.getValue());
+        }
+        if (exifLeakageCb != null) {
+            config.setTestExifLeakage(exifLeakageCb.isSelected());
+        }
+        if (exifXssCb != null) {
+            config.setTestExifXss(exifXssCb.isSelected());
+            config.setTestExifInjections(exifXssCb.isSelected());
+        }
+
         config.setThrottleMs((Integer) throttleSpinner.getValue());
     }
 
@@ -769,24 +865,17 @@ public class UploadSessionPanel extends JPanel {
         return UploadScanExecutor.extractFilenameFromRequest(request);
     }
 
-    private void probeAllowedExtensions() {
-        syncConfigFromUI();
-        startScanBtn.setEnabled(false);
-        probeExtBtn.setEnabled(false);
-        stopScanBtn.setEnabled(true);
-        testRedlBtn.setEnabled(false);
-
-        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
-                ? uploadReqEditor.getRequest()
-                : baseRequest;
-
-        currentExecutor = new UploadScanExecutor(
+    private UploadScanExecutor createExecutor(String taskName) {
+        return new UploadScanExecutor(
                 api,
                 config,
                 entry -> {
-                    logEntryConsumer.accept(entry);
+                    sessionLogPanel.addLogEntry(entry);
+                    if (logEntryConsumer != null) {
+                        logEntryConsumer.accept(entry);
+                    }
 
-                    if (entry.getStage() == StageType.REDOWNLOAD) {
+                    if (entry.getStage() == StageType.REDOWNLOAD && entry.getRequestResponse() != null) {
                         redlReqEditor.setRequest(entry.getRequestResponse().request());
                         if (entry.getRequestResponse().hasResponse()) {
                             redlRespEditor.setResponse(entry.getRequestResponse().response());
@@ -798,57 +887,79 @@ public class UploadSessionPanel extends JPanel {
                 },
                 status -> SwingUtilities.invokeLater(() -> statusLabel.setText("● " + status)),
                 () -> SwingUtilities.invokeLater(() -> {
-                    startScanBtn.setEnabled(true);
-                    probeExtBtn.setEnabled(true);
-                    stopScanBtn.setEnabled(false);
-                    testRedlBtn.setEnabled(true);
-                    statusLabel.setText("● Probe Completed");
+                    setScanRunning(false);
+                    statusLabel.setText("● " + taskName + " Completed");
                     statusLabel.setForeground(new Color(0, 140, 50));
                 })
         );
+    }
 
+    private void setScanRunning(boolean isRunning) {
+        startScanBtn.setEnabled(!isRunning);
+        probeExtBtn.setEnabled(!isRunning);
+        probeContentTypeBtn.setEnabled(!isRunning);
+        testFileSizeBtn.setEnabled(!isRunning);
+        testExifBtn.setEnabled(!isRunning);
+        testRedlBtn.setEnabled(!isRunning);
+        stopScanBtn.setEnabled(isRunning);
+    }
+
+    private void probeAllowedExtensions() {
+        syncConfigFromUI();
+        setScanRunning(true);
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
+
+        currentExecutor = createExecutor("Extension Probe");
         statusLabel.setForeground(new Color(0, 100, 200));
         currentExecutor.startAllowedExtensionsProbe(activeReq);
     }
 
-    private void startScan() {
+    private void probeContentTypes() {
         syncConfigFromUI();
-        startScanBtn.setEnabled(false);
-        probeExtBtn.setEnabled(false);
-        stopScanBtn.setEnabled(true);
-        testRedlBtn.setEnabled(false);
-
+        setScanRunning(true);
         HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
                 ? uploadReqEditor.getRequest()
                 : baseRequest;
 
-        currentExecutor = new UploadScanExecutor(
-                api,
-                config,
-                entry -> {
-                    logEntryConsumer.accept(entry);
+        currentExecutor = createExecutor("Content-Type Probe");
+        statusLabel.setForeground(new Color(130, 40, 130));
+        currentExecutor.startContentTypeProbe(activeReq);
+    }
 
-                    if (entry.getStage() == StageType.REDOWNLOAD) {
-                        redlReqEditor.setRequest(entry.getRequestResponse().request());
-                        if (entry.getRequestResponse().hasResponse()) {
-                            redlRespEditor.setResponse(entry.getRequestResponse().response());
-                            if (!entry.getExtractedMarkerText().isEmpty()) {
-                                redlRespEditor.setSearchExpression(entry.getExtractedMarkerText());
-                            }
-                        }
-                    }
-                },
-                status -> SwingUtilities.invokeLater(() -> statusLabel.setText("● " + status)),
-                () -> SwingUtilities.invokeLater(() -> {
-                    startScanBtn.setEnabled(true);
-                    probeExtBtn.setEnabled(true);
-                    stopScanBtn.setEnabled(false);
-                    testRedlBtn.setEnabled(true);
-                    statusLabel.setText("● Completed");
-                    statusLabel.setForeground(new Color(0, 140, 50));
-                })
-        );
+    private void testFileSizes() {
+        syncConfigFromUI();
+        setScanRunning(true);
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
 
+        currentExecutor = createExecutor("File Size Probe");
+        statusLabel.setForeground(new Color(0, 120, 140));
+        currentExecutor.startFileSizeProbe(activeReq);
+    }
+
+    private void testExifLeakage() {
+        syncConfigFromUI();
+        setScanRunning(true);
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
+
+        currentExecutor = createExecutor("EXIF Test");
+        statusLabel.setForeground(new Color(180, 80, 0));
+        currentExecutor.startExifProbe(activeReq);
+    }
+
+    private void startScan() {
+        syncConfigFromUI();
+        setScanRunning(true);
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
+
+        currentExecutor = createExecutor("Full Scan");
         statusLabel.setForeground(new Color(0, 100, 200));
         currentExecutor.startScan(activeReq);
     }
@@ -858,11 +969,12 @@ public class UploadSessionPanel extends JPanel {
             currentExecutor.stop();
             statusLabel.setText("● Stopped");
             statusLabel.setForeground(Color.RED);
-            startScanBtn.setEnabled(true);
-            probeExtBtn.setEnabled(true);
-            stopScanBtn.setEnabled(false);
-            testRedlBtn.setEnabled(true);
+            setScanRunning(false);
         }
+    }
+
+    public ExecutionLogPanel getSessionLogPanel() {
+        return sessionLogPanel;
     }
 
     public void cleanup() {

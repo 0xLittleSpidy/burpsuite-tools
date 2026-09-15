@@ -18,6 +18,7 @@ import java.util.Map;
  * - Tab 2: PII, Network & Paths
  * - Tab 3: Errors & Exceptions
  * - Tab 4: Secrets & Tokens
+ * - Tab 5: Comments
  */
 public class ResponseInspectorTab extends JPanel {
 
@@ -40,7 +41,7 @@ public class ResponseInspectorTab extends JPanel {
         WelcomeGuidePanel welcomePanel = new WelcomeGuidePanel();
         tabbedPane.addTab("\uD83D\uDCD6 Welcome & Guide", welcomePanel);
 
-        // Tabs 1-4: Category Findings Panels
+        // Tabs 1-5: Category Findings Panels
         for (FindingCategory category : FindingCategory.values()) {
             CategoryFindingsPanel panel = new CategoryFindingsPanel(
                     api,
@@ -78,7 +79,8 @@ public class ResponseInspectorTab extends JPanel {
             case PASSWORD -> "\uD83D\uDD11 Passwords" + badge;
             case PII_NETWORK_PATH -> "\uD83D\uDEE1 PII, Network & Paths" + badge;
             case ERROR -> "\u26A0 Errors & Exceptions" + badge;
-            case SECRET -> "\uD83D\uDD10 Secrets & Tokens" + badge;
+            case SECRET -> "\uD83D\uDD10 Secrets" + badge;
+            case COMMENT -> "\uD83D\uDCAC Comments" + badge;
         };
     }
 }

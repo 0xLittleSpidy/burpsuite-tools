@@ -73,7 +73,9 @@ public class SourceMapUnpacker {
                 miningResult.secrets(),
                 miningResult.endpoints(),
                 miningResult.cloudUrls(),
-                miningResult.dependencies()
+                miningResult.dependencies(),
+                miningResult.comments(),
+                miningResult.securityBypasses()
             );
 
             project.addFile(file);

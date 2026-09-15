@@ -16,7 +16,6 @@ public class InspectorDataStore {
     private final AtomicInteger idCounter = new AtomicInteger(1);
     private final Map<String, FindingEntry> entriesByKey = new LinkedHashMap<>();
     private final List<FindingEntry> allEntries = new ArrayList<>();
-    private final Set<Integer> pinnedIds = Collections.synchronizedSet(new LinkedHashSet<>());
 
     public InspectorDataStore(FindingCategory category) {
         this.category = category;
@@ -48,7 +47,6 @@ public class InspectorDataStore {
     public synchronized void clear() {
         entriesByKey.clear();
         allEntries.clear();
-        pinnedIds.clear();
         idCounter.set(1);
     }
 
@@ -58,32 +56,6 @@ public class InspectorDataStore {
 
     public synchronized List<FindingEntry> getAllEntries() {
         return new ArrayList<>(allEntries);
-    }
-
-    // ─── Pinning Support ────────────────────────────────────────────────────────
-
-    public boolean isPinned(int entryId) {
-        return pinnedIds.contains(entryId);
-    }
-
-    public void pin(int entryId) {
-        pinnedIds.add(entryId);
-    }
-
-    public void unpin(int entryId) {
-        pinnedIds.remove(entryId);
-    }
-
-    public void clearPins() {
-        pinnedIds.clear();
-    }
-
-    public boolean hasPins() {
-        return !pinnedIds.isEmpty();
-    }
-
-    public int getPinnedCount() {
-        return pinnedIds.size();
     }
 
     // ─── Filtering API ──────────────────────────────────────────────────────────
@@ -102,13 +74,6 @@ public class InspectorDataStore {
             Predicate<String> inScopePredicate,
             InScopeDomainManager domainManager
     ) {
-        // If items are pinned, pinning overrides other filters to isolate pinned items
-        if (hasPins()) {
-            return allEntries.stream()
-                    .filter(e -> pinnedIds.contains(e.id()))
-                    .collect(Collectors.toList());
-        }
-
         String searchLower = (searchTerm != null) ? searchTerm.trim().toLowerCase() : "";
 
         return allEntries.stream()

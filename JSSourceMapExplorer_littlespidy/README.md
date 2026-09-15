@@ -47,10 +47,10 @@
      - **`Send to Organizer`**
    - Available on the main JS scripts table, requests table, and detail viewers.
 
-6. **Row Pinning (`📌 Pin Selected`)**:
-   - Pin important candidate scripts using the toolbar **`📌 Pin Selected`** button or context menu.
-   - Pinned rows remain visible across active filters and are highlighted in distinct golden amber (`#FFFACD`).
-   - One-click unpinning via **`Clear Pins`** or context menu.
+6. **In-Scope Proxy History Loading (`In-Scope Only`)**:
+   - Avoid Burp UI freezing and memory pressure when working with large proxy histories.
+   - An **`In-Scope Only`** checkbox sits directly adjacent to the **`Load Proxy History`** button.
+   - When checked, out-of-scope requests are discarded before fetching response bodies or queueing tasks.
 
 7. **Visual Tab Navigation**:
    - Clear emoji symbol prefixes across all suite tabs and sub-tabs:
@@ -60,7 +60,7 @@
      - `✨ AI Security Analyst`
      - `🌲 Reconstructed Source Tree`
      - `📤 Request` / `📥 Response`
-     - `🛣️ Paths`, `🔑 Secrets`, `☁️ Cloud URLs`, `📦 Dependencies`
+     - `🛣️ Paths`, `🔑 Secrets`, `💬 Comments`, `🛡️ Security Bypasses`, `☁️ Cloud URLs`, `📦 Dependencies`
 
 8. **Automatic URL Deduplication**:
    - Duplicate JavaScript URLs and requests are automatically deduplicated by default so each script is tracked and analyzed once.
@@ -80,9 +80,8 @@
       - `Pass (200 OK)`: Active `.map` probe succeeded (200 OK + valid SourceMap JSON).
       - `Fail (404/Error)`: Active probe returned 404 Not Found or error.
 
-11. **Dedicated Recon Columns (JS vs SourceMap)**:
-    - **`JS Recon (Paths / Keys)`**: Shows endpoints and secrets automatically discovered in the raw JavaScript file itself (e.g. `12 eps | 2 keys`).
-    - **`Map Recon (Paths / Keys)`**: Shows endpoints and secrets discovered across all unpacked Source Map original files (e.g. `84 eps | 5 keys`).
+11. **Dedicated Map Recon Column**:
+    - **`Map Recon (Paths / Keys)`**: Shows endpoints and secrets discovered across all unpacked Source Map original files (e.g. `84 eps | 5 keys`). Raw JavaScript recon findings are cleanly centralized in the Recon tab.
 
 12. **4-Way Raw HTTP Message Inspection**:
     - Select any script to view:
@@ -91,14 +90,19 @@
 
 13. **Dedicated Top-Level "Recon & Secret Mining" Suite Tab**:
     - Sequential request-first master-detail layout:
-      - **Master Table (Top)**: Lists requests sequentially with method, URL, status, origin, and counts of discovered paths, secrets, cloud URLs, and dependencies.
-      - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **Cloud URLs**, and **Dependencies** tabs on the right.
-    - **Multi-Select Technique & Category Filtering**:
+      - **Master Table (Top)**: Lists requests sequentially with method, URL, status, origin, and counts of discovered paths, secrets, comments, security bypasses, cloud URLs, and dependencies.
+      - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **💬 Comments**, **🛡️ Security Bypasses**, **Cloud URLs**, and **Dependencies** tabs on the right.
+    - **Multi-Select Technique, Category, and Header Filtering**:
+      - **Top Filter Toolbar**: Includes `In-Scope Only` checkbox, `Method ▾`, `Status ▾`, `Origin ▾` multi-select filter buttons, `Source Type` selector, and real-time search with 300ms debounce.
       - **Paths Tab**: Features `Method ▾` (GET, POST, etc.) and `Technique ▾` (Regex/Pattern, LinkFinder, etc.) multi-select buttons alongside search and TSV export.
-      - **Secrets Tab**: Features `Category ▾` (13 high-level categories), `Signature ▾` (all 48 curated secret signatures), `Confidence ▾` multi-select buttons, search, and the `📋 Signatures Catalog (48)` modal viewer displaying all regex patterns.
+      - **Secrets Tab**: Features `Category ▾`, `Signature ▾`, `Confidence ▾` multi-select buttons, search, and the `📋 Signatures Catalog` modal viewer.
+      - **💬 Comments Tab**: Extracts all developer comments (single-line `//`, multi-line `/* */`, HTML `<!-- -->`) with line numbers, code offsets for Burp editor deep-linking, and category tags (`TODO/FIXME`, `Credentials/Auth`, `Debug/Config`, `General`), plus `Type ▾` and `Category ▾` multi-select filters.
+      - **🛡️ Security Bypasses Tab (DOM XSS & Sanitizer Bypasses)**:
+        - **Framework Detection**: Detects sanitization bypasses and dangerous sinks across **Angular** (`bypassSecurityTrustHtml`, `bypassSecurityTrustScript`, `bypassSecurityTrustStyle`, `bypassSecurityTrustUrl`, `bypassSecurityTrustResourceUrl`, `ɵɵtrustConstantHtml`, `$sce.trustAs*`), **React** (`dangerouslySetInnerHTML`), **Vue.js** (`v-html`, `domProps.innerHTML`, `{{{ }}}`), **Svelte** (`{@html ...}`), **Sanitizers & Policies** (`DOMPurify.sanitize` loose configs, `trustedTypes.createPolicy` passthrough), and **Vanilla DOM Sinks** (`innerHTML` / `outerHTML` assignments, `document.write`, `insertAdjacentHTML`, `eval()`, `new Function()`, `$.html()`).
+        - **Intelligent FP Suppression**: Suppresses harmless empty innerHTML cleanups (`""`, `''`, `null`, `undefined`).
+        - **Multi-Select Filtering**: `Framework ▾` and `Risk ▾` (Critical, High, Medium) multi-select buttons, full-text search, TSV export, and 4-pillar deep-linking quad into Burp editors.
       - **Cloud URLs Tab**: Features `Provider ▾` multi-select (AWS S3, Google Cloud Storage, Azure Blob, Firebase, etc.).
       - **Dependencies Tab**: Features `Status ▾` multi-select (Internal/Private, Unregistered/Hijackable, Safe/Registered, Unchecked) with in-Burp NPM registry verification.
-    - Top-level toolbar with Source Type (`All Sources`, `JS Files Only`, `SourceMap Files Only`), HTTP Status filter, and full-text search.
 
 14. **Download JavaScript File(s)**:
     - Save individual JavaScript files or batch-download hundreds of selected files to a target directory.

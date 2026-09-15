@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
- * Coordinates response scanning across all 4 analyzers.
+ * Coordinates response scanning across all 5 analyzers.
  */
 public class ResponseScanEngine {
 
@@ -21,6 +21,7 @@ public class ResponseScanEngine {
     private final PiiNetworkPathScanner piiScanner = new PiiNetworkPathScanner();
     private final ErrorScanner errorScanner = new ErrorScanner();
     private final SecretScanner secretScanner = new SecretScanner();
+    private final CommentScanner commentScanner = new CommentScanner();
 
     public ResponseScanEngine() {
         for (FindingCategory category : FindingCategory.values()) {
@@ -48,6 +49,10 @@ public class ResponseScanEngine {
         return secretScanner;
     }
 
+    public CommentScanner getCommentScanner() {
+        return commentScanner;
+    }
+
     public int scanProxyItem(ProxyHttpRequestResponse item) {
         if (item == null || !item.hasResponse()) {
             return 0;
@@ -58,7 +63,7 @@ public class ResponseScanEngine {
     }
 
     /**
-     * Scans a single HTTP request/response across all categories and populates the data stores.
+     * Scans a single HTTP request/response across all 5 categories and populates the data stores.
      *
      * @return count of new findings added
      */
@@ -67,9 +72,10 @@ public class ResponseScanEngine {
             return 0;
         }
 
-        // Early-exit pre-filters from sensitive-discoverer
+        // Early-exit pre-filters from sensitive-discoverer + strict JS file exclusion
         if (ScannerUtils.isResponseEmpty(item.response()) ||
             ScannerUtils.isMimeTypeBlacklisted(item.response()) ||
+            ScannerUtils.isJsFile(item.request(), item.response()) ||
             ScannerUtils.isOversized(item.response())) {
             return 0;
         }
@@ -104,6 +110,14 @@ public class ResponseScanEngine {
         List<FindingEntry> secretFindings = secretScanner.scan(item, dataStores.get(FindingCategory.SECRET));
         for (FindingEntry entry : secretFindings) {
             if (dataStores.get(FindingCategory.SECRET).addEntry(entry)) {
+                newFindings++;
+            }
+        }
+
+        // 5. Developer Comments
+        List<FindingEntry> commentFindings = commentScanner.scan(item, dataStores.get(FindingCategory.COMMENT));
+        for (FindingEntry entry : commentFindings) {
+            if (dataStores.get(FindingCategory.COMMENT).addEntry(entry)) {
                 newFindings++;
             }
         }

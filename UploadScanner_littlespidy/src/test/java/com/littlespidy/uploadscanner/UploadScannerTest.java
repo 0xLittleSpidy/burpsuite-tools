@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -754,6 +755,170 @@ class UploadScannerTest {
         assertTrue(filenames.contains("probe_custom.yml"));
         assertTrue(filenames.contains("probe_custom.json"));
         assertTrue(filenames.contains("probe_custom.sql"));
+    }
+
+    @Test
+    @DisplayName("SecLists Wordlist: Successfully load all 2,387 web-all-content-types from classpath")
+    void testSecListsWordlistLoading() {
+        List<String> types = UploadPayloadGenerator.loadSecListsContentTypes();
+        assertNotNull(types, "Wordlist must not be null");
+        assertEquals(2387, types.size(), "Expected all 2,387 content-types from SecLists");
+        assertTrue(types.contains("application/json"), "Wordlist should contain application/json");
+        assertTrue(types.contains("image/jpeg"), "Wordlist should contain image/jpeg");
+        assertTrue(types.contains("application/x-php"), "Wordlist should contain application/x-php");
+    }
+
+    @Test
+    @DisplayName("Content-Type: Generate MIME spoofing and header mutation payloads")
+    void testContentTypePayloadGeneration() {
+        UploadScannerConfig config = new UploadScannerConfig();
+        config.setTestMimeSpoofing(true);
+
+        List<PayloadDefinition> payloads =
+                UploadPayloadGenerator.generateContentTypePayloads(config, "test.jpg", false, "TEST_TOKEN_123");
+
+        assertFalse(payloads.isEmpty());
+
+        boolean foundPhpJpeg = false;
+        boolean foundEmptyMime = false;
+        boolean foundSemiBypass = false;
+        boolean foundMixedCase = false;
+
+        for (PayloadDefinition p : payloads) {
+            assertEquals("Content-Type", p.getCategory());
+            if ("MIME Spoof: PHP Shell with image/jpeg".equals(p.getName())) {
+                foundPhpJpeg = true;
+                assertEquals("image/jpeg", p.getContentType());
+                assertEquals("shell_spoof.php", p.getFilename());
+            }
+            if ("Header Mutation: Empty Content-Type".equals(p.getName())) {
+                foundEmptyMime = true;
+                assertEquals("", p.getContentType());
+            }
+            if ("Header Mutation: Semicolon Parameter Bypass".equals(p.getName())) {
+                foundSemiBypass = true;
+                assertTrue(p.getContentType().contains("evil="));
+            }
+            if ("Header Mutation: Mixed-Case Content-Type".equals(p.getName())) {
+                foundMixedCase = true;
+                assertEquals("ImAgE/jPeG", p.getContentType());
+            }
+        }
+
+        assertTrue(foundPhpJpeg, "Expected PHP Shell with image/jpeg spoof");
+        assertTrue(foundEmptyMime, "Expected empty Content-Type mutation");
+        assertTrue(foundSemiBypass, "Expected semicolon parameter bypass");
+        assertTrue(foundMixedCase, "Expected mixed-case Content-Type");
+    }
+
+    @Test
+    @DisplayName("File Size: Boundary payloads generate exact byte lengths with valid image structure")
+    void testFileSizePayloadGeneration() {
+        UploadScannerConfig config = new UploadScannerConfig();
+        config.setMaxFileSizeMb(20);
+
+        List<PayloadDefinition> payloads =
+                UploadPayloadGenerator.generateFileSizePayloads(config, "avatar.jpg", "TEST_TOKEN_123");
+
+        assertFalse(payloads.isEmpty());
+
+        // Test 0 Bytes empty file
+        PayloadDefinition zeroByte = payloads.get(0);
+        assertEquals(0, zeroByte.getContent().length, "First payload should be 0 bytes empty file");
+        assertEquals("File-Size", zeroByte.getCategory());
+
+        // Test 1 KB (1024 B)
+        PayloadDefinition oneKb = payloads.get(1);
+        assertEquals(1024, oneKb.getContent().length, "1 KB payload must be exactly 1024 bytes");
+        // Verify JPEG magic (FF D8) and EOI (FF D9)
+        byte[] b = oneKb.getContent();
+        assertEquals((byte) 0xFF, b[0]);
+        assertEquals((byte) 0xD8, b[1]);
+        assertEquals((byte) 0xFF, b[b.length - 2]);
+        assertEquals((byte) 0xD9, b[b.length - 1]);
+
+        // Test 1 MB (1,048,576 B)
+        PayloadDefinition oneMb = payloads.stream()
+                .filter(p -> p.getName().contains("1 MB"))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(oneMb, "1 MB payload should exist");
+        assertEquals(1024 * 1024, oneMb.getContent().length);
+    }
+
+    @Test
+    @DisplayName("EXIF: JPEG with GPS & PII canary embeds APP1 segment, TIFF header, and canary text")
+    void testExifJpegPayloadGeneration() {
+        UploadScannerConfig config = new UploadScannerConfig();
+        config.setTestExifLeakage(true);
+        config.setTestExifXss(true);
+        config.setTestExifInjections(true);
+
+        List<PayloadDefinition> payloads =
+                UploadPayloadGenerator.generateExifPayloads(config, "photo.jpg", "collab.net", "EXIF_TEST_CANARY_99");
+
+        assertFalse(payloads.isEmpty());
+
+        PayloadDefinition gpsCanary = payloads.stream()
+                .filter(p -> p.getName().contains("GPS & PII Canary"))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(gpsCanary);
+        byte[] jpegBytes = gpsCanary.getContent();
+        assertTrue(jpegBytes.length > 50, "JPEG with EXIF should be larger than 50 bytes");
+
+        // Verify SOI (FF D8)
+        assertEquals((byte) 0xFF, jpegBytes[0]);
+        assertEquals((byte) 0xD8, jpegBytes[1]);
+        // Verify APP1 marker (FF E1)
+        assertEquals((byte) 0xFF, jpegBytes[2]);
+        assertEquals((byte) 0xE1, jpegBytes[3]);
+
+        String jpegContentStr = new String(jpegBytes, StandardCharsets.ISO_8859_1);
+        assertTrue(jpegContentStr.contains("Exif"), "Must contain Exif header identifier");
+        assertTrue(jpegContentStr.contains("LittleSpidy Security Canary"), "Must contain Artist canary");
+        assertTrue(jpegContentStr.contains("AuditProbe 1.0"), "Must contain Model tag");
+        assertTrue(jpegContentStr.contains("CANARY_EXIF_LEAK_TEST_"), "Must contain unique canary token");
+
+        // Test EXIF XSS payload
+        PayloadDefinition xssPayload = payloads.stream()
+                .filter(p -> p.getName().contains("EXIF Stored XSS"))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(xssPayload);
+        String xssContent = new String(xssPayload.getContent(), StandardCharsets.ISO_8859_1);
+        assertTrue(xssContent.contains("<script>alert("), "Must contain XSS vector inside EXIF metadata");
+    }
+
+    @Test
+    @DisplayName("EXIF: PNG with tEXt chunks embeds valid signature and canary keywords")
+    void testExifPngPayloadGeneration() {
+        Map<String, String> tags = new LinkedHashMap<>();
+        tags.put("Author", "LittleSpidy Security Canary");
+        tags.put("Comment", "GPS: 37.7749,-122.4194 canary");
+
+        byte[] pngBytes = UploadPayloadGenerator.createPngWithTextChunks(tags);
+        assertNotNull(pngBytes);
+
+        // Verify 8-byte PNG header
+        assertEquals((byte) 0x89, pngBytes[0]);
+        assertEquals((byte) 'P', pngBytes[1]);
+        assertEquals((byte) 'N', pngBytes[2]);
+        assertEquals((byte) 'G', pngBytes[3]);
+
+        String pngStr = new String(pngBytes, StandardCharsets.ISO_8859_1);
+        assertTrue(pngStr.contains("tEXt"), "Must contain tEXt chunk");
+        assertTrue(pngStr.contains("LittleSpidy Security Canary"), "Must contain Author text");
+        assertTrue(pngStr.contains("37.7749"), "Must contain GPS coordinates");
+    }
+
+    @Test
+    @DisplayName("StageType: Verify new probe stages have expected display names")
+    void testNewStageTypes() {
+        assertEquals("Content-Type", StageType.CONTENT_TYPE_PROBE.getDisplayName());
+        assertEquals("File-Size", StageType.FILE_SIZE_PROBE.getDisplayName());
+        assertEquals("EXIF", StageType.EXIF_PROBE.getDisplayName());
     }
 
     // ── Helper methods for mocking Montoya HttpRequest & HttpHeader ──

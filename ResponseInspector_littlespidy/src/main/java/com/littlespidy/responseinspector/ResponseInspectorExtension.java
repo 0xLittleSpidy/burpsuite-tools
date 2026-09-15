@@ -13,6 +13,7 @@ import com.littlespidy.responseinspector.ui.ResponseInspectorTab;
  * 2. Strict SSNs, RFC 1918 internal IPs, and OS server filesystem paths
  * 3. Detailed error messages, stack traces, and database leaks
  * 4. Secrets, cloud tokens, API keys, and private keys
+ * 5. Developer comments (TODO/FIXME, credentials, debug hints, general)
  */
 public class ResponseInspectorExtension implements BurpExtension {
 
@@ -25,15 +26,16 @@ public class ResponseInspectorExtension implements BurpExtension {
 
         api.userInterface().registerSuiteTab("Response Inspector", mainTab);
 
-        api.extension().registerUnloadingHandler(() -> {
-            api.logging().logToOutput("Response Inspector unloaded.");
-        });
+        api.extension().registerUnloadingHandler(() ->
+            api.logging().logToOutput("Response Inspector unloaded.")
+        );
 
         api.logging().logToOutput("==================================================");
         api.logging().logToOutput("Response Inspector extension loaded successfully!");
         api.logging().logToOutput("Created with the help of an AI Agent and littlespidy.");
-        api.logging().logToOutput("Tabs: Passwords | PII, Network & Paths | Errors | Secrets");
+        api.logging().logToOutput("Tabs: Passwords | PII, Network & Paths | Errors | Secrets | Comments");
         api.logging().logToOutput("Trigger: On-demand via 'Load Proxy History' button");
+        api.logging().logToOutput("Note: JS files are excluded from scanning.");
         api.logging().logToOutput("==================================================");
     }
 }

@@ -25,7 +25,6 @@ public class JsFilesTableModel extends AbstractTableModel {
         "JS Path",
         "Passive .map",
         "On-Demand Probe",
-        "JS Recon (Paths / Keys)",
         "Map Recon (Paths / Keys)",
         "SourceMap Location",
         "Unpacked Files",
@@ -92,11 +91,10 @@ public class JsFilesTableModel extends AbstractTableModel {
             case 5 -> entry.getPath();
             case 6 -> entry.getPassiveMapStatus() != null ? entry.getPassiveMapStatus().getLabel() : "Not Found";
             case 7 -> entry.getActiveProbeStatus() != null ? entry.getActiveProbeStatus().getLabel() : "-";
-            case 8 -> entry.getJsReconSummary();
-            case 9 -> entry.getMapReconSummary();
-            case 10 -> entry.getSourceMapLocation() != null ? entry.getSourceMapLocation() : "-";
-            case 11 -> entry.getUnpackedProject() != null ? entry.getUnpackedProject().getTotalFiles() + " files" : "-";
-            case 12 -> formatSize(entry.getContentLength());
+            case 8 -> entry.getMapReconSummary();
+            case 9 -> entry.getSourceMapLocation() != null ? entry.getSourceMapLocation() : "-";
+            case 10 -> entry.getUnpackedProject() != null ? entry.getUnpackedProject().getTotalFiles() + " files" : "-";
+            case 11 -> formatSize(entry.getContentLength());
             default -> null;
         };
     }

@@ -171,7 +171,7 @@ public class SensitiveDiscovererTechniquesTest {
         assertTrue(tsvHeader.contains("ID\tCategory\tPattern\tMatch Value\tLocation\tMethod\tURL\tHost\tStatus"));
 
         String tsvRow = headerEntry.toTsvRow();
-        assertTrue(tsvRow.startsWith("1\tSecrets & Tokens\tJSON Web Token (JWT)\teyJhbGciOi...masked\tResponse Headers\tGET\thttps://api.example.com/auth"));
+        assertTrue(tsvRow.startsWith("1\tSecrets\tJSON Web Token (JWT)\teyJhbGciOi...masked\tResponse Headers\tGET\thttps://api.example.com/auth"));
 
         FindingEntry bodyEntry = new FindingEntry(
                 2,
@@ -224,5 +224,64 @@ public class SensitiveDiscovererTechniquesTest {
         // Filter: select "OpenAI API Key" and "JSON Web Token (JWT)"
         List<FindingEntry> multiFiltered = store.getFilteredEntries("", null, null, null, java.util.Set.of("OpenAI API Key", "JSON Web Token (JWT)"), false, null, null);
         assertEquals(2, multiFiltered.size());
+    }
+
+    @Test
+    public void testJsFileExclusion() {
+        // Path endings
+        assertTrue(ScannerUtils.isJsPath("/assets/app.js"));
+        assertTrue(ScannerUtils.isJsPath("https://example.com/chunk-123.mjs?ver=2.1"));
+        assertTrue(ScannerUtils.isJsPath("/bundle.js#main"));
+        assertTrue(ScannerUtils.isJsPath("/source.ts"));
+        assertTrue(ScannerUtils.isJsPath("/source.tsx"));
+        assertTrue(ScannerUtils.isJsPath("/app.js.map"));
+        assertFalse(ScannerUtils.isJsPath("https://example.com/api/v1/users"));
+        assertFalse(ScannerUtils.isJsPath("/index.html"));
+        assertFalse(ScannerUtils.isJsPath("/styles.css"));
+
+        // Content types
+        assertTrue(ScannerUtils.isJsContentType("application/javascript"));
+        assertTrue(ScannerUtils.isJsContentType("text/javascript; charset=utf-8"));
+        assertTrue(ScannerUtils.isJsContentType("application/x-javascript"));
+        assertFalse(ScannerUtils.isJsContentType("text/html"));
+        assertFalse(ScannerUtils.isJsContentType("application/json"));
+    }
+
+    @Test
+    public void testSecretVerifierService() {
+        FindingEntry awsFinding = new FindingEntry(
+                1,
+                FindingCategory.SECRET,
+                "AWS Access Key",
+                "AKIAIOSFODNN7EXAMPLE",
+                "Response Body",
+                "GET",
+                "https://api.target.com/user",
+                "api.target.com",
+                "/user",
+                (short) 200,
+                "application/json",
+                100,
+                null,
+                "12:00",
+                0,
+                20
+        );
+
+        com.littlespidy.responseinspector.engine.SecretVerifierService.SecretVerificationSpec spec =
+                com.littlespidy.responseinspector.engine.SecretVerifierService.generateVerification(awsFinding);
+
+        assertNotNull(spec);
+        assertTrue(spec.curlCommand().contains("sts.amazonaws.com"));
+        assertTrue(spec.curlCommand().contains("AKIAIOSFODNN7EXAMPLE"));
+        assertEquals("POST", spec.httpMethod());
+    }
+
+    @Test
+    public void testCommentCategories() {
+        assertEquals(4, com.littlespidy.responseinspector.engine.CommentScanner.getCommentCategories().size() - 1);
+        assertTrue(com.littlespidy.responseinspector.engine.CommentScanner.getCommentTypes().contains("Single-Line (//)"));
+        assertTrue(com.littlespidy.responseinspector.engine.CommentScanner.getCommentTypes().contains("Multi-Line (/* */)"));
+        assertTrue(com.littlespidy.responseinspector.engine.CommentScanner.getCommentTypes().contains("HTML (<!-- -->)"));
     }
 }

@@ -59,6 +59,16 @@ public class UploadScannerConfig {
     private boolean testExtMedia = true;
     private String customExtensions = "";
 
+    // Category 7: Content-Type, File Size & EXIF Testing
+    private boolean testContentTypeValidation = true;
+    private boolean testMimeSpoofing = true;
+    private boolean testSecListsWordlist = false;
+    private boolean testFileSizeLimits = true;
+    private int maxFileSizeMb = 20;
+    private boolean testExifLeakage = true;
+    private boolean testExifXss = true;
+    private boolean testExifInjections = true;
+
     public ReDownloaderConfig getRedownloaderConfig() {
         return redownloaderConfig;
     }
@@ -232,6 +242,14 @@ public class UploadScannerConfig {
             setTestExtWebData(selected);
             setTestExtArchives(selected);
             setTestExtMedia(selected);
+        } else if ("Validation & EXIF".equalsIgnoreCase(category) || "Validation".equalsIgnoreCase(category)) {
+            setTestContentTypeValidation(selected);
+            setTestMimeSpoofing(selected);
+            setTestSecListsWordlist(selected);
+            setTestFileSizeLimits(selected);
+            setTestExifLeakage(selected);
+            setTestExifXss(selected);
+            setTestExifInjections(selected);
         }
     }
 
@@ -242,7 +260,33 @@ public class UploadScannerConfig {
         selectCategory("Client & Polyglots", selected);
         selectCategory("Archives & Quirks", selected);
         selectCategory("Allowed Extensions", selected);
+        selectCategory("Validation & EXIF", selected);
     }
+
+    // Category 7: Content-Type, File Size & EXIF Getters & Setters
+    public boolean isTestContentTypeValidation() { return testContentTypeValidation; }
+    public void setTestContentTypeValidation(boolean testContentTypeValidation) { this.testContentTypeValidation = testContentTypeValidation; }
+
+    public boolean isTestMimeSpoofing() { return testMimeSpoofing; }
+    public void setTestMimeSpoofing(boolean testMimeSpoofing) { this.testMimeSpoofing = testMimeSpoofing; }
+
+    public boolean isTestSecListsWordlist() { return testSecListsWordlist; }
+    public void setTestSecListsWordlist(boolean testSecListsWordlist) { this.testSecListsWordlist = testSecListsWordlist; }
+
+    public boolean isTestFileSizeLimits() { return testFileSizeLimits; }
+    public void setTestFileSizeLimits(boolean testFileSizeLimits) { this.testFileSizeLimits = testFileSizeLimits; }
+
+    public int getMaxFileSizeMb() { return maxFileSizeMb; }
+    public void setMaxFileSizeMb(int maxFileSizeMb) { this.maxFileSizeMb = Math.max(1, maxFileSizeMb); }
+
+    public boolean isTestExifLeakage() { return testExifLeakage; }
+    public void setTestExifLeakage(boolean testExifLeakage) { this.testExifLeakage = testExifLeakage; }
+
+    public boolean isTestExifXss() { return testExifXss; }
+    public void setTestExifXss(boolean testExifXss) { this.testExifXss = testExifXss; }
+
+    public boolean isTestExifInjections() { return testExifInjections; }
+    public void setTestExifInjections(boolean testExifInjections) { this.testExifInjections = testExifInjections; }
 
     // Backwards-Compatible Aliases
     public boolean isTestWebShells() { return testPhp || testJsp || testAsp; }

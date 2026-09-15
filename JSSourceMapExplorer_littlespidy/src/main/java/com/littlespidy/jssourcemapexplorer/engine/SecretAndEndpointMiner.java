@@ -300,19 +300,190 @@ public class SecretAndEndpointMiner {
         Pattern.compile("^//[\\s*#]")
     );
 
+    private static final Pattern COMMENT_SCAN_PATTERN = Pattern.compile(
+        "(/\\*[\\s\\S]*?\\*/)|(<!--[\\s\\S]*?-->)|((?<!:)\\/\\/(?![\\/\\*])[^\\r\\n]*)"
+    );
+    private static final Pattern COMMENT_TODO_PATTERN = Pattern.compile("(?i)\\b(todo|fixme|hack|xxx|bug|temp|workaround|revisit|cleanup)\\b");
+    private static final Pattern COMMENT_CRED_PATTERN = Pattern.compile("(?i)\\b(password|passwd|secret|token|apikey|api_key|auth|bearer|credential|admin|root|private_key)\\b");
+    private static final Pattern COMMENT_DEBUG_PATTERN = Pattern.compile("(?i)\\b(debug|test|dev|staging|localhost|internal|mock|deprecated|danger|security)\\b");
+
+    public record SecurityBypassRule(
+        String framework,
+        String method,
+        String risk,
+        String confidence,
+        Pattern pattern,
+        String description
+    ) {}
+
+    private static final List<SecurityBypassRule> SECURITY_BYPASS_RULES = List.of(
+        // ── Angular DomSanitizer ──
+        new SecurityBypassRule(
+            "Angular", "bypassSecurityTrustHtml", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\b(bypassSecurityTrustHtml)\\s*\\(([^)]*)\\)"),
+            "Angular DomSanitizer HTML bypass: renders untrusted content as trusted HTML, leading to direct XSS"
+        ),
+        new SecurityBypassRule(
+            "Angular", "bypassSecurityTrustScript", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\b(bypassSecurityTrustScript)\\s*\\(([^)]*)\\)"),
+            "Angular DomSanitizer Script bypass: directly executes untrusted content as trusted JavaScript"
+        ),
+        new SecurityBypassRule(
+            "Angular", "bypassSecurityTrustStyle", "High", "High [Firm]",
+            Pattern.compile("(?i)\\b(bypassSecurityTrustStyle)\\s*\\(([^)]*)\\)"),
+            "Angular DomSanitizer Style bypass: allows arbitrary CSS injection and potential data exfiltration"
+        ),
+        new SecurityBypassRule(
+            "Angular", "bypassSecurityTrustUrl", "High", "High [Firm]",
+            Pattern.compile("(?i)\\b(bypassSecurityTrustUrl)\\s*\\(([^)]*)\\)"),
+            "Angular DomSanitizer URL bypass: permits javascript: or untrusted navigation URIs"
+        ),
+        new SecurityBypassRule(
+            "Angular", "bypassSecurityTrustResourceUrl", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\b(bypassSecurityTrustResourceUrl)\\s*\\(([^)]*)\\)"),
+            "Angular DomSanitizer ResourceUrl bypass: allows untrusted script or iframe sources"
+        ),
+        new SecurityBypassRule(
+            "Angular", "ɵɵtrustConstantHtml", "High", "High [Firm]",
+            Pattern.compile("\\b(ɵɵtrustConstant(?:Html|ResourceUrl))\\s*\\(([^)]*)\\)"),
+            "Angular Ivy compiled template internal trust bypass method"
+        ),
+        new SecurityBypassRule(
+            "Angular", "$sce.trustAsHtml", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\$(?:sce|sceDelegate)\\.(trustAsHtml)\\s*\\(([^)]*)\\)"),
+            "AngularJS $sce trust bypass: disables Strict Contextual Escaping on untrusted HTML"
+        ),
+        new SecurityBypassRule(
+            "Angular", "$sce.trustAsJs", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\$(?:sce|sceDelegate)\\.(trustAsJs)\\s*\\(([^)]*)\\)"),
+            "AngularJS $sce trust bypass: executes untrusted string as trusted JavaScript"
+        ),
+        new SecurityBypassRule(
+            "Angular", "$sce.trustAsResourceUrl", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\$(?:sce|sceDelegate)\\.(trustAsResourceUrl|trustAsUrl)\\s*\\(([^)]*)\\)"),
+            "AngularJS $sce trust bypass: loads untrusted resource URL or script"
+        ),
+
+        // ── React / Preact ──
+        new SecurityBypassRule(
+            "React", "dangerouslySetInnerHTML", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\b(dangerouslySetInnerHTML)\\s*=\\s*\\{\\s*(?:\\{\\s*__html\\s*:|\\w+)"),
+            "React dangerouslySetInnerHTML: injects raw unescaped HTML directly into the DOM"
+        ),
+        new SecurityBypassRule(
+            "React", "dangerouslySetInnerHTML (prop)", "Critical", "High [Firm]",
+            Pattern.compile("(?i)\\b(dangerouslySetInnerHTML)\\b"),
+            "React dangerouslySetInnerHTML property detected"
+        ),
+
+        // ── Vue.js ──
+        new SecurityBypassRule(
+            "Vue", "v-html", "High", "High [Firm]",
+            Pattern.compile("(?i)\\b(v-html)\\s*=\\s*[\"']([^\"']+)[\"']"),
+            "Vue.js v-html directive: updates element innerHTML with raw HTML, leading to XSS on untrusted data"
+        ),
+        new SecurityBypassRule(
+            "Vue", "domProps.innerHTML", "High", "High [Firm]",
+            Pattern.compile("(?i)domProps\\s*:\\s*\\{[^}]*\\b(innerHTML)\\s*:\\s*([^},]+)"),
+            "Vue compiled render function binding unescaped innerHTML"
+        ),
+        new SecurityBypassRule(
+            "Vue", "{{{ ... }}}", "High", "Medium",
+            Pattern.compile("(\\{\\{\\{[^{}]+\\}\\}\\})"),
+            "Vue raw unescaped HTML interpolation syntax (triple-mustache)"
+        ),
+
+        // ── Svelte ──
+        new SecurityBypassRule(
+            "Svelte", "{@html ...}", "High", "High [Firm]",
+            Pattern.compile("\\{(@html)\\s+([^}]+)\\}"),
+            "Svelte @html tag: renders raw unescaped HTML directly into document without sanitization"
+        ),
+
+        // ── Sanitizer / Policy Bypasses (DOMPurify, Trusted Types) ──
+        new SecurityBypassRule(
+            "Sanitizer / Policy Bypass", "DOMPurify.sanitize (loose config)", "High", "High [Firm]",
+            Pattern.compile("(?i)DOMPurify\\.sanitize\\s*\\([^,)]+,\\s*\\{[^}]*\\b(ADD_TAGS|ADD_ATTR|WHOLE_DOCUMENT|RETURN_DOM_FRAGMENT|CUSTOM_ELEMENT_HANDLING)\\b"),
+            "DOMPurify configured with loose sanitization options or custom allowed tags/attributes"
+        ),
+        new SecurityBypassRule(
+            "Sanitizer / Policy Bypass", "trustedTypes.createPolicy (passthrough)", "Critical", "High [Firm]",
+            Pattern.compile("(?i)trustedTypes\\.createPolicy\\s*\\(\\s*['\"][^'\"]+['\"]\\s*,\\s*\\{[^}]*\\b(createHTML|createScript|createScriptURL)\\s*:\\s*(?:function\\s*\\([^)]*\\)|\\([^)]*\\)\\s*=>|[a-zA-Z0-9_$]+\\s*=>)"),
+            "Trusted Types policy configured with custom passthrough function bypassing browser enforcement"
+        ),
+
+        // ── Direct Dangerous DOM Sinks ──
+        new SecurityBypassRule(
+            "Vanilla DOM Sink", "innerHTML assignment", "High", "High [Firm]",
+            Pattern.compile("\\.innerHTML\\s*=\\s*([^;\\n]+)"),
+            "Direct innerHTML property assignment: parses and inserts untrusted markup into DOM"
+        ),
+        new SecurityBypassRule(
+            "Vanilla DOM Sink", "outerHTML assignment", "High", "High [Firm]",
+            Pattern.compile("\\.outerHTML\\s*=\\s*([^;\\n]+)"),
+            "Direct outerHTML property assignment replaces element with unescaped HTML"
+        ),
+        new SecurityBypassRule(
+            "Vanilla DOM Sink", "document.write", "High", "High [Firm]",
+            Pattern.compile("\\bdocument\\.(write(?:ln)?)\\s*\\(([^)]*)\\)"),
+            "document.write: dynamically writes raw HTML strings into open document stream"
+        ),
+        new SecurityBypassRule(
+            "Vanilla DOM Sink", "insertAdjacentHTML", "High", "High [Firm]",
+            Pattern.compile("\\b(insertAdjacentHTML)\\s*\\(([^)]*)\\)"),
+            "insertAdjacentHTML: parses text as HTML and inserts into DOM at specified position"
+        ),
+        new SecurityBypassRule(
+            "Vanilla DOM Sink", "eval()", "Critical", "High [Firm]",
+            Pattern.compile("(?<![a-zA-Z0-9_$.])eval\\s*\\(([^)]+)\\)"),
+            "eval(): directly executes string as JavaScript code, critical code injection sink"
+        ),
+        new SecurityBypassRule(
+            "Vanilla DOM Sink", "new Function()", "Critical", "High [Firm]",
+            Pattern.compile("\\bnew\\s+Function\\s*\\(([^)]+)\\)"),
+            "new Function(): dynamically constructs executable code from string arguments"
+        ),
+        new SecurityBypassRule(
+            "jQuery", "$.html()", "High", "High [Firm]",
+            Pattern.compile("\\$\\([^)]*\\)\\.(html)\\s*\\(([^)]+)\\)"),
+            "jQuery .html(content): dynamically sets inner HTML with untrusted string argument"
+        )
+    );
+
     public record MiningResult(
         List<DiscoveredSecret> secrets,
         List<DiscoveredEndpoint> endpoints,
         List<DiscoveredCloudUrl> cloudUrls,
-        List<DiscoveredDependency> dependencies
-    ) {}
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments,
+        List<DiscoveredSecurityBypass> securityBypasses
+    ) {
+        public MiningResult(
+            List<DiscoveredSecret> secrets,
+            List<DiscoveredEndpoint> endpoints,
+            List<DiscoveredCloudUrl> cloudUrls,
+            List<DiscoveredDependency> dependencies,
+            List<DiscoveredComment> comments
+        ) {
+            this(secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList());
+        }
+
+        public MiningResult(
+            List<DiscoveredSecret> secrets,
+            List<DiscoveredEndpoint> endpoints,
+            List<DiscoveredCloudUrl> cloudUrls,
+            List<DiscoveredDependency> dependencies
+        ) {
+            this(secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList());
+        }
+    }
 
     /**
      * Primary mining entry point. Analyzes raw source code with size ceilings and execution budgets.
      */
     public static MiningResult mine(String sourceLocation, String sourceType, String sourceCode) {
         if (sourceCode == null || sourceCode.trim().isEmpty()) {
-            return new MiningResult(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+            return new MiningResult(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
 
         // Cap analysis to 5MB to prevent memory exhaustion / OOM
@@ -323,11 +494,15 @@ public class SecretAndEndpointMiner {
         List<DiscoveredEndpoint> endpoints = new ArrayList<>();
         List<DiscoveredCloudUrl> cloudUrls = new ArrayList<>();
         List<DiscoveredDependency> dependencies = new ArrayList<>();
+        List<DiscoveredComment> comments = new ArrayList<>();
+        List<DiscoveredSecurityBypass> securityBypasses = new ArrayList<>();
 
         Set<String> seenEndpoints = new HashSet<>();
         Set<String> seenSecrets = new HashSet<>();
         Set<String> seenCloudUrls = new HashSet<>();
         Set<String> seenDependencies = new HashSet<>();
+        Set<String> seenComments = new HashSet<>();
+        Set<String> seenBypasses = new HashSet<>();
 
         // 1. Dependency Confusion Blocks
         Matcher depBlockMatcher = DEPENDENCIES_BLOCK_REGEX.matcher(scannable);
@@ -540,7 +715,83 @@ public class SecretAndEndpointMiner {
             }
         } catch (Exception ignored) {}
 
-        return new MiningResult(secrets, endpoints, cloudUrls, dependencies);
+        // 11. Developer Comments Mining (single-line //, multi-line /* */, HTML <!-- -->)
+        Matcher commentMatcher = COMMENT_SCAN_PATTERN.matcher(scannable);
+        while (commentMatcher.find()) {
+            if (System.nanoTime() > deadline || comments.size() >= 2500) break;
+            String rawComment = commentMatcher.group();
+            if (rawComment == null || rawComment.contains("sourceMappingURL=")) continue;
+
+            String cleanText = rawComment.replaceAll("^(/\\*+|<!--|//+)", "")
+                                         .replaceAll("(\\*/|-->)$", "")
+                                         .trim();
+            if (cleanText.isEmpty() || cleanText.length() < 3 || cleanText.matches("^[=\\-_*#~\\s]+$")) {
+                continue;
+            }
+
+            if (seenComments.add(cleanText)) {
+                int start = commentMatcher.start();
+                int end = commentMatcher.end();
+                int line = getLineNumber(scannable, start);
+
+                String type = rawComment.startsWith("//") ? "Single-Line (//)"
+                    : rawComment.startsWith("/*") ? "Multi-Line (/* */)"
+                    : "HTML (<!-- -->)";
+
+                String category = COMMENT_TODO_PATTERN.matcher(cleanText).find() ? "TODO / FIXME"
+                    : COMMENT_CRED_PATTERN.matcher(cleanText).find() ? "Credentials / Auth"
+                    : COMMENT_DEBUG_PATTERN.matcher(cleanText).find() ? "Debug / Config"
+                    : "General";
+
+                String snippet = cleanText.length() > 140 ? cleanText.substring(0, 140) + "..." : cleanText;
+                comments.add(new DiscoveredComment(
+                    sourceLocation, sourceType, type, category, cleanText, line, start, end, snippet
+                ));
+            }
+        }
+
+        // 12. Security Bypass Methods & Dangerous DOM Sinks (Angular, React, Vue, Svelte, Sanitizers, Vanilla)
+        for (SecurityBypassRule rule : SECURITY_BYPASS_RULES) {
+            if (System.nanoTime() > deadline || securityBypasses.size() >= 1000) break;
+            Matcher m = rule.pattern().matcher(scannable);
+            while (m.find()) {
+                if (System.nanoTime() > deadline || securityBypasses.size() >= 1000) break;
+
+                // False-positive suppression for innerHTML/outerHTML empty assignments
+                if ("innerHTML assignment".equals(rule.method()) || "outerHTML assignment".equals(rule.method())) {
+                    String assigned = m.groupCount() >= 1 ? m.group(1).trim() : "";
+                    if (assigned.equals("\"\"") || assigned.equals("''") || assigned.equals("``")
+                        || assigned.equals("null") || assigned.equals("undefined") || assigned.isEmpty()) {
+                        continue;
+                    }
+                }
+
+                int start = m.start();
+                int end = m.end();
+                int line = getLineNumber(scannable, start);
+                String dedupeKey = line + ":" + rule.method() + ":" + (start / 40);
+
+                if (seenBypasses.add(dedupeKey)) {
+                    // Extract surrounding context line
+                    int snippetStart = Math.max(0, start - 40);
+                    int snippetEnd = Math.min(scannable.length(), end + 60);
+                    int prevNewline = scannable.lastIndexOf('\n', start);
+                    if (prevNewline >= 0 && prevNewline >= start - 80) snippetStart = prevNewline + 1;
+                    int nextNewline = scannable.indexOf('\n', end);
+                    if (nextNewline >= 0 && nextNewline <= end + 100) snippetEnd = nextNewline;
+
+                    String snippet = scannable.substring(snippetStart, snippetEnd).trim();
+                    if (snippet.length() > 200) snippet = snippet.substring(0, 200) + "...";
+
+                    securityBypasses.add(new DiscoveredSecurityBypass(
+                        sourceLocation, sourceType, rule.framework(), rule.method(),
+                        rule.risk(), rule.confidence(), line, start, end, snippet, rule.description()
+                    ));
+                }
+            }
+        }
+
+        return new MiningResult(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses);
     }
 
     private static String classifyCloudProvider(String url) {

@@ -9,7 +9,11 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
+import com.littlespidy.responseinspector.engine.CommentScanner;
 import com.littlespidy.responseinspector.engine.ResponseScanEngine;
+import com.littlespidy.responseinspector.engine.ScannerUtils;
+import com.littlespidy.responseinspector.engine.SecretScanner;
+import com.littlespidy.responseinspector.engine.SecretVerifierService;
 import com.littlespidy.responseinspector.model.FindingCategory;
 import com.littlespidy.responseinspector.model.FindingEntry;
 import com.littlespidy.responseinspector.model.InScopeDomainManager;
@@ -18,11 +22,14 @@ import com.littlespidy.responseinspector.model.InspectorDataStore;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -38,11 +45,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Reusable findings panel supporting master-detail layout, multi-select toolbar filters,
  * in-scope domain selection, live ingestion progress bar, deep-linking navigation quad,
- * inter-tool integration (Repeater/Intruder/Organizer), and row pinning.
+ * dedicated Finding Type filter per category, KeyHacks credential verification for secrets,
+ * and inter-tool integration (Repeater/Intruder/Organizer).
+ *
+ * @author littlespidy
  */
 public class CategoryFindingsPanel extends JPanel {
 
@@ -70,7 +81,13 @@ public class CategoryFindingsPanel extends JPanel {
     private final MultiSelectFilterButton methodFilterBtn;
     private final MultiSelectFilterButton statusFilterBtn;
     private final MultiSelectFilterButton contentTypeFilterBtn;
-    private final MultiSelectFilterButton secretTypeFilterBtn;
+
+    // Dedicated Finding Type filter button on every tab
+    private final MultiSelectFilterButton findingTypeFilterBtn;
+
+    // COMMENT-only: semantic category filter (TODO, Creds, Debug, General)
+    private final MultiSelectFilterButton commentCategoryFilterBtn;
+
     private final JButton loadHistoryBtn;
     private JButton configPasswordsBtn;
 
@@ -91,7 +108,7 @@ public class CategoryFindingsPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        // Table Model & Sorter
+        // Table Model & Sorter (Pin column removed completely)
         tableModel = new FindingsTableModel(dataStore);
         table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -99,23 +116,22 @@ public class CategoryFindingsPanel extends JPanel {
         sorter = new TableRowSorter<>(tableModel);
         table.setRowSorter(sorter);
 
-        // Styling & Renderers
-        table.getColumnModel().getColumn(0).setPreferredWidth(45);  // #
+        // Column widths
+        // Cols: 0=#, 1=Method, 2=Status, 3=Finding Type, 4=Match Excerpt, 5=Location, 6=Length, 7=Content-Type, 8=URL, 9=Time
+        table.getColumnModel().getColumn(0).setPreferredWidth(45);   // #
         table.getColumnModel().getColumn(0).setMaxWidth(60);
-        table.getColumnModel().getColumn(1).setPreferredWidth(35);  // Pin
-        table.getColumnModel().getColumn(1).setMaxWidth(45);
-        table.getColumnModel().getColumn(2).setPreferredWidth(60);  // Method
-        table.getColumnModel().getColumn(2).setMaxWidth(80);
-        table.getColumnModel().getColumn(3).setPreferredWidth(60);  // Status
-        table.getColumnModel().getColumn(3).setMaxWidth(75);
-        table.getColumnModel().getColumn(3).setCellRenderer(new StatusCodeRenderer());
-        table.getColumnModel().getColumn(4).setPreferredWidth(160); // Type
-        table.getColumnModel().getColumn(5).setPreferredWidth(220); // Match
-        table.getColumnModel().getColumn(6).setPreferredWidth(110); // Location
-        table.getColumnModel().getColumn(7).setPreferredWidth(65);  // Length
-        table.getColumnModel().getColumn(8).setPreferredWidth(100); // Content-Type
-        table.getColumnModel().getColumn(9).setPreferredWidth(320); // URL
-        table.getColumnModel().getColumn(10).setPreferredWidth(70); // Time
+        table.getColumnModel().getColumn(1).setPreferredWidth(60);   // Method
+        table.getColumnModel().getColumn(1).setMaxWidth(80);
+        table.getColumnModel().getColumn(2).setPreferredWidth(60);   // Status
+        table.getColumnModel().getColumn(2).setMaxWidth(75);
+        table.getColumnModel().getColumn(2).setCellRenderer(new StatusCodeRenderer());
+        table.getColumnModel().getColumn(3).setPreferredWidth(180);  // Finding Type
+        table.getColumnModel().getColumn(4).setPreferredWidth(260);  // Match Excerpt
+        table.getColumnModel().getColumn(5).setPreferredWidth(130);  // Location
+        table.getColumnModel().getColumn(6).setPreferredWidth(65);   // Length
+        table.getColumnModel().getColumn(7).setPreferredWidth(110);  // Content-Type
+        table.getColumnModel().getColumn(8).setPreferredWidth(320);  // URL
+        table.getColumnModel().getColumn(9).setPreferredWidth(70);   // Time
 
         // Montoya Built-in Editors (Pretty/Raw/Hex)
         reqEditor = api.userInterface().createHttpRequestEditor();
@@ -125,7 +141,7 @@ public class CategoryFindingsPanel extends JPanel {
         editorTabs.addTab("Request", reqEditor.uiComponent());
         editorTabs.addTab("Response", respEditor.uiComponent());
 
-        // Deep-Linking Table Selection Listener (Auto-Switch, Marker, Search, Caret Scroll)
+        // Deep-Linking Table Selection Listener
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int viewRow = table.getSelectedRow();
@@ -139,13 +155,25 @@ public class CategoryFindingsPanel extends JPanel {
             }
         });
 
-        // Top Toolbar
+        // Double-click secret row to verify in Burp Repeater
+        if (category == FindingCategory.SECRET) {
+            table.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                        verifySelectedSecret();
+                    }
+                }
+            });
+        }
+
+        // ─── Top Toolbar ──────────────────────────────────────────────────────────
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         toolbar.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
         loadHistoryBtn = new JButton("Load Proxy History");
         loadHistoryBtn.setFont(loadHistoryBtn.getFont().deriveFont(Font.BOLD));
-        loadHistoryBtn.setToolTipText("Scan all HTTP responses currently in Burp Proxy history");
+        loadHistoryBtn.setToolTipText("Scan all HTTP responses currently in Burp Proxy history (JS files excluded)");
         loadHistoryBtn.addActionListener(e -> runProxyHistoryScan());
         toolbar.add(loadHistoryBtn);
 
@@ -156,6 +184,19 @@ public class CategoryFindingsPanel extends JPanel {
             configPasswordsBtn.setToolTipText("Configure target passwords to scan for in responses");
             configPasswordsBtn.addActionListener(e -> openPasswordConfigDialog());
             toolbar.add(configPasswordsBtn);
+        }
+
+        // Secret-specific toolbar buttons (Signatures Catalog & KeyHacks Repeater verification)
+        if (category == FindingCategory.SECRET) {
+            JButton catalogBtn = new JButton("📋 Signatures Catalog (" + scanEngine.getSecretScanner().getCuratedSignatures().size() + ")");
+            catalogBtn.setToolTipText("View complete catalog of all curated secret signatures, match patterns, and categories");
+            catalogBtn.addActionListener(e -> showSignaturesCatalogDialog());
+            toolbar.add(catalogBtn);
+
+            JButton verifyBtn = new JButton("🧪 Verify Secret (Repeater)");
+            verifyBtn.setToolTipText("Send non-destructive verification request directly to Burp Repeater");
+            verifyBtn.addActionListener(e -> verifySelectedSecret());
+            toolbar.add(verifyBtn);
         }
 
         toolbar.add(new JSeparator(JSeparator.VERTICAL));
@@ -175,20 +216,52 @@ public class CategoryFindingsPanel extends JPanel {
 
         toolbar.add(new JSeparator(JSeparator.VERTICAL));
 
-        if (category == FindingCategory.SECRET) {
-            List<String> secretTypes = new ArrayList<>();
-            secretTypes.add("All Secret Types");
-            secretTypes.addAll(scanEngine.getSecretScanner().getRuleNames());
-            secretTypeFilterBtn = new MultiSelectFilterButton(
-                    "Secret Type",
-                    secretTypes,
-                    sel -> refreshView()
-            );
-            toolbar.add(secretTypeFilterBtn);
-        } else {
-            secretTypeFilterBtn = null;
+        // ── Tab-specific Finding Type filter on every tab ──
+        List<String> findingTypes = new ArrayList<>();
+        findingTypes.add("All Finding Types");
+        if (category == FindingCategory.PASSWORD) {
+            findingTypes.add("Configured Password");
+        } else if (category == FindingCategory.PII_NETWORK_PATH) {
+            findingTypes.addAll(List.of("Social Security Number (SSN)", "RFC1918 Internal IP", "Server File Path"));
+        } else if (category == FindingCategory.ERROR) {
+            findingTypes.addAll(List.of(
+                    "Apache Server Error", "NGINX Server Error", "JBoss / WildFly Error",
+                    "Waitress Python Server Error", "WebSEAL Error",
+                    "ASP.NET Exception / Stack Trace",
+                    "MySQL / MariaDB Error", "PostgreSQL Error", "Oracle DB Error",
+                    "Microsoft SQL Server Error", "SQLite Error", "IBM DB2 Error",
+                    "MongoDB Error", "LDAP Leakage",
+                    "PHP Error / Stack Trace", "Java Exception / Stack Trace",
+                    "Python Traceback / Error", "Ruby / Rails Error",
+                    "Node.js / JavaScript Error", "Go Panic / Stack Trace",
+                    "Django ORM Error", "Hibernate / JPA Error"
+            ));
+        } else if (category == FindingCategory.SECRET) {
+            findingTypes.addAll(scanEngine.getSecretScanner().getRuleNames());
+        } else if (category == FindingCategory.COMMENT) {
+            findingTypes.addAll(CommentScanner.getCommentTypes().stream().filter(s -> !s.startsWith("All")).toList());
         }
 
+        findingTypeFilterBtn = new MultiSelectFilterButton(
+                "Finding Type",
+                findingTypes,
+                sel -> refreshView()
+        );
+        toolbar.add(findingTypeFilterBtn);
+
+        // ── COMMENT-only: Comment Category filter (TODO, Credentials, Debug, General) ──
+        if (category == FindingCategory.COMMENT) {
+            commentCategoryFilterBtn = new MultiSelectFilterButton(
+                    "Category",
+                    CommentScanner.getCommentCategories(),
+                    sel -> refreshView()
+            );
+            toolbar.add(commentCategoryFilterBtn);
+        } else {
+            commentCategoryFilterBtn = null;
+        }
+
+        // ── Standard Burp-architecture filters ──
         methodFilterBtn = new MultiSelectFilterButton(
                 "Method",
                 List.of("All Methods", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"),
@@ -205,7 +278,7 @@ public class CategoryFindingsPanel extends JPanel {
 
         contentTypeFilterBtn = new MultiSelectFilterButton(
                 "Content-Type",
-                List.of("All Types", "JSON", "HTML", "JavaScript", "XML", "Plain"),
+                List.of("All Types", "JSON", "HTML", "XML", "Plain"),
                 sel -> refreshView()
         );
         toolbar.add(contentTypeFilterBtn);
@@ -213,26 +286,11 @@ public class CategoryFindingsPanel extends JPanel {
         toolbar.add(new JLabel("Search:"));
         searchField = new JTextField(12);
         searchField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) { refreshView(); }
-            @Override
-            public void removeUpdate(DocumentEvent e) { refreshView(); }
-            @Override
-            public void changedUpdate(DocumentEvent e) { refreshView(); }
+            @Override public void insertUpdate(DocumentEvent e) { refreshView(); }
+            @Override public void removeUpdate(DocumentEvent e) { refreshView(); }
+            @Override public void changedUpdate(DocumentEvent e) { refreshView(); }
         });
         toolbar.add(searchField);
-
-        JButton pinBtn = new JButton("Pin Selected");
-        pinBtn.setToolTipText("Show only selected rows, isolating them from general filters");
-        pinBtn.addActionListener(e -> pinSelectedRows());
-        toolbar.add(pinBtn);
-
-        JButton clearPinsBtn = new JButton("Clear Pins");
-        clearPinsBtn.addActionListener(e -> {
-            dataStore.clearPins();
-            refreshView();
-        });
-        toolbar.add(clearPinsBtn);
 
         JButton clearDataBtn = new JButton("Clear");
         clearDataBtn.addActionListener(e -> {
@@ -250,7 +308,7 @@ public class CategoryFindingsPanel extends JPanel {
         statsLabel.setFont(statsLabel.getFont().deriveFont(Font.BOLD));
         toolbar.add(statsLabel);
 
-        // Dedicated Live Ingestion Status Strip (WEST: status label, EAST: progress bar)
+        // Dedicated Live Ingestion Status Strip
         JPanel statusRow = new JPanel(new BorderLayout(6, 2));
         statusRow.setBorder(BorderFactory.createEmptyBorder(2, 8, 4, 8));
 
@@ -293,28 +351,32 @@ public class CategoryFindingsPanel extends JPanel {
         Set<String> methods = methodFilterBtn.getSelected();
         Set<String> statuses = statusFilterBtn.getSelected();
         Set<String> contentTypes = contentTypeFilterBtn.getSelected();
-        Set<String> patterns = secretTypeFilterBtn != null ? secretTypeFilterBtn.getSelected() : null;
+        Set<String> patternFilter = findingTypeFilterBtn.getSelected();
 
         List<FindingEntry> filtered = dataStore.getFilteredEntries(
                 search,
                 statuses,
                 contentTypes,
                 methods,
-                patterns,
+                patternFilter,
                 inScope,
                 url -> api.scope().isInScope(url),
                 domainManager
         );
 
+        // Post-filter: comment semantic category (TODO, Credentials, Debug, General)
+        if (category == FindingCategory.COMMENT && commentCategoryFilterBtn != null) {
+            Set<String> selectedCategories = commentCategoryFilterBtn.getSelected();
+            if (!selectedCategories.isEmpty()) {
+                filtered = filtered.stream()
+                        .filter(e -> selectedCategories.contains(e.matchLocation()))
+                        .collect(Collectors.toList());
+            }
+        }
+
         tableModel.setEntries(filtered);
 
-        String stats;
-        if (dataStore.hasPins()) {
-            stats = "Pinned: " + dataStore.getPinnedCount() + " / " + dataStore.size();
-        } else {
-            stats = "Total: " + dataStore.size() + " | Displayed: " + filtered.size();
-        }
-        statsLabel.setText(stats);
+        statsLabel.setText("Total: " + dataStore.size() + " | Displayed: " + filtered.size());
 
         inScopeDomainsBtn.setText(getDomainButtonLabel());
         inScopeDomainsBtn.setEnabled(inScope);
@@ -336,10 +398,8 @@ public class CategoryFindingsPanel extends JPanel {
             HttpResponse response = message.response();
             if (response == null) return;
 
-            // Pillar 1: Active Tab Auto-Switching to Response
             editorTabs.setSelectedComponent(respEditor.uiComponent());
 
-            // Calculate absolute raw message offset if relative to body
             int rawStart = finding.startOffset();
             int rawEnd = finding.endOffset();
             int bodyOffset = response.bodyOffset();
@@ -350,7 +410,6 @@ public class CategoryFindingsPanel extends JPanel {
                     rawEnd += bodyOffset;
                 }
             } else if (query != null && !query.isEmpty()) {
-                // Fallback: Locate query inside raw response string
                 String rawStr = response.toString();
                 int idx = rawStr.indexOf(query);
                 if (idx >= 0) {
@@ -359,7 +418,6 @@ public class CategoryFindingsPanel extends JPanel {
                 }
             }
 
-            // Pillar 2: Apply Native Montoya Markers
             if (rawStart >= 0 && rawEnd > rawStart && rawEnd <= response.toByteArray().length()) {
                 try {
                     Marker marker = Marker.marker(rawStart, rawEnd);
@@ -368,30 +426,25 @@ public class CategoryFindingsPanel extends JPanel {
             }
             respEditor.setResponse(response);
 
-            // Update Request editor in background
             if (message.request() != null) {
                 reqEditor.setRequest(message.request());
             }
 
-            // Pillar 3: Search Bar Expression Populating
             if (query != null && !query.isEmpty()) {
                 try {
                     respEditor.setSearchExpression(query);
                 } catch (Exception ignored) {}
             }
 
-            // Pillar 4: Caret Positioning & Viewport Auto-Scroll
             if (rawStart >= 0) {
                 final int targetCaret = rawStart;
                 SwingUtilities.invokeLater(() -> scrollTextComponent(respEditor.uiComponent(), targetCaret));
             }
 
         } else {
-            // Request Finding
             HttpRequest request = message.request();
             if (request == null) return;
 
-            // Pillar 1: Active Tab Auto-Switching to Request
             editorTabs.setSelectedComponent(reqEditor.uiComponent());
 
             int rawStart = finding.startOffset();
@@ -412,7 +465,6 @@ public class CategoryFindingsPanel extends JPanel {
                 }
             }
 
-            // Pillar 2: Apply Native Montoya Markers
             if (rawStart >= 0 && rawEnd > rawStart && rawEnd <= request.toByteArray().length()) {
                 try {
                     Marker marker = Marker.marker(rawStart, rawEnd);
@@ -425,14 +477,12 @@ public class CategoryFindingsPanel extends JPanel {
                 respEditor.setResponse(message.response());
             }
 
-            // Pillar 3: Search Bar Expression Populating
             if (query != null && !query.isEmpty()) {
                 try {
                     reqEditor.setSearchExpression(query);
                 } catch (Exception ignored) {}
             }
 
-            // Pillar 4: Caret Positioning & Viewport Auto-Scroll
             if (rawStart >= 0) {
                 final int targetCaret = rawStart;
                 SwingUtilities.invokeLater(() -> scrollTextComponent(reqEditor.uiComponent(), targetCaret));
@@ -455,6 +505,148 @@ public class CategoryFindingsPanel extends JPanel {
                 scrollTextComponent(child, position);
             }
         }
+    }
+
+    // ─── KeyHacks Credential Verification & Signatures Catalog ───────────────────
+
+    private void verifySelectedSecret() {
+        int viewRow = table.getSelectedRow();
+        if (viewRow < 0) {
+            JOptionPane.showMessageDialog(this, "Please select a secret row to verify.", "No Secret Selected", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        int modelRow = table.convertRowIndexToModel(viewRow);
+        FindingEntry entry = tableModel.getEntryAt(modelRow);
+        if (entry != null) {
+            verifySecret(entry);
+        }
+    }
+
+    public void verifySecret(FindingEntry sec) {
+        if (sec == null) return;
+        try {
+            HttpRequest req = SecretVerifierService.buildVerificationRequest(sec);
+            if (req != null) {
+                String ruleName = sec.patternName() != null ? sec.patternName() : "Secret";
+                String tabName = "Verify: " + (ruleName.length() > 16 ? ruleName.substring(0, 16) : ruleName);
+                api.repeater().sendToRepeater(req, tabName);
+                api.logging().logToOutput("[Secret Verifier] Dispatched verification request for '" + ruleName + "' to Repeater tab '" + tabName + "'");
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Verification request for '" + ruleName + "' sent to Burp Repeater (Tab: " + tabName + ").",
+                    "Sent to Repeater",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Could not construct an HTTP verification request for this secret.",
+                    "Verification Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Failed to send to Repeater: " + ex.getMessage(),
+                "Repeater Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void showSignaturesCatalogDialog() {
+        Window parentWin = SwingUtilities.getWindowAncestor(this);
+        List<SecretScanner.SecretSignatureInfo> allSigs = scanEngine.getSecretScanner().getCuratedSignatures();
+        JDialog dialog = new JDialog(parentWin, "📋 Curated Secret Signatures & Match Patterns Catalog (" + allSigs.size() + " Signatures)", Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(1050, 600);
+        dialog.setLocationRelativeTo(parentWin);
+
+        JPanel contentPanel = new JPanel(new BorderLayout(8, 8));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        JPanel topBar = new JPanel(new BorderLayout(8, 8));
+        JLabel headerLbl = new JLabel("Curated Secret Signatures & Pattern Catalog (" + allSigs.size() + " signatures with Shannon entropy & FP suppression)");
+        headerLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+
+        JPanel searchRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        searchRow.add(new JLabel("Quick Filter:"));
+        JTextField catalogSearchField = new JTextField(22);
+        searchRow.add(catalogSearchField);
+
+        topBar.add(headerLbl, BorderLayout.WEST);
+        topBar.add(searchRow, BorderLayout.EAST);
+        contentPanel.add(topBar, BorderLayout.NORTH);
+
+        String[] cols = {"#", "Signature / Rule Name", "Category", "Matching Regex Pattern", "Confidence", "Shannon Entropy Guard"};
+
+        DefaultTableModel catModel = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int row, int column) { return false; }
+            @Override public Class<?> getColumnClass(int columnIndex) {
+                return columnIndex == 0 ? Integer.class : String.class;
+            }
+        };
+
+        for (int i = 0; i < allSigs.size(); i++) {
+            SecretScanner.SecretSignatureInfo s = allSigs.get(i);
+            catModel.addRow(new Object[]{
+                i + 1,
+                s.name(),
+                s.category(),
+                s.pattern(),
+                s.confidence() + "%",
+                s.needsEntropy() ? "Yes (Entropy \u2265 3.0)" : "Exact Pattern Match"
+            });
+        }
+
+        JTable catTable = new JTable(catModel);
+        catTable.setRowHeight(24);
+        catTable.getColumnModel().getColumn(0).setPreferredWidth(35);
+        catTable.getColumnModel().getColumn(1).setPreferredWidth(200);
+        catTable.getColumnModel().getColumn(2).setPreferredWidth(160);
+        catTable.getColumnModel().getColumn(3).setPreferredWidth(400);
+        catTable.getColumnModel().getColumn(4).setPreferredWidth(85);
+        catTable.getColumnModel().getColumn(5).setPreferredWidth(170);
+
+        catTable.getColumnModel().getColumn(3).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            private final Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 11);
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object val, boolean isSel, boolean hasFoc, int row, int col) {
+                Component comp = super.getTableCellRendererComponent(tbl, val, isSel, hasFoc, row, col);
+                comp.setFont(monoFont);
+                ((JComponent) comp).setToolTipText(null);
+                return comp;
+            }
+        });
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(catModel);
+        catTable.setRowSorter(sorter);
+
+        catalogSearchField.getDocument().addDocumentListener(new DocumentListener() {
+            private void updateFilter() {
+                String text = catalogSearchField.getText().trim();
+                if (text.isEmpty()) {
+                    sorter.setRowFilter(null);
+                } else {
+                    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + java.util.regex.Pattern.quote(text)));
+                }
+            }
+            @Override public void insertUpdate(DocumentEvent e) { updateFilter(); }
+            @Override public void removeUpdate(DocumentEvent e) { updateFilter(); }
+            @Override public void changedUpdate(DocumentEvent e) { updateFilter(); }
+        });
+
+        contentPanel.add(new JScrollPane(catTable), BorderLayout.CENTER);
+
+        JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton closeBtn = new JButton("Close");
+        closeBtn.addActionListener(e -> dialog.dispose());
+        bottomBar.add(closeBtn);
+        contentPanel.add(bottomBar, BorderLayout.SOUTH);
+
+        dialog.setContentPane(contentPanel);
+        dialog.setVisible(true);
     }
 
     // ─── Helpers & Event Handlers ────────────────────────────────────────────────
@@ -496,12 +688,11 @@ public class CategoryFindingsPanel extends JPanel {
         dialog.setVisible(true);
     }
 
-    // ─── Proxy History Scan with Live Progress Bar ───────────────────────────────
+    // ─── Proxy History Scan with Live Progress Bar & Scope Architecture ──────────
 
     private record ProgressChunk(int processed, int total, int newFindings) {}
 
     private void runProxyHistoryScan() {
-        // If password tab and no passwords set, prompt user
         if (category == FindingCategory.PASSWORD && scanEngine.getPasswordScanner().getPasswordCount() == 0) {
             int opt = JOptionPane.showConfirmDialog(
                     this,
@@ -519,7 +710,9 @@ public class CategoryFindingsPanel extends JPanel {
         progressBar.setVisible(true);
         progressBar.setIndeterminate(false);
         progressBar.setValue(0);
-        liveStatusLabel.setText("Scanning Proxy history for in-scope traffic...");
+        liveStatusLabel.setText("Scanning Proxy history for traffic (JS files excluded)...");
+
+        final boolean inScopeOnlyIngestion = inScopeCb.isSelected();
 
         SwingWorker<Integer, ProgressChunk> worker = new SwingWorker<>() {
             @Override
@@ -528,18 +721,21 @@ public class CategoryFindingsPanel extends JPanel {
                 int total = history.size();
                 if (total == 0) return 0;
 
-                // 1. Discover in-scope domains from history
+                // Pre-discovery pass for in-scope domains (excluding JS files)
                 for (ProxyHttpRequestResponse item : history) {
                     if (item.request() != null) {
-                        String url = item.request().url();
+                        var req = item.finalRequest() != null ? item.finalRequest() : item.request();
+                        if (ScannerUtils.isJsFile(req, item.response())) {
+                            continue;
+                        }
+                        String url = req.url();
                         if (api.scope().isInScope(url)) {
-                            String host = item.request().httpService() != null ? item.request().httpService().host() : "";
+                            String host = req.httpService() != null ? req.httpService().host() : "";
                             domainManager.addDomain(host);
                         }
                     }
                 }
 
-                // 2. Multi-Threaded Ingestion Pool (Bounded by CPU cores)
                 int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
                 ExecutorService executor = Executors.newFixedThreadPool(numThreads);
                 AtomicInteger processed = new AtomicInteger(0);
@@ -551,9 +747,29 @@ public class CategoryFindingsPanel extends JPanel {
                         if (isCancelled()) break;
                         futures.add(executor.submit(() -> {
                             if (isCancelled()) return;
+                            var req = item.finalRequest() != null ? item.finalRequest() : item.request();
+
+                            // 1. Strict JS File Exclusion
+                            if (ScannerUtils.isJsFile(req, item.response())) {
+                                int cur = processed.incrementAndGet();
+                                if (cur % 25 == 0 || cur == total) {
+                                    publish(new ProgressChunk(cur, total, newFindings.get()));
+                                }
+                                return;
+                            }
+
+                            // 2. Dual-stage Ingestion Pre-Filter (when in-scope only is selected)
+                            if (inScopeOnlyIngestion && (req == null || !api.scope().isInScope(req.url()))) {
+                                int cur = processed.incrementAndGet();
+                                if (cur % 25 == 0 || cur == total) {
+                                    publish(new ProgressChunk(cur, total, newFindings.get()));
+                                }
+                                return;
+                            }
+
                             if (item.hasResponse()) {
-                                String host = (item.request() != null && item.request().httpService() != null)
-                                        ? item.request().httpService().host() : "";
+                                String host = (req != null && req.httpService() != null)
+                                        ? req.httpService().host() : "";
                                 int added = scanEngine.scanProxyItem(item);
                                 if (added > 0 && !host.isBlank()) {
                                     domainManager.registerFinding(host);
@@ -569,9 +785,7 @@ public class CategoryFindingsPanel extends JPanel {
 
                     for (Future<?> f : futures) {
                         if (isCancelled()) break;
-                        try {
-                            f.get();
-                        } catch (Exception ignored) {}
+                        try { f.get(); } catch (Exception ignored) {}
                     }
                 } finally {
                     executor.shutdownNow();
@@ -614,18 +828,31 @@ public class CategoryFindingsPanel extends JPanel {
         worker.execute();
     }
 
+    // ─── Export Findings as TSV ──────────────────────────────────────────────────
+
     private void exportFindingsToTsv() {
-        Set<String> patterns = secretTypeFilterBtn != null ? secretTypeFilterBtn.getSelected() : null;
+        Set<String> patternFilter = findingTypeFilterBtn.getSelected();
+
         List<FindingEntry> currentFindings = dataStore.getFilteredEntries(
                 searchField.getText(),
                 statusFilterBtn.getSelected(),
                 contentTypeFilterBtn.getSelected(),
                 methodFilterBtn.getSelected(),
-                patterns,
+                patternFilter,
                 inScopeCb.isSelected(),
                 url -> api.scope().isInScope(url),
                 domainManager
         );
+
+        // Apply comment category post-filter for export
+        if (category == FindingCategory.COMMENT && commentCategoryFilterBtn != null) {
+            Set<String> selectedCategories = commentCategoryFilterBtn.getSelected();
+            if (!selectedCategories.isEmpty()) {
+                currentFindings = currentFindings.stream()
+                        .filter(e -> selectedCategories.contains(e.matchLocation()))
+                        .collect(Collectors.toList());
+            }
+        }
 
         if (currentFindings.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No findings available to export.", "Export TSV", JOptionPane.INFORMATION_MESSAGE);
@@ -633,40 +860,54 @@ public class CategoryFindingsPanel extends JPanel {
         }
 
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Export Findings as TSV");
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        fileChooser.setSelectedFile(new File(category.name().toLowerCase() + "_findings_" + timestamp + ".tsv"));
+        String defaultFileName = String.format("response_inspector_%s_%s.tsv",
+                category.name().toLowerCase(), timestamp);
+        fileChooser.setSelectedFile(new File(defaultFileName));
+        fileChooser.setDialogTitle("Export Findings as TSV");
 
         int userSelection = fileChooser.showSaveDialog(this);
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
-            if (!fileToSave.getName().toLowerCase().endsWith(".tsv")) {
-                fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".tsv");
-            }
-            try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fileToSave), StandardCharsets.UTF_8))) {
-                writer.println(FindingEntry.tsvHeader());
-                for (FindingEntry entry : currentFindings) {
-                    writer.println(entry.toTsvRow());
-                }
-                JOptionPane.showMessageDialog(this,
-                        "Successfully exported " + currentFindings.size() + " findings to:\n" + fileToSave.getAbsolutePath(),
-                        "Export Complete",
-                        JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Failed to export TSV: " + ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
-            }
+        if (userSelection != JFileChooser.APPROVE_OPTION) {
+            return;
         }
-    }
 
-    private void pinSelectedRows() {
-        for (int viewRow : table.getSelectedRows()) {
-            int modelRow = table.convertRowIndexToModel(viewRow);
-            FindingEntry entry = tableModel.getEntryAt(modelRow);
-            if (entry != null) {
-                dataStore.pin(entry.id());
-            }
+        File fileToSave = fileChooser.getSelectedFile();
+        if (!fileToSave.getName().toLowerCase().endsWith(".tsv")) {
+            fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".tsv");
         }
-        refreshView();
+
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fileToSave), StandardCharsets.UTF_8))) {
+            writer.println("#\tMethod\tStatus\tFinding Type\tMatch Excerpt\tLocation\tLength\tContent-Type\tURL\tTime");
+
+            for (FindingEntry e : currentFindings) {
+                writer.printf("%d\t%s\t%d\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n",
+                        e.id(),
+                        e.method(),
+                        e.statusCode(),
+                        e.patternName().replace("\t", " "),
+                        e.matchValue().replace("\t", " ").replace("\n", " "),
+                        e.matchLocation().replace("\t", " "),
+                        e.contentLength(),
+                        e.contentType().replace("\t", " "),
+                        e.url().replace("\t", " "),
+                        e.timeString()
+                );
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    String.format("Successfully exported %d findings to:\n%s", currentFindings.size(), fileToSave.getAbsolutePath()),
+                    "Export Successful",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to export TSV: " + ex.getMessage(),
+                    "Export Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     private void setupContextMenu() {
@@ -674,19 +915,25 @@ public class CategoryFindingsPanel extends JPanel {
 
         JMenuItem sendRepeater = new JMenuItem("Send to Repeater");
         sendRepeater.addActionListener(e -> {
-            for (int viewRow : table.getSelectedRows()) {
+            int viewRow = table.getSelectedRow();
+            if (viewRow != -1) {
                 int modelRow = table.convertRowIndexToModel(viewRow);
                 FindingEntry entry = tableModel.getEntryAt(modelRow);
                 if (entry != null && entry.requestResponse() != null && entry.requestResponse().request() != null) {
+                    HttpRequest req = entry.requestResponse().request();
                     String tabName = entry.method() + " " + entry.host() + entry.path();
-                    api.repeater().sendToRepeater(entry.requestResponse().request(), tabName);
+                    if (tabName.length() > 30) {
+                        tabName = tabName.substring(0, 27) + "...";
+                    }
+                    api.repeater().sendToRepeater(req, tabName);
                 }
             }
         });
 
         JMenuItem sendIntruder = new JMenuItem("Send to Intruder");
         sendIntruder.addActionListener(e -> {
-            for (int viewRow : table.getSelectedRows()) {
+            int viewRow = table.getSelectedRow();
+            if (viewRow != -1) {
                 int modelRow = table.convertRowIndexToModel(viewRow);
                 FindingEntry entry = tableModel.getEntryAt(modelRow);
                 if (entry != null && entry.requestResponse() != null && entry.requestResponse().request() != null) {
@@ -697,7 +944,8 @@ public class CategoryFindingsPanel extends JPanel {
 
         JMenuItem sendOrganizer = new JMenuItem("Send to Organizer");
         sendOrganizer.addActionListener(e -> {
-            for (int viewRow : table.getSelectedRows()) {
+            int viewRow = table.getSelectedRow();
+            if (viewRow != -1) {
                 int modelRow = table.convertRowIndexToModel(viewRow);
                 FindingEntry entry = tableModel.getEntryAt(modelRow);
                 if (entry != null && entry.requestResponse() != null) {
@@ -720,32 +968,38 @@ public class CategoryFindingsPanel extends JPanel {
             }
         });
 
-        JMenuItem pinItem = new JMenuItem("Pin Selected");
-        pinItem.addActionListener(e -> pinSelectedRows());
-
-        JMenuItem unpinItem = new JMenuItem("Unpin Selected");
-        unpinItem.addActionListener(e -> {
-            for (int viewRow : table.getSelectedRows()) {
-                int modelRow = table.convertRowIndexToModel(viewRow);
-                FindingEntry entry = tableModel.getEntryAt(modelRow);
-                if (entry != null) {
-                    dataStore.unpin(entry.id());
-                }
-            }
-            refreshView();
-        });
-
         popup.add(sendRepeater);
         popup.add(sendIntruder);
         popup.add(sendOrganizer);
         popup.addSeparator();
+
+        // Secret-specific context menu items
+        if (category == FindingCategory.SECRET) {
+            JMenuItem verifySecretItem = new JMenuItem("🧪 Verify Secret (Repeater)");
+            verifySecretItem.addActionListener(e -> verifySelectedSecret());
+            popup.add(verifySecretItem);
+
+            JMenuItem copySecretItem = new JMenuItem("Copy Secret Value");
+            copySecretItem.addActionListener(e -> {
+                int viewRow = table.getSelectedRow();
+                if (viewRow != -1) {
+                    int modelRow = table.convertRowIndexToModel(viewRow);
+                    FindingEntry entry = tableModel.getEntryAt(modelRow);
+                    if (entry != null) {
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
+                                new StringSelection(entry.matchValue()), null
+                        );
+                    }
+                }
+            });
+            popup.add(copySecretItem);
+            popup.addSeparator();
+        }
+
         popup.add(copyMatch);
         JMenuItem exportTsvItem = new JMenuItem("Export Findings as TSV...");
         exportTsvItem.addActionListener(e -> exportFindingsToTsv());
         popup.add(exportTsvItem);
-        popup.addSeparator();
-        popup.add(pinItem);
-        popup.add(unpinItem);
 
         table.setComponentPopupMenu(popup);
     }
@@ -760,11 +1014,9 @@ public class CategoryFindingsPanel extends JPanel {
                 if (selectedRows.length == 0) return;
 
                 StringBuilder sb = new StringBuilder();
-                // Headers
                 for (int c = 0; c < table.getColumnCount(); c++) {
                     sb.append(table.getColumnName(c)).append(c < table.getColumnCount() - 1 ? "\t" : "\n");
                 }
-                // Selected Rows
                 for (int viewRow : selectedRows) {
                     int modelRow = table.convertRowIndexToModel(viewRow);
                     for (int c = 0; c < table.getColumnCount(); c++) {
