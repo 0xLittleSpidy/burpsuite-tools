@@ -90,8 +90,9 @@
       - `Pass (200 OK)`: Active `.map` probe succeeded (200 OK + valid SourceMap JSON).
       - `Fail (404/Error)`: Active probe returned 404 Not Found or error.
 
-11. **Dedicated Map Recon Column**:
-    - **`Map Recon (Paths / Keys)`**: Shows endpoints and secrets discovered across all unpacked Source Map original files (e.g. `84 eps | 5 keys`). Raw JavaScript recon findings are cleanly centralized in the Recon tab.
+11. **Streamlined Workspace Views**:
+    - **JS Workspace Tab**: Streamlined view showing `#`, `Framework`, `Status`, `Host`, `JS Path`, `Passive .map`, `On-Demand Probe`, `SourceMap Location`, `Unpacked Files`, and `Size`.
+    - **Recon Tab Ingestion**: Includes the dedicated `Load Proxy History` button right next to `In-Scope Only` and `Domains ▾` multi-select filter.
 
 12. **4-Way Raw HTTP Message Inspection**:
     - Select any script to view:
@@ -100,7 +101,7 @@
 
 13. **Dedicated Top-Level "Recon & Secret Mining" Suite Tab**:
     - Sequential request-first master-detail layout:
-      - **Master Table (Top)**: Lists requests sequentially with method, URL, status, origin, and counts of discovered paths, secrets, comments, security bypasses, cloud URLs, and dependencies.
+      - **Master Table (Top)**: Lists requests sequentially with method, URL, status, and counts of discovered paths, secrets, comments, security bypasses, cloud URLs, and dependencies.
       - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **💬 Comments**, **🛡️ Security Bypasses**, **Cloud URLs**, and **Dependencies** tabs on the right.
     - **Multi-Select Technique, Category, and Header Filtering**:
       - **Top Filter Toolbar**: Includes `In-Scope Only` (enabled by default), `Domains ▾` multi-select button, `Method ▾`, `Status ▾` multi-select filter buttons, `Source Type` selector, and real-time search with 300ms debounce.

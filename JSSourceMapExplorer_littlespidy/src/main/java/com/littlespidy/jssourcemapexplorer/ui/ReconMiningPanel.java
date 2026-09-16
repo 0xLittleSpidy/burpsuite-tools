@@ -81,6 +81,7 @@ public class ReconMiningPanel extends JPanel {
     private final JTabbedPane httpEditorsTabs = new JTabbedPane();
 
     // ── Top Toolbar Controls ──
+    private final JButton loadHistoryBtn = new JButton("Load Proxy History");
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", true);
     private MultiSelectFilterButton methodFilterBtn;
     private MultiSelectFilterButton statusFilterBtn;
@@ -91,6 +92,9 @@ public class ReconMiningPanel extends JPanel {
     });
     private final JTextField searchField = new JTextField(16);
     private final JLabel statsLabel = new JLabel("Requests: 0 | Paths: 0 | Secrets: 0 | Comments: 0 | Bypasses: 0 | Cloud: 0 | Deps: 0");
+
+    private Runnable historyLoader;
+    private java.util.function.Consumer<Boolean> inScopeChangeListener;
 
     // ── Bottom Detail Filters ──
     private MultiSelectFilterButton pathMethodFilterBtn;
@@ -136,6 +140,28 @@ public class ReconMiningPanel extends JPanel {
 
     public void setAiAnalysisOpener(java.util.function.BiConsumer<String, String> opener) {
         this.aiAnalysisOpener = opener;
+    }
+
+    public void setHistoryLoader(Runnable loader) {
+        this.historyLoader = loader;
+    }
+
+    public void setHistoryLoading(boolean loading) {
+        if (loadHistoryBtn != null) {
+            loadHistoryBtn.setEnabled(!loading);
+            loadHistoryBtn.setText(loading ? "Loading Proxy..." : "Load Proxy History");
+        }
+    }
+
+    public void setInScopeChangeListener(java.util.function.Consumer<Boolean> listener) {
+        this.inScopeChangeListener = listener;
+    }
+
+    public void setInScopeOnly(boolean inScope) {
+        if (inScopeOnlyCheckBox.isSelected() != inScope) {
+            inScopeOnlyCheckBox.setSelected(inScope);
+            applyRequestFilter();
+        }
     }
 
     public ReconMiningPanel(MontoyaApi api, JsDataStore dataStore) {
@@ -191,9 +217,23 @@ public class ReconMiningPanel extends JPanel {
         // ── Top Master Toolbar ──
         JPanel topToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
 
-        topToolbar.add(inScopeOnlyCheckBox);
+        loadHistoryBtn.setToolTipText("Scan Burp Proxy HTTP history to extract and analyze JavaScript requests");
+        loadHistoryBtn.addActionListener(e -> {
+            if (historyLoader != null) {
+                historyLoader.run();
+            }
+        });
+        topToolbar.add(loadHistoryBtn);
+
         inScopeOnlyCheckBox.setToolTipText("Show only requests targeting hosts in Burp target scope");
-        inScopeOnlyCheckBox.addActionListener(e -> applyRequestFilter());
+        inScopeOnlyCheckBox.addActionListener(e -> {
+            boolean selected = inScopeOnlyCheckBox.isSelected();
+            if (inScopeChangeListener != null) {
+                inScopeChangeListener.accept(selected);
+            }
+            applyRequestFilter();
+        });
+        topToolbar.add(inScopeOnlyCheckBox);
 
         domainFilterBtn.setToolTipText("Filter requests by one or more target domains");
         topToolbar.add(domainFilterBtn);
@@ -232,6 +272,9 @@ public class ReconMiningPanel extends JPanel {
         JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> {
             inScopeOnlyCheckBox.setSelected(true);
+            if (inScopeChangeListener != null) {
+                inScopeChangeListener.accept(true);
+            }
             if (methodFilterBtn != null) methodFilterBtn.clearSelection();
             if (statusFilterBtn != null) statusFilterBtn.clearSelection();
             if (domainFilterBtn != null) domainFilterBtn.selectAll();
@@ -285,13 +328,12 @@ public class ReconMiningPanel extends JPanel {
         requestsTable.getColumnModel().getColumn(1).setPreferredWidth(60);  // Method
         requestsTable.getColumnModel().getColumn(2).setPreferredWidth(400); // URL
         requestsTable.getColumnModel().getColumn(3).setPreferredWidth(55);  // Status
-        requestsTable.getColumnModel().getColumn(4).setPreferredWidth(70);  // Origin
-        requestsTable.getColumnModel().getColumn(5).setPreferredWidth(70);  // Paths
-        requestsTable.getColumnModel().getColumn(6).setPreferredWidth(70);  // Secrets
-        requestsTable.getColumnModel().getColumn(7).setPreferredWidth(75);  // Comments
-        requestsTable.getColumnModel().getColumn(8).setPreferredWidth(75);  // Bypasses
-        requestsTable.getColumnModel().getColumn(9).setPreferredWidth(70);  // Cloud
-        requestsTable.getColumnModel().getColumn(10).setPreferredWidth(70); // Deps
+        requestsTable.getColumnModel().getColumn(4).setPreferredWidth(70);  // Paths
+        requestsTable.getColumnModel().getColumn(5).setPreferredWidth(70);  // Secrets
+        requestsTable.getColumnModel().getColumn(6).setPreferredWidth(75);  // Comments
+        requestsTable.getColumnModel().getColumn(7).setPreferredWidth(75);  // Bypasses
+        requestsTable.getColumnModel().getColumn(8).setPreferredWidth(70);  // Cloud
+        requestsTable.getColumnModel().getColumn(9).setPreferredWidth(70);  // Deps
 
         requestsTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -2050,7 +2092,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class RequestsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Method", "URL", "Status", "Origin", "Paths", "Secrets", "Comments", "Bypasses", "Cloud URLs", "Dependencies"
+            "#", "Method", "URL", "Status", "Paths", "Secrets", "Comments", "Bypasses", "Cloud URLs", "Dependencies"
         };
         private final List<JsFileEntry> list = new ArrayList<>();
 
@@ -2070,7 +2112,7 @@ public class ReconMiningPanel extends JPanel {
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
             return switch (c) {
-                case 0, 3, 5, 6, 7, 8, 9, 10 -> Integer.class;
+                case 0, 3, 4, 5, 6, 7, 8, 9 -> Integer.class;
                 default -> String.class;
             };
         }
@@ -2084,33 +2126,32 @@ public class ReconMiningPanel extends JPanel {
                 case 1 -> item.getRequest() != null ? item.getRequest().method() : "GET";
                 case 2 -> item.getUrl();
                 case 3 -> item.getStatusCode();
-                case 4 -> item.getOriginLabel();
-                case 5 -> {
+                case 4 -> {
                     int count = item.getJsEndpoints().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllEndpoints().size();
                     yield count;
                 }
-                case 6 -> {
+                case 5 -> {
                     int count = item.getJsSecrets().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllSecrets().size();
                     yield count;
                 }
-                case 7 -> {
+                case 6 -> {
                     int count = item.getJsComments().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllComments().size();
                     yield count;
                 }
-                case 8 -> {
+                case 7 -> {
                     int count = item.getJsSecurityBypasses().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllSecurityBypasses().size();
                     yield count;
                 }
-                case 9 -> {
+                case 8 -> {
                     int count = item.getJsCloudUrls().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllCloudUrls().size();
                     yield count;
                 }
-                case 10 -> {
+                case 9 -> {
                     int count = item.getJsDependencies().size();
                     if (item.getUnpackedProject() != null) count += item.getUnpackedProject().getAllDependencies().size();
                     yield count;

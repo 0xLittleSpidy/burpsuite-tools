@@ -18,14 +18,12 @@ public class JsFilesTableModel extends AbstractTableModel {
 
     private static final String[] COLUMN_NAMES = {
         "#",
-        "Origin",
         "Framework",
         "Status",
         "Host",
         "JS Path",
         "Passive .map",
         "On-Demand Probe",
-        "Map Recon (Paths / Keys)",
         "SourceMap Location",
         "Unpacked Files",
         "Size"
@@ -70,7 +68,7 @@ public class JsFilesTableModel extends AbstractTableModel {
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         return switch (columnIndex) {
-            case 0, 3 -> Integer.class;
+            case 0, 2 -> Integer.class;
             default -> String.class;
         };
     }
@@ -84,17 +82,15 @@ public class JsFilesTableModel extends AbstractTableModel {
         JsFileEntry entry = entries.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> entry.getId();
-            case 1 -> entry.getOriginLabel();
-            case 2 -> entry.getFramework();
-            case 3 -> entry.getStatusCode();
-            case 4 -> entry.getHost();
-            case 5 -> entry.getPath();
-            case 6 -> entry.getPassiveMapStatus() != null ? entry.getPassiveMapStatus().getLabel() : "Not Found";
-            case 7 -> entry.getActiveProbeStatus() != null ? entry.getActiveProbeStatus().getLabel() : "-";
-            case 8 -> entry.getMapReconSummary();
-            case 9 -> entry.getSourceMapLocation() != null ? entry.getSourceMapLocation() : "-";
-            case 10 -> entry.getUnpackedProject() != null ? entry.getUnpackedProject().getTotalFiles() + " files" : "-";
-            case 11 -> formatSize(entry.getContentLength());
+            case 1 -> entry.getFramework();
+            case 2 -> entry.getStatusCode();
+            case 3 -> entry.getHost();
+            case 4 -> entry.getPath();
+            case 5 -> entry.getPassiveMapStatus() != null ? entry.getPassiveMapStatus().getLabel() : "Not Found";
+            case 6 -> entry.getActiveProbeStatus() != null ? entry.getActiveProbeStatus().getLabel() : "-";
+            case 7 -> entry.getSourceMapLocation() != null ? entry.getSourceMapLocation() : "-";
+            case 8 -> entry.getUnpackedProject() != null ? entry.getUnpackedProject().getTotalFiles() + " files" : "-";
+            case 9 -> formatSize(entry.getContentLength());
             default -> null;
         };
     }

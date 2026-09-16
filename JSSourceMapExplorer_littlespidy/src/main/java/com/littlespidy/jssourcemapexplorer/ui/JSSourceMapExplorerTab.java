@@ -116,6 +116,13 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         this.sourceTreePanel = new SourceTreePanel(codeViewerPanel::displayFile);
         this.reconMiningPanel = new ReconMiningPanel(api, dataStore);
+        this.reconMiningPanel.setHistoryLoader(this::loadProxyHistory);
+        this.reconMiningPanel.setInScopeChangeListener(s -> {
+            if (inScopeOnlyCheckBox.isSelected() != s) {
+                inScopeOnlyCheckBox.setSelected(s);
+                refreshView();
+            }
+        });
         this.aiSecurityPanel = new AiSecurityAnalystPanel(api);
 
         this.codeViewerPanel.setAiReviewListener(file -> {
@@ -370,7 +377,13 @@ public class JSSourceMapExplorerTab extends JPanel {
         loadHistoryBtn.addActionListener(e -> loadProxyHistory());
 
         inScopeOnlyCheckBox.setToolTipText("When checked, only in-scope JavaScript requests will be loaded from Proxy history and displayed");
-        inScopeOnlyCheckBox.addActionListener(e -> refreshView());
+        inScopeOnlyCheckBox.addActionListener(e -> {
+            boolean s = inScopeOnlyCheckBox.isSelected();
+            if (reconMiningPanel != null) {
+                reconMiningPanel.setInScopeOnly(s);
+            }
+            refreshView();
+        });
 
         domainFilterBtn.setToolTipText("Filter JavaScript assets by one or more target domains");
 
@@ -862,6 +875,7 @@ public class JSSourceMapExplorerTab extends JPanel {
 
     private void loadProxyHistory() {
         if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(false);
+        if (reconMiningPanel != null) reconMiningPanel.setHistoryLoading(true);
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);
         liveStatusLabel.setText("Stage 1: Scanning Proxy history for JavaScript assets...");
@@ -1026,6 +1040,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                 } finally {
                     progressBar.setVisible(false);
                     if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(true);
+                    if (reconMiningPanel != null) reconMiningPanel.setHistoryLoading(false);
                 }
             }
         };
@@ -1145,18 +1160,16 @@ public class JSSourceMapExplorerTab extends JPanel {
     }
 
     private void setupJsTableRendering() {
-        jsTable.getColumnModel().getColumn(0).setMaxWidth(45);  // #
-        jsTable.getColumnModel().getColumn(1).setMaxWidth(130); // Origin
-        jsTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Framework
-        jsTable.getColumnModel().getColumn(3).setMaxWidth(55);  // Status
-        jsTable.getColumnModel().getColumn(4).setPreferredWidth(140); // Host
-        jsTable.getColumnModel().getColumn(5).setPreferredWidth(250); // JS Path
-        jsTable.getColumnModel().getColumn(6).setPreferredWidth(125); // Passive .map
-        jsTable.getColumnModel().getColumn(7).setPreferredWidth(120); // On-Demand Probe
-        jsTable.getColumnModel().getColumn(8).setPreferredWidth(130); // Map Recon
-        jsTable.getColumnModel().getColumn(9).setPreferredWidth(200); // SourceMap Location
-        jsTable.getColumnModel().getColumn(10).setMaxWidth(95); // Unpacked Files
-        jsTable.getColumnModel().getColumn(11).setMaxWidth(80); // Size
+        jsTable.getColumnModel().getColumn(0).setMaxWidth(45);        // #
+        jsTable.getColumnModel().getColumn(1).setPreferredWidth(100); // Framework
+        jsTable.getColumnModel().getColumn(2).setMaxWidth(55);        // Status
+        jsTable.getColumnModel().getColumn(3).setPreferredWidth(140); // Host
+        jsTable.getColumnModel().getColumn(4).setPreferredWidth(250); // JS Path
+        jsTable.getColumnModel().getColumn(5).setPreferredWidth(125); // Passive .map
+        jsTable.getColumnModel().getColumn(6).setPreferredWidth(120); // On-Demand Probe
+        jsTable.getColumnModel().getColumn(7).setPreferredWidth(200); // SourceMap Location
+        jsTable.getColumnModel().getColumn(8).setMaxWidth(95);        // Unpacked Files
+        jsTable.getColumnModel().getColumn(9).setMaxWidth(80);        // Size
 
         // Custom renderer for whole row background and hover cloud tooltip
         jsTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -1186,13 +1199,13 @@ public class JSSourceMapExplorerTab extends JPanel {
                         }
 
                         // Column-specific text colors
-                        if (column == 6) { // Passive .map column
+                        if (column == 5) { // Passive .map column
                             if (entry.getPassiveMapStatus() != null && entry.getPassiveMapStatus().isFound()) {
                                 c.setForeground(new Color(180, 100, 0)); // dark amber
                             } else {
                                 c.setForeground(Color.GRAY);
                             }
-                        } else if (column == 7) { // On-Demand Probe column
+                        } else if (column == 6) { // On-Demand Probe column
                             if (entry.getActiveProbeStatus() == ActiveProbeStatus.PASS) {
                                 c.setForeground(new Color(0, 140, 0)); // dark green
                             } else if (entry.getActiveProbeStatus() == ActiveProbeStatus.FAIL) {
@@ -1202,9 +1215,9 @@ public class JSSourceMapExplorerTab extends JPanel {
                             } else {
                                 c.setForeground(Color.GRAY);
                             }
-                        } else if (column == 8 || column == 9) { // Recon columns
+                        } else if (column == 7) { // SourceMap Location
                             c.setForeground(new Color(40, 70, 130)); // navy blue
-                        } else if (column == 2 && !"-".equals(entry.getFramework())) {
+                        } else if (column == 1 && !"-".equals(entry.getFramework())) {
                             c.setForeground(new Color(110, 40, 150)); // purple for framework
                             setFont(getFont().deriveFont(Font.BOLD));
                         } else {

@@ -412,11 +412,14 @@ public class JsReconEngineTest {
     @Test
     public void testJsFilesTableModelColumns() {
         var model = new com.littlespidy.jssourcemapexplorer.ui.JsFilesTableModel();
-        assertEquals(12, model.getColumnCount());
+        assertEquals(10, model.getColumnCount());
         for (int i = 0; i < model.getColumnCount(); i++) {
+            assertNotEquals("Origin", model.getColumnName(i));
+            assertNotEquals("Map Recon (Paths / Keys)", model.getColumnName(i));
             assertNotEquals("JS Recon (Paths / Keys)", model.getColumnName(i));
         }
-        assertEquals("Map Recon (Paths / Keys)", model.getColumnName(8));
+        assertEquals("Framework", model.getColumnName(1));
+        assertEquals("Status", model.getColumnName(2));
     }
 
     @Test
