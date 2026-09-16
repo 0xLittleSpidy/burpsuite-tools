@@ -47,10 +47,20 @@
      - **`Send to Organizer`**
    - Available on the main JS scripts table, requests table, and detail viewers.
 
-6. **In-Scope Proxy History Loading (`In-Scope Only`)**:
-   - Avoid Burp UI freezing and memory pressure when working with large proxy histories.
-   - An **`In-Scope Only`** checkbox sits directly adjacent to the **`Load Proxy History`** button.
-   - When checked, out-of-scope requests are discarded before fetching response bodies or queueing tasks.
+5. **Multi-Interval Selection & Burp Suite Native Tool Dispatch**:
+   - Multi-interval row selection support across tables.
+   - Native dispatch actions in context menus:
+     - **`Send to Repeater`**
+     - **`Send to Intruder`**
+     - **`Send to Organizer`**
+   - Available on the main JS scripts table, requests table, and detail viewers.
+
+6. **Default-Enabled In-Scope Ingestion & Multi-Select Domain Filter (`In-Scope Only` & `Domains ▾`)**:
+   - **Strict In-Scope Ingestion**: The **`In-Scope Only`** checkbox is **enabled by default** across both the Workspace tab and Recon & Secret Mining tab. Gated by both `item.request().isInScope()` and `api.scope().isInScope(url)`, preventing out-of-scope assets from flooding memory and the UI.
+   - **Granular Multi-Select Domain Filter (`Domains ▾`)**: Sits directly adjacent to the `In-Scope Only` checkbox on the top toolbar in both the Workspace tab and Recon & Secret Mining tab.
+     - **All Domains Selected by Default**: Automatically discovers and lists all target application hosts as traffic is ingested.
+     - **Flexible Selection**: Users can select 1 or more specific target domains (or click "Select All" / "Clear") to instantly isolate specific subdomains and endpoints without modifying Burp Suite's global project scope.
+     - **Subdomain-Aware**: Accurately matches both exact hostnames and subdomains (`api.target.com` matches `target.com`).
 
 7. **Visual Tab Navigation**:
    - Clear emoji symbol prefixes across all suite tabs and sub-tabs:
@@ -65,9 +75,9 @@
 8. **Automatic URL Deduplication**:
    - Duplicate JavaScript URLs and requests are automatically deduplicated by default so each script is tracked and analyzed once.
 
-9. **1st Party (App) vs 3rd Party (CDN/Trackers) Classification**:
-   - Automatically separates your target application's proprietary JavaScript from external libraries, CDNs, and trackers (e.g. Google Analytics, Stripe, Sentry, Cloudflare, Recaptcha, Datadog).
-   - Quick one-click radio filters: `All`, `1st Party (App)`, `3rd Party (CDN/Trackers)`, and `Exposed .map Only`.
+9. **Dedicated Exposed .map Filter**:
+   - Dedicated **`[ ] Exposed .map Only`** standalone toggle checkbox in the filter toolbar to immediately filter for scripts with confirmed passive or active `.map` exposures.
+   - Cleanly replaces former 1st-party / 3rd-party CDN radio boxes with the more precise `Domains ▾` filter.
 
 10. **Separate Passive & On-Demand Active Probe Columns**:
     - **`Passive .map`**: Displays passive indicators:
@@ -93,7 +103,7 @@
       - **Master Table (Top)**: Lists requests sequentially with method, URL, status, origin, and counts of discovered paths, secrets, comments, security bypasses, cloud URLs, and dependencies.
       - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **💬 Comments**, **🛡️ Security Bypasses**, **Cloud URLs**, and **Dependencies** tabs on the right.
     - **Multi-Select Technique, Category, and Header Filtering**:
-      - **Top Filter Toolbar**: Includes `In-Scope Only` checkbox, `Method ▾`, `Status ▾`, `Origin ▾` multi-select filter buttons, `Source Type` selector, and real-time search with 300ms debounce.
+      - **Top Filter Toolbar**: Includes `In-Scope Only` (enabled by default), `Domains ▾` multi-select button, `Method ▾`, `Status ▾` multi-select filter buttons, `Source Type` selector, and real-time search with 300ms debounce.
       - **Paths Tab**: Features `Method ▾` (GET, POST, etc.) and `Technique ▾` (Regex/Pattern, LinkFinder, etc.) multi-select buttons alongside search and TSV export.
       - **Secrets Tab**: Features `Category ▾`, `Signature ▾`, `Confidence ▾` multi-select buttons, search, and the `📋 Signatures Catalog` modal viewer.
       - **💬 Comments Tab**: Extracts all developer comments (single-line `//`, multi-line `/* */`, HTML `<!-- -->`) with line numbers, code offsets for Burp editor deep-linking, and category tags (`TODO/FIXME`, `Credentials/Auth`, `Debug/Config`, `General`), plus `Type ▾` and `Category ▾` multi-select filters.

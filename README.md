@@ -28,13 +28,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 ## 🛠️ Included Extensions
 
 ### 1. [JS SourceMap Explorer](file:///home/littlespidy/myextra/burpsuite/JSSourceMapExplorer_littlespidy)
+- **Default In-Scope Ingestion & Multi-Select Domain Filter**: Gated by Burp target scope by default (`In-Scope Only`), preventing out-of-scope assets from flooding memory and tables. Includes dynamic `Domains ▾` multi-select popup button in both workspace and recon tabs to isolate specific subdomains.
 - **High-Performance Two-Stage Ingestion Pipeline**: Eliminates proxy history loading freezes via instantaneous Stage 1 deduplication/ingestion and bounded multi-threaded Stage 2 deep mining with a live progress bar.
 - **Ghost-Js Secret Mining & Shannon Entropy Suppression**: 40+ curated secret patterns with Severity & Confidence tracking, Shannon entropy heuristic, exact character offsets, and false-positive suppression of sample keys, public tokens, and hashes.
 - **js-recon Advanced Techniques**: Webpack chunk extractor (object maps, if-chains, string-keyed maps), framework fingerprinting (Next.js, Nuxt.js, React, Vue, Svelte, Angular, Vite), inline Base64 data URI decoding, and directory traversal protection.
 - **4-Pillar Deep-Linking Quad**: Double-clicking any secret, endpoint, cloud URL, or dependency automatically marks range offsets in native Montoya editors, syncs search, scrolls caret to view, and activates the request/response tab.
 - **Tool Dispatch & Row Pinning**: Multi-interval row selection with `Send to Repeater`, `Send to Intruder`, and `Send to Organizer`, plus row pinning (`📌 Pin Selected`) with amber highlighting.
-- **1st Party vs 3rd Party Classification**: Automatically distinguishes target app scripts from external CDNs, analytics, and trackers.
-- **Passive & Active .map Detection**: Detects `//# sourceMappingURL=...` trailing comments, response headers, inline Base64 data URIs, and supports on-demand batch `.map` active probing.
+- **Passive & Active .map Detection**: Detects `//# sourceMappingURL=...` trailing comments, response headers, inline Base64 data URIs, and supports on-demand batch `.map` active probing with standalone `Exposed .map Only` toggle filter.
 - **In-Burp Unpacker & Source Tree Reconstructor**: Parses SourceMap v3 JSON, reconstructs original repository directory hierarchies (`webpack:///`, `vite://`, etc.), and provides a built-in monospace source code editor with offline VS Code export.
 
 ### 2. [Cache Header Inspector](file:///home/littlespidy/myextra/burpsuite/CacheHeaderInspector_littlespidy)

@@ -81,10 +81,11 @@ public class ReconMiningPanel extends JPanel {
     private final JTabbedPane httpEditorsTabs = new JTabbedPane();
 
     // ── Top Toolbar Controls ──
-    private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
+    private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", true);
     private MultiSelectFilterButton methodFilterBtn;
     private MultiSelectFilterButton statusFilterBtn;
-    private MultiSelectFilterButton originFilterBtn;
+    private MultiSelectFilterButton domainFilterBtn;
+    private final Set<String> knownReconDomains = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
     private final JComboBox<String> sourceTypeFilter = new JComboBox<>(new String[]{
         "All Sources", "JS Files Only", "SourceMap Files Only"
     });
@@ -173,9 +174,9 @@ public class ReconMiningPanel extends JPanel {
             sel -> applyRequestFilter()
         );
 
-        originFilterBtn = new MultiSelectFilterButton(
-            "Origin",
-            List.of("All Origins", "1st Party (App)", "3rd Party (CDN/Trackers)"),
+        domainFilterBtn = new MultiSelectFilterButton(
+            "Domains",
+            List.of("All Domains"),
             sel -> applyRequestFilter()
         );
 
@@ -194,6 +195,9 @@ public class ReconMiningPanel extends JPanel {
         inScopeOnlyCheckBox.setToolTipText("Show only requests targeting hosts in Burp target scope");
         inScopeOnlyCheckBox.addActionListener(e -> applyRequestFilter());
 
+        domainFilterBtn.setToolTipText("Filter requests by one or more target domains");
+        topToolbar.add(domainFilterBtn);
+
         topToolbar.add(new JSeparator(SwingConstants.VERTICAL));
 
         JLabel mthdLbl = new JLabel("Method:");
@@ -205,11 +209,6 @@ public class ReconMiningPanel extends JPanel {
         statusLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         topToolbar.add(statusLbl);
         topToolbar.add(statusFilterBtn);
-
-        JLabel originLbl = new JLabel("Origin:");
-        originLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        topToolbar.add(originLbl);
-        topToolbar.add(originFilterBtn);
 
         JLabel filterLbl = new JLabel("Source:");
         filterLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
@@ -232,10 +231,10 @@ public class ReconMiningPanel extends JPanel {
 
         JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> {
-            inScopeOnlyCheckBox.setSelected(false);
+            inScopeOnlyCheckBox.setSelected(true);
             if (methodFilterBtn != null) methodFilterBtn.clearSelection();
             if (statusFilterBtn != null) statusFilterBtn.clearSelection();
-            if (originFilterBtn != null) originFilterBtn.clearSelection();
+            if (domainFilterBtn != null) domainFilterBtn.selectAll();
             sourceTypeFilter.setSelectedIndex(0);
             searchField.setText("");
             if (pathMethodFilterBtn != null) pathMethodFilterBtn.clearSelection();
@@ -967,14 +966,32 @@ public class ReconMiningPanel extends JPanel {
         if (dataStore != null) {
             masterEntries.addAll(dataStore.getEntries());
         }
+        updateDomainFilterOptions();
         applyRequestFilter();
+    }
+
+    private void updateDomainFilterOptions() {
+        if (domainFilterBtn == null) return;
+        Set<String> currentDomains = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (JsFileEntry entry : masterEntries) {
+            if (entry.getHost() != null && !entry.getHost().isBlank()) {
+                currentDomains.add(entry.getHost().trim().toLowerCase());
+            }
+        }
+        if (!currentDomains.equals(knownReconDomains)) {
+            knownReconDomains.clear();
+            knownReconDomains.addAll(currentDomains);
+            List<String> opts = new ArrayList<>();
+            opts.add("All Domains");
+            opts.addAll(knownReconDomains);
+            domainFilterBtn.setOptions(opts, false);
+        }
     }
 
     private synchronized void applyRequestFilter() {
         boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
         Set<String> selectedMethods = methodFilterBtn != null ? methodFilterBtn.getSelected() : Collections.emptySet();
         Set<String> selectedStatuses = statusFilterBtn != null ? statusFilterBtn.getSelected() : Collections.emptySet();
-        Set<String> selectedOrigins = originFilterBtn != null ? originFilterBtn.getSelected() : Collections.emptySet();
         String filterSource = (String) sourceTypeFilter.getSelectedItem();
         if (filterSource == null) filterSource = "All Sources";
         String query = searchField.getText().trim().toLowerCase();
@@ -989,23 +1006,30 @@ public class ReconMiningPanel extends JPanel {
 
         for (JsFileEntry entry : masterEntries) {
             // 1. In-Scope Filter
-            if (inScopeOnly && !api.scope().isInScope(entry.getUrl())) {
-                continue;
+            if (inScopeOnly) {
+                boolean inScope = (entry.getRequest() != null && entry.getRequest().isInScope())
+                               || (api != null && entry.getUrl() != null && api.scope().isInScope(entry.getUrl()));
+                if (!inScope) {
+                    continue;
+                }
             }
 
-            // 2. HTTP Method Filter
+            // 2. Domain Filter
+            if (domainFilterBtn != null && !domainFilterBtn.isAllSelected()) {
+                Set<String> selectedDomains = domainFilterBtn.getSelected();
+                if (!MultiSelectFilterButton.matchesDomain(entry.getHost(), selectedDomains)) {
+                    continue;
+                }
+            }
+
+            // 3. HTTP Method Filter
             String method = entry.getRequest() != null ? entry.getRequest().method() : "GET";
             if (!matchesMethod(method, selectedMethods)) {
                 continue;
             }
 
-            // 3. HTTP Status Filter
+            // 4. HTTP Status Filter
             if (!matchesStatus(entry.getStatusCode(), selectedStatuses)) {
-                continue;
-            }
-
-            // 4. Origin Filter
-            if (!matchesOrigin(entry.isFirstParty(), selectedOrigins)) {
                 continue;
             }
 
@@ -1101,16 +1125,6 @@ public class ReconMiningPanel extends JPanel {
             try {
                 if (Integer.parseInt(sel.trim()) == statusCode) return true;
             } catch (NumberFormatException ignored) {}
-        }
-        return false;
-    }
-
-    public static boolean matchesOrigin(boolean is1stParty, Set<String> selectedOrigins) {
-        if (selectedOrigins == null || selectedOrigins.isEmpty()) return true;
-        for (String sel : selectedOrigins) {
-            if ("All Origins".equalsIgnoreCase(sel)) return true;
-            if (sel.contains("1st") && is1stParty) return true;
-            if (sel.contains("3rd") && !is1stParty) return true;
         }
         return false;
     }

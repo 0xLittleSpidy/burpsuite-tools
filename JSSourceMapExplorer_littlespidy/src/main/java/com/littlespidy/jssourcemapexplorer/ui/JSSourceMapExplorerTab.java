@@ -65,8 +65,10 @@ public class JSSourceMapExplorerTab extends JPanel {
     private final HttpResponseEditor mapResponseEditor;
 
     // Filters & Status Strip
-    private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
-    private final JCheckBox loadInScopeOnlyCheckBox = new JCheckBox("In-Scope Only", false);
+    private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", true);
+    private final JCheckBox exposedMapOnlyCheckBox = new JCheckBox("Exposed .map Only", false);
+    private final MultiSelectFilterButton domainFilterBtn;
+    private final Set<String> knownDomains = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
     private final JComboBox<String> httpStatusFilter = new JComboBox<>(new String[]{
         "200 OK Only",
         "All Status Codes",
@@ -92,8 +94,6 @@ public class JSSourceMapExplorerTab extends JPanel {
     public void clearPins() { pinnedIds.clear(); }
     public boolean hasPins() { return !pinnedIds.isEmpty(); }
 
-    private OriginFilter currentOriginFilter = OriginFilter.ALL;
-
     // UI Debounce Timer
     private final javax.swing.Timer refreshTimer;
     private volatile boolean needsRefresh = false;
@@ -102,17 +102,12 @@ public class JSSourceMapExplorerTab extends JPanel {
     private final AtomicBoolean isBatchProbing = new AtomicBoolean(false);
     private ExecutorService probeExecutor;
 
-    public enum OriginFilter {
-        ALL,
-        FIRST_PARTY_ONLY,
-        THIRD_PARTY_ONLY,
-        EXPOSED_MAP_ONLY
-    }
-
     public JSSourceMapExplorerTab(MontoyaApi api, JsDataStore dataStore) {
         this.api = api;
         this.dataStore = dataStore;
         this.prober = new SourceMapProber(api);
+
+        this.domainFilterBtn = new MultiSelectFilterButton("Domains", List.of("All Domains"), sel -> refreshView());
 
         this.jsRequestEditor = api.userInterface().createHttpRequestEditor();
         this.jsResponseEditor = api.userInterface().createHttpResponseEditor();
@@ -374,7 +369,10 @@ public class JSSourceMapExplorerTab extends JPanel {
         loadHistoryBtn.setToolTipText("Scrape and deduplicate all JavaScript responses from Burp Proxy history");
         loadHistoryBtn.addActionListener(e -> loadProxyHistory());
 
-        loadInScopeOnlyCheckBox.setToolTipText("When checked, only in-scope JavaScript requests will be loaded from Proxy history (prevents hanging on large scopes)");
+        inScopeOnlyCheckBox.setToolTipText("When checked, only in-scope JavaScript requests will be loaded from Proxy history and displayed");
+        inScopeOnlyCheckBox.addActionListener(e -> refreshView());
+
+        domainFilterBtn.setToolTipText("Filter JavaScript assets by one or more target domains");
 
         JButton selectAllBtn = new JButton("Select All");
         selectAllBtn.addActionListener(e -> {
@@ -417,6 +415,8 @@ public class JSSourceMapExplorerTab extends JPanel {
             );
             if (confirm == JOptionPane.YES_OPTION) {
                 pinnedIds.clear();
+                knownDomains.clear();
+                if (domainFilterBtn != null) domainFilterBtn.setOptions(List.of("All Domains"), true);
                 dataStore.clear();
                 sourceTreePanel.setProject(null);
                 codeViewerPanel.displayFile(null);
@@ -426,7 +426,8 @@ public class JSSourceMapExplorerTab extends JPanel {
         });
 
         toolbar.add(loadHistoryBtn);
-        toolbar.add(loadInScopeOnlyCheckBox);
+        toolbar.add(inScopeOnlyCheckBox);
+        toolbar.add(domainFilterBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(selectAllBtn);
         toolbar.add(deselectAllBtn);
@@ -448,30 +449,9 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         JPanel filtersPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 
-        JLabel filterLbl = new JLabel("Origin:");
-        filterLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        filtersPanel.add(filterLbl);
-
-        ButtonGroup group = new ButtonGroup();
-        JRadioButton allBtn = new JRadioButton("All", true);
-        JRadioButton firstPartyBtn = new JRadioButton("1st Party (App)");
-        JRadioButton thirdPartyBtn = new JRadioButton("3rd Party (CDN/Trackers)");
-        JRadioButton exposedMapBtn = new JRadioButton("Exposed .map Only");
-
-        group.add(allBtn);
-        group.add(firstPartyBtn);
-        group.add(thirdPartyBtn);
-        group.add(exposedMapBtn);
-
-        allBtn.addActionListener(e -> { currentOriginFilter = OriginFilter.ALL; refreshView(); });
-        firstPartyBtn.addActionListener(e -> { currentOriginFilter = OriginFilter.FIRST_PARTY_ONLY; refreshView(); });
-        thirdPartyBtn.addActionListener(e -> { currentOriginFilter = OriginFilter.THIRD_PARTY_ONLY; refreshView(); });
-        exposedMapBtn.addActionListener(e -> { currentOriginFilter = OriginFilter.EXPOSED_MAP_ONLY; refreshView(); });
-
-        filtersPanel.add(allBtn);
-        filtersPanel.add(firstPartyBtn);
-        filtersPanel.add(thirdPartyBtn);
-        filtersPanel.add(exposedMapBtn);
+        filtersPanel.add(exposedMapOnlyCheckBox);
+        exposedMapOnlyCheckBox.setToolTipText("Show only scripts with detected or active .map files");
+        exposedMapOnlyCheckBox.addActionListener(e -> refreshView());
 
         filtersPanel.add(new JSeparator(SwingConstants.VERTICAL));
 
@@ -483,8 +463,6 @@ public class JSSourceMapExplorerTab extends JPanel {
         filtersPanel.add(httpStatusFilter);
 
         filtersPanel.add(new JSeparator(SwingConstants.VERTICAL));
-        filtersPanel.add(inScopeOnlyCheckBox);
-        inScopeOnlyCheckBox.addActionListener(e -> refreshView());
 
         filtersPanel.add(new JLabel(" Search: "));
         searchField.setToolTipText("Filter by URL, host, or script path");
@@ -497,10 +475,10 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> {
-            allBtn.setSelected(true);
-            currentOriginFilter = OriginFilter.ALL;
+            exposedMapOnlyCheckBox.setSelected(false);
             httpStatusFilter.setSelectedIndex(0); // 200 OK Only
-            inScopeOnlyCheckBox.setSelected(false);
+            inScopeOnlyCheckBox.setSelected(true);
+            if (domainFilterBtn != null) domainFilterBtn.selectAll();
             searchField.setText("");
             refreshView();
         });
@@ -893,17 +871,33 @@ public class JSSourceMapExplorerTab extends JPanel {
             protected List<JsFileEntry> doInBackground() {
                 List<ProxyHttpRequestResponse> history = api.proxy().history();
                 List<JsFileEntry> stage1Entries = new ArrayList<>();
-                boolean inScopeOnly = loadInScopeOnlyCheckBox.isSelected();
+                boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
 
                 // Stage 1: Fast Scrape & Deduplication + Framework Detection
                 for (ProxyHttpRequestResponse item : history) {
                     if (isCancelled()) break;
                     if (!item.hasResponse()) continue;
 
-                    String url = item.request().url();
-                    if (inScopeOnly && !api.scope().isInScope(url)) {
-                        continue;
+                    var req = item.finalRequest() != null ? item.finalRequest() : item.request();
+                    String url = req.url();
+                    String host = req.httpService() != null ? req.httpService().host() : "";
+
+                    if (inScopeOnly) {
+                        boolean inScope = req.isInScope()
+                                       || (item.request() != null && item.request().isInScope())
+                                       || (api != null && url != null && api.scope().isInScope(url));
+                        if (!inScope) {
+                            continue;
+                        }
                     }
+
+                    if (domainFilterBtn != null && !domainFilterBtn.isAllSelected()) {
+                        Set<String> selectedDomains = domainFilterBtn.getSelected();
+                        if (!MultiSelectFilterButton.matchesDomain(host, selectedDomains)) {
+                            continue;
+                        }
+                    }
+
                     if (dataStore.isKnownUrl(url)) continue; // Instant deduplication!
 
                     var resp = item.response();
@@ -911,7 +905,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                     if (resp.body().length() > 5 * 1024 * 1024) continue;
 
                     String ctype = resp.headerValue("Content-Type");
-                    String path = item.request().path() != null ? item.request().path() : "/";
+                    String path = req.path() != null ? req.path() : "/";
 
                     boolean isJs = (ctype != null && (ctype.contains("javascript") || ctype.contains("ecmascript")))
                         || path.endsWith(".js")
@@ -920,7 +914,6 @@ public class JSSourceMapExplorerTab extends JPanel {
 
                     if (!isJs) continue;
 
-                    String host = item.request().httpService() != null ? item.request().httpService().host() : "";
                     boolean is1st = JsClassifier.isFirstParty(api, url, host);
                     String originLabel = JsClassifier.getOriginLabel(is1st);
 
@@ -1048,6 +1041,25 @@ public class JSSourceMapExplorerTab extends JPanel {
             if (selectedStatus == null) selectedStatus = "200 OK Only";
 
             List<JsFileEntry> all = dataStore.getEntries();
+
+            // Synchronize domain filter options dynamically
+            Set<String> currentDomains = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            for (JsFileEntry e : all) {
+                if (e.getHost() != null && !e.getHost().isBlank()) {
+                    currentDomains.add(e.getHost().trim().toLowerCase());
+                }
+            }
+            if (!currentDomains.equals(knownDomains)) {
+                knownDomains.clear();
+                knownDomains.addAll(currentDomains);
+                List<String> domainOpts = new ArrayList<>();
+                domainOpts.add("All Domains");
+                domainOpts.addAll(knownDomains);
+                if (domainFilterBtn != null) {
+                    domainFilterBtn.setOptions(domainOpts, false);
+                }
+            }
+
             List<JsFileEntry> filtered = new ArrayList<>();
 
             int count1st = 0;
@@ -1067,14 +1079,26 @@ public class JSSourceMapExplorerTab extends JPanel {
                     continue;
                 }
 
-                if (inScopeOnly && !api.scope().isInScope(e.getUrl())) {
-                    continue;
+                if (inScopeOnly) {
+                    boolean inScope = (e.getRequest() != null && e.getRequest().isInScope())
+                                   || (api != null && e.getUrl() != null && api.scope().isInScope(e.getUrl()));
+                    if (!inScope) {
+                        continue;
+                    }
                 }
 
-                // Origin filtering
-                if (currentOriginFilter == OriginFilter.FIRST_PARTY_ONLY && !e.isFirstParty()) continue;
-                if (currentOriginFilter == OriginFilter.THIRD_PARTY_ONLY && e.isFirstParty()) continue;
-                if (currentOriginFilter == OriginFilter.EXPOSED_MAP_ONLY && !e.isMapExposed()) continue;
+                // Domain filter
+                if (domainFilterBtn != null && !domainFilterBtn.isAllSelected()) {
+                    Set<String> selectedDomains = domainFilterBtn.getSelected();
+                    if (!MultiSelectFilterButton.matchesDomain(e.getHost(), selectedDomains)) {
+                        continue;
+                    }
+                }
+
+                // Exposed .map filter
+                if (exposedMapOnlyCheckBox.isSelected() && !e.isMapExposed()) {
+                    continue;
+                }
 
                 // HTTP Status filtering
                 int code = e.getStatusCode();

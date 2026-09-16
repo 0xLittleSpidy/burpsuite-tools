@@ -46,7 +46,7 @@ public class MultiSelectFilterButton extends JButton {
     // ── Public API ──────────────────────────────────────────────────────────
 
     /** Returns a snapshot of currently checked options (excluding the "All" sentinel). */
-    public Set<String> getSelected() {
+    public synchronized Set<String> getSelected() {
         Set<String> result = new LinkedHashSet<>();
         for (Map.Entry<String, JCheckBox> entry : checkBoxMap.entrySet()) {
             if (entry.getValue().isSelected() && !isAllSentinel(entry.getKey())) {
@@ -56,15 +56,86 @@ public class MultiSelectFilterButton extends JButton {
         return result;
     }
 
-    /** Returns true if no specific items are checked (i.e., "All" is effectively active). */
-    public boolean isAllSelected() {
-        return getSelected().isEmpty();
+    /** Returns true if all items are checked or none are checked (pass-all state). */
+    public synchronized boolean isAllSelected() {
+        return allOptionsChecked() || getSelected().isEmpty();
+    }
+
+    /** Programmatically check all items. */
+    public synchronized void selectAll() {
+        for (JCheckBox cb : checkBoxMap.values()) cb.setSelected(true);
+        updateButtonText();
     }
 
     /** Programmatically reset to "all cleared" (pass-all) state. */
-    public void clearSelection() {
+    public synchronized void clearSelection() {
         for (JCheckBox cb : checkBoxMap.values()) cb.setSelected(false);
         updateButtonText();
+    }
+
+    /** Dynamically updates selectable options, preserving selection or defaulting to all selected. */
+    public synchronized void setOptions(Collection<String> newOptions, boolean selectAllByDefault) {
+        Set<String> currentlySelected = getSelected();
+        boolean wasAllOrEmpty = currentlySelected.isEmpty() || isAllSelected();
+
+        options.clear();
+        checkBoxMap.clear();
+
+        if (newOptions != null) {
+            options.addAll(newOptions);
+        }
+
+        buildCheckBoxes();
+
+        if (selectAllByDefault || wasAllOrEmpty) {
+            for (JCheckBox cb : checkBoxMap.values()) {
+                cb.setSelected(true);
+            }
+        } else {
+            boolean anySelected = false;
+            for (Map.Entry<String, JCheckBox> entry : checkBoxMap.entrySet()) {
+                if (!isAllSentinel(entry.getKey()) && currentlySelected.contains(entry.getKey())) {
+                    entry.getValue().setSelected(true);
+                    anySelected = true;
+                }
+            }
+            if (!anySelected) {
+                for (JCheckBox cb : checkBoxMap.values()) {
+                    cb.setSelected(true);
+                }
+            } else {
+                JCheckBox allCb = options.isEmpty() ? null : checkBoxMap.get(options.get(0));
+                if (allCb != null && isAllSentinel(options.get(0))) {
+                    allCb.setSelected(allOptionsChecked());
+                }
+            }
+        }
+
+        updateButtonText();
+    }
+
+    /** Helper to check if a host matches a set of selected domains (exact or subdomain). */
+    public static boolean matchesDomain(String host, Set<String> selectedDomains) {
+        if (selectedDomains == null || selectedDomains.isEmpty()) return true;
+        if (host == null || host.isBlank()) return false;
+        String cleanHost = host.trim().toLowerCase();
+        int colonIdx = cleanHost.indexOf(':');
+        if (colonIdx != -1) {
+            cleanHost = cleanHost.substring(0, colonIdx);
+        }
+
+        for (String d : selectedDomains) {
+            if ("All Domains".equalsIgnoreCase(d) || "All".equalsIgnoreCase(d)) return true;
+            String cleanDomain = d.trim().toLowerCase();
+            int dColon = cleanDomain.indexOf(':');
+            if (dColon != -1) {
+                cleanDomain = cleanDomain.substring(0, dColon);
+            }
+            if (cleanHost.equals(cleanDomain) || cleanHost.endsWith("." + cleanDomain)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ── Private helpers ─────────────────────────────────────────────────────
@@ -97,7 +168,7 @@ public class MultiSelectFilterButton extends JButton {
                 cb.addActionListener(e -> {
                     boolean checked = cb.isSelected();
                     for (Map.Entry<String, JCheckBox> inner : checkBoxMap.entrySet()) {
-                        if (!isAllSentinel(inner.getKey())) inner.getValue().setSelected(checked);
+                        inner.getValue().setSelected(checked);
                     }
                     updateButtonText();
                     fireOnChange();
@@ -123,6 +194,14 @@ public class MultiSelectFilterButton extends JButton {
         popup.add(scroll, BorderLayout.CENTER);
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
+        JButton selectAllBtn = new JButton("Select All");
+        selectAllBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        selectAllBtn.addActionListener(e -> {
+            selectAll();
+            fireOnChange();
+        });
+        btnRow.add(selectAllBtn);
+
         JButton clearBtn = new JButton("Clear");
         clearBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         clearBtn.addActionListener(e -> {
@@ -136,16 +215,16 @@ public class MultiSelectFilterButton extends JButton {
         popup.show(this, 0, getHeight());
     }
 
-    private boolean allOptionsChecked() {
+    public synchronized boolean allOptionsChecked() {
         for (Map.Entry<String, JCheckBox> e : checkBoxMap.entrySet()) {
             if (!isAllSentinel(e.getKey()) && !e.getValue().isSelected()) return false;
         }
         return true;
     }
 
-    private void updateButtonText() {
+    private synchronized void updateButtonText() {
         Set<String> sel = getSelected();
-        if (sel.isEmpty()) {
+        if (sel.isEmpty() || allOptionsChecked()) {
             setText(label + " \u25be");
         } else if (sel.size() == 1) {
             setText(label + ": " + sel.iterator().next() + " \u25be");
