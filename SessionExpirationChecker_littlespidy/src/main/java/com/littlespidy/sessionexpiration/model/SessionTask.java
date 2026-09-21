@@ -21,6 +21,7 @@ public class SessionTask {
 
     private final int id;
     private final HttpRequest originalRequest;
+    private final HttpRequestResponse originalRequestResponse;
     private HttpRequestResponse baseline;
     private Instant createdAt;
 
@@ -37,10 +38,11 @@ public class SessionTask {
     private String lastVerdict = "Awaiting first scheduled check";
     private boolean cancelOnExpire = true;
 
-    public SessionTask(int id, HttpRequest originalRequest, HttpRequestResponse baseline) {
+    public SessionTask(int id, HttpRequest originalRequest, HttpRequestResponse originalRequestResponse) {
         this.id = id;
         this.originalRequest = originalRequest;
-        this.baseline = baseline;
+        this.originalRequestResponse = originalRequestResponse;
+        this.baseline = null;
         this.createdAt = Instant.now();
 
         this.method = (originalRequest != null && originalRequest.method() != null) ? originalRequest.method() : "GET";
@@ -48,8 +50,8 @@ public class SessionTask {
         this.path = (originalRequest != null && originalRequest.path() != null) ? originalRequest.path() : "/";
         this.host = (originalRequest != null && originalRequest.httpService() != null) ? originalRequest.httpService().host() : "";
 
-        if (baseline != null && baseline.hasResponse()) {
-            HttpResponse resp = baseline.response();
+        if (originalRequestResponse != null && originalRequestResponse.hasResponse()) {
+            HttpResponse resp = originalRequestResponse.response();
             this.baselineStatusCode = resp.statusCode();
             this.baselineLength = resp.toByteArray().length();
         } else {
@@ -64,6 +66,16 @@ public class SessionTask {
 
     public HttpRequest getOriginalRequest() {
         return originalRequest;
+    }
+
+    public HttpRequestResponse getOriginalRequestResponse() {
+        return originalRequestResponse;
+    }
+
+    public HttpResponse getOriginalResponse() {
+        return (originalRequestResponse != null && originalRequestResponse.hasResponse())
+                ? originalRequestResponse.response()
+                : null;
     }
 
     public HttpRequestResponse getBaseline() {

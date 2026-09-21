@@ -104,12 +104,10 @@ public class ReconMiningPanel extends JPanel {
 
     private MultiSelectFilterButton secretCategoryFilterBtn;
     private MultiSelectFilterButton secretSignatureFilterBtn;
-    private MultiSelectFilterButton secretConfidenceFilterBtn;
     private final JTextField secretSearchField = new JTextField(10);
     private final JLabel secretCountLabel = new JLabel("Secrets: 0");
 
     private MultiSelectFilterButton commentTypeFilterBtn;
-    private MultiSelectFilterButton commentCategoryFilterBtn;
     private final JTextField commentSearchField = new JTextField(10);
     private final JLabel commentCountLabel = new JLabel("Comments: 0");
 
@@ -284,9 +282,7 @@ public class ReconMiningPanel extends JPanel {
             if (pathTechniqueFilterBtn != null) pathTechniqueFilterBtn.clearSelection();
             if (secretCategoryFilterBtn != null) secretCategoryFilterBtn.clearSelection();
             if (secretSignatureFilterBtn != null) secretSignatureFilterBtn.clearSelection();
-            if (secretConfidenceFilterBtn != null) secretConfidenceFilterBtn.clearSelection();
             if (commentTypeFilterBtn != null) commentTypeFilterBtn.clearSelection();
-            if (commentCategoryFilterBtn != null) commentCategoryFilterBtn.clearSelection();
             if (bypassFrameworkFilterBtn != null) bypassFrameworkFilterBtn.clearSelection();
             if (bypassRiskFilterBtn != null) bypassRiskFilterBtn.clearSelection();
             if (cloudProviderFilterBtn != null) cloudProviderFilterBtn.clearSelection();
@@ -470,19 +466,6 @@ public class ReconMiningPanel extends JPanel {
         );
         toolbar.add(secretSignatureFilterBtn);
 
-
-
-        JLabel confLbl = new JLabel("Confidence:");
-        confLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        toolbar.add(confLbl);
-
-        secretConfidenceFilterBtn = new MultiSelectFilterButton(
-            "Confidence",
-            List.of("All Confidences", "High [Firm]", "Low [Tentative]"),
-            sel -> applySecretFilter()
-        );
-        toolbar.add(secretConfidenceFilterBtn);
-
         toolbar.add(new JLabel(" Search: "));
         secretSearchField.addActionListener(e -> applySecretFilter());
         toolbar.add(secretSearchField);
@@ -579,17 +562,6 @@ public class ReconMiningPanel extends JPanel {
         );
         toolbar.add(commentTypeFilterBtn);
 
-        JLabel catLbl = new JLabel("Category:");
-        catLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        toolbar.add(catLbl);
-
-        commentCategoryFilterBtn = new MultiSelectFilterButton(
-            "Category",
-            List.of("All Categories", "TODO / FIXME", "Credentials / Auth", "Debug / Config", "General"),
-            sel -> applyCommentFilter()
-        );
-        toolbar.add(commentCategoryFilterBtn);
-
         toolbar.add(new JLabel(" Search: "));
         commentSearchField.addActionListener(e -> applyCommentFilter());
         toolbar.add(commentSearchField);
@@ -616,7 +588,6 @@ public class ReconMiningPanel extends JPanel {
         commentsTable.getColumnModel().getColumn(2).setPreferredWidth(50);  // Line
         commentsTable.getColumnModel().getColumn(3).setPreferredWidth(450); // Comment Content
         commentsTable.getColumnModel().getColumn(4).setPreferredWidth(90);  // Source Type
-        commentsTable.getColumnModel().getColumn(5).setPreferredWidth(250); // Location / File
 
         // Click-to-locate navigation
         commentsTable.getSelectionModel().addListSelectionListener(e -> {
@@ -695,7 +666,6 @@ public class ReconMiningPanel extends JPanel {
         securityBypassesTable.getColumnModel().getColumn(4).setPreferredWidth(320); // Context Snippet
         securityBypassesTable.getColumnModel().getColumn(5).setPreferredWidth(260); // Description
         securityBypassesTable.getColumnModel().getColumn(6).setPreferredWidth(90);  // Source Type
-        securityBypassesTable.getColumnModel().getColumn(7).setPreferredWidth(220); // Location / File
 
         // Click-to-locate navigation
         securityBypassesTable.getSelectionModel().addListSelectionListener(e -> {
@@ -1272,7 +1242,6 @@ public class ReconMiningPanel extends JPanel {
     private synchronized void applySecretFilter() {
         Set<String> selectedCategories = secretCategoryFilterBtn != null ? secretCategoryFilterBtn.getSelected() : Collections.emptySet();
         Set<String> selectedSignatures = secretSignatureFilterBtn != null ? secretSignatureFilterBtn.getSelected() : Collections.emptySet();
-        Set<String> selectedConfidences = secretConfidenceFilterBtn != null ? secretConfidenceFilterBtn.getSelected() : Collections.emptySet();
         String query = secretSearchField.getText().trim().toLowerCase();
 
         List<DiscoveredSecret> filtered = new ArrayList<>();
@@ -1297,15 +1266,10 @@ public class ReconMiningPanel extends JPanel {
                 }
                 if (!sigMatch) continue;
             }
-            if (!selectedConfidences.isEmpty() && !selectedConfidences.contains(sec.confidence())) {
-                continue;
-            }
             if (!query.isEmpty()) {
                 boolean match = (sec.secretValue() != null && sec.secretValue().toLowerCase().contains(query))
                     || (sec.category() != null && sec.category().toLowerCase().contains(query))
                     || (sec.technique() != null && sec.technique().toLowerCase().contains(query))
-                    || (sec.confidence() != null && sec.confidence().toLowerCase().contains(query))
-                    || (sec.sourceLocation() != null && sec.sourceLocation().toLowerCase().contains(query))
                     || (sec.contextSnippet() != null && sec.contextSnippet().toLowerCase().contains(query));
                 if (!match) continue;
             }
@@ -1318,15 +1282,11 @@ public class ReconMiningPanel extends JPanel {
 
     private synchronized void applyCommentFilter() {
         Set<String> selectedTypes = commentTypeFilterBtn != null ? commentTypeFilterBtn.getSelected() : Collections.emptySet();
-        Set<String> selectedCats = commentCategoryFilterBtn != null ? commentCategoryFilterBtn.getSelected() : Collections.emptySet();
         String query = commentSearchField.getText().trim().toLowerCase();
 
         List<DiscoveredComment> filtered = new ArrayList<>();
         for (DiscoveredComment comm : currentEntryComments) {
             if (!selectedTypes.isEmpty() && !selectedTypes.contains(comm.commentType())) {
-                continue;
-            }
-            if (!selectedCats.isEmpty() && !selectedCats.contains(comm.category())) {
                 continue;
             }
             if (!query.isEmpty()) {
@@ -2163,7 +2123,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class SecurityBypassesTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "Framework", "Method / Sink", "Risk", "Line", "Context Snippet", "Description", "Source Type", "Location / File"
+            "Framework", "Method / Sink", "Risk", "Line", "Context Snippet", "Description", "Source Type"
         };
         private final List<DiscoveredSecurityBypass> list = new ArrayList<>();
 
@@ -2200,7 +2160,6 @@ public class ReconMiningPanel extends JPanel {
                 case 4 -> item.contextSnippet();
                 case 5 -> item.description();
                 case 6 -> item.sourceType();
-                case 7 -> item.sourceLocation();
                 default -> null;
             };
         }
@@ -2208,7 +2167,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class CommentsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "Type", "Category", "Line", "Comment Content", "Source Type", "Location / File"
+            "Type", "Category", "Line", "Comment Content", "Source Type"
         };
         private final List<DiscoveredComment> list = new ArrayList<>();
 
@@ -2243,7 +2202,6 @@ public class ReconMiningPanel extends JPanel {
                 case 2 -> item.line();
                 case 3 -> item.commentText();
                 case 4 -> item.sourceType();
-                case 5 -> item.sourceLocation();
                 default -> null;
             };
         }
@@ -2251,7 +2209,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class EndpointsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "Method", "Endpoint / Route", "Technique", "Source Type", "Location / File", "Line", "Context Snippet"
+            "Method", "Endpoint / Route", "Technique", "Source Type", "Line", "Context Snippet"
         };
         private final List<DiscoveredEndpoint> list = new ArrayList<>();
 
@@ -2269,7 +2227,7 @@ public class ReconMiningPanel extends JPanel {
         @Override public int getRowCount() { return list.size(); }
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
-        @Override public Class<?> getColumnClass(int c) { return c == 5 ? Integer.class : String.class; }
+        @Override public Class<?> getColumnClass(int c) { return c == 4 ? Integer.class : String.class; }
 
         @Override
         public synchronized Object getValueAt(int r, int c) {
@@ -2280,9 +2238,8 @@ public class ReconMiningPanel extends JPanel {
                 case 1 -> item.endpoint();
                 case 2 -> item.technique();
                 case 3 -> item.sourceType();
-                case 4 -> item.sourceLocation();
-                case 5 -> item.line();
-                case 6 -> item.contextSnippet();
+                case 4 -> item.line();
+                case 5 -> item.contextSnippet();
                 default -> null;
             };
         }
@@ -2290,7 +2247,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class SecretsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "Category", "Secret Value / Match", "Entropy", "Confidence", "Signature / Technique", "Source Type", "Location / File", "Line", "Context Snippet"
+            "Category", "Secret Value / Match", "Signature / Technique", "Source Type", "Line", "Context Snippet"
         };
         private final List<DiscoveredSecret> list = new ArrayList<>();
 
@@ -2309,11 +2266,7 @@ public class ReconMiningPanel extends JPanel {
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return switch (c) {
-                case 2 -> Double.class;
-                case 7 -> Integer.class;
-                default -> String.class;
-            };
+            return c == 4 ? Integer.class : String.class;
         }
 
         @Override
@@ -2323,13 +2276,10 @@ public class ReconMiningPanel extends JPanel {
             return switch (c) {
                 case 0 -> item.category();
                 case 1 -> item.secretValue();
-                case 2 -> item.entropy();
-                case 3 -> item.confidence();
-                case 4 -> item.technique();
-                case 5 -> item.sourceType();
-                case 6 -> item.sourceLocation();
-                case 7 -> item.line();
-                case 8 -> item.contextSnippet();
+                case 2 -> item.technique();
+                case 3 -> item.sourceType();
+                case 4 -> item.line();
+                case 5 -> item.contextSnippet();
                 default -> null;
             };
         }
@@ -2337,7 +2287,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class CloudUrlsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "Provider", "Cloud URL / Resource", "Source Type", "Location / File", "Line", "Context Snippet"
+            "Provider", "Cloud URL / Resource", "Source Type", "Line", "Context Snippet"
         };
         private final List<DiscoveredCloudUrl> list = new ArrayList<>();
 
@@ -2355,7 +2305,7 @@ public class ReconMiningPanel extends JPanel {
         @Override public int getRowCount() { return list.size(); }
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
-        @Override public Class<?> getColumnClass(int c) { return c == 4 ? Integer.class : String.class; }
+        @Override public Class<?> getColumnClass(int c) { return c == 3 ? Integer.class : String.class; }
 
         @Override
         public synchronized Object getValueAt(int r, int c) {
@@ -2365,9 +2315,8 @@ public class ReconMiningPanel extends JPanel {
                 case 0 -> item.cloudProvider();
                 case 1 -> item.cloudUrl();
                 case 2 -> item.sourceType();
-                case 3 -> item.sourceLocation();
-                case 4 -> item.line();
-                case 5 -> item.contextSnippet();
+                case 3 -> item.line();
+                case 4 -> item.contextSnippet();
                 default -> null;
             };
         }
@@ -2375,7 +2324,7 @@ public class ReconMiningPanel extends JPanel {
 
     private static class DependenciesTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "Package Name", "Version", "Type", "Status", "Verification Detail", "Source Type", "Location / File", "Line", "Context Snippet"
+            "Package Name", "Version", "Type", "Status", "Verification Detail", "Source Type", "Line", "Context Snippet"
         };
         private final List<DiscoveredDependency> list = new ArrayList<>();
 
@@ -2393,7 +2342,7 @@ public class ReconMiningPanel extends JPanel {
         @Override public int getRowCount() { return list.size(); }
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
-        @Override public Class<?> getColumnClass(int c) { return c == 7 ? Integer.class : String.class; }
+        @Override public Class<?> getColumnClass(int c) { return c == 6 ? Integer.class : String.class; }
 
         @Override
         public synchronized Object getValueAt(int r, int c) {
@@ -2406,9 +2355,8 @@ public class ReconMiningPanel extends JPanel {
                 case 3 -> item.status();
                 case 4 -> item.verificationDetail();
                 case 5 -> item.sourceType();
-                case 6 -> item.sourceLocation();
-                case 7 -> item.line();
-                case 8 -> item.contextSnippet();
+                case 6 -> item.line();
+                case 7 -> item.contextSnippet();
                 default -> null;
             };
         }

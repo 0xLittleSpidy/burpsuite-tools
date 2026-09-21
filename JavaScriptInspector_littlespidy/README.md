@@ -1,4 +1,4 @@
-# JS SourceMap Explorer (Burp Suite Extension)
+# JavaScript Inspector (Burp Suite Extension)
 
 **Author**: littlespidy  
 *Created with the help of an AI Agent and littlespidy.*
@@ -7,7 +7,7 @@
 
 ## Overview
 
-**JS SourceMap Explorer** is a Burp Suite extension built on the modern Montoya API to help security testers and bug bounty hunters analyze client-side JavaScript assets, automatically deduplicate scripts, classify 1st-party vs 3rd-party origins, detect exposed `.map` files (source maps) through passive inspection and on-demand active probing, inspect both JS and `.map` HTTP requests/responses, unpack original source trees, and automatically mine for hidden API endpoints and sensitive credentials across both raw JS and unpacked source maps.
+**JavaScript Inspector** is a Burp Suite extension built on the modern Montoya API to help security testers and bug bounty hunters analyze client-side JavaScript assets, automatically deduplicate scripts, classify 1st-party vs 3rd-party origins, detect exposed `.map` files (source maps) through passive inspection and on-demand active probing, inspect both JS and `.map` HTTP requests/responses, unpack original source trees, and automatically mine for hidden API endpoints and sensitive credentials across both raw JS and unpacked source maps.
 
 ---
 
@@ -102,12 +102,12 @@
 13. **Dedicated Top-Level "Recon & Secret Mining" Suite Tab**:
     - Sequential request-first master-detail layout:
       - **Master Table (Top)**: Lists requests sequentially with method, URL, status, and counts of discovered paths, secrets, comments, security bypasses, cloud URLs, and dependencies.
-      - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **💬 Comments**, **🛡️ Security Bypasses**, **Cloud URLs**, and **Dependencies** tabs on the right.
+      - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **💬 Comments**, **🛡️ Security Bypasses**, **Cloud URLs**, and **Dependencies** tabs on the right. In all panels, the Location/File columns have been streamlined away, as well as Entropy and Confidence columns.
     - **Multi-Select Technique, Category, and Header Filtering**:
       - **Top Filter Toolbar**: Includes `In-Scope Only` (enabled by default), `Domains ▾` multi-select button, `Method ▾`, `Status ▾` multi-select filter buttons, `Source Type` selector, and real-time search with 300ms debounce.
       - **Paths Tab**: Features `Method ▾` (GET, POST, etc.) and `Technique ▾` (Regex/Pattern, LinkFinder, etc.) multi-select buttons alongside search and TSV export.
-      - **Secrets Tab**: Features `Category ▾`, `Signature ▾`, `Confidence ▾` multi-select buttons, search, and the `📋 Signatures Catalog` modal viewer.
-      - **💬 Comments Tab**: Extracts all developer comments (single-line `//`, multi-line `/* */`, HTML `<!-- -->`) with line numbers, code offsets for Burp editor deep-linking, and category tags (`TODO/FIXME`, `Credentials/Auth`, `Debug/Config`, `General`), plus `Type ▾` and `Category ▾` multi-select filters.
+      - **Secrets Tab**: Features `Category ▾` and `Signature ▾` multi-select buttons, search, and the `📋 Signatures Catalog` modal viewer (Entropy and Confidence columns removed, Confidence filter removed).
+      - **💬 Comments Tab**: Extracts all developer comments (single-line `//`, multi-line `/* */`, HTML `<!-- -->`) with line numbers, code offsets for Burp editor deep-linking, and category tags (`TODO/FIXME`, `Credentials/Auth`, `Debug/Config`, `General`), plus `Type ▾` multi-select filter (Category filter removed).
       - **🛡️ Security Bypasses Tab (DOM XSS & Sanitizer Bypasses)**:
         - **Framework Detection**: Detects sanitization bypasses and dangerous sinks across **Angular** (`bypassSecurityTrustHtml`, `bypassSecurityTrustScript`, `bypassSecurityTrustStyle`, `bypassSecurityTrustUrl`, `bypassSecurityTrustResourceUrl`, `ɵɵtrustConstantHtml`, `$sce.trustAs*`), **React** (`dangerouslySetInnerHTML`), **Vue.js** (`v-html`, `domProps.innerHTML`, `{{{ }}}`), **Svelte** (`{@html ...}`), **Sanitizers & Policies** (`DOMPurify.sanitize` loose configs, `trustedTypes.createPolicy` passthrough), and **Vanilla DOM Sinks** (`innerHTML` / `outerHTML` assignments, `document.write`, `insertAdjacentHTML`, `eval()`, `new Function()`, `$.html()`).
         - **Intelligent FP Suppression**: Suppresses harmless empty innerHTML cleanups (`""`, `''`, `null`, `undefined`).
@@ -140,13 +140,13 @@
 To compile the standalone JAR file:
 
 ```bash
-cd /home/littlespidy/myextra/burpsuite/JSSourceMapExplorer_littlespidy
+cd /home/littlespidy/myextra/burpsuite/JavaScriptInspector_littlespidy
 ./gradlew jar
 ```
 
 The output JAR will be generated at:
 ```
-build/libs/js-sourcemap-explorer-littlespidy-1.0.0.jar
+build/libs/javascript-inspector-littlespidy-1.0.0.jar
 ```
 
 ---
@@ -159,6 +159,6 @@ build/libs/js-sourcemap-explorer-littlespidy-1.0.0.jar
 4. Set **Extension Type** to `Java`.
 5. Select the compiled JAR:
    ```
-   /home/littlespidy/myextra/burpsuite/JSSourceMapExplorer_littlespidy/build/libs/js-sourcemap-explorer-littlespidy-1.0.0.jar
+   /home/littlespidy/myextra/burpsuite/JavaScriptInspector_littlespidy/build/libs/javascript-inspector-littlespidy-1.0.0.jar
    ```
-6. Click **Next** -> the **JS Explorer** tab will appear in Burp's top navigation bar.
+6. Click **Next** -> the **JavaScript Inspector** tab will appear in Burp's top navigation bar.

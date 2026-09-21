@@ -25,7 +25,6 @@ public class TimerConfigDialog extends JDialog {
     private final JTable intervalTable;
 
     private final JCheckBox cancelOnExpireBox;
-    private final JCheckBox refreshBaselineBox;
 
     public TimerConfigDialog(Window owner, SessionTask task) {
         super(owner, "⏱️ Configure Session Expiration Timers", ModalityType.APPLICATION_MODAL);
@@ -42,9 +41,7 @@ public class TimerConfigDialog extends JDialog {
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 13f));
         topPanel.add(titleLabel, BorderLayout.NORTH);
 
-        String baselineInfo = "Baseline: " + (task.getBaselineStatusCode() > 0
-                ? (task.getBaselineStatusCode() + " (" + task.getBaselineLength() + " bytes)")
-                : "Not yet captured (will execute on start)");
+        String baselineInfo = "Baseline: Live baseline probe will be sent automatically at T0 to establish reference response.";
         JLabel subLabel = new JLabel(baselineInfo);
         subLabel.setFont(subLabel.getFont().deriveFont(Font.ITALIC, 11f));
         topPanel.add(subLabel, BorderLayout.SOUTH);
@@ -158,12 +155,9 @@ public class TimerConfigDialog extends JDialog {
         JPanel bottomPanel = new JPanel(new BorderLayout(6, 6));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(6, 12, 10, 12));
 
-        JPanel optionsPanel = new JPanel(new GridLayout(2, 1, 2, 2));
+        JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 2));
         cancelOnExpireBox = new JCheckBox("Cancel remaining scheduled timers if session expires", true);
-        refreshBaselineBox = new JCheckBox("Send immediate baseline request now to establish baseline response",
-                task.getBaseline() == null || !task.getBaseline().hasResponse());
         optionsPanel.add(cancelOnExpireBox);
-        optionsPanel.add(refreshBaselineBox);
         bottomPanel.add(optionsPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
@@ -256,9 +250,5 @@ public class TimerConfigDialog extends JDialog {
 
     public boolean isCancelOnExpire() {
         return cancelOnExpireBox.isSelected();
-    }
-
-    public boolean isRefreshBaseline() {
-        return refreshBaselineBox.isSelected();
     }
 }

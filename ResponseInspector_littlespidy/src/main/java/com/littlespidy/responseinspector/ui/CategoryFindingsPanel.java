@@ -88,7 +88,8 @@ public class CategoryFindingsPanel extends JPanel {
     // COMMENT-only: semantic category filter (TODO, Creds, Debug, General)
     private final MultiSelectFilterButton commentCategoryFilterBtn;
 
-    private final JButton loadHistoryBtn;
+    private final JButton loadProxyBtn;
+    private final JButton loadRepeaterBtn;
     private JButton configPasswordsBtn;
 
     public CategoryFindingsPanel(
@@ -171,11 +172,17 @@ public class CategoryFindingsPanel extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         toolbar.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
-        loadHistoryBtn = new JButton("Load Proxy History");
-        loadHistoryBtn.setFont(loadHistoryBtn.getFont().deriveFont(Font.BOLD));
-        loadHistoryBtn.setToolTipText("Scan all HTTP responses currently in Burp Proxy history (JS files excluded)");
-        loadHistoryBtn.addActionListener(e -> runProxyHistoryScan());
-        toolbar.add(loadHistoryBtn);
+        loadProxyBtn = new JButton("Load Proxy");
+        loadProxyBtn.setFont(loadProxyBtn.getFont().deriveFont(Font.BOLD));
+        loadProxyBtn.setToolTipText("Scan all HTTP responses currently in Burp Proxy history (static files excluded)");
+        loadProxyBtn.addActionListener(e -> runProxyHistoryScan());
+        toolbar.add(loadProxyBtn);
+
+        loadRepeaterBtn = new JButton("Load from Repeater");
+        loadRepeaterBtn.setFont(loadRepeaterBtn.getFont().deriveFont(Font.BOLD));
+        loadRepeaterBtn.setToolTipText("Scan all HTTP responses sent from Burp Repeater (static files excluded)");
+        loadRepeaterBtn.addActionListener(e -> runRepeaterScan());
+        toolbar.add(loadRepeaterBtn);
 
         // Prominent Password Configuration Button on Password tab
         if (category == FindingCategory.PASSWORD) {
@@ -312,7 +319,7 @@ public class CategoryFindingsPanel extends JPanel {
         JPanel statusRow = new JPanel(new BorderLayout(6, 2));
         statusRow.setBorder(BorderFactory.createEmptyBorder(2, 8, 4, 8));
 
-        liveStatusLabel = new JLabel("Ready. Click 'Load Proxy History' to begin analysis.");
+        liveStatusLabel = new JLabel("Ready. Click 'Load Proxy' or 'Load from Repeater' to begin analysis.");
         liveStatusLabel.setFont(liveStatusLabel.getFont().deriveFont(Font.PLAIN, 12f));
 
         progressBar = new JProgressBar();
@@ -706,11 +713,12 @@ public class CategoryFindingsPanel extends JPanel {
             }
         }
 
-        loadHistoryBtn.setEnabled(false);
+        loadProxyBtn.setEnabled(false);
+        loadRepeaterBtn.setEnabled(false);
         progressBar.setVisible(true);
         progressBar.setIndeterminate(false);
         progressBar.setValue(0);
-        liveStatusLabel.setText("Scanning Proxy history for traffic (JS files excluded)...");
+        liveStatusLabel.setText("Scanning Proxy history for traffic (static files excluded)...");
 
         final boolean inScopeOnlyIngestion = inScopeCb.isSelected();
 
@@ -721,11 +729,11 @@ public class CategoryFindingsPanel extends JPanel {
                 int total = history.size();
                 if (total == 0) return 0;
 
-                // Pre-discovery pass for in-scope domains (excluding JS files)
+                // Pre-discovery pass for in-scope domains (excluding static resources)
                 for (ProxyHttpRequestResponse item : history) {
                     if (item.request() != null) {
                         var req = item.finalRequest() != null ? item.finalRequest() : item.request();
-                        if (ScannerUtils.isJsFile(req, item.response())) {
+                        if (ScannerUtils.isStaticResource(req, item.response())) {
                             continue;
                         }
                         String url = req.url();
@@ -749,8 +757,8 @@ public class CategoryFindingsPanel extends JPanel {
                             if (isCancelled()) return;
                             var req = item.finalRequest() != null ? item.finalRequest() : item.request();
 
-                            // 1. Strict JS File Exclusion
-                            if (ScannerUtils.isJsFile(req, item.response())) {
+                            // 1. Strict Static Resource Exclusion (JS, CSS, PNG, images, fonts, binaries)
+                            if (ScannerUtils.isStaticResource(req, item.response())) {
                                 int cur = processed.incrementAndGet();
                                 if (cur % 25 == 0 || cur == total) {
                                     publish(new ProgressChunk(cur, total, newFindings.get()));
@@ -815,7 +823,159 @@ public class CategoryFindingsPanel extends JPanel {
                     liveStatusLabel.setText("Scan encountered an issue: " + ex.getMessage());
                 } finally {
                     progressBar.setVisible(false);
-                    loadHistoryBtn.setEnabled(true);
+                    loadProxyBtn.setEnabled(true);
+                    loadRepeaterBtn.setEnabled(true);
+                    if (refreshAllTabsCallback != null) {
+                        refreshAllTabsCallback.run();
+                    } else {
+                        refreshView();
+                    }
+                }
+            }
+        };
+
+        worker.execute();
+    }
+
+    private void runRepeaterScan() {
+        if (category == FindingCategory.PASSWORD && scanEngine.getPasswordScanner().getPasswordCount() == 0) {
+            int opt = JOptionPane.showConfirmDialog(
+                    this,
+                    "No target passwords have been configured yet.\nWould you like to configure passwords before analyzing Repeater traffic?",
+                    "Configure Passwords",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (opt == JOptionPane.YES_OPTION) {
+                openPasswordConfigDialog();
+            }
+        }
+
+        List<HttpRequestResponse> repeaterItems = scanEngine.getRepeaterTraffic();
+        if (repeaterItems.isEmpty()) {
+            liveStatusLabel.setText("No Repeater traffic recorded yet. Send requests in Repeater or right-click 'Send to Response Inspector'.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No Repeater traffic has been captured yet.\n\n"
+                    + "Requests sent from Burp Repeater while Response Inspector is active will appear here.\n"
+                    + "You can also right-click any request in Repeater or Proxy and choose 'Send to Response Inspector'.",
+                    "No Repeater Traffic",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return;
+        }
+
+        loadProxyBtn.setEnabled(false);
+        loadRepeaterBtn.setEnabled(false);
+        progressBar.setVisible(true);
+        progressBar.setIndeterminate(false);
+        progressBar.setValue(0);
+        liveStatusLabel.setText("Scanning Repeater traffic (static files excluded)...");
+
+        final boolean inScopeOnlyIngestion = inScopeCb.isSelected();
+
+        SwingWorker<Integer, ProgressChunk> worker = new SwingWorker<>() {
+            @Override
+            protected Integer doInBackground() {
+                int total = repeaterItems.size();
+                if (total == 0) return 0;
+
+                // Pre-discovery pass for in-scope domains (excluding static resources)
+                for (HttpRequestResponse item : repeaterItems) {
+                    if (item.request() != null) {
+                        var req = item.request();
+                        if (ScannerUtils.isStaticResource(req, item.response())) {
+                            continue;
+                        }
+                        String url = req.url();
+                        if (api.scope().isInScope(url)) {
+                            String host = req.httpService() != null ? req.httpService().host() : "";
+                            domainManager.addDomain(host);
+                        }
+                    }
+                }
+
+                int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
+                ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+                AtomicInteger processed = new AtomicInteger(0);
+                AtomicInteger newFindings = new AtomicInteger(0);
+
+                try {
+                    List<Future<?>> futures = new ArrayList<>(total);
+                    for (HttpRequestResponse item : repeaterItems) {
+                        if (isCancelled()) break;
+                        futures.add(executor.submit(() -> {
+                            if (isCancelled()) return;
+                            var req = item.request();
+
+                            // 1. Strict Static Resource Exclusion (JS, CSS, PNG, images, fonts, binaries)
+                            if (ScannerUtils.isStaticResource(req, item.response())) {
+                                int cur = processed.incrementAndGet();
+                                if (cur % 25 == 0 || cur == total) {
+                                    publish(new ProgressChunk(cur, total, newFindings.get()));
+                                }
+                                return;
+                            }
+
+                            // 2. Dual-stage Ingestion Pre-Filter (when in-scope only is selected)
+                            if (inScopeOnlyIngestion && (req == null || !api.scope().isInScope(req.url()))) {
+                                int cur = processed.incrementAndGet();
+                                if (cur % 25 == 0 || cur == total) {
+                                    publish(new ProgressChunk(cur, total, newFindings.get()));
+                                }
+                                return;
+                            }
+
+                            if (item.hasResponse()) {
+                                String host = (req != null && req.httpService() != null)
+                                        ? req.httpService().host() : "";
+                                int added = scanEngine.scanItem(item);
+                                if (added > 0 && !host.isBlank()) {
+                                    domainManager.registerFinding(host);
+                                }
+                                newFindings.addAndGet(added);
+                            }
+                            int cur = processed.incrementAndGet();
+                            if (cur % 25 == 0 || cur == total) {
+                                publish(new ProgressChunk(cur, total, newFindings.get()));
+                            }
+                        }));
+                    }
+
+                    for (Future<?> f : futures) {
+                        if (isCancelled()) break;
+                        try { f.get(); } catch (Exception ignored) {}
+                    }
+                } finally {
+                    executor.shutdownNow();
+                }
+
+                return newFindings.get();
+            }
+
+            @Override
+            protected void process(List<ProgressChunk> chunks) {
+                if (!chunks.isEmpty()) {
+                    ProgressChunk latest = chunks.get(chunks.size() - 1);
+                    progressBar.setMaximum(latest.total());
+                    progressBar.setValue(latest.processed());
+                    liveStatusLabel.setText("Scanning Repeater traffic: " + latest.processed() + " / " + latest.total()
+                            + " items (" + latest.newFindings() + " findings)...");
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    int count = get();
+                    liveStatusLabel.setText("Analysis complete: scanned Repeater traffic | Discovered " + count + " new findings.");
+                    api.logging().logToOutput("Response Inspector: Repeater traffic analysis complete. New findings: " + count);
+                } catch (Exception ex) {
+                    liveStatusLabel.setText("Repeater scan encountered an issue: " + ex.getMessage());
+                } finally {
+                    progressBar.setVisible(false);
+                    loadProxyBtn.setEnabled(true);
+                    loadRepeaterBtn.setEnabled(true);
                     if (refreshAllTabsCallback != null) {
                         refreshAllTabsCallback.run();
                     } else {

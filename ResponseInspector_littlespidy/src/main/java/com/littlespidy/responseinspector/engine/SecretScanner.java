@@ -276,13 +276,7 @@ public class SecretScanner {
 
         HttpResponse response = requestResponse.response();
 
-        // 1. Scan Response Headers
-        String headers = ScannerUtils.extractHeadersString(response);
-        if (!headers.isEmpty()) {
-            scanSection(headers, "Response Headers", requestResponse, dataStore, findings);
-        }
-
-        // 2. Scan Response Body
+        // Strictly scan Response Body only (headers produce frequent false positives)
         String body = ScannerUtils.convertByteArrayToString(response.body());
         if (!body.isEmpty()) {
             scanSection(body, "Response Body", requestResponse, dataStore, findings);

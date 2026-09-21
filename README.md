@@ -10,7 +10,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 
 | Extension | Direct JAR Download | Description |
 | :--- | :--- | :--- |
-| **JS SourceMap Explorer** | [📥 `js-sourcemap-explorer-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/js-sourcemap-explorer-littlespidy-1.0.0.jar) | SourceMap reconstructor, hidden route miner, VS Code export |
+| **JavaScript Inspector** | [📥 `javascript-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/JavaScriptInspector_littlespidy/build/libs/javascript-inspector-littlespidy-1.0.0.jar) | Client-side JavaScript analysis, source map unpacker, endpoint & secret reconnaissance, and AI analyst |
 | **Cache Header Inspector** | [📥 `cache-header-inspector-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/cache-header-inspector-littlespidy-1.0.0.jar) | Passive CDN & cache header indexing and directive analysis |
 | **Convert POST to GET** | [📥 `convert-post-to-get-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/convert-post-to-get-littlespidy-1.0.0.jar) | Request body to GET query converter for auth bypass testing |
 | **Input Validation Fuzzer** | [📥 `input-validation-fuzzer-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/input-validation-fuzzer-littlespidy-1.0.0.jar) | Multi-point input validation and boundary fuzzer |
@@ -27,7 +27,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 
 ## 🛠️ Included Extensions
 
-### 1. [JS SourceMap Explorer](file:///home/littlespidy/myextra/burpsuite/JSSourceMapExplorer_littlespidy)
+### 1. [JavaScript Inspector](file:///home/littlespidy/myextra/burpsuite/JavaScriptInspector_littlespidy)
 - **Default In-Scope Ingestion & Multi-Select Domain Filter**: Gated by Burp target scope by default (`In-Scope Only`), preventing out-of-scope assets from flooding memory and tables. Includes dynamic `Domains ▾` multi-select popup button in both workspace and recon tabs to isolate specific subdomains.
 - **High-Performance Two-Stage Ingestion Pipeline**: Eliminates proxy history loading freezes via instantaneous Stage 1 deduplication/ingestion and bounded multi-threaded Stage 2 deep mining with a live progress bar.
 - **Ghost-Js Secret Mining & Shannon Entropy Suppression**: 40+ curated secret patterns with Severity & Confidence tracking, Shannon entropy heuristic, exact character offsets, and false-positive suppression of sample keys, public tokens, and hashes.
@@ -100,11 +100,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Dynamic Multi-Session Architecture**: Context menu `Send to Upload Scanner` spawning independent closeable session tabs (`×`) with safe non-blocking background execution (`SwingWorker`).
 
 ### 10. [Session Expiration Checker](file:///home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy)
+- **🍪 Systematic Session Cookie & Auth Header Finder (New Tab)**: Systematically removes cookies one by one, strips standard authorization headers (`Authorization`, `Bearer`, etc.), tests custom suspect headers (e.g. `X-Access-Token`, `X-API-Key`), and compares against baseline and anonymous control benchmarks to definitively pinpoint active session tokens vs optional tracking cookies.
+- **Automated Live Baseline at $T_0$**: Dispatches live baseline request immediately upon tracking without user prompting; preserves and displays Original Request & Response, Baseline Request & Response, and Probe Request & Response across 6 dedicated Montoya editors.
 - **Automated Milestone Probing**: Schedule multiple custom milestone timers (e.g., 30m, 1h, 3h, 8h) relative to start time ($T_0$) to test idle and absolute session expiration.
 - **Baseline Matching & Verification Engine**: Captures initial authenticated baseline response and inspects probe responses for HTTP status shifts (200 $\rightarrow$ 401/403), login redirects (`/login`, `/signin`, `auth`), `Set-Cookie` invalidations (`Max-Age=0`), and response body termination signatures.
 - **Auto-Cancellation on Expiry**: Automatically halts remaining scheduled timers for a request once expiration is confirmed.
 - **Master-Detail Workspace**: Real-time ticking countdown timers, milestone history table, and native Montoya Pretty/Raw/Hex request and response editors.
-- **Burp Suite Interoperability**: Context menu ingestion (`⏱️ Send to Session Expiration Checker`) and dispatch to Repeater, Intruder, and Organizer.
+- **Burp Suite Interoperability**: Context menu ingestion (`⏱️ Send to Session Expiration Checker`, `🍪 Send to Session Cookie Finder`) and dispatch to Repeater, Intruder, and Organizer.
 
 ### 11. [Param Payload Injector](file:///home/littlespidy/myextra/burpsuite/ParamPayloadInjector_littlespidy)
 - **Parameter Name Binding & Attribution**: Solves multi-parameter attribution ambiguity by dynamically injecting parameter names into security payloads (e.g. `alert('username')`, `"><img src=x onerror=alert('redirect')>`, `{{constructor.constructor('alert(\\'param\\')')()}}`).

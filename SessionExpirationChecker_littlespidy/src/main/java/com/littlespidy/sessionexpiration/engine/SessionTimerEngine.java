@@ -49,14 +49,12 @@ public class SessionTimerEngine {
     public void startSession(SessionTask task, Runnable onUpdate) {
         workerPool.submit(() -> {
             try {
-                // Ensure baseline response exists
-                if (task.getBaseline() == null || !task.getBaseline().hasResponse()) {
-                    api.logging().logToOutput("[Session #" + task.getId() + "] Sending initial baseline probe...");
-                    HttpRequestResponse baselineRR = api.http().sendRequest(task.getOriginalRequest());
-                    task.setBaseline(baselineRR);
-                    api.logging().logToOutput("[Session #" + task.getId() + "] Baseline captured with status "
-                            + (baselineRR.hasResponse() ? baselineRR.response().statusCode() : "none"));
-                }
+                // Always send the baseline request by default to establish live baseline at T0
+                api.logging().logToOutput("[Session #" + task.getId() + "] Sending live baseline probe at T0...");
+                HttpRequestResponse baselineRR = api.http().sendRequest(task.getOriginalRequest());
+                task.setBaseline(baselineRR);
+                api.logging().logToOutput("[Session #" + task.getId() + "] Baseline captured with status "
+                        + (baselineRR.hasResponse() ? baselineRR.response().statusCode() : "none"));
 
                 Instant t0 = Instant.now();
                 task.setCreatedAt(t0);

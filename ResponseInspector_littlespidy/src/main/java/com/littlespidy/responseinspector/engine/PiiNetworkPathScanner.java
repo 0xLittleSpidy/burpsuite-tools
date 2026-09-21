@@ -61,29 +61,6 @@ public class PiiNetworkPathScanner {
 
         HttpResponse response = requestResponse.response();
 
-        // 0. Response Headers: Internal IPs
-        String headers = ScannerUtils.extractHeadersString(response);
-        if (!headers.isEmpty()) {
-            Matcher headerIpMatcher = INTERNAL_IPV4_PATTERN.matcher(headers);
-            Set<String> seenHeaderIps = new HashSet<>();
-            while (headerIpMatcher.find()) {
-                String ip = headerIpMatcher.group();
-                if (seenHeaderIps.add(ip)) {
-                    String subType = getIpSubtype(ip);
-                    findings.add(FindingEntry.create(
-                            dataStore.nextId(),
-                            FindingCategory.PII_NETWORK_PATH,
-                            "Internal IP Address (" + subType + ")",
-                            ip,
-                            "Response Headers",
-                            requestResponse,
-                            headerIpMatcher.start(),
-                            headerIpMatcher.end()
-                    ));
-                }
-            }
-        }
-
         String body = ScannerUtils.convertByteArrayToString(response.body());
         if (body.isEmpty()) {
             return findings;

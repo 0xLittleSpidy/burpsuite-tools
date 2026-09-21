@@ -30,12 +30,12 @@ public class WelcomeGuidePanel extends JPanel {
         descArea.setWrapStyleWord(true);
         descArea.setText(
                 "Response Inspector is an interactive auditing and triage extension for Burp Suite designed to analyze "
-                        + "HTTP responses for exposed credentials, personal identifiable information (PII), server infrastructure paths, "
+                        + "HTTP response bodies for exposed credentials, personal identifiable information (PII), server infrastructure paths, "
                         + "database exceptions, runtime stack traces, developer comments, and cloud API secrets.\n\n"
                         + "Built on the modern Montoya API with a zero-freeze, on-demand processing architecture.\n\n"
-                        + "Note: JavaScript files (.js, .mjs, .cjs, script MIME responses) are intentionally excluded from Response Inspector "
-                        + "scanning to eliminate tool overlap and maximize triage throughput, as dedicated JavaScript intelligence, chunk mining, "
-                        + "and Source Map reconstruction are provided by the companion JS SourceMap Explorer extension."
+                        + "Note: Static files (.js, .css, .png, images, fonts, media, binaries, and script/css MIME responses) are intentionally "
+                        + "excluded from Response Inspector loading and scanning to eliminate tool overlap and maximize triage throughput. "
+                        + "Furthermore, scanning is strictly performed on response bodies, eliminating high-noise header false positives."
         );
 
         headerPanel.add(titleLabel, BorderLayout.NORTH);
@@ -45,9 +45,9 @@ public class WelcomeGuidePanel extends JPanel {
         JPanel cardsPanel = new JPanel(new GridLayout(0, 2, 18, 18));
 
         cardsPanel.add(createCard(
-                "1. On-Demand Ingestion & Live Progress Bar",
-                "Traffic is ingested deterministically via 'Load Proxy History' without continuous background listener overhead. "
-                        + "A dedicated live progress strip displays real-time item counts (e.g. 'Scanning 450/2100 items') along with "
+                "1. On-Demand Ingestion ('Load Proxy' & 'Load from Repeater')",
+                "Traffic is ingested on-demand via 'Load Proxy' or 'Load from Repeater' (plus suite-wide context menu "
+                        + "'Send to Response Inspector'). A dedicated live progress strip displays real-time item counts along with "
                         + "an auto-hiding determinate JProgressBar that guarantees safe UI state recovery."
         ));
 
@@ -66,10 +66,9 @@ public class WelcomeGuidePanel extends JPanel {
         ));
 
         cardsPanel.add(createCard(
-                "4. Targeted Password Auditing",
+                "4. Targeted Password Auditing (Response Body Only)",
                 "Click 'Configure Passwords... (N active)' on the Passwords tab to paste known target credentials, user passwords, "
-                        + "or wordlists. Responses (bodies, Set-Cookie, auth headers) are scanned for these exact credentials "
-                        + "with zero speculative false-positives."
+                        + "or wordlists. Response bodies are scanned for these exact credentials with zero header noise or speculative false-positives."
         ));
 
         cardsPanel.add(createCard(

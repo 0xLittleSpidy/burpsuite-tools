@@ -38,6 +38,16 @@ public class WelcomeGuidePanel extends JPanel {
         });
         headerButtons.add(launchBtn);
 
+        JButton finderBtn = new JButton("🍪 Open Cookie & Auth Finder");
+        finderBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        finderBtn.setToolTipText("Switch to session cookie and auth header identification tab");
+        finderBtn.addActionListener(e -> {
+            if (this.mainTab != null) {
+                this.mainTab.selectCookieFinderTab();
+            }
+        });
+        headerButtons.add(finderBtn);
+
         titleAndAction.add(titleLabel, BorderLayout.WEST);
         if (this.mainTab != null) {
             titleAndAction.add(headerButtons, BorderLayout.EAST);
@@ -50,12 +60,13 @@ public class WelcomeGuidePanel extends JPanel {
         descArea.setLineWrap(true);
         descArea.setWrapStyleWord(true);
         descArea.setText(
-                "Session Expiration Checker is an automated session management testing extension for Burp Suite. "
+                "Session Expiration Checker is an automated session management and token analysis extension for Burp Suite. "
                         + "Designed specifically for modern web application assessments (OWASP ASVS & WSTG-SESS-07), "
-                        + "it allows security testers to capture authenticated requests with session cookies/tokens and schedule "
-                        + "precision probes across custom milestone intervals (e.g., 15m, 30m, 1h, 3h, 8h) without manual intervention.\n\n"
-                        + "Built on the modern Montoya API with daemon background executors, real-time countdown tickers, "
-                        + "baseline comparison heuristics, auto-cancellation upon expiration, and native Montoya HTTP editors."
+                        + "it allows security testers to capture authenticated requests, schedule precision milestone probes "
+                        + "across custom intervals (e.g., 15m, 30m, 1h, 3h, 8h), and systematically identify which specific cookies, "
+                        + "standard authorization headers, or custom API tokens actually maintain the session state.\n\n"
+                        + "Built on the modern Montoya API with daemon background executors, live baseline automation at T0, "
+                        + "side-by-side Original vs Baseline vs Probe editors, and systematic credential isolation fuzzing."
         );
 
         headerPanel.add(titleAndAction, BorderLayout.NORTH);
@@ -73,14 +84,21 @@ public class WelcomeGuidePanel extends JPanel {
         ));
 
         cardsPanel.add(createCard(
-                "2. Baseline Cookie & Request Tracking",
-                "When a session request is submitted, the extension captures a baseline with your active cookies and "
-                        + "authorization headers. It records the baseline HTTP status code, response body length, and headers. "
-                        + "All subsequent milestone probes are matched against this baseline to detect session termination."
+                "2. Automated Baseline & Original Request Storing",
+                "When a session request is submitted, the extension automatically sends a live baseline request at T0 "
+                        + "to verify active session state without prompting the user. It stores both the untouched Original "
+                        + "request/response and the newly established Baseline request/response in dedicated inspector tabs."
         ));
 
         cardsPanel.add(createCard(
-                "3. Staged Milestones from T0 (T0 + Δ)",
+                "3. 🍪 Systematic Session Cookie & Header Finder",
+                "Not sure which token maintains the session? The '🍪 Session Cookie Finder' systematically strips cookies "
+                        + "one-by-one, removes standard authorization headers (Authorization, Bearer, etc.), and checks custom "
+                        + "suspect headers (e.g. X-Access-Token, X-Api-Key) to pinpoint exact session tokens vs optional tracking cookies."
+        ));
+
+        cardsPanel.add(createCard(
+                "4. Staged Milestones from T0 (T0 + Δ)",
                 "Configure multiple custom milestone intervals relative to creation time (T0), such as +15m, +30m, +1h, "
                         + "+2h, +3h, +8h, +24h or arbitrary values. Milestones execute automatically in background daemon "
                         + "executors without blocking Burp Suite's UI or freezing the Event Dispatch Thread (EDT)."

@@ -22,11 +22,12 @@ public final class ScannerUtils {
     public static final int MAX_RESPONSE_SIZE = 10 * 1024 * 1024;
 
     /**
-     * Set of binary and media MIME types that should be skipped to avoid unnecessary
+     * Set of static, media, and binary MIME types that should be skipped to avoid unnecessary
      * CPU consumption and false positive pattern matching.
      */
     public static final EnumSet<MimeType> BLACKLISTED_MIME_TYPES = EnumSet.of(
             MimeType.APPLICATION_FLASH,
+            MimeType.CSS,
             MimeType.FONT_WOFF,
             MimeType.FONT_WOFF2,
             MimeType.IMAGE_BMP,
@@ -41,6 +42,26 @@ public final class ScannerUtils {
             MimeType.SOUND,
             MimeType.VIDEO,
             MimeType.SCRIPT
+    );
+
+    /**
+     * Common static file extensions that do not contain actionable secrets, passwords, or error disclosures.
+     */
+    private static final java.util.Set<String> STATIC_EXTENSIONS = java.util.Set.of(
+            // Scripts
+            "js", "mjs", "cjs", "jsx", "ts", "tsx", "map",
+            // Styles
+            "css", "scss", "sass", "less",
+            // Images
+            "png", "jpg", "jpeg", "gif", "ico", "svg", "bmp", "tiff", "tif", "webp", "avif",
+            // Fonts
+            "woff", "woff2", "ttf", "otf", "eot",
+            // Audio & Video
+            "mp4", "mp3", "wav", "ogg", "webm", "avi", "mov", "flv", "m4a", "aac",
+            // Documents & Binaries
+            "pdf", "zip", "gz", "tar", "tgz", "rar", "7z", "exe", "dll", "bin", "iso", "dmg", "apk",
+            // Assets
+            "swf", "wasm"
     );
 
     private ScannerUtils() {}
@@ -60,7 +81,7 @@ public final class ScannerUtils {
     }
 
     /**
-     * Checks if the response declared or inferred MIME type is blacklisted (e.g. image, video, font).
+     * Checks if the response declared or inferred MIME type is blacklisted (e.g. image, video, font, css).
      */
     public static boolean isMimeTypeBlacklisted(HttpResponse response) {
         if (response == null) return false;
@@ -80,14 +101,39 @@ public final class ScannerUtils {
      */
     public static boolean isJsPath(String path) {
         if (path == null || path.isEmpty()) return false;
+        String lower = cleanPath(path);
+        return lower.endsWith(".js") || lower.endsWith(".mjs") || lower.endsWith(".cjs")
+                || lower.endsWith(".jsx") || lower.endsWith(".ts") || lower.endsWith(".tsx")
+                || lower.endsWith(".map") || lower.endsWith(".js.map");
+    }
+
+    /**
+     * Checks if a URL path or filename corresponds to an excluded static resource (JS, CSS, PNG, images, fonts, media, etc.).
+     */
+    public static boolean isStaticPath(String path) {
+        if (path == null || path.isEmpty()) return false;
+        String lower = cleanPath(path);
+
+        if (lower.endsWith(".js.map") || lower.endsWith(".css.map")) {
+            return true;
+        }
+
+        int dotIdx = lower.lastIndexOf('.');
+        if (dotIdx != -1 && dotIdx < lower.length() - 1) {
+            String ext = lower.substring(dotIdx + 1);
+            if (STATIC_EXTENSIONS.contains(ext)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String cleanPath(String path) {
         int qIdx = path.indexOf('?');
         String clean = qIdx != -1 ? path.substring(0, qIdx) : path;
         int hIdx = clean.indexOf('#');
         if (hIdx != -1) clean = clean.substring(0, hIdx);
-        String lower = clean.toLowerCase();
-        return lower.endsWith(".js") || lower.endsWith(".mjs") || lower.endsWith(".cjs")
-                || lower.endsWith(".jsx") || lower.endsWith(".ts") || lower.endsWith(".tsx")
-                || lower.endsWith(".map") || lower.endsWith(".js.map");
+        return clean.toLowerCase();
     }
 
     /**
@@ -100,15 +146,32 @@ public final class ScannerUtils {
     }
 
     /**
-     * Identifies JavaScript files, scripts, and source maps that must be skipped in Response Inspector,
-     * as dedicated JavaScript analysis is handled by the JS SourceMap Explorer extension.
+     * Checks if a Content-Type header string indicates an excluded static resource (CSS, images, fonts, media, etc.).
+     */
+    public static boolean isStaticContentType(String contentType) {
+        if (contentType == null) return false;
+        String lower = contentType.toLowerCase();
+        if (isJsContentType(lower)) {
+            return true;
+        }
+        return lower.contains("text/css")
+                || lower.startsWith("image/")
+                || lower.startsWith("font/")
+                || lower.startsWith("audio/")
+                || lower.startsWith("video/")
+                || lower.contains("application/pdf")
+                || lower.contains("application/zip")
+                || lower.contains("application/x-zip")
+                || lower.contains("application/octet-stream")
+                || lower.contains("application/wasm");
+    }
+
+    /**
+     * Identifies JavaScript files, scripts, and source maps that must be skipped in Response Inspector.
      */
     public static boolean isJsFile(HttpRequest request, HttpResponse response) {
         if (request != null) {
-            String path = request.path();
-            if (path == null || path.isEmpty()) {
-                path = request.url();
-            }
+            String path = request.path() != null && !request.path().isEmpty() ? request.path() : request.url();
             if (isJsPath(path)) {
                 return true;
             }
@@ -121,6 +184,29 @@ public final class ScannerUtils {
 
             String contentType = response.headerValue("Content-Type");
             if (isJsContentType(contentType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Comprehensive check to determine whether an HTTP transaction is a static asset
+     * (JS, CSS, PNG, images, fonts, audio, video, archives) that should be excluded from loading.
+     */
+    public static boolean isStaticResource(HttpRequest request, HttpResponse response) {
+        if (request != null) {
+            String path = request.path() != null && !request.path().isEmpty() ? request.path() : request.url();
+            if (isStaticPath(path)) {
+                return true;
+            }
+        }
+        if (response != null) {
+            if (isMimeTypeBlacklisted(response)) {
+                return true;
+            }
+            String contentType = response.headerValue("Content-Type");
+            if (isStaticContentType(contentType)) {
                 return true;
             }
         }

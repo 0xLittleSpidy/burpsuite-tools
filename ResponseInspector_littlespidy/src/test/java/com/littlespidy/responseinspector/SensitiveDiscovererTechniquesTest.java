@@ -248,6 +248,47 @@ public class SensitiveDiscovererTechniquesTest {
     }
 
     @Test
+    public void testStaticResourceExclusion() {
+        // Static Paths (CSS, Images, Fonts, Media, Binaries, etc.)
+        assertTrue(ScannerUtils.isStaticPath("/static/styles.css"));
+        assertTrue(ScannerUtils.isStaticPath("/static/theme.scss?v=1.0"));
+        assertTrue(ScannerUtils.isStaticPath("/images/logo.png"));
+        assertTrue(ScannerUtils.isStaticPath("/img/banner.jpg"));
+        assertTrue(ScannerUtils.isStaticPath("/icons/favicon.ico"));
+        assertTrue(ScannerUtils.isStaticPath("/vector/icon.svg"));
+        assertTrue(ScannerUtils.isStaticPath("/fonts/inter.woff2"));
+        assertTrue(ScannerUtils.isStaticPath("/fonts/roboto.ttf"));
+        assertTrue(ScannerUtils.isStaticPath("/media/intro.mp4"));
+        assertTrue(ScannerUtils.isStaticPath("/audio/alert.mp3"));
+        assertTrue(ScannerUtils.isStaticPath("/docs/manual.pdf"));
+        assertTrue(ScannerUtils.isStaticPath("/downloads/archive.zip"));
+        assertTrue(ScannerUtils.isStaticPath("/app.wasm"));
+        assertTrue(ScannerUtils.isStaticPath("/style.css.map"));
+
+        // Non-static paths
+        assertFalse(ScannerUtils.isStaticPath("/api/v1/profile"));
+        assertFalse(ScannerUtils.isStaticPath("/login.php"));
+        assertFalse(ScannerUtils.isStaticPath("/oauth/token"));
+        assertFalse(ScannerUtils.isStaticPath("/rest/users.json"));
+
+        // Static Content-Types
+        assertTrue(ScannerUtils.isStaticContentType("text/css"));
+        assertTrue(ScannerUtils.isStaticContentType("image/png"));
+        assertTrue(ScannerUtils.isStaticContentType("image/jpeg"));
+        assertTrue(ScannerUtils.isStaticContentType("font/woff2"));
+        assertTrue(ScannerUtils.isStaticContentType("application/pdf"));
+        assertTrue(ScannerUtils.isStaticContentType("application/zip"));
+        assertTrue(ScannerUtils.isStaticContentType("application/octet-stream"));
+        assertTrue(ScannerUtils.isStaticContentType("video/mp4"));
+
+        // Non-static Content-Types
+        assertFalse(ScannerUtils.isStaticContentType("application/json"));
+        assertFalse(ScannerUtils.isStaticContentType("text/html; charset=UTF-8"));
+        assertFalse(ScannerUtils.isStaticContentType("application/xml"));
+        assertFalse(ScannerUtils.isStaticContentType("text/plain"));
+    }
+
+    @Test
     public void testSecretVerifierService() {
         FindingEntry awsFinding = new FindingEntry(
                 1,

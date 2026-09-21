@@ -24,7 +24,7 @@ tasks.test {
 }
 
 tasks.named<Jar>("jar") {
-    archiveBaseName.set("js-sourcemap-explorer-littlespidy")
+    archiveBaseName.set("javascript-inspector-littlespidy")
     archiveClassifier.set("")
     archiveVersion.set("1.0.0")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

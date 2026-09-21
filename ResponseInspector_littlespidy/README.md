@@ -2,19 +2,35 @@
 
 <!-- Created with the help of an AI Agent and littlespidy. -->
 
-A high-performance Burp Suite extension built on the modern **Montoya API** to passively analyze and triage sensitive data exposures in HTTP responses across six functional tabs:
+A high-performance Burp Suite extension built on the modern **Montoya API** to passively analyze and triage sensitive data exposures in HTTP response bodies across six functional tabs:
 
-1. **📖 Welcome & Guide**: Onboarding dashboard with modular tutorial cards explaining the audit methodology, zero-overhead philosophy, JS exclusion policy, and triage shortcuts.
-2. **🔑 Passwords**: Targeted scanning for user-configured passwords leaked in response bodies, headers, and cookies.
+1. **📖 Welcome & Guide**: Onboarding dashboard with modular tutorial cards explaining the audit methodology, zero-overhead philosophy, static asset exclusion policy, and triage shortcuts.
+2. **🔑 Passwords**: Targeted scanning for user-configured passwords leaked in response bodies.
 3. **🛡️ PII, Network & Server Paths**: Strict Social Security Numbers (SSNs), RFC 1918 / loopback internal IP addresses, and real OS filesystem paths (Linux & Windows).
 4. **⚠️ Errors & Exceptions**: Comprehensive database leaks, stack traces, and verbose server error disclosures ported from `DetectHTTPResponseErrors_littlespidy.bambda`.
 5. **🔐 Secrets**: Cloud API keys, auth tokens, private keys, JWTs, and cloud storage buckets upgraded with 40+ curated patterns, Shannon entropy scoring, Signatures Catalog dialog, and one-click KeyHacks credential verification in Burp Repeater.
-6. **💬 Comments**: Developer comments extracted from HTTP responses (single-line `//`, multi-line `/* */`, and HTML `<!-- -->`), categorized into `TODO / FIXME`, `Credentials / Auth`, `Debug / Config`, and `General`.
+6. **💬 Comments**: Developer comments extracted from HTTP response bodies (single-line `//`, multi-line `/* */`, and HTML `<!-- -->`), categorized into `TODO / FIXME`, `Credentials / Auth`, `Debug / Config`, and `General`.
 
 ---
 
 ## 🚀 Key Features & Architectural Upgrades
 
+- **🔁 "Load Proxy" & "Load from Repeater" On-Demand Ingestion**:
+  - **Load Proxy**: Scan HTTP responses from Burp Proxy history with multi-threaded execution.
+  - **Load from Repeater**: Dedicated toolbar button next to `Load Proxy` to scan all HTTP responses dispatched through Burp Repeater (captured live via `HttpHandler`).
+  - **Suite-Wide Context Menu**: Right-click any request/response across Burp (Repeater, Proxy, Logger, SiteMap, Message Editors) and select **"Send to Response Inspector"** to immediately analyze and surface findings.
+- **🛡️ Strictly Response Body Only (Header False-Positive Suppression)**:
+  - Scanning is performed strictly on **HTTP response bodies**.
+  - Response headers (e.g. `Server`, `Via`, `X-Forwarded-For`, `Set-Cookie`, `ETag`, `Cache-Control`) are excluded from scanning to eliminate noisy false positives.
+- **🚫 Comprehensive Static Resource & File Exclusion**:
+  - Automatically excludes non-actionable static files from loading and domain pre-discovery:
+    - **Scripts**: `.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.tsx`, `.map`, `.js.map`
+    - **Styles**: `.css`, `.scss`, `.sass`, `.less`, `.css.map`
+    - **Images**: `.png`, `.jpg`, `.jpeg`, `.gif`, `.ico`, `.svg`, `.bmp`, `.tiff`, `.tif`, `.webp`, `.avif`
+    - **Fonts**: `.woff`, `.woff2`, `.ttf`, `.otf`, `.eot`
+    - **Audio & Video**: `.mp4`, `.mp3`, `.wav`, `.ogg`, `.webm`, `.avi`, `.mov`, `.flv`, `.m4a`, `.aac`
+    - **Binaries & Static Archives**: `.pdf`, `.zip`, `.gz`, `.tar`, `.tgz`, `.rar`, `.7z`, `.exe`, `.dll`, `.bin`, `.iso`, `.dmg`, `.apk`, `.swf`, `.wasm`
+    - **MIME & Content-Types**: Image, font, audio, video, CSS, script, and binary MIME types are skipped before processing.
 - **💬 Dedicated Developer Comments Tab**: Extracts inline, block, and HTML comments from response bodies, filtering by comment syntax and semantic category with zero EDT lag and automatic 500-item safeguard against response flooding.
 - **🔐 Upgraded Secrets Tab with KeyHacks Verification**:
   - **40+ Curated Signatures**: Patterns covering Cloud (AWS, GCP, Azure, Firebase, DigitalOcean, Cloudflare), Payments (Stripe, PayPal, Square), Source Control & CI/CD (GitHub, GitLab, Bitbucket, Vercel, Netlify, npm), AI/ML (OpenAI, Anthropic, HuggingFace, Cohere), and SaaS (Slack, Discord, Algolia, SendGrid, Twilio).
@@ -22,16 +38,11 @@ A high-performance Burp Suite extension built on the modern **Montoya API** to p
   - **Signatures Catalog Dialog**: Click **`📋 Signatures Catalog (N)`** to review active detection regexes, confidence levels, and entropy guards in a filterable modal dialog.
   - **KeyHacks Credential Verification**: Click **`🧪 Verify Secret (Repeater)`** or right-click any secret row to construct an authentic, non-destructive identity query request and dispatch it directly to Burp Repeater.
 - **🔎 Universal "Finding Type" Filter**: Every tab features a dedicated **`Finding Type ▾`** `MultiSelectFilterButton` popup tailored to that tab (e.g. SSN / Internal IP / OS Path on PII tab; DB & runtime exception names on Errors tab; Secret Signatures on Secrets tab; Comment Types on Comments tab).
-- **🚫 Strict JavaScript File Exclusion**: JavaScript files (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.tsx`, `.map`) and script MIME responses are intentionally excluded from loading and scanning in Response Inspector to eliminate tool overlap, as full JavaScript intelligence and Source Map extraction are provided by the companion [JS SourceMap Explorer](file:///home/littlespidy/myextra/burpsuite/JSSourceMapExplorer_littlespidy).
 - **📌 Clean Non-Destructive Triage (Pinning Removed)**: Row pinning has been completely removed in favor of clean live non-destructive view filtering, ensuring dataset integrity and immediate filter resetting.
 - **🌐 In-Scope Dual-Stage Strategy (`extension_architecture.md`)**: Live target scope evaluation (`api.scope().isInScope(url)`) combined with an optional ingestion pre-filter and a granular **`In-Scope Domains...`** dialog to isolate specific target subdomains without re-importing history.
-- **⚡ Multi-Threaded Ingestion Pool**: Rapid parallel scanning of Proxy HTTP history powered by a bounded `ExecutorService` (`Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()))`) with atomic progress counters and non-blocking batch UI updates.
+- **⚡ Multi-Threaded Ingestion Pool**: Rapid parallel scanning of Proxy & Repeater HTTP history powered by a bounded `ExecutorService` (`Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()))`) with atomic progress counters and non-blocking batch UI updates.
 - **📊 TSV Findings Export**: Dedicated **`Export TSV`** toolbar button and right-click context menu item to save currently displayed or filtered findings to a clean Tab-Separated Values (`.tsv`) file for reporting.
-- **🎯 Auto-Navigation & Deep-Linking Quad**: Selecting any finding row immediately:
-  1. *Tab Auto-Switching*: Flips the editor to the **Response** (or Request) sub-tab automatically.
-  2. *Native Marker Highlighting*: Paints native Burp yellow/orange markers over the match range across Pretty, Raw, and Hex editors.
-  3. *Search Expression Populating*: Populates Burp's search bar with the finding value to enable immediate `Enter` / `Shift+Enter` keyboard jumping.
-  4. *Viewport Auto-Scroll*: Automatically scrolls the text component vertically and horizontally to center the finding on-screen.
+- **🎯 Auto-Navigation & Deep-Linking Quad**: Selecting any finding row immediately auto-switches the editor, paints native Burp markers over the match, populates the search bar, and centers the text component.
 - **🔄 Inter-Tool Integration**: Right-click context menu on all tables to **Send to Repeater** (with clean `METHOD host/path` tab naming), **Send to Intruder**, **Send to Organizer**, and **Copy Match Excerpt**.
 
 ---
@@ -39,11 +50,11 @@ A high-performance Burp Suite extension built on the modern **Montoya API** to p
 ## 🛠️ Tabs & Coverage
 
 ### 0. 📖 Welcome & Guide Tab
-- Overview of architecture, zero-EDT-freeze guidelines, domain selection walkthrough, JS exclusion notice, and triage shortcuts.
+- Overview of architecture, zero-EDT-freeze guidelines, domain selection walkthrough, static asset exclusion policy, and triage shortcuts.
 
 ### 1. 🔑 Passwords Tab
 - Prompts or opens via **`Configure Passwords... (N active)`**.
-- Scans response bodies and all response headers (`Set-Cookie`, custom authentication headers).
+- Scans response bodies for exact configured credentials with zero header noise or speculative false positives.
 - Highlights context snippets surrounding leaked credentials.
 
 ### 2. 🛡️ PII, Network & Server Paths Tab

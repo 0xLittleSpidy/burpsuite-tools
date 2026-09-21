@@ -70,47 +70,29 @@ public class PasswordScanner {
 
         HttpResponse response = requestResponse.response();
         String body = ScannerUtils.convertByteArrayToString(response.body());
-        String headers = ScannerUtils.extractHeadersString(response);
+        if (body.isEmpty()) {
+            return findings;
+        }
 
         for (String targetPassword : targetPasswords) {
             if (targetPassword.length() < 2) {
                 continue; // Avoid matching single character noise
             }
 
-            // Check response body
-            if (!body.isEmpty()) {
-                int idx = caseSensitive ? body.indexOf(targetPassword)
-                        : body.toLowerCase().indexOf(targetPassword.toLowerCase());
-                if (idx != -1) {
-                    findings.add(FindingEntry.create(
-                            dataStore.nextId(),
-                            FindingCategory.PASSWORD,
-                            "Configured Password Leak",
-                            targetPassword,
-                            "Response Body",
-                            requestResponse,
-                            idx,
-                            idx + targetPassword.length()
-                    ));
-                }
-            }
-
-            // Check response headers with exact offset alignment
-            if (!headers.isEmpty()) {
-                int hIdx = caseSensitive ? headers.indexOf(targetPassword)
-                        : headers.toLowerCase().indexOf(targetPassword.toLowerCase());
-                if (hIdx != -1) {
-                    findings.add(FindingEntry.create(
-                            dataStore.nextId(),
-                            FindingCategory.PASSWORD,
-                            "Configured Password in Header",
-                            targetPassword,
-                            "Response Headers",
-                            requestResponse,
-                            hIdx,
-                            hIdx + targetPassword.length()
-                    ));
-                }
+            // Strictly check response body only (headers yield excessive false positives)
+            int idx = caseSensitive ? body.indexOf(targetPassword)
+                    : body.toLowerCase().indexOf(targetPassword.toLowerCase());
+            if (idx != -1) {
+                findings.add(FindingEntry.create(
+                        dataStore.nextId(),
+                        FindingCategory.PASSWORD,
+                        "Configured Password Leak",
+                        targetPassword,
+                        "Response Body",
+                        requestResponse,
+                        idx,
+                        idx + targetPassword.length()
+                ));
             }
         }
 

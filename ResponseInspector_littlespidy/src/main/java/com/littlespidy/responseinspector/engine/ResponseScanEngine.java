@@ -53,6 +53,26 @@ public class ResponseScanEngine {
         return commentScanner;
     }
 
+    private final List<HttpRequestResponse> repeaterTraffic = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    public void addRepeaterItem(HttpRequestResponse item) {
+        if (item != null && item.hasResponse()) {
+            repeaterTraffic.add(item);
+        }
+    }
+
+    public List<HttpRequestResponse> getRepeaterTraffic() {
+        return new ArrayList<>(repeaterTraffic);
+    }
+
+    public int getRepeaterTrafficCount() {
+        return repeaterTraffic.size();
+    }
+
+    public void clearRepeaterTraffic() {
+        repeaterTraffic.clear();
+    }
+
     public int scanProxyItem(ProxyHttpRequestResponse item) {
         if (item == null || !item.hasResponse()) {
             return 0;
@@ -72,10 +92,9 @@ public class ResponseScanEngine {
             return 0;
         }
 
-        // Early-exit pre-filters from sensitive-discoverer + strict JS file exclusion
+        // Early-exit pre-filters: empty responses, static resources (JS, CSS, images, fonts, binaries), oversized
         if (ScannerUtils.isResponseEmpty(item.response()) ||
-            ScannerUtils.isMimeTypeBlacklisted(item.response()) ||
-            ScannerUtils.isJsFile(item.request(), item.response()) ||
+            ScannerUtils.isStaticResource(item.request(), item.response()) ||
             ScannerUtils.isOversized(item.response())) {
             return 0;
         }

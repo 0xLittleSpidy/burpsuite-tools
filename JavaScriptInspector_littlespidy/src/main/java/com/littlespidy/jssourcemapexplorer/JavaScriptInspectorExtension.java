@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @author littlespidy
  */
-public class JSSourceMapExplorerExtension implements BurpExtension {
+public class JavaScriptInspectorExtension implements BurpExtension {
 
     private MontoyaApi api;
     private final JsDataStore dataStore = new JsDataStore();
@@ -34,11 +34,11 @@ public class JSSourceMapExplorerExtension implements BurpExtension {
     @Override
     public void initialize(MontoyaApi api) {
         this.api = api;
-        api.extension().setName("JS SourceMap Explorer (littlespidy)");
+        api.extension().setName("JavaScript Inspector (littlespidy)");
 
         // ── 1. Create and Register Suite Tab ──
         this.mainTab = new JSSourceMapExplorerTab(api, dataStore);
-        api.userInterface().registerSuiteTab("🗺️ JS Explorer", mainTab);
+        api.userInterface().registerSuiteTab("🔍 JavaScript Inspector", mainTab);
 
         // ── 2. Register Context Menu Provider ──
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
@@ -46,7 +46,7 @@ public class JSSourceMapExplorerExtension implements BurpExtension {
             public List<Component> provideMenuItems(ContextMenuEvent event) {
                 List<Component> menuItems = new ArrayList<>();
 
-                JMenuItem sendToExplorer = new JMenuItem("Send to JS SourceMap Explorer");
+                JMenuItem sendToExplorer = new JMenuItem("Send to JavaScript Inspector");
                 sendToExplorer.addActionListener(e -> handleSendToExplorer(event));
                 menuItems.add(sendToExplorer);
 
@@ -59,10 +59,10 @@ public class JSSourceMapExplorerExtension implements BurpExtension {
             if (mainTab != null) {
                 mainTab.cleanup();
             }
-            api.logging().logToOutput("JS SourceMap Explorer extension unloaded successfully.");
+            api.logging().logToOutput("JavaScript Inspector extension unloaded successfully.");
         });
 
-        api.logging().logToOutput("JS SourceMap Explorer (littlespidy) loaded successfully!");
+        api.logging().logToOutput("JavaScript Inspector (littlespidy) loaded successfully!");
     }
 
     private void handleSendToExplorer(ContextMenuEvent event) {

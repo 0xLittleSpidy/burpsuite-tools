@@ -55,6 +55,11 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
                 mainTab.refreshView();
             });
             items.add(openTabItem);
+
+            JMenuItem openFinderItem = new JMenuItem("🍪 Open Session Cookie Finder");
+            openFinderItem.addActionListener(e -> mainTab.selectCookieFinderTab());
+            items.add(openFinderItem);
+
             return items;
         }
 
@@ -66,6 +71,12 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
         JMenuItem sendItem = new JMenuItem(menuTitle);
         sendItem.addActionListener(e -> handleSendRequests(targetRequests));
         items.add(sendItem);
+
+        JMenuItem sendCookieFinderItem = new JMenuItem("🍪 Send to Session Cookie Finder");
+        sendCookieFinderItem.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> mainTab.loadIntoCookieFinder(targetRequests.get(0)));
+        });
+        items.add(sendCookieFinderItem);
 
         return items;
     }

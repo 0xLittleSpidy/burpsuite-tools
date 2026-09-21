@@ -8,6 +8,7 @@ import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
+import com.littlespidy.sessionexpiration.cookiefinder.SessionCookieFinderTab;
 import com.littlespidy.sessionexpiration.engine.SessionTimerEngine;
 import com.littlespidy.sessionexpiration.model.ProbeResult;
 import com.littlespidy.sessionexpiration.model.SessionDataStore;
@@ -33,8 +34,8 @@ import java.util.regex.Pattern;
  * Provides a top-level tab hierarchy:
  * 1. 📖 Welcome & Guide - Onboarding, workflow playbooks, and methodology cards.
  * 2. ⏱️ Session Monitor - Master-detail dashboard with real-time countdowns, triage filters,
- *    side-by-side milestone history, and dedicated Montoya editors for Probe Request, Probe Response,
- *    Baseline Request, and Baseline Response.
+ *    side-by-side milestone history, and dedicated Montoya editors for Probe, Baseline, and Original.
+ * 3. 🍪 Session Cookie Finder - Systematic isolation of cookies, standard auth headers, and custom headers.
  *
  * @author littlespidy
  */
@@ -47,6 +48,7 @@ public class SessionExpirationTab extends JPanel {
     // Root Tabbed Pane
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
     private final WelcomeGuidePanel welcomeGuidePanel;
+    private final SessionCookieFinderTab cookieFinderTab;
 
     // Master Table Components
     private final SessionTableModel sessionTableModel = new SessionTableModel();
@@ -61,6 +63,8 @@ public class SessionExpirationTab extends JPanel {
     private final HttpResponseEditor probeResponseEditor;
     private final HttpRequestEditor baselineRequestEditor;
     private final HttpResponseEditor baselineResponseEditor;
+    private final HttpRequestEditor originalRequestEditor;
+    private final HttpResponseEditor originalResponseEditor;
     private final JTabbedPane inspectorTabs = new JTabbedPane();
 
     // Filters
@@ -86,6 +90,8 @@ public class SessionExpirationTab extends JPanel {
         this.probeResponseEditor = api.userInterface().createHttpResponseEditor();
         this.baselineRequestEditor = api.userInterface().createHttpRequestEditor();
         this.baselineResponseEditor = api.userInterface().createHttpResponseEditor();
+        this.originalRequestEditor = api.userInterface().createHttpRequestEditor();
+        this.originalResponseEditor = api.userInterface().createHttpResponseEditor();
 
         // 1. Debounce Timer (300ms) for filter text fields
         this.filterDebounceTimer = new Timer(300, e -> refreshView());
@@ -123,8 +129,10 @@ public class SessionExpirationTab extends JPanel {
 
         // 7. Assemble Root Tabbed Pane
         this.welcomeGuidePanel = new WelcomeGuidePanel(this);
+        this.cookieFinderTab = new SessionCookieFinderTab(api, dataStore, timerEngine, this);
         rootTabbedPane.addTab("📖 Welcome & Guide", welcomeGuidePanel);
         rootTabbedPane.addTab("⏱️ Session Monitor", monitorPanel);
+        rootTabbedPane.addTab("🍪 Session Cookie Finder", cookieFinderTab);
 
         add(rootTabbedPane, BorderLayout.CENTER);
 
@@ -140,6 +148,21 @@ public class SessionExpirationTab extends JPanel {
 
     public void selectMonitorTab() {
         rootTabbedPane.setSelectedIndex(1);
+    }
+
+    public void selectCookieFinderTab() {
+        rootTabbedPane.setSelectedIndex(2);
+    }
+
+    public void loadIntoCookieFinder(HttpRequestResponse rr) {
+        selectCookieFinderTab();
+        if (rr != null) {
+            cookieFinderTab.setTargetRequest(rr.request(), rr);
+        }
+    }
+
+    public SessionTask getSelectedTaskFromMonitor() {
+        return getSelectedTask();
     }
 
     private JPanel createToolbar() {
@@ -244,6 +267,8 @@ public class SessionExpirationTab extends JPanel {
         inspectorTabs.addTab("📥 Probe Response", probeResponseEditor.uiComponent());
         inspectorTabs.addTab("🎯 Baseline Request", baselineRequestEditor.uiComponent());
         inspectorTabs.addTab("🎯 Baseline Response", baselineResponseEditor.uiComponent());
+        inspectorTabs.addTab("📄 Original Request", originalRequestEditor.uiComponent());
+        inspectorTabs.addTab("📄 Original Response", originalResponseEditor.uiComponent());
         inspectorTabs.setBorder(BorderFactory.createTitledBorder("Request & Response Inspector"));
 
         // Horizontal Split: Left = Milestones Table, Right = Message Editors
@@ -437,7 +462,25 @@ public class SessionExpirationTab extends JPanel {
                 baselineResponseEditor.setResponse(null);
             }
 
-            // 2. Automatically select the latest executed milestone or the first milestone
+            // 2. Populate Original Editors
+            if (task.getOriginalRequestResponse() != null) {
+                if (task.getOriginalRequestResponse().request() != null) {
+                    originalRequestEditor.setRequest(task.getOriginalRequestResponse().request());
+                } else {
+                    originalRequestEditor.setRequest(task.getOriginalRequest());
+                }
+
+                if (task.getOriginalRequestResponse().hasResponse()) {
+                    originalResponseEditor.setResponse(task.getOriginalRequestResponse().response());
+                } else {
+                    originalResponseEditor.setResponse(null);
+                }
+            } else {
+                originalRequestEditor.setRequest(task.getOriginalRequest());
+                originalResponseEditor.setResponse(null);
+            }
+
+            // 3. Automatically select the latest executed milestone or the first milestone
             int targetRow = -1;
             List<TimerInterval> intervals = task.getIntervals();
             for (int i = intervals.size() - 1; i >= 0; i--) {
@@ -464,6 +507,8 @@ public class SessionExpirationTab extends JPanel {
             probeResponseEditor.setResponse(null);
             baselineRequestEditor.setRequest(null);
             baselineResponseEditor.setResponse(null);
+            originalRequestEditor.setRequest(null);
+            originalResponseEditor.setResponse(null);
             inspectorTabs.setTitleAt(0, "📤 Probe Request");
             inspectorTabs.setTitleAt(1, "📥 Probe Response");
         }
@@ -578,12 +623,7 @@ public class SessionExpirationTab extends JPanel {
         if (dialog.isConfirmed()) {
             task.setIntervals(dialog.getSelectedIntervals());
             task.setCancelOnExpire(dialog.isCancelOnExpire());
-
-            if (dialog.isRefreshBaseline()) {
-                timerEngine.refreshBaseline(task, () -> timerEngine.startSession(task, this::refreshView));
-            } else {
-                timerEngine.startSession(task, this::refreshView);
-            }
+            timerEngine.startSession(task, this::refreshView);
             refreshView();
         }
     }
@@ -639,6 +679,9 @@ public class SessionExpirationTab extends JPanel {
         }
         if (filterDebounceTimer != null) {
             filterDebounceTimer.stop();
+        }
+        if (cookieFinderTab != null) {
+            cookieFinderTab.cleanup();
         }
     }
 }

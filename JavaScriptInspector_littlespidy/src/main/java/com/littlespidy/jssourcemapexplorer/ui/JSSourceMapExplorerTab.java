@@ -215,7 +215,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(15, 15));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
 
-        JLabel titleLabel = new JLabel("JS SourceMap Explorer");
+        JLabel titleLabel = new JLabel("JavaScript Inspector");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
 
         JTextArea descArea = new JTextArea();
@@ -225,7 +225,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         descArea.setLineWrap(true);
         descArea.setWrapStyleWord(true);
         descArea.setText(
-            "JS SourceMap Explorer helps security testers analyze JavaScript assets, "
+            "JavaScript Inspector helps security testers analyze JavaScript assets, "
                 + "automatically deduplicate script URLs, classify 1st-party vs 3rd-party origins, "
                 + "detect passive and active .map exposures, inspect both JS and .map raw HTTP requests/responses, "
                 + "reconstruct original unminified source code trees, and mine for hidden API endpoints and secrets."
