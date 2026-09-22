@@ -22,6 +22,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **Session Expiration Checker** | [📥 `session-expiration-checker-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy/build/libs/session-expiration-checker-littlespidy-1.0.0.jar) | Automated session timeout and token expiration tester with staged milestone timers and baseline matching |
 | **Header Inspector** | [📥 `header-inspector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/HeaderInspector_littlespidy/build/libs/header-inspector-littlespidy-1.0.0.jar) | Consolidated Protocol Suite: Header Collector, Method Collector, Status Collector, Cache Inspector, CSP Inspector, and HSTS Inspector with synchronized proxy ingestion |
 | **Param Payload Injector** | [📥 `param-payload-injector-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/ParamPayloadInjector_littlespidy/build/libs/param-payload-injector-littlespidy-1.0.0.jar) | Parameter-attributed payload injector (XSS & Angular CSTI) with reflection monitoring and context attribution |
+| **Active Scan Session Keeper** | [📥 `activescan-session-keeper-littlespidy-1.0.0.jar`](file:///home/littlespidy/myextra/burpsuite/ActiveScanSessionKeeper_littlespidy/build/libs/activescan-session-keeper-littlespidy-1.0.0.jar) | Active scan session timeout interceptor that pauses scan threads on session expiry, prompts for fresh cookies, and auto-retries failed checks |
 
 ---
 
@@ -124,6 +125,14 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Synchronized On-Demand Ingestion**: Clicking `Load Proxy History` in any tab executes a single non-blocking background pass with early in-scope gating (`[x] In-Scope Only`) to ingest traffic across all six inspectors simultaneously without UI lag.
 - **Zero Passive Overhead**: Purely on-demand architecture with no background passive listeners during normal proxy usage.
 - **Interoperability & TSV Export**: Multi-row selection, `Send to Repeater / Intruder / Organizer`, and instant clipboard TSV export.
+
+### 13. [Active Scan Session Keeper](file:///home/littlespidy/myextra/burpsuite/ActiveScanSessionKeeper_littlespidy)
+- **Active Scanner Interception**: Continuously monitors Burp Active Scanner HTTP requests and responses via Montoya `HttpHandler`, with selective tool gating and domain/scope filtering to ensure session validity throughout long-running audits.
+- **Multi-Factor Expiration Detection**: Configurable rules detecting HTTP status codes (401, 403, 419, 440), login redirects (3xx to `/login`, `auth`, `sso`), response body regex patterns (`"session expired"`, `"please log in"`, `"invalid token"`), Set-Cookie invalidations (`Max-Age=0`), and sudden body size drops.
+- **Thread-Safe Scanner Pausing & Prompting**: Atomic lock ensures only 1 modal dialog pops up across concurrent scanner worker threads with audio alert chime; safely pauses all scanner threads on a condition variable without deadlocks or UI freezes.
+- **Automated Request Retrying**: Automatically re-issues the failed check with the newly supplied session cookie and supplies the fresh response directly back to Burp Scanner, preventing false negatives and keeping all checks intact.
+- **Live Triage Log & Montoya Editors**: Activity table with `MultiSelectFilterButton`s for Tool, Status, and Event, live search, TSV clipboard export, and embedded Montoya split-view HTTP request/response inspectors.
+- **Context Menu Integration**: One-click right-click actions across Burp: `🍪 Set as Active Scan Session Cookie`, `🎯 Set Target Host Scope`, and manual pause/resume.
 
 ---
 
