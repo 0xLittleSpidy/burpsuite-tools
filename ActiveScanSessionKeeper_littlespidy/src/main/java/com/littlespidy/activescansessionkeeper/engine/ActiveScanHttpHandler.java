@@ -4,6 +4,7 @@ package com.littlespidy.activescansessionkeeper.engine;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.handler.*;
+import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -11,9 +12,14 @@ import com.littlespidy.activescansessionkeeper.config.SessionKeeperConfig;
 import com.littlespidy.activescansessionkeeper.model.ScanActivityDataStore;
 import com.littlespidy.activescansessionkeeper.model.ScanActivityEntry;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Intercepts HTTP requests and responses from Burp Active Scanner (and optionally other tools),
  * injects updated session credentials, monitors for session expiration, and pauses scan threads.
+ * Also sniffs Burp Proxy traffic while the cookie prompt is open to capture fresh session cookies.
  *
  * @author littlespidy
  */
@@ -38,6 +44,17 @@ public class ActiveScanHttpHandler implements HttpHandler {
 
     @Override
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent requestToBeSent) {
+        // ── Sniff Proxy requests when cookie prompt is actively open ──
+        if (requestToBeSent.toolSource().toolType() == ToolType.PROXY && coordinator.isPromptOpen()) {
+            if (config.matchesHost(requestToBeSent.httpService().host()) && requestToBeSent.hasHeader("Cookie")) {
+                String cookieVal = requestToBeSent.headerValue("Cookie");
+                if (cookieVal != null && !cookieVal.trim().isEmpty()) {
+                    CapturedCookieEvent event = new CapturedCookieEvent(cookieVal.trim(), requestToBeSent.url(), requestToBeSent.method());
+                    coordinator.notifyCookieCaptured(event);
+                }
+            }
+        }
+
         if (!config.isEnabled() || !isMonitoredTool(requestToBeSent.toolSource().toolType())) {
             return RequestToBeSentAction.continueWith(requestToBeSent);
         }
@@ -64,6 +81,33 @@ public class ActiveScanHttpHandler implements HttpHandler {
 
     @Override
     public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived responseReceived) {
+        // ── Sniff Proxy responses when cookie prompt is actively open ──
+        if (responseReceived.toolSource().toolType() == ToolType.PROXY && coordinator.isPromptOpen()) {
+            HttpRequest initReq = responseReceived.initiatingRequest();
+            if (initReq != null && config.matchesHost(initReq.httpService().host())) {
+                List<String> setCookies = new ArrayList<>();
+                for (HttpHeader h : responseReceived.headers()) {
+                    if (h.name().equalsIgnoreCase("Set-Cookie")) {
+                        String val = h.value();
+                        if (!val.toLowerCase(Locale.ROOT).contains("max-age=0") &&
+                            !val.toLowerCase(Locale.ROOT).contains("1970") &&
+                            !val.toLowerCase(Locale.ROOT).contains("deleted")) {
+                            int semi = val.indexOf(';');
+                            String pair = (semi > 0) ? val.substring(0, semi).trim() : val.trim();
+                            if (!pair.isEmpty()) {
+                                setCookies.add(pair);
+                            }
+                        }
+                    }
+                }
+                if (!setCookies.isEmpty()) {
+                    String combined = String.join("; ", setCookies);
+                    CapturedCookieEvent event = new CapturedCookieEvent(combined, initReq.url(), initReq.method());
+                    coordinator.notifyCookieCaptured(event);
+                }
+            }
+        }
+
         if (!config.isEnabled() || !isMonitoredTool(responseReceived.toolSource().toolType())) {
             return ResponseReceivedAction.continueWith(responseReceived);
         }

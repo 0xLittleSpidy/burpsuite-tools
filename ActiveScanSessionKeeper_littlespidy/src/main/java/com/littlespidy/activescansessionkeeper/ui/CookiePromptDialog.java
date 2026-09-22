@@ -4,39 +4,55 @@ package com.littlespidy.activescansessionkeeper.ui;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import com.littlespidy.activescansessionkeeper.config.CookieMode;
 import com.littlespidy.activescansessionkeeper.config.SessionKeeperConfig;
+import com.littlespidy.activescansessionkeeper.engine.CapturedCookieEvent;
+import com.littlespidy.activescansessionkeeper.engine.ScanSessionCoordinator;
+import com.littlespidy.activescansessionkeeper.util.BrowserLauncher;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Modal prompt dialog displayed when an active scan thread detects session expiration.
- * Pauses scan execution, alerts the user, and collects fresh session credentials to resume scanning.
+ * Supports launching a proxied browser session, real-time cookie sniffing from Burp Proxy traffic,
+ * and one-click confirmation to resume the active scan.
  *
  * @author littlespidy
  */
 public class CookiePromptDialog extends JDialog {
 
     private final SessionKeeperConfig config;
+    private final ScanSessionCoordinator coordinator;
     private final String reason;
     private final String details;
     private final String url;
     private final HttpRequest initiatingRequest;
     private final BiConsumer<String, Boolean> onUpdateCallback;
 
+    private Consumer<CapturedCookieEvent> cookieListener;
+
     private JTextArea cookieInputArea;
     private JRadioButton namedRadio;
     private JRadioButton fullHeaderRadio;
     private JRadioButton bearerRadio;
     private JCheckBox autoRetryCheckbox;
+    private JLabel snifferStatusLabel;
+    private JPanel snifferPanel;
+    private JButton updateBtn;
 
-    public CookiePromptDialog(Window parent, SessionKeeperConfig config, String reason, String details,
+    public CookiePromptDialog(Window parent, SessionKeeperConfig config,
+                              ScanSessionCoordinator coordinator,
+                              String reason, String details,
                               String url, HttpRequest initiatingRequest,
                               BiConsumer<String, Boolean> onUpdateCallback) {
         super(parent, "⚠️ Active Scan Session Expired — Action Required", ModalityType.APPLICATION_MODAL);
         this.config = config;
+        this.coordinator = coordinator;
         this.reason = reason;
         this.details = details;
         this.url = url;
@@ -44,7 +60,8 @@ public class CookiePromptDialog extends JDialog {
         this.onUpdateCallback = onUpdateCallback;
 
         initComponents();
-        setSize(650, 520);
+        setupSnifferListener();
+        setSize(700, 600);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
@@ -66,17 +83,17 @@ public class CookiePromptDialog extends JDialog {
         titleLabel.setForeground(new Color(146, 64, 14)); // Dark amber
 
         JLabel descLabel = new JLabel("<html>The Burp Active Scanner encountered an expiration trigger. "
-                + "All scan threads are safely paused waiting for fresh credentials.</html>");
+                + "Scan threads are paused. You can open a browser to log in, and the dialog will auto-catch the new cookies!</html>");
         descLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
         descLabel.setForeground(new Color(120, 53, 15));
 
         bannerPanel.add(titleLabel, BorderLayout.NORTH);
         bannerPanel.add(descLabel, BorderLayout.CENTER);
 
-        // ── 2. Trigger Info Details ─────────────────────────────────────────
+        // ── 2. Trigger Diagnostics & Browser Launch ─────────────────────────
         JPanel infoPanel = new JPanel(new GridBagLayout());
         infoPanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), "Expiration Trigger Diagnostics",
+                BorderFactory.createEtchedBorder(), "Expiration Trigger & Target",
                 TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 11)
         ));
 
@@ -92,7 +109,7 @@ public class CookiePromptDialog extends JDialog {
 
         gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
         JLabel reasonVal = new JLabel("🚨 " + reason);
-        reasonVal.setForeground(new Color(185, 28, 28)); // Dark red
+        reasonVal.setForeground(new Color(185, 28, 28));
         reasonVal.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         infoPanel.add(reasonVal, gbc);
 
@@ -102,11 +119,24 @@ public class CookiePromptDialog extends JDialog {
         infoPanel.add(urlHeader, gbc);
 
         gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
+        JPanel urlRow = new JPanel(new BorderLayout(6, 0));
         JTextField urlField = new JTextField(url);
         urlField.setEditable(false);
         urlField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         urlField.setBackground(new Color(243, 244, 246));
-        infoPanel.add(urlField, gbc);
+
+        JButton openBrowserBtn = new JButton("🌐 Open in Browser");
+        openBrowserBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        openBrowserBtn.setForeground(new Color(30, 64, 175)); // Dark blue
+        openBrowserBtn.setToolTipText("Launch Chrome with Burp proxy flags (127.0.0.1:8080) to log in");
+        openBrowserBtn.addActionListener(e -> {
+            String res = BrowserLauncher.launchBrowser(url, "127.0.0.1", 8080);
+            snifferStatusLabel.setText("🌐 " + res);
+        });
+
+        urlRow.add(urlField, BorderLayout.CENTER);
+        urlRow.add(openBrowserBtn, BorderLayout.EAST);
+        infoPanel.add(urlRow, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0;
         JLabel detailHeader = new JLabel("Details:");
@@ -118,10 +148,25 @@ public class CookiePromptDialog extends JDialog {
         detailVal.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         infoPanel.add(detailVal, gbc);
 
-        // ── 3. Cookie Input & Mode Selection ────────────────────────────────
+        // ── 3. Live Cookie Sniffer Card ─────────────────────────────────────
+        String host = (initiatingRequest != null) ? initiatingRequest.httpService().host() : config.getTargetHostFilter();
+        snifferPanel = new JPanel(new BorderLayout(8, 4));
+        snifferPanel.setBackground(new Color(240, 253, 244)); // Soft mint/green
+        snifferPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(134, 239, 172), 1),
+                new EmptyBorder(8, 10, 8, 10)
+        ));
+
+        snifferStatusLabel = new JLabel("📡 Live Sniffer Active: Listening on Burp Proxy for \"" + host + "\"... Log in to auto-capture.");
+        snifferStatusLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        snifferStatusLabel.setForeground(new Color(22, 101, 52));
+
+        snifferPanel.add(snifferStatusLabel, BorderLayout.CENTER);
+
+        // ── 4. Cookie Input & Mode Selection ────────────────────────────────
         JPanel inputPanel = new JPanel(new BorderLayout(6, 6));
         inputPanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), "Provide Fresh Session Credentials",
+                BorderFactory.createEtchedBorder(), "Fresh Session Credentials",
                 TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 11)
         ));
 
@@ -155,7 +200,6 @@ public class CookiePromptDialog extends JDialog {
         cookieInputArea.setLineWrap(true);
         cookieInputArea.setWrapStyleWord(true);
 
-        // Prepopulate with current or initiating request cookies
         String initialText = "";
         if (config.getCookieMode() == CookieMode.FULL_COOKIE_HEADER && !config.getFullCookieHeader().isEmpty()) {
             initialText = config.getFullCookieHeader();
@@ -178,10 +222,14 @@ public class CookiePromptDialog extends JDialog {
 
         // ── Center Compound ──
         JPanel centerPanel = new JPanel(new BorderLayout(6, 6));
-        centerPanel.add(infoPanel, BorderLayout.NORTH);
+        JPanel topCompound = new JPanel(new BorderLayout(4, 4));
+        topCompound.add(infoPanel, BorderLayout.NORTH);
+        topCompound.add(snifferPanel, BorderLayout.CENTER);
+
+        centerPanel.add(topCompound, BorderLayout.NORTH);
         centerPanel.add(inputPanel, BorderLayout.CENTER);
 
-        // ── 4. Bottom Action Buttons ────────────────────────────────────────
+        // ── 5. Bottom Action Buttons ────────────────────────────────────────
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
 
         JButton disableBtn = new JButton("Disable Keeper for this Scan");
@@ -195,7 +243,7 @@ public class CookiePromptDialog extends JDialog {
         ignoreBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         ignoreBtn.addActionListener(e -> dispose());
 
-        JButton updateBtn = new JButton("✅ Update Cookie & Resume Scan");
+        updateBtn = new JButton("✅ Confirm & Resume Scan");
         updateBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         updateBtn.setForeground(new Color(22, 101, 52)); // Dark green
         updateBtn.addActionListener(e -> handleUpdate());
@@ -204,13 +252,44 @@ public class CookiePromptDialog extends JDialog {
         btnPanel.add(ignoreBtn);
         btnPanel.add(updateBtn);
 
-        // Layout Assembly
+        // Assembly
         contentPane.add(bannerPanel, BorderLayout.NORTH);
         contentPane.add(centerPanel, BorderLayout.CENTER);
         contentPane.add(btnPanel, BorderLayout.SOUTH);
 
         setContentPane(contentPane);
         getRootPane().setDefaultButton(updateBtn);
+    }
+
+    private void setupSnifferListener() {
+        if (coordinator == null) return;
+
+        cookieListener = event -> SwingUtilities.invokeLater(() -> {
+            snifferStatusLabel.setText("🎉 Fresh Cookie Captured from Proxy: " + event.getMethod() + " " + event.getSourceUrl() + " at " + event.getTimestamp());
+            snifferStatusLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+            snifferPanel.setBackground(new Color(220, 252, 231)); // vibrant soft green
+
+            cookieInputArea.setText(event.getCookieString());
+            fullHeaderRadio.setSelected(true);
+
+            updateBtn.setText("✅ Confirm & Use Captured Cookies");
+            updateBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
+
+            try {
+                Toolkit.getDefaultToolkit().beep();
+            } catch (Exception ignored) {}
+        });
+
+        coordinator.addCapturedCookieListener(cookieListener);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (coordinator != null && cookieListener != null) {
+                    coordinator.removeCapturedCookieListener(cookieListener);
+                }
+            }
+        });
     }
 
     private void handleUpdate() {

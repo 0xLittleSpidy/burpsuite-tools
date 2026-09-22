@@ -37,6 +37,7 @@ public class ScanSessionCoordinator {
 
     private final AtomicBoolean isPaused = new AtomicBoolean(false);
     private final AtomicBoolean isPromptOpen = new AtomicBoolean(false);
+    private final List<java.util.function.Consumer<CapturedCookieEvent>> capturedCookieListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     public ScanSessionCoordinator(MontoyaApi api, SessionKeeperConfig config, ScanActivityDataStore dataStore) {
         this.api = api;
@@ -49,6 +50,29 @@ public class ScanSessionCoordinator {
      */
     public boolean isPaused() {
         return isPaused.get();
+    }
+
+    /**
+     * Checks if the cookie prompt modal is currently open.
+     */
+    public boolean isPromptOpen() {
+        return isPromptOpen.get();
+    }
+
+    public void addCapturedCookieListener(java.util.function.Consumer<CapturedCookieEvent> listener) {
+        capturedCookieListeners.add(listener);
+    }
+
+    public void removeCapturedCookieListener(java.util.function.Consumer<CapturedCookieEvent> listener) {
+        capturedCookieListeners.remove(listener);
+    }
+
+    public void notifyCookieCaptured(CapturedCookieEvent event) {
+        for (java.util.function.Consumer<CapturedCookieEvent> listener : capturedCookieListeners) {
+            try {
+                listener.accept(event);
+            } catch (Exception ignored) {}
+        }
     }
 
     /**
@@ -179,7 +203,7 @@ public class ScanSessionCoordinator {
 
     private void showPromptModal(String reason, String details, String url, HttpRequest initiatingRequest) {
         Window parent = api.userInterface().swingUtils().suiteFrame();
-        CookiePromptDialog dialog = new CookiePromptDialog(parent, config, reason, details, url, initiatingRequest, (newCookie, retrySelected) -> {
+        CookiePromptDialog dialog = new CookiePromptDialog(parent, config, this, reason, details, url, initiatingRequest, (newCookie, retrySelected) -> {
             dataStore.addEntry(new ScanActivityEntry(
                     dataStore.nextId(), "User", "-", "-", url, 0,
                     "COOKIE_UPDATED", "New session cookie applied: " + truncate(newCookie, 40), null

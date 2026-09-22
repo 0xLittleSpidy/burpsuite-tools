@@ -39,17 +39,23 @@ Includes a comprehensive suite of expiration checks that can be toggled and conf
 - **Custom Regex**:
   - Allows testers to define arbitrary regex patterns evaluated against the full HTTP response.
 
-### 3. 🛑 Thread-Safe Scanner Pausing & Prompting
+### 3. 🛑 Thread-Safe Scanner Pausing & Interactive Browser Login
 - **Single-Prompt Coordination**: Active scans often run with 10–20 concurrent threads. When session expiration occurs, an atomic lock ensures **only one prompt dialog opens**; all other threads gracefully wait on a condition variable without deadlocks or UI freezes.
 - **Audio / System Beep Alert**: Emits an audible chime via `Toolkit.beep()` to alert the tester immediately when the scan pauses.
-- **Interactive Swing Prompt**:
-  - Displays the exact trigger reason and the target URL that failed.
-  - Pre-populates existing cookies for fast editing.
-  - Supports pasting full `Cookie:` headers, specific named cookies (e.g. `JSESSIONID`), or `Authorization: Bearer` tokens.
-  - Provides quick action buttons:
-    - **`✅ Update Cookie & Resume Scan`**: Injects new credentials, unblocks all threads, and retries the failed request.
-    - **`⏭ Ignore Once & Resume`**: Bypasses the pause and lets threads continue.
-    - **`❌ Disable Keeper for this Scan`**: Disables interception so the scanner runs unhindered.
+- **🌐 "Open in Browser" Launcher**:
+  - One-click **`Open in Browser`** button inside the modal dialog.
+  - Automatically spawns an isolated Chromium/Chrome instance configured with `--proxy-server=http://127.0.0.1:8080` and a temporary user profile, routing all authentication traffic directly through Burp Proxy without altering user settings.
+  - Seamlessly falls back to system browser or Burp's built-in Chromium browser (**Proxy → Open browser**).
+- **📡 Real-Time Live Proxy Cookie Sniffer**:
+  - While the prompt modal is open, the extension actively sniffs Burp Proxy traffic for responses/requests matching the target host.
+  - Captures `Set-Cookie` headers from login endpoints (e.g. `POST /login`) or subsequent `Cookie:` headers.
+  - Automatically flashes a live confirmation banner in the dialog:
+    `🎉 Fresh Cookie Captured from Proxy: POST /login at 18:05:22`
+  - Instantly populates the credentials input with the new cookie.
+- **Interactive Actions**:
+  - **`✅ Confirm & Resume Scan` / `✅ Confirm & Use Captured Cookies`**: Applies the new session credentials, unblocks all worker threads, and retries the failed check.
+  - **`⏭ Ignore Once & Resume`**: Bypasses the pause and lets threads continue.
+  - **`❌ Disable Keeper for this Scan`**: Disables interception so the scanner runs unhindered.
 
 ### 4. 🔄 Automated Request Retries
 - When enabled, the request that triggered the session expiration is automatically re-sent with the newly supplied session cookie.
