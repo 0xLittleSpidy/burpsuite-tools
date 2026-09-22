@@ -9,6 +9,8 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
 import com.littlespidy.sessionexpiration.cookiefinder.SessionCookieFinderTab;
+import com.littlespidy.sessionexpiration.cookiestore.model.CookieStoreDataStore;
+import com.littlespidy.sessionexpiration.cookiestore.ui.CookieStoreTab;
 import com.littlespidy.sessionexpiration.engine.SessionTimerEngine;
 import com.littlespidy.sessionexpiration.model.ProbeResult;
 import com.littlespidy.sessionexpiration.model.SessionDataStore;
@@ -49,6 +51,8 @@ public class SessionExpirationTab extends JPanel {
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
     private final WelcomeGuidePanel welcomeGuidePanel;
     private final SessionCookieFinderTab cookieFinderTab;
+    private final CookieStoreDataStore cookieStoreDataStore;
+    private final CookieStoreTab cookieStoreTab;
 
     // Master Table Components
     private final SessionTableModel sessionTableModel = new SessionTableModel();
@@ -130,9 +134,13 @@ public class SessionExpirationTab extends JPanel {
         // 7. Assemble Root Tabbed Pane
         this.welcomeGuidePanel = new WelcomeGuidePanel(this);
         this.cookieFinderTab = new SessionCookieFinderTab(api, dataStore, timerEngine, this);
+        this.cookieStoreDataStore = new CookieStoreDataStore();
+        this.cookieStoreTab = new CookieStoreTab(api, cookieStoreDataStore);
+
         rootTabbedPane.addTab("📖 Welcome & Guide", welcomeGuidePanel);
         rootTabbedPane.addTab("⏱️ Session Monitor", monitorPanel);
         rootTabbedPane.addTab("🍪 Session Cookie Finder", cookieFinderTab);
+        rootTabbedPane.addTab("📦 Cookie Store", cookieStoreTab);
 
         add(rootTabbedPane, BorderLayout.CENTER);
 
@@ -154,11 +162,30 @@ public class SessionExpirationTab extends JPanel {
         rootTabbedPane.setSelectedIndex(2);
     }
 
+    public void selectCookieStoreTab() {
+        rootTabbedPane.setSelectedIndex(3);
+    }
+
     public void loadIntoCookieFinder(HttpRequestResponse rr) {
         selectCookieFinderTab();
         if (rr != null) {
             cookieFinderTab.setTargetRequest(rr.request(), rr);
         }
+    }
+
+    public void loadIntoCookieStore(HttpRequestResponse rr) {
+        selectCookieStoreTab();
+        if (rr != null) {
+            cookieStoreTab.ingestMessage(rr);
+        }
+    }
+
+    public CookieStoreTab getCookieStoreTab() {
+        return cookieStoreTab;
+    }
+
+    public CookieStoreDataStore getCookieStoreDataStore() {
+        return cookieStoreDataStore;
     }
 
     public SessionTask getSelectedTaskFromMonitor() {
@@ -682,6 +709,9 @@ public class SessionExpirationTab extends JPanel {
         }
         if (cookieFinderTab != null) {
             cookieFinderTab.cleanup();
+        }
+        if (cookieStoreDataStore != null) {
+            cookieStoreDataStore.clear();
         }
     }
 }

@@ -60,6 +60,10 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
             openFinderItem.addActionListener(e -> mainTab.selectCookieFinderTab());
             items.add(openFinderItem);
 
+            JMenuItem openStoreItem = new JMenuItem("📦 Open Cookie Store");
+            openStoreItem.addActionListener(e -> mainTab.selectCookieStoreTab());
+            items.add(openStoreItem);
+
             return items;
         }
 
@@ -77,6 +81,20 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
             SwingUtilities.invokeLater(() -> mainTab.loadIntoCookieFinder(targetRequests.get(0)));
         });
         items.add(sendCookieFinderItem);
+
+        String storeTitle = (count == 1)
+                ? "📦 Send to Cookie Store"
+                : "📦 Send " + count + " Requests to Cookie Store";
+        JMenuItem sendCookieStoreItem = new JMenuItem(storeTitle);
+        sendCookieStoreItem.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                mainTab.selectCookieStoreTab();
+                for (HttpRequestResponse rr : targetRequests) {
+                    mainTab.getCookieStoreTab().ingestMessage(rr);
+                }
+            });
+        });
+        items.add(sendCookieStoreItem);
 
         return items;
     }
