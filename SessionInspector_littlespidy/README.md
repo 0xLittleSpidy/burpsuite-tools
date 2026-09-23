@@ -54,7 +54,7 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
   - Embedded **`📖 Cookie Explained (cookiesearch.org)`** tab in the detail editor split pane, matching `HeaderDocPanel` in `HeaderInspector_littlespidy`.
   - Quick-info banner above the values table displays real-time Category badges (`Necessary`, `Analytics`, `Functional`, `Performance`, `Advertisement`) and a direct **`📖 Explain Cookie`** button.
   - Right-click context menu on any cookie in the cookie names table: **`📖 Explain Cookie (cookiesearch.org)`**.
-  - **Extensive Offline Knowledge Base**: Pre-bundled with 706 cookie definitions scraped from `cookiesearch.org` providing instantaneous $O(1)$ lookup, full behavioral descriptions, associated script providers (`Google Analytics`, `Cloudflare`, `Meta`, etc.), tracking domains, and clickable related cookie chips.
+  - **Extensive Offline Knowledge Base**: Pre-bundled with 706 cookie definitions scraped from `cookiesearch.org` providing instantaneous $O(1)$ lookup, full behavioral descriptions, associated script providers (`Google Analytics`, `Cloudflare`, `Meta`, etc.), and clickable related cookie chips.
   - **Live Background Web Crawler**: Automatically queries `https://www.cookiesearch.org/` in a non-blocking daemon thread pool for novel or unrecognized cookies, parsing descriptions and caching results dynamically without freezing the Swing EDT.
   - **Security Heuristics Fallback**: For custom application tokens, intelligently infers session characteristics (`session`, `token`, `auth`, `id`) and supplies actionable security testing advice.
   - Direct controls to open the official documentation in the system browser or copy the reference URL.

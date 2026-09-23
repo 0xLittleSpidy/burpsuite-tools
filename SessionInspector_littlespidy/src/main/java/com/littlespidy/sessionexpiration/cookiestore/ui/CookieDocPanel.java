@@ -11,12 +11,11 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.net.URI;
-import java.util.List;
 
 /**
  * Dedicated reference and documentation panel for web cookies,
  * embedding category classifications, behavioral explanations, scripts,
- * and associated URLs scraped from https://www.cookiesearch.org/.
+ * and related cookies scraped from https://www.cookiesearch.org/.
  *
  * Modeled after HeaderDocPanel with offline database support and automatic
  * live background fetching.
@@ -36,13 +35,7 @@ public class CookieDocPanel extends JPanel {
 
     private final JLabel statusIndicator = new JLabel("");
 
-    private final JLabel summaryLabel = new JLabel("Select a cookie from the table above to view its exact documentation from cookiesearch.org.");
-    private final JPanel summaryCard = new JPanel(new BorderLayout(5, 5));
-
     private final JTextArea explanationArea = new JTextArea();
-
-    private final JPanel domainsContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
-    private final JLabel domainsTitle = new JLabel("Associated Domains / URLs:");
 
     private final JPanel relatedContainer = new JPanel();
     private final JLabel relatedTitle = new JLabel("Related Cookies:");
@@ -143,30 +136,6 @@ public class CookieDocPanel extends JPanel {
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setOpaque(false);
 
-        // Summary Card
-        summaryCard.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(210, 215, 220), 1, true),
-                new EmptyBorder(8, 10, 8, 10)
-        ));
-        summaryCard.setBackground(new Color(248, 250, 252));
-        summaryLabel.setFont(summaryLabel.getFont().deriveFont(Font.PLAIN, 12f));
-        summaryCard.add(summaryLabel, BorderLayout.CENTER);
-        contentPanel.add(summaryCard);
-        contentPanel.add(Box.createVerticalStrut(8));
-
-        // Associated Domains / Scripts Container
-        JPanel domainSection = new JPanel(new BorderLayout(4, 4));
-        domainSection.setOpaque(false);
-        domainsTitle.setFont(domainsTitle.getFont().deriveFont(Font.BOLD, 12f));
-        domainsTitle.setVisible(false);
-        domainSection.add(domainsTitle, BorderLayout.NORTH);
-
-        domainsContainer.setOpaque(false);
-        domainsContainer.setVisible(false);
-        domainSection.add(domainsContainer, BorderLayout.CENTER);
-        contentPanel.add(domainSection);
-        contentPanel.add(Box.createVerticalStrut(8));
-
         // Explanation & Behavioral Details Area
         JPanel explanationSection = new JPanel(new BorderLayout(4, 4));
         explanationSection.setOpaque(false);
@@ -177,15 +146,16 @@ public class CookieDocPanel extends JPanel {
         explanationArea.setEditable(false);
         explanationArea.setLineWrap(true);
         explanationArea.setWrapStyleWord(true);
-        explanationArea.setFont(explanationArea.getFont().deriveFont(Font.PLAIN, 12f));
+        explanationArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
         explanationArea.setBackground(new Color(252, 253, 255));
+        explanationArea.setText("Select a cookie from the table above to view its classification, purpose, and behavioral description from cookiesearch.org.");
         explanationArea.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(210, 215, 220), 1, true),
-                new EmptyBorder(8, 10, 8, 10)
+                new EmptyBorder(10, 12, 10, 12)
         ));
         explanationSection.add(explanationArea, BorderLayout.CENTER);
         contentPanel.add(explanationSection);
-        contentPanel.add(Box.createVerticalStrut(8));
+        contentPanel.add(Box.createVerticalStrut(10));
 
         // Related Cookies Section
         JPanel relatedSection = new JPanel(new BorderLayout(4, 4));
@@ -244,13 +214,8 @@ public class CookieDocPanel extends JPanel {
             categoryBadge.setVisible(true);
             scriptBadge.setVisible(false);
 
-            summaryLabel.setText("<html>Searching <b>cookiesearch.org</b> in background for <code>"
-                    + escapeHtml(currentCookieName) + "</code>...</html>");
+            statusIndicator.setText("🌐 Fetching live definition from cookiesearch.org for '" + currentCookieName + "'...");
             explanationArea.setText("Querying https://www.cookiesearch.org/ for cookie specifications and meaning...");
-
-            domainsTitle.setVisible(false);
-            domainsContainer.removeAll();
-            domainsContainer.setVisible(false);
 
             relatedTitle.setVisible(false);
             relatedContainer.removeAll();
@@ -292,45 +257,6 @@ public class CookieDocPanel extends JPanel {
             scriptBadge.setVisible(false);
         }
 
-        // Summary Card
-        StringBuilder summaryHtml = new StringBuilder("<html>");
-        summaryHtml.append("<b>Category:</b> <span style='color:").append(toHex(doc.categoryColor())).append("'><b>")
-                .append(escapeHtml(doc.category())).append("</b></span>");
-        if (doc.hasScript()) {
-            summaryHtml.append(" &nbsp;|&nbsp; <b>Provider / Script:</b> <code>").append(escapeHtml(doc.script())).append("</code>");
-        }
-        if (doc.hasUrl()) {
-            summaryHtml.append(" &nbsp;|&nbsp; <b>Host:</b> ").append(escapeHtml(doc.url()));
-        }
-        summaryHtml.append("</html>");
-        summaryLabel.setText(summaryHtml.toString());
-
-        // Domains
-        domainsContainer.removeAll();
-        if (doc.hasUrl()) {
-            domainsTitle.setVisible(true);
-            domainsContainer.setVisible(true);
-            String[] parts = doc.url().split("[|,]");
-            for (String part : parts) {
-                String domain = part.trim();
-                if (!domain.isEmpty()) {
-                    JLabel dLabel = new JLabel(domain);
-                    dLabel.setFont(dLabel.getFont().deriveFont(Font.BOLD, 11f));
-                    dLabel.setOpaque(true);
-                    dLabel.setBackground(new Color(236, 240, 241));
-                    dLabel.setForeground(new Color(44, 62, 80));
-                    dLabel.setBorder(BorderFactory.createCompoundBorder(
-                            new LineBorder(new Color(189, 195, 199), 1, true),
-                            new EmptyBorder(2, 6, 2, 6)
-                    ));
-                    domainsContainer.add(dLabel);
-                }
-            }
-        } else {
-            domainsTitle.setVisible(false);
-            domainsContainer.setVisible(false);
-        }
-
         // Description
         explanationArea.setText(doc.description());
         explanationArea.setCaretPosition(0);
@@ -366,10 +292,7 @@ public class CookieDocPanel extends JPanel {
         copyLinkBtn.setEnabled(false);
         openBrowserBtn.setEnabled(false);
         statusIndicator.setText("");
-        summaryLabel.setText("Select a cookie from the table above to view its exact documentation from cookiesearch.org.");
-        explanationArea.setText("");
-        domainsTitle.setVisible(false);
-        domainsContainer.removeAll();
+        explanationArea.setText("Select a cookie from the table above to view its classification, purpose, and behavioral description from cookiesearch.org.");
         relatedTitle.setVisible(false);
         relatedContainer.removeAll();
         revalidate();
@@ -382,14 +305,5 @@ public class CookieDocPanel extends JPanel {
         label.setForeground(fgColor);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 11f));
         label.setBorder(new EmptyBorder(2, 6, 2, 6));
-    }
-
-    private String toHex(Color c) {
-        return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
-    }
-
-    private String escapeHtml(String text) {
-        if (text == null) return "";
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 }
