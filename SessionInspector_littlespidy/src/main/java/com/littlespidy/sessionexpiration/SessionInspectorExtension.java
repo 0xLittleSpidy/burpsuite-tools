@@ -6,6 +6,7 @@ import burp.api.montoya.MontoyaApi;
 import com.littlespidy.sessionexpiration.context.SessionContextMenuProvider;
 import com.littlespidy.sessionexpiration.engine.SessionTimerEngine;
 import com.littlespidy.sessionexpiration.model.SessionDataStore;
+import com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence;
 import com.littlespidy.sessionexpiration.ui.SessionExpirationTab;
 
 /**
@@ -45,17 +46,34 @@ public class SessionInspectorExtension implements BurpExtension {
                 new SessionContextMenuProvider(api, dataStore, timerEngine, mainTab)
         );
 
-        // 5. Register Extension Unloading Handler
+        // 5. Restore Persistent State (across extension reload or Burp restart)
+        try {
+            String restoreSummary = SessionInspectorPersistence.load(
+                    dataStore, mainTab.getCookieStoreDataStore(), mainTab.getCookieFinderTab(), api
+            );
+            mainTab.refreshAllTabs();
+            api.logging().logToOutput("[Session Inspector] " + restoreSummary);
+        } catch (Exception ex) {
+            api.logging().logToError("[Session Inspector] Failed to restore persistent state: " + ex.getMessage());
+        }
+
+        // 6. Register Extension Unloading Handler
         api.extension().registerUnloadingHandler(() -> {
-            api.logging().logToOutput("[Session Inspector] Unloading extension: terminating timers...");
+            api.logging().logToOutput("[Session Inspector] Unloading extension: saving state & terminating timers...");
+            try {
+                SessionInspectorPersistence.saveSync(
+                        dataStore, mainTab.getCookieStoreDataStore(), mainTab.getCookieFinderTab()
+                );
+                api.logging().logToOutput("[Session Inspector] Saved persistent state to disk.");
+            } catch (Exception ex) {
+                api.logging().logToError("[Session Inspector] Error saving persistent state on unload: " + ex.getMessage());
+            }
+
             if (mainTab != null) {
                 mainTab.cleanup();
             }
             if (timerEngine != null) {
                 timerEngine.shutdown();
-            }
-            if (dataStore != null) {
-                dataStore.clearAll();
             }
             api.logging().logToOutput("[Session Inspector] Extension unloaded cleanly.");
         });

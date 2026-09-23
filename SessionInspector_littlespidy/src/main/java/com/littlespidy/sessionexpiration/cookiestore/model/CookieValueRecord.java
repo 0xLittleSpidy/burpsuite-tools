@@ -57,6 +57,37 @@ public class CookieValueRecord {
         this.sampleStatusCode = sampleStatusCode;
     }
 
+    public CookieValueRecord(
+            int id,
+            String cookieName,
+            CookieSource source,
+            String value,
+            Set<String> domains,
+            int occurrences,
+            String attributes,
+            HttpRequestResponse sampleMessage,
+            String sampleUrl,
+            String sampleMethod,
+            int sampleStatusCode) {
+        this.id = id;
+        this.cookieName = cookieName;
+        this.source = source;
+        this.value = (value != null) ? value : "";
+        if (domains != null) {
+            for (String d : domains) {
+                if (d != null && !d.isBlank()) {
+                    this.domains.add(d.trim().toLowerCase(Locale.ROOT));
+                }
+            }
+        }
+        this.occurrences = Math.max(1, occurrences);
+        this.attributes = (attributes != null) ? attributes.trim() : "";
+        this.sampleMessage = sampleMessage;
+        this.sampleUrl = sampleUrl;
+        this.sampleMethod = sampleMethod;
+        this.sampleStatusCode = sampleStatusCode;
+    }
+
     public synchronized void recordOccurrence(
             CookieSource occurrenceSource,
             String domain,

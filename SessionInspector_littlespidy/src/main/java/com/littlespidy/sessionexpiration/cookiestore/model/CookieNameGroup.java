@@ -62,6 +62,14 @@ public class CookieNameGroup {
         }
     }
 
+    public synchronized void restoreValueRecord(CookieValueRecord record) {
+        if (record == null) return;
+        valuesMap.put(record.value(), record);
+        if (record.source() != this.source && this.source != CookieSource.BOTH) {
+            this.source = CookieSource.BOTH;
+        }
+    }
+
     public String displayName() { return displayName; }
     public String cookieName() { return displayName; }
     public String lowercaseName() { return lowercaseName; }

@@ -44,10 +44,11 @@ public class CookieSearchFetcher {
      * Asynchronously fetches cookie documentation from cookiesearch.org,
      * delivering the result onto the Swing Event Dispatch Thread (EDT).
      *
-     * @param cookieName The cookie name to query
-     * @param callback   Callback receiving the resulting CookieDocRecord on the EDT
+     * @param cookieName   The cookie name to query
+     * @param forceRefresh If true, bypasses the in-memory cache and queries cookiesearch.org live
+     * @param callback     Callback receiving the resulting CookieDocRecord on the EDT
      */
-    public static void fetchAsync(String cookieName, Consumer<CookieDocRecord> callback) {
+    public static void fetchAsync(String cookieName, boolean forceRefresh, Consumer<CookieDocRecord> callback) {
         if (cookieName == null || cookieName.isBlank()) {
             if (callback != null) {
                 SwingUtilities.invokeLater(() -> callback.accept(null));
@@ -55,18 +56,20 @@ public class CookieSearchFetcher {
             return;
         }
 
-        // 1. Check in-memory cache first
-        CookieDocRecord cached = CookieSearchKnowledgeBase.get(cookieName);
-        if (cached != null) {
-            if (callback != null) {
-                SwingUtilities.invokeLater(() -> callback.accept(cached));
+        // 1. Check in-memory cache first if not forced refresh
+        if (!forceRefresh) {
+            CookieDocRecord cached = CookieSearchKnowledgeBase.get(cookieName);
+            if (cached != null) {
+                if (callback != null) {
+                    SwingUtilities.invokeLater(() -> callback.accept(cached));
+                }
+                return;
             }
-            return;
         }
 
         // 2. Fetch live in background thread
         EXECUTOR.submit(() -> {
-            CookieDocRecord fetched = fetchSync(cookieName);
+            CookieDocRecord fetched = fetchSync(cookieName, forceRefresh);
             if (callback != null) {
                 SwingUtilities.invokeLater(() -> callback.accept(fetched));
             }
@@ -74,15 +77,27 @@ public class CookieSearchFetcher {
     }
 
     /**
-     * Synchronously fetches cookie documentation from cookiesearch.org.
+     * Overload for standard non-forced asynchronous fetch.
      */
-    public static CookieDocRecord fetchSync(String cookieName) {
+    public static void fetchAsync(String cookieName, Consumer<CookieDocRecord> callback) {
+        fetchAsync(cookieName, false, callback);
+    }
+
+    /**
+     * Synchronously fetches cookie documentation from cookiesearch.org.
+     *
+     * @param cookieName   The cookie name to query
+     * @param forceRefresh If true, bypasses in-memory cache and re-queries cookiesearch.org
+     */
+    public static CookieDocRecord fetchSync(String cookieName, boolean forceRefresh) {
         if (cookieName == null || cookieName.isBlank()) return null;
 
         String trimmed = cookieName.trim();
-        CookieDocRecord cached = CookieSearchKnowledgeBase.get(trimmed);
-        if (cached != null) {
-            return cached;
+        if (!forceRefresh) {
+            CookieDocRecord cached = CookieSearchKnowledgeBase.get(trimmed);
+            if (cached != null) {
+                return cached;
+            }
         }
 
         try {
@@ -107,10 +122,23 @@ public class CookieSearchFetcher {
             System.err.println("[SessionInspector] Error fetching cookie '" + trimmed + "' from cookiesearch.org: " + e.getMessage());
         }
 
+        // If force refresh failed but we have an existing record in cache, preserve it
+        CookieDocRecord existing = CookieSearchKnowledgeBase.get(trimmed);
+        if (existing != null) {
+            return existing;
+        }
+
         // Fallback: Infer heuristics or unknown notice
         CookieDocRecord fallback = createInferredOrUnknownRecord(trimmed);
         CookieSearchKnowledgeBase.put(fallback);
         return fallback;
+    }
+
+    /**
+     * Overload for standard non-forced synchronous fetch.
+     */
+    public static CookieDocRecord fetchSync(String cookieName) {
+        return fetchSync(cookieName, false);
     }
 
     private static CookieDocRecord parseHtml(String cookieName, String referenceUrl, String html) {

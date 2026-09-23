@@ -135,7 +135,7 @@ public class SessionExpirationTab extends JPanel {
         this.welcomeGuidePanel = new WelcomeGuidePanel(this);
         this.cookieFinderTab = new SessionCookieFinderTab(api, dataStore, timerEngine, this);
         this.cookieStoreDataStore = new CookieStoreDataStore();
-        this.cookieStoreTab = new CookieStoreTab(api, cookieStoreDataStore);
+        this.cookieStoreTab = new CookieStoreTab(api, cookieStoreDataStore, this::triggerAutoSave);
 
         rootTabbedPane.addTab("📖 Welcome & Guide", welcomeGuidePanel);
         rootTabbedPane.addTab("⏱️ Session Monitor", monitorPanel);
@@ -145,9 +145,67 @@ public class SessionExpirationTab extends JPanel {
         add(rootTabbedPane, BorderLayout.CENTER);
 
         // Register DataStore listener
-        this.dataStore.addChangeListener(this::refreshView);
+        this.dataStore.addChangeListener(() -> {
+            refreshView();
+            triggerAutoSave();
+        });
 
         refreshView();
+    }
+
+    public SessionDataStore getDataStore() {
+        return dataStore;
+    }
+
+    public CookieStoreDataStore getCookieStoreDataStore() {
+        return cookieStoreDataStore;
+    }
+
+    public CookieStoreTab getCookieStoreTab() {
+        return cookieStoreTab;
+    }
+
+    public SessionCookieFinderTab getCookieFinderTab() {
+        return cookieFinderTab;
+    }
+
+    public void triggerAutoSave() {
+        com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.saveAsync(
+                dataStore, cookieStoreDataStore, cookieFinderTab
+        );
+    }
+
+    public void savePersistentStateNow() {
+        com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.saveSync(
+                dataStore, cookieStoreDataStore, cookieFinderTab
+        );
+    }
+
+    public String reloadPersistentStateNow() {
+        String msg = com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.load(
+                dataStore, cookieStoreDataStore, cookieFinderTab, api
+        );
+        refreshAllTabs();
+        return msg;
+    }
+
+    public void clearPersistentDataNow() {
+        com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.clearPersistentFile();
+        dataStore.clearAll();
+        if (cookieStoreDataStore != null) {
+            cookieStoreDataStore.clear();
+        }
+        if (cookieFinderTab != null) {
+            cookieFinderTab.clearAll();
+        }
+        refreshAllTabs();
+    }
+
+    public void refreshAllTabs() {
+        refreshView();
+        if (cookieStoreTab != null) {
+            cookieStoreTab.refreshView();
+        }
     }
 
     public void selectWelcomeTab() {
@@ -178,14 +236,6 @@ public class SessionExpirationTab extends JPanel {
         if (rr != null) {
             cookieStoreTab.ingestMessage(rr);
         }
-    }
-
-    public CookieStoreTab getCookieStoreTab() {
-        return cookieStoreTab;
-    }
-
-    public CookieStoreDataStore getCookieStoreDataStore() {
-        return cookieStoreDataStore;
     }
 
     public SessionTask getSelectedTaskFromMonitor() {

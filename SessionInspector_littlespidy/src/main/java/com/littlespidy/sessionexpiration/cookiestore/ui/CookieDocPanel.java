@@ -29,7 +29,7 @@ public class CookieDocPanel extends JPanel {
     private final JLabel sourceBadge = new JLabel("Request/Response");
     private final JLabel scriptBadge = new JLabel("Script/Provider");
 
-    private final JButton fetchLiveBtn = new JButton("🌐 Fetch from Site");
+    private final JButton fetchLiveBtn = new JButton("🔄 Re-check cookiesearch.org");
     private final JButton copyLinkBtn = new JButton("Copy Link");
     private final JButton openBrowserBtn = new JButton("Open in Browser");
 
@@ -80,11 +80,11 @@ public class CookieDocPanel extends JPanel {
         actions.setOpaque(false);
 
         fetchLiveBtn.setFont(fetchLiveBtn.getFont().deriveFont(11f));
-        fetchLiveBtn.setToolTipText("Fetch or refresh live documentation from cookiesearch.org");
+        fetchLiveBtn.setToolTipText("Force-query https://www.cookiesearch.org/ for live documentation (bypasses cache; does not contact target host)");
         fetchLiveBtn.setEnabled(false);
         fetchLiveBtn.addActionListener(e -> {
             if (!currentCookieName.isEmpty()) {
-                performLiveFetch(currentCookieName);
+                performLiveFetch(currentCookieName, true);
             }
         });
 
@@ -221,19 +221,22 @@ public class CookieDocPanel extends JPanel {
             relatedContainer.removeAll();
             relatedContainer.setVisible(false);
 
-            performLiveFetch(currentCookieName);
+            performLiveFetch(currentCookieName, false);
         }
     }
 
-    private void performLiveFetch(String cookieName) {
-        statusIndicator.setText("🌐 Fetching live definition from cookiesearch.org for '" + cookieName + "'...");
+    private void performLiveFetch(String cookieName, boolean forceRefresh) {
+        String msg = forceRefresh
+                ? "🔄 Re-checking cookiesearch.org live for '" + cookieName + "'..."
+                : "🌐 Fetching live definition from cookiesearch.org for '" + cookieName + "'...";
+        statusIndicator.setText(msg);
         fetchLiveBtn.setEnabled(false);
 
-        CookieSearchFetcher.fetchAsync(cookieName, doc -> {
+        CookieSearchFetcher.fetchAsync(cookieName, forceRefresh, doc -> {
             fetchLiveBtn.setEnabled(true);
             if (doc != null && currentCookieName.equalsIgnoreCase(cookieName)) {
                 this.currentDoc = doc;
-                statusIndicator.setText("✓ Definition retrieved successfully from cookiesearch.org.");
+                statusIndicator.setText("✓ Definition refreshed from cookiesearch.org.");
                 renderDoc(doc);
             } else if (currentCookieName.equalsIgnoreCase(cookieName)) {
                 statusIndicator.setText("Cookie not found in cookiesearch.org.");

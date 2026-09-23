@@ -170,6 +170,27 @@ public class CookieStoreDataStore {
         return totalMessagesProcessed;
     }
 
+    public synchronized void setTotalMessagesProcessed(int count) {
+        this.totalMessagesProcessed = count;
+    }
+
+    public synchronized Collection<CookieNameGroup> getAllGroups() {
+        return Collections.unmodifiableCollection(cookieGroups.values());
+    }
+
+    public synchronized void restoreRecord(String groupName, CookieSource groupSource, CookieValueRecord record) {
+        if (groupName == null || groupName.isBlank() || record == null) return;
+        String lower = groupName.trim().toLowerCase(Locale.ROOT);
+        CookieNameGroup group = cookieGroups.computeIfAbsent(
+                lower,
+                k -> new CookieNameGroup(groupName.trim(), groupSource)
+        );
+        group.restoreValueRecord(record);
+        if (record.id() >= idGen.get()) {
+            idGen.set(record.id() + 1);
+        }
+    }
+
     public synchronized String exportToTsv() {
         StringBuilder sb = new StringBuilder();
         sb.append("Cookie Name\tSource\tValue\tOccurrences (Repeated)\tDomains\tAttributes\tSample URL\tStatus\n");

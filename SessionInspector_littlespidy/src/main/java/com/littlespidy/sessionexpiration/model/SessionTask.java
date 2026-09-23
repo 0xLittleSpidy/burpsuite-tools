@@ -60,6 +60,49 @@ public class SessionTask {
         }
     }
 
+    public SessionTask(
+            int id,
+            HttpRequest originalRequest,
+            HttpRequestResponse originalRequestResponse,
+            HttpRequestResponse baseline,
+            Instant createdAt,
+            SessionState state,
+            String lastVerdict,
+            boolean cancelOnExpire,
+            List<TimerInterval> intervals
+    ) {
+        this.id = id;
+        this.originalRequest = originalRequest;
+        this.originalRequestResponse = originalRequestResponse;
+        this.baseline = baseline;
+        this.createdAt = (createdAt != null) ? createdAt : Instant.now();
+        this.state = (state != null) ? state : SessionState.PENDING;
+        this.lastVerdict = (lastVerdict != null) ? lastVerdict : "";
+        this.cancelOnExpire = cancelOnExpire;
+
+        this.method = (originalRequest != null && originalRequest.method() != null) ? originalRequest.method() : "GET";
+        this.url = (originalRequest != null && originalRequest.url() != null) ? originalRequest.url() : "";
+        this.path = (originalRequest != null && originalRequest.path() != null) ? originalRequest.path() : "/";
+        this.host = (originalRequest != null && originalRequest.httpService() != null) ? originalRequest.httpService().host() : "";
+
+        if (baseline != null && baseline.hasResponse()) {
+            HttpResponse resp = baseline.response();
+            this.baselineStatusCode = resp.statusCode();
+            this.baselineLength = resp.toByteArray().length();
+        } else if (originalRequestResponse != null && originalRequestResponse.hasResponse()) {
+            HttpResponse resp = originalRequestResponse.response();
+            this.baselineStatusCode = resp.statusCode();
+            this.baselineLength = resp.toByteArray().length();
+        } else {
+            this.baselineStatusCode = 0;
+            this.baselineLength = 0;
+        }
+
+        if (intervals != null) {
+            this.intervals.addAll(intervals);
+        }
+    }
+
     public int getId() {
         return id;
     }

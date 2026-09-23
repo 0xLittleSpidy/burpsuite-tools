@@ -43,6 +43,21 @@ public class SessionDataStore {
         return Collections.unmodifiableList(allTasks);
     }
 
+    public void restoreTasks(List<SessionTask> tasks) {
+        if (tasks == null) return;
+        int maxId = 0;
+        for (SessionTask t : tasks) {
+            allTasks.add(t);
+            if (t.getId() > maxId) {
+                maxId = t.getId();
+            }
+        }
+        if (maxId >= idCounter.get()) {
+            idCounter.set(maxId + 1);
+        }
+        notifyListeners();
+    }
+
     public SessionTask getTaskById(int id) {
         for (SessionTask t : allTasks) {
             if (t.getId() == id) {

@@ -79,11 +79,17 @@ public class CookieStoreTab extends JPanel {
     // Debounce Timer for text filtering
     private final Timer debounceTimer;
     private CookieNameGroup selectedGroup = null;
+    private final Runnable autoSaveCallback;
 
     public CookieStoreTab(MontoyaApi api, CookieStoreDataStore dataStore) {
+        this(api, dataStore, null);
+    }
+
+    public CookieStoreTab(MontoyaApi api, CookieStoreDataStore dataStore, Runnable autoSaveCallback) {
         super(new BorderLayout(5, 5));
         this.api = api;
         this.dataStore = dataStore;
+        this.autoSaveCallback = autoSaveCallback;
 
         this.requestEditor = api.userInterface().createHttpRequestEditor();
         this.responseEditor = api.userInterface().createHttpResponseEditor();
@@ -93,6 +99,10 @@ public class CookieStoreTab extends JPanel {
 
         initComponents();
         setupListeners();
+    }
+
+    public CookieStoreDataStore getDataStore() {
+        return dataStore;
     }
 
     private void initComponents() {
@@ -253,6 +263,9 @@ public class CookieStoreTab extends JPanel {
             cookieDocPanel.setCookie(null, null);
             quickInfoLabel.setText("Select a cookie to view its classification and documentation from cookiesearch.org.");
             quickInfoDocsBtn.setEnabled(false);
+            if (autoSaveCallback != null) {
+                autoSaveCallback.run();
+            }
         });
 
         // Group Table selection
@@ -408,6 +421,9 @@ public class CookieStoreTab extends JPanel {
                     progressBar.setVisible(false);
                     loadHistoryBtn.setEnabled(true);
                     refreshView();
+                    if (autoSaveCallback != null) {
+                        autoSaveCallback.run();
+                    }
                 }
             }
         };
@@ -419,6 +435,9 @@ public class CookieStoreTab extends JPanel {
         if (message == null) return;
         dataStore.ingest(message);
         refreshView();
+        if (autoSaveCallback != null) {
+            autoSaveCallback.run();
+        }
     }
 
     public void refreshView() {

@@ -55,7 +55,7 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
   - Quick-info banner above the values table displays real-time Category badges (`Necessary`, `Analytics`, `Functional`, `Performance`, `Advertisement`) and a direct **`📖 Explain Cookie`** button.
   - Right-click context menu on any cookie in the cookie names table: **`📖 Explain Cookie (cookiesearch.org)`**.
   - **Extensive Offline Knowledge Base**: Pre-bundled with 706 cookie definitions scraped from `cookiesearch.org` providing instantaneous $O(1)$ lookup, full behavioral descriptions, associated script providers (`Google Analytics`, `Cloudflare`, `Meta`, etc.), and clickable related cookie chips.
-  - **Live Background Web Crawler**: Automatically queries `https://www.cookiesearch.org/` in a non-blocking daemon thread pool for novel or unrecognized cookies, parsing descriptions and caching results dynamically without freezing the Swing EDT.
+  - **Live Background Web Crawler & Force-Refresh**: Automatically queries `https://www.cookiesearch.org/` in a non-blocking daemon thread pool for novel or unrecognized cookies, parsing descriptions and caching results dynamically without freezing the Swing EDT. Features a **`🔄 Re-check cookiesearch.org`** button to bypass cache and force a fresh lookup from `cookiesearch.org` on demand.
   - **Security Heuristics Fallback**: For custom application tokens, intelligently infers session characteristics (`session`, `token`, `auth`, `id`) and supplies actionable security testing advice.
   - Direct controls to open the official documentation in the system browser or copy the reference URL.
 - **One-Click "Cookie Value" Copy Button**:
@@ -67,7 +67,25 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
   - Right-click any request in Burp Suite to choose **`📦 Send to Cookie Store`** or **`📦 Open Cookie Store`**.
   - One-click **`📋 Export TSV`** button for bug bounty reports, session audits, and spreadsheet triage.
 
-### 3. ⏱️ Automated Baseline & 6-Editor Inspector
+### 3. 💾 Full Persistent Storage Across Reloads & Restarts
+- **Automatic State Persistence**:
+  - All collected Cookie Store groups, unique values, repetition counts, and domains;
+  - Dynamic `cookiesearch.org` crawled definitions cache;
+  - Active and completed Session Monitor tasks, baseline responses, probe histories, and timer schedules;
+  - Session Cookie Finder findings, tested variations, and loaded target requests;
+  - Are automatically saved to a dedicated local JSON database at `~/.burp_session_inspector/session_inspector_store.json`.
+- **Zero Data Loss on Reload**:
+  - Removing and reloading the extension or restarting Burp Suite automatically restores all session and cookie data with 100% fidelity.
+- **Robust Storage Architecture**:
+  - **Thread-safe Debounced Auto-Saves**: Coalesces rapid proxy traffic updates with a 2-second debounce timer to avoid disk thrashing.
+  - **Atomic Writes**: Writes to `.tmp` file and atomically moves to `session_inspector_store.json` using `StandardCopyOption.ATOMIC_MOVE`, preventing file corruption during unexpected power cuts or crashes.
+  - **Montoya Message Serialization**: Serializes full raw request and response byte streams via Base64 encoding, preserving complete HTTP fidelity (headers, binary bodies, compression).
+  - **Interactive State Controls in Welcome & Guide Tab**:
+    - **`💾 Save State Now`**: Forces an immediate synchronous flush to disk.
+    - **`📂 Reload From Disk`**: Re-reads and synchronizes all in-memory tables with disk.
+    - **`🗑️ Reset / Clear All Saved Data`**: Safely deletes the persistent storage file and clears all working tables after user confirmation.
+
+### 4. ⏱️ Automated Baseline & 6-Editor Inspector
 - **Automatic Live Baseline Probe**:
   - Whenever a session is scheduled or sent to the extension, the baseline probe is **automatically dispatched at $T_0$** by default without requiring user prompt.
 - **Preserved Original vs. Baseline Messages**:
@@ -81,17 +99,17 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
     - **`📄 Original Request`**
     - **`📄 Original Response`**
 
-### 4. ⏱️ Custom Milestone Timers (Milestone-based from $T_0$)
+### 5. ⏱️ Custom Milestone Timers (Milestone-based from $T_0$)
 - Configures **16 milestones by default** every 30 minutes from **30m up to 8 hours** (`30m`, `1h`, `1h 30m`, `2h`, `2h 30m`, `3h`, `3h 30m`, `4h`, `4h 30m`, `5h`, `5h 30m`, `6h`, `6h 30m`, `7h`, `7h 30m`, `8h`).
 - Timers count down concurrently from baseline start time ($T_0$).
 - Fast preset buttons to reload all 16 defaults or custom intervals.
 
-### 5. HTTP Response Date & Time Highlighting
+### 6. HTTP Response Date & Time Highlighting
 - Automatically inspects the standard HTTP `Date:` response header (as well as `Expires` and `Last-Modified`).
 - Applies native Montoya `Marker` highlighting to paint vibrant yellow/orange highlight boxes over server date/time stamps across Pretty, Raw, and Hex editors.
 - Displays the server's `Date:` header in the **Milestones & History** table to correlate server clock time against local milestone schedules.
 
-### 6. Multi-Factor Verification Engine & Auto-Cancellation
+### 7. Multi-Factor Verification Engine & Auto-Cancellation
 - Compares probe responses against baseline behavior:
   - **Status Code Shifts**: Identifies `200 -> 401 Unauthorized`, `200 -> 403 Forbidden`, or redirect codes (`302/301/307`).
   - **Auth Redirects**: Detects redirects to login endpoints (`/login`, `/signin`, `auth`, `sso`, etc.).
@@ -99,7 +117,7 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
   - **Body Signature Inspection**: Flags keywords indicating session termination (`"session expired"`, `"token expired"`, `"please log in"`, etc.) absent in the baseline.
 - **Auto-Cancellation on Expiry**: Automatically cancels all remaining scheduled milestone timers for a task once session expiration is detected.
 
-### 7. Master-Detail Workspace & Triage Filters
+### 8. Master-Detail Workspace & Triage Filters
 - **Live Dynamic Countdown**: Master table shows real-time countdowns (`29m 14s`) ticking down to the next scheduled check.
 - **Core Triage Filters**: Rapid filtering by Host/Domain, Method (`MultiSelectFilterButton`), Status Code, and State (`ACTIVE`, `EXPIRED`, `PENDING`, `RUNNING`, `CANCELLED`).
 - **Burp Suite Interoperability**: Right-click any session or probe to send to **Repeater**, **Intruder**, or **Organizer**.

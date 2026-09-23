@@ -113,6 +113,11 @@ public class CookieSearchKnowledgeBase {
         return COOKIES_MAP.size();
     }
 
+    public static Collection<CookieDocRecord> getAll() {
+        ensureLoaded();
+        return Collections.unmodifiableCollection(COOKIES_MAP.values());
+    }
+
     private static List<CookieDocRecord> parseJson(String json) {
         List<CookieDocRecord> list = new ArrayList<>();
         List<String> objects = splitTopLevelObjects(json);

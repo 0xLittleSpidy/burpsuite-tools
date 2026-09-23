@@ -48,6 +48,16 @@ public class WelcomeGuidePanel extends JPanel {
         });
         headerButtons.add(finderBtn);
 
+        JButton storeBtn = new JButton("🍪 Open Cookie Store");
+        storeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        storeBtn.setToolTipText("Switch to cookie inventory, history, and cookiesearch.org documentation tab");
+        storeBtn.addActionListener(e -> {
+            if (this.mainTab != null) {
+                this.mainTab.selectCookieStoreTab();
+            }
+        });
+        headerButtons.add(storeBtn);
+
         titleAndAction.add(titleLabel, BorderLayout.WEST);
         if (this.mainTab != null) {
             titleAndAction.add(headerButtons, BorderLayout.EAST);
@@ -105,7 +115,7 @@ public class WelcomeGuidePanel extends JPanel {
         ));
 
         cardsPanel.add(createCard(
-                "4. Heuristic Expiration Detection Engine",
+                "5. Heuristic Expiration Detection Engine",
                 "Each probe response is evaluated against the baseline using multi-factor heuristics:\n"
                         + " • Status shifts: 200 OK -> 401 Unauthorized, 403 Forbidden, or 3xx redirects.\n"
                         + " • Auth redirects: Location headers pointing to /login, /signin, auth, or SSO.\n"
@@ -114,31 +124,93 @@ public class WelcomeGuidePanel extends JPanel {
         ));
 
         cardsPanel.add(createCard(
-                "5. Auto-Cancellation on Expiry",
+                "6. Auto-Cancellation on Expiry",
                 "As soon as a probe confirms that the session has expired, the extension immediately halts and cancels "
                         + "all remaining scheduled milestone timers for that request. This conserves bandwidth, avoids "
                         + "unnecessary traffic to the target, and pinpoints the exact time window when the session expired."
         ));
 
         cardsPanel.add(createCard(
-                "6. Real-Time Dynamic Countdowns & Master-Detail Triage",
+                "7. Real-Time Dynamic Countdowns & Master-Detail Triage",
                 "The Session Monitor table features a 1-second live countdown ticker showing the time remaining until "
                         + "the next probe (e.g. '29m 14s (30m)'). Selecting a session reveals its milestone history table, "
                         + "probe request, probe response, and baseline response in built-in Montoya Pretty/Raw/Hex editors."
         ));
 
         cardsPanel.add(createCard(
-                "7. Burp Suite Interoperability & Context Menus",
+                "8. Burp Suite Interoperability & Context Menus",
                 "Right-click any request in Burp Proxy, Repeater, Logger, or Scanner and choose '⏱️ Send to Session "
-                        + "Expiration Checker'. In the extension tables, right-click any row to send requests directly "
+                        + "Inspector'. In the extension tables, right-click any row to send requests directly "
                         + "to Repeater ('METHOD host/path'), Intruder, or Organizer."
         ));
 
         cardsPanel.add(createCard(
-                "8. On-Demand Controls & Baseline Refresh",
+                "9. On-Demand Controls & Baseline Refresh",
                 "Need to verify a session immediately without waiting for the timer? Right-click and select '▶️ Run "
                         + "Probe Now'. You can also re-send the request to update the baseline with '🔄 Refresh Baseline' "
                         + "or reconfigure milestone intervals anytime via '⏱️ Configure Timers...'."
+        ));
+
+        // 10. Persistence & State Management Card
+        JPanel persistenceActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        persistenceActions.setOpaque(false);
+
+        JButton saveNowBtn = new JButton("💾 Save State Now");
+        saveNowBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        saveNowBtn.setToolTipText("Immediately write all in-memory data to ~/.burp_session_inspector/session_inspector_store.json");
+        saveNowBtn.addActionListener(e -> {
+            if (this.mainTab != null) {
+                this.mainTab.savePersistentStateNow();
+                JOptionPane.showMessageDialog(this,
+                        "Session Inspector state successfully saved to disk.\nLocation: "
+                                + com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.getStoragePath(),
+                        "State Saved", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        JButton reloadBtn = new JButton("📂 Reload From Disk");
+        reloadBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        reloadBtn.setToolTipText("Reload state from ~/.burp_session_inspector/session_inspector_store.json");
+        reloadBtn.addActionListener(e -> {
+            if (this.mainTab != null) {
+                int opt = JOptionPane.showConfirmDialog(this,
+                        "Reload state from disk? Any unsaved in-memory changes will be overwritten.",
+                        "Confirm Reload", JOptionPane.YES_NO_OPTION);
+                if (opt == JOptionPane.YES_OPTION) {
+                    String msg = this.mainTab.reloadPersistentStateNow();
+                    JOptionPane.showMessageDialog(this, msg, "Reload Complete", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        JButton resetBtn = new JButton("🗑️ Reset / Clear All Saved Data");
+        resetBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        resetBtn.setToolTipText("Delete persistent storage file and reset in-memory data");
+        resetBtn.addActionListener(e -> {
+            if (this.mainTab != null) {
+                int opt = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to delete the persistent storage file and clear all current data?\nThis cannot be undone.",
+                        "Confirm Reset", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (opt == JOptionPane.YES_OPTION) {
+                    this.mainTab.clearPersistentDataNow();
+                    JOptionPane.showMessageDialog(this,
+                            "Persistent storage file deleted and all data cleared.",
+                            "Reset Complete", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        persistenceActions.add(saveNowBtn);
+        persistenceActions.add(reloadBtn);
+        persistenceActions.add(resetBtn);
+
+        cardsPanel.add(createCard(
+                "10. 💾 Persistent Storage & State Management",
+                "All collected Cookie Store values, cached cookie definitions from cookiesearch.org, active and "
+                        + "completed Session Expiration monitor tasks, and Cookie Finder results are automatically "
+                        + "persisted to disk (~/.burp_session_inspector/session_inspector_store.json). Your findings remain "
+                        + "intact across extension unloads/reloads and Burp Suite restarts.",
+                persistenceActions
         ));
 
         JPanel container = new JPanel(new BorderLayout(15, 15));
@@ -151,6 +223,10 @@ public class WelcomeGuidePanel extends JPanel {
     }
 
     private JPanel createCard(String title, String description) {
+        return createCard(title, description, null);
+    }
+
+    private JPanel createCard(String title, String description, JComponent bottomComponent) {
         JPanel card = new JPanel(new BorderLayout(8, 8));
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground") != null ?
@@ -170,6 +246,9 @@ public class WelcomeGuidePanel extends JPanel {
 
         card.add(titleLbl, BorderLayout.NORTH);
         card.add(desc, BorderLayout.CENTER);
+        if (bottomComponent != null) {
+            card.add(bottomComponent, BorderLayout.SOUTH);
+        }
         return card;
     }
 }

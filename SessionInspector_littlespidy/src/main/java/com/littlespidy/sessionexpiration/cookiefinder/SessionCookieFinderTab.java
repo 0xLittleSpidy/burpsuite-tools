@@ -403,4 +403,40 @@ public class SessionCookieFinderTab extends JPanel {
             engine.shutdown();
         }
     }
+
+    public void restoreState(HttpRequestResponse target, String customHeaders, List<FinderResult> results) {
+        if (target != null) {
+            setTargetRequest(target.request(), target);
+        }
+        if (customHeaders != null && !customHeaders.isBlank()) {
+            this.customHeadersField.setText(customHeaders);
+        }
+        if (results != null && !results.isEmpty()) {
+            this.tableModel.setResults(results);
+            this.findingsBanner.setText("Restored " + results.size() + " cookie and auth isolation test results.");
+        }
+    }
+
+    public HttpRequestResponse getTargetRequestResponse() {
+        return targetRequestResponse;
+    }
+
+    public String getCustomHeaders() {
+        return customHeadersField.getText();
+    }
+
+    public List<FinderResult> getAllResults() {
+        return tableModel.getAllResults();
+    }
+
+    public void clearAll() {
+        tableModel.clear();
+        testRequestEditor.setRequest(null);
+        testResponseEditor.setResponse(null);
+        targetRequest = null;
+        targetRequestResponse = null;
+        targetLabel.setText("Target: No request loaded (Right-click any request -> '🍪 Send to Session Cookie Finder')");
+        findingsBanner.setText("Ready. Load an authenticated request to identify session tokens.");
+        progressBar.setValue(0);
+    }
 }
