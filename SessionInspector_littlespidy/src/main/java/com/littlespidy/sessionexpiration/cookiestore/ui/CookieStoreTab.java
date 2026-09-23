@@ -10,6 +10,7 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
+import com.littlespidy.sessionexpiration.cookiestore.knowledge.CookieSearchKnowledgeBase;
 import com.littlespidy.sessionexpiration.cookiestore.model.CookieNameGroup;
 import com.littlespidy.sessionexpiration.cookiestore.model.CookieSource;
 import com.littlespidy.sessionexpiration.cookiestore.model.CookieStoreDataStore;
@@ -48,6 +49,12 @@ public class CookieStoreTab extends JPanel {
     private final CookieValueTableModel valueTableModel = new CookieValueTableModel();
     private final JTable valueTable = new JTable(valueTableModel);
     private final CookieValueHeaderRenderer cookieValueHeaderRenderer = new CookieValueHeaderRenderer();
+
+    // Cookie Documentation Panel (cookiesearch.org)
+    private final CookieDocPanel cookieDocPanel = new CookieDocPanel();
+    private final JPanel quickInfoPanel = new JPanel(new BorderLayout(8, 0));
+    private final JLabel quickInfoLabel = new JLabel("Select a cookie to view its classification and documentation from cookiesearch.org.");
+    private final JButton quickInfoDocsBtn = new JButton("📖 Cookie Explained (cookiesearch.org)");
 
     // Native Montoya HTTP Editors
     private final HttpRequestEditor requestEditor;
@@ -165,11 +172,28 @@ public class CookieStoreTab extends JPanel {
         valueTable.getColumnModel().getColumn(6).setPreferredWidth(200); // URL
         valueTable.getColumnModel().getColumn(7).setPreferredWidth(50);  // Status
 
+        // Quick-info Banner configuration
+        quickInfoPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(210, 215, 220)),
+                BorderFactory.createEmptyBorder(4, 6, 4, 6)
+        ));
+        quickInfoLabel.setFont(quickInfoLabel.getFont().deriveFont(Font.PLAIN, 11f));
+        quickInfoDocsBtn.setFont(quickInfoDocsBtn.getFont().deriveFont(11f));
+        quickInfoDocsBtn.setMargin(new Insets(2, 6, 2, 6));
+        quickInfoDocsBtn.setEnabled(false);
+        quickInfoDocsBtn.addActionListener(e -> {
+            editorTabs.setSelectedComponent(cookieDocPanel);
+        });
+        quickInfoPanel.add(quickInfoLabel, BorderLayout.CENTER);
+        quickInfoPanel.add(quickInfoDocsBtn, BorderLayout.EAST);
+
+        valuePanel.add(quickInfoPanel, BorderLayout.NORTH);
         valuePanel.add(new JScrollPane(valueTable), BorderLayout.CENTER);
 
-        // Bottom: Montoya Message Editors
+        // Bottom: Montoya Message Editors & Cookie Explanation
         editorTabs.addTab("📤 Request", requestEditor.uiComponent());
         editorTabs.addTab("📥 Response", responseEditor.uiComponent());
+        editorTabs.addTab("📖 Cookie Explained (cookiesearch.org)", cookieDocPanel);
 
         rightSplit.setTopComponent(valuePanel);
         rightSplit.setBottomComponent(editorTabs);
@@ -226,6 +250,9 @@ public class CookieStoreTab extends JPanel {
             selectedGroup = null;
             refreshView();
             clearEditors();
+            cookieDocPanel.setCookie(null, null);
+            quickInfoLabel.setText("Select a cookie to view its classification and documentation from cookiesearch.org.");
+            quickInfoDocsBtn.setEnabled(false);
         });
 
         // Group Table selection
@@ -235,12 +262,37 @@ public class CookieStoreTab extends JPanel {
                 if (row >= 0) {
                     selectedGroup = groupTableModel.getGroupAt(row);
                     updateValueTableForSelectedGroup();
+                    if (selectedGroup != null) {
+                        String cat = CookieSearchKnowledgeBase.getCategory(selectedGroup.displayName());
+                        quickInfoLabel.setText("<html>Cookie: <b>" + escapeHtml(selectedGroup.displayName()) + "</b> &nbsp;|&nbsp; Category: <b>" + escapeHtml(cat) + "</b></html>");
+                        quickInfoDocsBtn.setEnabled(true);
+                        cookieDocPanel.setCookie(selectedGroup.displayName(), selectedGroup.source().getDisplayName());
+                    }
                 } else {
                     selectedGroup = null;
                     valueTableModel.setRecords(null);
+                    quickInfoLabel.setText("Select a cookie to view its classification and documentation from cookiesearch.org.");
+                    quickInfoDocsBtn.setEnabled(false);
+                    cookieDocPanel.setCookie(null, null);
                 }
             }
         });
+
+        // Group Table context menu (Right-click Explain)
+        JPopupMenu groupMenu = new JPopupMenu();
+        JMenuItem explainItem = new JMenuItem("📖 Explain Cookie (cookiesearch.org)");
+        explainItem.addActionListener(e -> {
+            int row = groupTable.getSelectedRow();
+            if (row >= 0) {
+                CookieNameGroup group = groupTableModel.getGroupAt(row);
+                if (group != null) {
+                    cookieDocPanel.setCookie(group.displayName(), group.source().getDisplayName());
+                    editorTabs.setSelectedComponent(cookieDocPanel);
+                }
+            }
+        });
+        groupMenu.add(explainItem);
+        groupTable.setComponentPopupMenu(groupMenu);
 
         // Value Table selection
         valueTable.getSelectionModel().addListSelectionListener(e -> {
@@ -413,6 +465,7 @@ public class CookieStoreTab extends JPanel {
     private void updateValueTableForSelectedGroup() {
         if (selectedGroup == null) {
             valueTableModel.setRecords(null);
+            clearEditors();
             return;
         }
 
@@ -420,6 +473,11 @@ public class CookieStoreTab extends JPanel {
         String searchFilter = searchFilterField.getText().trim();
         List<CookieValueRecord> values = selectedGroup.getValuesFiltered(domainFilter, searchFilter);
         valueTableModel.setRecords(values);
+
+        String cat = CookieSearchKnowledgeBase.getCategory(selectedGroup.displayName());
+        quickInfoLabel.setText("<html>Cookie: <b>" + escapeHtml(selectedGroup.displayName()) + "</b> &nbsp;|&nbsp; Category: <b>" + escapeHtml(cat) + "</b></html>");
+        quickInfoDocsBtn.setEnabled(true);
+        cookieDocPanel.setCookie(selectedGroup.displayName(), selectedGroup.source().getDisplayName());
 
         if (!values.isEmpty()) {
             valueTable.setRowSelectionInterval(0, 0);
@@ -483,7 +541,14 @@ public class CookieStoreTab extends JPanel {
     }
 
     private void clearEditors() {
-        // Clear or leave previous messages
+        cookieDocPanel.setCookie(null, null);
+        quickInfoLabel.setText("Select a cookie to view its classification and documentation from cookiesearch.org.");
+        quickInfoDocsBtn.setEnabled(false);
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 
     private boolean isPointOverCopyButton(Point p) {
