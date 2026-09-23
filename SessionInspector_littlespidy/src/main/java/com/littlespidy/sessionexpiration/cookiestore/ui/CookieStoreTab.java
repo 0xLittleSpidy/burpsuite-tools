@@ -20,8 +20,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,6 +47,7 @@ public class CookieStoreTab extends JPanel {
 
     private final CookieValueTableModel valueTableModel = new CookieValueTableModel();
     private final JTable valueTable = new JTable(valueTableModel);
+    private final CookieValueHeaderRenderer cookieValueHeaderRenderer = new CookieValueHeaderRenderer();
 
     // Native Montoya HTTP Editors
     private final HttpRequestEditor requestEditor;
@@ -152,7 +156,8 @@ public class CookieStoreTab extends JPanel {
         valueTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         valueTable.setRowHeight(22);
         valueTable.getColumnModel().getColumn(0).setPreferredWidth(35);  // #
-        valueTable.getColumnModel().getColumn(1).setPreferredWidth(200); // Value
+        valueTable.getColumnModel().getColumn(1).setPreferredWidth(220); // Value
+        valueTable.getColumnModel().getColumn(1).setHeaderRenderer(cookieValueHeaderRenderer);
         valueTable.getColumnModel().getColumn(2).setPreferredWidth(110); // Repeated (Count)
         valueTable.getColumnModel().getColumn(3).setPreferredWidth(130); // Domains
         valueTable.getColumnModel().getColumn(4).setPreferredWidth(140); // Attributes
@@ -249,6 +254,71 @@ public class CookieStoreTab extends JPanel {
                 }
             }
         });
+
+        // Value Table header listener for "Cookie Value" copy button
+        valueTable.getTableHeader().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (isPointOverCopyButton(e.getPoint())) {
+                    cookieValueHeaderRenderer.setButtonState(true, true);
+                    valueTable.getTableHeader().repaint();
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (cookieValueHeaderRenderer.isButtonPressed()) {
+                    boolean over = isPointOverCopyButton(e.getPoint());
+                    cookieValueHeaderRenderer.setButtonState(over, false);
+                    valueTable.getTableHeader().repaint();
+                    if (over) {
+                        copyAllCookieValues();
+                    }
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                valueTable.getTableHeader().setCursor(Cursor.getDefaultCursor());
+                cookieValueHeaderRenderer.setButtonState(false, false);
+                valueTable.getTableHeader().repaint();
+            }
+        });
+
+        valueTable.getTableHeader().addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (isPointOverCopyButton(e.getPoint())) {
+                    valueTable.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    cookieValueHeaderRenderer.setButtonState(true, false);
+                    valueTable.getTableHeader().repaint();
+                } else {
+                    valueTable.getTableHeader().setCursor(Cursor.getDefaultCursor());
+                    cookieValueHeaderRenderer.setButtonState(false, false);
+                    valueTable.getTableHeader().repaint();
+                }
+            }
+        });
+
+        // Context menu on valueTable for extra convenience
+        JPopupMenu valueMenu = new JPopupMenu();
+        JMenuItem copyAllItem = new JMenuItem("📋 Copy All Cookie Values (One by One)");
+        copyAllItem.addActionListener(e -> copyAllCookieValues());
+        valueMenu.add(copyAllItem);
+
+        JMenuItem copySelectedItem = new JMenuItem("📋 Copy Selected Cookie Value");
+        copySelectedItem.addActionListener(e -> {
+            int row = valueTable.getSelectedRow();
+            if (row >= 0) {
+                CookieValueRecord record = valueTableModel.getRecordAt(row);
+                if (record != null && !record.value().isEmpty()) {
+                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(record.value()), null);
+                    statusLabel.setText("✓ Copied selected cookie value to clipboard.");
+                }
+            }
+        });
+        valueMenu.add(copySelectedItem);
+        valueTable.setComponentPopupMenu(valueMenu);
     }
 
     public void loadProxyHistory() {
@@ -414,5 +484,118 @@ public class CookieStoreTab extends JPanel {
 
     private void clearEditors() {
         // Clear or leave previous messages
+    }
+
+    private boolean isPointOverCopyButton(Point p) {
+        int col = valueTable.getTableHeader().columnAtPoint(p);
+        if (col < 0) return false;
+        int modelCol = valueTable.convertColumnIndexToModel(col);
+        if (modelCol != 1) return false;
+
+        Rectangle headerRect = valueTable.getTableHeader().getHeaderRect(col);
+        JButton btn = cookieValueHeaderRenderer.getCopyButton();
+        Dimension btnPref = btn.getPreferredSize();
+        int btnWidth = btnPref.width + 6;
+        int btnHeight = Math.min(btnPref.height, Math.max(16, headerRect.height - 4));
+        int btnX = (headerRect.x + headerRect.width) - btnWidth - 4;
+        int btnY = headerRect.y + Math.max(0, (headerRect.height - btnHeight) / 2);
+
+        Rectangle btnBounds = new Rectangle(btnX, btnY, btnWidth, btnHeight);
+        return btnBounds.contains(p);
+    }
+
+    public void copyAllCookieValues() {
+        List<String> values = valueTableModel.getAllCookieValues();
+        if (values.isEmpty()) {
+            statusLabel.setText("No cookie values to copy for the selected cookie.");
+            return;
+        }
+
+        String joined = String.join("\n", values);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(joined), null);
+
+        statusLabel.setText("✓ Copied " + values.size() + " cookie value(s) to clipboard (one per line).");
+
+        // Temporary visual feedback on the header button
+        cookieValueHeaderRenderer.setCopiedFeedback(true);
+        valueTable.getTableHeader().repaint();
+
+        Timer revertTimer = new Timer(1500, evt -> {
+            cookieValueHeaderRenderer.setCopiedFeedback(false);
+            valueTable.getTableHeader().repaint();
+        });
+        revertTimer.setRepeats(false);
+        revertTimer.start();
+    }
+
+    /**
+     * Custom TableCellRenderer for the "Cookie Value" column header that displays
+     * the column title and an interactive "📋 Copy" button to copy all values.
+     */
+    private static class CookieValueHeaderRenderer implements TableCellRenderer {
+        private final JPanel panel = new JPanel(new BorderLayout(6, 0));
+        private final JLabel titleLabel = new JLabel("Cookie Value");
+        private final JButton copyBtn = new JButton("📋 Copy");
+        private boolean isHovered = false;
+        private boolean isPressed = false;
+
+        public CookieValueHeaderRenderer() {
+            panel.setOpaque(false);
+            titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+            copyBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
+            copyBtn.setMargin(new Insets(1, 5, 1, 5));
+            copyBtn.setFocusable(false);
+            copyBtn.setToolTipText("Copy all cookie values (one per line) to clipboard");
+
+            panel.add(titleLabel, BorderLayout.CENTER);
+            panel.add(copyBtn, BorderLayout.EAST);
+        }
+
+        public void setCopiedFeedback(boolean copied) {
+            if (copied) {
+                copyBtn.setText("✓ Copied!");
+                copyBtn.setForeground(new Color(0, 140, 0));
+            } else {
+                copyBtn.setText("📋 Copy");
+                copyBtn.setForeground(null);
+            }
+        }
+
+        public void setButtonState(boolean hovered, boolean pressed) {
+            this.isHovered = hovered;
+            this.isPressed = pressed;
+            copyBtn.getModel().setRollover(hovered);
+            copyBtn.getModel().setArmed(pressed);
+            copyBtn.getModel().setPressed(pressed);
+        }
+
+        public boolean isButtonPressed() {
+            return isPressed;
+        }
+
+        public JButton getCopyButton() {
+            return copyBtn;
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
+            TableCellRenderer defaultRenderer = (table != null && table.getTableHeader() != null)
+                    ? table.getTableHeader().getDefaultRenderer()
+                    : null;
+            if (defaultRenderer != null) {
+                Component comp = defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (comp instanceof JComponent jc) {
+                    panel.setBorder(jc.getBorder());
+                    panel.setBackground(jc.getBackground());
+                    panel.setOpaque(jc.isOpaque());
+                    titleLabel.setForeground(jc.getForeground());
+                }
+            }
+            if (panel.getBorder() == null) {
+                panel.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+            }
+            return panel;
+        }
     }
 }

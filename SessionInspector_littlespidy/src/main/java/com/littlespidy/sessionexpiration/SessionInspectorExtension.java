@@ -9,7 +9,7 @@ import com.littlespidy.sessionexpiration.model.SessionDataStore;
 import com.littlespidy.sessionexpiration.ui.SessionExpirationTab;
 
 /**
- * Main extension entrypoint implementing BurpExtension for Session Expiration Checker.
+ * Main extension entrypoint implementing BurpExtension for Session Inspector.
  *
  * Enables penetration testers and security researchers to schedule custom interval probes
  * (e.g., 30m, 1h, 3h, 8h) for authenticated requests to test idle and absolute session expiration.
@@ -18,7 +18,7 @@ import com.littlespidy.sessionexpiration.ui.SessionExpirationTab;
  *
  * @author littlespidy
  */
-public class SessionExpirationExtension implements BurpExtension {
+public class SessionInspectorExtension implements BurpExtension {
 
     private MontoyaApi api;
     private SessionDataStore dataStore;
@@ -30,7 +30,7 @@ public class SessionExpirationExtension implements BurpExtension {
         this.api = api;
 
         // 1. Set Extension Name
-        api.extension().setName("Session Expiration Checker (littlespidy)");
+        api.extension().setName("Session Inspector (littlespidy)");
 
         // 2. Initialize Core Engine and Store
         this.dataStore = new SessionDataStore();
@@ -38,7 +38,7 @@ public class SessionExpirationExtension implements BurpExtension {
 
         // 3. Initialize Main Suite UI Tab
         this.mainTab = new SessionExpirationTab(api, dataStore, timerEngine);
-        api.userInterface().registerSuiteTab("⏱️ Session Expiration Checker", mainTab);
+        api.userInterface().registerSuiteTab("⏱️ Session Inspector", mainTab);
 
         // 4. Register Right-Click Context Menu Provider
         api.userInterface().registerContextMenuItemsProvider(
@@ -47,7 +47,7 @@ public class SessionExpirationExtension implements BurpExtension {
 
         // 5. Register Extension Unloading Handler
         api.extension().registerUnloadingHandler(() -> {
-            api.logging().logToOutput("[Session Expiration Checker] Unloading extension: terminating timers...");
+            api.logging().logToOutput("[Session Inspector] Unloading extension: terminating timers...");
             if (mainTab != null) {
                 mainTab.cleanup();
             }
@@ -57,12 +57,12 @@ public class SessionExpirationExtension implements BurpExtension {
             if (dataStore != null) {
                 dataStore.clearAll();
             }
-            api.logging().logToOutput("[Session Expiration Checker] Extension unloaded cleanly.");
+            api.logging().logToOutput("[Session Inspector] Extension unloaded cleanly.");
         });
 
         api.logging().logToOutput("================================================================");
-        api.logging().logToOutput("⏱️ Session Expiration Checker (littlespidy) loaded successfully!");
-        api.logging().logToOutput("Right-click any authenticated request -> '⏱️ Send to Session Expiration Checker'");
+        api.logging().logToOutput("⏱️ Session Inspector (littlespidy) loaded successfully!");
+        api.logging().logToOutput("Right-click any authenticated request -> '⏱️ Send to Session Inspector'");
         api.logging().logToOutput("Configure custom milestones (e.g., 30m, 1h, 3h, 8h) and track expiration.");
         api.logging().logToOutput("================================================================");
     }

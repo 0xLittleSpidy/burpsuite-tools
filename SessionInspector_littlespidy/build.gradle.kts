@@ -17,7 +17,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.named<Jar>("jar") {
-    archiveBaseName.set("session-expiration-checker-littlespidy")
+    archiveBaseName.set("session-inspector-littlespidy")
     archiveClassifier.set("")
     archiveVersion.set("1.0.0")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

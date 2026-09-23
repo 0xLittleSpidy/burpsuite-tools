@@ -33,6 +33,20 @@ public class CookieValueTableModel extends AbstractTableModel {
         return null;
     }
 
+    public List<CookieValueRecord> getDisplayedRecords() {
+        return new ArrayList<>(displayedRecords);
+    }
+
+    public List<String> getAllCookieValues() {
+        List<String> values = new ArrayList<>();
+        for (CookieValueRecord record : displayedRecords) {
+            if (record != null && record.value() != null) {
+                values.add(record.value());
+            }
+        }
+        return values;
+    }
+
     @Override
     public int getRowCount() {
         return displayedRecords.size();

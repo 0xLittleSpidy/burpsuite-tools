@@ -49,7 +49,7 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
         }
 
         if (targetRequests.isEmpty()) {
-            JMenuItem openTabItem = new JMenuItem("⏱️ Open Session Expiration Checker");
+            JMenuItem openTabItem = new JMenuItem("⏱️ Open Session Inspector");
             openTabItem.addActionListener(e -> {
                 mainTab.selectMonitorTab();
                 mainTab.refreshView();
@@ -69,8 +69,8 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
 
         int count = targetRequests.size();
         String menuTitle = (count == 1)
-                ? "⏱️ Send to Session Expiration Checker"
-                : "⏱️ Send " + count + " Requests to Session Expiration Checker";
+                ? "⏱️ Send to Session Inspector"
+                : "⏱️ Send " + count + " Requests to Session Inspector";
 
         JMenuItem sendItem = new JMenuItem(menuTitle);
         sendItem.addActionListener(e -> handleSendRequests(targetRequests));

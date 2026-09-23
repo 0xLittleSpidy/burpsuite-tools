@@ -24,7 +24,7 @@ public class WelcomeGuidePanel extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout(10, 10));
 
         JPanel titleAndAction = new JPanel(new BorderLayout(10, 5));
-        JLabel titleLabel = new JLabel("⏱️ Session Expiration Checker");
+        JLabel titleLabel = new JLabel("⏱️ Session Inspector");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
 
         JPanel headerButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
@@ -60,7 +60,7 @@ public class WelcomeGuidePanel extends JPanel {
         descArea.setLineWrap(true);
         descArea.setWrapStyleWord(true);
         descArea.setText(
-                "Session Expiration Checker is an automated session management and token analysis extension for Burp Suite. "
+                "Session Inspector is an automated session management, expiration verification, and token analysis extension for Burp Suite. "
                         + "Designed specifically for modern web application assessments (OWASP ASVS & WSTG-SESS-07), "
                         + "it allows security testers to capture authenticated requests, schedule precision milestone probes "
                         + "across custom intervals (e.g., 15m, 30m, 1h, 3h, 8h), and systematically identify which specific cookies, "

@@ -1,8 +1,8 @@
-# ⏱️ Session Expiration Checker (littlespidy)
+# ⏱️ Session Inspector (littlespidy)
 
 > **Created with the help of an AI Agent and littlespidy.**
 
-A modern Burp Suite extension built on the **Montoya API** designed to automate session timeout, token expiration, session token discovery, and cookie inventory auditing. Security testers can send authenticated requests to schedule multiple custom milestone probes (e.g., **30 min**, **1 hr**, **3 hr**, **8 hr**, or arbitrary intervals), systematically identify which specific cookies or authorization headers maintain the session, inspect all observed cookies and track exact value repetition counts across HTTP traffic, and verify behavior against baseline responses.
+A modern Burp Suite extension built on the **Montoya API** designed to automate session timeout, token expiration, session token discovery, and cookie inventory auditing. Security testers can send authenticated requests to schedule multiple custom milestone probes (e.g., **30 min**, **1 hr**, **3 hr**, **8 hr**, or arbitrary intervals), systematically identify which specific cookies or authorization headers maintain the session, inspect all observed cookies, copy observed values with one click, track exact value repetition counts across HTTP traffic, and verify behavior against baseline responses.
 
 ---
 
@@ -50,6 +50,11 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 - **4-Pillar Deep-Linking with Native Montoya Editors**:
   - Selecting any cookie value displays the sample HTTP Request & Response in native Montoya Pretty/Raw/Hex editors.
   - Applies vibrant yellow/orange highlight markers over the selected cookie name and value directly in the request and response viewers.
+- **One-Click "Cookie Value" Copy Button**:
+  - The **`Cookie Value`** column header includes an embedded **`📋 Copy`** button.
+  - Clicking this button copies all observed cookie values for the selected cookie to the system clipboard one by one (separated by newlines `\n`), enabling instant wordlist generation, session token comparison, and offline security analysis.
+  - Features visual `"✓ Copied!"` state feedback and real-time status strip counts.
+  - Also includes a right-click context menu on the values table to copy all values or copy the selected value.
 - **Burp Interoperability & Export**:
   - Right-click any request in Burp Suite to choose **`📦 Send to Cookie Store`** or **`📦 Open Cookie Store`**.
   - One-click **`📋 Export TSV`** button for bug bounty reports, session audits, and spreadsheet triage.
@@ -110,13 +115,13 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 Ensure you have Java 17 or higher installed:
 
 ```bash
-cd /home/littlespidy/myextra/burpsuite/SessionExpirationChecker_littlespidy
+cd /home/littlespidy/myextra/burpsuite/SessionInspector_littlespidy
 ./gradlew jar
 ```
 
 The compiled fat JAR will be generated at:
 ```
-build/libs/session-expiration-checker-littlespidy-1.0.0.jar
+build/libs/session-inspector-littlespidy-1.0.0.jar
 ```
 
 ---
@@ -128,8 +133,8 @@ build/libs/session-expiration-checker-littlespidy-1.0.0.jar
 3. Click **Add**.
 4. In the dialog:
    - **Extension type**: `Java`
-   - **Extension file (.jar)**: Browse and select `SessionExpirationChecker_littlespidy/build/libs/session-expiration-checker-littlespidy-1.0.0.jar`.
-5. Click **Next**. The extension tab **`⏱️ Session Expiration Checker`** will appear in the top suite bar.
+   - **Extension file (.jar)**: Browse and select `SessionInspector_littlespidy/build/libs/session-inspector-littlespidy-1.0.0.jar`.
+5. Click **Next**. The extension tab **`⏱️ Session Inspector`** will appear in the top suite bar.
 
 ---
 
@@ -145,7 +150,7 @@ build/libs/session-expiration-checker-littlespidy-1.0.0.jar
 5. Click **`⏱️ Track Expiration in Session Monitor`** to seamlessly schedule expiration checks on the validated target!
 
 ### Workflow B: Schedule Milestone Expiration Tracking
-1. Right-click any authenticated request and select **`⏱️ Send to Session Expiration Checker`**.
+1. Right-click any authenticated request and select **`⏱️ Send to Session Inspector`**.
 2. Choose milestone presets (e.g. `+30m`, `+1h`, `+3h`, `+8h`) or add custom intervals.
 3. Click **`▶️ Start Tracking`** (the baseline probe is automatically dispatched at $T_0$ immediately).
 4. Monitor the countdown in the master table; when expired, remaining timers auto-cancel and the exact expiration time is highlighted.
@@ -155,6 +160,7 @@ build/libs/session-expiration-checker-littlespidy-1.0.0.jar
 2. Click **`📥 Load Proxy History`** (toggle **`In-Scope Only`** if desired) to ingest all cookies from Proxy traffic. Alternatively, right-click any request in Burp and choose **`📦 Send to Cookie Store`**.
 3. Select any cookie name in the left **Cookie Names** table (e.g., `JSESSIONID`, `PHPSESSID`, `session_token`).
 4. In the right **Cookie Values** table, check the **`Repeated (Count)`** column to see how many times each specific cookie value appeared.
-5. Review security attributes (`HttpOnly`, `Secure`, `SameSite`) to identify misconfigured cookies.
-6. Click any value to view the highlighted sample request and response in the embedded Montoya viewer.
-7. Click **`📋 Export TSV`** to copy the cookie inventory directly to your clipboard.
+5. Click the **`📋 Copy`** button in the **`Cookie Value`** table header to immediately copy all cookie values to your clipboard one by one (line-by-line).
+6. Review security attributes (`HttpOnly`, `Secure`, `SameSite`) to identify misconfigured cookies.
+7. Click any value to view the highlighted sample request and response in the embedded Montoya viewer.
+8. Click **`📋 Export TSV`** to copy the complete cookie inventory directly to your clipboard.
