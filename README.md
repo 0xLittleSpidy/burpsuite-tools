@@ -140,8 +140,9 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 
 ---
 
-## 🧩 Bambdas & BChecks
+## 🧩 Bambdas, BChecks & Utilities
 
+- **[`tools/`](file:///home/littlespidy/myextra/burpsuite/tools)**: Standalone desktop and security utilities, including [Mouse Jiggler](file:///home/littlespidy/myextra/burpsuite/tools/README.md) to keep displays awake during long-running audits and scans.
 - **[`bambdas/`](file:///home/littlespidy/myextra/burpsuite/bambdas)**: Custom actions, scan checks, filter scripts, and match-and-replace rules.
 - **[`BChecks/`](file:///home/littlespidy/myextra/burpsuite/BChecks)**: Custom passive and active Burp Scanner checks.
 - **[`ExtensionTemplateProject/`](file:///home/littlespidy/myextra/burpsuite/ExtensionTemplateProject)**: Starter template for modern Java Montoya API extensions.
