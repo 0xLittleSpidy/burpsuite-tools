@@ -1,0 +1,2 @@
+<esi:include src="http://collab-test.burpcollaborator.net/esi_callback" />
+<esi:inline name="UPLOAD_SCANNER_SAMPLE" fetchable="no">UPLOAD_SCANNER_SAMPLE</esi:inline>

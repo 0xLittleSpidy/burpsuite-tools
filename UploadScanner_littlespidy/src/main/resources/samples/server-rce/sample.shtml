@@ -1,0 +1,3 @@
+<!--#echo var="DATE_LOCAL" -->
+<!--#exec cmd="echo UPLOAD_SCANNER_SAMPLE" -->
+<!--#include virtual="/etc/passwd" -->
