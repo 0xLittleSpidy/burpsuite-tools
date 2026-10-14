@@ -23,6 +23,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **Header Inspector** | [📥 `header-inspector-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/header-inspector-littlespidy-1.0.0.jar) | Consolidated Protocol Suite: Header Collector, Method Collector, Status Collector, Cache Inspector, CSP Inspector, and HSTS Inspector with synchronized proxy ingestion |
 | **Param Payload Injector** | [📥 `param-payload-injector-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/param-payload-injector-littlespidy-1.0.0.jar) | Parameter-attributed payload injector (XSS & Angular CSTI) with reflection monitoring and context attribution |
 | **Active Scan Session Keeper** | [📥 `activescan-session-keeper-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/activescan-session-keeper-littlespidy-1.0.0.jar) | Active scan session timeout interceptor that pauses scan threads on session expiry, prompts for fresh cookies, and auto-retries failed checks |
+| **GWTMap** | [`gwtmap-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/gwtmap-littlespidy-1.0.0.jar) | GWT-RPC reverse engineering, permutation analysis, AST deserializer, automated fuzzer, Base64 long codec, and native Burp request editor tab |
 
 ---
 
@@ -137,6 +138,20 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Automated Request Retrying**: Automatically re-issues the failed check with the newly supplied session cookie and supplies the fresh response directly back to Burp Scanner, preventing false negatives and keeping all checks intact.
 - **Live Triage Log & Montoya Editors**: Activity table with `MultiSelectFilterButton`s for Tool, Status, and Event, live search, TSV clipboard export, and embedded Montoya split-view HTTP request/response inspectors.
 - **Context Menu Integration**: One-click right-click actions across Burp: `🍪 Set as Active Scan Session Cookie`, `🎯 Set Target Host Scope`, and manual pause/resume.
+
+### 14. [GWTMap](file:///home/littlespidy/myextra/burpsuite-extensions/GWTMap_littlespidy)
+- **Comprehensive Three-Way Tool Port & Unification**: Complete native Java port combining [gwtmap](https://github.com/reverseclabs/gwtmap), [GWT-Penetration-Testing-Toolset](https://github.com/GDSSecurity/GWT-Penetration-Testing-Toolset) (`gwtparse`, `gwtfuzzer`, `gwtenum`), and [GWTab](https://github.com/thehackerish/GWTab) using the modern Montoya API.
+- **Permutation & Fragment Resolution**: Discovers permutation hashes from `.nocache.js` bootstrap files (`unflattenKeylistIntoAnswers` & `selectingPermutation`), provides interactive permutation selection, and stitches deferred JavaScript fragments (`deferredjs/{permutation}/{i}.cache.js`).
+- **RPC Service & Method Enumeration**: Extracts service endpoint paths, serialization policy strong names (`.gwt.rpc`), method names, signatures, and resolves obfuscated parameter types and complex objects (`java.lang.String`, `java.util.List`, generics, primitive types).
+- **GWT-RPC Wire Generator & Intruder Markers**: Synthesizes valid GWT-RPC Version 7 wire protocol payloads with string tables and parameter maps, pre-injecting Intruder markers (`§param_...§`, `§0§`, `§numeric§`) for instant fuzzing.
+- **Built-in Single & Batch Probing**: Execute live HTTP POST probes via Montoya HTTP client with real-time status code, response time latency, and response length metrics.
+- **GWT-RPC AST Deserializer**: Pure Java parser for arbitrary GWT requests; handles string tables, index streams, complex objects, arrays, XSRF token flags (`FLAG_RPC_TOKEN_INCLUDED`), and parameter arming (`§`, surround, replace).
+- **Automated Parameter Fuzzer & Exception Tester**: Injects security payloads into string parameters (with automatic pipe escaping `|` -> `\!`) and executes numeric ID sweeps (+/- N) while actively detecting serialized GWT server exceptions (`//EX[`).
+- **GWT Base64 Long Codec**: Two-way converter for GWT 64-bit integer wire format using the custom GWT alphabet (`[A-Za-z0-9$_]`) and RFC 4648 Base64.
+- **Native Burp Request Editor Tab**: Registers a native "GWT" message editor tab inside Burp Proxy, Repeater, Logger, and Intruder displaying parsed calls, armed payloads, and Base64 Long codec.
+- **Burp Interoperability & Context Menus**: Native Montoya split-view Request/Response editors, 1-click `Send to Repeater`, `Send to Intruder`, and context menu actions (`Send to GWTMap`, `Send to GWTMap Deserializer`, `Send to GWTMap Fuzzer`).
+- **Passive GWT Traffic Detector**: Background listener auto-detects `.nocache.js` and `.cache.js` endpoints passing through Burp Proxy.
+- **Interactive Deobfuscated Code Viewer**: In-Burp formatted, retabbed, and unicode-decoded (`\uXXXX`) JavaScript viewer with local disk backup (`Save / Backup Code to Disk...`).
 
 ---
 
