@@ -55,11 +55,14 @@ public class GWTParser {
     private static final Pattern RPC_VER_PATTERN = Pattern.compile("^(?:[\\t ]*)_\\.(?:(?:k)|(?:version)) ?= ?([5-7]);");
     private static final Pattern RPC_FLAGS_PATTERN = Pattern.compile("^(?:[\\t ]*)?" + R_VAR + " ?= ?([0-2]);");
 
-    private static final Pattern SERVICE_PATTERN = Pattern.compile(R_VAR + "\\.call\\(this, ?" + R_VAR + "\\(\\), ?(?:(.*), ?)?(.*), ?" + R_VAR + "\\)");
+    private static final Pattern SERVICE_PATTERN = Pattern.compile(R_VAR + "\\.call\\(this, ?" + R_VAR + "\\(\\), ?(?:([^,]+), ?)?([^,]+), ?" + R_VAR + "\\)");
 
     private static final Pattern METHOD_PATTERN = Pattern.compile("(" + R_VAR + " ?= ?new ?" + R_VAR + "\\(" + R_VAR + ", ?)('?" + R_VAR + "'?), ?('?.*'?)\\);");
-    private static final Pattern RMT_SVC_PATTERN_1 = Pattern.compile("^[ \\t]*(?:" + R_VAR + " ?= ?)?(" + R_VAR + ")\\(" + R_VAR + ", ?(.*), ?(.*)\\);");
-    private static final Pattern RMT_SVC_PATTERN_2 = Pattern.compile(R_VAR + " ?= ?\\(.*\\(" + R_VAR + ", ?(.*)\\).*, ?.*\\(.*\\).*, ?(.*)\\), ?.*\\);");
+    private static final Pattern RMT_SVC_PATTERN_1 = Pattern.compile("^[ \\t]*(?:" + R_VAR + " ?= ?)?(" + R_VAR + ")\\(" + R_VAR + ", ?([^,]+), ?([^,]+)\\);");
+    private static final Pattern RMT_SVC_PATTERN_2 = Pattern.compile(R_VAR + " ?= ?\\(.*\\(" + R_VAR + ", ?([^,]+)\\).*, ?.*\\(.*\\).*, ?([^,]+)\\), ?.*\\);");
+    private static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("^[ \\t]*(?:var )?([a-zA-Z0-9_.\\$]+) ?= ?(?!=)([^;\\r\\n]+);?");
+
+    public static final int MAX_METHOD_LOOKAHEAD = 80;
 
     private static final Pattern LIST_OBJECT_PATTERN = Pattern.compile("(java\\.util\\.(?:[A-Za-z]+)?List(?:[0-9/]+)?)<([a-zA-Z0-9./]+)[<>]?(?:(.*[^>]))?>");
 
@@ -164,6 +167,26 @@ public class GWTParser {
         }
     }
 
+    public static Map<String, String> buildVariableMap(List<String> code) {
+        Map<String, String> map = new HashMap<>(code != null ? code.size() / 4 : 16);
+        if (code == null) return map;
+        for (String line : code) {
+            Matcher m = ASSIGNMENT_PATTERN.matcher(line);
+            if (m.find()) {
+                map.put(m.group(1).trim(), m.group(2).trim());
+            }
+        }
+        return map;
+    }
+
+    public static String findValue(List<String> code, Map<String, String> varMap, String value) {
+        if (value == null) return "";
+        if (varMap != null && varMap.containsKey(value)) {
+            return varMap.get(value).trim();
+        }
+        return value;
+    }
+
     public static String findValue(List<String> code, String value) {
         if (code == null || value == null) return value;
         Pattern valuePattern = Pattern.compile(Pattern.quote(value) + " ?= ?([^=][a-zA-Z0-9\\.'/_)(]*)");
@@ -176,11 +199,14 @@ public class GWTParser {
         return value;
     }
 
-    public static String parseParameter(List<String> code, String param) {
+    public static String parseParameter(Map<String, String> varMap, String param) {
         if (param == null) return "";
         param = param.trim();
         if (param.equals("null")) return "null";
         if (param.startsWith("'") && param.endsWith("'")) {
+            return param.substring(1, param.length() - 1);
+        }
+        if (param.startsWith("\"") && param.endsWith("\"")) {
             return param.substring(1, param.length() - 1);
         }
         if (param.startsWith("'")) {
@@ -189,24 +215,44 @@ public class GWTParser {
         if (isNumber(param)) {
             return param;
         }
-        return findValue(code, param).replace("'", "");
+        String resolved = findValue(null, varMap, param);
+        return resolved.replace("'", "").replace("\"", "");
+    }
+
+    public static String parseParameter(List<String> code, String param) {
+        if (param == null) return "";
+        param = param.trim();
+        if (param.equals("null")) return "null";
+        if (param.startsWith("'") && param.endsWith("'")) {
+            return param.substring(1, param.length() - 1);
+        }
+        if (param.startsWith("\"") && param.endsWith("\"")) {
+            return param.substring(1, param.length() - 1);
+        }
+        if (param.startsWith("'")) {
+            return param.replace("'", "");
+        }
+        if (isNumber(param)) {
+            return param;
+        }
+        return findValue(code, param).replace("'", "").replace("\"", "");
     }
 
     public static int getOffset(List<String> code, int line, String key) {
-        int offset = 0;
-        while (line + offset < code.size()) {
-            String check = code.get(line + offset).replace(" ", "");
+        if (code == null) return -1;
+        int max = Math.min(code.size(), line + MAX_METHOD_LOOKAHEAD);
+        for (int i = line; i < max; i++) {
+            String check = code.get(i).replace(" ", "");
             if (check.contains(key)) {
-                break;
+                return i - line;
             }
-            offset++;
         }
-        return offset;
+        return -1;
     }
 
     // ── Service Enumeration ──────────────────────────────────────────────────
 
-    public static List<GWTService> extractServiceInfo(List<String> code) {
+    public static List<GWTService> extractServiceInfo(List<String> code, Map<String, String> varMap) {
         List<GWTService> services = new ArrayList<>();
         if (code == null) return services;
 
@@ -216,8 +262,8 @@ public class GWTParser {
                 String rawPath = m.group(1);
                 String rawStrong = m.group(2);
 
-                String servicePath = (rawPath != null && !rawPath.isBlank()) ? parseParameter(code, rawPath) : "Unknown";
-                String strongName = (rawStrong != null) ? parseParameter(code, rawStrong) : "Unknown";
+                String servicePath = (rawPath != null && !rawPath.isBlank()) ? parseParameter(varMap, rawPath) : "Unknown";
+                String strongName = (rawStrong != null) ? parseParameter(varMap, rawStrong) : "Unknown";
 
                 GWTService service = new GWTService(servicePath, strongName);
                 if (!services.contains(service)) {
@@ -230,14 +276,20 @@ public class GWTParser {
         return services;
     }
 
+    public static List<GWTService> extractServiceInfo(List<String> code) {
+        return extractServiceInfo(code, buildVariableMap(code));
+    }
+
     // ── Method Enumeration ───────────────────────────────────────────────────
 
-    public static List<String> extractMethodSignature(List<String> code, int line) {
+    public static List<String> extractMethodSignature(List<String> code, Map<String, String> varMap, int line) {
         line += 5;
         List<String> signature = new ArrayList<>();
         if (code == null || line >= code.size()) return signature;
 
         int offset = getOffset(code, line, "catch(");
+        if (offset <= 2) return signature;
+
         Pattern paramPattern = Pattern.compile(R_VAR + "\\(.*, ?.*, ?(.*)\\)\\);");
 
         int count = (offset - 2) / 2;
@@ -245,7 +297,7 @@ public class GWTParser {
             Matcher m = paramPattern.matcher(code.get(line + i));
             String parameter = "UNKNOWN";
             if (m.find()) {
-                parameter = parseParameter(code, m.group(1));
+                parameter = parseParameter(varMap, m.group(1));
             }
             if (parameter == null || parameter.isBlank()) {
                 parameter = "UNKNOWN";
@@ -261,6 +313,10 @@ public class GWTParser {
         }
 
         return signature;
+    }
+
+    public static List<String> extractMethodSignature(List<String> code, int line) {
+        return extractMethodSignature(code, null, line);
     }
 
     public static GWTService correlateService(GWTMethod method, List<GWTService> services) {
@@ -314,7 +370,10 @@ public class GWTParser {
         List<String> paramList = new ArrayList<>();
         if (code == null) return paramList;
 
-        int offset = (getOffset(code, line, "catch(") - 3);
+        int rawOffset = getOffset(code, line, "catch(");
+        if (rawOffset <= 3) return paramList;
+
+        int offset = rawOffset - 3;
         line += (1 + (offset / 2));
 
         Pattern paramPattern = Pattern.compile(", ?(?:'' ?\\+ ?)?(?:" + R_VAR + "\\(?.*, ?)?(.*[^\\)])\\)\\)?;");
@@ -474,7 +533,7 @@ public class GWTParser {
         return new AbstractMap.SimpleEntry<>(rpcCall, complexTypes);
     }
 
-    public static List<GWTMethod> extractMethodInfo(List<String> code, List<GWTService> services, GWTModuleInfo moduleInfo) {
+    public static List<GWTMethod> extractMethodInfo(List<String> code, List<GWTService> services, GWTModuleInfo moduleInfo, Map<String, String> varMap) {
         List<GWTMethod> methodObjects = new ArrayList<>();
         if (code == null) return methodObjects;
 
@@ -494,20 +553,20 @@ public class GWTParser {
                     String line2 = code.get(loc + 2);
                     Matcher rmtM1 = RMT_SVC_PATTERN_1.matcher(line2);
                     if (rmtM1.find()) {
-                        rmtSvcIntName = parseParameter(code, rmtM1.group(2));
-                        paramCount = parseParameter(code, rmtM1.group(3));
+                        rmtSvcIntName = parseParameter(varMap, rmtM1.group(2));
+                        paramCount = parseParameter(varMap, rmtM1.group(3));
                     } else {
                         Matcher rmtM2 = RMT_SVC_PATTERN_2.matcher(line2);
                         if (rmtM2.find()) {
-                            rmtSvcIntName = parseParameter(code, rmtM2.group(1));
-                            paramCount = parseParameter(code, rmtM2.group(2));
+                            rmtSvcIntName = parseParameter(varMap, rmtM2.group(1));
+                            paramCount = parseParameter(varMap, rmtM2.group(2));
                         }
                     }
                 }
 
-                String methodName = parseParameter(code, rawMethodName);
-                String serviceProxy = parseParameter(code, rawServiceProxy);
-                List<String> signature = extractMethodSignature(code, loc - 2);
+                String methodName = parseParameter(varMap, rawMethodName);
+                String serviceProxy = parseParameter(varMap, rawServiceProxy);
+                List<String> signature = extractMethodSignature(code, varMap, loc - 2);
 
                 GWTMethod method = new GWTMethod(methodId++, methodName, serviceProxy, rmtSvcIntName, paramCount, signature);
 
@@ -542,5 +601,9 @@ public class GWTParser {
 
         methodObjects.sort(Comparator.comparing(GWTMethod::getServiceProxy).thenComparing(GWTMethod::getMethodName));
         return methodObjects;
+    }
+
+    public static List<GWTMethod> extractMethodInfo(List<String> code, List<GWTService> services, GWTModuleInfo moduleInfo) {
+        return extractMethodInfo(code, services, moduleInfo, buildVariableMap(code));
     }
 }

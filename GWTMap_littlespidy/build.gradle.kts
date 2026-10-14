@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
     compileOnly("net.portswigger.burp.extensions:montoya-api:2023.12.1")
+    testCompileOnly("net.portswigger.burp.extensions:montoya-api:2023.12.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

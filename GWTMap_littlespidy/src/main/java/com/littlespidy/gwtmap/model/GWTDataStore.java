@@ -17,6 +17,7 @@ public class GWTDataStore {
     private GWTModuleInfo moduleInfo = new GWTModuleInfo();
     private final List<GWTService> services = new CopyOnWriteArrayList<>();
     private final List<GWTMethod> methods = new CopyOnWriteArrayList<>();
+    private final List<GwtHttpHistoryEntry> httpHistory = new CopyOnWriteArrayList<>();
     private String rawCode = "";
     private String cleanedCode = "";
 
@@ -24,8 +25,23 @@ public class GWTDataStore {
         moduleInfo = new GWTModuleInfo();
         services.clear();
         methods.clear();
+        httpHistory.clear();
         rawCode = "";
         cleanedCode = "";
+    }
+
+    public synchronized void addHttpHistoryEntry(GwtHttpHistoryEntry entry) {
+        if (entry != null) {
+            httpHistory.add(entry);
+        }
+    }
+
+    public List<GwtHttpHistoryEntry> getHttpHistory() {
+        return new ArrayList<>(httpHistory);
+    }
+
+    public synchronized void clearHttpHistory() {
+        httpHistory.clear();
     }
 
     public synchronized GWTModuleInfo getModuleInfo() {

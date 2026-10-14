@@ -10,6 +10,7 @@ import com.littlespidy.gwtmap.parser.GWTCodeCleaner;
 import com.littlespidy.gwtmap.parser.GWTParser;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -191,6 +192,64 @@ public class GWTParserTest {
 
         assertEquals("http://example.com/app/", baseUrl);
         assertEquals("4DE825BB25A8D7B3950D45A81EA7CD84", forcedPerm);
+    }
+
+    @Test
+    public void testVariableMapPreIndexing() {
+        List<String> code = List.of(
+                "var a = 'user';",
+                "b = \"pass\";",
+                "var c = 'com.example.Service';",
+                "d = 42;",
+                "var $strongName = '4DE825BB25A8D7B3950D45A81EA7CD84';"
+        );
+
+        java.util.Map<String, String> varMap = GWTParser.buildVariableMap(code);
+        assertEquals("'user'", varMap.get("a"));
+        assertEquals("\"pass\"", varMap.get("b"));
+        assertEquals("'com.example.Service'", varMap.get("c"));
+        assertEquals("42", varMap.get("d"));
+        assertEquals("'4DE825BB25A8D7B3950D45A81EA7CD84'", varMap.get("$strongName"));
+
+        assertEquals("user", GWTParser.parseParameter(varMap, "a"));
+        assertEquals("pass", GWTParser.parseParameter(varMap, "b"));
+        assertEquals("42", GWTParser.parseParameter(varMap, "d"));
+    }
+
+    @Test
+    public void testBoundedLookaheadAbortsGracefully() {
+        List<String> dummyCode = new ArrayList<>(20000);
+        for (int i = 0; i < 20000; i++) {
+            dummyCode.add("var x" + i + " = " + i + ";");
+        }
+
+        long start = System.currentTimeMillis();
+        int offset = GWTParser.getOffset(dummyCode, 100, "catch(");
+        long elapsed = System.currentTimeMillis() - start;
+
+        assertEquals(-1, offset);
+        assertTrue(elapsed < 50, "getOffset should abort in less than 50ms, took: " + elapsed + "ms");
+
+        List<String> sig = GWTParser.extractMethodSignature(dummyCode, 100);
+        assertTrue(sig.isEmpty());
+    }
+
+    @Test
+    public void testHttpHistoryTableModel() {
+        com.littlespidy.gwtmap.ui.GwtHttpHistoryTableModel model = new com.littlespidy.gwtmap.ui.GwtHttpHistoryTableModel();
+        com.littlespidy.gwtmap.model.GwtHttpHistoryEntry entry = new com.littlespidy.gwtmap.model.GwtHttpHistoryEntry(
+                1, "Bootstrap", "GET", "http://example.com/app/app.nocache.js", 200, 15000, 120, null
+        );
+
+        model.addEntry(entry);
+        assertEquals(1, model.getRowCount());
+        assertEquals(1, model.getValueAt(0, 0));
+        assertEquals("Bootstrap", model.getValueAt(0, 2));
+        assertEquals("GET", model.getValueAt(0, 3));
+        assertEquals("http://example.com/app/app.nocache.js", model.getValueAt(0, 4));
+        assertEquals(200, model.getValueAt(0, 5));
+        assertEquals(15000, model.getValueAt(0, 6));
+        assertEquals("120 ms", model.getValueAt(0, 7));
     }
 
     @Test

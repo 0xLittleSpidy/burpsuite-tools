@@ -3,6 +3,7 @@ package com.littlespidy.gwtmap.ui;
 
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.message.requests.HttpRequest;
+import burp.api.montoya.ui.editor.EditorOptions;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
 import com.littlespidy.gwtmap.engine.GWTScanEngine;
@@ -10,6 +11,7 @@ import com.littlespidy.gwtmap.model.GWTDataStore;
 import com.littlespidy.gwtmap.model.GWTMethod;
 import com.littlespidy.gwtmap.model.GWTModuleInfo;
 import com.littlespidy.gwtmap.model.GWTService;
+import com.littlespidy.gwtmap.model.GwtHttpHistoryEntry;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,6 +20,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -69,7 +73,13 @@ public class GWTMapTab extends JPanel {
     private final JTextArea rawRpcArea = new JTextArea();
     private final JTextArea evidenceArea = new JTextArea();
 
-    // ── Tab 2: Services ─────────────────────────────────────────────────────
+    // ── Tab 2: HTTP History ─────────────────────────────────────────────────
+    private final GwtHttpHistoryTableModel httpHistoryModel = new GwtHttpHistoryTableModel();
+    private final JTable httpHistoryTable = new JTable(httpHistoryModel);
+    private HttpRequestEditor historyRequestEditor;
+    private HttpResponseEditor historyResponseEditor;
+
+    // ── Tab 3: Services ─────────────────────────────────────────────────────
     private final GWTServiceTableModel serviceTableModel = new GWTServiceTableModel();
     private final JTable serviceTable = new JTable(serviceTableModel);
 
@@ -107,6 +117,9 @@ public class GWTMapTab extends JPanel {
         // Request & Response editors from Montoya
         requestEditor = api.userInterface().createHttpRequestEditor();
         responseEditor = api.userInterface().createHttpResponseEditor();
+
+        historyRequestEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
+        historyResponseEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
 
         add(createTopPanel(), BorderLayout.NORTH);
         add(createCenterPanel(), BorderLayout.CENTER);
@@ -163,6 +176,7 @@ public class GWTMapTab extends JPanel {
 
     private JComponent createCenterPanel() {
         mainTabbedPane.addTab("Methods & Payloads", createMethodsPanel());
+        mainTabbedPane.addTab("HTTP History", createHttpHistoryPanel());
         mainTabbedPane.addTab("Services & Policies", createServicesPanel());
         mainTabbedPane.addTab("Module Info", createModuleInfoPanel());
         mainTabbedPane.addTab("Deobfuscated Code", createCodeViewerPanel());
@@ -218,6 +232,71 @@ public class GWTMapTab extends JPanel {
             }
         });
 
+        // Right-click context menu for methodTable
+        JPopupMenu methodPopup = new JPopupMenu();
+
+        JMenuItem probeItem = new JMenuItem("Send Probe");
+        probeItem.addActionListener(e -> probeSelectedMethod());
+        methodPopup.add(probeItem);
+
+        JMenuItem probeAllItem = new JMenuItem("Probe All Visible");
+        probeAllItem.addActionListener(e -> probeAllVisibleMethods());
+        methodPopup.add(probeAllItem);
+
+        methodPopup.addSeparator();
+
+        JMenuItem repeaterItem = new JMenuItem("Send to Repeater");
+        repeaterItem.addActionListener(e -> sendSelectedToRepeater());
+        methodPopup.add(repeaterItem);
+
+        JMenuItem intruderItem = new JMenuItem("Send to Intruder");
+        intruderItem.addActionListener(e -> sendSelectedToIntruder());
+        methodPopup.add(intruderItem);
+
+        methodPopup.addSeparator();
+
+        JMenuItem copyPayloadItem = new JMenuItem("Copy RPC Payload");
+        copyPayloadItem.addActionListener(e -> copySelectedRpcPayload());
+        methodPopup.add(copyPayloadItem);
+
+        JMenuItem copyReqItem = new JMenuItem("Copy HTTP Request");
+        copyReqItem.addActionListener(e -> copySelectedHttpRequest());
+        methodPopup.add(copyReqItem);
+
+        methodPopup.addSeparator();
+
+        JMenuItem deserItem = new JMenuItem("Send to Deserializer");
+        deserItem.addActionListener(e -> {
+            GWTMethod m = getSelectedMethod();
+            if (m != null) {
+                deserializerPanel.setTargetUrl(m.getFullEndpointUrl());
+                loadPayloadIntoDeserializer(m.getMethodRpcCall());
+            }
+        });
+        methodPopup.add(deserItem);
+
+        JMenuItem fuzzerItem = new JMenuItem("Send to Fuzzer");
+        fuzzerItem.addActionListener(e -> {
+            GWTMethod m = getSelectedMethod();
+            if (m != null) {
+                loadPayloadIntoFuzzer(m.getFullEndpointUrl(), m.getMethodRpcCall());
+            }
+        });
+        methodPopup.add(fuzzerItem);
+
+        methodTable.setComponentPopupMenu(methodPopup);
+        methodTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int row = methodTable.rowAtPoint(e.getPoint());
+                    if (row >= 0 && !methodTable.isRowSelected(row)) {
+                        methodTable.setRowSelectionInterval(row, row);
+                    }
+                }
+            }
+        });
+
         JScrollPane tableScroll = new JScrollPane(methodTable);
         tableScroll.setPreferredSize(new Dimension(800, 260));
 
@@ -249,56 +328,127 @@ public class GWTMapTab extends JPanel {
         editorTabs.addTab("Evidence & Types", new JScrollPane(evidenceArea));
 
         panel.add(editorTabs, BorderLayout.CENTER);
+        return panel;
+    }
 
-        // Action Toolbar
-        JPanel actionToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+    private JPanel createHttpHistoryPanel() {
+        JPanel panel = new JPanel(new BorderLayout(4, 4));
+        panel.setBorder(new EmptyBorder(6, 6, 6, 6));
 
-        JButton probeBtn = new JButton("Send Probe");
-        probeBtn.setToolTipText("Execute HTTP POST probe for the selected method (--probe)");
-        probeBtn.addActionListener(e -> probeSelectedMethod());
-        actionToolbar.add(probeBtn);
+        // Top toolbar
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        JButton clearHistoryBtn = new JButton("Clear History");
+        clearHistoryBtn.addActionListener(e -> {
+            httpHistoryModel.clear();
+            dataStore.clearHttpHistory();
+            try {
+                historyRequestEditor.setRequest(null);
+                historyResponseEditor.setResponse(null);
+            } catch (Throwable ignored) {}
+        });
+        toolbar.add(clearHistoryBtn);
 
-        JButton probeAllBtn = new JButton("Probe All Visible");
-        probeAllBtn.setToolTipText("Batch probe all currently filtered methods");
-        probeAllBtn.addActionListener(e -> probeAllVisibleMethods());
-        actionToolbar.add(probeAllBtn);
-
-        JButton repeaterBtn = new JButton("Send to Repeater");
-        repeaterBtn.addActionListener(e -> sendSelectedToRepeater());
-        actionToolbar.add(repeaterBtn);
-
-        JButton intruderBtn = new JButton("Send to Intruder");
-        intruderBtn.addActionListener(e -> sendSelectedToIntruder());
-        actionToolbar.add(intruderBtn);
-
-        JButton copyPayloadBtn = new JButton("Copy RPC Payload");
-        copyPayloadBtn.addActionListener(e -> copySelectedRpcPayload());
-        actionToolbar.add(copyPayloadBtn);
-
-        JButton copyReqBtn = new JButton("Copy HTTP Request");
-        copyReqBtn.addActionListener(e -> copySelectedHttpRequest());
-        actionToolbar.add(copyReqBtn);
-
-        JButton sendToDeserBtn = new JButton("Send to Deserializer");
-        sendToDeserBtn.addActionListener(e -> {
-            GWTMethod m = getSelectedMethod();
-            if (m != null) {
-                deserializerPanel.setTargetUrl(m.getFullEndpointUrl());
-                loadPayloadIntoDeserializer(m.getMethodRpcCall());
+        JButton toRepeaterBtn = new JButton("Send to Repeater");
+        toRepeaterBtn.addActionListener(e -> {
+            int row = httpHistoryTable.getSelectedRow();
+            if (row >= 0) {
+                int modelRow = httpHistoryTable.convertRowIndexToModel(row);
+                GwtHttpHistoryEntry entry = httpHistoryModel.getEntryAt(modelRow);
+                if (entry != null && entry.getRequestResponse() != null) {
+                    api.repeater().sendToRepeater(entry.getRequestResponse().request(), entry.getType());
+                }
             }
         });
-        actionToolbar.add(sendToDeserBtn);
+        toolbar.add(toRepeaterBtn);
 
-        JButton sendToFuzzerBtn = new JButton("Send to Fuzzer");
-        sendToFuzzerBtn.addActionListener(e -> {
-            GWTMethod m = getSelectedMethod();
-            if (m != null) {
-                loadPayloadIntoFuzzer(m.getFullEndpointUrl(), m.getMethodRpcCall());
+        JLabel historyHint = new JLabel("All HTTP requests and responses executed during target analysis, fragment enumeration, and RPC probes.");
+        historyHint.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
+        toolbar.add(historyHint);
+
+        panel.add(toolbar, BorderLayout.NORTH);
+
+        // Center split: Table on top, Request/Response on bottom
+        httpHistoryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        httpHistoryTable.setAutoCreateRowSorter(true);
+        httpHistoryTable.getColumnModel().getColumn(0).setPreferredWidth(45);  // #
+        httpHistoryTable.getColumnModel().getColumn(1).setPreferredWidth(80);  // Time
+        httpHistoryTable.getColumnModel().getColumn(2).setPreferredWidth(130); // Type
+        httpHistoryTable.getColumnModel().getColumn(3).setPreferredWidth(60);  // Method
+        httpHistoryTable.getColumnModel().getColumn(4).setPreferredWidth(350); // URL
+        httpHistoryTable.getColumnModel().getColumn(5).setPreferredWidth(65);  // Status
+        httpHistoryTable.getColumnModel().getColumn(6).setPreferredWidth(80);  // Length
+        httpHistoryTable.getColumnModel().getColumn(7).setPreferredWidth(80);  // Duration
+
+        httpHistoryTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = httpHistoryTable.getSelectedRow();
+                if (row >= 0) {
+                    int modelRow = httpHistoryTable.convertRowIndexToModel(row);
+                    GwtHttpHistoryEntry entry = httpHistoryModel.getEntryAt(modelRow);
+                    if (entry != null && entry.getRequestResponse() != null) {
+                        try {
+                            historyRequestEditor.setRequest(entry.getRequestResponse().request());
+                        } catch (Throwable ignored) {}
+                        try {
+                            historyResponseEditor.setResponse(entry.getRequestResponse().response());
+                        } catch (Throwable ignored) {}
+                    }
+                }
             }
         });
-        actionToolbar.add(sendToFuzzerBtn);
 
-        panel.add(actionToolbar, BorderLayout.SOUTH);
+        // Right click menu for history table
+        JPopupMenu historyPopup = new JPopupMenu();
+        JMenuItem repItem = new JMenuItem("Send to Repeater");
+        repItem.addActionListener(e -> {
+            int row = httpHistoryTable.getSelectedRow();
+            if (row >= 0) {
+                int modelRow = httpHistoryTable.convertRowIndexToModel(row);
+                GwtHttpHistoryEntry entry = httpHistoryModel.getEntryAt(modelRow);
+                if (entry != null && entry.getRequestResponse() != null) {
+                    api.repeater().sendToRepeater(entry.getRequestResponse().request(), entry.getType());
+                }
+            }
+        });
+        historyPopup.add(repItem);
+
+        JMenuItem copyUrlItem = new JMenuItem("Copy URL");
+        copyUrlItem.addActionListener(e -> {
+            int row = httpHistoryTable.getSelectedRow();
+            if (row >= 0) {
+                int modelRow = httpHistoryTable.convertRowIndexToModel(row);
+                GwtHttpHistoryEntry entry = httpHistoryModel.getEntryAt(modelRow);
+                if (entry != null) {
+                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(entry.getUrl()), null);
+                }
+            }
+        });
+        historyPopup.add(copyUrlItem);
+
+        httpHistoryTable.setComponentPopupMenu(historyPopup);
+        httpHistoryTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int row = httpHistoryTable.rowAtPoint(e.getPoint());
+                    if (row >= 0 && !httpHistoryTable.isRowSelected(row)) {
+                        httpHistoryTable.setRowSelectionInterval(row, row);
+                    }
+                }
+            }
+        });
+
+        JTabbedPane historyEditorsTab = new JTabbedPane();
+        historyEditorsTab.addTab("Request", historyRequestEditor.uiComponent());
+        historyEditorsTab.addTab("Response", historyResponseEditor.uiComponent());
+
+        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        split.setTopComponent(new JScrollPane(httpHistoryTable));
+        split.setBottomComponent(historyEditorsTab);
+        split.setDividerLocation(240);
+        split.setResizeWeight(0.4);
+
+        panel.add(split, BorderLayout.CENTER);
         return panel;
     }
 
@@ -379,6 +529,24 @@ public class GWTMapTab extends JPanel {
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);
         statusLabel.setText("Analyzing: " + target);
+
+        engine.setHttpHistoryListener(entry -> SwingUtilities.invokeLater(() -> {
+            httpHistoryModel.addEntry(entry);
+            if (entry.getRequestResponse() != null) {
+                try {
+                    historyRequestEditor.setRequest(entry.getRequestResponse().request());
+                    historyResponseEditor.setResponse(entry.getRequestResponse().response());
+                } catch (Throwable ignored) {}
+
+                // Immediately show downloaded HTTP request/response in editors
+                try {
+                    if (methodTable.getSelectedRow() < 0) {
+                        requestEditor.setRequest(entry.getRequestResponse().request());
+                        responseEditor.setResponse(entry.getRequestResponse().response());
+                    }
+                } catch (Throwable ignored) {}
+            }
+        }));
 
         engine.analyzeUrl(target, baseOverride,
                 status -> SwingUtilities.invokeLater(() -> statusLabel.setText(status)),
@@ -795,6 +963,7 @@ public class GWTMapTab extends JPanel {
 
     public void resetAll() {
         dataStore.reset();
+        engine.resetHistoryCounter();
         urlField.setText("");
         baseField.setText("");
         searchField.setText("");
@@ -803,8 +972,15 @@ public class GWTMapTab extends JPanel {
         headersBtn.setText("Headers & Cookies... (0)");
         serviceTableModel.setServices(Collections.emptyList());
         methodTableModel.setMethods(Collections.emptyList());
-        requestEditor.setRequest(null);
-        responseEditor.setResponse(null);
+        httpHistoryModel.clear();
+        try {
+            historyRequestEditor.setRequest(null);
+            historyResponseEditor.setResponse(null);
+        } catch (Throwable ignored) {}
+        try {
+            requestEditor.setRequest(null);
+            responseEditor.setResponse(null);
+        } catch (Throwable ignored) {}
         rawRpcArea.setText("");
         evidenceArea.setText("");
         moduleInfoArea.setText("");

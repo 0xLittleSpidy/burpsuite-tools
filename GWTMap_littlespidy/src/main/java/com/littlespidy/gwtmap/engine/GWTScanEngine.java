@@ -9,6 +9,7 @@ import com.littlespidy.gwtmap.model.GWTDataStore;
 import com.littlespidy.gwtmap.model.GWTMethod;
 import com.littlespidy.gwtmap.model.GWTModuleInfo;
 import com.littlespidy.gwtmap.model.GWTService;
+import com.littlespidy.gwtmap.model.GwtHttpHistoryEntry;
 import com.littlespidy.gwtmap.parser.GWTClassifier;
 import com.littlespidy.gwtmap.parser.GWTCodeCleaner;
 import com.littlespidy.gwtmap.parser.GWTParser;
@@ -19,6 +20,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -32,10 +34,31 @@ public class GWTScanEngine {
     private final MontoyaApi api;
     private final GWTDataStore dataStore;
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final AtomicInteger historyCounter = new AtomicInteger(1);
+    private Consumer<GwtHttpHistoryEntry> httpHistoryListener;
 
     public GWTScanEngine(MontoyaApi api, GWTDataStore dataStore) {
         this.api = api;
         this.dataStore = dataStore;
+    }
+
+    public void setHttpHistoryListener(Consumer<GwtHttpHistoryEntry> listener) {
+        this.httpHistoryListener = listener;
+    }
+
+    public void resetHistoryCounter() {
+        historyCounter.set(1);
+    }
+
+    private void recordHistory(String type, String method, String url, int statusCode, int length, long dur, HttpRequestResponse rr) {
+        GwtHttpHistoryEntry entry = new GwtHttpHistoryEntry(
+                historyCounter.getAndIncrement(),
+                type, method, url, statusCode, length, dur, rr
+        );
+        dataStore.addHttpHistoryEntry(entry);
+        if (httpHistoryListener != null) {
+            httpHistoryListener.accept(entry);
+        }
     }
 
     public void shutdown() {
@@ -87,12 +110,18 @@ public class GWTScanEngine {
                 }
                 moduleInfo.setBaseUrl(baseUrl);
 
+                long start = System.currentTimeMillis();
                 HttpRequest req = HttpRequest.httpRequestFromUrl(fetchUrl);
                 HttpRequestResponse rr = api.http().sendRequest(req);
+                long dur = System.currentTimeMillis() - start;
                 HttpResponse resp = rr.response();
 
+                int code = resp != null ? resp.statusCode() : 0;
+                int len = resp != null ? resp.body().length() : 0;
+                String type = (fetchUrl.contains(".cache.js") || fetchUrl.contains(".cache.html")) ? "Permutation" : "Bootstrap";
+                recordHistory(type, "GET", fetchUrl, code, len, dur, rr);
+
                 if (resp == null || resp.statusCode() != 200) {
-                    int code = resp != null ? resp.statusCode() : 0;
                     statusListener.accept("Error: Target returned HTTP " + code + " (expected 200)");
                     if (onCompletion != null) onCompletion.run();
                     return;
@@ -190,8 +219,14 @@ public class GWTScanEngine {
                         String permUrl = baseUrl + selectedPerm + ".cache.js";
                         statusListener.accept("Fetching permutation cache: " + permUrl);
                         try {
+                            long pStart = System.currentTimeMillis();
                             HttpRequest pReq = HttpRequest.httpRequestFromUrl(permUrl);
                             HttpRequestResponse pRr = api.http().sendRequest(pReq);
+                            long pDur = System.currentTimeMillis() - pStart;
+                            int pCode = pRr.response() != null ? pRr.response().statusCode() : 0;
+                            int pLen = pRr.response() != null ? pRr.response().body().length() : 0;
+                            recordHistory("Permutation", "GET", permUrl, pCode, pLen, pDur, pRr);
+
                             if (pRr.response() != null && pRr.response().statusCode() == 200) {
                                 rawContent = pRr.response().bodyToString();
                                 dataStore.setRawCode(rawContent);
@@ -232,15 +267,19 @@ public class GWTScanEngine {
             dataStore.setCleanedCode(String.join("\n", cleanedLines));
             dataStore.setModuleInfo(info);
 
-            // Extract services
+            // Pre-index variable definitions once in a single fast linear pass
+            statusListener.accept("Indexing JavaScript variables...");
+            Map<String, String> varMap = GWTParser.buildVariableMap(cleanedLines);
+
+            // Extract services using varMap
             statusListener.accept("Enumerating GWT services...");
-            List<GWTService> services = GWTParser.extractServiceInfo(cleanedLines);
+            List<GWTService> services = GWTParser.extractServiceInfo(cleanedLines, varMap);
             dataStore.setServices(services);
             statusListener.accept("Found " + services.size() + " GWT service endpoints.");
 
-            // Extract methods
+            // Extract methods using varMap
             statusListener.accept("Enumerating RPC methods and building payloads...");
-            List<GWTMethod> methods = GWTParser.extractMethodInfo(cleanedLines, services, info);
+            List<GWTMethod> methods = GWTParser.extractMethodInfo(cleanedLines, services, info, varMap);
             dataStore.setMethods(methods);
             statusListener.accept("Extracted " + methods.size() + " methods across " + services.size() + " services.");
 
@@ -261,8 +300,14 @@ public class GWTScanEngine {
         while (misses < 2 && frag < 100) {
             String fragUrl = info.getBaseUrl() + "deferredjs/" + perm + "/" + frag + ".cache.js";
             try {
+                long fStart = System.currentTimeMillis();
                 HttpRequest fReq = HttpRequest.httpRequestFromUrl(fragUrl);
                 HttpRequestResponse fRr = api.http().sendRequest(fReq);
+                long fDur = System.currentTimeMillis() - fStart;
+                int fCode = fRr.response() != null ? fRr.response().statusCode() : 0;
+                int fLen = fRr.response() != null ? fRr.response().body().length() : 0;
+                recordHistory("Fragment #" + frag, "GET", fragUrl, fCode, fLen, fDur, fRr);
+
                 if (fRr.response() != null && fRr.response().statusCode() == 200) {
                     String fragCode = fRr.response().bodyToString();
                     if (!fragCode.isBlank()) {
@@ -327,6 +372,9 @@ public class GWTScanEngine {
                 long elapsed = System.currentTimeMillis() - start;
 
                 HttpResponse resp = rr.response();
+                int code = resp != null ? resp.statusCode() : 0;
+                int len = resp != null ? resp.body().length() : 0;
+                recordHistory("Probe: " + method.getMethodName(), "POST", method.getFullEndpointUrl(), code, len, elapsed, rr);
                 method.setProbeResult(probeReq, resp, elapsed);
             } catch (Exception e) {
                 method.setProbeResult(null, null, 0);
@@ -348,7 +396,11 @@ public class GWTScanEngine {
                     try {
                         HttpRequestResponse rr = api.http().sendRequest(probeReq);
                         long elapsed = System.currentTimeMillis() - start;
-                        method.setProbeResult(probeReq, rr.response(), elapsed);
+                        HttpResponse resp = rr.response();
+                        int code = resp != null ? resp.statusCode() : 0;
+                        int len = resp != null ? resp.body().length() : 0;
+                        recordHistory("Probe: " + method.getMethodName(), "POST", method.getFullEndpointUrl(), code, len, elapsed, rr);
+                        method.setProbeResult(probeReq, resp, elapsed);
                     } catch (Exception e) {
                         method.setProbeResult(probeReq, null, 0);
                     }
