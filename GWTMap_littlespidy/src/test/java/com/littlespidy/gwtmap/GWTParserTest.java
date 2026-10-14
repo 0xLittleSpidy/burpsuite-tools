@@ -182,6 +182,18 @@ public class GWTParserTest {
     }
 
     @Test
+    public void testPermutationExtractionFromUrl() {
+        String testUrl = "http://example.com/app/4DE825BB25A8D7B3950D45A81EA7CD84.cache.js";
+        int lastSlash = testUrl.lastIndexOf('/');
+        String baseUrl = testUrl.substring(0, lastSlash + 1);
+        String filename = testUrl.substring(lastSlash + 1);
+        String forcedPerm = filename.replaceAll("\\.(cache|nocache)\\.(js|html)$", "");
+
+        assertEquals("http://example.com/app/", baseUrl);
+        assertEquals("4DE825BB25A8D7B3950D45A81EA7CD84", forcedPerm);
+    }
+
+    @Test
     public void testZeroEmojisInCodebase() throws Exception {
         java.nio.file.Path srcDir = java.nio.file.Paths.get("src");
         java.util.regex.Pattern emojiPattern = java.util.regex.Pattern.compile("[\\x{1F300}-\\x{1F9FF}\\x{2600}-\\x{26FF}\\x{2700}-\\x{27BF}]");

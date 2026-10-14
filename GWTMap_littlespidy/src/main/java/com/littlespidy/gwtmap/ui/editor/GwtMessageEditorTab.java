@@ -158,55 +158,83 @@ public class GwtMessageEditorTab implements ExtensionProvidedHttpRequestEditor {
 
     @Override
     public void setRequestResponse(HttpRequestResponse requestResponse) {
-        if (requestResponse == null || requestResponse.request() == null) {
-            currentRequest = null;
-            headerInfoLabel.setText("GWT-RPC Request: None");
-            parsedCallArea.setText("");
-            armedPayloadArea.setText("");
-            currentArmedPayload = "";
-            return;
+        try {
+            if (requestResponse == null || requestResponse.request() == null) {
+                clearView();
+                return;
+            }
+
+            this.currentRequest = requestResponse.request();
+            String body = null;
+            try {
+                body = currentRequest.bodyToString();
+            } catch (Throwable ignored) {}
+
+            if (body != null && !body.isBlank() && (body.contains("|0|") || body.contains("|1|") || body.matches("^[0-9]+\\|[0-9]+\\|.*"))) {
+                GWTRpcPayload parsed = GWTRpcDeserializer.deserialize(body);
+                String methodCall = parsed.getServiceInterface() + "." + parsed.getMethodName() + "()";
+                headerInfoLabel.setText("GWT-RPC: " + methodCall + " [v" + parsed.getStreamVersion() + ", params: " + parsed.getParameters().size() + "]");
+
+                parsedCallArea.setText(GWTRpcDeserializer.formatAstTree(parsed));
+                parsedCallArea.setCaretPosition(0);
+
+                currentArmedPayload = GWTRpcDeserializer.armWithIntruderMarkers(body);
+                armedPayloadArea.setText(currentArmedPayload);
+                armedPayloadArea.setCaretPosition(0);
+            } else {
+                clearView();
+            }
+        } catch (Throwable t) {
+            clearView();
         }
+    }
 
-        this.currentRequest = requestResponse.request();
-        String body = currentRequest.bodyToString();
-
-        if (body != null && !body.isBlank()) {
-            GWTRpcPayload parsed = GWTRpcDeserializer.deserialize(body);
-            String methodCall = parsed.getServiceInterface() + "." + parsed.getMethodName() + "()";
-            headerInfoLabel.setText("GWT-RPC: " + methodCall + " [v" + parsed.getStreamVersion() + ", params: " + parsed.getParameters().size() + "]");
-
-            parsedCallArea.setText(GWTRpcDeserializer.formatAstTree(parsed));
-            parsedCallArea.setCaretPosition(0);
-
-            currentArmedPayload = GWTRpcDeserializer.armWithIntruderMarkers(body);
-            armedPayloadArea.setText(currentArmedPayload);
-            armedPayloadArea.setCaretPosition(0);
-        } else {
-            headerInfoLabel.setText("GWT-RPC Request: Empty body");
-            parsedCallArea.setText("");
-            armedPayloadArea.setText("");
-            currentArmedPayload = "";
-        }
+    private void clearView() {
+        currentRequest = null;
+        headerInfoLabel.setText("GWT-RPC Request: None");
+        parsedCallArea.setText("");
+        armedPayloadArea.setText("");
+        currentArmedPayload = "";
     }
 
     @Override
     public boolean isEnabledFor(HttpRequestResponse requestResponse) {
-        if (requestResponse == null || requestResponse.request() == null) {
+        if (requestResponse == null) {
             return false;
         }
-        HttpRequest req = requestResponse.request();
-        for (HttpHeader header : req.headers()) {
-            String val = header.value().toLowerCase();
-            if (val.contains("gwt-rpc") || val.contains("x-gwt")) {
-                return true;
+        try {
+            HttpRequest req = requestResponse.request();
+            if (req == null) {
+                return false;
             }
-        }
-        String body = req.bodyToString();
-        if (body != null && !body.isBlank()) {
-            String trimmed = body.trim();
-            if (trimmed.matches("^[0-9]+\\|[0-9]+\\|.*") || trimmed.contains("|0|") || trimmed.contains("|1|")) {
-                return true;
+
+            // Check body first
+            try {
+                String body = req.bodyToString();
+                if (body != null && !body.isBlank()) {
+                    String trimmed = body.trim();
+                    if (trimmed.matches("^[0-9]+\\|[0-9]+\\|.*") || trimmed.contains("|0|") || trimmed.contains("|1|")) {
+                        return true;
+                    }
+                }
+            } catch (Throwable ignored) {}
+
+            // Safely check headers with try-catch to absorb Burp internal subList(1, 0) bug on headerless/stub requests
+            try {
+                java.util.List<HttpHeader> headers = req.headers();
+                if (headers != null) {
+                    for (HttpHeader header : headers) {
+                        String val = header.value().toLowerCase();
+                        if (val.contains("gwt-rpc") || val.contains("x-gwt")) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (Throwable ignored) {
+                // Ignore Burp subList RangeCheck on stub requests
             }
+        } catch (Throwable t) {
+            return false;
         }
         return false;
     }

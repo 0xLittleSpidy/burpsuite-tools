@@ -42,7 +42,7 @@ public class GWTMapTab extends JPanel {
     private final JTextField urlField = new JTextField(30);
     private final JTextField baseField = new JTextField(20);
     private final JButton analyzeBtn = new JButton("Analyze Target");
-    private final JButton openFileBtn = new JButton("Open Local File...");
+    private final JButton openFileBtn = new JButton("Open Permutation Local File...");
     private final JComboBox<String> permutationCombo = new JComboBox<>();
     private final JButton headersBtn = new JButton("Headers & Cookies... (0)");
     private final JCheckBox passiveMonitorBox = new JCheckBox("Passive Monitor", true);
@@ -123,17 +123,18 @@ public class GWTMapTab extends JPanel {
         ));
 
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        row1.add(new JLabel("Target URL:"));
-        urlField.setToolTipText("Enter .nocache.js bootstrap URL or {hex}.cache.js permutation URL");
+        row1.add(new JLabel("Bootstrap URL:"));
+        urlField.setToolTipText("Enter .nocache.js bootstrap URL");
         row1.add(urlField);
 
-        row1.add(new JLabel("Base URL (-b):"));
-        baseField.setToolTipText("Optional module base URL override (auto-detected if blank)");
+        row1.add(new JLabel("Permutation URL:"));
+        baseField.setToolTipText("Enter {hash}.cache.js permutation URL or base directory override");
         row1.add(baseField);
 
         analyzeBtn.addActionListener(e -> startAnalysis());
         row1.add(analyzeBtn);
 
+        openFileBtn.setToolTipText("Select offline .cache.js permutation file");
         openFileBtn.addActionListener(e -> openLocalFile());
         row1.add(openFileBtn);
 
@@ -363,18 +364,21 @@ public class GWTMapTab extends JPanel {
     }
 
     public void startAnalysis() {
-        String target = urlField.getText().trim();
-        if (target.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a target GWT URL.", "GWTMap", JOptionPane.WARNING_MESSAGE);
+        String bootstrap = urlField.getText().trim();
+        String permutation = baseField.getText().trim();
+
+        if (bootstrap.isEmpty() && permutation.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a Bootstrap URL or Permutation URL.", "GWTMap", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        String target = !bootstrap.isEmpty() ? bootstrap : permutation;
+        String baseOverride = !permutation.isEmpty() ? permutation : "";
 
         analyzeBtn.setEnabled(false);
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);
         statusLabel.setText("Analyzing: " + target);
-
-        String baseOverride = baseField.getText().trim();
 
         engine.analyzeUrl(target, baseOverride,
                 status -> SwingUtilities.invokeLater(() -> statusLabel.setText(status)),
@@ -389,11 +393,19 @@ public class GWTMapTab extends JPanel {
 
     public void openLocalFile() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Select GWT permutation file (*.cache.js) or bootstrap (*.nocache.js)");
+        chooser.setDialogTitle("Select local GWT permutation file (*.cache.js) or bootstrap (*.nocache.js)");
         int res = chooser.showOpenDialog(this);
         if (res == JFileChooser.APPROVE_OPTION) {
             File selectedFile = chooser.getSelectedFile();
-            urlField.setText(selectedFile.getAbsolutePath());
+            String path = selectedFile.getAbsolutePath();
+            if (path.contains(".cache.js") || path.contains(".cache.html")) {
+                baseField.setText(path);
+                if (urlField.getText().isBlank()) {
+                    urlField.setText(path);
+                }
+            } else {
+                urlField.setText(path);
+            }
 
             analyzeBtn.setEnabled(false);
             progressBar.setVisible(true);
@@ -568,8 +580,12 @@ public class GWTMapTab extends JPanel {
             methodTable.setRowSelectionInterval(0, 0);
             updateSelectedMethodDetails();
         } else {
-            requestEditor.setRequest(null);
-            responseEditor.setResponse(null);
+            try {
+                requestEditor.setRequest(null);
+            } catch (Throwable ignored) {}
+            try {
+                responseEditor.setResponse(null);
+            } catch (Throwable ignored) {}
             rawRpcArea.setText("");
             evidenceArea.setText("");
         }
@@ -584,15 +600,19 @@ public class GWTMapTab extends JPanel {
         if (method == null) return;
 
         // Display request in Montoya Request Editor (with markers)
-        HttpRequest req = engine.buildHttpRequest(method, customHeaders, true);
-        requestEditor.setRequest(req);
+        try {
+            HttpRequest req = engine.buildHttpRequest(method, customHeaders, true);
+            requestEditor.setRequest(req);
+        } catch (Throwable ignored) {}
 
         // Display response if probed
-        if (method.isProbed() && method.getProbeResponse() != null) {
-            responseEditor.setResponse(method.getProbeResponse());
-        } else {
-            responseEditor.setResponse(null);
-        }
+        try {
+            if (method.isProbed() && method.getProbeResponse() != null) {
+                responseEditor.setResponse(method.getProbeResponse());
+            } else {
+                responseEditor.setResponse(null);
+            }
+        } catch (Throwable ignored) {}
 
         // Display raw RPC call
         rawRpcArea.setText(method.getMethodRpcCall());

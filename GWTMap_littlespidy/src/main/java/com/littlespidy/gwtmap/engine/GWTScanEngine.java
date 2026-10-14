@@ -48,21 +48,46 @@ public class GWTScanEngine {
                            Consumer<String> statusListener, Runnable onCompletion) {
         executor.submit(() -> {
             try {
-                statusListener.accept("Fetching target: " + targetUrl);
-                GWTModuleInfo moduleInfo = new GWTModuleInfo();
-                moduleInfo.setTargetUrl(targetUrl);
+                String fetchUrl = targetUrl;
+                if ((fetchUrl == null || fetchUrl.isBlank()) && (baseOverride != null && !baseOverride.isBlank())) {
+                    fetchUrl = baseOverride.trim();
+                }
 
-                // Compute base URL
+                if (fetchUrl == null || fetchUrl.isBlank()) {
+                    statusListener.accept("Error: Target URL cannot be empty");
+                    if (onCompletion != null) onCompletion.run();
+                    return;
+                }
+
+                statusListener.accept("Fetching target: " + fetchUrl);
+                GWTModuleInfo moduleInfo = new GWTModuleInfo();
+                moduleInfo.setTargetUrl(fetchUrl);
+
+                // Compute base directory and extract any permutation hash from baseOverride
                 String baseUrl;
+                String forcedPermutation = null;
+
                 if (baseOverride != null && !baseOverride.isBlank()) {
-                    baseUrl = baseOverride.trim();
+                    String trimmed = baseOverride.trim();
+                    int lastSlash = trimmed.lastIndexOf('/');
+                    if (lastSlash != -1) {
+                        String filename = trimmed.substring(lastSlash + 1);
+                        if (filename.endsWith(".js") || filename.endsWith(".html")) {
+                            baseUrl = trimmed.substring(0, lastSlash + 1);
+                            forcedPermutation = filename.replaceAll("\\.(cache|nocache)\\.(js|html)$", "");
+                        } else {
+                            baseUrl = trimmed.endsWith("/") ? trimmed : trimmed + "/";
+                        }
+                    } else {
+                        baseUrl = trimmed.endsWith("/") ? trimmed : trimmed + "/";
+                    }
                 } else {
-                    int lastSlash = targetUrl.lastIndexOf('/');
-                    baseUrl = (lastSlash != -1) ? targetUrl.substring(0, lastSlash + 1) : targetUrl + "/";
+                    int lastSlash = fetchUrl.lastIndexOf('/');
+                    baseUrl = (lastSlash != -1) ? fetchUrl.substring(0, lastSlash + 1) : fetchUrl + "/";
                 }
                 moduleInfo.setBaseUrl(baseUrl);
 
-                HttpRequest req = HttpRequest.httpRequestFromUrl(targetUrl);
+                HttpRequest req = HttpRequest.httpRequestFromUrl(fetchUrl);
                 HttpRequestResponse rr = api.http().sendRequest(req);
                 HttpResponse resp = rr.response();
 
@@ -74,7 +99,7 @@ public class GWTScanEngine {
                 }
 
                 String body = resp.bodyToString();
-                processDownloadedCode(body, targetUrl, baseUrl, statusListener, onCompletion);
+                processDownloadedCode(body, fetchUrl, baseUrl, forcedPermutation, statusListener, onCompletion);
 
             } catch (Exception e) {
                 statusListener.accept("Analysis failed: " + e.getMessage());
@@ -90,12 +115,27 @@ public class GWTScanEngine {
                 statusListener.accept("Reading local file: " + file.getName());
                 String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
 
-                String baseUrl = (baseOverride != null && !baseOverride.isBlank())
-                        ? baseOverride.trim()
-                        : "http://127.0.0.1/stub/";
-                if (!baseUrl.endsWith("/")) baseUrl += "/";
+                String baseUrl;
+                String forcedPerm = null;
+                if (baseOverride != null && !baseOverride.isBlank()) {
+                    String trimmed = baseOverride.trim();
+                    int lastSlash = trimmed.lastIndexOf('/');
+                    if (lastSlash != -1) {
+                        String filename = trimmed.substring(lastSlash + 1);
+                        if (filename.endsWith(".js") || filename.endsWith(".html")) {
+                            baseUrl = trimmed.substring(0, lastSlash + 1);
+                            forcedPerm = filename.replaceAll("\\.(cache|nocache)\\.(js|html)$", "");
+                        } else {
+                            baseUrl = trimmed.endsWith("/") ? trimmed : trimmed + "/";
+                        }
+                    } else {
+                        baseUrl = trimmed.endsWith("/") ? trimmed : trimmed + "/";
+                    }
+                } else {
+                    baseUrl = "http://127.0.0.1/stub/";
+                }
 
-                processDownloadedCode(content, file.getAbsolutePath(), baseUrl, statusListener, onCompletion);
+                processDownloadedCode(content, file.getAbsolutePath(), baseUrl, forcedPerm, statusListener, onCompletion);
 
             } catch (Exception e) {
                 statusListener.accept("Failed reading file: " + e.getMessage());
@@ -105,8 +145,18 @@ public class GWTScanEngine {
     }
 
     private void processDownloadedCode(String rawContent, String sourcePath, String baseUrl,
+                                      String forcedPermutation,
                                       Consumer<String> statusListener, Runnable onCompletion) {
         try {
+            if (forcedPermutation == null && sourcePath != null && sourcePath.contains(".cache.")) {
+                int slash = Math.max(sourcePath.lastIndexOf('/'), sourcePath.lastIndexOf(File.separatorChar));
+                String fname = slash != -1 ? sourcePath.substring(slash + 1) : sourcePath;
+                String hash = fname.replaceAll("\\.(cache|nocache)\\.(js|html)$", "");
+                if (!hash.isBlank() && !hash.equals(fname)) {
+                    forcedPermutation = hash;
+                }
+            }
+
             dataStore.setRawCode(rawContent);
             GWTClassifier.CodeType codeType = GWTClassifier.classify(rawContent);
             statusListener.accept("Classified resource as: " + codeType.name());
@@ -122,10 +172,16 @@ public class GWTScanEngine {
                     || codeType == GWTClassifier.CodeType.BOOTSTRAP_CLEAN) {
                 statusListener.accept("Extracting permutations from bootstrap file...");
                 List<String> permutations = GWTParser.extractPermutations(cleanedLines, codeType);
+
+                if (forcedPermutation != null && !forcedPermutation.isBlank() && !permutations.contains(forcedPermutation)) {
+                    permutations.add(0, forcedPermutation);
+                }
                 info.setAllPermutations(permutations);
 
                 if (!permutations.isEmpty()) {
-                    String selectedPerm = permutations.get(0);
+                    String selectedPerm = (forcedPermutation != null && !forcedPermutation.isBlank())
+                            ? forcedPermutation
+                            : permutations.get(0);
                     info.setActivePermutation(selectedPerm);
                     statusListener.accept("Selected permutation " + selectedPerm + " (" + permutations.size() + " total discovered)");
 
@@ -153,6 +209,16 @@ public class GWTScanEngine {
 
             // Extract module metadata
             GWTParser.extractModuleInfo(cleanedLines, info);
+            if (forcedPermutation != null && !forcedPermutation.isBlank()) {
+                if ("Unknown".equals(info.getActivePermutation())) {
+                    info.setActivePermutation(forcedPermutation);
+                }
+                if (info.getAllPermutations().isEmpty()) {
+                    List<String> perms = new ArrayList<>();
+                    perms.add(forcedPermutation);
+                    info.setAllPermutations(perms);
+                }
+            }
             statusListener.accept("GWT Version: " + info.getGwtVersion() + " | RPC: v" + info.getRpcVersion());
 
             // Check for deferred fragments
