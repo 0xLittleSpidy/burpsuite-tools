@@ -28,23 +28,35 @@ GWTMap unifies the capabilities of three premier GWT security tools into one coh
 ## Extension Interface & Architecture
 
 ### 1. Main Suite Tab: GWTMap
-The main Suite Tab comprises six functional tabs:
+The main Suite Tab comprises seven functional tabs with a unified target input header:
+
+- **Target Header Controls**:
+  - **Bootstrap URL (-u)**: Target GWT application URL or `.nocache.js` bootstrap script.
+  - **Permutation URL (-b)**: Base directory URL or direct `.cache.js` permutation script URL.
+  - **Permutations Selector**: Dropdown listing all discovered permutation hashes with instant switching.
+  - **Analyze Target**: High-speed multi-stage reverse engineering engine with O(1) variable map indexing and 80-line lookahead bound.
+  - **Permutation Local File**: Offline file selection for analyzing saved `.cache.js` scripts directly from disk.
 
 1. **Methods & Payloads**:
    - Filter Toolbar: Real-time debounced search bar (`-f`), multi-select filter buttons for Services and Status (`200 OK`, `4xx`, `5xx`, `Probed`, `Unprobed`), and `In-Scope Only` gating.
    - Methods Table: Lists discovered methods, service categories, parameter signatures, full endpoint URLs, status codes, latencies, and response lengths.
-   - Action Toolbar: `Send Probe`, `Probe All Visible`, `Send to Repeater`, `Send to Intruder`, `Copy RPC Payload`, `Copy HTTP Request`, `Send to Deserializer`, and `Send to Fuzzer`.
-   - Integrated Montoya Editors: Split-view Request and Response editors displaying live probe transactions, raw wire format payloads, and type analysis evidence.
-2. **Services & Policies**:
+   - Right-Click Context Menu: Fast workflow actions available directly on selected rows (`Send Probe`, `Probe All Visible`, `Send to Repeater`, `Send to Intruder`, `Copy RPC Payload`, `Copy HTTP Request`, `Send to Deserializer`, and `Send to Fuzzer`).
+   - Integrated Montoya Editors: Maximized full-height split-view Request and Response editors displaying live probe transactions, raw wire format payloads, and type analysis evidence without bottom button clutter.
+2. **HTTP History**:
+   - Live Traffic Streaming: Displays all network activity initiated during "Analyze Target" in real time (Bootstrap fetch, Permutation script download, deferred JavaScript fragments, and single/batch RPC probes).
+   - History Table: Columns for ID, Time, Type (`BOOTSTRAP`, `PERMUTATION`, `FRAGMENT`, `PROBE`), Method, URL, Status Code, Response Length, and Round-Trip Duration (ms).
+   - Integrated Split Editors: Embedded native Montoya HTTP Request and Response editors with automatic search term synchronization and syntax formatting.
+   - Toolbar & Context Actions: `Clear History`, `Send to Repeater`, `Send to Intruder`, `Copy URL`, `Copy Request`, and `Copy Response`.
+3. **Services & Policies**:
    - Enumerates discovered service paths, serialization policy strong names (`.gwt.rpc`), and associated method counts (`--svc` mode).
-3. **Module Info**:
+4. **Module Info**:
    - Summary card displaying GWT Version, Content-Type, Base URL, Active Permutation Hash, RPC Version, RPC Flags, all discovered permutations, and deferred JS fragments.
-4. **Deobfuscated Code**:
+5. **Deobfuscated Code**:
    - Monospace viewer displaying retabbed, beautified, and unicode-decoded JavaScript with a `Save / Backup Code to Disk...` export button.
-5. **RPC Deserializer**:
+6. **RPC Deserializer**:
    - Accepts raw GWT-RPC wire requests, parses them into typed AST representations, identifies all fuzzable parameter offsets, and generates Intruder-armed (`§...§`) or custom-delimited payloads with one-click `Send to Repeater` dispatch.
    - Built-in GWT Base64 Long Codec for instant conversion between GWT Base64 strings and 64-bit decimal integers.
-6. **RPC Fuzzer & Tester**:
+7. **RPC Fuzzer & Tester**:
    - Automated testing console for GWT endpoints.
    - Detects fuzzable string parameters and numeric ID tokens from baseline requests.
    - Configurable string payload lists (SQL, XSS, format strings, path traversal) and numeric ID delta sweeps (+/- N).
