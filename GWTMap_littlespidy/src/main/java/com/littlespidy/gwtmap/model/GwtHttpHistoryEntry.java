@@ -28,8 +28,14 @@ public class GwtHttpHistoryEntry {
     public GwtHttpHistoryEntry(int id, String type, String method, String url,
                                int statusCode, int responseLength, long durationMs,
                                HttpRequestResponse requestResponse) {
+        this(id, new SimpleDateFormat("HH:mm:ss").format(new Date()), type, method, url, statusCode, responseLength, durationMs, requestResponse);
+    }
+
+    public GwtHttpHistoryEntry(int id, String timestamp, String type, String method, String url,
+                               int statusCode, int responseLength, long durationMs,
+                               HttpRequestResponse requestResponse) {
         this.id = id;
-        this.timestamp = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        this.timestamp = timestamp != null ? timestamp : new SimpleDateFormat("HH:mm:ss").format(new Date());
         this.type = type != null ? type : "Unknown";
         this.method = method != null ? method : "GET";
         this.url = url != null ? url : "";

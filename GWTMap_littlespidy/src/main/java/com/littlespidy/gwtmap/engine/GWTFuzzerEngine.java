@@ -132,6 +132,17 @@ public class GWTFuzzerEngine {
             Consumer<FuzzResult> onResult,
             Consumer<Integer> onProgress,
             Runnable onCompletion) {
+        startFuzzing(baseRequest, stringPayloads, idRange, onResult,
+                (cur, tot) -> { if (onProgress != null) onProgress.accept(cur); }, onCompletion);
+    }
+
+    public void startFuzzing(
+            HttpRequest baseRequest,
+            List<String> stringPayloads,
+            int idRange,
+            Consumer<FuzzResult> onResult,
+            java.util.function.BiConsumer<Integer, Integer> onProgress,
+            Runnable onCompletion) {
 
         cancelled.set(false);
         executor.submit(() -> {
@@ -152,6 +163,8 @@ public class GWTFuzzerEngine {
                         totalProbes += (idRange * 2);
                     }
                 }
+                final int finalTotal = totalProbes;
+                if (onProgress != null) onProgress.accept(0, finalTotal);
 
                 int currentCount = 0;
                 int resultId = 1;
@@ -208,7 +221,7 @@ public class GWTFuzzerEngine {
                             }
 
                             currentCount++;
-                            if (onProgress != null) onProgress.accept(currentCount);
+                            if (onProgress != null) onProgress.accept(currentCount, finalTotal);
                         }
                     } else if ("%d".equals(fuzzType) && idRange > 0) {
                         String origValStr = (tokenIdx < baseTokens.length) ? baseTokens[tokenIdx] : "0";
@@ -268,7 +281,7 @@ public class GWTFuzzerEngine {
                             }
 
                             currentCount++;
-                            if (onProgress != null) onProgress.accept(currentCount);
+                            if (onProgress != null) onProgress.accept(currentCount, finalTotal);
                         }
                     }
                 }

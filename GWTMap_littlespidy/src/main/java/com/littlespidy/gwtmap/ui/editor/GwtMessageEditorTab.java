@@ -59,15 +59,17 @@ public class GwtMessageEditorTab implements ExtensionProvidedHttpRequestEditor {
         headerInfoLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
 
         JPanel btnGroup = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
-        JButton copyArmedBtn = new JButton("Copy Armed Payload");
-        copyArmedBtn.setToolTipText("Copy raw GWT payload with Intruder markers (§...§) to clipboard");
-        copyArmedBtn.addActionListener(e -> {
-            if (!currentArmedPayload.isEmpty()) {
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(currentArmedPayload), null);
-                JOptionPane.showMessageDialog(mainPanel, "Armed GWT payload copied to clipboard.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
+        JButton sendToIntruderBtn = new JButton("Send to Intruder");
+        sendToIntruderBtn.setToolTipText("Send request armed with Intruder markers (§...§) to Burp Intruder");
+        sendToIntruderBtn.addActionListener(e -> {
+            if (currentRequest != null) {
+                String body = !currentArmedPayload.isEmpty() ? currentArmedPayload : currentRequest.bodyToString();
+                HttpRequest req = currentRequest.withBody(body);
+                api.intruder().sendToIntruder(req);
+                JOptionPane.showMessageDialog(mainPanel, "Sent request with Intruder markers (§...§) to Intruder.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
             }
         });
-        btnGroup.add(copyArmedBtn);
+        btnGroup.add(sendToIntruderBtn);
 
         JButton sendToDeserializerBtn = new JButton("Send to GWTMap Deserializer");
         sendToDeserializerBtn.setToolTipText("Send request body to the GWTMap suite tab for deep deserialization and fuzzing");

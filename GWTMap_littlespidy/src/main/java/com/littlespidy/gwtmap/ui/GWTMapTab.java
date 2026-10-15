@@ -12,14 +12,19 @@ import com.littlespidy.gwtmap.model.GWTMethod;
 import com.littlespidy.gwtmap.model.GWTModuleInfo;
 import com.littlespidy.gwtmap.model.GWTService;
 import com.littlespidy.gwtmap.model.GwtHttpHistoryEntry;
+import com.littlespidy.gwtmap.persistence.GWTMapPersistenceManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
+import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -27,12 +32,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Main Suite Tab UI component for GWTMap.
- * Incorporates target acquisition, method/service triage, native editors,
- * batch probing, and deobfuscated code inspection.
+ * Separates RPC Deserializer and RPC Fuzzer & Tester into distinct tabs,
+ * combines analysis tools under 'GWT Analysis' with ordered subtabs,
+ * provides accurate progress tracking, code search/highlighting, and cross-platform persistence.
  *
  * @author littlespidy
  */
@@ -41,14 +46,16 @@ public class GWTMapTab extends JPanel {
     private final MontoyaApi api;
     private final GWTDataStore dataStore;
     private final GWTScanEngine engine;
+    private final GWTMapPersistenceManager persistenceManager;
 
-    // Top Controls
-    private final JTextField urlField = new JTextField(30);
-    private final JTextField baseField = new JTextField(20);
+    // Top Controls (Target Acquisition)
+    private final JTextField urlField = new JTextField(28);
+    private final JTextField baseField = new JTextField(18);
     private final JButton analyzeBtn = new JButton("Analyze Target");
     private final JButton openFileBtn = new JButton("Open Permutation Local File...");
     private final JComboBox<String> permutationCombo = new JComboBox<>();
     private final JButton headersBtn = new JButton("Headers & Cookies... (0)");
+    private final JButton storageBtn = new JButton("Storage Folder...");
     private final JCheckBox passiveMonitorBox = new JCheckBox("Passive Monitor", true);
     private final JLabel statusLabel = new JLabel("Ready");
     private final JProgressBar progressBar = new JProgressBar();
@@ -56,16 +63,19 @@ public class GWTMapTab extends JPanel {
     // Custom headers buffer
     private String customHeaders = "";
 
-    // Sub-Tabs
+    // ── Main Top-Level Tabs ──────────────────────────────────────────────────
     private final JTabbedPane mainTabbedPane = new JTabbedPane();
 
-    // ── Tab 1: Methods & Payloads ───────────────────────────────────────────
+    // ── GWT Analysis Sub-Tabs ────────────────────────────────────────────────
+    private final JTabbedPane analysisTabbedPane = new JTabbedPane();
+
+    // Subtab: Methods & Payloads
     private final GWTMethodTableModel methodTableModel = new GWTMethodTableModel();
     private final JTable methodTable = new JTable(methodTableModel);
     private final JTextField searchField = new JTextField(15);
+    private final JComboBox<String> methodSelectCombo = new JComboBox<>();
+    private boolean isSyncingMethodSelection = false;
     private MultiSelectFilterButton serviceFilterBtn;
-    private MultiSelectFilterButton statusFilterBtn;
-    private final JCheckBox inScopeBox = new JCheckBox("In-Scope Only", false);
     private final JLabel counterLabel = new JLabel("Showing 0/0 Services | 0/0 Methods");
 
     private HttpRequestEditor requestEditor;
@@ -73,24 +83,31 @@ public class GWTMapTab extends JPanel {
     private final JTextArea rawRpcArea = new JTextArea();
     private final JTextArea evidenceArea = new JTextArea();
 
-    // ── Tab 2: HTTP History ─────────────────────────────────────────────────
+    // Subtab: HTTP History
     private final GwtHttpHistoryTableModel httpHistoryModel = new GwtHttpHistoryTableModel();
     private final JTable httpHistoryTable = new JTable(httpHistoryModel);
     private HttpRequestEditor historyRequestEditor;
     private HttpResponseEditor historyResponseEditor;
 
-    // ── Tab 3: Services ─────────────────────────────────────────────────────
+    // Subtab: Services & Policies
     private final GWTServiceTableModel serviceTableModel = new GWTServiceTableModel();
     private final JTable serviceTable = new JTable(serviceTableModel);
 
-    // ── Tab 3: Module Info ──────────────────────────────────────────────────
+    // Subtab: Module Info
     private final JTextArea moduleInfoArea = new JTextArea();
 
-    // ── Tab 4: Code Viewer ──────────────────────────────────────────────────
+    // Subtab: Deobfuscated Code
     private final JTextArea codeViewerArea = new JTextArea();
     private final JButton exportCodeBtn = new JButton("Save / Backup Code to Disk...");
+    private final JTextField codeSearchField = new JTextField(18);
+    private final JLabel codeMatchCountLabel = new JLabel("0 matches");
+    private final JCheckBox codeMatchCaseBox = new JCheckBox("Match Case", false);
+    private final List<int[]> codeMatchOffsets = new ArrayList<>();
+    private int currentCodeMatchIdx = -1;
+    private final DefaultHighlightPainter normalHighlightPainter = new DefaultHighlightPainter(new Color(255, 255, 140));
+    private final DefaultHighlightPainter activeHighlightPainter = new DefaultHighlightPainter(new Color(255, 175, 75));
 
-    // ── Tab 5 & 6: Deserializer & Fuzzer ─────────────────────────────────────
+    // Independent Tool Tabs
     private final RpcDeserializerPanel deserializerPanel;
     private final RpcFuzzerPanel fuzzerPanel;
 
@@ -104,11 +121,12 @@ public class GWTMapTab extends JPanel {
         this.api = api;
         this.dataStore = dataStore;
         this.engine = engine;
+        this.persistenceManager = new GWTMapPersistenceManager(api);
         this.deserializerPanel = new RpcDeserializerPanel(api);
         this.fuzzerPanel = new RpcFuzzerPanel(api);
 
         setLayout(new BorderLayout(4, 4));
-        setBorder(new EmptyBorder(6, 6, 6, 6));
+        setBorder(new EmptyBorder(4, 4, 4, 4));
 
         initUI();
     }
@@ -121,12 +139,21 @@ public class GWTMapTab extends JPanel {
         historyRequestEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
         historyResponseEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
 
-        add(createTopPanel(), BorderLayout.NORTH);
-        add(createCenterPanel(), BorderLayout.CENTER);
-        add(createBottomStatusPanel(), BorderLayout.SOUTH);
+        // 1. Build GWT Analysis tab content
+        JPanel gwtAnalysisPanel = new JPanel(new BorderLayout(4, 4));
+        gwtAnalysisPanel.add(createTopPanel(), BorderLayout.NORTH);
+        gwtAnalysisPanel.add(createAnalysisSubTabs(), BorderLayout.CENTER);
+        gwtAnalysisPanel.add(createBottomStatusPanel(), BorderLayout.SOUTH);
+
+        // 2. Add Top-Level Tabs: GWT Analysis, RPC Deserializer, RPC Fuzzer & Tester
+        mainTabbedPane.addTab("GWT Analysis", gwtAnalysisPanel);
+        mainTabbedPane.addTab("RPC Deserializer", deserializerPanel);
+        mainTabbedPane.addTab("RPC Fuzzer & Tester", fuzzerPanel);
+
+        add(mainTabbedPane, BorderLayout.CENTER);
     }
 
-    // ── Top Toolbar ──────────────────────────────────────────────────────────
+    // ── Top Toolbar (Target Acquisition) ─────────────────────────────────────
 
     private JPanel createTopPanel() {
         JPanel panel = new JPanel(new BorderLayout(6, 4));
@@ -154,6 +181,10 @@ public class GWTMapTab extends JPanel {
         headersBtn.addActionListener(e -> showHeadersDialog());
         row1.add(headersBtn);
 
+        storageBtn.setToolTipText("View or select directory for GWTMap persistent session storage");
+        storageBtn.addActionListener(e -> changeStorageDirectory());
+        row1.add(storageBtn);
+
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         row2.add(new JLabel("Active Permutation:"));
         permutationCombo.setPreferredSize(new Dimension(240, 24));
@@ -172,170 +203,25 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    // ── Center Main Tabs ─────────────────────────────────────────────────────
+    // ── GWT Analysis Sub-Tabs ────────────────────────────────────────────────
+    // Order: HTTP History (1st), Module Info (2nd), Methods & Payloads (3rd), Services & Policies (4th), Deobfuscated Code (5th)
 
-    private JComponent createCenterPanel() {
-        mainTabbedPane.addTab("Methods & Payloads", createMethodsPanel());
-        mainTabbedPane.addTab("HTTP History", createHttpHistoryPanel());
-        mainTabbedPane.addTab("Services & Policies", createServicesPanel());
-        mainTabbedPane.addTab("Module Info", createModuleInfoPanel());
-        mainTabbedPane.addTab("Deobfuscated Code", createCodeViewerPanel());
-        mainTabbedPane.addTab("RPC Deserializer", deserializerPanel);
-        mainTabbedPane.addTab("RPC Fuzzer & Tester", fuzzerPanel);
-        return mainTabbedPane;
+    private JComponent createAnalysisSubTabs() {
+        analysisTabbedPane.addTab("HTTP History", createHttpHistoryPanel());
+        analysisTabbedPane.addTab("Module Info", createModuleInfoPanel());
+        analysisTabbedPane.addTab("Methods & Payloads", createMethodsPanel());
+        analysisTabbedPane.addTab("Services & Policies", createServicesPanel());
+        analysisTabbedPane.addTab("Deobfuscated Code", createCodeViewerPanel());
+        return analysisTabbedPane;
     }
 
-    private JPanel createMethodsPanel() {
-        JPanel panel = new JPanel(new BorderLayout(4, 4));
-
-        // Filter Toolbar
-        JPanel filterToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        filterToolbar.add(new JLabel("Search (-f):"));
-        searchField.setToolTipText("Filter by method name, service, signature or URL");
-        searchField.getDocument().addDocumentListener(new SimpleDocListener(this::triggerDebouncedFilter));
-        filterToolbar.add(searchField);
-
-        serviceFilterBtn = new MultiSelectFilterButton(
-                "Service", List.of("All Services"), sel -> refreshFilteredViews()
-        );
-        filterToolbar.add(serviceFilterBtn);
-
-        statusFilterBtn = new MultiSelectFilterButton(
-                "Status", List.of("All Statuses", "Probed", "Unprobed", "2xx", "200", "4xx", "5xx"), sel -> refreshFilteredViews()
-        );
-        filterToolbar.add(statusFilterBtn);
-
-        inScopeBox.addActionListener(e -> refreshFilteredViews());
-        filterToolbar.add(inScopeBox);
-
-        JButton resetFiltersBtn = new JButton("Clear Filters");
-        resetFiltersBtn.addActionListener(e -> {
-            searchField.setText("");
-            serviceFilterBtn.clearSelection();
-            statusFilterBtn.clearSelection();
-            inScopeBox.setSelected(false);
-            refreshFilteredViews();
-        });
-        filterToolbar.add(resetFiltersBtn);
-
-        filterToolbar.add(new JSeparator(SwingConstants.VERTICAL));
-        counterLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
-        filterToolbar.add(counterLabel);
-
-        panel.add(filterToolbar, BorderLayout.NORTH);
-
-        // Center split: Table on top, Editors on bottom
-        methodTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        methodTable.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                updateSelectedMethodDetails();
-            }
-        });
-
-        // Right-click context menu for methodTable
-        JPopupMenu methodPopup = new JPopupMenu();
-
-        JMenuItem probeItem = new JMenuItem("Send Probe");
-        probeItem.addActionListener(e -> probeSelectedMethod());
-        methodPopup.add(probeItem);
-
-        JMenuItem probeAllItem = new JMenuItem("Probe All Visible");
-        probeAllItem.addActionListener(e -> probeAllVisibleMethods());
-        methodPopup.add(probeAllItem);
-
-        methodPopup.addSeparator();
-
-        JMenuItem repeaterItem = new JMenuItem("Send to Repeater");
-        repeaterItem.addActionListener(e -> sendSelectedToRepeater());
-        methodPopup.add(repeaterItem);
-
-        JMenuItem intruderItem = new JMenuItem("Send to Intruder");
-        intruderItem.addActionListener(e -> sendSelectedToIntruder());
-        methodPopup.add(intruderItem);
-
-        methodPopup.addSeparator();
-
-        JMenuItem copyPayloadItem = new JMenuItem("Copy RPC Payload");
-        copyPayloadItem.addActionListener(e -> copySelectedRpcPayload());
-        methodPopup.add(copyPayloadItem);
-
-        JMenuItem copyReqItem = new JMenuItem("Copy HTTP Request");
-        copyReqItem.addActionListener(e -> copySelectedHttpRequest());
-        methodPopup.add(copyReqItem);
-
-        methodPopup.addSeparator();
-
-        JMenuItem deserItem = new JMenuItem("Send to Deserializer");
-        deserItem.addActionListener(e -> {
-            GWTMethod m = getSelectedMethod();
-            if (m != null) {
-                deserializerPanel.setTargetUrl(m.getFullEndpointUrl());
-                loadPayloadIntoDeserializer(m.getMethodRpcCall());
-            }
-        });
-        methodPopup.add(deserItem);
-
-        JMenuItem fuzzerItem = new JMenuItem("Send to Fuzzer");
-        fuzzerItem.addActionListener(e -> {
-            GWTMethod m = getSelectedMethod();
-            if (m != null) {
-                loadPayloadIntoFuzzer(m.getFullEndpointUrl(), m.getMethodRpcCall());
-            }
-        });
-        methodPopup.add(fuzzerItem);
-
-        methodTable.setComponentPopupMenu(methodPopup);
-        methodTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    int row = methodTable.rowAtPoint(e.getPoint());
-                    if (row >= 0 && !methodTable.isRowSelected(row)) {
-                        methodTable.setRowSelectionInterval(row, row);
-                    }
-                }
-            }
-        });
-
-        JScrollPane tableScroll = new JScrollPane(methodTable);
-        tableScroll.setPreferredSize(new Dimension(800, 260));
-
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setTopComponent(tableScroll);
-        splitPane.setBottomComponent(createEditorPanel());
-        splitPane.setDividerLocation(260);
-        splitPane.setResizeWeight(0.45);
-
-        panel.add(splitPane, BorderLayout.CENTER);
-        return panel;
-    }
-
-    private JPanel createEditorPanel() {
-        JPanel panel = new JPanel(new BorderLayout(4, 4));
-
-        // Sub tabs for editors
-        JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("Request", requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
-
-        rawRpcArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        rawRpcArea.setLineWrap(true);
-        rawRpcArea.setWrapStyleWord(true);
-        editorTabs.addTab("GWT-RPC Payload", new JScrollPane(rawRpcArea));
-
-        evidenceArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        evidenceArea.setEditable(false);
-        editorTabs.addTab("Evidence & Types", new JScrollPane(evidenceArea));
-
-        panel.add(editorTabs, BorderLayout.CENTER);
-        return panel;
-    }
+    // ── Tab: HTTP History ────────────────────────────────────────────────────
 
     private JPanel createHttpHistoryPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
         panel.setBorder(new EmptyBorder(6, 6, 6, 6));
 
-        // Top toolbar
+        // Top toolbar without Send to Repeater button
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         JButton clearHistoryBtn = new JButton("Clear History");
         clearHistoryBtn.addActionListener(e -> {
@@ -345,21 +231,9 @@ public class GWTMapTab extends JPanel {
                 historyRequestEditor.setRequest(null);
                 historyResponseEditor.setResponse(null);
             } catch (Throwable ignored) {}
+            saveSession();
         });
         toolbar.add(clearHistoryBtn);
-
-        JButton toRepeaterBtn = new JButton("Send to Repeater");
-        toRepeaterBtn.addActionListener(e -> {
-            int row = httpHistoryTable.getSelectedRow();
-            if (row >= 0) {
-                int modelRow = httpHistoryTable.convertRowIndexToModel(row);
-                GwtHttpHistoryEntry entry = httpHistoryModel.getEntryAt(modelRow);
-                if (entry != null && entry.getRequestResponse() != null) {
-                    api.repeater().sendToRepeater(entry.getRequestResponse().request(), entry.getType());
-                }
-            }
-        });
-        toolbar.add(toRepeaterBtn);
 
         JLabel historyHint = new JLabel("All HTTP requests and responses executed during target analysis, fragment enumeration, and RPC probes.");
         historyHint.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
@@ -452,6 +326,209 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
+    // ── Tab: Module Info ─────────────────────────────────────────────────────
+
+    private JPanel createModuleInfoPanel() {
+        JPanel panel = new JPanel(new BorderLayout(4, 4));
+        panel.setBorder(new EmptyBorder(6, 6, 6, 6));
+
+        moduleInfoArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        moduleInfoArea.setEditable(false);
+        panel.add(new JScrollPane(moduleInfoArea), BorderLayout.CENTER);
+        return panel;
+    }
+
+    // ── Tab: Methods & Payloads ──────────────────────────────────────────────
+
+    private JPanel createMethodsPanel() {
+        JPanel panel = new JPanel(new BorderLayout(4, 4));
+
+        // Filter & Action Toolbar
+        JPanel filterToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+
+        // 1. Search (without (-f))
+        filterToolbar.add(new JLabel("Search:"));
+        searchField.setToolTipText("Filter by method name, service, signature or URL");
+        searchField.getDocument().addDocumentListener(new SimpleDocListener(this::triggerDebouncedFilter));
+        filterToolbar.add(searchField);
+
+        // 2. Service Filter
+        serviceFilterBtn = new MultiSelectFilterButton(
+                "Service", List.of("All Services"), sel -> refreshFilteredViews()
+        );
+        filterToolbar.add(serviceFilterBtn);
+
+        // 3. Method Selection Dropdown
+        filterToolbar.add(new JLabel("Method:"));
+        methodSelectCombo.setPreferredSize(new Dimension(280, 24));
+        methodSelectCombo.addActionListener(e -> onMethodComboSelected());
+        filterToolbar.add(methodSelectCombo);
+
+        // 4. Send Request Button
+        JButton sendRequestBtn = new JButton("Send Request");
+        sendRequestBtn.setToolTipText("Send HTTP probe request for the selected method and payload");
+        sendRequestBtn.addActionListener(e -> probeSelectedMethod());
+        filterToolbar.add(sendRequestBtn);
+
+        // 5. Send All Requests Button
+        JButton sendAllRequestsBtn = new JButton("Send All Requests");
+        sendAllRequestsBtn.setToolTipText("Send HTTP probe requests for all visible methods");
+        sendAllRequestsBtn.addActionListener(e -> probeAllVisibleMethods());
+        filterToolbar.add(sendAllRequestsBtn);
+
+        // Clear Filters
+        JButton resetFiltersBtn = new JButton("Clear Filters");
+        resetFiltersBtn.addActionListener(e -> {
+            searchField.setText("");
+            serviceFilterBtn.clearSelection();
+            refreshFilteredViews();
+        });
+        filterToolbar.add(resetFiltersBtn);
+
+        filterToolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        counterLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
+        filterToolbar.add(counterLabel);
+
+        panel.add(filterToolbar, BorderLayout.NORTH);
+
+        // Center split: Table on top, Editors on bottom
+        methodTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        methodTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                updateSelectedMethodDetails();
+                syncMethodComboFromTable();
+            }
+        });
+
+        // Right-click context menu for methodTable
+        JPopupMenu methodPopup = new JPopupMenu();
+
+        JMenuItem probeItem = new JMenuItem("Send Request");
+        probeItem.addActionListener(e -> probeSelectedMethod());
+        methodPopup.add(probeItem);
+
+        JMenuItem probeAllItem = new JMenuItem("Send All Requests");
+        probeAllItem.addActionListener(e -> probeAllVisibleMethods());
+        methodPopup.add(probeAllItem);
+
+        methodPopup.addSeparator();
+
+        JMenuItem repeaterItem = new JMenuItem("Send to Repeater");
+        repeaterItem.addActionListener(e -> sendSelectedToRepeater());
+        methodPopup.add(repeaterItem);
+
+        JMenuItem intruderItem = new JMenuItem("Send to Intruder");
+        intruderItem.addActionListener(e -> sendSelectedToIntruder());
+        methodPopup.add(intruderItem);
+
+        methodPopup.addSeparator();
+
+        JMenuItem copyPayloadItem = new JMenuItem("Copy RPC Payload");
+        copyPayloadItem.addActionListener(e -> copySelectedRpcPayload());
+        methodPopup.add(copyPayloadItem);
+
+        JMenuItem copyReqItem = new JMenuItem("Copy HTTP Request");
+        copyReqItem.addActionListener(e -> copySelectedHttpRequest());
+        methodPopup.add(copyReqItem);
+
+        methodPopup.addSeparator();
+
+        JMenuItem deserItem = new JMenuItem("Send to Deserializer");
+        deserItem.addActionListener(e -> {
+            GWTMethod m = getSelectedMethod();
+            if (m != null) {
+                deserializerPanel.setTargetUrl(m.getFullEndpointUrl());
+                loadPayloadIntoDeserializer(m.getMethodRpcCall());
+            }
+        });
+        methodPopup.add(deserItem);
+
+        JMenuItem fuzzerItem = new JMenuItem("Send to Fuzzer");
+        fuzzerItem.addActionListener(e -> {
+            GWTMethod m = getSelectedMethod();
+            if (m != null) {
+                loadPayloadIntoFuzzer(m.getFullEndpointUrl(), m.getMethodRpcCall());
+            }
+        });
+        methodPopup.add(fuzzerItem);
+
+        methodTable.setComponentPopupMenu(methodPopup);
+        methodTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int row = methodTable.rowAtPoint(e.getPoint());
+                    if (row >= 0 && !methodTable.isRowSelected(row)) {
+                        methodTable.setRowSelectionInterval(row, row);
+                    }
+                }
+            }
+        });
+
+        JScrollPane tableScroll = new JScrollPane(methodTable);
+        tableScroll.setPreferredSize(new Dimension(800, 260));
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setTopComponent(tableScroll);
+        splitPane.setBottomComponent(createEditorPanel());
+        splitPane.setDividerLocation(260);
+        splitPane.setResizeWeight(0.45);
+
+        panel.add(splitPane, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private void onMethodComboSelected() {
+        if (isSyncingMethodSelection) return;
+        int idx = methodSelectCombo.getSelectedIndex();
+        if (idx >= 0 && idx < methodTableModel.getRowCount()) {
+            isSyncingMethodSelection = true;
+            try {
+                methodTable.setRowSelectionInterval(idx, idx);
+                methodTable.scrollRectToVisible(methodTable.getCellRect(idx, 0, true));
+                updateSelectedMethodDetails();
+            } finally {
+                isSyncingMethodSelection = false;
+            }
+        }
+    }
+
+    private void syncMethodComboFromTable() {
+        if (isSyncingMethodSelection) return;
+        int row = methodTable.getSelectedRow();
+        if (row >= 0 && row < methodSelectCombo.getItemCount()) {
+            isSyncingMethodSelection = true;
+            try {
+                methodSelectCombo.setSelectedIndex(row);
+            } finally {
+                isSyncingMethodSelection = false;
+            }
+        }
+    }
+
+    private JPanel createEditorPanel() {
+        JPanel panel = new JPanel(new BorderLayout(4, 4));
+
+        // Sub tabs for editors
+        JTabbedPane editorTabs = new JTabbedPane();
+        editorTabs.addTab("Request", requestEditor.uiComponent());
+        editorTabs.addTab("Response", responseEditor.uiComponent());
+
+        rawRpcArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        rawRpcArea.setLineWrap(true);
+        rawRpcArea.setWrapStyleWord(true);
+        editorTabs.addTab("GWT-RPC Payload", new JScrollPane(rawRpcArea));
+
+        evidenceArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        evidenceArea.setEditable(false);
+        editorTabs.addTab("Evidence & Types", new JScrollPane(evidenceArea));
+
+        panel.add(editorTabs, BorderLayout.CENTER);
+        return panel;
+    }
+
+    // ── Tab: Services & Policies ─────────────────────────────────────────────
+
     private JPanel createServicesPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
         panel.setBorder(new EmptyBorder(6, 6, 6, 6));
@@ -465,19 +542,53 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    private JPanel createModuleInfoPanel() {
-        JPanel panel = new JPanel(new BorderLayout(4, 4));
-        panel.setBorder(new EmptyBorder(6, 6, 6, 6));
-
-        moduleInfoArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        moduleInfoArea.setEditable(false);
-        panel.add(new JScrollPane(moduleInfoArea), BorderLayout.CENTER);
-        return panel;
-    }
+    // ── Tab: Deobfuscated Code ───────────────────────────────────────────────
 
     private JPanel createCodeViewerPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
         panel.setBorder(new EmptyBorder(6, 6, 6, 6));
+
+        // Search Bar at Top
+        JPanel searchBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        searchBar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                new EmptyBorder(2, 4, 4, 4)
+        ));
+
+        searchBar.add(new JLabel("Find in Code:"));
+        codeSearchField.getDocument().addDocumentListener(new SimpleDocListener(this::updateCodeSearch));
+        codeSearchField.addActionListener(e -> navigateCodeMatch(1));
+        codeSearchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (e.isShiftDown()) {
+                        navigateCodeMatch(-1);
+                    } else {
+                        navigateCodeMatch(1);
+                    }
+                }
+            }
+        });
+        searchBar.add(codeSearchField);
+
+        JButton prevBtn = new JButton("▲");
+        prevBtn.setToolTipText("Previous Match (Shift+Enter)");
+        prevBtn.addActionListener(e -> navigateCodeMatch(-1));
+        searchBar.add(prevBtn);
+
+        JButton nextBtn = new JButton("▼");
+        nextBtn.setToolTipText("Next Match (Enter)");
+        nextBtn.addActionListener(e -> navigateCodeMatch(1));
+        searchBar.add(nextBtn);
+
+        codeMatchCaseBox.addActionListener(e -> updateCodeSearch());
+        searchBar.add(codeMatchCaseBox);
+
+        codeMatchCountLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        searchBar.add(codeMatchCountLabel);
+
+        panel.add(searchBar, BorderLayout.NORTH);
 
         codeViewerArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         codeViewerArea.setEditable(false);
@@ -490,6 +601,77 @@ public class GWTMapTab extends JPanel {
 
         return panel;
     }
+
+    private void updateCodeSearch() {
+        Highlighter highlighter = codeViewerArea.getHighlighter();
+        highlighter.removeAllHighlights();
+        codeMatchOffsets.clear();
+        currentCodeMatchIdx = -1;
+
+        String query = codeSearchField.getText();
+        String text = codeViewerArea.getText();
+        if (query == null || query.isEmpty() || text == null || text.isEmpty()) {
+            codeMatchCountLabel.setText("0 matches");
+            return;
+        }
+
+        boolean matchCase = codeMatchCaseBox.isSelected();
+        String searchText = matchCase ? text : text.toLowerCase();
+        String searchQuery = matchCase ? query : query.toLowerCase();
+
+        int index = 0;
+        while ((index = searchText.indexOf(searchQuery, index)) >= 0) {
+            int end = index + searchQuery.length();
+            codeMatchOffsets.add(new int[]{index, end});
+            try {
+                highlighter.addHighlight(index, end, normalHighlightPainter);
+            } catch (Throwable ignored) {}
+            index = end;
+        }
+
+        if (codeMatchOffsets.isEmpty()) {
+            codeMatchCountLabel.setText("0 matches");
+        } else {
+            currentCodeMatchIdx = 0;
+            highlightActiveCodeMatch();
+            codeMatchCountLabel.setText("Match 1 of " + codeMatchOffsets.size());
+        }
+    }
+
+    private void navigateCodeMatch(int direction) {
+        if (codeMatchOffsets.isEmpty()) return;
+        currentCodeMatchIdx = (currentCodeMatchIdx + direction + codeMatchOffsets.size()) % codeMatchOffsets.size();
+        highlightActiveCodeMatch();
+        codeMatchCountLabel.setText("Match " + (currentCodeMatchIdx + 1) + " of " + codeMatchOffsets.size());
+    }
+
+    private void highlightActiveCodeMatch() {
+        if (currentCodeMatchIdx < 0 || currentCodeMatchIdx >= codeMatchOffsets.size()) return;
+        Highlighter highlighter = codeViewerArea.getHighlighter();
+        highlighter.removeAllHighlights();
+
+        for (int i = 0; i < codeMatchOffsets.size(); i++) {
+            int[] pos = codeMatchOffsets.get(i);
+            try {
+                if (i == currentCodeMatchIdx) {
+                    highlighter.addHighlight(pos[0], pos[1], activeHighlightPainter);
+                } else {
+                    highlighter.addHighlight(pos[0], pos[1], normalHighlightPainter);
+                }
+            } catch (Throwable ignored) {}
+        }
+
+        int[] activePos = codeMatchOffsets.get(currentCodeMatchIdx);
+        codeViewerArea.setCaretPosition(activePos[0]);
+        try {
+            java.awt.geom.Rectangle2D viewRect = codeViewerArea.modelToView2D(activePos[0]);
+            if (viewRect != null) {
+                codeViewerArea.scrollRectToVisible(viewRect.getBounds());
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    // ── Status Bar & Progress ────────────────────────────────────────────────
 
     private JPanel createBottomStatusPanel() {
         JPanel panel = new JPanel(new BorderLayout(6, 4));
@@ -527,7 +709,11 @@ public class GWTMapTab extends JPanel {
 
         analyzeBtn.setEnabled(false);
         progressBar.setVisible(true);
-        progressBar.setIndeterminate(true);
+        progressBar.setIndeterminate(false);
+        progressBar.setMinimum(0);
+        progressBar.setMaximum(100);
+        progressBar.setValue(0);
+        progressBar.setString("0% - Starting analysis...");
         statusLabel.setText("Analyzing: " + target);
 
         engine.setHttpHistoryListener(entry -> SwingUtilities.invokeLater(() -> {
@@ -538,7 +724,6 @@ public class GWTMapTab extends JPanel {
                     historyResponseEditor.setResponse(entry.getRequestResponse().response());
                 } catch (Throwable ignored) {}
 
-                // Immediately show downloaded HTTP request/response in editors
                 try {
                     if (methodTable.getSelectedRow() < 0) {
                         requestEditor.setRequest(entry.getRequestResponse().request());
@@ -549,11 +734,15 @@ public class GWTMapTab extends JPanel {
         }));
 
         engine.analyzeUrl(target, baseOverride,
+                (percent, phase) -> SwingUtilities.invokeLater(() -> {
+                    progressBar.setValue(percent);
+                    progressBar.setString(percent + "% - " + phase);
+                    statusLabel.setText(percent + "%: " + phase);
+                }),
                 status -> SwingUtilities.invokeLater(() -> statusLabel.setText(status)),
                 () -> SwingUtilities.invokeLater(() -> {
                     analyzeBtn.setEnabled(true);
                     progressBar.setVisible(false);
-                    progressBar.setIndeterminate(false);
                     onAnalysisFinished();
                 })
         );
@@ -577,17 +766,25 @@ public class GWTMapTab extends JPanel {
 
             analyzeBtn.setEnabled(false);
             progressBar.setVisible(true);
-            progressBar.setIndeterminate(true);
+            progressBar.setIndeterminate(false);
+            progressBar.setMinimum(0);
+            progressBar.setMaximum(100);
+            progressBar.setValue(0);
+            progressBar.setString("0% - Reading file...");
             statusLabel.setText("Loading file: " + selectedFile.getName());
 
             String baseOverride = baseField.getText().trim();
 
             engine.analyzeFile(selectedFile, baseOverride,
+                    (percent, phase) -> SwingUtilities.invokeLater(() -> {
+                        progressBar.setValue(percent);
+                        progressBar.setString(percent + "% - " + phase);
+                        statusLabel.setText(percent + "%: " + phase);
+                    }),
                     status -> SwingUtilities.invokeLater(() -> statusLabel.setText(status)),
                     () -> SwingUtilities.invokeLater(() -> {
                         analyzeBtn.setEnabled(true);
                         progressBar.setVisible(false);
-                        progressBar.setIndeterminate(false);
                         onAnalysisFinished();
                     })
             );
@@ -597,7 +794,6 @@ public class GWTMapTab extends JPanel {
     private void onAnalysisFinished() {
         GWTModuleInfo info = dataStore.getModuleInfo();
 
-        // Update Base field if it was empty
         if (baseField.getText().isBlank()) {
             baseField.setText(info.getBaseUrl());
         }
@@ -624,7 +820,6 @@ public class GWTMapTab extends JPanel {
                 serviceNames.add(s.getServicePath());
             }
         }
-        // Rebuild service filter options
         int filterIdx = -1;
         Container parent = serviceFilterBtn.getParent();
         if (parent != null) {
@@ -653,9 +848,12 @@ public class GWTMapTab extends JPanel {
         codeViewerArea.setText(dataStore.getCleanedCode());
         codeViewerArea.setCaretPosition(0);
 
-        // Refresh Methods table
+        // Refresh Methods table & Combo
         refreshFilteredViews();
         statusLabel.setText("Analysis complete! Discovered " + dataStore.getAllMethods().size() + " methods across " + dataStore.getAllServices().size() + " services.");
+
+        // Automatically save snapshot
+        saveSession();
     }
 
     private void onPermutationChanged() {
@@ -664,7 +862,6 @@ public class GWTMapTab extends JPanel {
             return;
         }
 
-        // If user selects a different permutation from bootstrap
         String target = urlField.getText().trim();
         if (target.startsWith("http://") || target.startsWith("https://")) {
             String baseUrl = dataStore.getModuleInfo().getBaseUrl();
@@ -718,24 +915,27 @@ public class GWTMapTab extends JPanel {
     private void refreshFilteredViews() {
         String textQuery = searchField.getText();
         Set<String> selectedServices = (serviceFilterBtn != null) ? serviceFilterBtn.getSelected() : Collections.emptySet();
-        Set<String> statusFilter = (statusFilterBtn != null) ? statusFilterBtn.getSelected() : Collections.emptySet();
-        String statusStr = statusFilter.isEmpty() ? "All" : String.join(",", statusFilter);
-
-        boolean inScopeOnly = inScopeBox.isSelected();
 
         List<GWTMethod> filtered = dataStore.getFilteredEntries(
                 textQuery,
                 selectedServices,
-                statusStr,
+                "All",
                 Collections.emptySet(),
-                url -> {
-                    if (!inScopeOnly) return true;
-                    if (url == null || url.isBlank()) return false;
-                    return api.scope().isInScope(url);
-                }
+                url -> true
         );
 
         methodTableModel.setMethods(filtered);
+
+        // Update Method Selection Dropdown
+        isSyncingMethodSelection = true;
+        try {
+            methodSelectCombo.removeAllItems();
+            for (GWTMethod m : filtered) {
+                methodSelectCombo.addItem(m.getMethodName() + " (" + String.join(", ", m.getMethodSignature()) + ") - " + m.getServiceCategory());
+            }
+        } finally {
+            isSyncingMethodSelection = false;
+        }
 
         int totalMethods = dataStore.getAllMethods().size();
         int totalServices = dataStore.getAllServices().size();
@@ -747,6 +947,7 @@ public class GWTMapTab extends JPanel {
         if (!filtered.isEmpty()) {
             methodTable.setRowSelectionInterval(0, 0);
             updateSelectedMethodDetails();
+            syncMethodComboFromTable();
         } else {
             try {
                 requestEditor.setRequest(null);
@@ -825,11 +1026,11 @@ public class GWTMapTab extends JPanel {
     private void probeSelectedMethod() {
         GWTMethod method = getSelectedMethod();
         if (method == null) {
-            JOptionPane.showMessageDialog(this, "Please select a method from the table to probe.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a method from the table or dropdown to send request.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        statusLabel.setText("Probing: " + method.getMethodName() + " (" + method.getFullEndpointUrl() + ")...");
+        statusLabel.setText("Sending Request: " + method.getMethodName() + " (" + method.getFullEndpointUrl() + ")...");
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);
 
@@ -838,21 +1039,22 @@ public class GWTMapTab extends JPanel {
             progressBar.setIndeterminate(false);
             methodTableModel.fireTableDataChanged();
             updateSelectedMethodDetails();
-            statusLabel.setText("Probe finished for " + m.getMethodName() + ": HTTP " + m.getProbeStatusCode()
+            statusLabel.setText("Request sent for " + m.getMethodName() + ": HTTP " + m.getProbeStatusCode()
                     + " (" + m.getProbeResponseTimeMs() + "ms)");
+            saveSession();
         }));
     }
 
     private void probeAllVisibleMethods() {
         int count = methodTableModel.getRowCount();
         if (count == 0) {
-            JOptionPane.showMessageDialog(this, "No visible methods to probe.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No visible methods to send requests for.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to send HTTP probes to all " + count + " visible methods?",
-                "Confirm Batch Probing", JOptionPane.YES_NO_OPTION);
+                "Are you sure you want to send requests for all " + count + " visible methods?",
+                "Confirm Send All Requests", JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) return;
 
         List<GWTMethod> toProbe = new ArrayList<>();
@@ -865,21 +1067,26 @@ public class GWTMapTab extends JPanel {
         progressBar.setMinimum(0);
         progressBar.setMaximum(toProbe.size());
         progressBar.setValue(0);
-        statusLabel.setText("Probing 0/" + toProbe.size() + " methods...");
+        progressBar.setString("0/" + toProbe.size() + " (0%)");
+        statusLabel.setText("Sending requests 0/" + toProbe.size() + "...");
 
         engine.probeAll(toProbe, customHeaders,
                 current -> SwingUtilities.invokeLater(() -> {
                     progressBar.setValue(current);
-                    statusLabel.setText("Probing " + current + "/" + toProbe.size() + " methods...");
+                    int total = toProbe.size();
+                    int pct = total > 0 ? (current * 100 / total) : 0;
+                    progressBar.setString(current + "/" + total + " (" + pct + "%)");
+                    statusLabel.setText("Sent requests: " + current + "/" + total + " (" + pct + "%)...");
                     methodTableModel.fireTableDataChanged();
                 }),
                 () -> SwingUtilities.invokeLater(() -> {
                     progressBar.setVisible(false);
                     methodTableModel.fireTableDataChanged();
                     updateSelectedMethodDetails();
-                    statusLabel.setText("Batch probing completed for " + toProbe.size() + " methods!");
-                    JOptionPane.showMessageDialog(this, "Batch probing completed for " + toProbe.size() + " methods!",
-                            "GWTMap Prober", JOptionPane.INFORMATION_MESSAGE);
+                    statusLabel.setText("All requests completed for " + toProbe.size() + " methods!");
+                    saveSession();
+                    JOptionPane.showMessageDialog(this, "Completed requests for all " + toProbe.size() + " methods!",
+                            "GWTMap", JOptionPane.INFORMATION_MESSAGE);
                 })
         );
     }
@@ -957,7 +1164,31 @@ public class GWTMapTab extends JPanel {
             long lines = customHeaders.isEmpty() ? 0 : Arrays.stream(customHeaders.split("\n")).filter(s -> !s.isBlank()).count();
             headersBtn.setText("Headers & Cookies... (" + lines + ")");
             statusLabel.setText("Configured " + lines + " custom headers/cookies");
+            fuzzerPanel.setCustomHeaders(customHeaders);
             updateSelectedMethodDetails();
+            saveSession();
+        }
+    }
+
+    public void changeStorageDirectory() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select GWTMap Session Storage Directory");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        File current = persistenceManager.getStorageDirectory();
+        if (current != null && current.exists()) {
+            chooser.setSelectedFile(current);
+        }
+
+        int result = chooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File chosen = chooser.getSelectedFile();
+            if (chosen != null) {
+                persistenceManager.setStorageDirectory(chosen);
+                statusLabel.setText("Storage directory set to: " + chosen.getAbsolutePath());
+                saveSession();
+            }
         }
     }
 
@@ -967,8 +1198,11 @@ public class GWTMapTab extends JPanel {
         urlField.setText("");
         baseField.setText("");
         searchField.setText("");
+        codeSearchField.setText("");
         permutationCombo.removeAllItems();
+        methodSelectCombo.removeAllItems();
         customHeaders = "";
+        fuzzerPanel.setCustomHeaders("");
         headersBtn.setText("Headers & Cookies... (0)");
         serviceTableModel.setServices(Collections.emptyList());
         methodTableModel.setMethods(Collections.emptyList());
@@ -987,6 +1221,39 @@ public class GWTMapTab extends JPanel {
         codeViewerArea.setText("");
         counterLabel.setText("Showing 0/0 Services | 0/0 Methods");
         statusLabel.setText("Reset complete. Ready.");
+        persistenceManager.clear();
+    }
+
+    public void saveSession() {
+        persistenceManager.save(dataStore, urlField.getText(), baseField.getText(), customHeaders);
+    }
+
+    public void loadSavedSession() {
+        GWTMapPersistenceManager.SessionSnapshot snap = persistenceManager.load(dataStore);
+        if (snap != null) {
+            if (snap.targetUrl != null && !snap.targetUrl.isBlank()) {
+                urlField.setText(snap.targetUrl);
+            }
+            if (snap.permutationUrl != null && !snap.permutationUrl.isBlank()) {
+                baseField.setText(snap.permutationUrl);
+            }
+            if (snap.customHeaders != null && !snap.customHeaders.isBlank()) {
+                customHeaders = snap.customHeaders;
+                long lines = Arrays.stream(customHeaders.split("\n")).filter(s -> !s.isBlank()).count();
+                headersBtn.setText("Headers & Cookies... (" + lines + ")");
+                fuzzerPanel.setCustomHeaders(customHeaders);
+            }
+
+            // Restore HTTP History table model
+            httpHistoryModel.clear();
+            for (GwtHttpHistoryEntry entry : dataStore.getHttpHistory()) {
+                httpHistoryModel.addEntry(entry);
+            }
+
+            // Restore UI views
+            onAnalysisFinished();
+            statusLabel.setText("Restored saved session from: " + persistenceManager.getSessionFile().getAbsolutePath());
+        }
     }
 
     public void loadPayloadIntoDeserializer(String rawPayload) {
@@ -1003,6 +1270,7 @@ public class GWTMapTab extends JPanel {
         if (rawPayload != null) {
             fuzzerPanel.setBaselineBody(rawPayload);
         }
+        fuzzerPanel.setCustomHeaders(customHeaders);
         mainTabbedPane.setSelectedComponent(fuzzerPanel);
     }
 

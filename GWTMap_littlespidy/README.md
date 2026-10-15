@@ -28,57 +28,75 @@ GWTMap unifies the capabilities of three premier GWT security tools into one coh
 ## Extension Interface & Architecture
 
 ### 1. Main Suite Tab: GWTMap
-The main Suite Tab comprises seven functional tabs with a unified target input header:
+The main Suite Tab is organized into three dedicated top-level tabs with a unified target input header and cross-platform persistence:
 
-- **Target Header Controls**:
+- **Target Header Controls & Persistence**:
   - **Bootstrap URL (-u)**: Target GWT application URL or `.nocache.js` bootstrap script.
   - **Permutation URL (-b)**: Base directory URL or direct `.cache.js` permutation script URL.
   - **Permutations Selector**: Dropdown listing all discovered permutation hashes with instant switching.
-  - **Analyze Target**: High-speed multi-stage reverse engineering engine with O(1) variable map indexing and 80-line lookahead bound.
+  - **Analyze Target**: High-speed multi-stage reverse engineering engine with real-time percentage progress bar.
   - **Permutation Local File**: Offline file selection for analyzing saved `.cache.js` scripts directly from disk.
+  - **Storage Folder...**: View or configure the cross-platform session persistence directory (`gwtmap_session.json`). Data is auto-saved in the Burp project file directory (or prompts via folder chooser for temporary projects) and restored on launch.
 
-1. **Methods & Payloads**:
-   - Filter Toolbar: Real-time debounced search bar (`-f`), multi-select filter buttons for Services and Status (`200 OK`, `4xx`, `5xx`, `Probed`, `Unprobed`), and `In-Scope Only` gating.
-   - Methods Table: Lists discovered methods, service categories, parameter signatures, full endpoint URLs, status codes, latencies, and response lengths.
-   - Right-Click Context Menu: Fast workflow actions available directly on selected rows (`Send Probe`, `Probe All Visible`, `Send to Repeater`, `Send to Intruder`, `Copy RPC Payload`, `Copy HTTP Request`, `Send to Deserializer`, and `Send to Fuzzer`).
-   - Integrated Montoya Editors: Maximized full-height split-view Request and Response editors displaying live probe transactions, raw wire format payloads, and type analysis evidence without bottom button clutter.
-2. **HTTP History**:
+#### Tab 1: GWT Analysis
+Combines all core analysis tools into a structured multi-tab workspace:
+
+1. **HTTP History** (First Tab):
    - Live Traffic Streaming: Displays all network activity initiated during "Analyze Target" in real time (Bootstrap fetch, Permutation script download, deferred JavaScript fragments, and single/batch RPC probes).
    - History Table: Columns for ID, Time, Type (`BOOTSTRAP`, `PERMUTATION`, `FRAGMENT`, `PROBE`), Method, URL, Status Code, Response Length, and Round-Trip Duration (ms).
    - Integrated Split Editors: Embedded native Montoya HTTP Request and Response editors with automatic search term synchronization and syntax formatting.
-   - Toolbar & Context Actions: `Clear History`, `Send to Repeater`, `Send to Intruder`, `Copy URL`, `Copy Request`, and `Copy Response`.
-3. **Services & Policies**:
-   - Enumerates discovered service paths, serialization policy strong names (`.gwt.rpc`), and associated method counts (`--svc` mode).
-4. **Module Info**:
+   - Toolbar & Context Actions: `Clear History`, `Send to Intruder`, `Copy URL`, `Copy Request`, and `Copy Response`.
+2. **Module Info**:
    - Summary card displaying GWT Version, Content-Type, Base URL, Active Permutation Hash, RPC Version, RPC Flags, all discovered permutations, and deferred JS fragments.
+3. **Methods & Payloads**:
+   - Filter Toolbar: Real-time debounced search bar (`Search Methods:`), service selector, and method dropdown selector.
+   - Action Buttons: **Send Request** (dispatches HTTP request for the selected method/payload) and **Send All Requests** (batch sends requests for all methods with live progress tracking).
+   - Methods Table: Lists discovered methods, service categories, parameter signatures, full endpoint URLs, status codes, latencies, and response lengths.
+   - Right-Click Context Menu: Fast workflow actions (`Send Probe`, `Probe All Visible`, `Send to Repeater`, `Send to Intruder`, `Copy RPC Payload`, `Copy HTTP Request`, `Send to Deserializer`, and `Send to Fuzzer`).
+   - Integrated Montoya Editors: Split-view Request and Response editors displaying live probe transactions and raw wire format payloads.
+4. **Services & Policies**:
+   - Enumerates discovered service paths, serialization policy strong names (`.gwt.rpc`), and associated method counts (`--svc` mode).
 5. **Deobfuscated Code**:
-   - Monospace viewer displaying retabbed, beautified, and unicode-decoded JavaScript with a `Save / Backup Code to Disk...` export button.
-6. **RPC Deserializer**:
-   - Accepts raw GWT-RPC wire requests, parses them into typed AST representations, identifies all fuzzable parameter offsets, and generates Intruder-armed (`§...§`) or custom-delimited payloads with one-click `Send to Repeater` dispatch.
-   - Built-in GWT Base64 Long Codec for instant conversion between GWT Base64 strings and 64-bit decimal integers.
-7. **RPC Fuzzer & Tester**:
-   - Automated testing console for GWT endpoints.
-   - Detects fuzzable string parameters and numeric ID tokens from baseline requests.
-   - Configurable string payload lists (SQL, XSS, format strings, path traversal) and numeric ID delta sweeps (+/- N).
-   - Real-time results table tracking status codes, response lengths, response times, and highlights serialized GWT server exceptions (`//EX[`).
-   - Integrated Request and Response viewers for every executed test probe.
+   - Monospace viewer displaying retabbed, beautified, and unicode-decoded JavaScript.
+   - **Interactive Code Search**: Search bar with `< Prev` and `Next >` navigation buttons, `Match Case` toggle, match position counter (e.g. `3 / 15`), and dual-color occurrence highlighting that auto-scrolls to the active match.
+   - One-click `Save / Backup Code to Disk...` export button.
+
+#### Tab 2: RPC Deserializer
+- Accepts raw GWT-RPC wire requests, parses them into typed AST representations, resolves field types, decodes RPC flags, and identifies all fuzzable parameter offsets.
+- Built-in GWT Base64 Long Codec for instant conversion between GWT Base64 strings and 64-bit decimal integers.
+
+#### Tab 3: RPC Fuzzer & Tester
+- Automated testing console for GWT endpoints.
+- **Burp Cookie Store Integration**: Automatically extracts and includes relevant session cookies from Burp's `CookieJar` matching the target domain/path, merged with any custom headers.
+- **File Upload Options**: `Load Body from File...` for base requests and `Load Payloads from File...` for wordlists.
+- Detects fuzzable string parameters and numeric ID tokens from baseline requests.
+- Configurable string payload lists (SQL, XSS, format strings, path traversal) and numeric ID delta sweeps (+/- N).
+- Real-time results table tracking status codes, response lengths, response times, and serialized GWT server exceptions (`//EX[`).
+- Determinate percentage progress bar (`progressBar.setValue(...)` / `X / Y (Z%)`).
+
+---
 
 ### 2. Native Burp HTTP Request Editor Tab: "GWT"
 - Appears automatically in Burp Proxy, Repeater, Logger, and Intruder whenever viewing GWT-RPC traffic (`text/x-gwt-rpc` or payload starting with stream version `[0-9]+\|[0-9]+\|...`).
 - Sub-tab 1: **Parsed Call** -> Formatted AST breakdown of the method call, service interface, parameter types, values, and string table.
-- Sub-tab 2: **Armed Payload (§)** -> The request body pre-armed with Burp Intruder markers (`§...§`) for one-click copying.
+- Sub-tab 2: **Armed Payload (§)** -> The request body pre-armed with Burp Intruder markers (`§...§`).
 - Sub-tab 3: **Base64 Long Codec** -> Quick-access encoder and decoder for GWT 64-bit integers.
-- Action Buttons: `Copy Armed Payload` and `Send to GWTMap Deserializer`.
+- Action Buttons: **Send to Intruder** (arms payload and sends directly to Burp Intruder) and **Send to GWTMap Deserializer**.
+
+---
 
 ### 3. Context Menu Integration
 Right-clicking any HTTP request or response across Burp Suite provides:
 - **Send to GWTMap (Scan / Enumerate)**: Dispatches the URL of a `.nocache.js` or `.cache.js` file directly into GWTMap for full permutation and method analysis.
-- **Send to GWTMap Deserializer**: Extracts the GWT request body and loads it into the Deserializer tab for deep AST inspection and arming.
+- **Send to GWTMap Deserializer**: Extracts the GWT request body and loads it into the Deserializer tab for deep AST inspection.
 - **Send to GWTMap Fuzzer**: Extracts the target URL and request body and loads them into the automated Fuzzer tab.
 
-### 4. Passive Background Monitor
+---
+
+### 4. Passive Background Monitor & Session Persistence
 - Passively detects `.nocache.js` and `.cache.js` responses passing through Burp Proxy.
 - Automatically populates the target URL for immediate analysis if GWTMap is currently empty.
+- **Session Persistence**: Sessions auto-save on extension unloading to `gwtmap_session.json` and restore on startup across Windows, Linux, and macOS.
 
 ---
 

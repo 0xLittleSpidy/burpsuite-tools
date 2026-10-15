@@ -16,12 +16,12 @@ public class GWTModuleInfo {
     private String targetUrl = "Unknown";
     private String gwtVersion = "Unknown";
     private String activePermutation = "Unknown";
-    private final List<String> allPermutations = new ArrayList<>();
+    private List<String> allPermutations = new ArrayList<>();
     private String contentType = "text/x-gwt-rpc; charset=utf-8";
     private String baseUrl = "http://127.0.0.1/stub/";
     private String rpcVersion = "7";
     private String rpcFlags = "0";
-    private final List<String> deferredFragments = new ArrayList<>();
+    private List<String> deferredFragments = new ArrayList<>();
 
     public GWTModuleInfo() {}
 

@@ -11,9 +11,14 @@ import java.util.Objects;
  */
 public class GWTService {
 
-    private final String servicePath;
-    private final String strongName;
+    private String servicePath;
+    private String strongName;
     private int methodCount = 0;
+
+    public GWTService() {
+        this.servicePath = "Unknown";
+        this.strongName = "Unknown";
+    }
 
     public GWTService(String servicePath, String strongName) {
         this.servicePath = servicePath != null ? servicePath : "Unknown";

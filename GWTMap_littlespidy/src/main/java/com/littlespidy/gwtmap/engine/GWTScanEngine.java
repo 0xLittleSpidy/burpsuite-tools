@@ -69,6 +69,12 @@ public class GWTScanEngine {
 
     public void analyzeUrl(String targetUrl, String baseOverride,
                            Consumer<String> statusListener, Runnable onCompletion) {
+        analyzeUrl(targetUrl, baseOverride, null, statusListener, onCompletion);
+    }
+
+    public void analyzeUrl(String targetUrl, String baseOverride,
+                           java.util.function.BiConsumer<Integer, String> progressListener,
+                           Consumer<String> statusListener, Runnable onCompletion) {
         executor.submit(() -> {
             try {
                 String fetchUrl = targetUrl;
@@ -77,12 +83,13 @@ public class GWTScanEngine {
                 }
 
                 if (fetchUrl == null || fetchUrl.isBlank()) {
-                    statusListener.accept("Error: Target URL cannot be empty");
+                    if (statusListener != null) statusListener.accept("Error: Target URL cannot be empty");
                     if (onCompletion != null) onCompletion.run();
                     return;
                 }
 
-                statusListener.accept("Fetching target: " + fetchUrl);
+                if (progressListener != null) progressListener.accept(5, "Connecting to target: " + fetchUrl);
+                if (statusListener != null) statusListener.accept("Fetching target: " + fetchUrl);
                 GWTModuleInfo moduleInfo = new GWTModuleInfo();
                 moduleInfo.setTargetUrl(fetchUrl);
 
@@ -122,16 +129,17 @@ public class GWTScanEngine {
                 recordHistory(type, "GET", fetchUrl, code, len, dur, rr);
 
                 if (resp == null || resp.statusCode() != 200) {
-                    statusListener.accept("Error: Target returned HTTP " + code + " (expected 200)");
+                    if (statusListener != null) statusListener.accept("Error: Target returned HTTP " + code + " (expected 200)");
                     if (onCompletion != null) onCompletion.run();
                     return;
                 }
 
+                if (progressListener != null) progressListener.accept(20, "Downloaded target code (" + len + " bytes)");
                 String body = resp.bodyToString();
-                processDownloadedCode(body, fetchUrl, baseUrl, forcedPermutation, statusListener, onCompletion);
+                processDownloadedCode(body, fetchUrl, baseUrl, forcedPermutation, progressListener, statusListener, onCompletion);
 
             } catch (Exception e) {
-                statusListener.accept("Analysis failed: " + e.getMessage());
+                if (statusListener != null) statusListener.accept("Analysis failed: " + e.getMessage());
                 if (onCompletion != null) onCompletion.run();
             }
         });
@@ -139,9 +147,16 @@ public class GWTScanEngine {
 
     public void analyzeFile(File file, String baseOverride,
                             Consumer<String> statusListener, Runnable onCompletion) {
+        analyzeFile(file, baseOverride, null, statusListener, onCompletion);
+    }
+
+    public void analyzeFile(File file, String baseOverride,
+                            java.util.function.BiConsumer<Integer, String> progressListener,
+                            Consumer<String> statusListener, Runnable onCompletion) {
         executor.submit(() -> {
             try {
-                statusListener.accept("Reading local file: " + file.getName());
+                if (progressListener != null) progressListener.accept(10, "Reading local file: " + file.getName());
+                if (statusListener != null) statusListener.accept("Reading local file: " + file.getName());
                 String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
 
                 String baseUrl;
@@ -164,10 +179,11 @@ public class GWTScanEngine {
                     baseUrl = "http://127.0.0.1/stub/";
                 }
 
-                processDownloadedCode(content, file.getAbsolutePath(), baseUrl, forcedPerm, statusListener, onCompletion);
+                if (progressListener != null) progressListener.accept(25, "File loaded. Classifying JavaScript...");
+                processDownloadedCode(content, file.getAbsolutePath(), baseUrl, forcedPerm, progressListener, statusListener, onCompletion);
 
             } catch (Exception e) {
-                statusListener.accept("Failed reading file: " + e.getMessage());
+                if (statusListener != null) statusListener.accept("Failed reading file: " + e.getMessage());
                 if (onCompletion != null) onCompletion.run();
             }
         });
@@ -175,6 +191,7 @@ public class GWTScanEngine {
 
     private void processDownloadedCode(String rawContent, String sourcePath, String baseUrl,
                                       String forcedPermutation,
+                                      java.util.function.BiConsumer<Integer, String> progressListener,
                                       Consumer<String> statusListener, Runnable onCompletion) {
         try {
             if (forcedPermutation == null && sourcePath != null && sourcePath.contains(".cache.")) {
@@ -188,18 +205,21 @@ public class GWTScanEngine {
 
             dataStore.setRawCode(rawContent);
             GWTClassifier.CodeType codeType = GWTClassifier.classify(rawContent);
-            statusListener.accept("Classified resource as: " + codeType.name());
+            if (progressListener != null) progressListener.accept(30, "Classified resource as: " + codeType.name());
+            if (statusListener != null) statusListener.accept("Classified resource as: " + codeType.name());
 
             GWTModuleInfo info = new GWTModuleInfo();
             info.setTargetUrl(sourcePath);
             info.setBaseUrl(baseUrl);
 
+            if (progressListener != null) progressListener.accept(40, "Cleaning and normalizing code...");
             List<String> cleanedLines = GWTCodeCleaner.cleanCode(rawContent, codeType);
 
             // Handle bootstrap file -> resolve permutations
             if (codeType == GWTClassifier.CodeType.BOOTSTRAP_OBFUSCATED
                     || codeType == GWTClassifier.CodeType.BOOTSTRAP_CLEAN) {
-                statusListener.accept("Extracting permutations from bootstrap file...");
+                if (progressListener != null) progressListener.accept(45, "Extracting permutations from bootstrap...");
+                if (statusListener != null) statusListener.accept("Extracting permutations from bootstrap file...");
                 List<String> permutations = GWTParser.extractPermutations(cleanedLines, codeType);
 
                 if (forcedPermutation != null && !forcedPermutation.isBlank() && !permutations.contains(forcedPermutation)) {
@@ -212,12 +232,13 @@ public class GWTScanEngine {
                             ? forcedPermutation
                             : permutations.get(0);
                     info.setActivePermutation(selectedPerm);
-                    statusListener.accept("Selected permutation " + selectedPerm + " (" + permutations.size() + " total discovered)");
+                    if (statusListener != null) statusListener.accept("Selected permutation " + selectedPerm + " (" + permutations.size() + " total discovered)");
 
                     // If online URL, download the permutation file
                     if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
                         String permUrl = baseUrl + selectedPerm + ".cache.js";
-                        statusListener.accept("Fetching permutation cache: " + permUrl);
+                        if (progressListener != null) progressListener.accept(50, "Fetching permutation: " + selectedPerm);
+                        if (statusListener != null) statusListener.accept("Fetching permutation cache: " + permUrl);
                         try {
                             long pStart = System.currentTimeMillis();
                             HttpRequest pReq = HttpRequest.httpRequestFromUrl(permUrl);
@@ -234,15 +255,16 @@ public class GWTScanEngine {
                                 cleanedLines = GWTCodeCleaner.cleanCode(rawContent, codeType);
                             }
                         } catch (Exception pe) {
-                            statusListener.accept("Warning: Could not fetch permutation: " + pe.getMessage());
+                            if (statusListener != null) statusListener.accept("Warning: Could not fetch permutation: " + pe.getMessage());
                         }
                     }
                 } else {
-                    statusListener.accept("Warning: No permutation hashes found in bootstrap.");
+                    if (statusListener != null) statusListener.accept("Warning: No permutation hashes found in bootstrap.");
                 }
             }
 
             // Extract module metadata
+            if (progressListener != null) progressListener.accept(60, "Extracting GWT module metadata...");
             GWTParser.extractModuleInfo(cleanedLines, info);
             if (forcedPermutation != null && !forcedPermutation.isBlank()) {
                 if ("Unknown".equals(info.getActivePermutation())) {
@@ -254,12 +276,13 @@ public class GWTScanEngine {
                     info.setAllPermutations(perms);
                 }
             }
-            statusListener.accept("GWT Version: " + info.getGwtVersion() + " | RPC: v" + info.getRpcVersion());
+            if (statusListener != null) statusListener.accept("GWT Version: " + info.getGwtVersion() + " | RPC: v" + info.getRpcVersion());
 
             // Check for deferred fragments
             if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
                 if (GWTParser.isFragmented(rawContent)) {
-                    statusListener.accept("Permutation is fragmented. Enumerating deferred fragments...");
+                    if (progressListener != null) progressListener.accept(70, "Enumerating deferred fragments...");
+                    if (statusListener != null) statusListener.accept("Permutation is fragmented. Enumerating deferred fragments...");
                     appendDeferredFragments(cleanedLines, info, statusListener);
                 }
             }
@@ -268,23 +291,27 @@ public class GWTScanEngine {
             dataStore.setModuleInfo(info);
 
             // Pre-index variable definitions once in a single fast linear pass
-            statusListener.accept("Indexing JavaScript variables...");
+            if (progressListener != null) progressListener.accept(80, "Indexing JavaScript variables...");
+            if (statusListener != null) statusListener.accept("Indexing JavaScript variables...");
             Map<String, String> varMap = GWTParser.buildVariableMap(cleanedLines);
 
             // Extract services using varMap
-            statusListener.accept("Enumerating GWT services...");
+            if (progressListener != null) progressListener.accept(90, "Enumerating GWT services...");
+            if (statusListener != null) statusListener.accept("Enumerating GWT services...");
             List<GWTService> services = GWTParser.extractServiceInfo(cleanedLines, varMap);
             dataStore.setServices(services);
-            statusListener.accept("Found " + services.size() + " GWT service endpoints.");
+            if (statusListener != null) statusListener.accept("Found " + services.size() + " GWT service endpoints.");
 
             // Extract methods using varMap
-            statusListener.accept("Enumerating RPC methods and building payloads...");
+            if (progressListener != null) progressListener.accept(95, "Enumerating RPC methods & payloads...");
+            if (statusListener != null) statusListener.accept("Enumerating RPC methods and building payloads...");
             List<GWTMethod> methods = GWTParser.extractMethodInfo(cleanedLines, services, info, varMap);
             dataStore.setMethods(methods);
-            statusListener.accept("Extracted " + methods.size() + " methods across " + services.size() + " services.");
+            if (progressListener != null) progressListener.accept(100, "Done: " + methods.size() + " methods found");
+            if (statusListener != null) statusListener.accept("Extracted " + methods.size() + " methods across " + services.size() + " services.");
 
         } catch (Exception e) {
-            statusListener.accept("Error during parsing: " + e.getMessage());
+            if (statusListener != null) statusListener.accept("Error during parsing: " + e.getMessage());
         } finally {
             if (onCompletion != null) onCompletion.run();
         }
@@ -331,6 +358,49 @@ public class GWTScanEngine {
 
     // ── HTTP Probing Engine ──────────────────────────────────────────────────
 
+    public static String extractMatchingCookies(MontoyaApi api, String targetUrl, String customHeaders) {
+        StringBuilder cookieHeader = new StringBuilder();
+        try {
+            if (api != null && api.http() != null && api.http().cookieJar() != null && targetUrl != null) {
+                java.net.URI uri = java.net.URI.create(targetUrl);
+                String host = uri.getHost();
+                String path = uri.getPath();
+                if (host != null) {
+                    List<burp.api.montoya.http.message.Cookie> cookies = api.http().cookieJar().cookies();
+                    if (cookies != null) {
+                        for (burp.api.montoya.http.message.Cookie c : cookies) {
+                            String domain = c.domain();
+                            if (domain != null) {
+                                domain = domain.startsWith(".") ? domain.substring(1) : domain;
+                                if (host.equalsIgnoreCase(domain) || host.endsWith("." + domain)) {
+                                    String cPath = c.path();
+                                    if (cPath == null || cPath.isEmpty() || path == null || path.isEmpty() || path.startsWith(cPath)) {
+                                        if (cookieHeader.length() > 0) cookieHeader.append("; ");
+                                        cookieHeader.append(c.name()).append("=").append(c.value());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
+
+        if (customHeaders != null && !customHeaders.isBlank()) {
+            for (String line : customHeaders.split("\n")) {
+                line = line.trim();
+                if (line.toLowerCase().startsWith("cookie:")) {
+                    String val = line.substring("cookie:".length()).trim();
+                    if (!val.isEmpty()) {
+                        if (cookieHeader.length() > 0) cookieHeader.append("; ");
+                        cookieHeader.append(val);
+                    }
+                }
+            }
+        }
+        return cookieHeader.toString();
+    }
+
     public HttpRequest buildHttpRequest(GWTMethod method, String customHeaders, boolean includeIntruderMarkers) {
         GWTModuleInfo info = dataStore.getModuleInfo();
         String url = method.getFullEndpointUrl();
@@ -344,7 +414,13 @@ public class GWTScanEngine {
         req = req.withHeader("X-GWT-Permutation", info.getActivePermutation());
         req = req.withHeader("X-GWT-Module-Base", info.getBaseUrl());
 
-        // Apply custom headers / cookies
+        // Apply relevant cookies from Burp's cookie store and custom headers
+        String cookies = extractMatchingCookies(api, url, customHeaders);
+        if (cookies != null && !cookies.isBlank()) {
+            req = req.withHeader("Cookie", cookies);
+        }
+
+        // Apply custom headers (excluding Cookie to avoid duplicate headers)
         if (customHeaders != null && !customHeaders.isBlank()) {
             String[] lines = customHeaders.split("\n");
             for (String line : lines) {
@@ -353,7 +429,9 @@ public class GWTScanEngine {
                 if (colon > 0 && colon < line.length() - 1) {
                     String name = line.substring(0, colon).trim();
                     String val = line.substring(colon + 1).trim();
-                    req = req.withHeader(name, val);
+                    if (!name.equalsIgnoreCase("Cookie")) {
+                        req = req.withHeader(name, val);
+                    }
                 }
             }
         }

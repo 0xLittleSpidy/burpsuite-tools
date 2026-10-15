@@ -9,12 +9,17 @@ import com.littlespidy.gwtmap.engine.GWTFuzzerEngine;
 import com.littlespidy.gwtmap.model.GWTRpcPayload;
 import com.littlespidy.gwtmap.parser.GWTRpcDeserializer;
 
+import com.littlespidy.gwtmap.engine.GWTScanEngine;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +35,7 @@ public class RpcFuzzerPanel extends JPanel {
 
     private final MontoyaApi api;
     private final GWTFuzzerEngine fuzzerEngine;
+    private String customHeaders = "";
 
     // Controls
     private final JTextField urlField = new JTextField(35);
@@ -74,6 +80,10 @@ public class RpcFuzzerPanel extends JPanel {
         initUI();
     }
 
+    public void setCustomHeaders(String customHeaders) {
+        this.customHeaders = customHeaders != null ? customHeaders : "";
+    }
+
     private void initUI() {
         requestEditor = api.userInterface().createHttpRequestEditor();
         responseEditor = api.userInterface().createHttpResponseEditor();
@@ -90,6 +100,12 @@ public class RpcFuzzerPanel extends JPanel {
         JPanel urlRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
         urlRow.add(new JLabel("Target Endpoint URL:"));
         urlRow.add(urlField);
+
+        JButton loadBodyBtn = new JButton("Load Body from File...");
+        loadBodyBtn.setToolTipText("Load baseline GWT-RPC wire request body from a local file");
+        loadBodyBtn.addActionListener(e -> loadBodyFromFile());
+        urlRow.add(loadBodyBtn);
+
         JButton detectBtn = new JButton("Detect Parameters");
         detectBtn.addActionListener(e -> detectParameters());
         urlRow.add(detectBtn);
@@ -115,6 +131,14 @@ public class RpcFuzzerPanel extends JPanel {
         stringPayloadsArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         stringPayloadsArea.setText(DEFAULT_STRING_PAYLOADS);
         strOptPanel.add(new JScrollPane(stringPayloadsArea), BorderLayout.CENTER);
+
+        JPanel strBtnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
+        JButton loadPayloadsBtn = new JButton("Load Payloads from File...");
+        loadPayloadsBtn.setToolTipText("Upload a file (e.g. wordlist) and use its contents as injection payloads");
+        loadPayloadsBtn.addActionListener(e -> loadPayloadsFromFile());
+        strBtnRow.add(loadPayloadsBtn);
+        strOptPanel.add(strBtnRow, BorderLayout.SOUTH);
+
         optionsPanel.add(strOptPanel);
 
         // Right Options: ID Sweeps and Actions
@@ -225,6 +249,39 @@ public class RpcFuzzerPanel extends JPanel {
                 strCount, numCount, fuzzables.size()));
     }
 
+    private void loadBodyFromFile() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select GWT Baseline Body File");
+        int res = chooser.showOpenDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            try {
+                String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+                setBaselineBody(content);
+                JOptionPane.showMessageDialog(this, "Loaded baseline body from " + file.getName(), "GWTMap", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Failed to read file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void loadPayloadsFromFile() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Payloads File (One per line)");
+        int res = chooser.showOpenDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            try {
+                String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+                stringPayloadsArea.setText(content);
+                long count = content.lines().filter(s -> !s.isBlank()).count();
+                JOptionPane.showMessageDialog(this, "Loaded " + count + " payloads from " + file.getName(), "GWTMap", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Failed to read file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     private void runFuzzing() {
         String url = urlField.getText().trim();
         String body = baselineBodyArea.getText().trim();
@@ -244,8 +301,30 @@ public class RpcFuzzerPanel extends JPanel {
                     .withMethod("POST")
                     .withHeader("Content-Type", "text/x-gwt-rpc; charset=utf-8")
                     .withHeader("X-GWT-Permutation", "GWTMap")
-                    .withHeader("X-GWT-Module-Base", url.substring(0, url.lastIndexOf('/') + 1))
-                    .withBody(body);
+                    .withHeader("X-GWT-Module-Base", url.substring(0, url.lastIndexOf('/') + 1));
+
+            // Attach cookies from extension's cookie store (Burp cookie jar & custom headers)
+            String cookies = GWTScanEngine.extractMatchingCookies(api, url, customHeaders);
+            if (cookies != null && !cookies.isBlank()) {
+                baseReq = baseReq.withHeader("Cookie", cookies);
+            }
+
+            // Apply custom headers
+            if (customHeaders != null && !customHeaders.isBlank()) {
+                for (String line : customHeaders.split("\n")) {
+                    line = line.trim();
+                    int colon = line.indexOf(':');
+                    if (colon > 0 && colon < line.length() - 1) {
+                        String name = line.substring(0, colon).trim();
+                        String val = line.substring(colon + 1).trim();
+                        if (!name.equalsIgnoreCase("Cookie")) {
+                            baseReq = baseReq.withHeader(name, val);
+                        }
+                    }
+                }
+            }
+
+            baseReq = baseReq.withBody(body);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Invalid URL: " + ex.getMessage(), "GWTMap", JOptionPane.ERROR_MESSAGE);
             return;
@@ -261,7 +340,9 @@ public class RpcFuzzerPanel extends JPanel {
         tableModel.clear();
         startBtn.setEnabled(false);
         stopBtn.setEnabled(true);
+        progressBar.setIndeterminate(false);
         progressBar.setValue(0);
+        progressBar.setString("0%");
         progressStatusLabel.setText("Fuzzing in progress...");
 
         fuzzerEngine.startFuzzing(
@@ -269,9 +350,13 @@ public class RpcFuzzerPanel extends JPanel {
                 payloads,
                 idRange,
                 result -> SwingUtilities.invokeLater(() -> tableModel.addResult(result)),
-                currentProgress -> SwingUtilities.invokeLater(() -> {
+                (currentProgress, total) -> SwingUtilities.invokeLater(() -> {
+                    progressBar.setMinimum(0);
+                    progressBar.setMaximum(total);
                     progressBar.setValue(currentProgress);
-                    progressStatusLabel.setText("Completed probes: " + currentProgress);
+                    int pct = total > 0 ? (currentProgress * 100 / total) : 0;
+                    progressBar.setString(currentProgress + "/" + total + " (" + pct + "%)");
+                    progressStatusLabel.setText("Completed probes: " + currentProgress + "/" + total + " (" + pct + "%)");
                 }),
                 () -> SwingUtilities.invokeLater(() -> {
                     startBtn.setEnabled(true);

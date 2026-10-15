@@ -28,7 +28,6 @@ public class RpcDeserializerPanel extends JPanel {
     private final JTextArea astOutputArea = new JTextArea();
     private final JTextArea armedOutputArea = new JTextArea();
 
-    private final JTextField targetUrlField = new JTextField(35);
     private final JTextField b64InputField = new JTextField(16);
     private final JTextField b64OutputField = new JTextField(20);
     private final JTextField decInputField = new JTextField(16);
@@ -64,10 +63,6 @@ public class RpcDeserializerPanel extends JPanel {
         deserializeBtn.addActionListener(e -> deserializePayload());
         btnPanel.add(deserializeBtn);
 
-        JButton armIntruderBtn = new JButton("Arm with Intruder Markers (§)");
-        armIntruderBtn.addActionListener(e -> armPayload("§", "§"));
-        btnPanel.add(armIntruderBtn);
-
         JButton surroundBtn = new JButton("Surround Parameters...");
         surroundBtn.addActionListener(e -> showSurroundDialog());
         btnPanel.add(surroundBtn);
@@ -100,26 +95,6 @@ public class RpcDeserializerPanel extends JPanel {
         armedOutputArea.setLineWrap(true);
         armedOutputArea.setWrapStyleWord(true);
         rightPanel.add(new JScrollPane(armedOutputArea), BorderLayout.CENTER);
-
-        JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
-        JButton copyArmedBtn = new JButton("Copy Armed Payload");
-        copyArmedBtn.addActionListener(e -> {
-            String text = armedOutputArea.getText();
-            if (!text.isEmpty()) {
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
-                JOptionPane.showMessageDialog(this, "Armed payload copied to clipboard.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        rightActions.add(copyArmedBtn);
-
-        rightActions.add(new JLabel("Target URL:"));
-        rightActions.add(targetUrlField);
-
-        JButton sendRepeaterBtn = new JButton("Send to Repeater");
-        sendRepeaterBtn.addActionListener(e -> sendArmedToRepeater());
-        rightActions.add(sendRepeaterBtn);
-
-        rightPanel.add(rightActions, BorderLayout.SOUTH);
 
         JSplitPane centerSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
         centerSplit.setResizeWeight(0.5);
@@ -182,9 +157,7 @@ public class RpcDeserializerPanel extends JPanel {
     }
 
     public void setTargetUrl(String url) {
-        if (url != null) {
-            targetUrlField.setText(url.trim());
-        }
+        // Kept for backward compatibility
     }
 
     private void deserializePayload() {
@@ -240,33 +213,6 @@ public class RpcDeserializerPanel extends JPanel {
             String mutated = GWTRpcDeserializer.replaceFuzzable(raw, replacement);
             armedOutputArea.setText(mutated);
             armedOutputArea.setCaretPosition(0);
-        }
-    }
-
-    private void sendArmedToRepeater() {
-        String url = targetUrlField.getText().trim();
-        String body = armedOutputArea.getText().trim();
-
-        if (url.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid target URL first.", "GWTMap", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        if (body.isEmpty()) {
-            body = inputPayloadArea.getText().trim();
-        }
-
-        try {
-            HttpRequest req = HttpRequest.httpRequestFromUrl(url)
-                    .withMethod("POST")
-                    .withHeader("Content-Type", "text/x-gwt-rpc; charset=utf-8")
-                    .withHeader("X-GWT-Permutation", "GWTMap")
-                    .withHeader("X-GWT-Module-Base", url.substring(0, url.lastIndexOf('/') + 1))
-                    .withBody(body);
-
-            api.repeater().sendToRepeater(req, "GWTMap Deserializer");
-            JOptionPane.showMessageDialog(this, "Dispatched armed request to Repeater tab.", "GWTMap", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Failed to send to Repeater: " + ex.getMessage(), "GWTMap Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

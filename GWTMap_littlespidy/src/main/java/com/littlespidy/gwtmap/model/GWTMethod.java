@@ -173,6 +173,17 @@ public class GWTMethod {
         }
     }
 
+    public void restoreProbeResult(HttpRequest request, HttpResponse response, int statusCode, int length, String body, long elapsedMs, String notes) {
+        this.probed = true;
+        this.probeRequest = request;
+        this.probeResponse = response;
+        this.probeStatusCode = statusCode;
+        this.probeResponseLength = length;
+        this.probeResponseBody = body != null ? body : "";
+        this.probeResponseTimeMs = elapsedMs;
+        this.probeNotes = notes != null ? notes : "";
+    }
+
     public void clearProbe() {
         this.probed = false;
         this.probeStatusCode = -1;
