@@ -39,7 +39,7 @@ public class ResponseInspectorTab extends JPanel {
 
         // Tab 0: Welcome & Guide Dashboard
         WelcomeGuidePanel welcomePanel = new WelcomeGuidePanel();
-        tabbedPane.addTab("\uD83D\uDCD6 Welcome & Guide", welcomePanel);
+        tabbedPane.addTab("Welcome & Guide", welcomePanel);
 
         // Tabs 1-5: Category Findings Panels
         for (FindingCategory category : FindingCategory.values()) {
@@ -72,15 +72,19 @@ public class ResponseInspectorTab extends JPanel {
         });
     }
 
+    public InScopeDomainManager getDomainManager() {
+        return domainManager;
+    }
+
     private String getTabTitle(FindingCategory category) {
         int count = scanEngine.getDataStore(category).size();
         String badge = count > 0 ? " (" + count + ")" : "";
         return switch (category) {
-            case PASSWORD -> "\uD83D\uDD11 Passwords" + badge;
-            case PII_NETWORK_PATH -> "\uD83D\uDEE1 PII, Network & Paths" + badge;
-            case ERROR -> "\u26A0 Errors & Exceptions" + badge;
-            case SECRET -> "\uD83D\uDD10 Secrets" + badge;
-            case COMMENT -> "\uD83D\uDCAC Comments" + badge;
+            case PASSWORD -> "Passwords" + badge;
+            case PII_NETWORK_PATH -> "PII, Network & Paths" + badge;
+            case ERROR -> "Errors & Exceptions" + badge;
+            case SECRET -> "Secrets" + badge;
+            case COMMENT -> "Comments" + badge;
         };
     }
 }

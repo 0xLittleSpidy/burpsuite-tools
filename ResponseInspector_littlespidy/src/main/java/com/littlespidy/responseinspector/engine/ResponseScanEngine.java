@@ -6,6 +6,7 @@ import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import com.littlespidy.responseinspector.model.FindingCategory;
 import com.littlespidy.responseinspector.model.FindingEntry;
 import com.littlespidy.responseinspector.model.InspectorDataStore;
+import com.littlespidy.responseinspector.model.SecretClassificationManager;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,7 @@ public class ResponseScanEngine {
     private final ErrorScanner errorScanner = new ErrorScanner();
     private final SecretScanner secretScanner = new SecretScanner();
     private final CommentScanner commentScanner = new CommentScanner();
+    private final SecretClassificationManager secretClassificationManager = new SecretClassificationManager();
 
     public ResponseScanEngine() {
         for (FindingCategory category : FindingCategory.values()) {
@@ -51,6 +53,20 @@ public class ResponseScanEngine {
 
     public CommentScanner getCommentScanner() {
         return commentScanner;
+    }
+
+    public SecretClassificationManager getSecretClassificationManager() {
+        return secretClassificationManager;
+    }
+
+    private com.littlespidy.responseinspector.storage.PersistentStorageManager storageManager;
+
+    public com.littlespidy.responseinspector.storage.PersistentStorageManager getStorageManager() {
+        return storageManager;
+    }
+
+    public void setStorageManager(com.littlespidy.responseinspector.storage.PersistentStorageManager storageManager) {
+        this.storageManager = storageManager;
     }
 
     private final List<HttpRequestResponse> repeaterTraffic = new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -139,6 +155,10 @@ public class ResponseScanEngine {
             if (dataStores.get(FindingCategory.COMMENT).addEntry(entry)) {
                 newFindings++;
             }
+        }
+
+        if (newFindings > 0 && storageManager != null) {
+            storageManager.scheduleAutoSave();
         }
 
         return newFindings;

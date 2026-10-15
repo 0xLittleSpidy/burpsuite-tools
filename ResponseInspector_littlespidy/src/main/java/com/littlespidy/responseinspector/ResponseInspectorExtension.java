@@ -13,6 +13,7 @@ import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import com.littlespidy.responseinspector.engine.ResponseScanEngine;
+import com.littlespidy.responseinspector.storage.PersistentStorageManager;
 import com.littlespidy.responseinspector.ui.ResponseInspectorTab;
 
 import javax.swing.*;
@@ -36,7 +37,20 @@ public class ResponseInspectorExtension implements BurpExtension {
         api.extension().setName("Response Inspector");
 
         ResponseScanEngine scanEngine = new ResponseScanEngine();
+        PersistentStorageManager storageManager = new PersistentStorageManager(api);
+        scanEngine.setStorageManager(storageManager);
+
         ResponseInspectorTab mainTab = new ResponseInspectorTab(api, scanEngine);
+        storageManager.bindEngines(scanEngine, mainTab.getDomainManager());
+
+        // Check if project is temporary and prompt user if unconfigured
+        storageManager.promptUserIfTemporaryProject(null);
+
+        // Load stored data from disk and populate view
+        int loadedFindings = storageManager.loadData(scanEngine, mainTab.getDomainManager());
+        if (loadedFindings > 0) {
+            mainTab.refreshAllTabs();
+        }
 
         api.userInterface().registerSuiteTab("Response Inspector", mainTab);
 
@@ -93,9 +107,10 @@ public class ResponseInspectorExtension implements BurpExtension {
             }
         });
 
-        api.extension().registerUnloadingHandler(() ->
-            api.logging().logToOutput("Response Inspector unloaded.")
-        );
+        api.extension().registerUnloadingHandler(() -> {
+            storageManager.shutdown();
+            api.logging().logToOutput("Response Inspector unloaded. Stored state flushed to disk.");
+        });
 
         api.logging().logToOutput("==================================================");
         api.logging().logToOutput("Response Inspector extension loaded successfully!");

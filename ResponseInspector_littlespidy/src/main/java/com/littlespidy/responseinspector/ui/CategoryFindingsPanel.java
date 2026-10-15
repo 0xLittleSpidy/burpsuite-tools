@@ -18,6 +18,9 @@ import com.littlespidy.responseinspector.model.FindingCategory;
 import com.littlespidy.responseinspector.model.FindingEntry;
 import com.littlespidy.responseinspector.model.InScopeDomainManager;
 import com.littlespidy.responseinspector.model.InspectorDataStore;
+import com.littlespidy.responseinspector.model.SecretClassification;
+import com.littlespidy.responseinspector.model.SecretClassificationManager;
+import com.littlespidy.responseinspector.storage.StorageConfigDialog;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -88,6 +91,10 @@ public class CategoryFindingsPanel extends JPanel {
     // COMMENT-only: semantic category filter (TODO, Creds, Debug, General)
     private final MultiSelectFilterButton commentCategoryFilterBtn;
 
+    // SECRETS-only: verification classification filter dropdown
+    private final SecretClassificationManager classificationManager;
+    private JComboBox<String> classificationFilterCombo;
+
     private final JButton loadProxyBtn;
     private final JButton loadRepeaterBtn;
     private JButton configPasswordsBtn;
@@ -106,11 +113,12 @@ public class CategoryFindingsPanel extends JPanel {
         this.scanEngine = scanEngine;
         this.domainManager = domainManager;
         this.refreshAllTabsCallback = refreshAllTabsCallback;
+        this.classificationManager = scanEngine != null ? scanEngine.getSecretClassificationManager() : null;
 
         setLayout(new BorderLayout());
 
         // Table Model & Sorter (Pin column removed completely)
-        tableModel = new FindingsTableModel(dataStore);
+        tableModel = new FindingsTableModel(dataStore, category, classificationManager);
         table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -118,21 +126,41 @@ public class CategoryFindingsPanel extends JPanel {
         table.setRowSorter(sorter);
 
         // Column widths
-        // Cols: 0=#, 1=Method, 2=Status, 3=Finding Type, 4=Match Excerpt, 5=Location, 6=Length, 7=Content-Type, 8=URL, 9=Time
-        table.getColumnModel().getColumn(0).setPreferredWidth(45);   // #
-        table.getColumnModel().getColumn(0).setMaxWidth(60);
-        table.getColumnModel().getColumn(1).setPreferredWidth(60);   // Method
-        table.getColumnModel().getColumn(1).setMaxWidth(80);
-        table.getColumnModel().getColumn(2).setPreferredWidth(60);   // Status
-        table.getColumnModel().getColumn(2).setMaxWidth(75);
-        table.getColumnModel().getColumn(2).setCellRenderer(new StatusCodeRenderer());
-        table.getColumnModel().getColumn(3).setPreferredWidth(180);  // Finding Type
-        table.getColumnModel().getColumn(4).setPreferredWidth(260);  // Match Excerpt
-        table.getColumnModel().getColumn(5).setPreferredWidth(130);  // Location
-        table.getColumnModel().getColumn(6).setPreferredWidth(65);   // Length
-        table.getColumnModel().getColumn(7).setPreferredWidth(110);  // Content-Type
-        table.getColumnModel().getColumn(8).setPreferredWidth(320);  // URL
-        table.getColumnModel().getColumn(9).setPreferredWidth(70);   // Time
+        if (category == FindingCategory.SECRET) {
+            // Cols: 0=#, 1=Method, 2=Status, 3=Finding Type, 4=Classification, 5=Match Excerpt, 6=Location, 7=Length, 8=Content-Type, 9=URL, 10=Time
+            table.getColumnModel().getColumn(0).setPreferredWidth(45);   // #
+            table.getColumnModel().getColumn(0).setMaxWidth(60);
+            table.getColumnModel().getColumn(1).setPreferredWidth(60);   // Method
+            table.getColumnModel().getColumn(1).setMaxWidth(80);
+            table.getColumnModel().getColumn(2).setPreferredWidth(60);   // Status
+            table.getColumnModel().getColumn(2).setMaxWidth(75);
+            table.getColumnModel().getColumn(2).setCellRenderer(new StatusCodeRenderer());
+            table.getColumnModel().getColumn(3).setPreferredWidth(170);  // Finding Type
+            table.getColumnModel().getColumn(4).setPreferredWidth(110);  // Classification
+            table.getColumnModel().getColumn(4).setMaxWidth(130);
+            table.getColumnModel().getColumn(5).setPreferredWidth(250);  // Match Excerpt
+            table.getColumnModel().getColumn(6).setPreferredWidth(130);  // Location
+            table.getColumnModel().getColumn(7).setPreferredWidth(65);   // Length
+            table.getColumnModel().getColumn(8).setPreferredWidth(110);  // Content-Type
+            table.getColumnModel().getColumn(9).setPreferredWidth(320);  // URL
+            table.getColumnModel().getColumn(10).setPreferredWidth(70);  // Time
+        } else {
+            // Cols: 0=#, 1=Method, 2=Status, 3=Finding Type, 4=Match Excerpt, 5=Location, 6=Length, 7=Content-Type, 8=URL, 9=Time
+            table.getColumnModel().getColumn(0).setPreferredWidth(45);   // #
+            table.getColumnModel().getColumn(0).setMaxWidth(60);
+            table.getColumnModel().getColumn(1).setPreferredWidth(60);   // Method
+            table.getColumnModel().getColumn(1).setMaxWidth(80);
+            table.getColumnModel().getColumn(2).setPreferredWidth(60);   // Status
+            table.getColumnModel().getColumn(2).setMaxWidth(75);
+            table.getColumnModel().getColumn(2).setCellRenderer(new StatusCodeRenderer());
+            table.getColumnModel().getColumn(3).setPreferredWidth(180);  // Finding Type
+            table.getColumnModel().getColumn(4).setPreferredWidth(260);  // Match Excerpt
+            table.getColumnModel().getColumn(5).setPreferredWidth(130);  // Location
+            table.getColumnModel().getColumn(6).setPreferredWidth(65);   // Length
+            table.getColumnModel().getColumn(7).setPreferredWidth(110);  // Content-Type
+            table.getColumnModel().getColumn(8).setPreferredWidth(320);  // URL
+            table.getColumnModel().getColumn(9).setPreferredWidth(70);   // Time
+        }
 
         // Montoya Built-in Editors (Pretty/Raw/Hex)
         reqEditor = api.userInterface().createHttpRequestEditor();
@@ -195,15 +223,25 @@ public class CategoryFindingsPanel extends JPanel {
 
         // Secret-specific toolbar buttons (Signatures Catalog & KeyHacks Repeater verification)
         if (category == FindingCategory.SECRET) {
-            JButton catalogBtn = new JButton("📋 Signatures Catalog (" + scanEngine.getSecretScanner().getCuratedSignatures().size() + ")");
+            JButton catalogBtn = new JButton("Signatures Catalog (" + scanEngine.getSecretScanner().getCuratedSignatures().size() + ")");
             catalogBtn.setToolTipText("View complete catalog of all curated secret signatures, match patterns, and categories");
             catalogBtn.addActionListener(e -> showSignaturesCatalogDialog());
             toolbar.add(catalogBtn);
 
-            JButton verifyBtn = new JButton("🧪 Verify Secret (Repeater)");
+            JButton verifyBtn = new JButton("Verify Secret (Repeater)");
             verifyBtn.setToolTipText("Send non-destructive verification request directly to Burp Repeater");
             verifyBtn.addActionListener(e -> verifySelectedSecret());
             toolbar.add(verifyBtn);
+
+            JButton markTpBtn = new JButton("Mark TP");
+            markTpBtn.setToolTipText("Mark selected request(s) as True Positive");
+            markTpBtn.addActionListener(e -> markSelectedRequests(SecretClassification.TRUE_POSITIVE));
+            toolbar.add(markTpBtn);
+
+            JButton markFpBtn = new JButton("Mark FP");
+            markFpBtn.setToolTipText("Mark selected request(s) as False Positive");
+            markFpBtn.addActionListener(e -> markSelectedRequests(SecretClassification.FALSE_POSITIVE));
+            toolbar.add(markFpBtn);
         }
 
         toolbar.add(new JSeparator(JSeparator.VERTICAL));
@@ -290,6 +328,21 @@ public class CategoryFindingsPanel extends JPanel {
         );
         toolbar.add(contentTypeFilterBtn);
 
+        // SECRETS-only: classification filter dropdown
+        if (category == FindingCategory.SECRET) {
+            toolbar.add(new JLabel("Classification:"));
+            classificationFilterCombo = new JComboBox<>(new String[]{
+                    "True Positive",
+                    "False Positive",
+                    "Not Verified",
+                    "All Requests"
+            });
+            classificationFilterCombo.setSelectedItem("All Requests");
+            classificationFilterCombo.setToolTipText("Filter requests by verification classification");
+            classificationFilterCombo.addActionListener(e -> refreshView());
+            toolbar.add(classificationFilterCombo);
+        }
+
         toolbar.add(new JLabel("Search:"));
         searchField = new JTextField(12);
         searchField.getDocument().addDocumentListener(new DocumentListener() {
@@ -300,11 +353,14 @@ public class CategoryFindingsPanel extends JPanel {
         toolbar.add(searchField);
 
         JButton clearDataBtn = new JButton("Clear");
-        clearDataBtn.addActionListener(e -> {
-            dataStore.clear();
-            refreshView();
-        });
+        clearDataBtn.setToolTipText("Clear findings from memory or permanently delete from disk");
+        clearDataBtn.addActionListener(e -> handleClearAction());
         toolbar.add(clearDataBtn);
+
+        JButton storageBtn = new JButton("Storage...");
+        storageBtn.setToolTipText("Configure persistent storage directory, view disk usage, or delete stored data");
+        storageBtn.addActionListener(e -> openStorageConfigDialog());
+        toolbar.add(storageBtn);
 
         JButton exportTsvBtn = new JButton("Export TSV");
         exportTsvBtn.setToolTipText("Export currently displayed findings to a Tab-Separated Values (.tsv) file");
@@ -377,6 +433,17 @@ public class CategoryFindingsPanel extends JPanel {
             if (!selectedCategories.isEmpty()) {
                 filtered = filtered.stream()
                         .filter(e -> selectedCategories.contains(e.matchLocation()))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // Post-filter: classification (Secrets tab only)
+        if (category == FindingCategory.SECRET && classificationFilterCombo != null && classificationManager != null) {
+            String selClass = (String) classificationFilterCombo.getSelectedItem();
+            if (selClass != null && !selClass.equals("All Requests")) {
+                SecretClassification target = SecretClassification.fromDisplayName(selClass);
+                filtered = filtered.stream()
+                        .filter(e -> classificationManager.getEffectiveClassification(e) == target)
                         .collect(Collectors.toList());
             }
         }
@@ -538,12 +605,6 @@ public class CategoryFindingsPanel extends JPanel {
                 String tabName = "Verify: " + (ruleName.length() > 16 ? ruleName.substring(0, 16) : ruleName);
                 api.repeater().sendToRepeater(req, tabName);
                 api.logging().logToOutput("[Secret Verifier] Dispatched verification request for '" + ruleName + "' to Repeater tab '" + tabName + "'");
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Verification request for '" + ruleName + "' sent to Burp Repeater (Tab: " + tabName + ").",
-                    "Sent to Repeater",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
             } else {
                 JOptionPane.showMessageDialog(
                     this,
@@ -565,9 +626,9 @@ public class CategoryFindingsPanel extends JPanel {
     private void showSignaturesCatalogDialog() {
         Window parentWin = SwingUtilities.getWindowAncestor(this);
         List<SecretScanner.SecretSignatureInfo> allSigs = scanEngine.getSecretScanner().getCuratedSignatures();
-        JDialog dialog = new JDialog(parentWin, "📋 Curated Secret Signatures & Match Patterns Catalog (" + allSigs.size() + " Signatures)", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(parentWin, "Curated Secret Signatures & Match Patterns Catalog (" + allSigs.size() + " Signatures)", Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(1050, 600);
+        dialog.setSize(1100, 600);
         dialog.setLocationRelativeTo(parentWin);
 
         JPanel contentPanel = new JPanel(new BorderLayout(8, 8));
@@ -586,7 +647,7 @@ public class CategoryFindingsPanel extends JPanel {
         topBar.add(searchRow, BorderLayout.EAST);
         contentPanel.add(topBar, BorderLayout.NORTH);
 
-        String[] cols = {"#", "Signature / Rule Name", "Category", "Matching Regex Pattern", "Confidence", "Shannon Entropy Guard"};
+        String[] cols = {"#", "Signature / Rule Name", "Category", "Matching Regex Pattern", "Confidence", "Shannon Entropy Guard", "Classification"};
 
         DefaultTableModel catModel = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
@@ -597,24 +658,27 @@ public class CategoryFindingsPanel extends JPanel {
 
         for (int i = 0; i < allSigs.size(); i++) {
             SecretScanner.SecretSignatureInfo s = allSigs.get(i);
+            String clName = classificationManager != null ? classificationManager.getTypeClassification(s.name()).getDisplayName() : "Not Verified";
             catModel.addRow(new Object[]{
                 i + 1,
                 s.name(),
                 s.category(),
                 s.pattern(),
                 s.confidence() + "%",
-                s.needsEntropy() ? "Yes (Entropy \u2265 3.0)" : "Exact Pattern Match"
+                s.needsEntropy() ? "Yes (Entropy \u2265 3.0)" : "Exact Pattern Match",
+                clName
             });
         }
 
         JTable catTable = new JTable(catModel);
         catTable.setRowHeight(24);
         catTable.getColumnModel().getColumn(0).setPreferredWidth(35);
-        catTable.getColumnModel().getColumn(1).setPreferredWidth(200);
-        catTable.getColumnModel().getColumn(2).setPreferredWidth(160);
-        catTable.getColumnModel().getColumn(3).setPreferredWidth(400);
+        catTable.getColumnModel().getColumn(1).setPreferredWidth(190);
+        catTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+        catTable.getColumnModel().getColumn(3).setPreferredWidth(360);
         catTable.getColumnModel().getColumn(4).setPreferredWidth(85);
-        catTable.getColumnModel().getColumn(5).setPreferredWidth(170);
+        catTable.getColumnModel().getColumn(5).setPreferredWidth(160);
+        catTable.getColumnModel().getColumn(6).setPreferredWidth(120);
 
         catTable.getColumnModel().getColumn(3).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
             private final Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 11);
@@ -646,7 +710,67 @@ public class CategoryFindingsPanel extends JPanel {
 
         contentPanel.add(new JScrollPane(catTable), BorderLayout.CENTER);
 
-        JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
+
+        Runnable updateDialogRows = () -> {
+            for (int r = 0; r < allSigs.size(); r++) {
+                SecretScanner.SecretSignatureInfo s = allSigs.get(r);
+                String clName = classificationManager != null ? classificationManager.getTypeClassification(s.name()).getDisplayName() : "Not Verified";
+                catModel.setValueAt(clName, r, 6);
+            }
+            refreshView();
+        };
+
+        JButton markTypeTpBtn = new JButton("Mark Type as TP");
+        markTypeTpBtn.addActionListener(e -> {
+            int viewRow = catTable.getSelectedRow();
+            if (viewRow < 0) {
+                JOptionPane.showMessageDialog(dialog, "Please select a secret type from the catalog table.", "No Selection", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            int modelRow = catTable.convertRowIndexToModel(viewRow);
+            SecretScanner.SecretSignatureInfo s = allSigs.get(modelRow);
+            if (classificationManager != null) {
+                classificationManager.markSecretType(s.name(), SecretClassification.TRUE_POSITIVE);
+                updateDialogRows.run();
+            }
+        });
+
+        JButton markTypeFpBtn = new JButton("Mark Type as FP");
+        markTypeFpBtn.addActionListener(e -> {
+            int viewRow = catTable.getSelectedRow();
+            if (viewRow < 0) {
+                JOptionPane.showMessageDialog(dialog, "Please select a secret type from the catalog table.", "No Selection", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            int modelRow = catTable.convertRowIndexToModel(viewRow);
+            SecretScanner.SecretSignatureInfo s = allSigs.get(modelRow);
+            if (classificationManager != null) {
+                classificationManager.markSecretType(s.name(), SecretClassification.FALSE_POSITIVE);
+                updateDialogRows.run();
+            }
+        });
+
+        JButton markTypeNvBtn = new JButton("Reset Classification");
+        markTypeNvBtn.addActionListener(e -> {
+            int viewRow = catTable.getSelectedRow();
+            if (viewRow < 0) {
+                JOptionPane.showMessageDialog(dialog, "Please select a secret type from the catalog table.", "No Selection", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            int modelRow = catTable.convertRowIndexToModel(viewRow);
+            SecretScanner.SecretSignatureInfo s = allSigs.get(modelRow);
+            if (classificationManager != null) {
+                classificationManager.clearSecretTypeClassification(s.name());
+                updateDialogRows.run();
+            }
+        });
+
+        bottomBar.add(markTypeTpBtn);
+        bottomBar.add(markTypeFpBtn);
+        bottomBar.add(markTypeNvBtn);
+        bottomBar.add(new JSeparator(JSeparator.VERTICAL));
+
         JButton closeBtn = new JButton("Close");
         closeBtn.addActionListener(e -> dialog.dispose());
         bottomBar.add(closeBtn);
@@ -693,6 +817,61 @@ public class CategoryFindingsPanel extends JPanel {
             }
         });
         dialog.setVisible(true);
+    }
+
+    private void openStorageConfigDialog() {
+        Frame topFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+        if (scanEngine != null && scanEngine.getStorageManager() != null) {
+            StorageConfigDialog dialog = new StorageConfigDialog(
+                    topFrame,
+                    scanEngine.getStorageManager(),
+                    scanEngine,
+                    domainManager,
+                    refreshAllTabsCallback != null ? refreshAllTabsCallback : this::refreshView
+            );
+            dialog.setVisible(true);
+        }
+    }
+
+    private void handleClearAction() {
+        if (scanEngine == null || scanEngine.getStorageManager() == null) {
+            dataStore.clear();
+            refreshView();
+            return;
+        }
+
+        Object[] options = {"Clear Memory Only", "Delete from Disk", "Cancel"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                "Would you like to clear findings for this category from memory only,\n"
+                        + "or permanently delete stored data from disk as well?",
+                "Clear Findings",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if (choice == 0) { // Clear Memory Only
+            dataStore.clear();
+            refreshView();
+        } else if (choice == 1) { // Delete from Disk
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to permanently delete all persistent storage files from disk?\n"
+                            + "This cannot be undone.",
+                    "Confirm Disk Deletion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if (confirm == JOptionPane.YES_OPTION) {
+                scanEngine.getStorageManager().deleteStoredData();
+                dataStore.clear();
+                refreshView();
+                JOptionPane.showMessageDialog(this, "Persistent storage files deleted from disk.", "Data Deleted", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
     }
 
     // ─── Proxy History Scan with Live Progress Bar & Scope Architecture ──────────
@@ -1014,6 +1193,17 @@ public class CategoryFindingsPanel extends JPanel {
             }
         }
 
+        // Apply classification post-filter for export
+        if (category == FindingCategory.SECRET && classificationFilterCombo != null && classificationManager != null) {
+            String selClass = (String) classificationFilterCombo.getSelectedItem();
+            if (selClass != null && !selClass.equals("All Requests")) {
+                SecretClassification target = SecretClassification.fromDisplayName(selClass);
+                currentFindings = currentFindings.stream()
+                        .filter(e -> classificationManager.getEffectiveClassification(e) == target)
+                        .collect(Collectors.toList());
+            }
+        }
+
         if (currentFindings.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No findings available to export.", "Export TSV", JOptionPane.INFORMATION_MESSAGE);
             return;
@@ -1037,21 +1227,40 @@ public class CategoryFindingsPanel extends JPanel {
         }
 
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fileToSave), StandardCharsets.UTF_8))) {
-            writer.println("#\tMethod\tStatus\tFinding Type\tMatch Excerpt\tLocation\tLength\tContent-Type\tURL\tTime");
+            if (category == FindingCategory.SECRET && classificationManager != null) {
+                writer.println("#\tMethod\tStatus\tFinding Type\tClassification\tMatch Excerpt\tLocation\tLength\tContent-Type\tURL\tTime");
+                for (FindingEntry e : currentFindings) {
+                    writer.printf("%d\t%s\t%d\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n",
+                            e.id(),
+                            e.method(),
+                            e.statusCode(),
+                            e.patternName().replace("\t", " "),
+                            classificationManager.getEffectiveClassification(e).getDisplayName(),
+                            e.matchValue().replace("\t", " ").replace("\n", " "),
+                            e.matchLocation().replace("\t", " "),
+                            e.contentLength(),
+                            e.contentType().replace("\t", " "),
+                            e.url().replace("\t", " "),
+                            e.timeString()
+                    );
+                }
+            } else {
+                writer.println("#\tMethod\tStatus\tFinding Type\tMatch Excerpt\tLocation\tLength\tContent-Type\tURL\tTime");
 
-            for (FindingEntry e : currentFindings) {
-                writer.printf("%d\t%s\t%d\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n",
-                        e.id(),
-                        e.method(),
-                        e.statusCode(),
-                        e.patternName().replace("\t", " "),
-                        e.matchValue().replace("\t", " ").replace("\n", " "),
-                        e.matchLocation().replace("\t", " "),
-                        e.contentLength(),
-                        e.contentType().replace("\t", " "),
-                        e.url().replace("\t", " "),
-                        e.timeString()
-                );
+                for (FindingEntry e : currentFindings) {
+                    writer.printf("%d\t%s\t%d\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n",
+                            e.id(),
+                            e.method(),
+                            e.statusCode(),
+                            e.patternName().replace("\t", " "),
+                            e.matchValue().replace("\t", " ").replace("\n", " "),
+                            e.matchLocation().replace("\t", " "),
+                            e.contentLength(),
+                            e.contentType().replace("\t", " "),
+                            e.url().replace("\t", " "),
+                            e.timeString()
+                    );
+                }
             }
 
             JOptionPane.showMessageDialog(
@@ -1135,7 +1344,7 @@ public class CategoryFindingsPanel extends JPanel {
 
         // Secret-specific context menu items
         if (category == FindingCategory.SECRET) {
-            JMenuItem verifySecretItem = new JMenuItem("🧪 Verify Secret (Repeater)");
+            JMenuItem verifySecretItem = new JMenuItem("Verify Secret (Repeater)");
             verifySecretItem.addActionListener(e -> verifySelectedSecret());
             popup.add(verifySecretItem);
 
@@ -1154,6 +1363,31 @@ public class CategoryFindingsPanel extends JPanel {
             });
             popup.add(copySecretItem);
             popup.addSeparator();
+
+            JMenu markReqMenu = new JMenu("Mark Request as");
+            JMenuItem markReqTp = new JMenuItem("True Positive (TP)");
+            markReqTp.addActionListener(e -> markSelectedRequests(SecretClassification.TRUE_POSITIVE));
+            JMenuItem markReqFp = new JMenuItem("False Positive (FP)");
+            markReqFp.addActionListener(e -> markSelectedRequests(SecretClassification.FALSE_POSITIVE));
+            JMenuItem markReqNv = new JMenuItem("Not Verified");
+            markReqNv.addActionListener(e -> markSelectedRequests(SecretClassification.NOT_VERIFIED));
+            markReqMenu.add(markReqTp);
+            markReqMenu.add(markReqFp);
+            markReqMenu.add(markReqNv);
+            popup.add(markReqMenu);
+
+            JMenu markTypeMenu = new JMenu("Mark Secret Type as");
+            JMenuItem markTypeTp = new JMenuItem("True Positive (TP)");
+            markTypeTp.addActionListener(e -> markSelectedSecretTypes(SecretClassification.TRUE_POSITIVE));
+            JMenuItem markTypeFp = new JMenuItem("False Positive (FP)");
+            markTypeFp.addActionListener(e -> markSelectedSecretTypes(SecretClassification.FALSE_POSITIVE));
+            JMenuItem markTypeNv = new JMenuItem("Not Verified");
+            markTypeNv.addActionListener(e -> markSelectedSecretTypes(SecretClassification.NOT_VERIFIED));
+            markTypeMenu.add(markTypeTp);
+            markTypeMenu.add(markTypeFp);
+            markTypeMenu.add(markTypeNv);
+            popup.add(markTypeMenu);
+            popup.addSeparator();
         }
 
         popup.add(copyMatch);
@@ -1162,6 +1396,52 @@ public class CategoryFindingsPanel extends JPanel {
         popup.add(exportTsvItem);
 
         table.setComponentPopupMenu(popup);
+    }
+
+    public void markSelectedRequests(SecretClassification classification) {
+        if (classificationManager == null) return;
+        int[] selectedRows = table.getSelectedRows();
+        if (selectedRows.length == 0) {
+            JOptionPane.showMessageDialog(this, "Please select at least one request row.", "No Selection", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        for (int viewRow : selectedRows) {
+            int modelRow = table.convertRowIndexToModel(viewRow);
+            FindingEntry entry = tableModel.getEntryAt(modelRow);
+            if (entry != null) {
+                classificationManager.markRequest(entry, classification);
+            }
+        }
+        refreshView();
+    }
+
+    public void markSelectedSecretTypes(SecretClassification classification) {
+        if (classificationManager == null) return;
+        int[] selectedRows = table.getSelectedRows();
+        if (selectedRows.length == 0) {
+            JOptionPane.showMessageDialog(this, "Please select at least one secret row.", "No Selection", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        java.util.Set<String> affectedTypes = new java.util.LinkedHashSet<>();
+        for (int viewRow : selectedRows) {
+            int modelRow = table.convertRowIndexToModel(viewRow);
+            FindingEntry entry = tableModel.getEntryAt(modelRow);
+            if (entry != null && entry.patternName() != null) {
+                affectedTypes.add(entry.patternName());
+            }
+        }
+        for (String typeName : affectedTypes) {
+            classificationManager.markSecretType(typeName, classification);
+        }
+        refreshView();
+    }
+
+    public JComboBox<String> getClassificationFilterCombo() {
+        return classificationFilterCombo;
+    }
+
+    public FindingsTableModel getTableModel() {
+        return tableModel;
     }
 
     private void setupClipboardShortcut() {

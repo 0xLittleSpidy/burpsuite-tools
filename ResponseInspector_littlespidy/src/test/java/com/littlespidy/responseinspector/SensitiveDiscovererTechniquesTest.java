@@ -7,9 +7,15 @@ import com.littlespidy.responseinspector.engine.RefinerRule;
 import com.littlespidy.responseinspector.engine.ScannerUtils;
 import com.littlespidy.responseinspector.model.FindingCategory;
 import com.littlespidy.responseinspector.model.FindingEntry;
+import com.littlespidy.responseinspector.model.SecretClassification;
+import com.littlespidy.responseinspector.model.SecretClassificationManager;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -324,5 +330,191 @@ public class SensitiveDiscovererTechniquesTest {
         assertTrue(com.littlespidy.responseinspector.engine.CommentScanner.getCommentTypes().contains("Single-Line (//)"));
         assertTrue(com.littlespidy.responseinspector.engine.CommentScanner.getCommentTypes().contains("Multi-Line (/* */)"));
         assertTrue(com.littlespidy.responseinspector.engine.CommentScanner.getCommentTypes().contains("HTML (<!-- -->)"));
+    }
+
+    @Test
+    public void testClassificationRule1IndividualOverridesType() {
+        SecretClassificationManager manager = new SecretClassificationManager();
+
+        FindingEntry req1 = new FindingEntry(1, FindingCategory.SECRET, "Slack Token", "xoxb-123",
+                "Response Body", "GET", "https://api.target.com/a", "api.target.com", "/a", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+        FindingEntry req2 = new FindingEntry(2, FindingCategory.SECRET, "Slack Token", "xoxb-456",
+                "Response Body", "POST", "https://api.target.com/b", "api.target.com", "/b", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+
+        // Case A: Mark entire secret type as FP first, then mark specific request as TP
+        manager.markSecretType("Slack Token", SecretClassification.FALSE_POSITIVE);
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req1));
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req2));
+
+        manager.markRequest(req1, SecretClassification.TRUE_POSITIVE);
+        // Request 1 must be TP, Request 2 must remain FP
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req1));
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req2));
+
+        // Case B: Mark entire secret type as TP first, then mark specific request as FP
+        manager.clear();
+        FindingEntry req3 = new FindingEntry(3, FindingCategory.SECRET, "AWS Access Key", "AKIA1111",
+                "Response Body", "GET", "https://api.target.com/c", "api.target.com", "/c", (short) 200, "text/plain", 50, null, "12:00", 0, 10);
+        FindingEntry req4 = new FindingEntry(4, FindingCategory.SECRET, "AWS Access Key", "AKIA2222",
+                "Response Body", "POST", "https://api.target.com/d", "api.target.com", "/d", (short) 200, "text/plain", 50, null, "12:00", 0, 10);
+
+        manager.markSecretType("AWS Access Key", SecretClassification.TRUE_POSITIVE);
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req3));
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req4));
+
+        manager.markRequest(req3, SecretClassification.FALSE_POSITIVE);
+        // Request 3 must be FP, Request 4 must remain TP
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req3));
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req4));
+    }
+
+    @Test
+    public void testClassificationRule2SecretTypeAppliesExceptExplicitIndividual() {
+        SecretClassificationManager manager = new SecretClassificationManager();
+
+        FindingEntry req1 = new FindingEntry(10, FindingCategory.SECRET, "GitHub Token", "ghp_111",
+                "Response Body", "GET", "https://api.target.com/x", "api.target.com", "/x", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+        FindingEntry req2 = new FindingEntry(11, FindingCategory.SECRET, "GitHub Token", "ghp_222",
+                "Response Body", "GET", "https://api.target.com/y", "api.target.com", "/y", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+
+        // Case A: Mark single request as TP first, then mark entire secret type as FP
+        manager.markRequest(req1, SecretClassification.TRUE_POSITIVE);
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req1));
+        assertEquals(SecretClassification.NOT_VERIFIED, manager.getEffectiveClassification(req2));
+
+        manager.markSecretType("GitHub Token", SecretClassification.FALSE_POSITIVE);
+        // Individually marked request must remain TP, while req2 must become FP
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req1));
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req2));
+
+        // Case B: Mark single request as FP first, then mark entire secret type as TP
+        manager.clear();
+        FindingEntry req3 = new FindingEntry(12, FindingCategory.SECRET, "Stripe Key", "sk_live_111",
+                "Response Body", "GET", "https://api.target.com/s1", "api.target.com", "/s1", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+        FindingEntry req4 = new FindingEntry(13, FindingCategory.SECRET, "Stripe Key", "sk_live_222",
+                "Response Body", "GET", "https://api.target.com/s2", "api.target.com", "/s2", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+
+        manager.markRequest(req3, SecretClassification.FALSE_POSITIVE);
+        manager.markSecretType("Stripe Key", SecretClassification.TRUE_POSITIVE);
+        // Individually marked request must remain FP, while req4 must become TP
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req3));
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req4));
+    }
+
+    @Test
+    public void testClassificationPreservedOnSubsequentTypeChanges() {
+        SecretClassificationManager manager = new SecretClassificationManager();
+
+        FindingEntry req1 = new FindingEntry(20, FindingCategory.SECRET, "OpenAI API Key", "sk-proj-111",
+                "Response Body", "GET", "https://api.target.com/ai1", "api.target.com", "/ai1", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+        FindingEntry req2 = new FindingEntry(21, FindingCategory.SECRET, "OpenAI API Key", "sk-proj-222",
+                "Response Body", "GET", "https://api.target.com/ai2", "api.target.com", "/ai2", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+        FindingEntry req3 = new FindingEntry(22, FindingCategory.SECRET, "OpenAI API Key", "sk-proj-333",
+                "Response Body", "GET", "https://api.target.com/ai3", "api.target.com", "/ai3", (short) 200, "application/json", 50, null, "12:00", 0, 10);
+
+        manager.markRequest(req1, SecretClassification.TRUE_POSITIVE);
+        manager.markRequest(req2, SecretClassification.FALSE_POSITIVE);
+
+        // Type is initially unset -> req3 is NOT_VERIFIED
+        assertEquals(SecretClassification.NOT_VERIFIED, manager.getEffectiveClassification(req3));
+
+        // Change secret type to TP
+        manager.markSecretType("OpenAI API Key", SecretClassification.TRUE_POSITIVE);
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req1));
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req2));
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req3));
+
+        // Change secret type to FP
+        manager.markSecretType("OpenAI API Key", SecretClassification.FALSE_POSITIVE);
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req1));
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req2));
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req3));
+
+        // Clear secret type classification
+        manager.clearSecretTypeClassification("OpenAI API Key");
+        assertEquals(SecretClassification.TRUE_POSITIVE, manager.getEffectiveClassification(req1));
+        assertEquals(SecretClassification.FALSE_POSITIVE, manager.getEffectiveClassification(req2));
+        assertEquals(SecretClassification.NOT_VERIFIED, manager.getEffectiveClassification(req3));
+    }
+
+    @Test
+    public void testClassificationFiltering() {
+        SecretClassificationManager manager = new SecretClassificationManager();
+
+        FindingEntry tpEntry = new FindingEntry(30, FindingCategory.SECRET, "AWS S3 Bucket", "tp-bucket.s3.amazonaws.com",
+                "Response Body", "GET", "https://api.target.com/1", "api.target.com", "/1", (short) 200, "text/plain", 50, null, "12:00", 0, 10);
+        FindingEntry fpEntry = new FindingEntry(31, FindingCategory.SECRET, "AWS S3 Bucket", "fp-bucket.s3.amazonaws.com",
+                "Response Body", "GET", "https://api.target.com/2", "api.target.com", "/2", (short) 200, "text/plain", 50, null, "12:00", 0, 10);
+        FindingEntry nvEntry = new FindingEntry(32, FindingCategory.SECRET, "Slack Token", "xoxb-unverified",
+                "Response Body", "GET", "https://api.target.com/3", "api.target.com", "/3", (short) 200, "text/plain", 50, null, "12:00", 0, 10);
+
+        manager.markRequest(tpEntry, SecretClassification.TRUE_POSITIVE);
+        manager.markRequest(fpEntry, SecretClassification.FALSE_POSITIVE);
+
+        List<FindingEntry> all = List.of(tpEntry, fpEntry, nvEntry);
+
+        // Filter: True Positive
+        List<FindingEntry> tpList = all.stream()
+                .filter(e -> manager.getEffectiveClassification(e) == SecretClassification.TRUE_POSITIVE)
+                .collect(Collectors.toList());
+        assertEquals(1, tpList.size());
+        assertEquals("tp-bucket.s3.amazonaws.com", tpList.get(0).matchValue());
+
+        // Filter: False Positive
+        List<FindingEntry> fpList = all.stream()
+                .filter(e -> manager.getEffectiveClassification(e) == SecretClassification.FALSE_POSITIVE)
+                .collect(Collectors.toList());
+        assertEquals(1, fpList.size());
+        assertEquals("fp-bucket.s3.amazonaws.com", fpList.get(0).matchValue());
+
+        // Filter: Not Verified
+        List<FindingEntry> nvList = all.stream()
+                .filter(e -> manager.getEffectiveClassification(e) == SecretClassification.NOT_VERIFIED)
+                .collect(Collectors.toList());
+        assertEquals(1, nvList.size());
+        assertEquals("xoxb-unverified", nvList.get(0).matchValue());
+
+        // Filter: All Requests (no filter applied)
+        assertEquals(3, all.size());
+    }
+
+    @Test
+    public void testNoEmojisInExtensionCodebase() throws Exception {
+        File srcDir = new File("src/main/java");
+        assertTrue(srcDir.exists() && srcDir.isDirectory());
+
+        java.util.regex.Pattern unicodeEscapeEmoji = java.util.regex.Pattern.compile(
+                "\\\\u(D83[C-E]\\\\u[0-9A-Fa-f]{4}|26[0-9A-Fa-f]{2}|27[0-9A-Fa-f]{2}|2B[0-9A-Fa-f]{2})"
+        );
+
+        int checkedFiles = 0;
+        try (var stream = Files.walk(srcDir.toPath())) {
+            List<File> javaFiles = stream
+                    .filter(Files::isRegularFile)
+                    .map(java.nio.file.Path::toFile)
+                    .filter(f -> f.getName().endsWith(".java"))
+                    .collect(Collectors.toList());
+
+            for (File file : javaFiles) {
+                checkedFiles++;
+                String content = Files.readString(file.toPath());
+
+                // Check for unicode escapes that represent emojis
+                assertFalse(unicodeEscapeEmoji.matcher(content).find(),
+                        "Found emoji unicode escape in: " + file.getName());
+
+                // Check for literal emojis
+                for (int i = 0; i < content.length(); i++) {
+                    int codePoint = content.codePointAt(i);
+                    // Check standard emoji unicode blocks
+                    boolean isEmoji = (codePoint >= 0x1F300 && codePoint <= 0x1FAFF)
+                            || (codePoint >= 0x2600 && codePoint <= 0x27BF);
+                    assertFalse(isEmoji,
+                            String.format("Found literal emoji (U+%04X) in file: %s at character offset %d",
+                                    codePoint, file.getName(), i));
+                }
+            }
+        }
+        assertTrue(checkedFiles > 10, "Should have audited at least 10 Java source files.");
     }
 }
