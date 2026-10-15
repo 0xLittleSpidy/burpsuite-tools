@@ -78,8 +78,24 @@ public class CookieFinderEngine {
      */
     public void startAnalysis(HttpRequest originalRequest,
                               String customHeadersInput,
+                              boolean includeCustomHeaders,
+                              ExecutionListener listener) {
+        startAnalysis(originalRequest, customHeadersInput, true, false, includeCustomHeaders, listener);
+    }
+
+    public void startAnalysis(HttpRequest originalRequest,
+                              String customHeadersInput,
                               boolean includeAnonymous,
                               boolean includeGroupTests,
+                              ExecutionListener listener) {
+        startAnalysis(originalRequest, customHeadersInput, includeAnonymous, includeGroupTests, true, listener);
+    }
+
+    public void startAnalysis(HttpRequest originalRequest,
+                              String customHeadersInput,
+                              boolean includeAnonymous,
+                              boolean includeGroupTests,
+                              boolean includeCustomHeaders,
                               ExecutionListener listener) {
         cancelled.set(false);
 
@@ -102,11 +118,13 @@ public class CookieFinderEngine {
                 }
 
                 // 3. Identify User-Specified Custom Headers present in request
-                Set<String> customHeaderNames = parseCustomHeaderNames(customHeadersInput);
+                Set<String> customHeaderNames = includeCustomHeaders ? parseCustomHeaderNames(customHeadersInput) : Collections.emptySet();
                 List<HttpHeader> customHeadersPresent = new ArrayList<>();
-                for (HttpHeader h : originalRequest.headers()) {
-                    if (customHeaderNames.contains(h.name()) && !STANDARD_AUTH_HEADERS.contains(h.name())) {
-                        customHeadersPresent.add(h);
+                if (includeCustomHeaders) {
+                    for (HttpHeader h : originalRequest.headers()) {
+                        if (customHeaderNames.contains(h.name()) && !STANDARD_AUTH_HEADERS.contains(h.name())) {
+                            customHeadersPresent.add(h);
+                        }
                     }
                 }
 
@@ -147,7 +165,7 @@ public class CookieFinderEngine {
                         baseStatus,
                         baseLen,
                         0,
-                        "🎯 Baseline Reference",
+                        "Baseline Reference",
                         "Authenticated reference response (" + baseStatus + ", " + baseLen + " bytes)",
                         durBase,
                         baselineRR,
@@ -183,7 +201,7 @@ public class CookieFinderEngine {
                                 anonResp.statusCode(),
                                 anonLen,
                                 delta,
-                                "🔒 Anonymous Benchmark",
+                                "Anonymous Benchmark",
                                 "Unauthenticated control benchmark (" + anonResp.statusCode() + ", " + anonLen + " bytes)",
                                 durAnon,
                                 anonRR,
@@ -269,7 +287,7 @@ public class CookieFinderEngine {
 
                     FinderResult result = evaluateTest(
                             testId.getAndIncrement(),
-                            "Custom: " + customHdr.name(),
+                            "Custom Header: " + customHdr.name(),
                             FinderResult.TestType.CUSTOM_HEADER,
                             previewValue(customHdr.value()),
                             baseResp,
@@ -360,7 +378,7 @@ public class CookieFinderEngine {
         if (probeRR == null || !probeRR.hasResponse()) {
             return new FinderResult(
                     id, componentName, type, valuePreview, 0, 0, 0,
-                    "❌ Error / No Response", "Target failed to respond when " + componentName + " was removed",
+                    "Error / No Response", "Target failed to respond when " + componentName + " was removed",
                     durationMs, probeRR, false
             );
         }
@@ -381,24 +399,24 @@ public class CookieFinderEngine {
 
         if (verdict.isExpired()) {
             isSession = true;
-            verdictTitle = "🚨 Session Token (Required)";
+            verdictTitle = "Session Token (Required)";
             details = "Removing invalidated session: " + verdict.getSignal();
         } else if (anonBenchmark != null && Math.abs(probeLen - anonBenchmark.toByteArray().length()) <= 20
                 && Math.abs(baseLen - anonBenchmark.toByteArray().length()) > 50) {
             // Response closely matches anonymous control response structure
             isSession = true;
-            verdictTitle = "🚨 Session Token (Required)";
+            verdictTitle = "Session Token (Required)";
             details = "Response matches unauthenticated benchmark (" + probeLen + " bytes vs anon "
                     + anonBenchmark.toByteArray().length() + " bytes)";
         } else if (probeStatus != baseStatus) {
             isSession = (probeStatus == 401 || probeStatus == 403 || probeStatus >= 300 && probeStatus < 400);
-            verdictTitle = isSession ? "🚨 Session Token (Required)" : "⚠️ Suspicious / Changed";
+            verdictTitle = isSession ? "Session Token (Required)" : "Suspicious / Changed";
             details = "Status changed from baseline " + baseStatus + " to " + probeStatus;
         } else if (Math.abs(delta) > 500 && baseLen > 1000) {
-            verdictTitle = "⚠️ Significant Content Delta";
+            verdictTitle = "Significant Content Delta";
             details = "Response body shifted by " + (delta > 0 ? "+" : "") + delta + " bytes";
         } else {
-            verdictTitle = "ℹ️ Optional (Non-Session)";
+            verdictTitle = "Optional (Non-Session)";
             details = "Session intact; response matches baseline (" + probeStatus + " OK, delta " + (delta >= 0 ? "+" : "") + delta + "B)";
         }
 

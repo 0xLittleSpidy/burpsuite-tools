@@ -79,13 +79,13 @@ public class CookieFinderTableModel extends AbstractTableModel {
     private String formatType(FinderResult.TestType type) {
         if (type == null) return "";
         return switch (type) {
-            case BASELINE -> "🎯 Baseline";
-            case ANONYMOUS -> "🔒 Anonymous";
-            case COOKIE -> "🍪 Cookie";
-            case AUTH_HEADER -> "🔑 Standard Auth";
-            case CUSTOM_HEADER -> "⚙️ Custom Header";
-            case GROUP_ALL_COOKIES -> "📦 Group (No Cookies)";
-            case GROUP_ALL_HEADERS -> "📦 Group (No Auth Headers)";
+            case BASELINE -> "Baseline";
+            case ANONYMOUS -> "Anonymous";
+            case COOKIE -> "Cookie";
+            case AUTH_HEADER -> "Standard Auth";
+            case CUSTOM_HEADER -> "Custom Header";
+            case GROUP_ALL_COOKIES -> "Group (No Cookies)";
+            case GROUP_ALL_HEADERS -> "Group (No Auth Headers)";
         };
     }
 

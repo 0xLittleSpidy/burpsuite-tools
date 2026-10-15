@@ -34,10 +34,10 @@ import java.util.regex.Pattern;
  * Main Suite Tab UI for Session Expiration Checker.
  *
  * Provides a top-level tab hierarchy:
- * 1. 📖 Welcome & Guide - Onboarding, workflow playbooks, and methodology cards.
- * 2. ⏱️ Session Monitor - Master-detail dashboard with real-time countdowns, triage filters,
+ * 1. Session Monitor - Master-detail dashboard with real-time countdowns, triage filters,
  *    side-by-side milestone history, and dedicated Montoya editors for Probe, Baseline, and Original.
- * 3. 🍪 Session Cookie Finder - Systematic isolation of cookies, standard auth headers, and custom headers.
+ * 2. Session Cookie Finder - Systematic isolation of cookies, standard auth headers, and custom headers.
+ * 3. Cookie Store - Cookies and auth tokens extracted from proxy history and probe responses.
  *
  * @author littlespidy
  */
@@ -49,7 +49,6 @@ public class SessionExpirationTab extends JPanel {
 
     // Root Tabbed Pane
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
-    private final WelcomeGuidePanel welcomeGuidePanel;
     private final SessionCookieFinderTab cookieFinderTab;
     private final CookieStoreDataStore cookieStoreDataStore;
     private final CookieStoreTab cookieStoreTab;
@@ -132,15 +131,13 @@ public class SessionExpirationTab extends JPanel {
         monitorPanel.add(createMainSplitPane(), BorderLayout.CENTER);
 
         // 7. Assemble Root Tabbed Pane
-        this.welcomeGuidePanel = new WelcomeGuidePanel(this);
         this.cookieFinderTab = new SessionCookieFinderTab(api, dataStore, timerEngine, this);
         this.cookieStoreDataStore = new CookieStoreDataStore();
         this.cookieStoreTab = new CookieStoreTab(api, cookieStoreDataStore, this::triggerAutoSave);
 
-        rootTabbedPane.addTab("📖 Welcome & Guide", welcomeGuidePanel);
-        rootTabbedPane.addTab("⏱️ Session Monitor", monitorPanel);
-        rootTabbedPane.addTab("🍪 Session Cookie Finder", cookieFinderTab);
-        rootTabbedPane.addTab("📦 Cookie Store", cookieStoreTab);
+        rootTabbedPane.addTab("Session Monitor", monitorPanel);
+        rootTabbedPane.addTab("Session Cookie Finder", cookieFinderTab);
+        rootTabbedPane.addTab("Cookie Store", cookieStoreTab);
 
         add(rootTabbedPane, BorderLayout.CENTER);
 
@@ -208,20 +205,16 @@ public class SessionExpirationTab extends JPanel {
         }
     }
 
-    public void selectWelcomeTab() {
+    public void selectMonitorTab() {
         rootTabbedPane.setSelectedIndex(0);
     }
 
-    public void selectMonitorTab() {
+    public void selectCookieFinderTab() {
         rootTabbedPane.setSelectedIndex(1);
     }
 
-    public void selectCookieFinderTab() {
-        rootTabbedPane.setSelectedIndex(2);
-    }
-
     public void selectCookieStoreTab() {
-        rootTabbedPane.setSelectedIndex(3);
+        rootTabbedPane.setSelectedIndex(2);
     }
 
     public void loadIntoCookieFinder(HttpRequestResponse rr) {
@@ -273,6 +266,10 @@ public class SessionExpirationTab extends JPanel {
             }
         });
 
+        JButton storageBtn = new JButton("Storage...");
+        storageBtn.setToolTipText("View or configure persistent storage location and manual save/restore");
+        storageBtn.addActionListener(e -> showStorageDialog());
+
         statsLabel.setFont(statsLabel.getFont().deriveFont(Font.ITALIC, 11f));
 
         toolbar.add(new JLabel("Domain:"));
@@ -285,10 +282,91 @@ public class SessionExpirationTab extends JPanel {
         toolbar.add(resetBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(clearAllBtn);
+        toolbar.add(storageBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(statsLabel);
 
         return toolbar;
+    }
+
+    private void showStorageDialog() {
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        JDialog dlg = new JDialog(parent instanceof Frame ? (Frame) parent : null, "Session Inspector Storage", true);
+        dlg.setLayout(new BorderLayout(10, 10));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        JLabel infoLabel = new JLabel("Persistent Storage Location:");
+        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD));
+        infoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField pathField = new JTextField(com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.getStoragePath().toString());
+        pathField.setEditable(false);
+        pathField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
+        pathField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        btnPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JButton changeDirBtn = new JButton("Change Directory...");
+        changeDirBtn.addActionListener(ev -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Select Storage Directory for Session Inspector");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            if (chooser.showOpenDialog(dlg) == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+                java.nio.file.Path chosen = chooser.getSelectedFile().toPath();
+                com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.setStorageDirectory(chosen);
+                pathField.setText(com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.getStoragePath().toString());
+                JOptionPane.showMessageDialog(dlg, "Storage directory updated to:\n" + chosen, "Directory Updated", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        JButton saveNowBtn = new JButton("Save State Now");
+        saveNowBtn.addActionListener(ev -> {
+            savePersistentStateNow();
+            JOptionPane.showMessageDialog(dlg, "State saved successfully to:\n" + com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.getStoragePath(), "State Saved", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        JButton reloadBtn = new JButton("Reload From Disk");
+        reloadBtn.addActionListener(ev -> {
+            String msg = reloadPersistentStateNow();
+            JOptionPane.showMessageDialog(dlg, msg, "State Reloaded", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        JButton clearBtn = new JButton("Clear Saved Data");
+        clearBtn.addActionListener(ev -> {
+            int conf = JOptionPane.showConfirmDialog(dlg, "Erase all saved state on disk and reset current session data?", "Confirm Clear Data", JOptionPane.YES_NO_OPTION);
+            if (conf == JOptionPane.YES_OPTION) {
+                clearPersistentDataNow();
+                JOptionPane.showMessageDialog(dlg, "Saved data cleared from disk and memory reset.", "Data Cleared", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        btnPanel.add(changeDirBtn);
+        btnPanel.add(saveNowBtn);
+        btnPanel.add(reloadBtn);
+        btnPanel.add(clearBtn);
+
+        content.add(infoLabel);
+        content.add(Box.createVerticalStrut(6));
+        content.add(pathField);
+        content.add(Box.createVerticalStrut(10));
+        content.add(btnPanel);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton closeBtn = new JButton("Close");
+        closeBtn.addActionListener(ev -> dlg.dispose());
+        bottomPanel.add(closeBtn);
+
+        dlg.add(content, BorderLayout.CENTER);
+        dlg.add(bottomPanel, BorderLayout.SOUTH);
+        dlg.pack();
+        dlg.setMinimumSize(new Dimension(540, 180));
+        dlg.setLocationRelativeTo(parent);
+        dlg.setVisible(true);
     }
 
     private JSplitPane createMainSplitPane() {
@@ -340,12 +418,12 @@ public class SessionExpirationTab extends JPanel {
         historyScroll.setBorder(BorderFactory.createTitledBorder("Milestones & History"));
 
         // Detail View: Tabbed Message Editors
-        inspectorTabs.addTab("📤 Probe Request", probeRequestEditor.uiComponent());
-        inspectorTabs.addTab("📥 Probe Response", probeResponseEditor.uiComponent());
-        inspectorTabs.addTab("🎯 Baseline Request", baselineRequestEditor.uiComponent());
-        inspectorTabs.addTab("🎯 Baseline Response", baselineResponseEditor.uiComponent());
-        inspectorTabs.addTab("📄 Original Request", originalRequestEditor.uiComponent());
-        inspectorTabs.addTab("📄 Original Response", originalResponseEditor.uiComponent());
+        inspectorTabs.addTab("Probe Request", probeRequestEditor.uiComponent());
+        inspectorTabs.addTab("Probe Response", probeResponseEditor.uiComponent());
+        inspectorTabs.addTab("Baseline Request", baselineRequestEditor.uiComponent());
+        inspectorTabs.addTab("Baseline Response", baselineResponseEditor.uiComponent());
+        inspectorTabs.addTab("Original Request", originalRequestEditor.uiComponent());
+        inspectorTabs.addTab("Original Response", originalResponseEditor.uiComponent());
         inspectorTabs.setBorder(BorderFactory.createTitledBorder("Request & Response Inspector"));
 
         // Horizontal Split: Left = Milestones Table, Right = Message Editors
@@ -366,7 +444,7 @@ public class SessionExpirationTab extends JPanel {
     private void setupSessionContextMenu() {
         JPopupMenu popup = new JPopupMenu();
 
-        JMenuItem runNowItem = new JMenuItem("▶️ Run Probe Now");
+        JMenuItem runNowItem = new JMenuItem("Run Probe Now");
         runNowItem.addActionListener(e -> {
             SessionTask task = getSelectedTask();
             if (task != null) {
@@ -380,7 +458,7 @@ public class SessionExpirationTab extends JPanel {
             }
         });
 
-        JMenuItem refreshBaselineItem = new JMenuItem("🔄 Refresh Baseline");
+        JMenuItem refreshBaselineItem = new JMenuItem("Refresh Baseline");
         refreshBaselineItem.addActionListener(e -> {
             SessionTask task = getSelectedTask();
             if (task != null) {
@@ -388,7 +466,7 @@ public class SessionExpirationTab extends JPanel {
             }
         });
 
-        JMenuItem configTimersItem = new JMenuItem("⏱️ Configure Timers...");
+        JMenuItem configTimersItem = new JMenuItem("Configure Timers...");
         configTimersItem.addActionListener(e -> {
             SessionTask task = getSelectedTask();
             if (task != null) {
@@ -396,7 +474,7 @@ public class SessionExpirationTab extends JPanel {
             }
         });
 
-        JMenuItem cancelTimersItem = new JMenuItem("⏹️ Cancel Timers");
+        JMenuItem cancelTimersItem = new JMenuItem("Cancel Timers");
         cancelTimersItem.addActionListener(e -> {
             SessionTask task = getSelectedTask();
             if (task != null) {
@@ -438,7 +516,7 @@ public class SessionExpirationTab extends JPanel {
             }
         });
 
-        JMenuItem deleteItem = new JMenuItem("🗑️ Delete Session");
+        JMenuItem deleteItem = new JMenuItem("Delete Session");
         deleteItem.addActionListener(e -> {
             SessionTask task = getSelectedTask();
             if (task != null) {
@@ -476,7 +554,7 @@ public class SessionExpirationTab extends JPanel {
     private void setupProbeContextMenu() {
         JPopupMenu popup = new JPopupMenu();
 
-        JMenuItem runThisItem = new JMenuItem("▶️ Run This Milestone Now");
+        JMenuItem runThisItem = new JMenuItem("Run This Milestone Now");
         runThisItem.addActionListener(e -> {
             SessionTask task = getSelectedTask();
             int selectedRow = probeHistoryTable.getSelectedRow();
@@ -576,8 +654,8 @@ public class SessionExpirationTab extends JPanel {
             } else {
                 probeRequestEditor.setRequest(task.getOriginalRequest());
                 probeResponseEditor.setResponse(null);
-                inspectorTabs.setTitleAt(0, "📤 Probe Request");
-                inspectorTabs.setTitleAt(1, "📥 Probe Response");
+                inspectorTabs.setTitleAt(0, "Probe Request");
+                inspectorTabs.setTitleAt(1, "Probe Response");
             }
         } else {
             probeRequestEditor.setRequest(null);
@@ -586,8 +664,8 @@ public class SessionExpirationTab extends JPanel {
             baselineResponseEditor.setResponse(null);
             originalRequestEditor.setRequest(null);
             originalResponseEditor.setResponse(null);
-            inspectorTabs.setTitleAt(0, "📤 Probe Request");
-            inspectorTabs.setTitleAt(1, "📥 Probe Response");
+            inspectorTabs.setTitleAt(0, "Probe Request");
+            inspectorTabs.setTitleAt(1, "Probe Response");
         }
     }
 
@@ -601,8 +679,8 @@ public class SessionExpirationTab extends JPanel {
 
         if (interval != null) {
             String label = interval.getLabel();
-            inspectorTabs.setTitleAt(0, "📤 Probe Request (" + label + ")");
-            inspectorTabs.setTitleAt(1, "📥 Probe Response (" + label + ")");
+            inspectorTabs.setTitleAt(0, "Probe Request (" + label + ")");
+            inspectorTabs.setTitleAt(1, "Probe Response (" + label + ")");
 
             if (interval.getProbeResult() != null) {
                 HttpRequestResponse rr = interval.getProbeResult().getRequestResponse();

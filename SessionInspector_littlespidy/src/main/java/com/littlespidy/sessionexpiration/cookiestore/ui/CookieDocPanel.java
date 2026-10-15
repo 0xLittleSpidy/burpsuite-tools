@@ -29,7 +29,7 @@ public class CookieDocPanel extends JPanel {
     private final JLabel sourceBadge = new JLabel("Request/Response");
     private final JLabel scriptBadge = new JLabel("Script/Provider");
 
-    private final JButton fetchLiveBtn = new JButton("🔄 Re-check cookiesearch.org");
+    private final JButton fetchLiveBtn = new JButton("Re-check cookiesearch.org");
     private final JButton copyLinkBtn = new JButton("Copy Link");
     private final JButton openBrowserBtn = new JButton("Open in Browser");
 
@@ -214,7 +214,7 @@ public class CookieDocPanel extends JPanel {
             categoryBadge.setVisible(true);
             scriptBadge.setVisible(false);
 
-            statusIndicator.setText("🌐 Fetching live definition from cookiesearch.org for '" + currentCookieName + "'...");
+            statusIndicator.setText("Fetching live definition from cookiesearch.org for '" + currentCookieName + "'...");
             explanationArea.setText("Querying https://www.cookiesearch.org/ for cookie specifications and meaning...");
 
             relatedTitle.setVisible(false);
@@ -227,8 +227,8 @@ public class CookieDocPanel extends JPanel {
 
     private void performLiveFetch(String cookieName, boolean forceRefresh) {
         String msg = forceRefresh
-                ? "🔄 Re-checking cookiesearch.org live for '" + cookieName + "'..."
-                : "🌐 Fetching live definition from cookiesearch.org for '" + cookieName + "'...";
+                ? "Re-checking cookiesearch.org live for '" + cookieName + "'..."
+                : "Fetching live definition from cookiesearch.org for '" + cookieName + "'...";
         statusIndicator.setText(msg);
         fetchLiveBtn.setEnabled(false);
 
@@ -236,7 +236,7 @@ public class CookieDocPanel extends JPanel {
             fetchLiveBtn.setEnabled(true);
             if (doc != null && currentCookieName.equalsIgnoreCase(cookieName)) {
                 this.currentDoc = doc;
-                statusIndicator.setText("✓ Definition refreshed from cookiesearch.org.");
+                statusIndicator.setText("Definition refreshed from cookiesearch.org.");
                 renderDoc(doc);
             } else if (currentCookieName.equalsIgnoreCase(cookieName)) {
                 statusIndicator.setText("Cookie not found in cookiesearch.org.");
@@ -270,7 +270,7 @@ public class CookieDocPanel extends JPanel {
             relatedTitle.setVisible(true);
             relatedContainer.setVisible(true);
             for (String rel : doc.related()) {
-                JButton relBtn = new JButton("🍪 " + rel);
+                JButton relBtn = new JButton(rel);
                 relBtn.setFont(relBtn.getFont().deriveFont(11f));
                 relBtn.setMargin(new Insets(2, 6, 2, 6));
                 relBtn.setToolTipText("View documentation for " + rel);

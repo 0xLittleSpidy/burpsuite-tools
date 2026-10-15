@@ -35,20 +35,20 @@ public class SingleCookieFinderPanel extends JPanel {
 
     // Target Request State
     private final int id;
+    private String tabTitle;
     private HttpRequest targetRequest;
     private HttpRequestResponse targetRequestResponse;
 
     // UI Components
     private final JLabel targetLabel = new JLabel();
+    private final JCheckBox customHeaderBox = new JCheckBox("Custom Header", true);
     private final JTextField customHeadersField = new JTextField("X-Access-Token, X-Auth-Token, X-User-Token, X-API-Key, ApiKey, X-Session-Token", 26);
-    private final JCheckBox anonBenchmarkBox = new JCheckBox("Test Anonymous Control (Strip All)", true);
-    private final JCheckBox groupTestsBox = new JCheckBox("Test Group Isolation (All Cookies / All Headers)", true);
 
-    private final JButton startBtn = new JButton("▶️ Run Cookie & Auth Finder");
-    private final JButton stopBtn = new JButton("⏹️ Stop");
+    private final JButton startBtn = new JButton("Start");
+    private final JButton stopBtn = new JButton("Stop");
     private final JButton clearBtn = new JButton("Clear Results");
 
-    private final JLabel findingsBanner = new JLabel("Ready. Click '▶️ Run Cookie & Auth Finder' to identify session tokens.");
+    private final JLabel findingsBanner = new JLabel("Ready. Click 'Start' to identify session tokens.");
     private final JProgressBar progressBar = new JProgressBar();
 
     // Table & Inspector
@@ -77,6 +77,13 @@ public class SingleCookieFinderPanel extends JPanel {
         this.targetRequestResponse = requestResponse;
         this.autoSaveCallback = autoSaveCallback;
 
+        this.customHeaderBox.addActionListener(e -> {
+            customHeadersField.setEnabled(customHeaderBox.isSelected());
+            if (autoSaveCallback != null) {
+                autoSaveCallback.run();
+            }
+        });
+
         this.testRequestEditor = api.userInterface().createHttpRequestEditor();
         this.testResponseEditor = api.userInterface().createHttpResponseEditor();
 
@@ -100,6 +107,23 @@ public class SingleCookieFinderPanel extends JPanel {
 
     public HttpRequestResponse getTargetRequestResponse() {
         return targetRequestResponse;
+    }
+
+    public String getTabTitle() {
+        return tabTitle;
+    }
+
+    public void setTabTitle(String tabTitle) {
+        this.tabTitle = tabTitle;
+    }
+
+    public boolean isCustomHeadersEnabled() {
+        return customHeaderBox.isSelected();
+    }
+
+    public void setCustomHeadersEnabled(boolean enabled) {
+        customHeaderBox.setSelected(enabled);
+        customHeadersField.setEnabled(enabled);
     }
 
     public String getCustomHeaders() {
@@ -149,12 +173,9 @@ public class SingleCookieFinderPanel extends JPanel {
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         row2.setBorder(BorderFactory.createTitledBorder("Session Credential Configuration & Actions"));
 
-        row2.add(new JLabel("Suspect Custom Headers:"));
+        row2.add(customHeaderBox);
         customHeadersField.setToolTipText("Comma-separated list of custom headers suspect for authentication (e.g. X-Custom-Auth, Token, AppKey)");
         row2.add(customHeadersField);
-
-        row2.add(anonBenchmarkBox);
-        row2.add(groupTestsBox);
 
         startBtn.setFont(startBtn.getFont().deriveFont(Font.BOLD));
         startBtn.addActionListener(e -> runAnalysis());
@@ -218,12 +239,12 @@ public class SingleCookieFinderPanel extends JPanel {
         setupContextMenu();
 
         JScrollPane tableScroll = new JScrollPane(resultsTable);
-        tableScroll.setBorder(BorderFactory.createTitledBorder("Systematic Isolation & Fuzzing Results"));
+        tableScroll.setBorder(BorderFactory.createEmptyBorder());
 
         // Inspector Tabs
-        inspectorTabs.addTab("📤 Test Request Sent (Credential Removed)", testRequestEditor.uiComponent());
-        inspectorTabs.addTab("📥 Server Response Received", testResponseEditor.uiComponent());
-        inspectorTabs.setBorder(BorderFactory.createTitledBorder("Message Inspector for Selected Test Case"));
+        inspectorTabs.addTab("Request", testRequestEditor.uiComponent());
+        inspectorTabs.addTab("Response", testResponseEditor.uiComponent());
+        inspectorTabs.setBorder(BorderFactory.createEmptyBorder());
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroll, inspectorTabs);
         splitPane.setResizeWeight(0.52);
@@ -275,7 +296,7 @@ public class SingleCookieFinderPanel extends JPanel {
             }
         });
 
-        JMenuItem trackExpirationItem = new JMenuItem("⏱️ Track Expiration in Session Monitor");
+        JMenuItem trackExpirationItem = new JMenuItem("Track Expiration in Session Monitor");
         trackExpirationItem.setToolTipText("Send this authenticated target request to Session Monitor to track timeout");
         trackExpirationItem.addActionListener(e -> {
             if (targetRequest != null && parentTab != null) {
@@ -328,7 +349,6 @@ public class SingleCookieFinderPanel extends JPanel {
             } else {
                 testResponseEditor.setResponse(null);
             }
-            inspectorTabs.setTitleAt(0, "📤 Test Request (" + res.getComponentName() + " removed)");
         } else {
             testRequestEditor.setRequest(targetRequest);
             if (targetRequestResponse != null && targetRequestResponse.hasResponse()) {
@@ -336,7 +356,6 @@ public class SingleCookieFinderPanel extends JPanel {
             } else {
                 testResponseEditor.setResponse(null);
             }
-            inspectorTabs.setTitleAt(0, "📤 Test Request Sent");
         }
     }
 
@@ -355,10 +374,9 @@ public class SingleCookieFinderPanel extends JPanel {
         findingsBanner.setText("Starting systematic cookie and header isolation...");
 
         String customHeaders = customHeadersField.getText();
-        boolean anon = anonBenchmarkBox.isSelected();
-        boolean groups = groupTestsBox.isSelected();
+        boolean customHeadersEnabled = customHeaderBox.isSelected();
 
-        engine.startAnalysis(targetRequest, customHeaders, anon, groups, new CookieFinderEngine.ExecutionListener() {
+        engine.startAnalysis(targetRequest, customHeaders, customHeadersEnabled, new CookieFinderEngine.ExecutionListener() {
             private int total = 0;
             private int current = 0;
 
@@ -390,9 +408,9 @@ public class SingleCookieFinderPanel extends JPanel {
                 progressBar.setString("Completed (" + total + "/" + total + ")");
 
                 if (identifiedSessionTokens.isEmpty()) {
-                    findingsBanner.setText("⚠️ Finished: No single cookie or header was uniquely required. Application may accept alternate tokens or rely on IP/client state.");
+                    findingsBanner.setText("Finished: No single cookie or header was uniquely required. Application may accept alternate tokens or rely on IP/client state.");
                 } else {
-                    findingsBanner.setText("🚨 IDENTIFIED SESSION TOKENS: " + String.join(", ", identifiedSessionTokens));
+                    findingsBanner.setText("IDENTIFIED SESSION TOKENS: " + String.join(", ", identifiedSessionTokens));
                 }
 
                 if (autoSaveCallback != null) {
@@ -404,7 +422,7 @@ public class SingleCookieFinderPanel extends JPanel {
             public void onError(String errorMessage) {
                 startBtn.setEnabled(true);
                 stopBtn.setEnabled(false);
-                findingsBanner.setText("❌ Error: " + errorMessage);
+                findingsBanner.setText("Error: " + errorMessage);
                 JOptionPane.showMessageDialog(SingleCookieFinderPanel.this,
                         errorMessage, "Analysis Error", JOptionPane.ERROR_MESSAGE);
             }

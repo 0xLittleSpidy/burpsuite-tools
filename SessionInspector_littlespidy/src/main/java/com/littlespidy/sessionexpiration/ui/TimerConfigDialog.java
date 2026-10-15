@@ -27,7 +27,7 @@ public class TimerConfigDialog extends JDialog {
     private final JCheckBox cancelOnExpireBox;
 
     public TimerConfigDialog(Window owner, SessionTask task) {
-        super(owner, "⏱️ Configure Session Expiration Timers", ModalityType.APPLICATION_MODAL);
+        super(owner, "Configure Session Expiration Timers", ModalityType.APPLICATION_MODAL);
         setLayout(new BorderLayout(10, 10));
         setSize(580, 520);
         setLocationRelativeTo(owner);
@@ -56,7 +56,7 @@ public class TimerConfigDialog extends JDialog {
         JPanel presetsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         presetsPanel.setBorder(BorderFactory.createTitledBorder("Quick-Add Milestones"));
 
-        JButton defaultAllBtn = new JButton("⚡ 30m to 8h (All 16)");
+        JButton defaultAllBtn = new JButton("30m to 8h (All 16)");
         defaultAllBtn.setFont(defaultAllBtn.getFont().deriveFont(Font.BOLD, 11f));
         defaultAllBtn.setToolTipText("Load all 16 milestones: 30m, 1h, 1.5h, 2h ... up to 8h");
         defaultAllBtn.addActionListener(e -> {
@@ -94,7 +94,7 @@ public class TimerConfigDialog extends JDialog {
 
         JSpinner valueSpinner = new JSpinner(new SpinnerNumberModel(45, 1, 10000, 1));
         JComboBox<String> unitCombo = new JComboBox<>(new String[]{"Minutes", "Hours", "Seconds"});
-        JButton addBtn = new JButton("➕ Add Milestone");
+        JButton addBtn = new JButton("Add Milestone");
 
         addBtn.addActionListener(e -> {
             int val = (Integer) valueSpinner.getValue();
@@ -135,7 +135,7 @@ public class TimerConfigDialog extends JDialog {
         tableScroll.setBorder(BorderFactory.createTitledBorder("Scheduled Milestones"));
 
         JPanel tableActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
-        JButton removeBtn = new JButton("❌ Remove Selected");
+        JButton removeBtn = new JButton("Remove Selected");
         removeBtn.addActionListener(e -> removeSelected());
         JButton clearBtn = new JButton("Clear All");
         clearBtn.addActionListener(e -> clearAllIntervals());
@@ -161,7 +161,7 @@ public class TimerConfigDialog extends JDialog {
         bottomPanel.add(optionsPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
-        JButton startBtn = new JButton("▶️ Start Tracking");
+        JButton startBtn = new JButton("Start Tracking");
         startBtn.setFont(startBtn.getFont().deriveFont(Font.BOLD));
         startBtn.addActionListener(e -> {
             if (intervals.isEmpty()) {

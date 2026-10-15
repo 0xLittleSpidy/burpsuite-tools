@@ -49,18 +49,18 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
         }
 
         if (targetRequests.isEmpty()) {
-            JMenuItem openTabItem = new JMenuItem("⏱️ Open Session Inspector");
+            JMenuItem openTabItem = new JMenuItem("Open Session Inspector");
             openTabItem.addActionListener(e -> {
                 mainTab.selectMonitorTab();
                 mainTab.refreshView();
             });
             items.add(openTabItem);
 
-            JMenuItem openFinderItem = new JMenuItem("🍪 Open Session Cookie Finder");
+            JMenuItem openFinderItem = new JMenuItem("Open Session Cookie Finder");
             openFinderItem.addActionListener(e -> mainTab.selectCookieFinderTab());
             items.add(openFinderItem);
 
-            JMenuItem openStoreItem = new JMenuItem("📦 Open Cookie Store");
+            JMenuItem openStoreItem = new JMenuItem("Open Cookie Store");
             openStoreItem.addActionListener(e -> mainTab.selectCookieStoreTab());
             items.add(openStoreItem);
 
@@ -69,16 +69,16 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
 
         int count = targetRequests.size();
         String menuTitle = (count == 1)
-                ? "⏱️ Send to Session Inspector"
-                : "⏱️ Send " + count + " Requests to Session Inspector";
+                ? "Send to Session Inspector"
+                : "Send " + count + " Requests to Session Inspector";
 
         JMenuItem sendItem = new JMenuItem(menuTitle);
         sendItem.addActionListener(e -> handleSendRequests(targetRequests));
         items.add(sendItem);
 
         String finderTitle = (count == 1)
-                ? "🍪 Send to Session Cookie Finder"
-                : "🍪 Send " + count + " Requests to Session Cookie Finder";
+                ? "Send to Session Cookie Finder"
+                : "Send " + count + " Requests to Session Cookie Finder";
         JMenuItem sendCookieFinderItem = new JMenuItem(finderTitle);
         sendCookieFinderItem.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> {
@@ -91,8 +91,8 @@ public class SessionContextMenuProvider implements ContextMenuItemsProvider {
         items.add(sendCookieFinderItem);
 
         String storeTitle = (count == 1)
-                ? "📦 Send to Cookie Store"
-                : "📦 Send " + count + " Requests to Cookie Store";
+                ? "Send to Cookie Store"
+                : "Send " + count + " Requests to Cookie Store";
         JMenuItem sendCookieStoreItem = new JMenuItem(storeTitle);
         sendCookieStoreItem.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> {

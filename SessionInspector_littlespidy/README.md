@@ -1,4 +1,4 @@
-# ⏱️ Session Inspector (littlespidy)
+# Session Inspector (littlespidy)
 
 > **Created with the help of an AI Agent and littlespidy.**
 
@@ -6,34 +6,37 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 
 ---
 
-## 🎯 Key Features
+## Key Features
 
-### 1. 🍪 Systematic Session Cookie & Auth Header Finder (Tab #2)
+### 1. Systematic Session Cookie & Auth Header Finder (Tab #2)
 - **Multi-Tab Target Ingestion**:
-  - Right-click any single or multiple HTTP requests across **Proxy History**, **Repeater**, **Logger**, or the **HTTP Message Editor** and choose **`🍪 Send to Session Cookie Finder`** (or **`🍪 Send N Requests to Session Cookie Finder`**).
+  - Right-click any single or multiple HTTP requests across **Proxy History**, **Repeater**, **Logger**, or the **HTTP Message Editor** and choose **`Send to Session Cookie Finder`** (or **`Send N Requests to Session Cookie Finder`**).
   - Each request opens in its own dedicated, numbered sub-tab (e.g., `#1 GET /api/v1/user`, `#2 POST /login`) equipped with independent isolation test configurations, results, and message editors.
   - Previously loaded requests and their test findings are **never overwritten or lost** when sending new requests.
-  - Each tab includes an interactive **`×`** close button and tab context menu (*Close Tab*, *Close Other Tabs*, *Close All Tabs*).
+  - Each tab includes an interactive **`x`** close button and tab context menu (*Close Tab*, *Close Other Tabs*, *Close All Tabs*).
+  - Double-clicking any target sub-tab header label (or right-clicking and selecting *Rename Tab...*) allows the user to rename the tab.
 - **Automated Credential Discovery**:
   - Automatically parses individual cookies from the `Cookie` header (`JSESSIONID`, `PHPSESSID`, `token`, `remember_me`, `_ga`, etc.).
   - Automatically recognizes standard and common authorization headers (`Authorization`, `Proxy-Authorization`, `X-Access-Token`, `X-Auth-Token`, `Bearer`, `Token`, `X-Session-ID`, etc.).
-- **Suspect Custom Header Configuration**:
-  - Allows testers to specify arbitrary custom headers suspect for authentication (e.g., `X-Custom-Auth, X-Session-Token, X-User-Token, X-API-Key, ApiKey`).
-- **Systematic Isolation & Fuzzing Pipeline**:
-  - **Authenticated Baseline**: Captures initial active response ($200\text{ OK}$, body length, keywords).
-  - **Anonymous Control Benchmark**: Strips all cookies, standard auth headers, and custom headers to benchmark unauthenticated response behavior.
+- **Custom Header Configuration**:
+  - Specify arbitrary headers suspected of holding authentication tokens (e.g., `X-Custom-Auth, X-Session-Token, X-User-Token, X-API-Key, ApiKey`).
+  - When the **Custom Header** checkbox is enabled, custom header isolation checks are executed. When disabled, custom header checks are skipped.
+- **Systematic Isolation Pipeline**:
+  - **Authenticated Baseline**: Captures initial active response (HTTP 200 OK, body length, keywords).
+  - **Anonymous Control Benchmark**: Automatically runs an anonymous benchmark by default with all cookies and auth tokens removed.
   - **Cookie-by-Cookie Removal**: Systematically removes *only* cookie $C_i$ while preserving all other cookies and headers, pinpointing which specific cookie maintains the session.
   - **Header-by-Header Removal**: Systematically removes *only* authorization header $H_j$ while preserving cookies.
-  - **Group Tests**: Runs group isolation tests (all cookies removed vs all headers removed) to identify if the application accepts tokens via header alone, cookies alone, or both.
+  - Execution is triggered by the **Start** button.
 - **Actionable Verdicts & Signal Analysis**:
   - Color-coded results table:
-    - **`🚨 Session Token (Required)`**: Removing this credential broken session (status shift to 401/403, redirect to `/login`, expiry keywords, or body drop matching anonymous control).
-    - **`⚠️ Suspicious / Changed`**: Significant content delta or unexpected status code change.
-    - **`ℹ️ Optional (Non-Session)`**: Session remained fully active; cookie or header is not required for authentication (e.g., analytics, UI preferences).
-- **Direct Workflow Handoff**:
-  - Right-click any finding to send to **Repeater**, **Intruder**, **Organizer**, or click **`⏱️ Track Expiration in Session Monitor`** to immediately schedule milestone timers on the target.
+    - **`Session Token (Required)`**: Removing this credential broke the session (status shift to 401/403, redirect to `/login`, expiry keywords, or body drop matching anonymous control).
+    - **`Suspicious / Changed`**: Significant content delta or unexpected status code change.
+    - **`Optional (Non-Session)`**: Session remained fully active; cookie or header is not required for authentication (e.g., analytics, UI preferences).
+- **Direct Workflow Handoff & Message Inspection**:
+  - Embedded **Request** and **Response** message viewers to inspect exact sent and received HTTP messages for any test case.
+  - Right-click any finding to send to **Repeater**, **Intruder**, **Organizer**, or click **`Track Expiration in Session Monitor`** to immediately schedule milestone timers on the target.
 
-### 2. 📦 Comprehensive Cookie Store Tab (Tab #4)
+### 2. Comprehensive Cookie Store Tab (Tab #3)
 - **Modeled after Header Collector**:
   - Features an intuitive **Master-Detail** split pane interface inspired by `HeaderInspector_littlespidy`.
   - Ingests cookies from both request `Cookie:` headers and response `Set-Cookie:` headers.
@@ -46,70 +49,76 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 - **Detailed Set-Cookie Attributes**:
   - Surfaces security flags and parameters: `HttpOnly`, `Secure`, `SameSite` (`Strict`/`Lax`/`None`), `Path`, `Domain`, and `Expires / Max-Age`.
 - **Synchronized Proxy History Ingestion**:
-  - One-click **`📥 Load Proxy History`** button runs a background worker with optional **`[x] In-Scope Only`** filter gating to parse thousands of items without freezing the UI.
+  - One-click **`Load Proxy History`** button runs a background worker with optional **`[x] In-Scope Only`** filter gating to parse thousands of items without freezing the UI.
 - **Search & Domain Filtering**:
   - Live search filters both cookie names, values, and attributes with case-insensitivity support.
   - Dedicated **Domain Dropdown (`JComboBox`)** dynamically lists all discovered domains (`All Domains` + unique hosts) for instant domain-scoped cookie inspection.
-- **4-Pillar Deep-Linking with Native Montoya Editors**:
+- **Deep-Linking with Native Montoya Editors**:
   - Selecting any cookie value displays the sample HTTP Request & Response in native Montoya Pretty/Raw/Hex editors.
-  - Applies vibrant yellow/orange highlight markers over the selected cookie name and value directly in the request and response viewers.
-- **📖 Integrated Cookie Documentation & Classifier (`cookiesearch.org`)**:
-  - Embedded **`📖 Cookie Explained (cookiesearch.org)`** tab in the detail editor split pane, matching `HeaderDocPanel` in `HeaderInspector_littlespidy`.
-  - Quick-info banner above the values table displays real-time Category badges (`Necessary`, `Analytics`, `Functional`, `Performance`, `Advertisement`) and a direct **`📖 Explain Cookie`** button.
-  - Right-click context menu on any cookie in the cookie names table: **`📖 Explain Cookie (cookiesearch.org)`**.
+  - Applies yellow/orange highlight markers over the selected cookie name and value directly in the request and response viewers.
+- **Integrated Cookie Documentation & Classifier (`cookiesearch.org`)**:
+  - Embedded **`Cookie Explained (cookiesearch.org)`** tab in the detail editor split pane.
+  - Quick-info banner above the values table displays real-time Category badges (`Necessary`, `Analytics`, `Functional`, `Performance`, `Advertisement`) and a direct **`Explain Cookie`** button.
+  - Right-click context menu on any cookie in the cookie names table: **`Explain Cookie (cookiesearch.org)`**.
   - **Extensive Offline Knowledge Base**: Pre-bundled with 706 cookie definitions scraped from `cookiesearch.org` providing instantaneous $O(1)$ lookup, full behavioral descriptions, associated script providers (`Google Analytics`, `Cloudflare`, `Meta`, etc.), and clickable related cookie chips.
-  - **Live Background Web Crawler & Force-Refresh**: Automatically queries `https://www.cookiesearch.org/` in a non-blocking daemon thread pool for novel or unrecognized cookies, parsing descriptions and caching results dynamically without freezing the Swing EDT. Features a **`🔄 Re-check cookiesearch.org`** button to bypass cache and force a fresh lookup from `cookiesearch.org` on demand.
+  - **Live Background Web Crawler & Force-Refresh**: Automatically queries `https://www.cookiesearch.org/` in a non-blocking daemon thread pool for novel or unrecognized cookies, parsing descriptions and caching results dynamically without freezing the Swing EDT. Features a **`Re-check cookiesearch.org`** button to bypass cache and force a fresh lookup from `cookiesearch.org` on demand.
   - **Security Heuristics Fallback**: For custom application tokens, intelligently infers session characteristics (`session`, `token`, `auth`, `id`) and supplies actionable security testing advice.
   - Direct controls to open the official documentation in the system browser or copy the reference URL.
 - **One-Click "Cookie Value" Copy Button**:
-  - The **`Cookie Value`** column header includes an embedded **`📋 Copy`** button.
+  - The **`Cookie Value`** column header includes an embedded **`Copy`** button.
   - Clicking this button copies all observed cookie values for the selected cookie to the system clipboard one by one (separated by newlines `\n`), enabling instant wordlist generation, session token comparison, and offline security analysis.
-  - Features visual `"✓ Copied!"` state feedback and real-time status strip counts.
+  - Features visual `"Copied!"` state feedback and real-time status strip counts.
   - Also includes a right-click context menu on the values table to copy all values or copy the selected value.
 - **Burp Interoperability & Export**:
-  - Right-click any request in Burp Suite to choose **`📦 Send to Cookie Store`** or **`📦 Open Cookie Store`**.
-  - One-click **`📋 Export TSV`** button for bug bounty reports, session audits, and spreadsheet triage.
+  - Right-click any request in Burp Suite to choose **`Send to Cookie Store`** or **`Open Cookie Store`**.
+  - One-click **`Export TSV`** button for bug bounty reports, session audits, and spreadsheet triage.
 
-### 3. 💾 Full Persistent Storage Across Reloads & Restarts
+### 3. Persistent Storage Across Reloads & Restarts
 - **Automatic State Persistence**:
   - All collected Cookie Store groups, unique values, repetition counts, and domains;
   - Dynamic `cookiesearch.org` crawled definitions cache;
   - Active and completed Session Monitor tasks, baseline responses, probe histories, and timer schedules;
-  - Session Cookie Finder findings, tested variations, and loaded target requests;
-  - Are automatically saved to a dedicated local JSON database at `~/.burp_session_inspector/session_inspector_store.json`.
+  - Session Cookie Finder findings, custom headers settings, tab titles, and loaded target requests;
+  - Are automatically saved to a persistent JSON database (`session_inspector_store.json`).
+- **Project Directory Storage & Temporary Project Support**:
+  - By default, extension data is stored in the directory where the active Burp Suite project is saved.
+  - If working with a temporary Burp project (where no persistent project directory is available), the extension automatically prompts the user to select a directory to store extension data, and remembers the preference.
+  - The storage location can be inspected or changed at any time using the **`Storage...`** button in the Session Monitor toolbar.
 - **Zero Data Loss on Reload**:
-  - Removing and reloading the extension or restarting Burp Suite automatically restores all session and cookie data with 100% fidelity.
+  - Removing and reinstalling the extension or closing and reopening Burp Suite restores all session and cookie data with complete fidelity.
 - **Robust Storage Architecture**:
-  - **Thread-safe Debounced Auto-Saves**: Coalesces rapid proxy traffic updates with a 2-second debounce timer to avoid disk thrashing.
-  - **Atomic Writes**: Writes to `.tmp` file and atomically moves to `session_inspector_store.json` using `StandardCopyOption.ATOMIC_MOVE`, preventing file corruption during unexpected power cuts or crashes.
+  - **Thread-safe Debounced Auto-Saves**: Coalesces rapid updates with a 2-second debounce timer to avoid disk thrashing.
+  - **Atomic Writes**: Writes to a `.tmp` file and atomically moves to `session_inspector_store.json` using `StandardCopyOption.ATOMIC_MOVE`, preventing file corruption during power cuts or crashes.
   - **Montoya Message Serialization**: Serializes full raw request and response byte streams via Base64 encoding, preserving complete HTTP fidelity (headers, binary bodies, compression).
-  - **Interactive State Controls in Welcome & Guide Tab**:
-    - **`💾 Save State Now`**: Forces an immediate synchronous flush to disk.
-    - **`📂 Reload From Disk`**: Re-reads and synchronizes all in-memory tables with disk.
-    - **`🗑️ Reset / Clear All Saved Data`**: Safely deletes the persistent storage file and clears all working tables after user confirmation.
+  - **Storage Management Dialog (`Storage...`)**:
+    - Displays current storage path.
+    - **`Change Directory...`**: Select a different folder for persistent storage.
+    - **`Save State Now`**: Forces an immediate synchronous flush to disk.
+    - **`Reload From Disk`**: Re-reads and synchronizes all in-memory tables from disk.
+    - **`Clear Saved Data`**: Safely deletes the persistent storage file and clears memory after confirmation.
 
-### 4. ⏱️ Automated Baseline & 6-Editor Inspector
+### 4. Automated Baseline & 6-Editor Inspector
 - **Automatic Live Baseline Probe**:
   - Whenever a session is scheduled or sent to the extension, the baseline probe is **automatically dispatched at $T_0$** by default without requiring user prompt.
 - **Preserved Original vs. Baseline Messages**:
   - Stores both the untouched **Original Request & Response** (captured when sent from Burp) and the fresh **Baseline Request & Response** (executed at $T_0$).
 - **6 Dedicated Montoya Editors**:
   - Side-by-side tabs in the inspector:
-    - **`📤 Probe Request`**
-    - **`📥 Probe Response`**
-    - **`🎯 Baseline Request`**
-    - **`🎯 Baseline Response`**
-    - **`📄 Original Request`**
-    - **`📄 Original Response`**
+    - **`Probe Request`**
+    - **`Probe Response`**
+    - **`Baseline Request`**
+    - **`Baseline Response`**
+    - **`Original Request`**
+    - **`Original Response`**
 
-### 5. ⏱️ Custom Milestone Timers (Milestone-based from $T_0$)
+### 5. Custom Milestone Timers (Milestone-based from $T_0$)
 - Configures **16 milestones by default** every 30 minutes from **30m up to 8 hours** (`30m`, `1h`, `1h 30m`, `2h`, `2h 30m`, `3h`, `3h 30m`, `4h`, `4h 30m`, `5h`, `5h 30m`, `6h`, `6h 30m`, `7h`, `7h 30m`, `8h`).
 - Timers count down concurrently from baseline start time ($T_0$).
 - Fast preset buttons to reload all 16 defaults or custom intervals.
 
 ### 6. HTTP Response Date & Time Highlighting
 - Automatically inspects the standard HTTP `Date:` response header (as well as `Expires` and `Last-Modified`).
-- Applies native Montoya `Marker` highlighting to paint vibrant yellow/orange highlight boxes over server date/time stamps across Pretty, Raw, and Hex editors.
+- Applies native Montoya `Marker` highlighting to paint highlight boxes over server date/time stamps across Pretty, Raw, and Hex editors.
 - Displays the server's `Date:` header in the **Milestones & History** table to correlate server clock time against local milestone schedules.
 
 ### 7. Multi-Factor Verification Engine & Auto-Cancellation
@@ -127,7 +136,7 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 
 ---
 
-## 🏗️ Architecture & Technical Specs
+## Architecture & Technical Specs
 
 - **Montoya API**: Built using `net.portswigger.burp.extensions:montoya-api:2023.12.1`.
 - **Concurrency & Zero-Freeze UI**:
@@ -139,12 +148,12 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 
 ---
 
-## 🚀 Building the Extension
+## Building the Extension
 
 Ensure you have Java 17 or higher installed:
 
 ```bash
-cd /home/littlespidy/myextra/burpsuite/SessionInspector_littlespidy
+cd SessionInspector_littlespidy
 ./gradlew jar
 ```
 
@@ -155,42 +164,43 @@ build/libs/session-inspector-littlespidy-1.0.0.jar
 
 ---
 
-## 🔌 Installing into Burp Suite
+## Installing into Burp Suite
 
 1. Open **Burp Suite**.
-2. Navigate to **Extensions** → **Installed**.
+2. Navigate to **Extensions** -> **Installed**.
 3. Click **Add**.
 4. In the dialog:
    - **Extension type**: `Java`
-   - **Extension file (.jar)**: Browse and select `SessionInspector_littlespidy/build/libs/session-inspector-littlespidy-1.0.0.jar`.
-5. Click **Next**. The extension tab **`⏱️ Session Inspector`** will appear in the top suite bar.
+   - **Extension file (.jar)**: Browse and select `build/libs/session-inspector-littlespidy-1.0.0.jar`.
+5. Click **Next**. The extension tab **`Session Inspector`** will appear in the top suite bar.
 
 ---
 
-## 📖 Testing Workflow Guide
+## Testing Workflow Guide
 
 ### Workflow A: Identify Session Cookies & Auth Headers
-1. Right-click any authenticated request in Proxy or Repeater and select **`🍪 Send to Session Cookie Finder`**.
-2. If your target uses non-standard authentication headers, specify them in **Suspect Custom Headers** (e.g., `X-Custom-Auth, X-Session-Id, Api-Key`).
-3. Click **`▶️ Run Cookie & Auth Finder`**.
-4. Inspect the results table:
-   - Rows marked **`🚨 Session Token (Required)`** identify the exact cookie(s) or header(s) maintaining the session.
-   - Rows marked **`ℹ️ Optional (Non-Session)`** show non-critical tracking/analytics cookies.
-5. Click **`⏱️ Track Expiration in Session Monitor`** to seamlessly schedule expiration checks on the validated target!
+1. Right-click any authenticated request in Proxy or Repeater and select **`Send to Session Cookie Finder`**.
+2. Double-click the tab header if you wish to give the target tab a custom name.
+3. If your target uses non-standard authentication headers, check **Custom Header** and enter them (e.g., `X-Custom-Auth, X-Session-Id, Api-Key`). Uncheck it if not needed.
+4. Click **`Start`**.
+5. Inspect the results table:
+   - Rows marked **`Session Token (Required)`** identify the exact cookie(s) or header(s) maintaining the session.
+   - Rows marked **`Optional (Non-Session)`** show non-critical tracking/analytics cookies.
+6. Click **`Track Expiration in Session Monitor`** to seamlessly schedule expiration checks on the validated target!
 
 ### Workflow B: Schedule Milestone Expiration Tracking
-1. Right-click any authenticated request and select **`⏱️ Send to Session Inspector`**.
+1. Right-click any authenticated request and select **`Send to Session Inspector`**.
 2. Choose milestone presets (e.g. `+30m`, `+1h`, `+3h`, `+8h`) or add custom intervals.
-3. Click **`▶️ Start Tracking`** (the baseline probe is automatically dispatched at $T_0$ immediately).
+3. Click **`Start Tracking`** (the baseline probe is automatically dispatched at $T_0$ immediately).
 4. Monitor the countdown in the master table; when expired, remaining timers auto-cancel and the exact expiration time is highlighted.
 
 ### Workflow C: Inspect and Audit Cookies in Cookie Store
-1. Open the **`📦 Cookie Store`** tab in the extension.
-2. Click **`📥 Load Proxy History`** (toggle **`In-Scope Only`** if desired) to ingest all cookies from Proxy traffic. Alternatively, right-click any request in Burp and choose **`📦 Send to Cookie Store`**.
+1. Open the **`Cookie Store`** tab in the extension.
+2. Click **`Load Proxy History`** (toggle **`In-Scope Only`** if desired) to ingest all cookies from Proxy traffic. Alternatively, right-click any request in Burp and choose **`Send to Cookie Store`**.
 3. Select any cookie name in the left **Cookie Names** table (e.g., `JSESSIONID`, `PHPSESSID`, `session_token`).
 4. In the right **Cookie Values** table, check the **`Repeated (Count)`** column to see how many times each specific cookie value appeared.
-5. Click the **`📋 Copy`** button in the **`Cookie Value`** table header to immediately copy all cookie values to your clipboard one by one (line-by-line).
+5. Click the **`Copy`** button in the **`Cookie Value`** table header to immediately copy all cookie values to your clipboard one by one (line-by-line).
 6. Review security attributes (`HttpOnly`, `Secure`, `SameSite`) to identify misconfigured cookies.
 7. Click any value to view the highlighted sample request and response in the embedded Montoya viewer.
-8. Switch to the **`📖 Cookie Explained (cookiesearch.org)`** tab (or click **`📖 Explain Cookie`** in the quick-info banner or right-click context menu) to read the full behavioral explanation, category, script provider, and related cookies.
-9. Click **`📋 Export TSV`** to copy the complete cookie inventory directly to your clipboard.
+8. Switch to the **`Cookie Explained (cookiesearch.org)`** tab (or click **`Explain Cookie`** in the quick-info banner or right-click context menu) to read the full behavioral explanation, category, script provider, and related cookies.
+9. Click **`Export TSV`** to copy the complete cookie inventory directly to your clipboard.

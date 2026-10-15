@@ -56,7 +56,7 @@ public class CookieStoreTab extends JPanel {
     private final CookieDocPanel cookieDocPanel = new CookieDocPanel();
     private final JPanel quickInfoPanel = new JPanel(new BorderLayout(8, 0));
     private final JLabel quickInfoLabel = new JLabel("Select a cookie to view its classification and documentation from cookiesearch.org.");
-    private final JButton quickInfoDocsBtn = new JButton("📖 Cookie Explained (cookiesearch.org)");
+    private final JButton quickInfoDocsBtn = new JButton("Cookie Explained (cookiesearch.org)");
 
     // Native Montoya HTTP Editors
     private final HttpRequestEditor requestEditor;
@@ -64,7 +64,7 @@ public class CookieStoreTab extends JPanel {
     private final JTabbedPane editorTabs = new JTabbedPane();
 
     // Toolbar Controls
-    private final JButton loadHistoryBtn = new JButton("📥 Load Proxy History");
+    private final JButton loadHistoryBtn = new JButton("Load Proxy History");
     private final JCheckBox inScopeOnlyCheck = new JCheckBox("In-Scope Only", true);
     private final JComboBox<String> sourceFilterCombo = new JComboBox<>(new String[]{"All Cookies", "Request Cookies (Cookie)", "Response Cookies (Set-Cookie)"});
     private final JComboBox<String> domainFilterCombo = new JComboBox<>(new String[]{"All Domains"});
@@ -204,9 +204,9 @@ public class CookieStoreTab extends JPanel {
         valuePanel.add(new JScrollPane(valueTable), BorderLayout.CENTER);
 
         // Bottom: Montoya Message Editors & Cookie Explanation
-        editorTabs.addTab("📤 Request", requestEditor.uiComponent());
-        editorTabs.addTab("📥 Response", responseEditor.uiComponent());
-        editorTabs.addTab("📖 Cookie Explained (cookiesearch.org)", cookieDocPanel);
+        editorTabs.addTab("Request", requestEditor.uiComponent());
+        editorTabs.addTab("Response", responseEditor.uiComponent());
+        editorTabs.addTab("Cookie Explained (cookiesearch.org)", cookieDocPanel);
 
         rightSplit.setTopComponent(valuePanel);
         rightSplit.setBottomComponent(editorTabs);
@@ -296,7 +296,7 @@ public class CookieStoreTab extends JPanel {
 
         // Group Table context menu (Right-click Explain)
         JPopupMenu groupMenu = new JPopupMenu();
-        JMenuItem explainItem = new JMenuItem("📖 Explain Cookie (cookiesearch.org)");
+        JMenuItem explainItem = new JMenuItem("Explain Cookie (cookiesearch.org)");
         explainItem.addActionListener(e -> {
             int row = groupTable.getSelectedRow();
             if (row >= 0) {
@@ -370,18 +370,18 @@ public class CookieStoreTab extends JPanel {
 
         // Context menu on valueTable for extra convenience
         JPopupMenu valueMenu = new JPopupMenu();
-        JMenuItem copyAllItem = new JMenuItem("📋 Copy All Cookie Values (One by One)");
+        JMenuItem copyAllItem = new JMenuItem("Copy All Cookie Values (One by One)");
         copyAllItem.addActionListener(e -> copyAllCookieValues());
         valueMenu.add(copyAllItem);
 
-        JMenuItem copySelectedItem = new JMenuItem("📋 Copy Selected Cookie Value");
+        JMenuItem copySelectedItem = new JMenuItem("Copy Selected Cookie Value");
         copySelectedItem.addActionListener(e -> {
             int row = valueTable.getSelectedRow();
             if (row >= 0) {
                 CookieValueRecord record = valueTableModel.getRecordAt(row);
                 if (record != null && !record.value().isEmpty()) {
                     Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(record.value()), null);
-                    statusLabel.setText("✓ Copied selected cookie value to clipboard.");
+                    statusLabel.setText("Copied selected cookie value to clipboard.");
                 }
             }
         });
@@ -646,7 +646,7 @@ public class CookieStoreTab extends JPanel {
         String joined = String.join("\n", values);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(joined), null);
 
-        statusLabel.setText("✓ Copied " + values.size() + " cookie value(s) to clipboard (one per line).");
+        statusLabel.setText("Copied " + values.size() + " cookie value(s) to clipboard (one per line).");
 
         // Temporary visual feedback on the header button
         cookieValueHeaderRenderer.setCopiedFeedback(true);
@@ -662,12 +662,12 @@ public class CookieStoreTab extends JPanel {
 
     /**
      * Custom TableCellRenderer for the "Cookie Value" column header that displays
-     * the column title and an interactive "📋 Copy" button to copy all values.
+     * the column title and an interactive "Copy" button to copy all values.
      */
     private static class CookieValueHeaderRenderer implements TableCellRenderer {
         private final JPanel panel = new JPanel(new BorderLayout(6, 0));
         private final JLabel titleLabel = new JLabel("Cookie Value");
-        private final JButton copyBtn = new JButton("📋 Copy");
+        private final JButton copyBtn = new JButton("Copy");
         private boolean isHovered = false;
         private boolean isPressed = false;
 
@@ -685,10 +685,10 @@ public class CookieStoreTab extends JPanel {
 
         public void setCopiedFeedback(boolean copied) {
             if (copied) {
-                copyBtn.setText("✓ Copied!");
+                copyBtn.setText("Copied!");
                 copyBtn.setForeground(new Color(0, 140, 0));
             } else {
-                copyBtn.setText("📋 Copy");
+                copyBtn.setText("Copy");
                 copyBtn.setForeground(null);
             }
         }

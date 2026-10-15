@@ -18,18 +18,25 @@ import com.littlespidy.sessionexpiration.cookiestore.model.CookieStoreDataStore;
 import com.littlespidy.sessionexpiration.cookiestore.model.CookieValueRecord;
 import com.littlespidy.sessionexpiration.model.*;
 
+import java.awt.Component;
+import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
+import java.awt.Window;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 
 /**
  * Manages full persistent storage of Session Inspector data across extension reloads,
  * uninstalls/re-adds, and Burp Suite restarts.
  *
- * Saves state to a dedicated JSON database at ~/.burp_session_inspector/session_inspector_store.json.
+ * Saves state to a dedicated JSON database (by default in the Burp project directory,
+ * or user-specified folder for temporary projects).
  * Features thread-safe atomic writes via temporary files, non-blocking debounced auto-saves,
  * and high-fidelity serialization of Montoya HTTP request and response objects.
  *
@@ -37,8 +44,11 @@ import java.util.concurrent.*;
  */
 public class SessionInspectorPersistence {
 
-    private static final String DIR_NAME = ".burp_session_inspector";
-    private static final String FILE_NAME = "session_inspector_store.json";
+    public static final String PREF_KEY_STORAGE_DIR = "session_inspector_storage_dir";
+    public static final String FILE_NAME = "session_inspector_store.json";
+    private static final String DEFAULT_FALLBACK_DIR = ".burp_session_inspector";
+
+    private static Path currentStorageDirectory = null;
 
     private static final ScheduledExecutorService DEBOUNCE_EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "SessionInspector-Persistence-Thread");
@@ -50,12 +60,180 @@ public class SessionInspectorPersistence {
     private static final Object SAVE_LOCK = new Object();
     private static long lastSaveTimestamp = 0;
 
+    public static Path getStorageDirectory() {
+        if (currentStorageDirectory == null) {
+            currentStorageDirectory = Paths.get(System.getProperty("user.home"), DEFAULT_FALLBACK_DIR);
+        }
+        return currentStorageDirectory;
+    }
+
+    public static void setStorageDirectory(Path dir) {
+        if (dir != null) {
+            currentStorageDirectory = dir;
+        }
+    }
+
     /**
      * Returns the absolute Path to the persistent storage file.
      */
     public static Path getStoragePath() {
-        String userHome = System.getProperty("user.home");
-        return Paths.get(userHome, DIR_NAME, FILE_NAME);
+        return getStorageDirectory().resolve(FILE_NAME);
+    }
+
+    public static Path resolveStorageDirectory(MontoyaApi api) {
+        return resolveStorageDirectory(api, null);
+    }
+
+    public static Path resolveStorageDirectory(MontoyaApi api, Window parentWindow) {
+        // 1. Try detecting active Burp project file on disk
+        Path detectedProjectDir = detectBurpProjectDirectory(api);
+        if (detectedProjectDir != null && Files.isDirectory(detectedProjectDir)) {
+            currentStorageDirectory = detectedProjectDir;
+            if (api != null) {
+                api.logging().logToOutput("[Session Inspector] Using active Burp project directory: " + currentStorageDirectory);
+            }
+            return currentStorageDirectory;
+        }
+
+        // 2. Running in a Temporary Project (no disk project available)
+        String savedPrefDir = null;
+        try {
+            if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
+                savedPrefDir = api.persistence().preferences().getString(PREF_KEY_STORAGE_DIR);
+            }
+        } catch (Exception ignored) {}
+
+        Path chosenDir = promptUserForStorageDirectory(api, parentWindow, savedPrefDir);
+        if (chosenDir != null) {
+            currentStorageDirectory = chosenDir;
+            try {
+                if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
+                    api.persistence().preferences().setString(PREF_KEY_STORAGE_DIR, chosenDir.toAbsolutePath().toString());
+                }
+            } catch (Exception ignored) {}
+            if (api != null) {
+                api.logging().logToOutput("[Session Inspector] Temporary project storage directory set to: " + currentStorageDirectory);
+            }
+            return currentStorageDirectory;
+        }
+
+        if (savedPrefDir != null && !savedPrefDir.isBlank()) {
+            Path p = Paths.get(savedPrefDir);
+            if (Files.exists(p)) {
+                currentStorageDirectory = p;
+                if (api != null) {
+                    api.logging().logToOutput("[Session Inspector] Using previously configured temporary project storage directory: " + currentStorageDirectory);
+                }
+                return currentStorageDirectory;
+            }
+        }
+
+        currentStorageDirectory = Paths.get(System.getProperty("user.home"), DEFAULT_FALLBACK_DIR);
+        if (api != null) {
+            api.logging().logToOutput("[Session Inspector] Fallback storage directory: " + currentStorageDirectory);
+        }
+        return currentStorageDirectory;
+    }
+
+    public static Path detectBurpProjectDirectory(MontoyaApi api) {
+        if (api == null) return null;
+
+        // A. Check command line arguments
+        try {
+            List<String> args = api.burpSuite().commandLineArguments();
+            if (args != null) {
+                for (int i = 0; i < args.size(); i++) {
+                    String arg = args.get(i);
+                    if (arg.startsWith("--project-file=")) {
+                        String filePath = arg.substring("--project-file=".length()).trim();
+                        Path p = Paths.get(filePath);
+                        if (p.getParent() != null && Files.exists(p.getParent())) {
+                            return p.getParent();
+                        }
+                    } else if ("--project-file".equals(arg) && i + 1 < args.size()) {
+                        String filePath = args.get(i + 1).trim();
+                        Path p = Paths.get(filePath);
+                        if (p.getParent() != null && Files.exists(p.getParent())) {
+                            return p.getParent();
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // B. Check Burp Suite Frame title
+        try {
+            Frame frame = api.userInterface() != null && api.userInterface().swingUtils() != null
+                    ? api.userInterface().swingUtils().suiteFrame()
+                    : null;
+            if (frame != null) {
+                String title = frame.getTitle();
+                if (title != null && !title.isBlank()) {
+                    if (title.contains("[Temporary Project]") || title.contains("Temporary Project")) {
+                        return null;
+                    }
+
+                    int burpIdx = title.lastIndexOf(".burp");
+                    if (burpIdx > 0) {
+                        int startIdx = title.lastIndexOf(" - ", burpIdx);
+                        String candidateStr = (startIdx != -1) ? title.substring(startIdx + 3, burpIdx + 5).trim() : title.substring(0, burpIdx + 5).trim();
+                        Path candidatePath = Paths.get(candidateStr);
+                        if (Files.exists(candidatePath)) {
+                            return candidatePath.getParent();
+                        } else if (candidatePath.getParent() != null && Files.exists(candidatePath.getParent())) {
+                            return candidatePath.getParent();
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        return null;
+    }
+
+    public static Path promptUserForStorageDirectory(MontoyaApi api, Window parentWindow, String initialDir) {
+        if (GraphicsEnvironment.isHeadless()) {
+            return (initialDir != null && !initialDir.isBlank()) ? Paths.get(initialDir) : null;
+        }
+
+        final Path[] result = new Path[1];
+        Runnable r = () -> {
+            Component parent = parentWindow;
+            if (parent == null && api != null && api.userInterface() != null && api.userInterface().swingUtils() != null) {
+                parent = api.userInterface().swingUtils().suiteFrame();
+            }
+
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Select Directory to Store Session Inspector Data (Temporary Project)");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+
+            if (initialDir != null && !initialDir.isBlank()) {
+                File initFile = new File(initialDir);
+                if (initFile.exists()) {
+                    chooser.setSelectedFile(initFile);
+                }
+            } else {
+                chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+            }
+
+            int opt = chooser.showOpenDialog(parent);
+            if (opt == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+                result[0] = chooser.getSelectedFile().toPath();
+            }
+        };
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(r);
+            } catch (Exception ex) {
+                r.run();
+            }
+        }
+
+        return result[0];
     }
 
     public static long getLastSaveTimestamp() {
@@ -342,7 +520,9 @@ public class SessionInspectorPersistence {
 
         for (SingleCookieFinderPanel p : panels) {
             Map<String, Object> tMap = new LinkedHashMap<>();
+            tMap.put("tabTitle", p.getTabTitle());
             tMap.put("customHeaders", p.getCustomHeaders());
+            tMap.put("customHeadersEnabled", p.isCustomHeadersEnabled());
 
             HttpRequestResponse target = p.getTargetRequestResponse();
             if (target != null) {
@@ -596,12 +776,14 @@ public class SessionInspectorPersistence {
             for (Object tObj : targetsList) {
                 if (!(tObj instanceof Map<?, ?> tMap)) continue;
                 Map<String, Object> tData = (Map<String, Object>) tMap;
+                String tabTitle = SimpleJson.getString(tData, "tabTitle", null);
                 String customHeaders = SimpleJson.getString(tData, "customHeaders", "");
+                boolean customHeadersEnabled = SimpleJson.getBoolean(tData, "customHeadersEnabled", true);
                 HttpRequestResponse targetMsg = deserializeHttpMessage(tData, "target", api);
 
                 List<FinderResult> results = deserializeFinderResults(tData, api);
                 if (targetMsg != null) {
-                    finderTab.restoreTarget(targetMsg, customHeaders, results);
+                    finderTab.restoreTarget(targetMsg, customHeaders, results, tabTitle, customHeadersEnabled);
                     totalFindings += results.size();
                 }
             }

@@ -39,7 +39,7 @@ public class SessionInspectorExtension implements BurpExtension {
 
         // 3. Initialize Main Suite UI Tab
         this.mainTab = new SessionExpirationTab(api, dataStore, timerEngine);
-        api.userInterface().registerSuiteTab("⏱️ Session Inspector", mainTab);
+        api.userInterface().registerSuiteTab("Session Inspector", mainTab);
 
         // 4. Register Right-Click Context Menu Provider
         api.userInterface().registerContextMenuItemsProvider(
@@ -48,6 +48,7 @@ public class SessionInspectorExtension implements BurpExtension {
 
         // 5. Restore Persistent State (across extension reload or Burp restart)
         try {
+            SessionInspectorPersistence.resolveStorageDirectory(api);
             String restoreSummary = SessionInspectorPersistence.load(
                     dataStore, mainTab.getCookieStoreDataStore(), mainTab.getCookieFinderTab(), api
             );
@@ -79,8 +80,8 @@ public class SessionInspectorExtension implements BurpExtension {
         });
 
         api.logging().logToOutput("================================================================");
-        api.logging().logToOutput("⏱️ Session Inspector (littlespidy) loaded successfully!");
-        api.logging().logToOutput("Right-click any authenticated request -> '⏱️ Send to Session Inspector'");
+        api.logging().logToOutput("Session Inspector (littlespidy) loaded successfully!");
+        api.logging().logToOutput("Right-click any authenticated request -> 'Send to Session Inspector'");
         api.logging().logToOutput("Configure custom milestones (e.g., 30m, 1h, 3h, 8h) and track expiration.");
         api.logging().logToOutput("================================================================");
     }

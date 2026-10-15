@@ -67,24 +67,18 @@ public class SessionCookieFinderTab extends JPanel {
         centerBox.setLayout(new BoxLayout(centerBox, BoxLayout.Y_AXIS));
         centerBox.setOpaque(false);
 
-        JLabel iconLabel = new JLabel("🍪", SwingConstants.CENTER);
-        iconLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 48));
-        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         JLabel titleLabel = new JLabel("No Target Requests Loaded", SwingConstants.CENTER);
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel subtitleLabel = new JLabel("<html><center>"
                 + "Right-click any HTTP request in Burp Suite (<b>Proxy, Repeater, Logger, Scanner</b>)<br>"
-                + "and choose <b>'🍪 Send to Session Cookie Finder'</b>.<br><br>"
+                + "and choose <b>'Send to Session Cookie Finder'</b>.<br><br>"
                 + "Each request will open as an independent tab with dedicated isolation tests and response editors."
                 + "</center></html>", SwingConstants.CENTER);
         subtitleLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
         subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        centerBox.add(iconLabel);
-        centerBox.add(Box.createVerticalStrut(10));
         centerBox.add(titleLabel);
         centerBox.add(Box.createVerticalStrut(8));
         centerBox.add(subtitleLabel);
@@ -116,6 +110,7 @@ public class SessionCookieFinderTab extends JPanel {
         String title = "#" + id + " " + method + " " + shortPath;
         String fullUrl = request.url() != null ? request.url() : path;
 
+        panel.setTabTitle(title);
         targetTabbedPane.addTab(title, panel);
         int tabIndex = targetTabbedPane.indexOfComponent(panel);
         targetTabbedPane.setToolTipTextAt(tabIndex, fullUrl);
@@ -145,9 +140,18 @@ public class SessionCookieFinderTab extends JPanel {
         headerPanel.setOpaque(false);
 
         JLabel label = new JLabel(title);
+        label.setToolTipText("Double-click to rename tab");
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    promptRenameTab(panel, label);
+                }
+            }
+        });
         headerPanel.add(label);
 
-        JButton closeBtn = new JButton("×");
+        JButton closeBtn = new JButton("x");
         closeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         closeBtn.setMargin(new Insets(0, 2, 0, 2));
         closeBtn.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
@@ -172,6 +176,11 @@ public class SessionCookieFinderTab extends JPanel {
 
         // Context menu on tab header
         JPopupMenu menu = new JPopupMenu();
+        JMenuItem renameItem = new JMenuItem("Rename Tab");
+        renameItem.addActionListener(e -> promptRenameTab(panel, label));
+        menu.add(renameItem);
+        menu.addSeparator();
+
         JMenuItem closeItem = new JMenuItem("Close Tab");
         closeItem.addActionListener(e -> closePanel(panel));
         menu.add(closeItem);
@@ -188,6 +197,31 @@ public class SessionCookieFinderTab extends JPanel {
         label.setComponentPopupMenu(menu);
 
         return headerPanel;
+    }
+
+    private void promptRenameTab(SingleCookieFinderPanel panel, JLabel label) {
+        String current = label.getText();
+        String newName = JOptionPane.showInputDialog(
+                this,
+                "Enter new tab name:",
+                "Rename Tab",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                null,
+                current
+        ) instanceof String str ? str.trim() : null;
+
+        if (newName != null && !newName.isEmpty()) {
+            label.setText(newName);
+            panel.setTabTitle(newName);
+            int idx = targetTabbedPane.indexOfComponent(panel);
+            if (idx >= 0) {
+                targetTabbedPane.setTitleAt(idx, newName);
+            }
+            if (parentTab != null) {
+                parentTab.triggerAutoSave();
+            }
+        }
     }
 
     public void closePanel(SingleCookieFinderPanel panel) {
@@ -284,18 +318,36 @@ public class SessionCookieFinderTab extends JPanel {
         }
     }
 
-    /**
-     * Restores a target panel during deserialization.
-     */
     public SingleCookieFinderPanel restoreTarget(HttpRequestResponse target, String customHeaders, List<FinderResult> results) {
+        return restoreTarget(target, customHeaders, results, null, true);
+    }
+
+    public SingleCookieFinderPanel restoreTarget(HttpRequestResponse target, String customHeaders, List<FinderResult> results, String tabTitle, boolean customHeadersEnabled) {
         if (target == null || target.request() == null) return null;
         SingleCookieFinderPanel panel = addTargetRequest(target.request(), target);
         if (panel != null) {
             if (customHeaders != null && !customHeaders.isBlank()) {
                 panel.setCustomHeaders(customHeaders);
             }
+            panel.setCustomHeadersEnabled(customHeadersEnabled);
             if (results != null && !results.isEmpty()) {
                 panel.setResults(results);
+            }
+            if (tabTitle != null && !tabTitle.isBlank()) {
+                panel.setTabTitle(tabTitle);
+                int idx = targetTabbedPane.indexOfComponent(panel);
+                if (idx >= 0) {
+                    targetTabbedPane.setTitleAt(idx, tabTitle);
+                    Component c = targetTabbedPane.getTabComponentAt(idx);
+                    if (c instanceof JPanel jp) {
+                        for (Component comp : jp.getComponents()) {
+                            if (comp instanceof JLabel lbl) {
+                                lbl.setText(tabTitle);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
         return panel;

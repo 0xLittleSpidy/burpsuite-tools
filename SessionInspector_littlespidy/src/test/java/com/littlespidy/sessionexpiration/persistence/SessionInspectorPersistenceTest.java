@@ -85,4 +85,58 @@ public class SessionInspectorPersistenceTest {
         assertTrue(cleared);
         assertFalse(Files.exists(storagePath));
     }
+
+    @Test
+    public void testCustomStorageDirectory() throws Exception {
+        Path tempDir = Files.createTempDirectory("si_test_storage");
+        try {
+            SessionInspectorPersistence.setStorageDirectory(tempDir);
+            Path expectedPath = tempDir.resolve(SessionInspectorPersistence.FILE_NAME);
+            assertEquals(expectedPath, SessionInspectorPersistence.getStoragePath());
+
+            SessionDataStore sessionStore = new SessionDataStore();
+            CookieStoreDataStore cookieStore = new CookieStoreDataStore();
+            SessionInspectorPersistence.saveSync(sessionStore, cookieStore, null);
+
+            assertTrue(Files.exists(expectedPath));
+
+            SessionDataStore restored = new SessionDataStore();
+            String summary = SessionInspectorPersistence.load(restored, null, null, null);
+            assertNotNull(summary);
+            assertTrue(summary.contains("0 session tasks"));
+        } finally {
+            SessionInspectorPersistence.clearPersistentFile();
+            // Reset to default
+            SessionInspectorPersistence.setStorageDirectory(null);
+            try {
+                Files.deleteIfExists(tempDir.resolve(SessionInspectorPersistence.FILE_NAME));
+                Files.deleteIfExists(tempDir);
+            } catch (Exception ignored) {}
+        }
+    }
+
+    @Test
+    public void testCookieFinderTargetSerialization() {
+        // Build JSON representation of cookie finder target
+        String targetJson = "{" +
+                "\"tabTitle\":\"Custom Target 1\"," +
+                "\"url\":\"https://example.com/api/user\"," +
+                "\"method\":\"GET\"," +
+                "\"requestBase64\":\"" + java.util.Base64.getEncoder().encodeToString("GET /api/user HTTP/1.1\r\nHost: example.com\r\n\r\n".getBytes()) + "\"," +
+                "\"customHeadersEnabled\":false," +
+                "\"customHeadersText\":\"X-Custom-Token, X-Api-Key\"," +
+                "\"rows\":[]" +
+                "}";
+
+        Object parsed = SimpleJson.parse(targetJson);
+        assertTrue(parsed instanceof java.util.Map);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Object> parsedMap = (java.util.Map<String, Object>) parsed;
+
+        assertEquals("Custom Target 1", SimpleJson.getString(parsedMap, "tabTitle", ""));
+        assertEquals("https://example.com/api/user", SimpleJson.getString(parsedMap, "url", ""));
+        assertEquals("GET", SimpleJson.getString(parsedMap, "method", ""));
+        assertFalse(SimpleJson.getBoolean(parsedMap, "customHeadersEnabled", true));
+        assertEquals("X-Custom-Token, X-Api-Key", SimpleJson.getString(parsedMap, "customHeadersText", ""));
+    }
 }
