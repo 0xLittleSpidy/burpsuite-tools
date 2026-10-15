@@ -9,6 +9,7 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import com.littlespidy.sessionexpiration.cookiefinder.FinderResult;
 import com.littlespidy.sessionexpiration.cookiefinder.SessionCookieFinderTab;
+import com.littlespidy.sessionexpiration.cookiefinder.SingleCookieFinderPanel;
 import com.littlespidy.sessionexpiration.cookiestore.knowledge.CookieDocRecord;
 import com.littlespidy.sessionexpiration.cookiestore.knowledge.CookieSearchKnowledgeBase;
 import com.littlespidy.sessionexpiration.cookiestore.model.CookieNameGroup;
@@ -335,34 +336,74 @@ public class SessionInspectorPersistence {
 
     private static Map<String, Object> serializeCookieFinder(SessionCookieFinderTab finderTab) {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("customHeaders", finderTab.getCustomHeaders());
 
-        HttpRequestResponse target = finderTab.getTargetRequestResponse();
-        if (target != null) {
-            serializeHttpMessage(target, map, "target");
-        }
+        List<SingleCookieFinderPanel> panels = finderTab.getAllPanels();
+        List<Map<String, Object>> targetsList = new ArrayList<>();
 
-        List<Map<String, Object>> resList = new ArrayList<>();
-        for (FinderResult r : finderTab.getAllResults()) {
-            Map<String, Object> rMap = new LinkedHashMap<>();
-            rMap.put("id", r.getId());
-            rMap.put("componentName", r.getComponentName());
-            rMap.put("type", r.getType().name());
-            rMap.put("rawValuePreview", r.getRawValuePreview());
-            rMap.put("statusCode", r.getStatusCode());
-            rMap.put("responseLength", r.getResponseLength());
-            rMap.put("lengthDelta", r.getLengthDelta());
-            rMap.put("verdict", r.getVerdict());
-            rMap.put("signalDetails", r.getSignalDetails());
-            rMap.put("durationMs", r.getDurationMs());
-            rMap.put("isSessionToken", r.isSessionToken());
+        for (SingleCookieFinderPanel p : panels) {
+            Map<String, Object> tMap = new LinkedHashMap<>();
+            tMap.put("customHeaders", p.getCustomHeaders());
 
-            if (r.getRequestResponse() != null) {
-                serializeHttpMessage(r.getRequestResponse(), rMap, "item");
+            HttpRequestResponse target = p.getTargetRequestResponse();
+            if (target != null) {
+                serializeHttpMessage(target, tMap, "target");
             }
-            resList.add(rMap);
+
+            List<Map<String, Object>> resList = new ArrayList<>();
+            for (FinderResult r : p.getAllResults()) {
+                Map<String, Object> rMap = new LinkedHashMap<>();
+                rMap.put("id", r.getId());
+                rMap.put("componentName", r.getComponentName());
+                rMap.put("type", r.getType().name());
+                rMap.put("rawValuePreview", r.getRawValuePreview());
+                rMap.put("statusCode", r.getStatusCode());
+                rMap.put("responseLength", r.getResponseLength());
+                rMap.put("lengthDelta", r.getLengthDelta());
+                rMap.put("verdict", r.getVerdict());
+                rMap.put("signalDetails", r.getSignalDetails());
+                rMap.put("durationMs", r.getDurationMs());
+                rMap.put("isSessionToken", r.isSessionToken());
+
+                if (r.getRequestResponse() != null) {
+                    serializeHttpMessage(r.getRequestResponse(), rMap, "item");
+                }
+                resList.add(rMap);
+            }
+            tMap.put("results", resList);
+            targetsList.add(tMap);
         }
-        map.put("results", resList);
+
+        map.put("targets", targetsList);
+
+        // Keep top-level keys for backward compatibility
+        if (!panels.isEmpty()) {
+            SingleCookieFinderPanel first = panels.get(0);
+            map.put("customHeaders", first.getCustomHeaders());
+            if (first.getTargetRequestResponse() != null) {
+                serializeHttpMessage(first.getTargetRequestResponse(), map, "target");
+            }
+            List<Map<String, Object>> firstResList = new ArrayList<>();
+            for (FinderResult r : first.getAllResults()) {
+                Map<String, Object> rMap = new LinkedHashMap<>();
+                rMap.put("id", r.getId());
+                rMap.put("componentName", r.getComponentName());
+                rMap.put("type", r.getType().name());
+                rMap.put("rawValuePreview", r.getRawValuePreview());
+                rMap.put("statusCode", r.getStatusCode());
+                rMap.put("responseLength", r.getResponseLength());
+                rMap.put("lengthDelta", r.getLengthDelta());
+                rMap.put("verdict", r.getVerdict());
+                rMap.put("signalDetails", r.getSignalDetails());
+                rMap.put("durationMs", r.getDurationMs());
+                rMap.put("isSessionToken", r.isSessionToken());
+                if (r.getRequestResponse() != null) {
+                    serializeHttpMessage(r.getRequestResponse(), rMap, "item");
+                }
+                firstResList.add(rMap);
+            }
+            map.put("results", firstResList);
+        }
+
         return map;
     }
 
@@ -548,11 +589,40 @@ public class SessionInspectorPersistence {
 
     @SuppressWarnings("unchecked")
     private static int deserializeCookieFinder(Map<String, Object> cfMap, SessionCookieFinderTab finderTab, MontoyaApi api) {
-        String customHeaders = SimpleJson.getString(cfMap, "customHeaders", "");
-        HttpRequestResponse targetMsg = deserializeHttpMessage(cfMap, "target", api);
+        int totalFindings = 0;
+        List<Object> targetsList = SimpleJson.getList(cfMap, "targets");
 
+        if (!targetsList.isEmpty()) {
+            for (Object tObj : targetsList) {
+                if (!(tObj instanceof Map<?, ?> tMap)) continue;
+                Map<String, Object> tData = (Map<String, Object>) tMap;
+                String customHeaders = SimpleJson.getString(tData, "customHeaders", "");
+                HttpRequestResponse targetMsg = deserializeHttpMessage(tData, "target", api);
+
+                List<FinderResult> results = deserializeFinderResults(tData, api);
+                if (targetMsg != null) {
+                    finderTab.restoreTarget(targetMsg, customHeaders, results);
+                    totalFindings += results.size();
+                }
+            }
+        } else {
+            // Legacy single target support
+            String customHeaders = SimpleJson.getString(cfMap, "customHeaders", "");
+            HttpRequestResponse targetMsg = deserializeHttpMessage(cfMap, "target", api);
+            List<FinderResult> results = deserializeFinderResults(cfMap, api);
+            if (targetMsg != null) {
+                finderTab.restoreState(targetMsg, customHeaders, results);
+                totalFindings += results.size();
+            }
+        }
+
+        return totalFindings;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<FinderResult> deserializeFinderResults(Map<String, Object> map, MontoyaApi api) {
         List<FinderResult> results = new ArrayList<>();
-        List<Object> resList = SimpleJson.getList(cfMap, "results");
+        List<Object> resList = SimpleJson.getList(map, "results");
 
         for (Object rObj : resList) {
             if (!(rObj instanceof Map<?, ?> rMap)) continue;
@@ -581,9 +651,7 @@ public class SessionInspectorPersistence {
             );
             results.add(result);
         }
-
-        finderTab.restoreState(targetMsg, customHeaders, results);
-        return results.size();
+        return results;
     }
 
     @SuppressWarnings("unchecked")

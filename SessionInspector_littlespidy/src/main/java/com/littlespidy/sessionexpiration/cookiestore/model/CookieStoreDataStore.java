@@ -151,11 +151,15 @@ public class CookieStoreDataStore {
     }
 
     public synchronized int totalDomainsCount() {
-        Set<String> all = new HashSet<>();
+        return getAllUniqueDomains().size();
+    }
+
+    public synchronized Set<String> getAllUniqueDomains() {
+        Set<String> all = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         for (CookieNameGroup g : cookieGroups.values()) {
             all.addAll(g.allDomains());
         }
-        return all.size();
+        return all;
     }
 
     public synchronized int totalOccurrences() {

@@ -199,7 +199,7 @@ public class ReDownloaderEngine {
      * Executes the redownload HTTP request and wraps it with markers.
      */
     public HttpRequestResponse executeRedownload(HttpRequest redownloadRequest, String searchPayload) {
-        if (redownloadRequest == null) {
+        if (!config.isEnabled() || redownloadRequest == null) {
             return null;
         }
 

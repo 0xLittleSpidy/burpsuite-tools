@@ -9,8 +9,11 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 ## 🎯 Key Features
 
 ### 1. 🍪 Systematic Session Cookie & Auth Header Finder (Tab #2)
-- **Target Ingestion**:
-  - Right-click any HTTP request in **Proxy History**, **Repeater**, **Logger**, or the **HTTP Message Editor** and choose **`🍪 Send to Session Cookie Finder`** (or paste raw requests directly from the clipboard).
+- **Multi-Tab Target Ingestion**:
+  - Right-click any single or multiple HTTP requests across **Proxy History**, **Repeater**, **Logger**, or the **HTTP Message Editor** and choose **`🍪 Send to Session Cookie Finder`** (or **`🍪 Send N Requests to Session Cookie Finder`**).
+  - Each request opens in its own dedicated, numbered sub-tab (e.g., `#1 GET /api/v1/user`, `#2 POST /login`) equipped with independent isolation test configurations, results, and message editors.
+  - Previously loaded requests and their test findings are **never overwritten or lost** when sending new requests.
+  - Each tab includes an interactive **`×`** close button and tab context menu (*Close Tab*, *Close Other Tabs*, *Close All Tabs*).
 - **Automated Credential Discovery**:
   - Automatically parses individual cookies from the `Cookie` header (`JSESSIONID`, `PHPSESSID`, `token`, `remember_me`, `_ga`, etc.).
   - Automatically recognizes standard and common authorization headers (`Authorization`, `Proxy-Authorization`, `X-Access-Token`, `X-Auth-Token`, `Bearer`, `Token`, `X-Session-ID`, etc.).
@@ -45,8 +48,8 @@ A modern Burp Suite extension built on the **Montoya API** designed to automate 
 - **Synchronized Proxy History Ingestion**:
   - One-click **`📥 Load Proxy History`** button runs a background worker with optional **`[x] In-Scope Only`** filter gating to parse thousands of items without freezing the UI.
 - **Search & Domain Filtering**:
-  - Live search filters both cookie names and values with regex and case-insensitivity support.
-  - Dynamic domain combo box filters cookies down to specific hosts.
+  - Live search filters both cookie names, values, and attributes with case-insensitivity support.
+  - Dedicated **Domain Dropdown (`JComboBox`)** dynamically lists all discovered domains (`All Domains` + unique hosts) for instant domain-scoped cookie inspection.
 - **4-Pillar Deep-Linking with Native Montoya Editors**:
   - Selecting any cookie value displays the sample HTTP Request & Response in native Montoya Pretty/Raw/Hex editors.
   - Applies vibrant yellow/orange highlight markers over the selected cookie name and value directly in the request and response viewers.

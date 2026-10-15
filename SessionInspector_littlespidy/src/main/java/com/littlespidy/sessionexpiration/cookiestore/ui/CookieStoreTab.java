@@ -26,8 +26,10 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Suite tab for Cookie Store.
@@ -65,7 +67,7 @@ public class CookieStoreTab extends JPanel {
     private final JButton loadHistoryBtn = new JButton("📥 Load Proxy History");
     private final JCheckBox inScopeOnlyCheck = new JCheckBox("In-Scope Only", true);
     private final JComboBox<String> sourceFilterCombo = new JComboBox<>(new String[]{"All Cookies", "Request Cookies (Cookie)", "Response Cookies (Set-Cookie)"});
-    private final JTextField domainFilterField = new JTextField(14);
+    private final JComboBox<String> domainFilterCombo = new JComboBox<>(new String[]{"All Domains"});
     private final JTextField searchFilterField = new JTextField(14);
     private final JButton resetFiltersBtn = new JButton("Reset Filters");
     private final JButton exportTsvBtn = new JButton("Export TSV");
@@ -121,8 +123,9 @@ public class CookieStoreTab extends JPanel {
         toolbar.add(sourceFilterCombo);
 
         toolbar.add(new JLabel("Domain:"));
-        domainFilterField.setToolTipText("Filter by hostname (e.g., example.com)");
-        toolbar.add(domainFilterField);
+        domainFilterCombo.setToolTipText("Filter by discovered domain");
+        domainFilterCombo.setPreferredSize(new Dimension(160, 24));
+        toolbar.add(domainFilterCombo);
 
         toolbar.add(new JLabel("Search:"));
         searchFilterField.setToolTipText("Search cookie names, values, or attributes");
@@ -232,18 +235,18 @@ public class CookieStoreTab extends JPanel {
         inScopeOnlyCheck.addActionListener(e -> refreshView());
 
         sourceFilterCombo.addActionListener(e -> refreshView());
+        domainFilterCombo.addActionListener(e -> refreshView());
 
         DocumentListener dl = new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { debounceTimer.restart(); }
             public void removeUpdate(DocumentEvent e) { debounceTimer.restart(); }
             public void changedUpdate(DocumentEvent e) { debounceTimer.restart(); }
         };
-        domainFilterField.getDocument().addDocumentListener(dl);
         searchFilterField.getDocument().addDocumentListener(dl);
 
         resetFiltersBtn.addActionListener(e -> {
             sourceFilterCombo.setSelectedIndex(0);
-            domainFilterField.setText("");
+            domainFilterCombo.setSelectedItem("All Domains");
             searchFilterField.setText("");
             inScopeOnlyCheck.setSelected(true);
             refreshView();
@@ -440,13 +443,57 @@ public class CookieStoreTab extends JPanel {
         }
     }
 
+    private boolean isUpdatingDomainCombo = false;
+
+    private void updateDomainCombo() {
+        if (isUpdatingDomainCombo) return;
+        Set<String> domains = dataStore.getAllUniqueDomains();
+        String currentSelection = (String) domainFilterCombo.getSelectedItem();
+        if (currentSelection == null) currentSelection = "All Domains";
+
+        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) domainFilterCombo.getModel();
+        List<String> expectedItems = new ArrayList<>();
+        expectedItems.add("All Domains");
+        expectedItems.addAll(domains);
+
+        boolean identical = model.getSize() == expectedItems.size();
+        if (identical) {
+            for (int i = 0; i < model.getSize(); i++) {
+                if (!model.getElementAt(i).equals(expectedItems.get(i))) {
+                    identical = false;
+                    break;
+                }
+            }
+        }
+
+        if (!identical) {
+            isUpdatingDomainCombo = true;
+            try {
+                model.removeAllElements();
+                for (String d : expectedItems) {
+                    model.addElement(d);
+                }
+                if (domains.contains(currentSelection)) {
+                    domainFilterCombo.setSelectedItem(currentSelection);
+                } else {
+                    domainFilterCombo.setSelectedItem("All Domains");
+                }
+            } finally {
+                isUpdatingDomainCombo = false;
+            }
+        }
+    }
+
     public void refreshView() {
+        updateDomainCombo();
+
         CookieSource sourceFilter = null;
         int srcIdx = sourceFilterCombo.getSelectedIndex();
         if (srcIdx == 1) sourceFilter = CookieSource.REQUEST;
         else if (srcIdx == 2) sourceFilter = CookieSource.RESPONSE;
 
-        String domainFilter = domainFilterField.getText().trim();
+        String selectedDomain = (String) domainFilterCombo.getSelectedItem();
+        String domainFilter = (selectedDomain == null || "All Domains".equalsIgnoreCase(selectedDomain)) ? "" : selectedDomain.trim();
         String searchFilter = searchFilterField.getText().trim();
 
         List<CookieNameGroup> filtered = dataStore.getFilteredGroups(sourceFilter, domainFilter, searchFilter);
@@ -488,7 +535,8 @@ public class CookieStoreTab extends JPanel {
             return;
         }
 
-        String domainFilter = domainFilterField.getText().trim();
+        String selectedDomain = (String) domainFilterCombo.getSelectedItem();
+        String domainFilter = (selectedDomain == null || "All Domains".equalsIgnoreCase(selectedDomain)) ? "" : selectedDomain.trim();
         String searchFilter = searchFilterField.getText().trim();
         List<CookieValueRecord> values = selectedGroup.getValuesFiltered(domainFilter, searchFilter);
         valueTableModel.setRecords(values);

@@ -195,12 +195,9 @@ Provide `build.gradle.kts` (or `pom.xml`) with Montoya API dependency (`net.port
 Before generating code, ALWAYS refer to the existing examples in the current workspace directory (`/home/littlespidy/myextra/burpsuite`). This repository contains various tools that you should use to match best practices and current usage:
 - **Bambdas**: Check the `/home/littlespidy/myextra/burpsuite/bambdas/` directory (e.g., `Filter/`, `CustomAction/`, `CustomScanChecks/`).
 - **BChecks**: Check the `/home/littlespidy/myextra/burpsuite/BChecks/` directory for custom scan check definitions.
-- **Extensions**: Check the `/home/littlespidy/myextra/burpsuite/ExtensionTemplateProject/` directory for standard structure and Montoya API usage.
-- **CSP Inspector** (`/home/littlespidy/myextra/burpsuite/CSPInspector_littlespidy/`): The canonical reference for a full Montoya API extension with:
-  - Multi-select filter toolbar (`MultiSelectFilterButton` — Method, Status, Content-Type).
-  - DataStore method filtering (`matchesMethod()`, `Set<String> methodFilter` param).
-  - Master-detail table with Montoya HTTP editors.
-  - Debounce-timer-based refresh pattern.
-  - OR-merge strategy for multi-value content-type selections.
+- **Upload Scanner** (`/home/littlespidy/myextra/burpsuite-extensions/UploadScanner_littlespidy/`): Reference for advanced file upload vulnerability scanning and probing with:
+  - **Probe Extensions Scanner**: Probes upload endpoints using comprehensive lists of allowed/target extensions, including a consolidated dataset of 912 file extensions collected from Wikipedia (`https://en.wikipedia.org/wiki/Lists_of_filename_extensions` spanning alphanumeric subpages 0–9, A–E, F–L, M–R, S–Z). Used to discover accepted file types, map server-side whitelist/blacklist boundaries, and identify viable extension bypass vectors.
+  - **ReDownloader Configuration**: Validates file persistence and execution via dynamic upload directory presets derived from baseline requests, with full enable/disable control to prevent unintended download requests.
+  - **Compact Multi-Column Attack Types**: High-density grid categorization covering Server RCE, Image Libraries, XML/Documents, Client-Side/Polyglots, Archives/Quirks/DoS, Allowed Extensions, and Validation/EXIF Leakage.
 
 Use the `list_dir`, `grep_search`, or `view_file` tools on these directories to find relevant examples based on what the user is asking for.

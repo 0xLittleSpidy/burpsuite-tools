@@ -31,8 +31,6 @@ public class UploadScannerTab extends JPanel {
 
         this.rootTabbedPane = new JTabbedPane();
 
-        rootTabbedPane.addTab("📖 Welcome & Guide", new WelcomeGuidePanel());
-
         add(rootTabbedPane, BorderLayout.CENTER);
     }
 

@@ -914,7 +914,111 @@ public class UploadPayloadGenerator {
             }
         }
 
+        // 7. Wikipedia Consolidated File Extensions
+        if (config.isTestExtWikipedia()) {
+            java.util.Set<String> alreadyCoveredExts = new java.util.HashSet<>();
+            for (PayloadDefinition p : payloads) {
+                String fn = p.getFilename();
+                int dot = fn.lastIndexOf('.');
+                if (dot > 0 && dot < fn.length() - 1) {
+                    alreadyCoveredExts.add(fn.substring(dot + 1).toLowerCase());
+                }
+            }
+
+            List<String> wikiExts = loadWikipediaExtensions();
+            for (String ext : wikiExts) {
+                ext = ext.trim().toLowerCase().replaceAll("^\\.+", "");
+                if (!ext.isEmpty() && !alreadyCoveredExts.contains(ext)) {
+                    alreadyCoveredExts.add(ext);
+                    String fn = "probe_test." + ext;
+                    String mime = resolveMimeTypeForExtension(ext);
+                    byte[] content = ("Upload Scanner Allowed Extension Probe: " + ext + " | " + token + "\n").getBytes(StandardCharsets.UTF_8);
+                    payloads.add(new PayloadDefinition("Allowed Extension: ." + ext + " (Wikipedia)", category, fn, mime, content, token));
+                }
+            }
+        }
+
         return payloads;
+    }
+
+    /**
+     * Loads the consolidated list of filename extensions collected from Wikipedia.
+     */
+    public static List<String> loadWikipediaExtensions() {
+        List<String> exts = new ArrayList<>();
+        try (InputStream is = UploadPayloadGenerator.class.getResourceAsStream("/wikipedia_extensions.txt")) {
+            if (is != null) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        line = line.trim().toLowerCase();
+                        if (!line.isEmpty() && !line.startsWith("#")) {
+                            exts.add(line);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return exts;
+    }
+
+    /**
+     * Maps common file extensions to appropriate MIME Content-Types, defaulting to application/octet-stream.
+     */
+    public static String resolveMimeTypeForExtension(String ext) {
+        if (ext == null) return "application/octet-stream";
+        return switch (ext.toLowerCase()) {
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "webp" -> "image/webp";
+            case "svg" -> "image/svg+xml";
+            case "bmp" -> "image/bmp";
+            case "ico" -> "image/x-icon";
+            case "tiff", "tif" -> "image/tiff";
+            case "avif" -> "image/avif";
+            case "txt", "log", "ini", "conf", "cfg" -> "text/plain";
+            case "html", "htm", "xhtml" -> "text/html";
+            case "css" -> "text/css";
+            case "js", "mjs", "cjs" -> "application/javascript";
+            case "json" -> "application/json";
+            case "xml", "xsd", "xsl" -> "application/xml";
+            case "pdf" -> "application/pdf";
+            case "doc", "dot" -> "application/msword";
+            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "xls", "xlt" -> "application/vnd.ms-excel";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "ppt", "pps" -> "application/vnd.ms-powerpoint";
+            case "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            case "odt" -> "application/vnd.oasis.opendocument.text";
+            case "ods" -> "application/vnd.oasis.opendocument.spreadsheet";
+            case "odp" -> "application/vnd.oasis.opendocument.presentation";
+            case "csv" -> "text/csv";
+            case "rtf" -> "application/rtf";
+            case "zip" -> "application/zip";
+            case "tar" -> "application/x-tar";
+            case "gz", "gzip" -> "application/gzip";
+            case "7z" -> "application/x-7z-compressed";
+            case "rar" -> "application/vnd.rar";
+            case "mp3" -> "audio/mpeg";
+            case "wav" -> "audio/wav";
+            case "mp4" -> "video/mp4";
+            case "avi" -> "video/x-msvideo";
+            case "mov" -> "video/quicktime";
+            case "mkv" -> "video/x-matroska";
+            case "webm" -> "video/webm";
+            case "ogg", "oga" -> "audio/ogg";
+            case "ogv" -> "video/ogg";
+            case "yaml", "yml" -> "application/x-yaml";
+            case "php", "phtml", "php3", "php4", "php5", "phps" -> "application/x-php";
+            case "jsp", "jspx" -> "application/x-jsp";
+            case "asp", "aspx" -> "text/asp";
+            case "sh", "bash" -> "application/x-sh";
+            case "py", "pyw" -> "text/x-python";
+            case "rb" -> "application/x-ruby";
+            case "pl", "pm" -> "application/x-perl";
+            default -> "application/octet-stream";
+        };
     }
 
     // ──────────────────────────────────────────────────────────────────

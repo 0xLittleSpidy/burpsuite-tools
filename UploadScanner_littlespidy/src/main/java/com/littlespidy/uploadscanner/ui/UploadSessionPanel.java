@@ -24,6 +24,7 @@ import com.littlespidy.uploadscanner.model.UploadScannerConfig;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -45,22 +46,11 @@ public class UploadSessionPanel extends JPanel {
     private final UploadScannerConfig config;
     private final Consumer<UploadEntry> logEntryConsumer;
 
-    // ReDownloader Wizard Controls
-    private JButton autoDetectBtn;
-    private JLabel autoDetectResultLabel;
-
-    private JButton useSelectionBtn;
-    private JLabel useSelectionResultLabel;
-
+    // ReDownloader Configuration Controls
+    private JCheckBox redownloaderEnabledCb;
     private JTextField staticUrlField;
-    private JTextField startMarkerField;
-    private JTextField endMarkerField;
-    private JTextField prefixField;
-    private JTextField suffixField;
-    private JTextField preflightUrlField;
-    private JCheckBox replaceBackslashCb;
 
-    // 24 Attack Vector Checkboxes across 5 Categories
+    // Attack Vector Checkboxes across 7 Categories
     // Category 1: Server RCE
     private JCheckBox phpCb;
     private JCheckBox jspCb;
@@ -100,6 +90,7 @@ public class UploadSessionPanel extends JPanel {
     private JCheckBox billionLaughsCb;
 
     // Category 6: Allowed Extensions Matrix
+    private JCheckBox extWikipediaCb;
     private JCheckBox extImagesCb;
     private JCheckBox extDocsCb;
     private JCheckBox extWebDataCb;
@@ -153,73 +144,22 @@ public class UploadSessionPanel extends JPanel {
         JPanel configContainer = new JPanel(new BorderLayout(6, 6));
         configContainer.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
 
-        // ── 1. ReDownloader Help Explainer Banner ──
-        JPanel bannerPanel = new JPanel(new BorderLayout(6, 4));
-        bannerPanel.setBorder(BorderFactory.createCompoundBorder(
+        // ── 1. Redownloader Configuration (Enabled Checkbox + Directory Preset) ──
+        JPanel redlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
+        redlPanel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(180, 210, 240), 1),
-                BorderFactory.createEmptyBorder(6, 10, 6, 10)
-        ));
-        bannerPanel.setBackground(new Color(242, 248, 255));
-        JLabel bannerTitle = new JLabel("💡 What is ReDownloader and Why Do You Need It?");
-        bannerTitle.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        bannerTitle.setForeground(new Color(0, 80, 160));
+                "ReDownloader Configuration",
+                TitledBorder.LEFT, TitledBorder.TOP,
+                new Font(Font.SANS_SERIF, Font.BOLD, 11),
+                new Color(0, 80, 160)));
 
-        JLabel bannerDesc = new JLabel("<html><b>Uploading</b> a payload only tells you if the server accepted the file. " +
-                "To verify if code actually executed (e.g. <code>phpinfo()</code> or whoami) or if SVG XSS reflected, Burp must <b>re-download</b> the file from the web server. " +
-                "Choose one of the 3 simple modes below to tell the scanner where to find the uploaded file:</html>");
-        bannerDesc.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-        bannerPanel.add(bannerTitle, BorderLayout.NORTH);
-        bannerPanel.add(bannerDesc, BorderLayout.CENTER);
+        redownloaderEnabledCb = new JCheckBox("Enable ReDownloader", true);
+        redownloaderEnabledCb.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        redownloaderEnabledCb.setToolTipText("Enable or disable automatic re-downloading of uploaded files. If disabled, ReDownloader will not run.");
 
-        // ── 2. ReDownloader Wizard Modes (Tabbed) ──
-        JTabbedPane redlTabs = new JTabbedPane();
-        redlTabs.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-
-        // Mode 1: ✨ Magic Auto-Detect (Recommended)
-        JPanel autoDetectPanel = new JPanel(new BorderLayout(8, 8));
-        autoDetectPanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
-
-        JPanel autoTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
-        autoDetectBtn = new JButton("✨ Auto-Detect Download URL from Response");
-        autoDetectBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        autoDetectBtn.setBackground(new Color(230, 245, 230));
-        autoDetectBtn.addActionListener(e -> autoDetectDownloadUrl());
-
-        replaceBackslashCb = new JCheckBox("Replace \\/ with / (unescape JSON slashes)", true);
-        autoTop.add(autoDetectBtn);
-        autoTop.add(replaceBackslashCb);
-
-        autoDetectResultLabel = new JLabel("Click 'Auto-Detect' to automatically parse JSON keys ('url', 'path', 'file'), HTML tags, or redirects.");
-        autoDetectResultLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
-        autoDetectResultLabel.setForeground(Color.GRAY);
-
-        autoDetectPanel.add(autoTop, BorderLayout.NORTH);
-        autoDetectPanel.add(autoDetectResultLabel, BorderLayout.CENTER);
-        redlTabs.addTab("✨ 1. Magic Auto-Detect", autoDetectPanel);
-
-        // Mode 2: 🎯 1-Click Selection Helper
-        JPanel selectionPanel = new JPanel(new BorderLayout(8, 8));
-        selectionPanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
-
-        JPanel selTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
-        useSelectionBtn = new JButton("🎯 Use Highlighted Text as Download URL");
-        useSelectionBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        useSelectionBtn.addActionListener(e -> useSelectionAsDownloadUrl());
-        selTop.add(useSelectionBtn);
-
-        useSelectionResultLabel = new JLabel("Highlight the file URL inside the 'Upload Response' editor below, then click this button.");
-        useSelectionResultLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
-        useSelectionResultLabel.setForeground(Color.GRAY);
-
-        selectionPanel.add(selTop, BorderLayout.NORTH);
-        selectionPanel.add(useSelectionResultLabel, BorderLayout.CENTER);
-        redlTabs.addTab("🎯 2. 1-Click Highlight Helper", selectionPanel);
-
-        // Mode 3: 📁 Directory Preset
-        JPanel presetsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        presetsPanel.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
-
-        staticUrlField = new JTextField("/uploads/${FILENAME}", 30);
+        String initialPreset = deriveUploadFileDirectoryPreset(baseRequest);
+        staticUrlField = new JTextField(initialPreset, 36);
+        staticUrlField.setToolTipText("Target directory preset where uploaded files are stored (supports ${FILENAME}, ${FILENAME_NO_EXT}, ${ORIG_EXT}, ${RANDOMIZE})");
         staticUrlField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) { syncConfigFromUI(); }
@@ -229,219 +169,134 @@ public class UploadSessionPanel extends JPanel {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { syncConfigFromUI(); }
         });
 
-        presetsPanel.add(new JLabel("Target Directory Preset / URL Pattern:"));
-        presetsPanel.add(staticUrlField);
-        presetsPanel.add(new JLabel("(supports ${FILENAME}, ${FILENAME_NO_EXT}, ${ORIG_EXT}, ${RANDOMIZE})"));
+        redownloaderEnabledCb.addActionListener(e -> {
+            boolean enabled = redownloaderEnabledCb.isSelected();
+            staticUrlField.setEnabled(enabled);
+            syncConfigFromUI();
+        });
 
-        redlTabs.addTab("📁 3. Directory Preset", presetsPanel);
+        redlPanel.add(redownloaderEnabledCb);
+        redlPanel.add(Box.createHorizontalStrut(8));
+        JLabel dirLabel = new JLabel("Upload File Directory:");
+        dirLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        redlPanel.add(dirLabel);
+        redlPanel.add(staticUrlField);
+        JLabel tipLabel = new JLabel("(e.g. " + initialPreset + ")");
+        tipLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
+        tipLabel.setForeground(Color.GRAY);
+        redlPanel.add(tipLabel);
 
-        // Mode 4: ⚙️ Advanced Custom Markers
-        JPanel advancedPanel = new JPanel(new GridBagLayout());
-        advancedPanel.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 4, 2, 4);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // ── 2. Attack Vectors (Compact Multi-Column Layout) ──
+        JPanel attackPanel = new JPanel(new BorderLayout(4, 4));
+        attackPanel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180), 1),
+                "Attack Types & Probes",
+                TitledBorder.LEFT, TitledBorder.TOP,
+                new Font(Font.SANS_SERIF, Font.BOLD, 11)));
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        advancedPanel.add(new JLabel("Start Marker:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 0.5;
-        startMarkerField = new JTextField("{\"url\":\"", 14);
-        advancedPanel.add(startMarkerField, gbc);
-
-        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0;
-        advancedPanel.add(new JLabel("End Marker:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 0.5;
-        endMarkerField = new JTextField("\"}", 14);
-        advancedPanel.add(endMarkerField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
-        advancedPanel.add(new JLabel("URL Prefix:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 0.5;
-        prefixField = new JTextField(14);
-        advancedPanel.add(prefixField, gbc);
-
-        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
-        advancedPanel.add(new JLabel("URL Suffix:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 1; gbc.weightx = 0.5;
-        suffixField = new JTextField(14);
-        advancedPanel.add(suffixField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
-        advancedPanel.add(new JLabel("Preflight URL:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; gbc.gridwidth = 3;
-        preflightUrlField = new JTextField();
-        preflightUrlField.setToolTipText("Optional URL to fetch before redownload (e.g. /profile/)");
-        advancedPanel.add(preflightUrlField, gbc);
-
-        redlTabs.addTab("⚙️ 4. Advanced Markers", advancedPanel);
-
-        // ── 3. Categorized Attack Vectors (5 Tabs) ──
-        JTabbedPane attackTabs = new JTabbedPane();
-        attackTabs.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-
-        // Tab 1: Server RCE
-        JPanel rcePanel = new JPanel(new BorderLayout(4, 4));
-        JPanel rceChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        phpCb = new JCheckBox("PHP Shells & Bypasses", true);
+        // Category 1: Server RCE
+        phpCb = new JCheckBox("PHP Shells", true);
         jspCb = new JCheckBox("JSP / JSPX", true);
         aspCb = new JCheckBox("ASP / ASPX", true);
         htaccessCb = new JCheckBox("Apache .htaccess", true);
         webConfigCb = new JCheckBox("IIS web.config", true);
-        cgiCb = new JCheckBox("CGI Scripts (Perl/Python/Sh)", true);
+        cgiCb = new JCheckBox("CGI Scripts", true);
         ssiEsiCb = new JCheckBox("SSI & ESI", true);
 
-        rceChecks.add(phpCb);
-        rceChecks.add(jspCb);
-        rceChecks.add(aspCb);
-        rceChecks.add(htaccessCb);
-        rceChecks.add(webConfigCb);
-        rceChecks.add(cgiCb);
-        rceChecks.add(ssiEsiCb);
-
-        JPanel rceActions = createCategoryActionToolbar(List.of(phpCb, jspCb, aspCb, htaccessCb, webConfigCb, cgiCb, ssiEsiCb));
-        rcePanel.add(rceChecks, BorderLayout.CENTER);
-        rcePanel.add(rceActions, BorderLayout.EAST);
-        attackTabs.addTab("💻 Server RCE", rcePanel);
-
-        // Tab 2: Image Libraries
-        JPanel imgPanel = new JPanel(new BorderLayout(4, 4));
-        JPanel imgChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        imageTragickCb = new JCheckBox("ImageTragick (CVE-2016-3714)", true);
+        // Category 2: Image Libraries
+        imageTragickCb = new JCheckBox("ImageTragick", true);
         magickDelegatesCb = new JCheckBox("Magick Delegates", true);
-        ghostscriptCb = new JCheckBox("Ghostscript (CVE-2018-16509)", true);
+        ghostscriptCb = new JCheckBox("Ghostscript", true);
         libavformatCb = new JCheckBox("LibAVFormat SSRF", true);
 
-        imgChecks.add(imageTragickCb);
-        imgChecks.add(magickDelegatesCb);
-        imgChecks.add(ghostscriptCb);
-        imgChecks.add(libavformatCb);
-
-        JPanel imgActions = createCategoryActionToolbar(List.of(imageTragickCb, magickDelegatesCb, ghostscriptCb, libavformatCb));
-        imgPanel.add(imgChecks, BorderLayout.CENTER);
-        imgPanel.add(imgActions, BorderLayout.EAST);
-        attackTabs.addTab("🖼️ Image Libraries", imgPanel);
-
-        // Tab 3: XML & Documents
-        JPanel docPanel = new JPanel(new BorderLayout(4, 4));
-        JPanel docChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        // Category 3: XML & Documents
         xxeSvgCb = new JCheckBox("SVG XXE", true);
         xxeXmlCb = new JCheckBox("XML XXE", true);
-        xxeOfficeCb = new JCheckBox("Office DOCX XXE", true);
-        xxeXmpCb = new JCheckBox("XMP Metadata XXE", true);
-        pdfInjectionsCb = new JCheckBox("PDF Actions & JavaScript", true);
-        csvFormulaCb = new JCheckBox("CSV Formula Injection", true);
+        xxeOfficeCb = new JCheckBox("Office DOCX", true);
+        xxeXmpCb = new JCheckBox("XMP Metadata", true);
+        pdfInjectionsCb = new JCheckBox("PDF Injections", true);
+        csvFormulaCb = new JCheckBox("CSV Formula", true);
 
-        docChecks.add(xxeSvgCb);
-        docChecks.add(xxeXmlCb);
-        docChecks.add(xxeOfficeCb);
-        docChecks.add(xxeXmpCb);
-        docChecks.add(pdfInjectionsCb);
-        docChecks.add(csvFormulaCb);
-
-        JPanel docActions = createCategoryActionToolbar(List.of(xxeSvgCb, xxeXmlCb, xxeOfficeCb, xxeXmpCb, pdfInjectionsCb, csvFormulaCb));
-        docPanel.add(docChecks, BorderLayout.CENTER);
-        docPanel.add(docActions, BorderLayout.EAST);
-        attackTabs.addTab("📄 XML & Documents", docPanel);
-
-        // Tab 4: Client-Side & Polyglots
-        JPanel clientPanel = new JPanel(new BorderLayout(4, 4));
-        JPanel clientChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        xssHtmlCb = new JCheckBox("HTML Stored XSS", true);
-        xssSvgCb = new JCheckBox("SVG Stored XSS", true);
+        // Category 4: Client-Side & Polyglots
+        xssHtmlCb = new JCheckBox("HTML XSS", true);
+        xssSvgCb = new JCheckBox("SVG XSS", true);
         xssSwfCb = new JCheckBox("Flash SWF", true);
-        polyglotJpegCb = new JCheckBox("JPEG+JS CSP Polyglot", true);
-        polyglotGifCb = new JCheckBox("GIF+JS CSP Polyglot", true);
+        polyglotJpegCb = new JCheckBox("JPEG Polyglot", true);
+        polyglotGifCb = new JCheckBox("GIF Polyglot", true);
 
-        clientChecks.add(xssHtmlCb);
-        clientChecks.add(xssSvgCb);
-        clientChecks.add(xssSwfCb);
-        clientChecks.add(polyglotJpegCb);
-        clientChecks.add(polyglotGifCb);
-
-        JPanel clientActions = createCategoryActionToolbar(List.of(xssHtmlCb, xssSvgCb, xssSwfCb, polyglotJpegCb, polyglotGifCb));
-        clientPanel.add(clientChecks, BorderLayout.CENTER);
-        clientPanel.add(clientActions, BorderLayout.EAST);
-        attackTabs.addTab("🌐 Client-Side & Polyglots", clientPanel);
-
-        // Tab 5: Archives, Quirks & DoS
-        JPanel archPanel = new JPanel(new BorderLayout(4, 4));
-        JPanel archChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        zipSlipCb = new JCheckBox("Zip Slip (Traversal in ZIP)", true);
-        tarSymlinkCb = new JCheckBox("TAR Symlink (/etc/passwd)", true);
-        uploadQuirksCb = new JCheckBox("Upload Quirks (dots, nulls)", true);
+        // Category 5: Archives, Quirks & DoS
+        zipSlipCb = new JCheckBox("Zip Slip", true);
+        tarSymlinkCb = new JCheckBox("TAR Symlink", true);
+        uploadQuirksCb = new JCheckBox("Upload Quirks", true);
         eicarCb = new JCheckBox("EICAR AV Test", true);
         pixelFloodCb = new JCheckBox("DoS: Pixel Flood", false);
         billionLaughsCb = new JCheckBox("DoS: Billion Laughs", false);
 
-        archChecks.add(zipSlipCb);
-        archChecks.add(tarSymlinkCb);
-        archChecks.add(uploadQuirksCb);
-        archChecks.add(eicarCb);
-        archChecks.add(pixelFloodCb);
-        archChecks.add(billionLaughsCb);
+        // Category 6: Allowed Extensions
+        extWikipediaCb = new JCheckBox("Wikipedia (912)", true);
+        extWikipediaCb.setToolTipText("Probe endpoint with all 912 consolidated file extensions extracted from Wikipedia");
+        extImagesCb = new JCheckBox("Images (jpg, png..)", true);
+        extDocsCb = new JCheckBox("Documents (pdf, doc..)", true);
+        extWebDataCb = new JCheckBox("Web/Data (json..)", true);
+        extArchivesCb = new JCheckBox("Archives (zip, tar..)", true);
+        extMediaCb = new JCheckBox("Media (mp4, mp3..)", true);
+        customExtField = new JTextField(8);
+        customExtField.setToolTipText("Custom extensions (e.g. bak, log, sql)");
+        JPanel customExtPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        customExtPanel.add(new JLabel("Custom:"));
+        customExtPanel.add(customExtField);
 
-        JPanel archActions = createCategoryActionToolbar(List.of(zipSlipCb, tarSymlinkCb, uploadQuirksCb, eicarCb, pixelFloodCb, billionLaughsCb));
-        archPanel.add(archChecks, BorderLayout.CENTER);
-        archPanel.add(archActions, BorderLayout.EAST);
-        attackTabs.addTab("⚙️ Archives, Quirks & DoS", archPanel);
-
-        // Tab 6: Allowed Extensions Matrix
-        JPanel extPanel = new JPanel(new BorderLayout(4, 4));
-        JPanel extChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        extImagesCb = new JCheckBox("Images (jpg, png, gif, webp, svg, bmp, ico, tiff, avif)", true);
-        extDocsCb = new JCheckBox("Documents (txt, pdf, doc, docx, xls, xlsx, csv, rtf, odt)", true);
-        extWebDataCb = new JCheckBox("Web & Data (json, xml, html, js, css, yaml)", true);
-        extArchivesCb = new JCheckBox("Archives (zip, tar, gz, 7z, rar)", true);
-        extMediaCb = new JCheckBox("Media (mp3, wav, mp4, avi, mov, mkv, ogg)", true);
-
-        customExtField = new JTextField(12);
-        customExtField.setToolTipText("Comma-separated custom extensions (e.g. bak, log, sql, ini)");
-
-        extChecks.add(extImagesCb);
-        extChecks.add(extDocsCb);
-        extChecks.add(extWebDataCb);
-        extChecks.add(extArchivesCb);
-        extChecks.add(extMediaCb);
-        extChecks.add(new JLabel("Custom:"));
-        extChecks.add(customExtField);
-
-        JPanel extActions = createCategoryActionToolbar(List.of(extImagesCb, extDocsCb, extWebDataCb, extArchivesCb, extMediaCb));
-        extPanel.add(extChecks, BorderLayout.CENTER);
-        extPanel.add(extActions, BorderLayout.EAST);
-        attackTabs.addTab("📁 Allowed Extensions", extPanel);
-
-        // Tab 7: Validation, File Sizes & EXIF Metadata
-        JPanel valPanel = new JPanel(new BorderLayout(4, 4));
-        JPanel valChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-
-        contentTypeValidationCb = new JCheckBox("SecLists Content-Types (2,387 types)", false);
-        contentTypeValidationCb.setToolTipText("Run all 2,387 MIME types from SecLists web-all-content-types.txt (or click '🧪 Probe Content-Types' button)");
-        mimeSpoofingCb = new JCheckBox("MIME Spoofing & Header Mutation", true);
-        mimeSpoofingCb.setToolTipText("Test PHP/JSP scripts with image MIME types, and header tamperings");
-        fileSizeLimitsCb = new JCheckBox("File Size Limits (0B-20MB)", true);
-        fileSizeLimitsCb.setToolTipText("Boundary test file sizes from 0 bytes up to max MB");
+        // Category 7: Validation & EXIF
+        mimeSpoofingCb = new JCheckBox("MIME Spoofing", true);
+        fileSizeLimitsCb = new JCheckBox("File Size Limits", true);
         maxFileSizeSpinner = new JSpinner(new SpinnerNumberModel(20, 1, 500, 5));
         maxFileSizeSpinner.setToolTipText("Max file size to test in MB");
-        exifLeakageCb = new JCheckBox("EXIF GPS/PII Leakage", true);
-        exifLeakageCb.setToolTipText("Test if GPS and author metadata are stripped upon upload/redownload");
-        exifXssCb = new JCheckBox("EXIF Stored XSS & Injections", true);
-        exifXssCb.setToolTipText("Embed Stored XSS and command injection vectors inside EXIF metadata tags");
+        ((JSpinner.DefaultEditor) maxFileSizeSpinner.getEditor()).getTextField().setColumns(3);
+        JPanel maxMbPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        maxMbPanel.add(new JLabel("Max MB:"));
+        maxMbPanel.add(maxFileSizeSpinner);
+        exifLeakageCb = new JCheckBox("EXIF Leakage", true);
+        exifXssCb = new JCheckBox("EXIF XSS", true);
+        contentTypeValidationCb = new JCheckBox("SecLists CTypes", false);
+        contentTypeValidationCb.setToolTipText("Run all 2,387 MIME types from SecLists web-all-content-types.txt");
 
-        valChecks.add(contentTypeValidationCb);
-        valChecks.add(mimeSpoofingCb);
-        valChecks.add(fileSizeLimitsCb);
-        valChecks.add(new JLabel("Max MB:"));
-        valChecks.add(maxFileSizeSpinner);
-        valChecks.add(exifLeakageCb);
-        valChecks.add(exifXssCb);
+        // Layout: 7 compact vertical columns
+        JPanel attackGrid = new JPanel(new GridLayout(1, 7, 8, 0));
+        Color hdrColor = new Color(0, 80, 160);
 
-        JPanel valActions = createCategoryActionToolbar(List.of(
-                contentTypeValidationCb, mimeSpoofingCb, fileSizeLimitsCb, exifLeakageCb, exifXssCb));
-        valPanel.add(valChecks, BorderLayout.CENTER);
-        valPanel.add(valActions, BorderLayout.EAST);
-        attackTabs.addTab("🛡️ Validation & EXIF", valPanel);
+        attackGrid.add(createCategoryColumn("💻 Server RCE", hdrColor, phpCb, jspCb, aspCb, htaccessCb, webConfigCb, cgiCb, ssiEsiCb));
+        attackGrid.add(createCategoryColumn("🖼️ Image Libs", hdrColor, imageTragickCb, magickDelegatesCb, ghostscriptCb, libavformatCb));
+        attackGrid.add(createCategoryColumn("📄 XML & Docs", hdrColor, xxeSvgCb, xxeXmlCb, xxeOfficeCb, xxeXmpCb, pdfInjectionsCb, csvFormulaCb));
+        attackGrid.add(createCategoryColumn("🌐 Client-Side", hdrColor, xssHtmlCb, xssSvgCb, xssSwfCb, polyglotJpegCb, polyglotGifCb));
+        attackGrid.add(createCategoryColumn("⚙️ Archives/DoS", hdrColor, zipSlipCb, tarSymlinkCb, uploadQuirksCb, eicarCb, pixelFloodCb, billionLaughsCb));
+        attackGrid.add(createCategoryColumn("📁 Allowed Exts", hdrColor, extWikipediaCb, extImagesCb, extDocsCb, extWebDataCb, extArchivesCb, extMediaCb, customExtPanel));
+        attackGrid.add(createCategoryColumn("🛡️ Validation & EXIF", hdrColor, mimeSpoofingCb, fileSizeLimitsCb, maxMbPanel, exifLeakageCb, exifXssCb, contentTypeValidationCb));
 
-        // ── 4. Live Action & Status Toolbar ──
+        // Quick toolbar
+        List<JCheckBox> allAttackBoxes = new ArrayList<>(List.of(
+                phpCb, jspCb, aspCb, htaccessCb, webConfigCb, cgiCb, ssiEsiCb,
+                imageTragickCb, magickDelegatesCb, ghostscriptCb, libavformatCb,
+                xxeSvgCb, xxeXmlCb, xxeOfficeCb, xxeXmpCb, pdfInjectionsCb, csvFormulaCb,
+                xssHtmlCb, xssSvgCb, xssSwfCb, polyglotJpegCb, polyglotGifCb,
+                zipSlipCb, tarSymlinkCb, uploadQuirksCb, eicarCb, pixelFloodCb, billionLaughsCb,
+                extWikipediaCb, extImagesCb, extDocsCb, extWebDataCb, extArchivesCb, extMediaCb,
+                mimeSpoofingCb, fileSizeLimitsCb, exifLeakageCb, exifXssCb, contentTypeValidationCb
+        ));
+
+        JPanel attackToolbar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 2));
+        JButton selectAllBtn = new JButton("Select All");
+        selectAllBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
+        selectAllBtn.addActionListener(e -> allAttackBoxes.forEach(b -> b.setSelected(true)));
+        JButton clearAllBtn = new JButton("Clear All");
+        clearAllBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
+        clearAllBtn.addActionListener(e -> allAttackBoxes.forEach(b -> b.setSelected(false)));
+        attackToolbar.add(selectAllBtn);
+        attackToolbar.add(clearAllBtn);
+
+        attackPanel.add(attackGrid, BorderLayout.CENTER);
+        attackPanel.add(attackToolbar, BorderLayout.SOUTH);
+
+        // ── 3. Live Action & Status Toolbar ──
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
         testRedlBtn = new JButton("🧪 Test ReDownloader Now");
         testRedlBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
@@ -451,25 +306,25 @@ public class UploadSessionPanel extends JPanel {
         probeExtBtn = new JButton("🧪 Probe Extensions");
         probeExtBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         probeExtBtn.setForeground(new Color(0, 100, 180));
-        probeExtBtn.setToolTipText("Probe which file extensions (jpg, png, txt, etc.) are accepted by the upload endpoint");
+        probeExtBtn.setToolTipText("Probe which file extensions are accepted by the upload endpoint");
         probeExtBtn.addActionListener(e -> probeAllowedExtensions());
 
         probeContentTypeBtn = new JButton("🧪 Probe Content-Types");
         probeContentTypeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         probeContentTypeBtn.setForeground(new Color(130, 40, 130));
-        probeContentTypeBtn.setToolTipText("Probe endpoint with all 2,387 MIME types from SecLists wordlist & MIME spoofing");
+        probeContentTypeBtn.setToolTipText("Probe endpoint with all 2,387 MIME types from SecLists wordlist");
         probeContentTypeBtn.addActionListener(e -> probeContentTypes());
 
         testFileSizeBtn = new JButton("📏 Test File Sizes");
         testFileSizeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         testFileSizeBtn.setForeground(new Color(0, 120, 140));
-        testFileSizeBtn.setToolTipText("Test file size limits with stepped probes (0B, 1KB, 10KB, 100KB, 500KB, 1MB, 2MB, 5MB, 10MB, 20MB)");
+        testFileSizeBtn.setToolTipText("Test file size limits with stepped probes");
         testFileSizeBtn.addActionListener(e -> testFileSizes());
 
         testExifBtn = new JButton("📷 Test EXIF Leakage");
         testExifBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         testExifBtn.setForeground(new Color(180, 80, 0));
-        testExifBtn.setToolTipText("Upload image with GPS & PII canary and verify whether metadata is stripped upon re-download");
+        testExifBtn.setToolTipText("Upload image with GPS & PII canary and verify whether metadata is stripped");
         testExifBtn.addActionListener(e -> testExifLeakage());
 
         startScanBtn = new JButton("▶ Start Scan");
@@ -503,16 +358,16 @@ public class UploadSessionPanel extends JPanel {
         actionsPanel.add(Box.createHorizontalStrut(6));
         actionsPanel.add(previewResultLabel);
 
-        // Assemble Top
-        JPanel midPanel = new JPanel(new BorderLayout(4, 4));
-        midPanel.add(redlTabs, BorderLayout.NORTH);
-        midPanel.add(attackTabs, BorderLayout.CENTER);
+        // Assemble Top: ReDownloader + Attack Grid + Actions
+        JPanel topPanel = new JPanel(new BorderLayout(4, 4));
+        topPanel.add(redlPanel, BorderLayout.NORTH);
+        topPanel.add(attackPanel, BorderLayout.CENTER);
 
-        configContainer.add(bannerPanel, BorderLayout.NORTH);
-        configContainer.add(midPanel, BorderLayout.CENTER);
+        configContainer.add(topPanel, BorderLayout.CENTER);
         configContainer.add(actionsPanel, BorderLayout.SOUTH);
 
-        // ── 5. Lower Message Editors ──
+
+        // ── 4. Lower Message Editors ──
         uploadReqEditor = api.userInterface().createHttpRequestEditor();
         uploadRespEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
         redlReqEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
@@ -526,7 +381,7 @@ public class UploadSessionPanel extends JPanel {
         JPanel reqTabPanel = new JPanel(new BorderLayout());
         JPanel markerToolbar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         JButton addMarkerBtn = new JButton("§ Add Marker");
-        addMarkerBtn.setToolTipText("Wrap highlighted text in §...§ (or auto-wrap filename=\"...\") to replace filename across multiple locations");
+        addMarkerBtn.setToolTipText("Wrap highlighted text in §...§ to replace filename across multiple locations");
         addMarkerBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         addMarkerBtn.setForeground(new Color(0, 100, 180));
 
@@ -554,125 +409,70 @@ public class UploadSessionPanel extends JPanel {
         editorsTab.addTab("🎯 ReDownload Request", redlReqEditor.uiComponent());
         editorsTab.addTab("🔍 ReDownload Response", redlRespEditor.uiComponent());
 
-        // ── 6. Integrated Split View: Left (Setup & Baseline) | Right (Activity Log & Detail Viewer) ──
-        JPanel leftPanel = new JPanel(new BorderLayout());
-        JSplitPane leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+        // ── 5. Integrated Split View: Top (Setup & Baseline) | Bottom (Generated Traffic Log) ──
+        JSplitPane topSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 new JScrollPane(configContainer), editorsTab);
-        leftSplit.setResizeWeight(0.55);
-        leftPanel.add(leftSplit, BorderLayout.CENTER);
+        topSplit.setResizeWeight(0.50);
 
-        JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                leftPanel, sessionLogPanel);
+        JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                topSplit, sessionLogPanel);
         mainSplit.setResizeWeight(0.48);
 
         add(mainSplit, BorderLayout.CENTER);
-
-        // Auto-run detection at initial load if response exists
-        if (baseResponse != null) {
-            SwingUtilities.invokeLater(this::autoDetectDownloadUrl);
-        }
     }
 
-    private JPanel createCategoryActionToolbar(List<JCheckBox> boxes) {
-        JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 2));
-        JButton selAll = new JButton("Select All");
-        selAll.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
-        selAll.addActionListener(e -> boxes.forEach(b -> b.setSelected(true)));
-
-        JButton clearAll = new JButton("Clear");
-        clearAll.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
-        clearAll.addActionListener(e -> boxes.forEach(b -> b.setSelected(false)));
-
-        bar.add(selAll);
-        bar.add(clearAll);
-        return bar;
-    }
-
-    private void autoDetectDownloadUrl() {
-        if (baseResponse == null) {
-            autoDetectResultLabel.setText("No upload response available to analyze.");
-            autoDetectResultLabel.setForeground(Color.RED);
-            return;
+    public static String deriveUploadFileDirectoryPreset(HttpRequest request) {
+        if (request == null || request.path() == null || request.path().isEmpty()) {
+            return "/uploads/${FILENAME}";
         }
-
-        ReDownloaderEngine engine = new ReDownloaderEngine(api, config.getRedownloaderConfig());
-        String uploadedFilename = extractFilename(baseRequest);
-        ReDownloaderEngine.DetectionResult result = engine.autoDetectDownloadUrl(baseResponse, uploadedFilename);
-
-        if (result.isFound()) {
-            autoDetectResultLabel.setText("✔ " + result.getReason() + ": " + result.getDetectedUrl());
-            autoDetectResultLabel.setForeground(new Color(0, 130, 40));
-
-            if (!result.getSuggestedStartMarker().isEmpty()) {
-                startMarkerField.setText(result.getSuggestedStartMarker());
-            }
-            if (!result.getSuggestedEndMarker().isEmpty()) {
-                endMarkerField.setText(result.getSuggestedEndMarker());
-            }
-
-            previewResultLabel.setText("✔ Detected Target: " + result.getDetectedUrl());
-            previewResultLabel.setForeground(new Color(0, 130, 40));
-
-            uploadRespEditor.setSearchExpression(result.getDetectedUrl());
-
-            HttpRequest testReq = engine.buildRedownloadRequest(baseRequest, result.getDetectedUrl());
-            if (testReq != null) {
-                redlReqEditor.setRequest(testReq);
-            }
+        String path = request.path();
+        int qIdx = path.indexOf('?');
+        if (qIdx != -1) {
+            path = path.substring(0, qIdx);
+        }
+        int hIdx = path.indexOf('#');
+        if (hIdx != -1) {
+            path = path.substring(0, hIdx);
+        }
+        if (path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        int lastSlash = path.lastIndexOf('/');
+        String dir;
+        if (lastSlash > 0) {
+            dir = path.substring(0, lastSlash);
+        } else if (lastSlash == 0 && path.length() > 1) {
+            dir = path;
         } else {
-            autoDetectResultLabel.setText("❌ " + result.getReason() + " (Use 1-Click Highlight or Directory Preset)");
-            autoDetectResultLabel.setForeground(Color.RED);
+            dir = "/uploads";
         }
+        return dir.endsWith("/") ? dir + "${FILENAME}" : dir + "/${FILENAME}";
     }
 
-    private void useSelectionAsDownloadUrl() {
-        if (uploadRespEditor == null || baseResponse == null) {
-            useSelectionResultLabel.setText("No response available.");
-            useSelectionResultLabel.setForeground(Color.RED);
-            return;
-        }
+    private JPanel createCategoryColumn(String title, Color titleColor, Component... components) {
+        JPanel col = new JPanel();
+        col.setLayout(new BoxLayout(col, BoxLayout.Y_AXIS));
+        col.setAlignmentY(Component.TOP_ALIGNMENT);
 
-        Optional<Selection> selOpt = uploadRespEditor.selection();
-        if (selOpt.isEmpty()) {
-            useSelectionResultLabel.setText("⚠️ Please highlight the URL text in the 'Upload Response' editor below first.");
-            useSelectionResultLabel.setForeground(Color.ORANGE.darker());
-            return;
-        }
+        JLabel lbl = new JLabel(title);
+        lbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        lbl.setForeground(titleColor);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        col.add(lbl);
+        col.add(Box.createVerticalStrut(4));
 
-        Selection sel = selOpt.get();
-        String fullBody = baseResponse.bodyToString();
-        int selStart = sel.offsets().startIndexInclusive();
-        int selEnd = sel.offsets().endIndexExclusive();
-
-        String selectedStr = sel.contents().toString();
-        if (selectedStr.trim().isEmpty()) {
-            useSelectionResultLabel.setText("⚠️ Highlighted text is empty.");
-            useSelectionResultLabel.setForeground(Color.ORANGE.darker());
-            return;
-        }
-
-        ReDownloaderEngine engine = new ReDownloaderEngine(api, config.getRedownloaderConfig());
-        ReDownloaderEngine.DetectionResult det = engine.deriveMarkersFromSelection(fullBody, selStart, selEnd);
-
-        if (det.isFound()) {
-            startMarkerField.setText(det.getSuggestedStartMarker());
-            endMarkerField.setText(det.getSuggestedEndMarker());
-            useSelectionResultLabel.setText("✔ Set Markers! Start: '" + det.getSuggestedStartMarker() + "' | End: '" + det.getSuggestedEndMarker() + "'");
-            useSelectionResultLabel.setForeground(new Color(0, 130, 40));
-
-            previewResultLabel.setText("✔ Selection Target: " + det.getDetectedUrl());
-            previewResultLabel.setForeground(new Color(0, 130, 40));
-
-            uploadRespEditor.setSearchExpression(det.getDetectedUrl());
-
-            HttpRequest testReq = engine.buildRedownloadRequest(baseRequest, det.getDetectedUrl());
-            if (testReq != null) {
-                redlReqEditor.setRequest(testReq);
+        for (Component c : components) {
+            if (c instanceof JCheckBox cb) {
+                cb.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+                cb.setMargin(new Insets(1, 1, 1, 1));
+                cb.setAlignmentX(Component.LEFT_ALIGNMENT);
+            } else if (c instanceof JComponent jc) {
+                jc.setAlignmentX(Component.LEFT_ALIGNMENT);
             }
-        } else {
-            useSelectionResultLabel.setText("❌ " + det.getReason());
-            useSelectionResultLabel.setForeground(Color.RED);
+            col.add(c);
+            col.add(Box.createVerticalStrut(1));
         }
+        return col;
     }
 
     private void addFilenameMarker() {
@@ -722,13 +522,8 @@ public class UploadSessionPanel extends JPanel {
 
     private void syncConfigFromUI() {
         ReDownloaderConfig rConfig = config.getRedownloaderConfig();
-        rConfig.setPreflightUrl(preflightUrlField.getText().trim());
-        rConfig.setStartMarker(startMarkerField.getText().trim());
-        rConfig.setEndMarker(endMarkerField.getText().trim());
+        rConfig.setEnabled(redownloaderEnabledCb.isSelected());
         rConfig.setStaticUrl(staticUrlField.getText().trim());
-        rConfig.setUrlPrefix(prefixField.getText().trim());
-        rConfig.setUrlSuffix(suffixField.getText().trim());
-        rConfig.setReplaceBackslash(replaceBackslashCb.isSelected());
 
         // Category 1
         config.setTestPhp(phpCb.isSelected());
@@ -769,12 +564,13 @@ public class UploadSessionPanel extends JPanel {
         config.setTestBillionLaughs(billionLaughsCb.isSelected());
 
         // Category 6: Allowed Extensions Matrix
+        config.setTestExtWikipedia(extWikipediaCb.isSelected());
         config.setTestExtImages(extImagesCb.isSelected());
         config.setTestExtDocuments(extDocsCb.isSelected());
         config.setTestExtWebData(extWebDataCb.isSelected());
         config.setTestExtArchives(extArchivesCb.isSelected());
         config.setTestExtMedia(extMediaCb.isSelected());
-        config.setTestAllowedExtensions(extImagesCb.isSelected() || extDocsCb.isSelected() ||
+        config.setTestAllowedExtensions(extWikipediaCb.isSelected() || extImagesCb.isSelected() || extDocsCb.isSelected() ||
                 extWebDataCb.isSelected() || extArchivesCb.isSelected() || extMediaCb.isSelected() ||
                 (customExtField != null && !customExtField.getText().trim().isEmpty()));
         if (customExtField != null) {
@@ -808,9 +604,9 @@ public class UploadSessionPanel extends JPanel {
 
     private void testReDownloader() {
         syncConfigFromUI();
-        if (baseResponse == null) {
-            previewResultLabel.setText("No base response available to test.");
-            previewResultLabel.setForeground(Color.RED);
+        if (!config.getRedownloaderConfig().isEnabled()) {
+            previewResultLabel.setText("⚠️ ReDownloader is disabled.");
+            previewResultLabel.setForeground(Color.GRAY);
             return;
         }
 
@@ -819,23 +615,18 @@ public class UploadSessionPanel extends JPanel {
                 : baseRequest;
 
         ReDownloaderEngine engine = new ReDownloaderEngine(api, config.getRedownloaderConfig());
-        String responseStr = baseResponse.bodyToString();
+        String responseStr = baseResponse != null ? baseResponse.bodyToString() : "";
         String testFilename = extractFilename(activeReq);
         MarkerHighlighter.ExtractionResult extraction = engine.parseDownloadUrl(responseStr, testFilename);
-
-        if (!extraction.isFound()) {
-            ReDownloaderEngine.DetectionResult auto = engine.autoDetectDownloadUrl(baseResponse, testFilename);
-            if (auto.isFound()) {
-                extraction = new MarkerHighlighter.ExtractionResult(true, auto.getDetectedUrl(), 0, 0, 0, auto.getDetectedUrl().length());
-            }
-        }
 
         if (extraction.isFound()) {
             String targetUrl = extraction.getExtractedText();
             previewResultLabel.setText("Testing GET: " + targetUrl + " ...");
             previewResultLabel.setForeground(new Color(0, 100, 180));
 
-            uploadRespEditor.setSearchExpression(targetUrl);
+            if (uploadRespEditor != null && baseResponse != null) {
+                uploadRespEditor.setSearchExpression(targetUrl);
+            }
 
             HttpRequest redlReq = engine.buildRedownloadRequest(activeReq, targetUrl);
             if (redlReq != null) {
@@ -856,7 +647,7 @@ public class UploadSessionPanel extends JPanel {
                 }).start();
             }
         } else {
-            previewResultLabel.setText("❌ Delimiters not found. Use Auto-Detect, 1-Click Highlight, or Directory Preset!");
+            previewResultLabel.setText("❌ Download target could not be resolved from Directory Preset.");
             previewResultLabel.setForeground(Color.RED);
         }
     }

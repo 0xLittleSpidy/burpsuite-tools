@@ -235,21 +235,13 @@ public class UploadScanExecutor {
             int uploadLen = uploadPair.hasResponse() ? uploadPair.response().body().length() : 0;
             String uploadResponseStr = uploadPair.hasResponse() ? uploadPair.response().bodyToString() : "";
 
-            // Check if ReDownloader can parse a URL from upload response or preflight response
-            MarkerHighlighter.ExtractionResult extraction =
-                    redlEngine.parseDownloadUrl(uploadResponseStr, payload.getFilename());
+            // Check if ReDownloader is enabled and can parse a URL from upload response or preflight response
+            MarkerHighlighter.ExtractionResult extraction = MarkerHighlighter.ExtractionResult.notFound();
+            if (config.getRedownloaderConfig().isEnabled()) {
+                extraction = redlEngine.parseDownloadUrl(uploadResponseStr, payload.getFilename());
 
-            if (!extraction.isFound() && preflightPair != null && preflightPair.hasResponse()) {
-                extraction = redlEngine.parseDownloadUrl(preflightPair.response().bodyToString(), payload.getFilename());
-            }
-
-            // Fallback: Smart Auto-Detect from response if not matched by custom markers
-            if (!extraction.isFound() && uploadPair.hasResponse()) {
-                ReDownloaderEngine.DetectionResult autoDet =
-                        redlEngine.autoDetectDownloadUrl(uploadPair.response(), payload.getFilename());
-                if (autoDet.isFound()) {
-                    extraction = new MarkerHighlighter.ExtractionResult(
-                            true, autoDet.getDetectedUrl(), 0, 0, 0, autoDet.getDetectedUrl().length());
+                if (!extraction.isFound() && preflightPair != null && preflightPair.hasResponse()) {
+                    extraction = redlEngine.parseDownloadUrl(preflightPair.response().bodyToString(), payload.getFilename());
                 }
             }
 

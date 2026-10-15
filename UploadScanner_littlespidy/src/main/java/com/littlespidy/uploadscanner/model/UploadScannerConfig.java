@@ -57,6 +57,7 @@ public class UploadScannerConfig {
     private boolean testExtWebData = true;
     private boolean testExtArchives = true;
     private boolean testExtMedia = true;
+    private boolean testExtWikipedia = true;
     private String customExtensions = "";
 
     // Category 7: Content-Type, File Size & EXIF Testing
@@ -197,6 +198,9 @@ public class UploadScannerConfig {
     public boolean isTestExtMedia() { return testExtMedia; }
     public void setTestExtMedia(boolean testExtMedia) { this.testExtMedia = testExtMedia; }
 
+    public boolean isTestExtWikipedia() { return testExtWikipedia; }
+    public void setTestExtWikipedia(boolean testExtWikipedia) { this.testExtWikipedia = testExtWikipedia; }
+
     public String getCustomExtensions() { return customExtensions; }
     public void setCustomExtensions(String customExtensions) { this.customExtensions = customExtensions != null ? customExtensions.trim() : ""; }
 
@@ -242,6 +246,7 @@ public class UploadScannerConfig {
             setTestExtWebData(selected);
             setTestExtArchives(selected);
             setTestExtMedia(selected);
+            setTestExtWikipedia(selected);
         } else if ("Validation & EXIF".equalsIgnoreCase(category) || "Validation".equalsIgnoreCase(category)) {
             setTestContentTypeValidation(selected);
             setTestMimeSpoofing(selected);
