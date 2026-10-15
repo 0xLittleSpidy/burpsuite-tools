@@ -54,9 +54,8 @@ public class GWTMapTab extends JPanel {
     private final JButton analyzeBtn = new JButton("Analyze Target");
     private final JButton openFileBtn = new JButton("Open Permutation Local File...");
     private final JComboBox<String> permutationCombo = new JComboBox<>();
-    private final JButton headersBtn = new JButton("Headers & Cookies... (0)");
+    private final JButton sessionStorageBtn = new JButton("Session Storage... (0)");
     private final JButton storageBtn = new JButton("Storage Folder...");
-    private final JCheckBox passiveMonitorBox = new JCheckBox("Passive Monitor", true);
     private final JLabel statusLabel = new JLabel("Ready");
     private final JProgressBar progressBar = new JProgressBar();
 
@@ -117,6 +116,14 @@ public class GWTMapTab extends JPanel {
         filterDebounceTimer.setRepeats(false);
     }
 
+    // Debounce timer and search state for Deobfuscated Code viewer search
+    private final javax.swing.Timer codeSearchDebounceTimer = new javax.swing.Timer(250, e -> performAsyncCodeSearch());
+    {
+        codeSearchDebounceTimer.setRepeats(false);
+    }
+    private int currentSearchSeq = 0;
+    private static final int MAX_RENDERED_HIGHLIGHTS = 1000;
+
     public GWTMapTab(MontoyaApi api, GWTDataStore dataStore, GWTScanEngine engine) {
         this.api = api;
         this.dataStore = dataStore;
@@ -138,6 +145,20 @@ public class GWTMapTab extends JPanel {
 
         historyRequestEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
         historyResponseEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
+
+        // Common top-level storage actions (shared across all tabs)
+        sessionStorageBtn.setToolTipText("Configure session headers, cookies, and authentication tokens");
+        sessionStorageBtn.addActionListener(e -> showHeadersDialog());
+        storageBtn.setToolTipText("View or select directory for GWTMap persistent session storage");
+        storageBtn.addActionListener(e -> changeStorageDirectory());
+
+        JPanel commonStoragePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
+        commonStoragePanel.add(sessionStorageBtn);
+        commonStoragePanel.add(storageBtn);
+
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.add(commonStoragePanel, BorderLayout.EAST);
+        add(topBar, BorderLayout.NORTH);
 
         // 1. Build GWT Analysis tab content
         JPanel gwtAnalysisPanel = new JPanel(new BorderLayout(4, 4));
@@ -178,21 +199,11 @@ public class GWTMapTab extends JPanel {
         openFileBtn.addActionListener(e -> openLocalFile());
         row1.add(openFileBtn);
 
-        headersBtn.addActionListener(e -> showHeadersDialog());
-        row1.add(headersBtn);
-
-        storageBtn.setToolTipText("View or select directory for GWTMap persistent session storage");
-        storageBtn.addActionListener(e -> changeStorageDirectory());
-        row1.add(storageBtn);
-
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         row2.add(new JLabel("Active Permutation:"));
         permutationCombo.setPreferredSize(new Dimension(240, 24));
         permutationCombo.addActionListener(e -> onPermutationChanged());
         row2.add(permutationCombo);
-
-        passiveMonitorBox.setToolTipText("Automatically detect and extract GWT files passing through Burp Proxy");
-        row2.add(passiveMonitorBox);
 
         JButton resetBtn = new JButton("Reset All");
         resetBtn.addActionListener(e -> resetAll());
@@ -556,7 +567,7 @@ public class GWTMapTab extends JPanel {
         ));
 
         searchBar.add(new JLabel("Find in Code:"));
-        codeSearchField.getDocument().addDocumentListener(new SimpleDocListener(this::updateCodeSearch));
+        codeSearchField.getDocument().addDocumentListener(new SimpleDocListener(this::scheduleCodeSearch));
         codeSearchField.addActionListener(e -> navigateCodeMatch(1));
         codeSearchField.addKeyListener(new KeyAdapter() {
             @Override
@@ -582,7 +593,7 @@ public class GWTMapTab extends JPanel {
         nextBtn.addActionListener(e -> navigateCodeMatch(1));
         searchBar.add(nextBtn);
 
-        codeMatchCaseBox.addActionListener(e -> updateCodeSearch());
+        codeMatchCaseBox.addActionListener(e -> scheduleCodeSearch());
         searchBar.add(codeMatchCaseBox);
 
         codeMatchCountLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
@@ -602,66 +613,117 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    private void updateCodeSearch() {
-        Highlighter highlighter = codeViewerArea.getHighlighter();
-        highlighter.removeAllHighlights();
-        codeMatchOffsets.clear();
-        currentCodeMatchIdx = -1;
+    private void scheduleCodeSearch() {
+        codeSearchDebounceTimer.restart();
+    }
 
+    private void performAsyncCodeSearch() {
+        final int searchSeq = ++currentSearchSeq;
         String query = codeSearchField.getText();
         String text = codeViewerArea.getText();
+
         if (query == null || query.isEmpty() || text == null || text.isEmpty()) {
+            codeViewerArea.getHighlighter().removeAllHighlights();
+            codeMatchOffsets.clear();
+            currentCodeMatchIdx = -1;
             codeMatchCountLabel.setText("0 matches");
             return;
         }
 
+        codeMatchCountLabel.setText("Searching...");
         boolean matchCase = codeMatchCaseBox.isSelected();
-        String searchText = matchCase ? text : text.toLowerCase();
-        String searchQuery = matchCase ? query : query.toLowerCase();
 
-        int index = 0;
-        while ((index = searchText.indexOf(searchQuery, index)) >= 0) {
-            int end = index + searchQuery.length();
-            codeMatchOffsets.add(new int[]{index, end});
-            try {
-                highlighter.addHighlight(index, end, normalHighlightPainter);
-            } catch (Throwable ignored) {}
-            index = end;
-        }
+        // Run search index matching off the EDT
+        SwingWorker<List<int[]>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<int[]> doInBackground() {
+                List<int[]> offsets = new ArrayList<>();
+                int queryLen = query.length();
+                int textLen = text.length();
 
-        if (codeMatchOffsets.isEmpty()) {
-            codeMatchCountLabel.setText("0 matches");
-        } else {
-            currentCodeMatchIdx = 0;
-            highlightActiveCodeMatch();
-            codeMatchCountLabel.setText("Match 1 of " + codeMatchOffsets.size());
-        }
+                if (matchCase) {
+                    int index = 0;
+                    while ((index = text.indexOf(query, index)) >= 0) {
+                        if (searchSeq != currentSearchSeq) return Collections.emptyList();
+                        offsets.add(new int[]{index, index + queryLen});
+                        index += queryLen;
+                    }
+                } else {
+                    int index = 0;
+                    int max = textLen - queryLen;
+                    while (index <= max) {
+                        if ((index & 0x7FFF) == 0 && searchSeq != currentSearchSeq) {
+                            return Collections.emptyList();
+                        }
+                        if (text.regionMatches(true, index, query, 0, queryLen)) {
+                            offsets.add(new int[]{index, index + queryLen});
+                            index += queryLen;
+                        } else {
+                            index++;
+                        }
+                    }
+                }
+                return offsets;
+            }
+
+            @Override
+            protected void done() {
+                if (searchSeq != currentSearchSeq) return;
+                try {
+                    List<int[]> results = get();
+                    codeMatchOffsets.clear();
+                    codeMatchOffsets.addAll(results);
+
+                    Highlighter highlighter = codeViewerArea.getHighlighter();
+                    highlighter.removeAllHighlights();
+
+                    if (codeMatchOffsets.isEmpty()) {
+                        currentCodeMatchIdx = -1;
+                        codeMatchCountLabel.setText("0 matches");
+                    } else {
+                        currentCodeMatchIdx = 0;
+                        renderHighlights();
+                        String countSuffix = codeMatchOffsets.size() > MAX_RENDERED_HIGHLIGHTS
+                                ? " (capped at " + MAX_RENDERED_HIGHLIGHTS + " highlighted)"
+                                : "";
+                        codeMatchCountLabel.setText("Match 1 of " + codeMatchOffsets.size() + countSuffix);
+                    }
+                } catch (Throwable ignored) {}
+            }
+        };
+        worker.execute();
     }
 
     private void navigateCodeMatch(int direction) {
         if (codeMatchOffsets.isEmpty()) return;
         currentCodeMatchIdx = (currentCodeMatchIdx + direction + codeMatchOffsets.size()) % codeMatchOffsets.size();
-        highlightActiveCodeMatch();
-        codeMatchCountLabel.setText("Match " + (currentCodeMatchIdx + 1) + " of " + codeMatchOffsets.size());
+        renderHighlights();
+        String countSuffix = codeMatchOffsets.size() > MAX_RENDERED_HIGHLIGHTS
+                ? " (capped at " + MAX_RENDERED_HIGHLIGHTS + " highlighted)"
+                : "";
+        codeMatchCountLabel.setText("Match " + (currentCodeMatchIdx + 1) + " of " + codeMatchOffsets.size() + countSuffix);
     }
 
-    private void highlightActiveCodeMatch() {
+    private void renderHighlights() {
         if (currentCodeMatchIdx < 0 || currentCodeMatchIdx >= codeMatchOffsets.size()) return;
         Highlighter highlighter = codeViewerArea.getHighlighter();
         highlighter.removeAllHighlights();
 
-        for (int i = 0; i < codeMatchOffsets.size(); i++) {
+        int limit = Math.min(codeMatchOffsets.size(), MAX_RENDERED_HIGHLIGHTS);
+        for (int i = 0; i < limit; i++) {
+            if (i == currentCodeMatchIdx) continue;
             int[] pos = codeMatchOffsets.get(i);
             try {
-                if (i == currentCodeMatchIdx) {
-                    highlighter.addHighlight(pos[0], pos[1], activeHighlightPainter);
-                } else {
-                    highlighter.addHighlight(pos[0], pos[1], normalHighlightPainter);
-                }
+                highlighter.addHighlight(pos[0], pos[1], normalHighlightPainter);
             } catch (Throwable ignored) {}
         }
 
+        // Always highlight the active match even if beyond MAX_RENDERED_HIGHLIGHTS
         int[] activePos = codeMatchOffsets.get(currentCodeMatchIdx);
+        try {
+            highlighter.addHighlight(activePos[0], activePos[1], activeHighlightPainter);
+        } catch (Throwable ignored) {}
+
         codeViewerArea.setCaretPosition(activePos[0]);
         try {
             java.awt.geom.Rectangle2D viewRect = codeViewerArea.modelToView2D(activePos[0]);
@@ -689,10 +751,6 @@ public class GWTMapTab extends JPanel {
 
     public void setTargetUrl(String url) {
         urlField.setText(url != null ? url.trim() : "");
-    }
-
-    public boolean isPassiveMonitorEnabled() {
-        return passiveMonitorBox.isSelected();
     }
 
     public void startAnalysis() {
@@ -1158,12 +1216,12 @@ public class GWTMapTab extends JPanel {
         p.add(new JLabel("Enter Custom Headers or Cookies (one per line, e.g. Cookie: JSESSIONID=...):"), BorderLayout.NORTH);
         p.add(new JScrollPane(area), BorderLayout.CENTER);
 
-        int opt = JOptionPane.showConfirmDialog(this, p, "Custom Headers & Auth Injection", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        int opt = JOptionPane.showConfirmDialog(this, p, "Session Storage & Auth Injection", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (opt == JOptionPane.OK_OPTION) {
             customHeaders = area.getText().trim();
             long lines = customHeaders.isEmpty() ? 0 : Arrays.stream(customHeaders.split("\n")).filter(s -> !s.isBlank()).count();
-            headersBtn.setText("Headers & Cookies... (" + lines + ")");
-            statusLabel.setText("Configured " + lines + " custom headers/cookies");
+            sessionStorageBtn.setText("Session Storage... (" + lines + ")");
+            statusLabel.setText("Configured " + lines + " session storage headers/cookies");
             fuzzerPanel.setCustomHeaders(customHeaders);
             updateSelectedMethodDetails();
             saveSession();
@@ -1199,11 +1257,17 @@ public class GWTMapTab extends JPanel {
         baseField.setText("");
         searchField.setText("");
         codeSearchField.setText("");
+        codeSearchDebounceTimer.stop();
+        currentSearchSeq++;
+        codeViewerArea.getHighlighter().removeAllHighlights();
+        codeMatchOffsets.clear();
+        currentCodeMatchIdx = -1;
+        codeMatchCountLabel.setText("0 matches");
         permutationCombo.removeAllItems();
         methodSelectCombo.removeAllItems();
         customHeaders = "";
         fuzzerPanel.setCustomHeaders("");
-        headersBtn.setText("Headers & Cookies... (0)");
+        sessionStorageBtn.setText("Session Storage... (0)");
         serviceTableModel.setServices(Collections.emptyList());
         methodTableModel.setMethods(Collections.emptyList());
         httpHistoryModel.clear();
@@ -1240,7 +1304,7 @@ public class GWTMapTab extends JPanel {
             if (snap.customHeaders != null && !snap.customHeaders.isBlank()) {
                 customHeaders = snap.customHeaders;
                 long lines = Arrays.stream(customHeaders.split("\n")).filter(s -> !s.isBlank()).count();
-                headersBtn.setText("Headers & Cookies... (" + lines + ")");
+                sessionStorageBtn.setText("Session Storage... (" + lines + ")");
                 fuzzerPanel.setCustomHeaders(customHeaders);
             }
 

@@ -3,7 +3,6 @@ package com.littlespidy.gwtmap;
 
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.http.handler.*;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
@@ -110,34 +109,7 @@ public class GWTMapExtension_littlespidy implements BurpExtension {
             }
         });
 
-        // 3. Register HTTP Handler (Passive GWT Traffic Detector)
-        api.http().registerHttpHandler(new HttpHandler() {
-            @Override
-            public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent requestToBeSent) {
-                return RequestToBeSentAction.continueWith(requestToBeSent);
-            }
-
-            @Override
-            public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived responseReceived) {
-                if (mainTab.isPassiveMonitorEnabled()) {
-                    String url = responseReceived.initiatingRequest().url();
-                    if (url != null) {
-                        String lowerUrl = url.toLowerCase();
-                        if (lowerUrl.endsWith(".nocache.js") || (lowerUrl.endsWith(".cache.js") && !lowerUrl.contains("deferredjs/"))) {
-                            api.logging().logToOutput("[GWTMap Passive Detector] Intercepted GWT candidate: " + url);
-                            SwingUtilities.invokeLater(() -> {
-                                if (dataStore.getAllMethods().isEmpty()) {
-                                    mainTab.setTargetUrl(url);
-                                }
-                            });
-                        }
-                    }
-                }
-                return ResponseReceivedAction.continueWith(responseReceived);
-            }
-        });
-
-        // 4. Register Unloading Handler
+        // 3. Register Unloading Handler
         api.extension().registerUnloadingHandler(() -> {
             api.logging().logToOutput("[-] Unloading GWTMap extension and terminating thread pool...");
             try {
