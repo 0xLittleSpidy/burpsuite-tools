@@ -154,6 +154,28 @@ public static boolean matchesMethod(String method, Set<String> selectedMethods) 
 }
 ```
 
+### 8. Table Column Sorting (Proxy History & Intruder Behavior)
+
+When an extension displays a results table (such as an activity log, scan findings, or HTTP traffic history), **always enable column sorting** so testers can sort and reverse-sort columns by clicking the column headers, mirroring the sorting behavior in Burp's Proxy History and Intruder tabs.
+
+**Implementation**:
+1. Configure `TableRowSorter` on the `JTable`:
+```java
+TableRowSorter<MyTableModel> sorter = new TableRowSorter<>(tableModel);
+sorter.setSortsOnUpdates(true);
+table.setRowSorter(sorter);
+```
+2. Ensure `getColumnClass(int columnIndex)` in the `TableModel` returns the exact class type (e.g. `Integer.class` for ID, Status, Length; `String.class` for Method, URL, Stage) so numbers sort numerically rather than lexicographically:
+```java
+@Override
+public Class<?> getColumnClass(int columnIndex) {
+    return COLUMN_CLASSES[columnIndex];
+}
+```
+3. Always convert view row indices to model indices before retrieving data from the table model (`table.convertRowIndexToModel(selectedRow)`), ensuring row selection and context menus operate on the correct underlying item regardless of active sort.
+4. Clicking a column header once sorts ascending; clicking a second time reverses the sort order (descending).
+5. Explicitly register custom renderers for typed columns: When `getColumnClass` returns specific classes like `Integer.class`, Swing's default class renderers may override renderers registered only for `Object.class`. Explicitly register custom renderers for `Integer.class`, `String.class`, and other specific types to ensure consistent visual styling (e.g. status code badges) across sorted columns.
+
 
 ## Output and Saving
 

@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -130,6 +131,10 @@ public class ExecutionLogPanel extends JPanel {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         table.setRowHeight(22);
 
+        TableRowSorter<UploadLogTableModel> sorter = new TableRowSorter<>(tableModel);
+        sorter.setSortsOnUpdates(true);
+        table.setRowSorter(sorter);
+
         // Column widths
         table.getColumnModel().getColumn(0).setPreferredWidth(50);   // #
         table.getColumnModel().getColumn(0).setMaxWidth(60);
@@ -145,7 +150,7 @@ public class ExecutionLogPanel extends JPanel {
         table.getColumnModel().getColumn(6).setPreferredWidth(320);  // URL
 
         // Custom Cell Renderer for Status and Stage styling
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable tbl, Object value,
                                                            boolean isSelected, boolean hasFocus,
@@ -186,7 +191,10 @@ public class ExecutionLogPanel extends JPanel {
                 }
                 return c;
             }
-        });
+        };
+        table.setDefaultRenderer(Object.class, customRenderer);
+        table.setDefaultRenderer(Integer.class, customRenderer);
+        table.setDefaultRenderer(String.class, customRenderer);
 
         // ── 3. Detail View (Montoya Editors) ──
         requestEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);

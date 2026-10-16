@@ -28,7 +28,7 @@ Each upload session provides a clean, two-tab workspace:
   - **Action Toolbar**: Dedicated 1-click action buttons (`Test ReDownloader Now`, `Probe Extensions`, `Probe Content-Types`, `Test File Sizes`, `Test EXIF Leakage`, `Start Scan`, `Stop`, Delay spinner, and Status).
   - **Message Editors**: Vertical split pane hosting baseline upload request/response editors (with `§ Add Marker` / `§ Clear Markers`) and ReDownload request/response inspectors.
 - **History Tab**:
-  - Full-width traffic activity log displaying `#`, `Stage`, `Method`, `Status`, `Filename / Payload`, `Length (B)`, and `URL`.
+  - Full-width traffic activity log displaying `#`, `Stage`, `Method`, `Status`, `Filename / Payload`, `Length (B)`, and `URL` with interactive column sorting (click column header once to sort ascending, click a second time to sort descending, mirroring Burp Proxy History and Intruder).
   - Triage toolbar with multi-select buttons (`Stage`, `Status`, `Method`), dedicated **Length** filter (`>0`, `100-500`, etc.), instant text search, entry counter, `Clear Log`, and `Export TSV`.
   - Detail inspector with embedded Montoya HTTP Request and Response editors with automatic search/marker synchronization.
 

@@ -1042,6 +1042,46 @@ Override `DefaultTableCellRenderer.getTableCellRendererComponent()` for:
 - User-applied highlight colors
 - Font weight changes for important rows
 
+### Interactive Table Column Sorting (Proxy History & Intruder Behavior)
+
+When an extension displays a results table (such as an activity log, scan findings, or HTTP traffic history), **always enable interactive column sorting** so testers can sort and reverse-sort columns by clicking the column headers, mirroring the sorting behavior in Burp's Proxy History and Intruder tabs.
+
+**Key Requirements**:
+1. **TableRowSorter**: Attach a `TableRowSorter` to the table and enable live updates:
+```java
+TableRowSorter<MyTableModel> sorter = new TableRowSorter<>(tableModel);
+sorter.setSortsOnUpdates(true);
+table.setRowSorter(sorter);
+```
+2. **Typed Column Classes**: Ensure the `TableModel` returns exact data types (`Integer.class`, `String.class`, `Long.class`, etc.) in `getColumnClass(int columnIndex)`. If `Object.class` or `String.class` is returned for numeric values (such as `#`, `Status`, `Length`), sorting will occur lexicographically (`100` before `20`) instead of numerically (`20` before `100`):
+```java
+@Override
+public Class<?> getColumnClass(int columnIndex) {
+    switch (columnIndex) {
+        case 0: return Integer.class; // ID / #
+        case 3: return Integer.class; // Status code
+        case 5: return Integer.class; // Length (B)
+        default: return String.class;
+    }
+}
+```
+3. **Model Index Conversion**: Always convert view indices to model indices (`table.convertRowIndexToModel(viewRow)`) whenever reading selected rows for master-detail viewer updates, context menus, or export actions:
+```java
+int selectedViewRow = table.getSelectedRow();
+if (selectedViewRow != -1) {
+    int modelRow = table.convertRowIndexToModel(selectedViewRow);
+    MyEntry entry = tableModel.getEntry(modelRow);
+    reqEditor.setRequest(entry.request());
+    respEditor.setResponse(entry.response());
+}
+```
+4. **Custom Renderer Registration**: When `getColumnClass` returns explicit classes (e.g. `Integer.class`), Swing default renderers can take precedence over renderers registered only for `Object.class`. Explicitly register custom renderers across all applicable column classes:
+```java
+table.setDefaultRenderer(Object.class, customRenderer);
+table.setDefaultRenderer(Integer.class, customRenderer);
+table.setDefaultRenderer(String.class, customRenderer);
+```
+
 ### Dialog Patterns
 
 | Dialog | Type | Size |

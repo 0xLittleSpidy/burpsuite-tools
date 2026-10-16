@@ -728,6 +728,56 @@ class UploadScannerTest {
     }
 
     @Test
+    @DisplayName("UploadLogTableModel: Verify TableRowSorter sorts columns numerically and alphabetically")
+    void testLogTableSorting() {
+        UploadLogTableModel model = new UploadLogTableModel();
+
+        UploadEntry e1 = new UploadEntry(1, StageType.UPLOAD, "POST", (short) 404, "Beta",
+                500, "https://example.com/b", null, "", null, null);
+        UploadEntry e2 = new UploadEntry(2, StageType.EXTENSION_PROBE, "GET", (short) 200, "Alpha",
+                120, "https://example.com/a", null, "", null, null);
+        UploadEntry e3 = new UploadEntry(3, StageType.REDOWNLOAD, "PUT", (short) 500, "Gamma",
+                1500, "https://example.com/c", null, "", null, null);
+
+        model.addEntry(e1);
+        model.addEntry(e2);
+        model.addEntry(e3);
+
+        javax.swing.JTable table = new javax.swing.JTable(model);
+        javax.swing.table.TableRowSorter<UploadLogTableModel> sorter = new javax.swing.table.TableRowSorter<>(model);
+        table.setRowSorter(sorter);
+
+        // Sort by Length (column 5) Ascending: 120 (e2), 500 (e1), 1500 (e3)
+        sorter.setSortKeys(List.of(new javax.swing.RowSorter.SortKey(5, javax.swing.SortOrder.ASCENDING)));
+        assertEquals(2, (int) table.getValueAt(0, 0)); // ID 2
+        assertEquals(1, (int) table.getValueAt(1, 0)); // ID 1
+        assertEquals(3, (int) table.getValueAt(2, 0)); // ID 3
+
+        // Verify convertRowIndexToModel
+        assertEquals(1, table.convertRowIndexToModel(0)); // Visual row 0 is model row 1 (e2)
+        assertEquals(0, table.convertRowIndexToModel(1)); // Visual row 1 is model row 0 (e1)
+        assertEquals(2, table.convertRowIndexToModel(2)); // Visual row 2 is model row 2 (e3)
+
+        // Sort by Length (column 5) Descending: 1500 (e3), 500 (e1), 120 (e2)
+        sorter.setSortKeys(List.of(new javax.swing.RowSorter.SortKey(5, javax.swing.SortOrder.DESCENDING)));
+        assertEquals(3, (int) table.getValueAt(0, 0)); // ID 3
+        assertEquals(1, (int) table.getValueAt(1, 0)); // ID 1
+        assertEquals(2, (int) table.getValueAt(2, 0)); // ID 2
+
+        // Sort by Status (column 3) Ascending: 200 (e2), 404 (e1), 500 (e3)
+        sorter.setSortKeys(List.of(new javax.swing.RowSorter.SortKey(3, javax.swing.SortOrder.ASCENDING)));
+        assertEquals(200, (int) table.getValueAt(0, 3));
+        assertEquals(404, (int) table.getValueAt(1, 3));
+        assertEquals(500, (int) table.getValueAt(2, 3));
+
+        // Sort by Filename / Payload (column 4) Ascending: Alpha, Beta, Gamma
+        sorter.setSortKeys(List.of(new javax.swing.RowSorter.SortKey(4, javax.swing.SortOrder.ASCENDING)));
+        assertEquals("Alpha", table.getValueAt(0, 4));
+        assertEquals("Beta", table.getValueAt(1, 4));
+        assertEquals("Gamma", table.getValueAt(2, 4));
+    }
+
+    @Test
     @DisplayName("UploadScanExecutor: Extract filename from §...§ marker in path, body, or fallback")
     void testExtractFilenameMarkers() {
         // 1. Path marker
