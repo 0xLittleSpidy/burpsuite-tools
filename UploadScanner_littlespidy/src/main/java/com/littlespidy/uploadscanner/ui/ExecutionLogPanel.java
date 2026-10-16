@@ -37,6 +37,7 @@ public class ExecutionLogPanel extends JPanel {
     private MultiSelectFilterButton stageFilterBtn;
     private MultiSelectFilterButton statusFilterBtn;
     private MultiSelectFilterButton methodFilterBtn;
+    private JTextField lengthFilterField;
     private JTextField searchField;
 
     private HttpRequestEditor requestEditor;
@@ -75,6 +76,15 @@ public class ExecutionLogPanel extends JPanel {
                 sel -> refreshFilter()
         );
 
+        lengthFilterField = new JTextField(9);
+        lengthFilterField.putClientProperty("JTextField.placeholderText", "Length e.g. >0, 100-500");
+        lengthFilterField.setToolTipText("Filter by response length (e.g. 500, >100, <=5000, 100-500, !=0)");
+        lengthFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { refreshFilter(); }
+            @Override public void removeUpdate(DocumentEvent e) { refreshFilter(); }
+            @Override public void changedUpdate(DocumentEvent e) { refreshFilter(); }
+        });
+
         searchField = new JTextField(15);
         searchField.putClientProperty("JTextField.placeholderText", "Search URL / Payload...");
         searchField.getDocument().addDocumentListener(new DocumentListener() {
@@ -83,7 +93,7 @@ public class ExecutionLogPanel extends JPanel {
             @Override public void changedUpdate(DocumentEvent e) { refreshFilter(); }
         });
 
-        JButton clearBtn = new JButton("🗑️ Clear Log");
+        JButton clearBtn = new JButton("Clear Log");
         clearBtn.setToolTipText("Clear all entries from the activity log");
         clearBtn.addActionListener(e -> {
             tableModel.clear();
@@ -92,7 +102,7 @@ public class ExecutionLogPanel extends JPanel {
             responseEditor.setResponse(null);
         });
 
-        JButton exportBtn = new JButton("💾 Export TSV");
+        JButton exportBtn = new JButton("Export TSV");
         exportBtn.setToolTipText("Export logged requests and responses to a TSV file");
         exportBtn.addActionListener(e -> exportToTsv());
 
@@ -103,6 +113,8 @@ public class ExecutionLogPanel extends JPanel {
         toolbar.add(stageFilterBtn);
         toolbar.add(statusFilterBtn);
         toolbar.add(methodFilterBtn);
+        toolbar.add(new JLabel("Length:"));
+        toolbar.add(lengthFilterField);
         toolbar.add(new JLabel("Search:"));
         toolbar.add(searchField);
         toolbar.add(Box.createHorizontalStrut(10));
@@ -181,8 +193,8 @@ public class ExecutionLogPanel extends JPanel {
         responseEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
 
         JTabbedPane viewerTabs = new JTabbedPane();
-        viewerTabs.addTab("📤 Request", requestEditor.uiComponent());
-        viewerTabs.addTab("📥 Response", responseEditor.uiComponent());
+        viewerTabs.addTab("Request", requestEditor.uiComponent());
+        viewerTabs.addTab("Response", responseEditor.uiComponent());
 
         // Row Selection Listener with Visual Marker & Search Highlighting
         table.getSelectionModel().addListSelectionListener(e -> {
@@ -240,6 +252,7 @@ public class ExecutionLogPanel extends JPanel {
                 stageFilterBtn.getSelected(),
                 statusFilterBtn.getSelected(),
                 methodFilterBtn.getSelected(),
+                lengthFilterField != null ? lengthFilterField.getText() : "",
                 searchField.getText()
         );
         updateCountLabel();

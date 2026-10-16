@@ -21,7 +21,7 @@ public class WelcomeGuidePanel extends JPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
         // Header Title
-        JLabel title = new JLabel("📤 Upload Scanner (Montoya Edition)");
+        JLabel title = new JLabel("Upload Scanner (Montoya Edition)");
         title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
         content.add(title);
@@ -34,16 +34,16 @@ public class WelcomeGuidePanel extends JPanel {
         content.add(Box.createVerticalStrut(16));
 
         // Section 1: Workflow Overview
-        content.add(createCard("🚀 How It Works",
+        content.add(createCard("How It Works",
                 "<html><b>1. Select an Upload Request:</b> Right-click any HTTP file upload request across Burp (Proxy, Repeater, Logger) and choose <i>'Send to Upload Scanner'</i>.<br>" +
                         "<b>2. Configure the ReDownloader:</b> Specify where the uploaded file is stored. Use Start and End markers to parse dynamic URLs from the upload response, or define a static URL.<br>" +
-                        "<b>3. Test ReDownloader:</b> Click <i>'🧪 Test ReDownloader'</i> to instantly verify URL extraction and see visual editor highlights.<br>" +
-                        "<b>4. Launch the Scan:</b> Click <i>'▶ Start Scan'</i> to automatically test Web Shells, Polyglots, Path Traversal, and Extension Bypasses.<br>" +
+                        "<b>3. Test ReDownloader:</b> Click <i>'Test ReDownloader'</i> to instantly verify URL extraction and see visual editor highlights.<br>" +
+                        "<b>4. Launch the Scan:</b> Click <i>'Start Scan'</i> to automatically test Web Shells, Polyglots, Path Traversal, and Extension Bypasses.<br>" +
                         "<b>5. Triage Results:</b> Monitor the <i>'Done Uploads'</i> activity log in real time with multi-select triage filters.</html>"));
         content.add(Box.createVerticalStrut(12));
 
         // Section 2: ReDownloader & Visual Markers
-        content.add(createCard("🎯 ReDownloader & Visual Marker Highlights",
+        content.add(createCard("ReDownloader & Visual Marker Highlights",
                 "<html>The ReDownloader fetches the uploaded file to verify whether the server executed or exposed it.<br>" +
                         "<ul>" +
                         "<li><b>Start / End Markers:</b> Define delimiters surrounding the uploaded file URL in the response (e.g. <code>{\"url\":\"</code> and <code>\"}</code>).</li>" +
@@ -53,18 +53,18 @@ public class WelcomeGuidePanel extends JPanel {
         content.add(Box.createVerticalStrut(12));
 
         // Section 3: Done Uploads Log Triage
-        content.add(createCard("📋 Enhanced Activity Log Triage",
+        content.add(createCard("Enhanced Activity Log Triage",
                 "<html>The modern <i>'Done Uploads'</i> activity log provides comprehensive oversight:<br>" +
                         "<ul>" +
                         "<li><b>Multi-Select Triage Buttons:</b> Instant popups to filter by <b>Stage</b> (Upload, Preflight, ReDownload), <b>Status</b> (2xx, 3xx, 4xx, 5xx), and <b>Method</b>.</li>" +
                         "<li><b>Live Search:</b> Filter entries instantly by target URL, payload filename, or status code.</li>" +
                         "<li><b>Master-Detail Inspection:</b> Click any row to view full request/response pairs in native Montoya editors.</li>" +
-                        "<li><b>Export & Clear:</b> One-click <i>'🗑️ Clear Log'</i> and <i>'💾 Export TSV'</i> for offline reporting and sharing.</li>" +
+                        "<li><b>Export & Clear:</b> One-click <i>'Clear Log'</i> and <i>'Export TSV'</i> for offline reporting and sharing.</li>" +
                         "</ul></html>"));
         content.add(Box.createVerticalStrut(12));
 
         // Section 4: Attack Categories
-        content.add(createCard("⚡ Supported Attack Vectors",
+        content.add(createCard("Supported Attack Vectors",
                 "<html>" +
                         "<b>• Web Shells:</b> PHP system/phpinfo shells, PHTML, JSP Runtime execution, ASPX test files.<br>" +
                         "<b>• Image Polyglots:</b> Valid GIF89a headers and PNG IHDR chunks containing embedded PHP code to bypass strict magic-byte validation.<br>" +

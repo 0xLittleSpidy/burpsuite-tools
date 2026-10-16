@@ -670,6 +670,64 @@ class UploadScannerTest {
     }
 
     @Test
+    @DisplayName("UploadLogTableModel: Filter by response length (exact, comparison, range, inequality)")
+    void testLogTableModelFilterByLength() {
+        UploadLogTableModel model = new UploadLogTableModel();
+
+        UploadEntry e1 = new UploadEntry(1, StageType.EXTENSION_PROBE, "POST", (short) 200, "Entry 1",
+                100, "https://example.com/1", null, "", null, null);
+        UploadEntry e2 = new UploadEntry(2, StageType.EXTENSION_PROBE, "POST", (short) 200, "Entry 2",
+                250, "https://example.com/2", null, "", null, null);
+        UploadEntry e3 = new UploadEntry(3, StageType.UPLOAD, "POST", (short) 200, "Entry 3",
+                500, "https://example.com/3", null, "", null, null);
+        UploadEntry e4 = new UploadEntry(4, StageType.UPLOAD, "POST", (short) 404, "Entry 4",
+                1024, "https://example.com/4", null, "", null, null);
+
+        model.addEntry(e1);
+        model.addEntry(e2);
+        model.addEntry(e3);
+        model.addEntry(e4);
+
+        // Exact match
+        model.applyFilters(null, null, null, "250", "");
+        assertEquals(1, model.getRowCount());
+        assertEquals("Entry 2", model.getValueAt(0, 4));
+
+        // Comparison > 250
+        model.applyFilters(null, null, null, ">250", "");
+        assertEquals(2, model.getRowCount()); // e3 (500), e4 (1024)
+
+        // Comparison >= 250
+        model.applyFilters(null, null, null, ">=250", "");
+        assertEquals(3, model.getRowCount()); // e2, e3, e4
+
+        // Comparison < 500
+        model.applyFilters(null, null, null, "<500", "");
+        assertEquals(2, model.getRowCount()); // e1 (100), e2 (250)
+
+        // Comparison <= 500
+        model.applyFilters(null, null, null, "<=500", "");
+        assertEquals(3, model.getRowCount()); // e1, e2, e3
+
+        // Range 200-600
+        model.applyFilters(null, null, null, "200-600", "");
+        assertEquals(2, model.getRowCount()); // e2 (250), e3 (500)
+
+        // Inequality != 500
+        model.applyFilters(null, null, null, "!=500", "");
+        assertEquals(3, model.getRowCount()); // e1, e2, e4
+
+        // Combined: Stage=Upload AND Status=2xx AND Length > 300
+        model.applyFilters(Set.of("Upload"), Set.of("2xx"), null, ">300", "");
+        assertEquals(1, model.getRowCount());
+        assertEquals("Entry 3", model.getValueAt(0, 4));
+
+        // Empty filter matches all
+        model.applyFilters(null, null, null, "", "");
+        assertEquals(4, model.getRowCount());
+    }
+
+    @Test
     @DisplayName("UploadScanExecutor: Extract filename from §...§ marker in path, body, or fallback")
     void testExtractFilenameMarkers() {
         // 1. Path marker

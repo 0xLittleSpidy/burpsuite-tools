@@ -29,6 +29,7 @@ public class UploadLogTableModel extends AbstractTableModel {
     private Set<String> stageFilter = Collections.emptySet();
     private Set<String> statusFilter = Collections.emptySet();
     private Set<String> methodFilter = Collections.emptySet();
+    private String lengthFilter = "";
     private String searchFilter = "";
 
     public synchronized void addEntry(UploadEntry entry) {
@@ -58,9 +59,14 @@ public class UploadLogTableModel extends AbstractTableModel {
     }
 
     public synchronized void applyFilters(Set<String> stages, Set<String> statuses, Set<String> methods, String search) {
+        applyFilters(stages, statuses, methods, "", search);
+    }
+
+    public synchronized void applyFilters(Set<String> stages, Set<String> statuses, Set<String> methods, String lengthFilter, String search) {
         this.stageFilter = stages != null ? new HashSet<>(stages) : Collections.emptySet();
         this.statusFilter = statuses != null ? new HashSet<>(statuses) : Collections.emptySet();
         this.methodFilter = methods != null ? new HashSet<>(methods) : Collections.emptySet();
+        this.lengthFilter = lengthFilter != null ? lengthFilter.trim() : "";
         this.searchFilter = search != null ? search.trim().toLowerCase() : "";
 
         displayedEntries.clear();
@@ -109,6 +115,13 @@ public class UploadLogTableModel extends AbstractTableModel {
             if (!statusMatched) return false;
         }
 
+        // Response length filter
+        if (!lengthFilter.isEmpty()) {
+            if (!matchesLength(entry.getResponseLength(), lengthFilter)) {
+                return false;
+            }
+        }
+
         // Search text
         if (!searchFilter.isEmpty()) {
             boolean searchMatched = entry.getUrl().toLowerCase().contains(searchFilter)
@@ -119,6 +132,68 @@ public class UploadLogTableModel extends AbstractTableModel {
             if (!searchMatched) return false;
         }
 
+        return true;
+    }
+
+    public static boolean matchesLength(int responseLength, String filterText) {
+        if (filterText == null || filterText.trim().isEmpty()) {
+            return true;
+        }
+        String filter = filterText.trim();
+        String[] parts = filter.split("[,;]");
+        for (String rawPart : parts) {
+            String part = rawPart.trim().replaceAll("\\s+", "");
+            if (part.isEmpty()) continue;
+
+            if (part.startsWith(">=")) {
+                try {
+                    int val = Integer.parseInt(part.substring(2));
+                    if (responseLength < val) return false;
+                } catch (NumberFormatException ignored) {}
+            } else if (part.startsWith("<=")) {
+                try {
+                    int val = Integer.parseInt(part.substring(2));
+                    if (responseLength > val) return false;
+                } catch (NumberFormatException ignored) {}
+            } else if (part.startsWith(">")) {
+                try {
+                    int val = Integer.parseInt(part.substring(1));
+                    if (responseLength <= val) return false;
+                } catch (NumberFormatException ignored) {}
+            } else if (part.startsWith("<")) {
+                try {
+                    int val = Integer.parseInt(part.substring(1));
+                    if (responseLength >= val) return false;
+                } catch (NumberFormatException ignored) {}
+            } else if (part.startsWith("!=") || part.startsWith("!")) {
+                try {
+                    int val = Integer.parseInt(part.startsWith("!=") ? part.substring(2) : part.substring(1));
+                    if (responseLength == val) return false;
+                } catch (NumberFormatException ignored) {}
+            } else if (part.contains("-")) {
+                String[] range = part.split("-");
+                if (range.length == 2) {
+                    try {
+                        int min = Integer.parseInt(range[0]);
+                        int max = Integer.parseInt(range[1]);
+                        if (min > max) {
+                            int t = min; min = max; max = t;
+                        }
+                        if (responseLength < min || responseLength > max) return false;
+                    } catch (NumberFormatException ignored) {}
+                }
+            } else if (part.startsWith("=")) {
+                try {
+                    int val = Integer.parseInt(part.substring(1));
+                    if (responseLength != val) return false;
+                } catch (NumberFormatException ignored) {}
+            } else {
+                try {
+                    int val = Integer.parseInt(part);
+                    if (responseLength != val) return false;
+                } catch (NumberFormatException ignored) {}
+            }
+        }
         return true;
     }
 

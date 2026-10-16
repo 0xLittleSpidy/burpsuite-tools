@@ -1,38 +1,40 @@
-# 📤 Upload Scanner (Montoya Edition)
+# Upload Scanner (Montoya Edition)
 
 <!-- Created with the help of an AI Agent and littlespidy. -->
 
 A modern, high-performance Burp Suite extension written in **Java** using PortSwigger's **Montoya API** (`burp.api.montoya.*`). 
 
 This project is a modernized, standalone rewrite and enhancement of the legacy *Upload Scanner* extension, featuring:
-- **Integrated Top/Bottom Split Workspace**: Comprehensive configuration and baseline editors on the top, with a full-width generated traffic activity log and Montoya detail viewers on the bottom, providing real-time triage without switching tabs.
-- **Compact Vertical Attack Types Matrix**: High-density 7-column vertical layout displaying all attack modules at once without excessive scrolling, equipped with category-wide Select All / Clear All controls.
+- **Dedicated Request and History Tabs**: Clean two-tab architecture per upload session separating target configuration and message editors from the execution traffic history log.
+- **Enhanced HTTP History with Response Length Filtering**: Comprehensive triage activity log equipped with multi-select filters (`Stage`, `Status`, `Method`), live search, and a flexible **response length filter** supporting exact bytes, ranges, and comparison operators (`>100`, `<=2000`, `100-500`, `!=0`).
+- **Downloader Configuration & Compact Attack Types Matrix**: Downloader Configuration located at the top with dynamic directory preset and enable/disable toggle, with the high-density 7-column vertical attack types grid positioned directly below it.
 - **Wikipedia File Extensions Probe Integration**: Full integration of 912 consolidated, deduplicated file extensions extracted from Wikipedia (`Lists of filename extensions`), allowing the extension probe scanner to test a comprehensive set of real-world file formats.
 - **SecLists Content-Type Validation**: Complete integration with the SecLists `web-all-content-types.txt` wordlist (2,387 MIME types) alongside MIME spoofing (e.g. PHP/JSP scripts with image MIME types) and header tampering checks.
 - **File Size Limit Checking**: Stepped boundary probe suite (0-byte empty file, 1KB, 10KB, 100KB, 500KB, 1MB, 2MB, 5MB, 10MB, 20MB) with valid image structure and configurable max size.
 - **EXIF Metadata Upload & Leakage Testing**: 100% native Java in-memory JPEG APP1 (EXIF) and PNG tEXt chunk generation with GPS/PII canaries, automated ReDownloader stripping verification, and stored EXIF XSS testing (zero `exiftool` dependencies).
 - **Streamlined ReDownloader**: Dynamic upload file directory preset derived automatically from baseline upload requests (`${UPLOAD_DIR}/${FILENAME}`), equipped with an Enable/Disable toggle (preventing any unnecessary download requests when unchecked), placeholder template expansion, and automated cookie/auth header propagation.
 - **Integrated Burp Collaborator** for automated Out-Of-Band (OOB) blind interaction tracking.
-- **Interactive Triage Activity Log**: Full-width activity log with multi-select filtering (`Stage`, `Status`, `Method`), live search, and synchronized editor marker highlighting.
+- **Professional, Emoji-Free Interface**: Clean, standard Burp Suite UI layout with native styling.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 1. 🖥️ Integrated Top/Bottom Split Workspace
-Instead of burying scan results in a separate tab or cramming wide columns into a side panel, each upload request session features an integrated vertical split view:
-- **Top Section (Configuration & Baseline Reference)**:
-  - **Left Half**: Streamlined ReDownloader configuration bar with Enable/Disable checkbox and dynamic Upload File Directory preset, high-density 7-column vertical attack types grid, and 1-click action toolbar (`🧪 Test ReDownloader Now`, `🧪 Probe Extensions`, `🧪 Probe Content-Types`, `📏 Test File Sizes`, `📷 Test EXIF Leakage`, `▶ Start Scan`).
-  - **Right Half**: Intruder-style baseline request editor (with `§ Add Marker` / `§ Clear Markers`), baseline upload response editor, and ReDownload request/response inspectors.
-- **Bottom Section (Generated Traffic Activity Log & Detail Inspector)**:
-  - Real-time streaming log table displaying `#`, `Stage`, `Method`, `Status`, `Filename / Payload`, `Length`, `URL` across the full window width.
-  - Multi-select filter buttons (`Stage`, `Status`, `Method`), instant text search, and entry counter.
-  - Embedded Montoya HTTP Request and Response editors with automatic search/marker synchronization upon row selection.
-  - `🗑️ Clear Log` and `💾 Export TSV` controls.
+### 1. Dedicated Request and History Tabs
+Each upload session provides a clean, two-tab workspace:
+- **Request Tab**:
+  - **Downloader Configuration**: Streamlined configuration bar with Enable/Disable checkbox and dynamic Upload File Directory preset.
+  - **Attack Types & Probes**: High-density 7-column vertical attack types grid placed directly below Downloader Configuration, with category-wide Select All / Clear All controls.
+  - **Action Toolbar**: Dedicated 1-click action buttons (`Test ReDownloader Now`, `Probe Extensions`, `Probe Content-Types`, `Test File Sizes`, `Test EXIF Leakage`, `Start Scan`, `Stop`, Delay spinner, and Status).
+  - **Message Editors**: Vertical split pane hosting baseline upload request/response editors (with `§ Add Marker` / `§ Clear Markers`) and ReDownload request/response inspectors.
+- **History Tab**:
+  - Full-width traffic activity log displaying `#`, `Stage`, `Method`, `Status`, `Filename / Payload`, `Length (B)`, and `URL`.
+  - Triage toolbar with multi-select buttons (`Stage`, `Status`, `Method`), dedicated **Length** filter (`>0`, `100-500`, etc.), instant text search, entry counter, `Clear Log`, and `Export TSV`.
+  - Detail inspector with embedded Montoya HTTP Request and Response editors with automatic search/marker synchronization.
 
 ---
 
-### 2. 📑 SecLists Content-Type Validation & MIME Spoofing
+### 2. SecLists Content-Type Validation & MIME Spoofing
 - **Full SecLists Wordlist**: Bundles Daniel Miessler's SecLists `web-all-content-types.txt` (2,387 MIME types) directly inside the extension jar.
 - **MIME Spoofing Probes**: Tests whether the server allows executable scripts when disguised with harmless MIME types:
   - `.php` web shell with `Content-Type: image/jpeg`, `image/png`, `application/octet-stream`, `text/plain`
@@ -46,11 +48,11 @@ Instead of burying scan results in a separate tab or cramming wide columns into 
   - Semicolon parameter injection (`Content-Type: image/jpeg; evil=application/x-php`)
   - Mixed-case tampering (`Content-Type: ImAgE/jPeG`)
   - Binary charset parameter (`Content-Type: image/jpeg; charset=binary`)
-- **1-Click Probe**: Click **`🧪 Probe Content-Types`** to test MIME acceptance and spoofing against the target endpoint.
+- **1-Click Probe**: Click **`Probe Content-Types`** to test MIME acceptance and spoofing against the target endpoint.
 
 ---
 
-### 3. 📏 File Size Limit Checking
+### 3. File Size Limit Checking
 - **Stepped Boundary Probes**:
   - `0 Bytes`: Empty file upload to test for unhandled `NullPointerException` or division-by-zero crashes.
   - `1 KB (1,024 B)`
@@ -63,47 +65,47 @@ Instead of burying scan results in a separate tab or cramming wide columns into 
   - `10 MB (10,485,760 B)`
   - `20 MB (20,971,520 B)` (configurable max size up to 500 MB)
 - **Authentic Magic Envelope**: Padded files begin with valid image magic bytes and end with valid image termination markers (e.g. JPEG `FF D8 ... FF D9`), ensuring pure file-size rejection is evaluated rather than premature magic-byte rejections.
-- **1-Click Probe**: Click **`📏 Test File Sizes`** to map the application's file size acceptance boundary.
+- **1-Click Probe**: Click **`Test File Sizes`** to map the application's file size acceptance boundary.
 
 ---
 
-### 4. 📷 EXIF Metadata Upload & Leakage Testing (100% Native Java)
+### 4. EXIF Metadata Upload & Leakage Testing (100% Native Java)
 - **Zero External Dependencies**: Generates valid JPEG images with embedded `APP1` (EXIF) segments and TIFF structures, as well as PNG images with `tEXt` chunks entirely in memory (no Perl or `exiftool` required).
 - **GPS & PII Canary Leakage**:
   - Embeds authentic GPS coordinates (`37.7749° N, 122.4194° W` / San Francisco), Camera Make (`LittleSpidy Phone 1.0`), Model (`AuditProbe 1.0`), Artist (`LittleSpidy Security Canary`), and unique canary timestamp tokens into EXIF tags.
   - **Automated ReDownloader Stripping Verification**: Re-downloads the uploaded image and checks whether GPS/PII canaries remain intact.
-    - If canaries are preserved: Flags `⚠️ VULNERABILITY: EXIF PII Leakage (GPS / Metadata Preserved on Server!)`.
-    - If stripped: Flags `✔ EXIF Stripped: Server sanitized metadata`.
+    - If canaries are preserved: Flags `VULNERABILITY: EXIF PII Leakage (GPS / Metadata Preserved on Server!)`.
+    - If stripped: Flags `EXIF Stripped: Server sanitized metadata`.
 - **Stored EXIF Injections**:
   - Embeds Stored XSS vectors (`"><script>alert('EXIF_XSS')</script>`) inside Artist and ImageDescription tags.
   - Embeds Command Injection vectors (`$(whoami);id`) and SQL Injection vectors (`' OR '1'='1'`) inside EXIF metadata.
   - Automatically flags if XSS payloads reflect unencoded in upload or download HTTP responses.
-- **1-Click Probe**: Click **`📷 Test EXIF Leakage`** to run the complete EXIF security assessment.
+- **1-Click Probe**: Click **`Test EXIF Leakage`** to run the complete EXIF security assessment.
 
 ---
 
-### 5. 🎯 Streamlined ReDownloader (Upload File Directory & Toggle)
+### 5. Streamlined ReDownloader (Upload File Directory & Toggle)
 The ReDownloader verifies whether uploaded files are stored, publicly accessible, or executed by automatically redownloading them after upload:
 
-1. **📁 Dynamic Upload File Directory Preset**:
-   - The extension automatically derives the default directory path from the baseline upload request URI (e.g. `/api/v1/upload` → `/api/v1/${FILENAME}` or `${UPLOAD_DIR}/${FILENAME}`).
+1. **Dynamic Upload File Directory Preset**:
+   - The extension automatically derives the default directory path from the baseline upload request URI (e.g. `/api/v1/upload` -> `/api/v1/${FILENAME}` or `${UPLOAD_DIR}/${FILENAME}`).
    - Fully customizable with live synchronization and template placeholder expansion:
      - `${FILENAME}`: Injected filename (e.g. `shell.php`)
      - `${ENCODED_FILENAME}`: URL-encoded filename (`%20`, `%2e`, etc.)
      - `${FILENAME_NO_EXT}`: Filename without extension (e.g. `shell`)
      - `${ORIG_EXT}`: File extension (e.g. `php`)
      - `${RANDOMIZE}`: Unique 12-digit random number for cache busting
-2. **🔘 Enable / Disable ReDownloader Checkbox**:
+2. **Enable / Disable ReDownloader Checkbox**:
    - Easily enable or disable ReDownloader with a dedicated checkbox located directly beside the directory preset field.
    - When unchecked, the ReDownloader is completely disabled: no background GET requests, no preflight checks, and no response parsing occur.
-3. **🔐 Cookie & Auth Header Propagation**:
+3. **Cookie & Auth Header Propagation**:
    - Automatically forwards `Cookie`, `Authorization`, `Proxy-Authorization`, and custom session/token headers (`X-Auth-Token`, `X-API-Key`, `Bearer`, etc.) from the upload request onto all ReDownloader verification requests.
-4. **🧪 Live ReDownloader Verification**:
-   - Click **🧪 Test ReDownloader Now** to test parsing and dispatch a live background verification request to verify download headers and content in real-time (with immediate feedback if ReDownloader is disabled).
+4. **Live ReDownloader Verification**:
+   - Click **Test ReDownloader Now** to test parsing and dispatch a live background verification request to verify download headers and content in real-time (with immediate feedback if ReDownloader is disabled).
 
 ---
 
-## ⚔️ Complete Attack Matrix (7 Categories)
+## Complete Attack Matrix (7 Categories)
 
 | Category | Module | Description | Detection / OOB |
 | :--- | :--- | :--- | :--- |
@@ -146,7 +148,7 @@ The ReDownloader verifies whether uploaded files are stored, publicly accessible
 
 ---
 
-## 🛠️ Build & Installation
+## Build & Installation
 
 ### Requirements
 - **Java 17+** (or Java 21)
@@ -168,28 +170,28 @@ build/libs/upload-scanner-littlespidy-1.0.0.jar
 3. Click **Add**.
 4. Choose **Extension type: Java**.
 5. Select `build/libs/upload-scanner-littlespidy-1.0.0.jar`.
-6. Click **Next**. The `📤 Upload Scanner` suite tab will appear in the top bar.
+6. Click **Next**. The `Upload Scanner` suite tab will appear in the top bar.
 
 ---
 
-## 📖 Quick Start Walkthrough
+## Quick Start Walkthrough
 
 1. **Send Request to Extension**: Find a file upload HTTP request in Burp Proxy history or Repeater. Right-click and choose **Send to Upload Scanner**.
-2. **Top/Bottom Workspace Opens**: The request configuration and baseline editors appear in the top pane, while the full-width live activity log table and detail response viewers are ready at the bottom.
-3. **Configure ReDownloader**:
+2. **Session Tab Opens**: The session tab opens with two subtabs: **Request** and **History**.
+3. **Configure ReDownloader in Request Tab**:
    - The **Upload File Directory** preset is automatically populated based on your upload request path (e.g. `/api/v1/upload` -> `/api/v1/${FILENAME}`).
    - Adjust the path template if files are served from a distinct path (e.g. `/uploads/${FILENAME}`).
    - Keep **Enable ReDownloader** checked if file redownload validation is desired, or uncheck it to completely disable all post-upload download requests.
-4. **Verify Download**: Click **🧪 Test ReDownloader Now** to test parsing and inspect the live response in the preview label.
+4. **Verify Download**: Click **Test ReDownloader Now** to test parsing and inspect the live response in the preview label.
 5. **Run Focused Probes or Full Scan**:
-   - Click **`🧪 Probe Extensions`**: Tests accepted file formats across Images, Documents, Archives, and all **912 Wikipedia extensions**.
-   - Click **`🧪 Probe Content-Types`**: Tests MIME acceptance using the 2,387-type SecLists wordlist & MIME spoofing.
-   - Click **`📏 Test File Sizes`**: Maps file size limits (0B to 20MB+).
-   - Click **`📷 Test EXIF Leakage`**: Uploads GPS/PII canaries and tests whether the server strips metadata or reflects EXIF XSS.
-   - Click **`▶ Start Scan`**: Runs selected categories from the attack matrix.
-6. **Triage Results on the Bottom**: Inspect responses in real-time in the bottom pane using multi-select stage/status/method filters and search highlighting.
+   - Click **`Probe Extensions`**: Tests accepted file formats across Images, Documents, Archives, and all **912 Wikipedia extensions**.
+   - Click **`Probe Content-Types`**: Tests MIME acceptance using the 2,387-type SecLists wordlist & MIME spoofing.
+   - Click **`Test File Sizes`**: Maps file size limits (0B to 20MB+).
+   - Click **`Test EXIF Leakage`**: Uploads GPS/PII canaries and tests whether the server strips metadata or reflects EXIF XSS.
+   - Click **`Start Scan`**: Runs selected categories from the attack matrix.
+6. **Triage Results in History Tab**: Switch to the **History** tab to view all requests and responses in real time, filter by stage, status, method, and **response length**, and view markers in the Montoya detail viewer.
 
 ---
 
-## 📄 License & Attribution
+## License & Attribution
 Created with the help of an AI Agent and littlespidy.

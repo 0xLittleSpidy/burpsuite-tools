@@ -36,7 +36,7 @@ public class UploadScannerExtension implements BurpExtension {
 
         // ── 1. Create and Register Suite Tab ──
         this.mainTab = new UploadScannerTab(api);
-        api.userInterface().registerSuiteTab("📤 Upload Scanner", mainTab);
+        api.userInterface().registerSuiteTab("Upload Scanner", mainTab);
 
         // ── 2. Register Context Menu Provider ──
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
@@ -64,7 +64,7 @@ public class UploadScannerExtension implements BurpExtension {
         });
 
         api.logging().logToOutput("=================================================");
-        api.logging().logToOutput("📤 Upload Scanner (Montoya Edition) by littlespidy");
+        api.logging().logToOutput("Upload Scanner (Montoya Edition) by littlespidy");
         api.logging().logToOutput("ReDownloader Visual Markers & Triage Log Ready!");
         api.logging().logToOutput("=================================================");
     }

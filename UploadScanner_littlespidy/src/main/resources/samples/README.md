@@ -1,4 +1,4 @@
-# 📁 Upload Scanner Sample Files Directory
+# Upload Scanner Sample Files Directory
 
 This directory contains a complete library of sample test files and payloads covering all file extensions, categories, and test cases supported by **Upload Scanner (Montoya Edition)**.
 
@@ -6,7 +6,7 @@ Each file has been generated with authentic file magic headers, structural metad
 
 ---
 
-## 🗂️ Directory Structure
+## Directory Structure
 
 ```
 samples/
@@ -82,7 +82,7 @@ samples/
 
 ---
 
-## 📋 Comprehensive File Catalog
+## Comprehensive File Catalog
 
 ### 1. Allowed Extensions: Images
 | File | Extension | Content-Type | Format Details |
@@ -228,7 +228,7 @@ samples/
 
 ---
 
-## 🚀 How to Use These Samples
+## How to Use These Samples
 
 ### Method 1: Manual Upload Testing
 1. Select any sample file from `samples/` based on the vulnerability you wish to test.

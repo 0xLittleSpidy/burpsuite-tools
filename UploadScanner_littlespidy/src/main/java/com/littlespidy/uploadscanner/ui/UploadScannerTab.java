@@ -58,7 +58,7 @@ public class UploadScannerTab extends JPanel {
         // Custom Tab Header with Title and Close Button
         JPanel tabHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         tabHeader.setOpaque(false);
-        JLabel titleLabel = new JLabel("🎯 " + tabTitle);
+        JLabel titleLabel = new JLabel(tabTitle);
 
         JButton closeBtn = new JButton("×");
         closeBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));

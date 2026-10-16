@@ -293,7 +293,7 @@ public class UploadScanExecutor {
                             StageType.VERIFICATION,
                             uploadReq.method(),
                             (short) 200,
-                            "🔥 CRITICAL: Stored EXIF XSS reflection in upload response!",
+                            "CRITICAL: Stored EXIF XSS reflection in upload response!",
                             uploadLen,
                             uploadReq.url(),
                             uploadPair,
@@ -347,8 +347,8 @@ public class UploadScanExecutor {
                             if (payload.getName().contains("Leakage") || payload.getName().contains("Canary") || payload.getName().contains("GPS")) {
                                 int verifId = sequenceCounter.getAndIncrement();
                                 String verifDesc = canaryFound
-                                        ? "⚠️ VULNERABILITY: EXIF PII Leakage (GPS / Metadata Preserved on Server!)"
-                                        : "✔ EXIF Stripped: Server sanitized metadata (" + payload.getFilename() + ")";
+                                        ? "VULNERABILITY: EXIF PII Leakage (GPS / Metadata Preserved on Server!)"
+                                        : "EXIF Stripped: Server sanitized metadata (" + payload.getFilename() + ")";
                                 UploadEntry verifEntry = new UploadEntry(
                                         verifId,
                                         StageType.VERIFICATION,
@@ -370,7 +370,7 @@ public class UploadScanExecutor {
                                         StageType.VERIFICATION,
                                         redlReq.method(),
                                         (short) 200,
-                                        "🔥 CRITICAL: Stored EXIF XSS reflection in downloaded image (" + payload.getFilename() + ")",
+                                        "CRITICAL: Stored EXIF XSS reflection in downloaded image (" + payload.getFilename() + ")",
                                         redlLen,
                                         redlReq.url(),
                                         redlPair,
@@ -405,7 +405,7 @@ public class UploadScanExecutor {
                 for (Interaction interaction : interactions) {
                     int oobId = sequenceCounter.getAndIncrement();
                     String clientIp = (interaction.clientIp() != null) ? interaction.clientIp().getHostAddress() : "unknown";
-                    String desc = "🔥 Collaborator OOB: " + interaction.type().name() + " callback from " + clientIp;
+                    String desc = "Collaborator OOB: " + interaction.type().name() + " callback from " + clientIp;
                     UploadEntry oobEntry = new UploadEntry(
                             oobId,
                             StageType.VERIFICATION,
