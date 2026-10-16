@@ -28,7 +28,7 @@ GWTMap unifies the capabilities of three premier GWT security tools into one coh
 ## Extension Interface & Architecture
 
 ### 1. Main Suite Tab: GWTMap
-The main Suite Tab is organized into three dedicated top-level tabs with a unified target input header and cross-platform persistence:
+The main Suite Tab is organized into four dedicated top-level tabs with a unified target input header and cross-platform persistence:
 
 - **Target Header Controls & Persistence**:
   - **Bootstrap URL (-u)**: Target GWT application URL or `.nocache.js` bootstrap script.
@@ -43,7 +43,7 @@ Combines all core analysis tools into a structured multi-tab workspace:
 
 1. **HTTP History** (First Tab):
    - Live Traffic Streaming: Displays all network activity initiated during "Analyze Target" in real time (Bootstrap fetch, Permutation script download, deferred JavaScript fragments, and single/batch RPC probes).
-   - History Table: Columns for ID, Time, Type (`BOOTSTRAP`, `PERMUTATION`, `FRAGMENT`, `PROBE`), Method, URL, Status Code, Response Length, and Round-Trip Duration (ms).
+   - History Table: Columns for ID, Time, Type (`BOOTSTRAP`, `PERMUTATION`, `FRAGMENT`, `PROBE`), Method, Method Name (GWT RPC method), URL, Status Code, Response Length, and Round-Trip Duration (ms).
    - Integrated Split Editors: Embedded native Montoya HTTP Request and Response editors with automatic search term synchronization and syntax formatting.
    - Toolbar & Context Actions: `Clear History`, `Send to Intruder`, `Copy URL`, `Copy Request`, and `Copy Response`.
 2. **Module Info**:
@@ -61,11 +61,23 @@ Combines all core analysis tools into a structured multi-tab workspace:
    - **Interactive Code Search**: Search bar with `< Prev` and `Next >` navigation buttons, `Match Case` toggle, match position counter (e.g. `3 / 15`), and dual-color occurrence highlighting that auto-scrolls to the active match.
    - One-click `Save / Backup Code to Disk...` export button.
 
-#### Tab 2: RPC Deserializer
+#### Tab 2: HTTP Proxy History
+- Ingests all past and live proxy traffic via Montoya API (`api.proxy().history()` & `registerResponseHandler`).
+- Enriches every request with extracted GWT RPC metadata: Method Name, Service Interface, and GWT-RPC classification.
+- Multi-Criteria Filtering Toolbar:
+  - **Search**: Debounced real-time filter across URLs, method names, services, and payload bodies.
+  - **Method Name Filter**: Dynamic dropdown populated with all unique GWT methods observed in proxy history.
+  - **Service Filter**: Dynamic dropdown populated with all unique GWT services observed.
+  - **Status Filter**: Fast filter for 2xx, 3xx, 4xx, and 5xx response codes.
+  - **Only GWT-RPC Traffic Toggle**: Instant filter focusing exclusively on GWT transactions.
+- Split-Screen Inspection: Embedded Request, Response, Structured GWT Response, and GWT Request AST editors.
+- Context Menu: `Send to Repeater`, `Send to Intruder`, `Send to GWTMap Deserializer`, `Send to GWTMap Fuzzer`, `Copy URL`, `Copy GWT Method Name`, `Copy RPC Payload`.
+
+#### Tab 3: RPC Deserializer
 - Accepts raw GWT-RPC wire requests, parses them into typed AST representations, resolves field types, decodes RPC flags, and identifies all fuzzable parameter offsets.
 - Built-in GWT Base64 Long Codec for instant conversion between GWT Base64 strings and 64-bit decimal integers.
 
-#### Tab 3: RPC Fuzzer & Tester
+#### Tab 4: RPC Fuzzer & Tester
 - Automated testing console for GWT endpoints.
 - **Burp Cookie Store Integration**: Automatically extracts and includes relevant session cookies from Burp's `CookieJar` matching the target domain/path, merged with any custom headers.
 - **File Upload Options**: `Load Body from File...` for base requests and `Load Payloads from File...` for wordlists.
@@ -76,12 +88,19 @@ Combines all core analysis tools into a structured multi-tab workspace:
 
 ---
 
-### 2. Native Burp HTTP Request Editor Tab: "GWT"
-- Appears automatically in Burp Proxy, Repeater, Logger, and Intruder whenever viewing GWT-RPC traffic (`text/x-gwt-rpc` or payload starting with stream version `[0-9]+\|[0-9]+\|...`).
-- Sub-tab 1: **Parsed Call** -> Formatted AST breakdown of the method call, service interface, parameter types, values, and string table.
-- Sub-tab 2: **Armed Payload (§)** -> The request body pre-armed with Burp Intruder markers (`§...§`).
-- Sub-tab 3: **Base64 Long Codec** -> Quick-access encoder and decoder for GWT 64-bit integers.
-- Action Buttons: **Send to Intruder** (arms payload and sends directly to Burp Intruder) and **Send to GWTMap Deserializer**.
+### 2. Native Burp Message Editor Tabs: "GWT" & "GWT Response"
+- **"GWT" (Request Editor Tab)**:
+  - Appears automatically across Burp Proxy, Repeater, Logger, and Intruder whenever viewing GWT-RPC traffic (`text/x-gwt-rpc` or payload starting with stream version `[0-9]+\|[0-9]+\|...`).
+  - Sub-tab 1: **Parsed Call** -> Formatted AST breakdown of the method call, service interface, parameter types, values, and string table.
+  - Sub-tab 2: **Armed Payload (§)** -> The request body pre-armed with Burp Intruder markers (`§...§`).
+  - Sub-tab 3: **Base64 Long Codec** -> Quick-access encoder and decoder for GWT 64-bit integers.
+  - Action Buttons: **Send to Intruder** and **Send to GWTMap Deserializer**.
+- **"GWT Response" (Response Editor Tab)**:
+  - Appears automatically across Burp Proxy, Repeater, Logger, and GWTMap whenever viewing GWT-RPC responses (`//OK[...]` success payloads or `//EX[...]` server exceptions).
+  - Top Status Banner: Green success badge for `//OK` returns and red exception badge for `//EX` server errors (with exception class and error message).
+  - Sub-tab 1: **Structured View** -> Human-readable breakdown of return values, types, and flags.
+  - Sub-tab 2: **String Table** -> Sortable table mapping indices to string values and type signatures.
+  - Sub-tab 3: **Raw Response** -> Preserved raw response with one-click copy actions.
 
 ---
 

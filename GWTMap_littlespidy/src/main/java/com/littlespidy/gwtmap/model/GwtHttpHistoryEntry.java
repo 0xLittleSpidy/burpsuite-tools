@@ -19,6 +19,7 @@ public class GwtHttpHistoryEntry {
     private final String timestamp;
     private final String type;
     private final String method;
+    private final String methodName;
     private final String url;
     private final int statusCode;
     private final int responseLength;
@@ -28,16 +29,23 @@ public class GwtHttpHistoryEntry {
     public GwtHttpHistoryEntry(int id, String type, String method, String url,
                                int statusCode, int responseLength, long durationMs,
                                HttpRequestResponse requestResponse) {
-        this(id, new SimpleDateFormat("HH:mm:ss").format(new Date()), type, method, url, statusCode, responseLength, durationMs, requestResponse);
+        this(id, null, type, method, "", url, statusCode, responseLength, durationMs, requestResponse);
     }
 
     public GwtHttpHistoryEntry(int id, String timestamp, String type, String method, String url,
+                               int statusCode, int responseLength, long durationMs,
+                               HttpRequestResponse requestResponse) {
+        this(id, timestamp, type, method, "", url, statusCode, responseLength, durationMs, requestResponse);
+    }
+
+    public GwtHttpHistoryEntry(int id, String timestamp, String type, String method, String methodName, String url,
                                int statusCode, int responseLength, long durationMs,
                                HttpRequestResponse requestResponse) {
         this.id = id;
         this.timestamp = timestamp != null ? timestamp : new SimpleDateFormat("HH:mm:ss").format(new Date());
         this.type = type != null ? type : "Unknown";
         this.method = method != null ? method : "GET";
+        this.methodName = methodName != null ? methodName : "";
         this.url = url != null ? url : "";
         this.statusCode = statusCode;
         this.responseLength = responseLength;
@@ -59,6 +67,10 @@ public class GwtHttpHistoryEntry {
 
     public String getMethod() {
         return method;
+    }
+
+    public String getMethodName() {
+        return methodName;
     }
 
     public String getUrl() {

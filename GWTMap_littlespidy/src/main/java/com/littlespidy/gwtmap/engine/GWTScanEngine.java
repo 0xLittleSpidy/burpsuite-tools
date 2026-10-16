@@ -51,9 +51,14 @@ public class GWTScanEngine {
     }
 
     private void recordHistory(String type, String method, String url, int statusCode, int length, long dur, HttpRequestResponse rr) {
+        recordHistory(type, method, "", url, statusCode, length, dur, rr);
+    }
+
+    private void recordHistory(String type, String method, String methodName, String url, int statusCode, int length, long dur, HttpRequestResponse rr) {
         GwtHttpHistoryEntry entry = new GwtHttpHistoryEntry(
                 historyCounter.getAndIncrement(),
-                type, method, url, statusCode, length, dur, rr
+                null,
+                type, method, methodName, url, statusCode, length, dur, rr
         );
         dataStore.addHttpHistoryEntry(entry);
         if (httpHistoryListener != null) {
@@ -452,7 +457,7 @@ public class GWTScanEngine {
                 HttpResponse resp = rr.response();
                 int code = resp != null ? resp.statusCode() : 0;
                 int len = resp != null ? resp.body().length() : 0;
-                recordHistory("Probe: " + method.getMethodName(), "POST", method.getFullEndpointUrl(), code, len, elapsed, rr);
+                recordHistory("Probe: " + method.getMethodName(), "POST", method.getMethodName(), method.getFullEndpointUrl(), code, len, elapsed, rr);
                 method.setProbeResult(probeReq, resp, elapsed);
             } catch (Exception e) {
                 method.setProbeResult(null, null, 0);
@@ -477,7 +482,7 @@ public class GWTScanEngine {
                         HttpResponse resp = rr.response();
                         int code = resp != null ? resp.statusCode() : 0;
                         int len = resp != null ? resp.body().length() : 0;
-                        recordHistory("Probe: " + method.getMethodName(), "POST", method.getFullEndpointUrl(), code, len, elapsed, rr);
+                        recordHistory("Probe: " + method.getMethodName(), "POST", method.getMethodName(), method.getFullEndpointUrl(), code, len, elapsed, rr);
                         method.setProbeResult(probeReq, resp, elapsed);
                     } catch (Exception e) {
                         method.setProbeResult(probeReq, null, 0);

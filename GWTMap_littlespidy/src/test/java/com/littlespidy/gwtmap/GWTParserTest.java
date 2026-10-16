@@ -243,13 +243,22 @@ public class GWTParserTest {
 
         model.addEntry(entry);
         assertEquals(1, model.getRowCount());
+        assertEquals(9, model.getColumnCount());
         assertEquals(1, model.getValueAt(0, 0));
         assertEquals("Bootstrap", model.getValueAt(0, 2));
         assertEquals("GET", model.getValueAt(0, 3));
-        assertEquals("http://example.com/app/app.nocache.js", model.getValueAt(0, 4));
-        assertEquals(200, model.getValueAt(0, 5));
-        assertEquals(15000, model.getValueAt(0, 6));
-        assertEquals("120 ms", model.getValueAt(0, 7));
+        assertEquals("", model.getValueAt(0, 4));
+        assertEquals("http://example.com/app/app.nocache.js", model.getValueAt(0, 5));
+        assertEquals(200, model.getValueAt(0, 6));
+        assertEquals(15000, model.getValueAt(0, 7));
+        assertEquals("120 ms", model.getValueAt(0, 8));
+
+        com.littlespidy.gwtmap.model.GwtHttpHistoryEntry probeEntry = new com.littlespidy.gwtmap.model.GwtHttpHistoryEntry(
+                2, "12:00:00", "Probe", "POST", "getUserProfile", "http://example.com/app/userRpcService", 200, 42, 85, null
+        );
+        model.addEntry(probeEntry);
+        assertEquals(2, model.getRowCount());
+        assertEquals("getUserProfile", model.getValueAt(1, 4));
     }
 
     @Test

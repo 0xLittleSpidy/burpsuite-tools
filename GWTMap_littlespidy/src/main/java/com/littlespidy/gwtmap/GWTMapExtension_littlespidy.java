@@ -10,6 +10,7 @@ import com.littlespidy.gwtmap.engine.GWTScanEngine;
 import com.littlespidy.gwtmap.model.GWTDataStore;
 import com.littlespidy.gwtmap.ui.GWTMapTab;
 import com.littlespidy.gwtmap.ui.editor.GwtHttpRequestEditorProvider;
+import com.littlespidy.gwtmap.ui.editor.GwtHttpResponseEditorProvider;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,8 +56,9 @@ public class GWTMapExtension_littlespidy implements BurpExtension {
         // 1. Register Suite Tab
         api.userInterface().registerSuiteTab("GWTMap", mainTab);
 
-        // 2. Register Native HTTP Request Editor Provider ("GWT" Tab in Proxy / Repeater)
+        // 2. Register Native HTTP Request & Response Editor Providers ("GWT" and "GWT Response" Tabs)
         api.userInterface().registerHttpRequestEditorProvider(new GwtHttpRequestEditorProvider(api, mainTab));
+        api.userInterface().registerHttpResponseEditorProvider(new GwtHttpResponseEditorProvider(api, mainTab));
 
         // 3. Register Context Menus: "Send to GWTMap", "Send to GWTMap Deserializer", "Send to GWTMap Fuzzer"
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {

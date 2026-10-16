@@ -275,6 +275,7 @@ public class GWTMapPersistenceManager {
                 hd.timestamp = h.getTimestamp();
                 hd.type = h.getType();
                 hd.method = h.getMethod();
+                hd.methodName = h.getMethodName();
                 hd.url = h.getUrl();
                 hd.statusCode = h.getStatusCode();
                 hd.responseLength = h.getResponseLength();
@@ -383,8 +384,9 @@ public class GWTMapPersistenceManager {
                     } catch (Throwable ignored) {}
 
                     GwtHttpHistoryEntry entry = new GwtHttpHistoryEntry(
-                            hd.id, hd.timestamp, hd.type, hd.method, hd.url,
-                            hd.statusCode, hd.responseLength, hd.durationMs, rr
+                            hd.id, hd.timestamp, hd.type, hd.method,
+                            hd.methodName != null ? hd.methodName : "",
+                            hd.url, hd.statusCode, hd.responseLength, hd.durationMs, rr
                     );
                     dataStore.addHttpHistoryEntry(entry);
                 }
@@ -459,6 +461,7 @@ public class GWTMapPersistenceManager {
         public String timestamp;
         public String type;
         public String method;
+        public String methodName;
         public String url;
         public int statusCode;
         public int responseLength;

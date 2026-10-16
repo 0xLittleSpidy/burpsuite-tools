@@ -9,13 +9,14 @@ import java.util.List;
 
 /**
  * Table model for displaying all HTTP requests and responses executed by GWTMap.
+ * Includes GWT RPC Method Name column.
  *
  * @author littlespidy
  */
 public class GwtHttpHistoryTableModel extends AbstractTableModel {
 
     private static final String[] COLUMN_NAMES = {
-            "#", "Time", "Type", "Method", "URL", "Status", "Length", "Duration"
+            "#", "Time", "Type", "Method", "Method Name", "URL", "Status", "Length", "Duration"
     };
 
     private final List<GwtHttpHistoryEntry> entries = new ArrayList<>();
@@ -67,8 +68,8 @@ public class GwtHttpHistoryTableModel extends AbstractTableModel {
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex) {
             case 0:
-            case 5:
             case 6:
+            case 7:
                 return Integer.class;
             default:
                 return String.class;
@@ -85,10 +86,11 @@ public class GwtHttpHistoryTableModel extends AbstractTableModel {
             case 1: return entry.getTimestamp();
             case 2: return entry.getType();
             case 3: return entry.getMethod();
-            case 4: return entry.getUrl();
-            case 5: return entry.getStatusCode() > 0 ? entry.getStatusCode() : "";
-            case 6: return entry.getResponseLength() >= 0 ? entry.getResponseLength() : "";
-            case 7: return entry.getDurationMs() >= 0 ? entry.getDurationMs() + " ms" : "";
+            case 4: return entry.getMethodName();
+            case 5: return entry.getUrl();
+            case 6: return entry.getStatusCode() > 0 ? entry.getStatusCode() : "";
+            case 7: return entry.getResponseLength() >= 0 ? entry.getResponseLength() : "";
+            case 8: return entry.getDurationMs() >= 0 ? entry.getDurationMs() + " ms" : "";
             default: return "";
         }
     }

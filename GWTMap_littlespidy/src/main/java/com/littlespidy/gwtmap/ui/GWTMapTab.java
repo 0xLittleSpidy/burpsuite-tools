@@ -109,6 +109,7 @@ public class GWTMapTab extends JPanel {
     // Independent Tool Tabs
     private final RpcDeserializerPanel deserializerPanel;
     private final RpcFuzzerPanel fuzzerPanel;
+    private final GwtProxyHistoryPanel proxyHistoryPanel;
 
     // Debounce timer for search input (300ms)
     private final javax.swing.Timer filterDebounceTimer = new javax.swing.Timer(300, e -> refreshFilteredViews());
@@ -131,6 +132,7 @@ public class GWTMapTab extends JPanel {
         this.persistenceManager = new GWTMapPersistenceManager(api);
         this.deserializerPanel = new RpcDeserializerPanel(api);
         this.fuzzerPanel = new RpcFuzzerPanel(api);
+        this.proxyHistoryPanel = new GwtProxyHistoryPanel(api, this);
 
         setLayout(new BorderLayout(4, 4));
         setBorder(new EmptyBorder(4, 4, 4, 4));
@@ -166,12 +168,17 @@ public class GWTMapTab extends JPanel {
         gwtAnalysisPanel.add(createAnalysisSubTabs(), BorderLayout.CENTER);
         gwtAnalysisPanel.add(createBottomStatusPanel(), BorderLayout.SOUTH);
 
-        // 2. Add Top-Level Tabs: GWT Analysis, RPC Deserializer, RPC Fuzzer & Tester
+        // 2. Add Top-Level Tabs: GWT Analysis, HTTP Proxy History, RPC Deserializer, RPC Fuzzer & Tester
         mainTabbedPane.addTab("GWT Analysis", gwtAnalysisPanel);
+        mainTabbedPane.addTab("HTTP Proxy History", proxyHistoryPanel);
         mainTabbedPane.addTab("RPC Deserializer", deserializerPanel);
         mainTabbedPane.addTab("RPC Fuzzer & Tester", fuzzerPanel);
 
         add(mainTabbedPane, BorderLayout.CENTER);
+    }
+
+    public GwtProxyHistoryPanel getProxyHistoryPanel() {
+        return proxyHistoryPanel;
     }
 
     // ── Top Toolbar (Target Acquisition) ─────────────────────────────────────
@@ -256,13 +263,14 @@ public class GWTMapTab extends JPanel {
         httpHistoryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         httpHistoryTable.setAutoCreateRowSorter(true);
         httpHistoryTable.getColumnModel().getColumn(0).setPreferredWidth(45);  // #
-        httpHistoryTable.getColumnModel().getColumn(1).setPreferredWidth(80);  // Time
-        httpHistoryTable.getColumnModel().getColumn(2).setPreferredWidth(130); // Type
+        httpHistoryTable.getColumnModel().getColumn(1).setPreferredWidth(75);  // Time
+        httpHistoryTable.getColumnModel().getColumn(2).setPreferredWidth(110); // Type
         httpHistoryTable.getColumnModel().getColumn(3).setPreferredWidth(60);  // Method
-        httpHistoryTable.getColumnModel().getColumn(4).setPreferredWidth(350); // URL
-        httpHistoryTable.getColumnModel().getColumn(5).setPreferredWidth(65);  // Status
-        httpHistoryTable.getColumnModel().getColumn(6).setPreferredWidth(80);  // Length
-        httpHistoryTable.getColumnModel().getColumn(7).setPreferredWidth(80);  // Duration
+        httpHistoryTable.getColumnModel().getColumn(4).setPreferredWidth(140); // Method Name
+        httpHistoryTable.getColumnModel().getColumn(5).setPreferredWidth(320); // URL
+        httpHistoryTable.getColumnModel().getColumn(6).setPreferredWidth(65);  // Status
+        httpHistoryTable.getColumnModel().getColumn(7).setPreferredWidth(80);  // Length
+        httpHistoryTable.getColumnModel().getColumn(8).setPreferredWidth(80);  // Duration
 
         httpHistoryTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
