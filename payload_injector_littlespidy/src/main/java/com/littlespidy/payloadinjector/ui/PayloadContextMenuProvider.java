@@ -161,13 +161,40 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
         }
 
         JMenu catMenu = new JMenu(categoryName + " Payloads");
-        for (ParamPayloadEntry entry : list) {
-            JMenuItem item = new JMenuItem(entry.getName() + " (" + truncate(entry.getTemplate(), 30) + ")");
-            if (!entry.getDescription().isEmpty()) {
-                item.setToolTipText(entry.getDescription());
+
+        if (categoryName.equalsIgnoreCase("Path Traversal")) {
+            JMenu windowsMenu = new JMenu("Windows");
+            JMenu linuxMenu = new JMenu("Linux");
+
+            for (ParamPayloadEntry entry : list) {
+                JMenuItem item = new JMenuItem(entry.getName() + " (" + truncate(entry.getTemplate(), 30) + ")");
+                if (!entry.getDescription().isEmpty()) {
+                    item.setToolTipText(entry.getDescription());
+                }
+                item.addActionListener(e -> onSelect.accept(entry));
+
+                if ("Windows".equalsIgnoreCase(entry.getPlatform())) {
+                    windowsMenu.add(item);
+                } else {
+                    linuxMenu.add(item);
+                }
             }
-            item.addActionListener(e -> onSelect.accept(entry));
-            catMenu.add(item);
+
+            if (windowsMenu.getItemCount() > 0) {
+                catMenu.add(windowsMenu);
+            }
+            if (linuxMenu.getItemCount() > 0) {
+                catMenu.add(linuxMenu);
+            }
+        } else {
+            for (ParamPayloadEntry entry : list) {
+                JMenuItem item = new JMenuItem(entry.getName() + " (" + truncate(entry.getTemplate(), 30) + ")");
+                if (!entry.getDescription().isEmpty()) {
+                    item.setToolTipText(entry.getDescription());
+                }
+                item.addActionListener(e -> onSelect.accept(entry));
+                catMenu.add(item);
+            }
         }
         parentMenu.add(catMenu);
     }

@@ -32,6 +32,7 @@ import java.util.List;
 public class ParamPayloadTab extends JPanel {
 
     private final String categoryTitle;
+    private final boolean isPathTraversal;
     private final ParamPayloadStore store;
     private final InjectionSettings settings;
 
@@ -41,6 +42,7 @@ public class ParamPayloadTab extends JPanel {
 
     public ParamPayloadTab(String categoryTitle, ParamPayloadStore store, InjectionSettings settings) {
         this.categoryTitle = categoryTitle;
+        this.isPathTraversal = "Path Traversal".equalsIgnoreCase(categoryTitle);
         this.store = store;
         this.settings = settings;
 
@@ -126,11 +128,20 @@ public class ParamPayloadTab extends JPanel {
         table.setFont(table.getFont().deriveFont(13f));
         table.getTableHeader().setFont(table.getFont().deriveFont(Font.BOLD, 13f));
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(160); // Name
-        table.getColumnModel().getColumn(1).setPreferredWidth(320); // Payload Value
-        table.getColumnModel().getColumn(2).setPreferredWidth(220); // Description
-        table.getColumnModel().getColumn(3).setPreferredWidth(100); // Source Type
-        table.getColumnModel().getColumn(4).setPreferredWidth(130); // Source File
+        if (isPathTraversal) {
+            table.getColumnModel().getColumn(0).setPreferredWidth(160); // Name
+            table.getColumnModel().getColumn(1).setPreferredWidth(90);  // Platform
+            table.getColumnModel().getColumn(2).setPreferredWidth(300); // Payload Value
+            table.getColumnModel().getColumn(3).setPreferredWidth(200); // Description
+            table.getColumnModel().getColumn(4).setPreferredWidth(100); // Source Type
+            table.getColumnModel().getColumn(5).setPreferredWidth(130); // Source File
+        } else {
+            table.getColumnModel().getColumn(0).setPreferredWidth(160); // Name
+            table.getColumnModel().getColumn(1).setPreferredWidth(320); // Payload Value
+            table.getColumnModel().getColumn(2).setPreferredWidth(220); // Description
+            table.getColumnModel().getColumn(3).setPreferredWidth(100); // Source Type
+            table.getColumnModel().getColumn(4).setPreferredWidth(130); // Source File
+        }
 
         // Burp-style sorting: toggle between ASCENDING and DESCENDING
         TableRowSorter<PayloadTableModel> sorter = new TableRowSorter<>(tableModel) {
@@ -179,8 +190,9 @@ public class ParamPayloadTab extends JPanel {
 
     private void setupPayloadColumnHeaderButton() {
         TableCellRenderer defaultRenderer = table.getTableHeader().getDefaultRenderer();
+        final int payloadCol = isPathTraversal ? 2 : 1;
 
-        table.getColumnModel().getColumn(1).setHeaderRenderer(new TableCellRenderer() {
+        table.getColumnModel().getColumn(payloadCol).setHeaderRenderer(new TableCellRenderer() {
             private final JPanel panel = new JPanel(new BorderLayout(4, 0));
             private final JLabel titleLabel = new JLabel();
             private final JButton copyBtn = new JButton("Copy All");
@@ -216,7 +228,7 @@ public class ParamPayloadTab extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int viewCol = table.getTableHeader().columnAtPoint(e.getPoint());
-                if (viewCol == 1) {
+                if (viewCol == payloadCol) {
                     Rectangle rect = table.getTableHeader().getHeaderRect(viewCol);
                     int btnWidth = 65;
                     int btnHeight = 20;
@@ -459,7 +471,15 @@ public class ParamPayloadTab extends JPanel {
     // ── Inner Table Model ──
 
     public class PayloadTableModel extends AbstractTableModel {
-        private final String[] columns = {"Name", "Payload Value", "Description", "Source Type", "Source File"};
+        private final String[] columns;
+
+        public PayloadTableModel() {
+            if (isPathTraversal) {
+                this.columns = new String[]{"Name", "Platform", "Payload Value", "Description", "Source Type", "Source File"};
+            } else {
+                this.columns = new String[]{"Name", "Payload Value", "Description", "Source Type", "Source File"};
+            }
+        }
 
         @Override public int getRowCount() { return store.getEntries().size(); }
         @Override public int getColumnCount() { return columns.length; }
@@ -480,14 +500,26 @@ public class ParamPayloadTab extends JPanel {
             List<ParamPayloadEntry> list = store.getEntries();
             if (row < 0 || row >= list.size()) return null;
             ParamPayloadEntry e = list.get(row);
-            return switch (col) {
-                case 0 -> e.getName();
-                case 1 -> e.getTemplate();
-                case 2 -> e.getDescription();
-                case 3 -> e.getSourceType();
-                case 4 -> e.getSourceFile();
-                default -> null;
-            };
+            if (isPathTraversal) {
+                return switch (col) {
+                    case 0 -> e.getName();
+                    case 1 -> (e.getPlatform() != null) ? e.getPlatform() : "";
+                    case 2 -> e.getTemplate();
+                    case 3 -> e.getDescription();
+                    case 4 -> e.getSourceType();
+                    case 5 -> e.getSourceFile();
+                    default -> null;
+                };
+            } else {
+                return switch (col) {
+                    case 0 -> e.getName();
+                    case 1 -> e.getTemplate();
+                    case 2 -> e.getDescription();
+                    case 3 -> e.getSourceType();
+                    case 4 -> e.getSourceFile();
+                    default -> null;
+                };
+            }
         }
     }
 }

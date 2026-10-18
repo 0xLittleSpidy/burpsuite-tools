@@ -644,5 +644,171 @@ public class PayloadFeaturesTest_littlespidy {
         assertEquals("OWASP, PayloadBox", testEntry.getSourceType());
         assertEquals("http-request-smuggling-payloads.txt, CL-TE-Payloads.txt", testEntry.getSourceFile());
     }
+
+    @Test
+    void testPathTraversalPayloadPlatformClassification() throws IOException {
+        com.google.gson.Gson gson = new com.google.gson.Gson();
+        java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<java.util.Map<String, Object>>>() {}.getType();
+
+        Path path = Path.of("path_traversal_payloads_littlespidy.json");
+        assertTrue(Files.exists(path), "path_traversal_payloads_littlespidy.json must exist");
+
+        List<java.util.Map<String, Object>> list = gson.fromJson(Files.readString(path), listType);
+        assertEquals(23070, list.size(), "Should have exactly 23070 path traversal payloads");
+
+        long windowsCount = 0;
+        long linuxCount = 0;
+
+        for (var entry : list) {
+            String platform = (String) entry.get("platform");
+            assertNotNull(platform, "Platform must not be null for payload: " + entry.get("name"));
+            assertFalse(platform.isBlank(), "Platform must not be blank for payload: " + entry.get("name"));
+            assertTrue("Windows".equals(platform) || "Linux".equals(platform),
+                    "Platform must be either Windows or Linux, found: " + platform);
+
+            if ("Windows".equals(platform)) {
+                windowsCount++;
+            } else if ("Linux".equals(platform)) {
+                linuxCount++;
+            }
+        }
+
+        assertTrue(windowsCount >= 13000, "Should have >= 13000 Windows payloads, found: " + windowsCount);
+        assertTrue(linuxCount >= 9000, "Should have >= 9000 Linux payloads, found: " + linuxCount);
+        assertEquals(23070, windowsCount + linuxCount, "Total Windows + Linux count must equal total payloads");
+    }
+
+    @Test
+    void testPathTraversalTabSixColumns() {
+        ParamPayloadStore pathStore = new ParamPayloadStore(null, "path_traversal_payloads_littlespidy.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        pathStore.addEntry(new ParamPayloadEntry("pt-1", "Linux Traversal", "../../../etc/passwd", "Linux probe", true, "Manual", "N/A", "Linux"));
+        pathStore.addEntry(new ParamPayloadEntry("pt-2", "Windows Traversal", "..\\..\\win.ini", "Windows probe", true, "Manual", "N/A", "Windows"));
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab ptTab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("Path Traversal", pathStore, settings);
+
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab.PayloadTableModel ptModel = ptTab.getTableModel();
+        assertEquals(6, ptModel.getColumnCount(), "Path Traversal tab must have exactly 6 columns");
+        assertEquals("Name", ptModel.getColumnName(0));
+        assertEquals("Platform", ptModel.getColumnName(1), "Second column must be Platform");
+        assertEquals("Payload Value", ptModel.getColumnName(2));
+        assertEquals("Description", ptModel.getColumnName(3));
+        assertEquals("Source Type", ptModel.getColumnName(4));
+        assertEquals("Source File", ptModel.getColumnName(5));
+
+        assertEquals("Linux", ptModel.getValueAt(0, 1));
+        assertEquals("Windows", ptModel.getValueAt(1, 1));
+
+        // Verify standard categories retain 5 columns
+        ParamPayloadStore xssStore = new ParamPayloadStore(null, "xss_payloads.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        xssStore.addEntry(new ParamPayloadEntry("xss-1", "XSS Payload", "<script>alert(1)</script>", "XSS probe", true));
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab xssTab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("XSS", xssStore, settings);
+        assertEquals(5, xssTab.getTableModel().getColumnCount(), "XSS tab must retain 5 columns");
+        assertEquals("Payload Value", xssTab.getTableModel().getColumnName(1));
+    }
+
+    @Test
+    void testPathTraversalContextMenuWindowsAndLinuxSubmenus() {
+        ParamPayloadStore ptStore = new ParamPayloadStore(null, "path_traversal_payloads_littlespidy.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        ptStore.addEntry(new ParamPayloadEntry("pt-1", "Linux Traversal", "../../../etc/passwd", "Linux probe", true, "Manual", "N/A", "Linux"));
+        ptStore.addEntry(new ParamPayloadEntry("pt-2", "Windows Traversal", "..\\..\\win.ini", "Windows probe", true, "Manual", "N/A", "Windows"));
+
+        java.util.Map<String, ParamPayloadStore> stores = new java.util.LinkedHashMap<>();
+        stores.put("Path Traversal", ptStore);
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.PayloadContextMenuProvider provider =
+                new com.littlespidy.payloadinjector.ui.PayloadContextMenuProvider(null, stores, null, settings);
+
+        burp.api.montoya.http.message.requests.HttpRequest mockRequest = (burp.api.montoya.http.message.requests.HttpRequest) java.lang.reflect.Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class<?>[]{burp.api.montoya.http.message.requests.HttpRequest.class},
+                (proxy, method, args) -> {
+                    if ("method".equals(method.getName())) return "GET";
+                    if ("path".equals(method.getName())) return "/test";
+                    if ("pathWithoutQuery".equals(method.getName())) return "/test";
+                    return null;
+                }
+        );
+
+        burp.api.montoya.ui.contextmenu.ContextMenuEvent mockEvent = (burp.api.montoya.ui.contextmenu.ContextMenuEvent) java.lang.reflect.Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class<?>[]{burp.api.montoya.ui.contextmenu.ContextMenuEvent.class},
+                (proxy, method, args) -> {
+                    if ("selectedRequestResponses".equals(method.getName())) {
+                        burp.api.montoya.http.message.HttpRequestResponse mockRr = (burp.api.montoya.http.message.HttpRequestResponse) java.lang.reflect.Proxy.newProxyInstance(
+                                getClass().getClassLoader(),
+                                new Class<?>[]{burp.api.montoya.http.message.HttpRequestResponse.class},
+                                (p2, m2, a2) -> {
+                                    if ("request".equals(m2.getName())) return mockRequest;
+                                    return null;
+                                }
+                        );
+                        return java.util.List.of(mockRr);
+                    }
+                    if ("messageEditorRequestResponse".equals(method.getName())) return java.util.Optional.empty();
+                    return null;
+                }
+        );
+
+        java.util.List<java.awt.Component> menuItems = provider.provideMenuItems(mockEvent);
+        assertFalse(menuItems.isEmpty(), "Context menu items should not be empty");
+
+        javax.swing.JMenu rootMenu = (javax.swing.JMenu) menuItems.get(0);
+        assertEquals("Payload Injector (littlespidy)", rootMenu.getText());
+
+        // Find "Send to Repeater with Armed Payloads"
+        javax.swing.JMenu repeaterMenu = null;
+        for (int i = 0; i < rootMenu.getItemCount(); i++) {
+            javax.swing.JMenuItem item = rootMenu.getItem(i);
+            if (item instanceof javax.swing.JMenu m && "Send to Repeater with Armed Payloads".equals(m.getText())) {
+                repeaterMenu = m;
+                break;
+            }
+        }
+        assertNotNull(repeaterMenu, "Repeater menu must be present");
+
+        // Find "Path Traversal Payloads" submenu
+        javax.swing.JMenu ptSubmenu = null;
+        for (int i = 0; i < repeaterMenu.getItemCount(); i++) {
+            javax.swing.JMenuItem item = repeaterMenu.getItem(i);
+            if (item instanceof javax.swing.JMenu m && "Path Traversal Payloads".equals(m.getText())) {
+                ptSubmenu = m;
+                break;
+            }
+        }
+        assertNotNull(ptSubmenu, "Path Traversal Payloads submenu must be present");
+
+        // Verify Windows and Linux submenus
+        javax.swing.JMenu windowsSubmenu = null;
+        javax.swing.JMenu linuxSubmenu = null;
+        for (int i = 0; i < ptSubmenu.getItemCount(); i++) {
+            javax.swing.JMenuItem item = ptSubmenu.getItem(i);
+            if (item instanceof javax.swing.JMenu m) {
+                if ("Windows".equals(m.getText())) windowsSubmenu = m;
+                if ("Linux".equals(m.getText())) linuxSubmenu = m;
+            }
+        }
+
+        assertNotNull(windowsSubmenu, "Windows submenu must exist under Path Traversal Payloads");
+        assertNotNull(linuxSubmenu, "Linux submenu must exist under Path Traversal Payloads");
+
+        assertEquals(1, windowsSubmenu.getItemCount(), "Windows submenu should contain 1 item");
+        assertTrue(windowsSubmenu.getItem(0).getText().contains("Windows Traversal"));
+
+        assertEquals(1, linuxSubmenu.getItemCount(), "Linux submenu should contain 1 item");
+        assertTrue(linuxSubmenu.getItem(0).getText().contains("Linux Traversal"));
+    }
 }
 

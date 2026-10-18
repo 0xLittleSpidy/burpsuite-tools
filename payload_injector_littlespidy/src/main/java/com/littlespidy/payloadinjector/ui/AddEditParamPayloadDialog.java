@@ -18,6 +18,7 @@ import java.util.UUID;
 public class AddEditParamPayloadDialog extends JDialog {
 
     private final JTextField nameField;
+    private final JComboBox<String> platformCombo;
     private final JTextArea templateArea;
     private final JTextField descField;
     private final JLabel errorLabel;
@@ -30,6 +31,7 @@ public class AddEditParamPayloadDialog extends JDialog {
         setResizable(true);
 
         boolean isEdit = existing != null;
+        boolean isPathTraversal = "Path Traversal".equalsIgnoreCase(categoryTitle);
 
         JPanel form = new JPanel(new GridBagLayout());
         form.setBorder(new EmptyBorder(12, 14, 6, 14));
@@ -37,34 +39,50 @@ public class AddEditParamPayloadDialog extends JDialog {
         GridBagConstraints lc = labelConstraints();
         GridBagConstraints fc = fieldConstraints();
 
+        int gridy = 0;
+
         // Name
-        form.add(bold("Name *"), row(lc, 0));
+        form.add(bold("Name *"), row(lc, gridy));
         nameField = new JTextField(isEdit ? existing.getName() : "", 35);
-        form.add(nameField, row(fc, 0));
+        form.add(nameField, row(fc, gridy++));
 
         // Error label
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(new Color(200, 0, 0));
         errorLabel.setFont(errorLabel.getFont().deriveFont(11f));
-        GridBagConstraints ec = row(fc, 1);
+        GridBagConstraints ec = row(fc, gridy++);
         ec.insets = new Insets(0, 4, 4, 4);
         form.add(errorLabel, ec);
+
+        // Platform (Path Traversal only)
+        if (isPathTraversal) {
+            form.add(bold("Platform *"), row(lc, gridy));
+            platformCombo = new JComboBox<>(new String[]{"Linux", "Windows"});
+            if (isEdit && existing.getPlatform() != null && !existing.getPlatform().isBlank()) {
+                platformCombo.setSelectedItem(existing.getPlatform());
+            } else {
+                platformCombo.setSelectedItem("Linux");
+            }
+            form.add(platformCombo, row(fc, gridy++));
+        } else {
+            platformCombo = null;
+        }
 
         // Template
         JPanel tplLabel = new JPanel(new BorderLayout());
         tplLabel.setOpaque(false);
         tplLabel.add(bold("Payload Template *"), BorderLayout.NORTH);
         tplLabel.add(hint("Placeholders: {param}, {value}, {rand}"), BorderLayout.CENTER);
-        form.add(tplLabel, row(lc, 2));
+        form.add(tplLabel, row(lc, gridy));
 
         templateArea = new JTextArea(isEdit ? existing.getTemplate() : "", 4, 35);
         templateArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        form.add(new JScrollPane(templateArea), row(fc, 2));
+        form.add(new JScrollPane(templateArea), row(fc, gridy++));
 
         // Description
-        form.add(bold("Description"), row(lc, 3));
+        form.add(bold("Description"), row(lc, gridy));
         descField = new JTextField(isEdit ? existing.getDescription() : "", 35);
-        form.add(descField, row(fc, 3));
+        form.add(descField, row(fc, gridy++));
 
         // Buttons
         JButton cancelBtn = new JButton("Cancel");
@@ -91,7 +109,8 @@ public class AddEditParamPayloadDialog extends JDialog {
             String id = isEdit ? existing.getId() : UUID.randomUUID().toString();
             String sourceType = isEdit ? existing.getSourceType() : "Manual";
             String sourceFile = isEdit ? existing.getSourceFile() : "N/A";
-            result = new ParamPayloadEntry(id, name, tpl, desc, true, sourceType, sourceFile);
+            String platform = isPathTraversal ? (String) platformCombo.getSelectedItem() : (isEdit ? existing.getPlatform() : "");
+            result = new ParamPayloadEntry(id, name, tpl, desc, true, sourceType, sourceFile, platform);
             dispose();
         });
 

@@ -25,15 +25,20 @@ public class ParamPayloadEntry {
     private boolean enabled;
     private String sourceType;
     private String sourceFile;
+    private String platform;
 
     private static final String CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
     private static final Random RNG = new Random();
 
     public ParamPayloadEntry(String id, String name, String template, String description, boolean enabled) {
-        this(id, name, template, description, enabled, "Manual", "N/A");
+        this(id, name, template, description, enabled, "Manual", "N/A", "");
     }
 
     public ParamPayloadEntry(String id, String name, String template, String description, boolean enabled, String sourceType, String sourceFile) {
+        this(id, name, template, description, enabled, sourceType, sourceFile, "");
+    }
+
+    public ParamPayloadEntry(String id, String name, String template, String description, boolean enabled, String sourceType, String sourceFile, String platform) {
         this.id = id != null ? id : "";
         this.name = name != null ? name : "";
         this.template = template != null ? template : "";
@@ -41,6 +46,7 @@ public class ParamPayloadEntry {
         this.enabled = enabled;
         this.sourceType = (sourceType != null && !sourceType.isBlank()) ? sourceType : "Manual";
         this.sourceFile = (sourceFile != null && !sourceFile.isBlank()) ? sourceFile : "N/A";
+        this.platform = platform != null ? platform : "";
     }
 
     public String getId() {
@@ -97,6 +103,14 @@ public class ParamPayloadEntry {
 
     public void setSourceFile(String sourceFile) {
         this.sourceFile = (sourceFile != null && !sourceFile.isBlank()) ? sourceFile : "N/A";
+    }
+
+    public String getPlatform() {
+        return platform != null ? platform : "";
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform != null ? platform : "";
     }
 
     /**

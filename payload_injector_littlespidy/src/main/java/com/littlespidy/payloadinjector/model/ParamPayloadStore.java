@@ -43,7 +43,9 @@ public class ParamPayloadStore {
     public synchronized void reload() {
         Path jsonPath = resolveJsonPath();
         if (jsonPath == null || !Files.exists(jsonPath)) {
-            api.logging().logToOutput("[PayloadInjector] " + fileName + " not found at: " + jsonPath + " — list empty.");
+            if (api != null && api.logging() != null) {
+                api.logging().logToOutput("[PayloadInjector] " + fileName + " not found at: " + jsonPath + " — list empty.");
+            }
             entries.clear();
             notifyListeners();
             return;
@@ -68,15 +70,20 @@ public class ParamPayloadStore {
                             raw.description != null ? raw.description : "",
                             raw.enabled != null ? raw.enabled : true,
                             srcType,
-                            srcFile
+                            srcFile,
+                            raw.platform != null ? raw.platform : ""
                     ));
                 }
             }
             entries.clear();
             entries.addAll(loaded);
-            api.logging().logToOutput("[PayloadInjector] Loaded " + entries.size() + " payloads from " + jsonPath);
+            if (api != null && api.logging() != null) {
+                api.logging().logToOutput("[PayloadInjector] Loaded " + entries.size() + " payloads from " + jsonPath);
+            }
         } catch (Exception ex) {
-            api.logging().logToError("[PayloadInjector] Failed to parse " + fileName + ": " + ex.getMessage());
+            if (api != null && api.logging() != null) {
+                api.logging().logToError("[PayloadInjector] Failed to parse " + fileName + ": " + ex.getMessage());
+            }
             entries.clear();
         }
         notifyListeners();
@@ -85,7 +92,9 @@ public class ParamPayloadStore {
     public synchronized void save() {
         Path jsonPath = resolveJsonPath();
         if (jsonPath == null) {
-            api.logging().logToError("[PayloadInjector] Cannot save " + fileName + " — path unresolvable.");
+            if (api != null && api.logging() != null) {
+                api.logging().logToError("[PayloadInjector] Cannot save " + fileName + " — path unresolvable.");
+            }
             return;
         }
 
@@ -101,12 +110,17 @@ public class ParamPayloadStore {
                 r.enabled = e.isEnabled();
                 r.sourceType = e.getSourceType();
                 r.sourceFile = e.getSourceFile();
+                r.platform = e.getPlatform();
                 rawList.add(r);
             }
             Files.writeString(jsonPath, gson.toJson(rawList));
-            api.logging().logToOutput("[PayloadInjector] Saved " + entries.size() + " payloads to " + jsonPath);
+            if (api != null && api.logging() != null) {
+                api.logging().logToOutput("[PayloadInjector] Saved " + entries.size() + " payloads to " + jsonPath);
+            }
         } catch (Exception ex) {
-            api.logging().logToError("[PayloadInjector] Failed to save " + fileName + ": " + ex.getMessage());
+            if (api != null && api.logging() != null) {
+                api.logging().logToError("[PayloadInjector] Failed to save " + fileName + ": " + ex.getMessage());
+            }
         }
     }
 
@@ -196,5 +210,6 @@ public class ParamPayloadStore {
         Boolean enabled;
         String sourceType;
         String sourceFile;
+        String platform;
     }
 }
