@@ -24,6 +24,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **Param Payload Injector** | [📥 `param-payload-injector-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/param-payload-injector-littlespidy-1.0.0.jar) | Parameter-attributed payload injector (XSS & Angular CSTI) with reflection monitoring and context attribution |
 | **Active Scan Session Keeper** | [📥 `activescan-session-keeper-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/activescan-session-keeper-littlespidy-1.0.0.jar) | Active scan session timeout interceptor that pauses scan threads on session expiry, prompts for fresh cookies, and auto-retries failed checks |
 | **GWTMap** | [`gwtmap-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/gwtmap-littlespidy-1.0.0.jar) | GWT-RPC reverse engineering, permutation analysis, AST deserializer, automated fuzzer, Base64 long codec, and native Burp request editor tab |
+| **Request Smuggling Inspector** | `request-smuggling-inspector-littlespidy-1.0.0.jar` (build locally) | HTTP request smuggling payload injector — right-click CL.TE, TE.CL, TE.TE variants directly into Repeater |
 
 ---
 
@@ -155,9 +156,21 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Passive GWT Traffic Detector**: Background listener auto-detects `.nocache.js` and `.cache.js` endpoints passing through Burp Proxy.
 - **Interactive Deobfuscated Code Viewer**: In-Burp formatted, retabbed, and unicode-decoded (`\uXXXX`) JavaScript viewer with local disk backup (`Save / Backup Code to Disk...`).
 
+### 13. [Request Smuggling Inspector](file:///home/littlespidy/myextra/burpsuite-extensions/RequestSmugglingInspector_littlespidy)
+- **CL.TE Context Menu Action**: Right-click inside any Repeater request editor -> **Request Smuggling Inspector (littlespidy)** -> **CL.TE** to inject the classic Content-Length / Transfer-Encoding smuggling payload in-place.
+- **Smart Header Mutation**: Adds `Content-Length: 10` and `Transfer-Encoding: chunked` if absent, or updates them if already present - never duplicates headers.
+- **Chunked Body Injection**: Replaces the request body with `0\r\n\r\nHELLO` (10 bytes) - the chunked terminator plus `HELLO` as the smuggled prefix for the next request.
+- **Editor-Only Visibility**: The menu only appears when right-clicking inside a Message Editor (Repeater). Hidden in table-based contexts (Proxy History rows).
+
+### 14. [Payload Injector](file:///home/littlespidy/myextra/burpsuite-extensions/payload_injector_littlespidy)
+- **Unified 4-in-1 Payload Hub**: Combines **XSS**, **CSTI (Angular)**, **SQL Injection**, and **HTTP Request Smuggling** into a single extension with four dedicated, independent tabs.
+- **Dedicated Independent JSON Stores**: Each tab loads and saves strictly to its own file (`xss_payloads.json`, `csti_payloads.json`, `sql_payloads.json`, `http_request_smuggling_payloads.json`).
+- **In-App Payload Management**: Full UI support for adding (`Add Payload`), editing (`Edit Selected`), deleting (`Delete Selected`), and reloading (`Reload from JSON`) payloads on the fly without restarting Burp.
+- **Dynamic Context Menu Injection**: Injects parameterized payloads into all parameters, selected ranges, or dispatches directly to Repeater with armed payloads, plus direct in-editor HTTP request smuggling desync injection.
+
 ---
 
-## 🧩 Bambdas, BChecks & Utilities
+## Bambdas, BChecks and Utilities
 
 - **[`tools/`](file:///home/littlespidy/myextra/burpsuite/tools)**: Standalone desktop and security utilities, including [Mouse Jiggler](file:///home/littlespidy/myextra/burpsuite/tools/README.md) to keep displays awake during long-running audits and scans.
 - **[`bambdas/`](file:///home/littlespidy/myextra/burpsuite/bambdas)**: Custom actions, scan checks, filter scripts, and match-and-replace rules.
@@ -166,14 +179,14 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 
 ---
 
-## 🧠 Custom Agent Skills
+## Custom Agent Skills
 
 - **[`burp-suite-creator`](file:///home/littlespidy/myextra/burpsuite/.agents/skills/burp-suite-creator/SKILL.md)**: Generates Burp Suite tools, Montoya API extensions, Bambdas, and BChecks based on security testing scenarios.
 - **[`sensitive-pattern-extractor`](file:///home/littlespidy/myextra/burpsuite/.agents/skills/sensitive-pattern-extractor/SKILL.md)**: Catalog and refiners for sensitive tokens, cloud storage URLs, credentials, and keywords stored in **[`patterns.md`](file:///home/littlespidy/myextra/burpsuite/.agents/skills/sensitive-pattern-extractor/patterns.md)**.
 
 ---
 
-## ⚙️ Building
+## Building
 
 Each extension is Gradle-based (Java 17/21). To build any extension JAR:
 

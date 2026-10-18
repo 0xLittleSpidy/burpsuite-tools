@@ -1,0 +1,1208 @@
+[
+  {
+    "id": "weak-cryptography-owasp-0001",
+    "name": "MD5 hashes (weak)",
+    "template": "5f4dcc3b5aa765d61d8327deb882cf99  # password",
+    "description": "MD5 hashes (weak) probe from OWASP. Tests application handling of: 5f4dcc3b5aa765d61d8327deb882cf...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0002",
+    "name": "MD5 hashes (weak) #2",
+    "template": "e10adc3949ba59abbe56e057f20f883e  # 123456",
+    "description": "MD5 hashes (weak) probe from OWASP. Tests application handling of: e10adc3949ba59abbe56e057f20f88...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0003",
+    "name": "MD5 hashes (weak) #3",
+    "template": "25d55ad283aa400af464c76d713c07ad  # 12345678",
+    "description": "MD5 hashes (weak) probe from OWASP. Tests application handling of: 25d55ad283aa400af464c76d713c07...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0004",
+    "name": "MD5 hashes (weak) #4",
+    "template": "202cb962ac59075b964b07152d234b70  # 123",
+    "description": "MD5 hashes (weak) probe from OWASP. Tests application handling of: 202cb962ac59075b964b07152d234b...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0005",
+    "name": "SHA1 hashes (weak)",
+    "template": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8  # password",
+    "description": "SHA1 hashes (weak) probe from OWASP. Tests application handling of: 5baa61e4c9b93f3f0682250b6cf833...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0006",
+    "name": "SHA1 hashes (weak) #2",
+    "template": "7c4a8d09ca3762af61e59520943dc26494f8941b  # 123456",
+    "description": "SHA1 hashes (weak) probe from OWASP. Tests application handling of: 7c4a8d09ca3762af61e59520943dc2...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0007",
+    "name": "SHA1 hashes (weak) #3",
+    "template": "7c222fb2927d828af22f592134e8932480637c0d  # 12345678",
+    "description": "SHA1 hashes (weak) probe from OWASP. Tests application handling of: 7c222fb2927d828af22f592134e893...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0008",
+    "name": "Common encoded credentials",
+    "template": "YWRtaW46YWRtaW4=  # admin:admin (base64)",
+    "description": "Common encoded credentials probe from OWASP. Tests application handling of: YWRtaW46YWRtaW4=  # admin:admi...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0009",
+    "name": "Common encoded credentials #2",
+    "template": "cm9vdDpyb290  # root:root (base64)",
+    "description": "Common encoded credentials probe from OWASP. Tests application handling of: cm9vdDpyb290  # root:root (bas...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0010",
+    "name": "Common encoded credentials #3",
+    "template": "dGVzdDp0ZXN0  # test:test (base64)",
+    "description": "Common encoded credentials probe from OWASP. Tests application handling of: dGVzdDp0ZXN0  # test:test (bas...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0011",
+    "name": "Common API keys pattern (for detection testing)",
+    "template": "AKIA[0-9A-Z]{16}  # AWS Access Key pattern",
+    "description": "Common API keys pattern (for detection testing) probe from OWASP. Tests application handling of: AKIA[0-9A-Z]{16}  # AWS Access...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0012",
+    "name": "Common API keys pattern (for detection testing) #2",
+    "template": "[0-9a-zA-Z]{32}  # Generic 32-char key",
+    "description": "Common API keys pattern (for detection testing) probe from OWASP. Tests application handling of: [0-9a-zA-Z]{32}  # Generic 32-...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0013",
+    "name": "Common API keys pattern (for detection testing) #3",
+    "template": "ghp_[0-9a-zA-Z]{36}  # GitHub Personal Access Token pattern",
+    "description": "Common API keys pattern (for detection testing) probe from OWASP. Tests application handling of: ghp_[0-9a-zA-Z]{36}  # GitHub ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0014",
+    "name": "Common API keys pattern (for detection testing) #4",
+    "template": "sk_live_[0-9a-zA-Z]{24}  # Stripe Live Secret Key pattern",
+    "description": "Common API keys pattern (for detection testing) probe from OWASP. Tests application handling of: sk_live_[0-9a-zA-Z]{24}  # Str...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0015",
+    "name": "DES (Data Encryption Standard) - 56-bit key",
+    "template": "DES",
+    "description": "DES (Data Encryption Standard) - 56-bit key probe from OWASP. Tests application handling of: DES",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0016",
+    "name": "DES (Data Encryption Standard) - 56-bit key #2",
+    "template": "DES-CBC",
+    "description": "DES (Data Encryption Standard) - 56-bit key probe from OWASP. Tests application handling of: DES-CBC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0017",
+    "name": "DES (Data Encryption Standard) - 56-bit key #3",
+    "template": "DES-ECB",
+    "description": "DES (Data Encryption Standard) - 56-bit key probe from OWASP. Tests application handling of: DES-ECB",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0018",
+    "name": "DES (Data Encryption Standard) - 56-bit key #4",
+    "template": "DES-EDE",
+    "description": "DES (Data Encryption Standard) - 56-bit key probe from OWASP. Tests application handling of: DES-EDE",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0019",
+    "name": "DES (Data Encryption Standard) - 56-bit key #5",
+    "template": "DES-EDE-CBC",
+    "description": "DES (Data Encryption Standard) - 56-bit key probe from OWASP. Tests application handling of: DES-EDE-CBC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0020",
+    "name": "3DES with weak keys",
+    "template": "3DES",
+    "description": "3DES with weak keys probe from OWASP. Tests application handling of: 3DES",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0021",
+    "name": "3DES with weak keys #2",
+    "template": "DES-EDE3",
+    "description": "3DES with weak keys probe from OWASP. Tests application handling of: DES-EDE3",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0022",
+    "name": "3DES with weak keys #3",
+    "template": "DES-EDE3-CBC",
+    "description": "3DES with weak keys probe from OWASP. Tests application handling of: DES-EDE3-CBC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0023",
+    "name": "RC4 (Rivest Cipher 4)",
+    "template": "RC4",
+    "description": "RC4 (Rivest Cipher 4) probe from OWASP. Tests application handling of: RC4",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0024",
+    "name": "RC4 (Rivest Cipher 4) #2",
+    "template": "RC4-40",
+    "description": "RC4 (Rivest Cipher 4) probe from OWASP. Tests application handling of: RC4-40",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0025",
+    "name": "RC4 (Rivest Cipher 4) #3",
+    "template": "RC4-128",
+    "description": "RC4 (Rivest Cipher 4) probe from OWASP. Tests application handling of: RC4-128",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0026",
+    "name": "RC4 (Rivest Cipher 4) #4",
+    "template": "ARCFOUR",
+    "description": "RC4 (Rivest Cipher 4) probe from OWASP. Tests application handling of: ARCFOUR",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0027",
+    "name": "RC2",
+    "template": "RC2",
+    "description": "RC2 probe from OWASP. Tests application handling of: RC2",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0028",
+    "name": "RC2 #2",
+    "template": "RC2-40-CBC",
+    "description": "RC2 probe from OWASP. Tests application handling of: RC2-40-CBC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0029",
+    "name": "RC2 #3",
+    "template": "RC2-64-CBC",
+    "description": "RC2 probe from OWASP. Tests application handling of: RC2-64-CBC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0030",
+    "name": "RC2 #4",
+    "template": "RC2-CBC",
+    "description": "RC2 probe from OWASP. Tests application handling of: RC2-CBC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0031",
+    "name": "MD5 hash algorithm (broken)",
+    "template": "MD5",
+    "description": "MD5 hash algorithm (broken) probe from OWASP. Tests application handling of: MD5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0032",
+    "name": "MD5 hash algorithm (broken) #2",
+    "template": "MD5-SHA1",
+    "description": "MD5 hash algorithm (broken) probe from OWASP. Tests application handling of: MD5-SHA1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0033",
+    "name": "SHA1 hash algorithm (weak)",
+    "template": "SHA1",
+    "description": "SHA1 hash algorithm (weak) probe from OWASP. Tests application handling of: SHA1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0034",
+    "name": "SHA1 hash algorithm (weak) #2",
+    "template": "SHA-1",
+    "description": "SHA1 hash algorithm (weak) probe from OWASP. Tests application handling of: SHA-1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0035",
+    "name": "Weak RSA key sizes",
+    "template": "RSA-512",
+    "description": "Weak RSA key sizes probe from OWASP. Tests application handling of: RSA-512",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0036",
+    "name": "Weak RSA key sizes #2",
+    "template": "RSA-768",
+    "description": "Weak RSA key sizes probe from OWASP. Tests application handling of: RSA-768",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0037",
+    "name": "Weak RSA key sizes #3",
+    "template": "RSA-1024",
+    "description": "Weak RSA key sizes probe from OWASP. Tests application handling of: RSA-1024",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0038",
+    "name": "ECB mode (Electronic Codebook) - deterministic",
+    "template": "AES-128-ECB",
+    "description": "ECB mode (Electronic Codebook) - deterministic probe from OWASP. Tests application handling of: AES-128-ECB",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0039",
+    "name": "ECB mode (Electronic Codebook) - deterministic #2",
+    "template": "AES-192-ECB",
+    "description": "ECB mode (Electronic Codebook) - deterministic probe from OWASP. Tests application handling of: AES-192-ECB",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0040",
+    "name": "ECB mode (Electronic Codebook) - deterministic #3",
+    "template": "AES-256-ECB",
+    "description": "ECB mode (Electronic Codebook) - deterministic probe from OWASP. Tests application handling of: AES-256-ECB",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0041",
+    "name": "Weak padding schemes",
+    "template": "PKCS1-v1_5",
+    "description": "Weak padding schemes probe from OWASP. Tests application handling of: PKCS1-v1_5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0042",
+    "name": "Weak padding schemes #2",
+    "template": "PKCS#1 v1.5",
+    "description": "Weak padding schemes probe from OWASP. Tests application handling of: PKCS#1 v1.5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0043",
+    "name": "Null encryption",
+    "template": "NULL",
+    "description": "Null encryption probe from OWASP. Tests application handling of: NULL",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0044",
+    "name": "Null encryption #2",
+    "template": "eNULL",
+    "description": "Null encryption probe from OWASP. Tests application handling of: eNULL",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0045",
+    "name": "Null encryption #3",
+    "template": "NULL-MD5",
+    "description": "Null encryption probe from OWASP. Tests application handling of: NULL-MD5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0046",
+    "name": "Null encryption #4",
+    "template": "NULL-SHA",
+    "description": "Null encryption probe from OWASP. Tests application handling of: NULL-SHA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0047",
+    "name": "Export grade ciphers",
+    "template": "EXP-DES-CBC-SHA",
+    "description": "Export grade ciphers probe from OWASP. Tests application handling of: EXP-DES-CBC-SHA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0048",
+    "name": "Export grade ciphers #2",
+    "template": "EXP-RC2-CBC-MD5",
+    "description": "Export grade ciphers probe from OWASP. Tests application handling of: EXP-RC2-CBC-MD5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0049",
+    "name": "Export grade ciphers #3",
+    "template": "EXP-RC4-MD5",
+    "description": "Export grade ciphers probe from OWASP. Tests application handling of: EXP-RC4-MD5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0050",
+    "name": "Anonymous key exchange (no authentication)",
+    "template": "AECDH",
+    "description": "Anonymous key exchange (no authentication) probe from OWASP. Tests application handling of: AECDH",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0051",
+    "name": "Anonymous key exchange (no authentication) #2",
+    "template": "ADH",
+    "description": "Anonymous key exchange (no authentication) probe from OWASP. Tests application handling of: ADH",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0052",
+    "name": "Anonymous key exchange (no authentication) #3",
+    "template": "aNULL",
+    "description": "Anonymous key exchange (no authentication) probe from OWASP. Tests application handling of: aNULL",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0053",
+    "name": "Weak Diffie-Hellman",
+    "template": "DH-512",
+    "description": "Weak Diffie-Hellman probe from OWASP. Tests application handling of: DH-512",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0054",
+    "name": "Weak Diffie-Hellman #2",
+    "template": "DH-1024",
+    "description": "Weak Diffie-Hellman probe from OWASP. Tests application handling of: DH-1024",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0055",
+    "name": "CBC with weak MAC (BEAST/POODLE vulnerable)",
+    "template": "TLS_RSA_WITH_AES_128_CBC_SHA",
+    "description": "CBC with weak MAC (BEAST/POODLE vulnerable) probe from OWASP. Tests application handling of: TLS_RSA_WITH_AES_128_CBC_SHA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0056",
+    "name": "CBC with weak MAC (BEAST/POODLE vulnerable) #2",
+    "template": "TLS_RSA_WITH_AES_256_CBC_SHA",
+    "description": "CBC with weak MAC (BEAST/POODLE vulnerable) probe from OWASP. Tests application handling of: TLS_RSA_WITH_AES_256_CBC_SHA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0057",
+    "name": "CBC with weak MAC (BEAST/POODLE vulnerable) #3",
+    "template": "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
+    "description": "CBC with weak MAC (BEAST/POODLE vulnerable) probe from OWASP. Tests application handling of: TLS_RSA_WITH_3DES_EDE_CBC_SHA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0058",
+    "name": "SSL/TLS version issues",
+    "template": "SSLv2",
+    "description": "SSL/TLS version issues probe from OWASP. Tests application handling of: SSLv2",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0059",
+    "name": "SSL/TLS version issues #2",
+    "template": "SSLv3",
+    "description": "SSL/TLS version issues probe from OWASP. Tests application handling of: SSLv3",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0060",
+    "name": "SSL/TLS version issues #3",
+    "template": "TLSv1.0",
+    "description": "SSL/TLS version issues probe from OWASP. Tests application handling of: TLSv1.0",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0061",
+    "name": "SSL/TLS version issues #4",
+    "template": "TLSv1.1",
+    "description": "SSL/TLS version issues probe from OWASP. Tests application handling of: TLSv1.1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0062",
+    "name": "Weak cipher suites",
+    "template": "TLS_RSA_WITH_RC4_128_SHA",
+    "description": "Weak cipher suites probe from OWASP. Tests application handling of: TLS_RSA_WITH_RC4_128_SHA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0063",
+    "name": "Weak cipher suites #2",
+    "template": "TLS_RSA_WITH_RC4_128_MD5",
+    "description": "Weak cipher suites probe from OWASP. Tests application handling of: TLS_RSA_WITH_RC4_128_MD5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0064",
+    "name": "Weak cipher suites #3",
+    "template": "TLS_RSA_WITH_DES_CBC_SHA",
+    "description": "Weak cipher suites probe from OWASP. Tests application handling of: TLS_RSA_WITH_DES_CBC_SHA",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0065",
+    "name": "Weak cipher suites #4",
+    "template": "TLS_DH_anon_WITH_AES_128_CBC_SHA",
+    "description": "Weak cipher suites probe from OWASP. Tests application handling of: TLS_DH_anon_WITH_AES_128_CBC_S...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0066",
+    "name": "XOR cipher (trivial)",
+    "template": "XOR",
+    "description": "XOR cipher (trivial) probe from OWASP. Tests application handling of: XOR",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0067",
+    "name": "Caesar cipher",
+    "template": "ROT13",
+    "description": "Caesar cipher probe from OWASP. Tests application handling of: ROT13",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0068",
+    "name": "Caesar cipher #2",
+    "template": "ROT47",
+    "description": "Caesar cipher probe from OWASP. Tests application handling of: ROT47",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0069",
+    "name": "Vigenere cipher patterns",
+    "template": "VIGENERE",
+    "description": "Vigenere cipher patterns probe from OWASP. Tests application handling of: VIGENERE",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0070",
+    "name": "Predictable seeds",
+    "template": "PRNG with time() seed",
+    "description": "Predictable seeds probe from OWASP. Tests application handling of: PRNG with time() seed",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0071",
+    "name": "Predictable seeds #2",
+    "template": "Math.random()",
+    "description": "Predictable seeds probe from OWASP. Tests application handling of: Math.random()",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0072",
+    "name": "Predictable seeds #3",
+    "template": "rand()",
+    "description": "Predictable seeds probe from OWASP. Tests application handling of: rand()",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0073",
+    "name": "Predictable seeds #4",
+    "template": "srand(time())",
+    "description": "Predictable seeds probe from OWASP. Tests application handling of: srand(time())",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0074",
+    "name": "Weak key derivation functions",
+    "template": "PBKDF1",
+    "description": "Weak key derivation functions probe from OWASP. Tests application handling of: PBKDF1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0075",
+    "name": "Weak key derivation functions #2",
+    "template": "MD5-based KDF",
+    "description": "Weak key derivation functions probe from OWASP. Tests application handling of: MD5-based KDF",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0076",
+    "name": "Weak key derivation functions #3",
+    "template": "SHA1-based KDF",
+    "description": "Weak key derivation functions probe from OWASP. Tests application handling of: SHA1-based KDF",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0077",
+    "name": "Hardcoded encryption keys (testing patterns)",
+    "template": "key=00000000000000000000000000000000",
+    "description": "Hardcoded encryption keys (testing patterns) probe from OWASP. Tests application handling of: key=00000000000000000000000000...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0078",
+    "name": "Hardcoded encryption keys (testing patterns) #2",
+    "template": "key=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "description": "Hardcoded encryption keys (testing patterns) probe from OWASP. Tests application handling of: key=FFFFFFFFFFFFFFFFFFFFFFFFFF...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0079",
+    "name": "Hardcoded encryption keys (testing patterns) #3",
+    "template": "key=12345678901234567890123456789012",
+    "description": "Hardcoded encryption keys (testing patterns) probe from OWASP. Tests application handling of: key=12345678901234567890123456...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0080",
+    "name": "Hardcoded encryption keys (testing patterns) #4",
+    "template": "secretkey=admin",
+    "description": "Hardcoded encryption keys (testing patterns) probe from OWASP. Tests application handling of: secretkey=admin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0081",
+    "name": "Hardcoded encryption keys (testing patterns) #5",
+    "template": "encryptionKey=password",
+    "description": "Hardcoded encryption keys (testing patterns) probe from OWASP. Tests application handling of: encryptionKey=password",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0082",
+    "name": "Weak initialization vectors",
+    "template": "IV=00000000000000000000000000000000",
+    "description": "Weak initialization vectors probe from OWASP. Tests application handling of: IV=000000000000000000000000000...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0083",
+    "name": "Weak initialization vectors #2",
+    "template": "IV=11111111111111111111111111111111",
+    "description": "Weak initialization vectors probe from OWASP. Tests application handling of: IV=111111111111111111111111111...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0084",
+    "name": "Weak initialization vectors #3",
+    "template": "Fixed IV",
+    "description": "Weak initialization vectors probe from OWASP. Tests application handling of: Fixed IV",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0085",
+    "name": "Weak initialization vectors #4",
+    "template": "Reused IV",
+    "description": "Weak initialization vectors probe from OWASP. Tests application handling of: Reused IV",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0086",
+    "name": "Predictable salts",
+    "template": "salt=salt",
+    "description": "Predictable salts probe from OWASP. Tests application handling of: salt=salt",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0087",
+    "name": "Predictable salts #2",
+    "template": "salt=123456",
+    "description": "Predictable salts probe from OWASP. Tests application handling of: salt=123456",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0088",
+    "name": "Predictable salts #3",
+    "template": "salt=\"\"",
+    "description": "Predictable salts probe from OWASP. Tests application handling of: salt=\"\"",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0089",
+    "name": "Predictable salts #4",
+    "template": "No salt",
+    "description": "Predictable salts probe from OWASP. Tests application handling of: No salt",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0090",
+    "name": "MD5 collisions",
+    "template": "d131dd02c5e6eec4693d9a0698aff95c  # Collision pair 1",
+    "description": "MD5 collisions probe from OWASP. Tests application handling of: d131dd02c5e6eec4693d9a0698aff9...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0091",
+    "name": "MD5 collisions #2",
+    "template": "d131dd02c5e6eec4693d9a0698aff95c  # Collision pair 2",
+    "description": "MD5 collisions probe from OWASP. Tests application handling of: d131dd02c5e6eec4693d9a0698aff9...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0092",
+    "name": "Timing attack vulnerabilities",
+    "template": "String comparison without constant time",
+    "description": "Timing attack vulnerabilities probe from OWASP. Tests application handling of: String comparison without cons...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0093",
+    "name": "Timing attack vulnerabilities #2",
+    "template": "strcmp() without timing safety",
+    "description": "Timing attack vulnerabilities probe from OWASP. Tests application handling of: strcmp() without timing safety",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0094",
+    "name": "Padding oracle indicators",
+    "template": "PaddingException",
+    "description": "Padding oracle indicators probe from OWASP. Tests application handling of: PaddingException",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0095",
+    "name": "Padding oracle indicators #2",
+    "template": "Invalid padding",
+    "description": "Padding oracle indicators probe from OWASP. Tests application handling of: Invalid padding",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0096",
+    "name": "Padding oracle indicators #3",
+    "template": "Bad padding",
+    "description": "Padding oracle indicators probe from OWASP. Tests application handling of: Bad padding",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0097",
+    "name": "ECB detection patterns (identical blocks)",
+    "template": "Block1: 0123456789ABCDEF",
+    "description": "ECB detection patterns (identical blocks) probe from OWASP. Tests application handling of: Block1: 0123456789ABCDEF",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0098",
+    "name": "ECB detection patterns (identical blocks) #2",
+    "template": "Block2: 0123456789ABCDEF",
+    "description": "ECB detection patterns (identical blocks) probe from OWASP. Tests application handling of: Block2: 0123456789ABCDEF",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0099",
+    "name": "Weak HMAC",
+    "template": "HMAC-MD5",
+    "description": "Weak HMAC probe from OWASP. Tests application handling of: HMAC-MD5",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0100",
+    "name": "Weak HMAC #2",
+    "template": "HMAC-SHA1",
+    "description": "Weak HMAC probe from OWASP. Tests application handling of: HMAC-SHA1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0101",
+    "name": "CRC (not cryptographic)",
+    "template": "CRC32",
+    "description": "CRC (not cryptographic) probe from OWASP. Tests application handling of: CRC32",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0102",
+    "name": "CRC (not cryptographic) #2",
+    "template": "CRC16",
+    "description": "CRC (not cryptographic) probe from OWASP. Tests application handling of: CRC16",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0103",
+    "name": "CRC (not cryptographic) #3",
+    "template": "ADLER32",
+    "description": "CRC (not cryptographic) probe from OWASP. Tests application handling of: ADLER32",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0104",
+    "name": "Length extension attacks",
+    "template": "SHA-256 without HMAC",
+    "description": "Length extension attacks probe from OWASP. Tests application handling of: SHA-256 without HMAC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0105",
+    "name": "Length extension attacks #2",
+    "template": "SHA-512 without HMAC",
+    "description": "Length extension attacks probe from OWASP. Tests application handling of: SHA-512 without HMAC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0106",
+    "name": "Insecure modes of operation",
+    "template": "CTR without authentication",
+    "description": "Insecure modes of operation probe from OWASP. Tests application handling of: CTR without authentication",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0107",
+    "name": "Insecure modes of operation #2",
+    "template": "CBC without HMAC",
+    "description": "Insecure modes of operation probe from OWASP. Tests application handling of: CBC without HMAC",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0108",
+    "name": "Insecure modes of operation #3",
+    "template": "OFB mode",
+    "description": "Insecure modes of operation probe from OWASP. Tests application handling of: OFB mode",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0109",
+    "name": "Bit flipping attack vectors",
+    "template": "CBC mode tampering",
+    "description": "Bit flipping attack vectors probe from OWASP. Tests application handling of: CBC mode tampering",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0110",
+    "name": "Bit flipping attack vectors #2",
+    "template": "CFB mode tampering",
+    "description": "Bit flipping attack vectors probe from OWASP. Tests application handling of: CFB mode tampering",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0111",
+    "name": "Known weak parameters",
+    "template": "p=2  # Weak prime",
+    "description": "Known weak parameters probe from OWASP. Tests application handling of: p=2  # Weak prime",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0112",
+    "name": "Known weak parameters #2",
+    "template": "g=1  # Weak generator",
+    "description": "Known weak parameters probe from OWASP. Tests application handling of: g=1  # Weak generator",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0113",
+    "name": "Known weak parameters #3",
+    "template": "e=3  # Weak RSA exponent",
+    "description": "Known weak parameters probe from OWASP. Tests application handling of: e=3  # Weak RSA exponent",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0114",
+    "name": "Textbook RSA (no padding)",
+    "template": "RSA without OAEP",
+    "description": "Textbook RSA (no padding) probe from OWASP. Tests application handling of: RSA without OAEP",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0115",
+    "name": "Textbook RSA (no padding) #2",
+    "template": "RSA without PSS",
+    "description": "Textbook RSA (no padding) probe from OWASP. Tests application handling of: RSA without PSS",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0116",
+    "name": "Weak digital signatures",
+    "template": "DSA with k reuse",
+    "description": "Weak digital signatures probe from OWASP. Tests application handling of: DSA with k reuse",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0117",
+    "name": "Weak digital signatures #2",
+    "template": "ECDSA with k reuse",
+    "description": "Weak digital signatures probe from OWASP. Tests application handling of: ECDSA with k reuse",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0118",
+    "name": "Weak digital signatures #3",
+    "template": "DSA-SHA1",
+    "description": "Weak digital signatures probe from OWASP. Tests application handling of: DSA-SHA1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0119",
+    "name": "Certificate issues",
+    "template": "Self-signed certificates",
+    "description": "Certificate issues probe from OWASP. Tests application handling of: Self-signed certificates",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0120",
+    "name": "Certificate issues #2",
+    "template": "Expired certificates",
+    "description": "Certificate issues probe from OWASP. Tests application handling of: Expired certificates",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0121",
+    "name": "Certificate issues #3",
+    "template": "MD5 certificate signature",
+    "description": "Certificate issues probe from OWASP. Tests application handling of: MD5 certificate signature",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0122",
+    "name": "Certificate issues #4",
+    "template": "SHA1 certificate signature",
+    "description": "Certificate issues probe from OWASP. Tests application handling of: SHA1 certificate signature",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0123",
+    "name": "Java Cipher strings (weak)",
+    "template": "AES/ECB/NoPadding",
+    "description": "Java Cipher strings (weak) probe from OWASP. Tests application handling of: AES/ECB/NoPadding",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0124",
+    "name": "Java Cipher strings (weak) #2",
+    "template": "AES/ECB/PKCS5Padding",
+    "description": "Java Cipher strings (weak) probe from OWASP. Tests application handling of: AES/ECB/PKCS5Padding",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0125",
+    "name": "Java Cipher strings (weak) #3",
+    "template": "DES/ECB/PKCS5Padding",
+    "description": "Java Cipher strings (weak) probe from OWASP. Tests application handling of: DES/ECB/PKCS5Padding",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0126",
+    "name": "Java Cipher strings (weak) #4",
+    "template": "DESede/ECB/PKCS5Padding",
+    "description": "Java Cipher strings (weak) probe from OWASP. Tests application handling of: DESede/ECB/PKCS5Padding",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0127",
+    "name": "OpenSSL weak ciphers",
+    "template": "openssl enc -des",
+    "description": "OpenSSL weak ciphers probe from OWASP. Tests application handling of: openssl enc -des",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0128",
+    "name": "OpenSSL weak ciphers #2",
+    "template": "openssl enc -des3",
+    "description": "OpenSSL weak ciphers probe from OWASP. Tests application handling of: openssl enc -des3",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0129",
+    "name": "OpenSSL weak ciphers #3",
+    "template": "openssl enc -rc4",
+    "description": "OpenSSL weak ciphers probe from OWASP. Tests application handling of: openssl enc -rc4",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0130",
+    "name": "Bcrypt with low cost",
+    "template": "bcrypt cost < 10",
+    "description": "Bcrypt with low cost probe from OWASP. Tests application handling of: bcrypt cost < 10",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0131",
+    "name": "Bcrypt with low cost #2",
+    "template": "bcrypt rounds = 1",
+    "description": "Bcrypt with low cost probe from OWASP. Tests application handling of: bcrypt rounds = 1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0132",
+    "name": "Scrypt with weak parameters",
+    "template": "N=2^10 (too low)",
+    "description": "Scrypt with weak parameters probe from OWASP. Tests application handling of: N=2^10 (too low)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0133",
+    "name": "Scrypt with weak parameters #2",
+    "template": "r=1 (too low)",
+    "description": "Scrypt with weak parameters probe from OWASP. Tests application handling of: r=1 (too low)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  },
+  {
+    "id": "weak-cryptography-owasp-0134",
+    "name": "Scrypt with weak parameters #3",
+    "template": "p=1 (too low)",
+    "description": "Scrypt with weak parameters probe from OWASP. Tests application handling of: p=1 (too low)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "weak-crypto-payloads.txt"
+  }
+]

