@@ -354,30 +354,346 @@ public class SessionTabManager {
 
 ### Persistent Session Storage & State Recovery (Across Restarts)
 
-When an extension maintains multiple request session tabs, audit findings, fuzzer results, or custom configurations, testers expect their workspaces to persist seamlessly across extension reloads, uninstalls/re-adds, and Burp Suite restarts.
+Every Burp Suite extension must provide robust session storage capabilities so testers can pause and resume their work, preserve historical findings, retain custom tabs, baselines, and configuration data, and continue seamlessly across testing sessions.
 
 #### 1. Core Architecture Principles
-1. **Interactive Directory Prompt on Startup**:
-   - Detect if an active Burp project file (`.burp`) exists on disk (via command-line arguments `--project-file` or the Burp Suite Frame title). If detected, automatically use the project directory.
-   - If running in a Temporary Project (in-memory) or no remembered preference exists, prompt the user with a directory chooser dialog (`JFileChooser` set to `DIRECTORIES_ONLY`) asking where to store extension session data.
-   - Save the user-selected folder in Montoya API preferences:
-     `api.persistence().preferences().setString("extension_storage_dir", chosenDir.getAbsolutePath());`
-   - Provide a persistent indicator and button in the toolbar (`Storage: [folder] [Change Folder]`) allowing testers to view and switch the directory at any time without restarting Burp.
 
-2. **Debounced Atomic Auto-Save Engine**:
+1. **Mandatory Session Storage for Every Extension**:
+   - All extensions that collect findings, manage session tabs, store injected payloads, or maintain test results must implement persistent session storage.
+   - Testers must be able to preserve their complete testing context and continue with their data whenever they choose.
+
+2. **Explicit User Decision on Load (Strictly No Auto-Load by Default)**:
+   - **Never Load Silently by Default**: When the extension is loaded or reloaded into Burp Suite, it must **never** automatically or silently load a previous session file or create a file without user intervention.
+   - **User Choice on Startup**: The user must explicitly decide what to do every time the extension loads.
+   - Upon extension initialization, the extension displays an interactive modal startup prompt on the Swing EDT (`SwingUtilities.invokeLater`) asking how the user wishes to proceed:
+     - **Open Previous Session File**: Opens a file chooser dialog (`JFileChooser`) allowing the tester to select an existing session JSON file from disk to restore tabs, findings, baselines, and settings.
+     - **Create New Session File**: Prompts the user to specify the target directory (via `JFileChooser` set to `DIRECTORIES_ONLY`) and enter the session filename. The new session workspace is initialized and bound to that destination.
+     - **Start Temporary Session (Decide Later)**: Starts with a clean, in-memory workspace without binding to a file immediately. The user can bind, save, or export a session file at any time later from the toolbar.
+
+3. **Explicit Directory Selection for New Sessions**:
+   - When creating a new session file, the user must explicitly specify the directory.
+   - The extension must never write session files into arbitrary, hidden, or unexpected system folders.
+   - Previously selected directories may be remembered in Montoya preferences (`api.persistence().preferences().setString(...)`) strictly as the default starting directory in the file chooser dialog, but never used to silently auto-load data.
+
+4. **Toolbar Session Management Controls**:
+   - The top toolbar of the extension must display persistent session controls:
+     - **Active Session Indicator**: Displays the current session file path or `[Temporary / In-Memory]`.
+     - **[New Session]**: Allows creating a new session file (prompting for save confirmation if dirty, then prompting for directory and filename).
+     - **[Open Session]**: Opens an existing session file via `JFileChooser`.
+     - **[Save As...]**: Exports or binds the current session to a new file location.
+     - **[Save Now]**: Immediately flushes in-memory data to the bound session file synchronously.
+
+5. **Debounced Atomic Auto-Save Engine**:
    - Never block the Swing Event Dispatch Thread (EDT) or trigger heavy disk I/O on every table event.
-   - Use a single-threaded daemon `ScheduledExecutorService` with a 1500-2000ms debounce delay.
+   - When a session file is bound, auto-save state changes using a single-threaded daemon `ScheduledExecutorService` with a 1500-2000ms debounce delay.
    - Always write data to a temporary file (`<filename>.tmp`) first, then commit via atomic replacement (`StandardCopyOption.ATOMIC_MOVE` with fallback to `REPLACE_EXISTING`) to guarantee zero file corruption.
 
-3. **High-Fidelity HTTP Message Serialization**:
+6. **High-Fidelity HTTP Message Serialization**:
    - Montoya API `HttpRequest` and `HttpResponse` objects cannot be blindly serialized directly by standard reflection serializers.
    - Convert raw message bytes to Base64 (`Base64.getEncoder().encodeToString(req.toByteArray().getBytes())`).
    - Store the associated `HttpService` metadata (host, port, and secure boolean) alongside the Base64 payload.
    - On deserialization, rebuild exact byte-accurate messages using `HttpRequest.httpRequest(service, ByteArray.byteArray(bytes))` and `HttpResponse.httpResponse(ByteArray.byteArray(bytes))`.
 
-4. **Lifecycle Hooks**:
-   - On extension initialization: Resolve directory -> deserialize JSON -> reconstruct all session sub-tabs with their original titles, baselines, and results.
-   - On extension unload: Register `api.extension().registerUnloadingHandler(...)` to perform an immediate synchronous save (`saveSync`) before Burp unloads the extension.
+7. **Lifecycle Unloading Hook**:
+   - Register `api.extension().registerUnloadingHandler(...)` to perform an immediate synchronous save (`saveSync`) before Burp unloads the extension, but only if an active session file is bound.
+   - Release background executor threads cleanly on unload.
+
+#### 2. Implementation Pattern: Startup Session Chooser Dialog
+
+Display this dialog on the Swing EDT during extension initialization. Never load any session file prior to the user making an explicit choice:
+
+```java
+// Created with the help of an AI Agent and littlespidy.
+package com.littlespidy.common.session;
+
+import burp.api.montoya.MontoyaApi;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.io.File;
+
+public class SessionStartupDialog {
+
+    public enum StartupAction {
+        OPEN_EXISTING,
+        CREATE_NEW,
+        TEMPORARY
+    }
+
+    public record StartupResult(StartupAction action, File sessionFile) {}
+
+    public static StartupResult promptUser(MontoyaApi api, Component parent) {
+        String lastDir = api.persistence().preferences().getString("extension_last_session_dir");
+        File defaultDir = (lastDir != null && !lastDir.isBlank()) ? new File(lastDir) : new File(System.getProperty("user.home"));
+
+        String[] options = {"Open Previous Session", "Create New Session", "Start Temporary Session"};
+        int choice = JOptionPane.showOptionDialog(
+            parent,
+            "Select how you would like to initialize your session:\n\n" +
+            "- Open Previous Session: Load saved results, tabs, and configurations from disk.\n" +
+            "- Create New Session: Specify a directory to store and auto-save new session data.\n" +
+            "- Start Temporary Session: Work in-memory without binding to a file.\n",
+            "Extension Session Storage Initialization",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+
+        if (choice == 0) {
+            // Option 1: Open Previous Session
+            JFileChooser chooser = new JFileChooser(defaultDir);
+            chooser.setDialogTitle("Select Existing Session File to Open");
+            chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+            int fileRes = chooser.showOpenDialog(parent);
+            if (fileRes == JFileChooser.APPROVE_OPTION) {
+                File selected = chooser.getSelectedFile();
+                api.persistence().preferences().setString("extension_last_session_dir", selected.getParent());
+                return new StartupResult(StartupAction.OPEN_EXISTING, selected);
+            }
+        } else if (choice == 1) {
+            // Option 2: Create New Session - User must specify the directory
+            JFileChooser dirChooser = new JFileChooser(defaultDir);
+            dirChooser.setDialogTitle("Select Directory For New Session File");
+            dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int dirRes = dirChooser.showOpenDialog(parent);
+            if (dirRes == JFileChooser.APPROVE_OPTION) {
+                File chosenDir = dirChooser.getSelectedFile();
+                api.persistence().preferences().setString("extension_last_session_dir", chosenDir.getAbsolutePath());
+
+                String fileName = JOptionPane.showInputDialog(
+                    parent,
+                    "Enter filename for the new session:",
+                    "session_data.json"
+                );
+
+                if (fileName != null && !fileName.isBlank()) {
+                    if (!fileName.toLowerCase().endsWith(".json")) {
+                        fileName = fileName + ".json";
+                    }
+                    File newFile = new File(chosenDir, fileName);
+                    return new StartupResult(StartupAction.CREATE_NEW, newFile);
+                }
+            }
+        }
+
+        // Option 3 or cancelled dialog: Start Temporary Session
+        return new StartupResult(StartupAction.TEMPORARY, null);
+    }
+}
+```
+
+#### 3. Implementation Pattern: SessionManager & Toolbar Integration
+
+```java
+// Created with the help of an AI Agent and littlespidy.
+package com.littlespidy.common.session;
+
+import burp.api.montoya.MontoyaApi;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+public class SessionManager {
+    private final MontoyaApi api;
+    private final SessionPersistenceCallback callback;
+    private final ScheduledExecutorService autoSaveExecutor;
+    private final JLabel sessionStatusLabel;
+
+    private File activeSessionFile;
+    private ScheduledFuture<?> pendingSaveTask;
+    private boolean isDirty = false;
+
+    public interface SessionPersistenceCallback {
+        String serializeSessionToJson();
+        void deserializeSessionFromJson(String json);
+        void resetSessionState();
+    }
+
+    public SessionManager(MontoyaApi api, SessionPersistenceCallback callback) {
+        this.api = api;
+        this.callback = callback;
+        this.sessionStatusLabel = new JLabel("Session: [Temporary / In-Memory]");
+        this.sessionStatusLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        this.autoSaveExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "Extension-Session-AutoSave-Thread");
+            t.setDaemon(true);
+            return t;
+        });
+
+        // Register unload handler for final synchronous flush
+        api.extension().registerUnloadingHandler(this::handleUnload);
+    }
+
+    public void initializeOnStartup(Component parent) {
+        SessionStartupDialog.StartupResult result = SessionStartupDialog.promptUser(api, parent);
+        switch (result.action()) {
+            case OPEN_EXISTING -> openSessionFile(result.sessionFile());
+            case CREATE_NEW -> createNewSessionFile(result.sessionFile());
+            case TEMPORARY -> startTemporarySession();
+        }
+    }
+
+    public synchronized void markDirty() {
+        this.isDirty = true;
+        if (activeSessionFile == null) return;
+
+        if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
+            pendingSaveTask.cancel(false);
+        }
+        pendingSaveTask = autoSaveExecutor.schedule(this::saveSync, 1500, TimeUnit.MILLISECONDS);
+    }
+
+    public synchronized void saveSync() {
+        if (activeSessionFile == null || !isDirty) return;
+        try {
+            String json = callback.serializeSessionToJson();
+            File tempFile = new File(activeSessionFile.getAbsolutePath() + ".tmp");
+            Files.writeString(tempFile.toPath(), json);
+            try {
+                Files.move(tempFile.toPath(), activeSessionFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception e) {
+                Files.move(tempFile.toPath(), activeSessionFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            isDirty = false;
+        } catch (Exception ex) {
+            api.logging().logToError("Failed to save session to " + activeSessionFile.getAbsolutePath() + ": " + ex.getMessage());
+        }
+    }
+
+    public void openSessionFile(File file) {
+        if (file == null || !file.exists()) return;
+        try {
+            String json = Files.readString(file.toPath());
+            callback.deserializeSessionFromJson(json);
+            this.activeSessionFile = file;
+            this.isDirty = false;
+            updateStatusLabel();
+            api.logging().logToOutput("Session successfully loaded: " + file.getAbsolutePath());
+        } catch (Exception ex) {
+            api.logging().logToError("Failed to load session from " + file.getAbsolutePath() + ": " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error loading session file:\n" + ex.getMessage(), "Session Load Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void createNewSessionFile(File file) {
+        if (file == null) return;
+        callback.resetSessionState();
+        this.activeSessionFile = file;
+        this.isDirty = true;
+        saveSync();
+        updateStatusLabel();
+        api.logging().logToOutput("New session created and bound: " + file.getAbsolutePath());
+    }
+
+    public void startTemporarySession() {
+        callback.resetSessionState();
+        this.activeSessionFile = null;
+        this.isDirty = false;
+        updateStatusLabel();
+        api.logging().logToOutput("Temporary in-memory session started.");
+    }
+
+    private void updateStatusLabel() {
+        SwingUtilities.invokeLater(() -> {
+            if (activeSessionFile != null) {
+                sessionStatusLabel.setText("Session: " + activeSessionFile.getName() + " (" + activeSessionFile.getParent() + ")");
+                sessionStatusLabel.setToolTipText(activeSessionFile.getAbsolutePath());
+            } else {
+                sessionStatusLabel.setText("Session: [Temporary / In-Memory]");
+                sessionStatusLabel.setToolTipText("Data is currently in-memory. Use 'Save As...' to bind to a file.");
+            }
+        });
+    }
+
+    public JPanel createSessionToolbarComponent(Component parent) {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+
+        JButton newBtn = new JButton("New Session");
+        newBtn.addActionListener(e -> {
+            if (isDirty && activeSessionFile != null) {
+                int res = JOptionPane.showConfirmDialog(parent, "Save current session before creating a new one?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
+                if (res == JOptionPane.YES_OPTION) saveSync();
+                else if (res == JOptionPane.CANCEL_OPTION) return;
+            }
+
+            JFileChooser dirChooser = new JFileChooser(getLastDirectory());
+            dirChooser.setDialogTitle("Select Directory For New Session");
+            dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            if (dirChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+                File dir = dirChooser.getSelectedFile();
+                api.persistence().preferences().setString("extension_last_session_dir", dir.getAbsolutePath());
+                String name = JOptionPane.showInputDialog(parent, "Enter session filename:", "session.json");
+                if (name != null && !name.isBlank()) {
+                    if (!name.toLowerCase().endsWith(".json")) name += ".json";
+                    createNewSessionFile(new File(dir, name));
+                }
+            }
+        });
+
+        JButton openBtn = new JButton("Open Session");
+        openBtn.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser(getLastDirectory());
+            chooser.setDialogTitle("Select Session File to Open");
+            chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+            if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+                File sel = chooser.getSelectedFile();
+                api.persistence().preferences().setString("extension_last_session_dir", sel.getParent());
+                openSessionFile(sel);
+            }
+        });
+
+        JButton saveAsBtn = new JButton("Save As...");
+        saveAsBtn.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser(getLastDirectory());
+            chooser.setDialogTitle("Save Session As");
+            chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+            if (chooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
+                File sel = chooser.getSelectedFile();
+                if (!sel.getName().toLowerCase().endsWith(".json")) {
+                    sel = new File(sel.getParentFile(), sel.getName() + ".json");
+                }
+                this.activeSessionFile = sel;
+                this.isDirty = true;
+                saveSync();
+                updateStatusLabel();
+            }
+        });
+
+        panel.add(sessionStatusLabel);
+        panel.add(newBtn);
+        panel.add(openBtn);
+        panel.add(saveAsBtn);
+        return panel;
+    }
+
+    private File getLastDirectory() {
+        String lastDir = api.persistence().preferences().getString("extension_last_session_dir");
+        if (lastDir != null && !lastDir.isBlank()) {
+            File dir = new File(lastDir);
+            if (dir.exists()) return dir;
+        }
+        return new File(System.getProperty("user.home"));
+    }
+
+    private void handleUnload() {
+        if (activeSessionFile != null && isDirty) {
+            saveSync();
+        }
+        autoSaveExecutor.shutdownNow();
+    }
+}
+```
 
 ### Collapsible Filter Sidebar
 

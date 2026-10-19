@@ -196,28 +196,33 @@ Whenever an extension spawns dynamic session tabs (e.g., when a user sends an HT
    - Pressing `Escape` cancels the edit without changing the title.
    - Focus loss (`focusLost`) automatically commits or cancels cleanly.
 
-### 10. Persistent Session Storage & State Recovery (Zero Data Loss Across Restarts)
+### 10. Persistent Session Storage & State Recovery (Mandatory, No Auto-Load By Default)
 
-Whenever an extension manages user sessions, sub-tabs, inspection results, or audit state:
+All extensions must implement persistent session storage so testers can resume and continue with their data whenever needed:
 
-1. **Prompt on Extension Load**:
-   - On initialization, resolve the storage folder:
-     a) If an active Burp project (`.burp`) is detected, automatically use the project directory.
-     b) If running in a temporary project or no remembered preference exists, prompt the user with a directory chooser dialog (`JFileChooser` with `DIRECTORIES_ONLY`) asking where to store session data.
-     c) Persist the resolved path in Montoya preferences (`api.persistence().preferences().setString(KEY, path)`).
-     d) Provide a `Storage: [folder] [Change Folder]` indicator in the extension toolbar so testers can view and switch directories at any time.
+1. **Strictly No Auto-Load By Default (User Decides On Load)**:
+   - When an extension is loaded or reloaded, it must **never** automatically or silently load a previous session file.
+   - The user must explicitly decide what to do every time the extension is loaded.
+   - On initialization, display an interactive startup modal dialog (`JOptionPane.showOptionDialog` on the Swing EDT) asking the user to choose:
+     a) **Open Previous Session**: Opens a `JFileChooser` to select an existing session JSON file from disk to restore findings, tabs, and configurations.
+     b) **Create New Session**: Prompts the user to specify the target directory (`JFileChooser` with `DIRECTORIES_ONLY`) and enter the session filename. The new session is initialized and bound to that destination.
+     c) **Start Temporary Session**: Starts with a clean in-memory workspace without binding immediately to a file. The user can bind/save to a session file at any time later.
 
-2. **Debounced Atomic Auto-Save**:
-   - Perform asynchronous auto-saves debounced by 1500-2000ms using a single-thread `ScheduledExecutorService`.
-   - Serialize all sub-tabs, custom names, baseline requests/responses, strategy options, and results tables to JSON.
-   - For `HttpRequest` and `HttpResponse`, serialize raw byte arrays to Base64 along with `HttpService` host, port, and secure flag to guarantee 100% byte-accurate reconstruction.
+2. **Directory Specification for New Sessions**:
+   - For new session files, the user must explicitly mention/select the directory. Never write to arbitrary or hidden locations without user consent.
+
+3. **Persistent Toolbar Session Controls**:
+   - Expose session management directly on the top toolbar:
+     - Live indicator: `Session: <filename> (<folder>)` or `Session: [Temporary / In-Memory]`.
+     - Action buttons: `[New Session]`, `[Open Session]`, `[Save As...]`.
+
+4. **Debounced Atomic Auto-Save Engine**:
+   - Perform asynchronous auto-saves debounced by 1500-2000ms using a single-thread daemon `ScheduledExecutorService` whenever state changes, provided an active session file is bound.
+   - For `HttpRequest` and `HttpResponse`, serialize raw bytes to Base64 along with `HttpService` host, port, and secure flag to guarantee byte-accurate reconstruction.
    - Always write to a `.tmp` file first and perform an atomic replace (`Files.move(..., ATOMIC_MOVE, REPLACE_EXISTING)`) to prevent file corruption.
 
-3. **Clean Shutdown Hook**:
-   - Register `api.extension().registerUnloadingHandler(...)` to perform a synchronous final save before the extension is unloaded or Burp is closed.
-
-4. **Auto-Reload on Startup**:
-   - After resolving the storage directory on initialization, automatically deserialize the session file and restore all sub-tabs, results, and UI states.
+5. **Clean Shutdown Hook**:
+   - Register `api.extension().registerUnloadingHandler(...)` to perform a synchronous final save before the extension is unloaded or Burp is closed (if a session file is bound).
 
 ## Output and Saving
 
