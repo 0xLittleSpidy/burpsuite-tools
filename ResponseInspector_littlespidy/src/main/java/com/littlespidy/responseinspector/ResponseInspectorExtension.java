@@ -40,19 +40,13 @@ public class ResponseInspectorExtension implements BurpExtension {
         PersistentStorageManager storageManager = new PersistentStorageManager(api);
         scanEngine.setStorageManager(storageManager);
 
-        ResponseInspectorTab mainTab = new ResponseInspectorTab(api, scanEngine);
+        ResponseInspectorTab mainTab = new ResponseInspectorTab(api, scanEngine, storageManager);
         storageManager.bindEngines(scanEngine, mainTab.getDomainManager());
 
-        // Check if project is temporary and prompt user if unconfigured
-        storageManager.promptUserIfTemporaryProject(null);
-
-        // Load stored data from disk and populate view
-        int loadedFindings = storageManager.loadData(scanEngine, mainTab.getDomainManager());
-        if (loadedFindings > 0) {
-            mainTab.refreshAllTabs();
-        }
-
         api.userInterface().registerSuiteTab("Response Inspector", mainTab);
+
+        // Interactive Startup Prompt: Never load data by default. User explicitly chooses session option.
+        SwingUtilities.invokeLater(() -> storageManager.initializeSessionOnStartup(mainTab, mainTab::refreshAllTabs));
 
         // 1. Live Repeater HTTP Handler: collects responses sent from Burp Repeater
         api.http().registerHttpHandler(new HttpHandler() {
@@ -75,12 +69,13 @@ public class ResponseInspectorExtension implements BurpExtension {
             }
         });
 
-        // 2. Suite-wide Context Menu: "Send to Response Inspector"
+        // 2. Suite-wide Context Menu: "Send to Response Inspector (Analyze File)"
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
             @Override
             public List<Component> provideMenuItems(ContextMenuEvent event) {
                 List<Component> menuItems = new ArrayList<>();
-                JMenuItem sendItem = new JMenuItem("Send to Response Inspector");
+                JMenuItem sendItem = new JMenuItem("Send to Response Inspector (Analyze File)");
+                sendItem.setToolTipText("Automatically inspect response body or file content for sensitive data");
                 sendItem.addActionListener(e -> {
                     List<HttpRequestResponse> items = new ArrayList<>();
                     if (event.messageEditorRequestResponse().isPresent()) {
@@ -99,6 +94,7 @@ public class ResponseInspectorExtension implements BurpExtension {
                         }
                         final int findingsCount = addedCount;
                         mainTab.refreshAllTabs();
+                        storageManager.scheduleAutoSave();
                         api.logging().logToOutput("[Response Inspector] Scanned " + items.size() + " items from context menu. New findings: " + findingsCount);
                     }
                 });
@@ -109,16 +105,16 @@ public class ResponseInspectorExtension implements BurpExtension {
 
         api.extension().registerUnloadingHandler(() -> {
             storageManager.shutdown();
-            api.logging().logToOutput("Response Inspector unloaded. Stored state flushed to disk.");
+            api.logging().logToOutput("Response Inspector unloaded. Stored state flushed to disk if session bound.");
         });
 
         api.logging().logToOutput("==================================================");
         api.logging().logToOutput("Response Inspector extension loaded successfully!");
         api.logging().logToOutput("Created with the help of an AI Agent and littlespidy.");
+        api.logging().logToOutput("Session Storage: Interactive on startup. Offboarding enabled.");
         api.logging().logToOutput("Tabs: Passwords | PII, Network & Paths | Errors | Secrets | Comments");
-        api.logging().logToOutput("Triggers: On-demand via 'Load Proxy' and 'Load from Repeater' buttons");
-        api.logging().logToOutput("Filters: JS, CSS, PNG, images, fonts, and static media files excluded from loading.");
-        api.logging().logToOutput("Inspection: Strictly analyzes response bodies to eliminate header false positives.");
+        api.logging().logToOutput("Triggers: On-demand via 'Load Proxy', 'Load from Repeater', and 'Analyze File...'");
+        api.logging().logToOutput("Context Menu: 'Send to Response Inspector (Analyze File)' active.");
         api.logging().logToOutput("==================================================");
     }
 }

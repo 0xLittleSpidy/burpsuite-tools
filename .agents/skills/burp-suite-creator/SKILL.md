@@ -211,10 +211,11 @@ All extensions must implement persistent session storage so testers can resume a
 2. **Directory Specification for New Sessions**:
    - For new session files, the user must explicitly mention/select the directory. Never write to arbitrary or hidden locations without user consent.
 
-3. **Persistent Toolbar Session Controls**:
+3. **Persistent Toolbar Session Controls & Offboarding**:
    - Expose session management directly on the top toolbar:
      - Live indicator: `Session: <filename> (<folder>)` or `Session: [Temporary / In-Memory]`.
-     - Action buttons: `[New Session]`, `[Open Session]`, `[Save As...]`.
+     - Action buttons: `[New Session]`, `[Open Session]`, `[Offboard Session]`, `[Save As...]`.
+   - **Session Offboarding**: Once a user has onboarded a session JSON file, provide an **Offboard Session** action to unbind the active file (prompting to save any unsaved changes first) and clear all in-memory findings and tables, restoring the extension to a clean, fresh state without restarting Burp.
 
 4. **Debounced Atomic Auto-Save Engine**:
    - Perform asynchronous auto-saves debounced by 1500-2000ms using a single-thread daemon `ScheduledExecutorService` whenever state changes, provided an active session file is bound.

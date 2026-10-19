@@ -7,6 +7,8 @@ import burp.api.montoya.http.HttpService;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.littlespidy.responseinspector.engine.PasswordScanner;
 import com.littlespidy.responseinspector.engine.ResponseScanEngine;
 import com.littlespidy.responseinspector.model.FindingCategory;
@@ -15,12 +17,14 @@ import com.littlespidy.responseinspector.model.InScopeDomainManager;
 import com.littlespidy.responseinspector.model.InspectorDataStore;
 import com.littlespidy.responseinspector.model.SecretClassification;
 import com.littlespidy.responseinspector.model.SecretClassificationManager;
+import com.littlespidy.responseinspector.storage.SessionStateDTO_littlespidy.*;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,28 +36,27 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Manages persistent storage of Response Inspector data so that findings,
- * in-scope domains, passwords, and secret classifications persist across
- * Burp Suite application restarts and extension reinstallation.
+ * Manages persistent session storage, state recovery, and session offboarding
+ * for Response Inspector across extension reloads and Burp Suite restarts.
  *
- * Default storage directory: ~/.BurpSuite/response-inspector
- * If project is temporary or lacks permanent storage, prompts user to specify/confirm.
- * Data persists across restarts/reinstalls unless the user explicitly chooses to delete it.
+ * Adheres strictly to the Extension Architecture standard:
+ * 1. Never loads a previous session by default.
+ * 2. Prompts user on load (Open Previous vs Create New with directory vs Temporary).
+ * 3. Provides clean session offboarding to restore fresh extension state at any time.
+ * 4. High-fidelity JSON persistence with Base64 HTTP message preservation.
+ * 5. Debounced atomic auto-save engine.
  */
 public class PersistentStorageManager {
 
     public static final String PREF_STORAGE_DIR = "response_inspector_storage_dir";
-    private static final int MAGIC_HEADER = 0x52494644; // "RIFD"
-    private static final int FORMAT_VERSION = 1;
-
-    private static final String FINDINGS_FILE = "findings.dat";
-    private static final String CONFIG_FILE = "config.properties";
+    public static final String DEFAULT_SESSION_FILENAME = "response_inspector_session.json";
 
     private final MontoyaApi api;
-    private volatile File storageDirectory;
+    private final Gson gson;
+    private volatile File activeSessionFile = null;
 
     private final ScheduledExecutorService autoSaveExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread t = new Thread(r, "ResponseInspector-PersistentStorage");
+        Thread t = new Thread(r, "ResponseInspector-SessionAutoSave");
         t.setDaemon(true);
         return t;
     });
@@ -63,182 +66,13 @@ public class PersistentStorageManager {
     private ResponseScanEngine boundScanEngine = null;
     private InScopeDomainManager boundDomainManager = null;
 
+    private final JLabel sessionStatusLabel;
+
     public PersistentStorageManager(MontoyaApi api) {
         this.api = api;
-        resolveStorageDirectory();
-    }
-
-    /**
-     * Resolves storage directory from user preferences, or default directory within Burp Suite.
-     */
-    public synchronized void resolveStorageDirectory() {
-        String savedPath = null;
-        if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
-            try {
-                savedPath = api.persistence().preferences().getString(PREF_STORAGE_DIR);
-            } catch (Throwable ignored) {}
-        }
-
-        if (savedPath != null && !savedPath.trim().isEmpty()) {
-            File f = new File(savedPath.trim());
-            if (f.exists() || f.mkdirs()) {
-                this.storageDirectory = f;
-                return;
-            }
-        }
-
-        // Default: dedicated directory within Burp Suite's directory
-        File defaultDir = getDefaultStorageDirectory();
-        defaultDir.mkdirs();
-        this.storageDirectory = defaultDir;
-    }
-
-    /**
-     * Returns the dedicated storage directory within Burp Suite's directory (~/.BurpSuite/response-inspector).
-     */
-    public static File getDefaultStorageDirectory() {
-        String userHome = System.getProperty("user.home", ".");
-        File burpDir = new File(userHome, ".BurpSuite");
-        return new File(burpDir, "response-inspector");
-    }
-
-    /**
-     * Checks if the current Burp project is temporary or does not have a permanent disk location.
-     */
-    public boolean isTemporaryProject() {
-        if (api == null) {
-            return true;
-        }
-        try {
-            java.lang.reflect.Method projectMethod = api.getClass().getMethod("project");
-            Object projectObj = projectMethod.invoke(api);
-            if (projectObj == null) {
-                return true;
-            }
-            java.lang.reflect.Method nameMethod = projectObj.getClass().getMethod("name");
-            Object nameObj = nameMethod.invoke(projectObj);
-            if (nameObj == null) {
-                return true;
-            }
-            String name = nameObj.toString();
-            if (name.isBlank()
-                    || name.equalsIgnoreCase("temporary")
-                    || name.equalsIgnoreCase("temporary project")
-                    || name.equalsIgnoreCase("untitled")) {
-                return true;
-            }
-            File f = new File(name);
-            if (!f.exists() && !name.toLowerCase().endsWith(".burp")) {
-                return true;
-            }
-            return false;
-        } catch (Throwable t) {
-            return true;
-        }
-    }
-
-    /**
-     * If the project is temporary and storage location has not been explicitly configured yet,
-     * asks the user where the data should be stored.
-     */
-    public void promptUserIfTemporaryProject(Window parent) {
-        if (GraphicsEnvironment.isHeadless()) {
-            return;
-        }
-
-        boolean alreadyConfigured = false;
-        if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
-            try {
-                String saved = api.persistence().preferences().getString(PREF_STORAGE_DIR);
-                if (saved != null && !saved.isBlank()) {
-                    alreadyConfigured = true;
-                }
-            } catch (Throwable ignored) {}
-        }
-
-        if (!alreadyConfigured && isTemporaryProject()) {
-            SwingUtilities.invokeLater(() -> showTemporaryProjectConfigDialog(parent));
-        }
-    }
-
-    private void showTemporaryProjectConfigDialog(Window parent) {
-        JDialog dialog = new JDialog(parent, "Persistent Storage Configuration", Dialog.ModalityType.APPLICATION_MODAL);
-        dialog.setLayout(new BorderLayout(12, 12));
-        dialog.setSize(620, 260);
-        dialog.setLocationRelativeTo(parent);
-
-        JPanel content = new JPanel(new BorderLayout(10, 10));
-        content.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-
-        JLabel info = new JLabel("<html><b>The current Burp project is temporary or does not have a permanent storage location.</b><br><br>"
-                + "Response Inspector ensures your findings, secret classifications, and configurations are preserved "
-                + "across restarts and extension reinstalls.<br><br>"
-                + "Please specify or confirm the persistent storage directory:</html>");
-        content.add(info, BorderLayout.NORTH);
-
-        JPanel pathRow = new JPanel(new BorderLayout(8, 0));
-        File defaultDir = getDefaultStorageDirectory();
-        JTextField pathField = new JTextField(storageDirectory != null ? storageDirectory.getAbsolutePath() : defaultDir.getAbsolutePath());
-        JButton browseBtn = new JButton("Browse...");
-        browseBtn.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser(pathField.getText());
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.setDialogTitle("Select Persistent Storage Directory");
-            if (chooser.showOpenDialog(dialog) == JFileChooser.APPROVE_OPTION) {
-                pathField.setText(chooser.getSelectedFile().getAbsolutePath());
-            }
-        });
-
-        pathRow.add(pathField, BorderLayout.CENTER);
-        pathRow.add(browseBtn, BorderLayout.EAST);
-        content.add(pathRow, BorderLayout.CENTER);
-
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        JButton defaultBtn = new JButton("Use Burp Suite Default");
-        defaultBtn.addActionListener(e -> {
-            setStorageDirectory(defaultDir);
-            dialog.dispose();
-        });
-
-        JButton saveBtn = new JButton("Save Location");
-        saveBtn.setFont(saveBtn.getFont().deriveFont(Font.BOLD));
-        saveBtn.addActionListener(e -> {
-            String text = pathField.getText().trim();
-            if (!text.isEmpty()) {
-                File chosen = new File(text);
-                chosen.mkdirs();
-                setStorageDirectory(chosen);
-            }
-            dialog.dispose();
-        });
-
-        btnRow.add(defaultBtn);
-        btnRow.add(saveBtn);
-        content.add(btnRow, BorderLayout.SOUTH);
-
-        dialog.setContentPane(content);
-        dialog.setVisible(true);
-    }
-
-    public synchronized File getStorageDirectory() {
-        if (storageDirectory == null) {
-            resolveStorageDirectory();
-        }
-        return storageDirectory;
-    }
-
-    public synchronized void setStorageDirectory(File newDir) {
-        if (newDir == null) return;
-        newDir.mkdirs();
-        this.storageDirectory = newDir;
-        if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
-            try {
-                api.persistence().preferences().setString(PREF_STORAGE_DIR, newDir.getAbsolutePath());
-            } catch (Throwable ignored) {}
-        }
-        if (api != null && api.logging() != null) {
-            api.logging().logToOutput("[Response Inspector] Persistent storage directory set to: " + newDir.getAbsolutePath());
-        }
+        this.gson = new GsonBuilder().setPrettyPrinting().create();
+        this.sessionStatusLabel = new JLabel("Session: [Fresh / Unbound]");
+        this.sessionStatusLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
     }
 
     public void bindEngines(ResponseScanEngine scanEngine, InScopeDomainManager domainManager) {
@@ -247,419 +81,572 @@ public class PersistentStorageManager {
     }
 
     /**
-     * Schedules a debounced asynchronous auto-save to write updated state to disk.
+     * Initializes session on extension load by presenting the interactive startup modal dialog.
+     * Strictly avoids loading any session by default.
      */
+    public void initializeSessionOnStartup(Component parent, Runnable onRefresh) {
+        SessionStartupDialog_littlespidy.StartupResult result = SessionStartupDialog_littlespidy.promptUser(api, parent);
+        switch (result.action()) {
+            case OPEN_EXISTING -> openSessionFile(result.sessionFile());
+            case CREATE_NEW -> createNewSessionFile(result.sessionFile());
+            case TEMPORARY -> startTemporarySession();
+        }
+        if (onRefresh != null) {
+            SwingUtilities.invokeLater(onRefresh);
+        }
+    }
+
+    public synchronized void openSessionFile(File file) {
+        if (file == null || !file.exists()) return;
+
+        try {
+            String json = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+            SessionRootDTO root = gson.fromJson(json, SessionRootDTO.class);
+            if (root == null) {
+                throw new IllegalStateException("Corrupted or empty session JSON file.");
+            }
+
+            // 1. Reset current state
+            resetCurrentState();
+
+            // 2. Restore passwords
+            if (boundScanEngine != null && boundScanEngine.getPasswordScanner() != null && root.passwordsConfig != null) {
+                PasswordScanner ps = boundScanEngine.getPasswordScanner();
+                ps.setCaseSensitive(root.passwordsConfig.caseSensitive);
+                if (root.passwordsConfig.passwords != null) {
+                    for (String pw : root.passwordsConfig.passwords) {
+                        ps.addPassword(pw);
+                    }
+                }
+            }
+
+            // 3. Restore in-scope domains
+            if (boundDomainManager != null && root.inScopeDomains != null) {
+                List<String> selectedDomains = new ArrayList<>();
+                for (DomainEntryDTO d : root.inScopeDomains) {
+                    if (d.domain != null && !d.domain.isBlank()) {
+                        boundDomainManager.addDomain(d.domain);
+                        if (d.selected) {
+                            selectedDomains.add(d.domain);
+                        }
+                        for (int i = 0; i < d.findingCount; i++) {
+                            boundDomainManager.registerFinding(d.domain);
+                        }
+                    }
+                }
+                if (!selectedDomains.isEmpty()) {
+                    boundDomainManager.setSelectedDomains(selectedDomains);
+                }
+            }
+
+            // 4. Restore secret type classifications
+            SecretClassificationManager scm = (boundScanEngine != null) ? boundScanEngine.getSecretClassificationManager() : null;
+            if (scm != null && root.secretTypeClassifications != null) {
+                for (Map.Entry<String, String> entry : root.secretTypeClassifications.entrySet()) {
+                    try {
+                        scm.markSecretType(entry.getKey(), SecretClassification.valueOf(entry.getValue()));
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            // 5. Restore findings
+            int restoredCount = 0;
+            if (root.findings != null) {
+                for (FindingEntryDTO dto : root.findings) {
+                    FindingCategory category;
+                    try {
+                        category = FindingCategory.valueOf(dto.category);
+                    } catch (Exception e) {
+                        category = FindingCategory.SECRET;
+                    }
+
+                    HttpRequest req = null;
+                    if (dto.hasRequest && dto.requestBase64 != null && !dto.requestBase64.isEmpty()) {
+                        try {
+                            byte[] reqBytes = Base64.getDecoder().decode(dto.requestBase64);
+                            HttpService svc = (dto.requestHost != null && !dto.requestHost.isBlank())
+                                    ? HttpService.httpService(dto.requestHost, dto.requestPort > 0 ? dto.requestPort : (dto.requestSecure ? 443 : 80), dto.requestSecure)
+                                    : null;
+                            ByteArray ba = ByteArray.byteArray(reqBytes);
+                            req = (svc != null) ? HttpRequest.httpRequest(svc, ba) : HttpRequest.httpRequest(ba);
+                        } catch (Exception ignored) {}
+                    }
+
+                    HttpResponse resp = null;
+                    if (dto.hasResponse && dto.responseBase64 != null && !dto.responseBase64.isEmpty()) {
+                        try {
+                            byte[] respBytes = Base64.getDecoder().decode(dto.responseBase64);
+                            resp = HttpResponse.httpResponse(ByteArray.byteArray(respBytes));
+                        } catch (Exception ignored) {}
+                    }
+
+                    HttpRequestResponse reqResp = null;
+                    if (req != null || resp != null) {
+                        reqResp = HttpRequestResponse.httpRequestResponse(
+                                req != null ? req : HttpRequest.httpRequest(),
+                                resp != null ? resp : HttpResponse.httpResponse()
+                        );
+                    }
+
+                    FindingEntry entry = new FindingEntry(
+                            dto.id,
+                            category,
+                            dto.patternName,
+                            dto.matchValue,
+                            dto.matchLocation,
+                            dto.method,
+                            dto.url,
+                            dto.host,
+                            dto.path,
+                            dto.statusCode,
+                            dto.contentType,
+                            dto.contentLength,
+                            reqResp,
+                            dto.timeString,
+                            dto.startOffset,
+                            dto.endOffset
+                    );
+
+                    if (boundScanEngine != null) {
+                        InspectorDataStore ds = boundScanEngine.getDataStore(category);
+                        if (ds != null && ds.addEntry(entry)) {
+                            restoredCount++;
+                        }
+                    }
+
+                    if (scm != null && dto.individualClassification != null && !dto.individualClassification.isBlank()) {
+                        try {
+                            scm.markRequest(entry, SecretClassification.valueOf(dto.individualClassification));
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+
+            this.activeSessionFile = file;
+            this.dirty.set(false);
+            updateStatusLabel();
+            log("[Response Inspector] Session opened successfully from: " + file.getAbsolutePath() + " (Restored " + restoredCount + " findings)");
+        } catch (Exception ex) {
+            logError("[Response Inspector] Failed to open session from " + file.getAbsolutePath() + ": " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Failed to load session file:\n" + ex.getMessage(), "Session Load Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public synchronized void createNewSessionFile(File file) {
+        if (file == null) return;
+        resetCurrentState();
+        this.activeSessionFile = file;
+        this.dirty.set(true);
+        saveNow();
+        updateStatusLabel();
+        log("[Response Inspector] Created new session bound to: " + file.getAbsolutePath());
+    }
+
+    public synchronized void startTemporarySession() {
+        resetCurrentState();
+        this.activeSessionFile = null;
+        this.dirty.set(false);
+        updateStatusLabel();
+        log("[Response Inspector] Started temporary in-memory session.");
+    }
+
+    /**
+     * Offboards the currently active session file, restoring the extension to a fresh state.
+     */
+    public synchronized void offboardSession(Component parent, Runnable onRefresh) {
+        if (activeSessionFile != null && dirty.get()) {
+            int choice = JOptionPane.showConfirmDialog(
+                    parent,
+                    "Save changes to '" + activeSessionFile.getName() + "' before offboarding?",
+                    "Offboard Session - Unsaved Changes",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                saveNow();
+            } else if (choice == JOptionPane.CANCEL_OPTION) {
+                return;
+            }
+        }
+
+        if (scheduledSaveTask != null && !scheduledSaveTask.isDone()) {
+            scheduledSaveTask.cancel(false);
+        }
+
+        resetCurrentState();
+        File previousFile = this.activeSessionFile;
+        this.activeSessionFile = null;
+        this.dirty.set(false);
+        updateStatusLabel();
+
+        log("[Response Inspector] Offboarded session " + (previousFile != null ? previousFile.getName() : "") + ". Restored clean fresh extension state.");
+        if (onRefresh != null) {
+            SwingUtilities.invokeLater(onRefresh);
+        }
+    }
+
+    public synchronized boolean saveNow() {
+        if (activeSessionFile == null) {
+            return false;
+        }
+
+        try {
+            SessionRootDTO root = new SessionRootDTO();
+            root.formatVersion = 1;
+            root.savedAt = Instant.now().toString();
+            root.sessionName = activeSessionFile.getName();
+
+            // Passwords
+            if (boundScanEngine != null && boundScanEngine.getPasswordScanner() != null) {
+                PasswordScanner ps = boundScanEngine.getPasswordScanner();
+                root.passwordsConfig.caseSensitive = ps.isCaseSensitive();
+                root.passwordsConfig.passwords = new ArrayList<>(ps.getPasswords());
+            }
+
+            // In-scope domains
+            if (boundDomainManager != null) {
+                for (String dom : boundDomainManager.getAllDomains()) {
+                    root.inScopeDomains.add(new DomainEntryDTO(
+                            dom,
+                            boundDomainManager.isDomainSelected(dom),
+                            boundDomainManager.getFindingCount(dom)
+                    ));
+                }
+            }
+
+            // Secret classifications
+            SecretClassificationManager scm = (boundScanEngine != null) ? boundScanEngine.getSecretClassificationManager() : null;
+            if (scm != null && boundScanEngine.getSecretScanner() != null) {
+                for (String rule : boundScanEngine.getSecretScanner().getRuleNames()) {
+                    SecretClassification cl = scm.getTypeClassification(rule);
+                    if (cl != SecretClassification.NOT_VERIFIED) {
+                        root.secretTypeClassifications.put(rule, cl.name());
+                    }
+                }
+            }
+
+            // Findings
+            if (boundScanEngine != null) {
+                for (FindingCategory cat : FindingCategory.values()) {
+                    InspectorDataStore ds = boundScanEngine.getDataStore(cat);
+                    if (ds != null) {
+                        for (FindingEntry e : ds.getAllEntries()) {
+                            FindingEntryDTO dto = new FindingEntryDTO();
+                            dto.id = e.id();
+                            dto.category = e.category().name();
+                            dto.patternName = e.patternName();
+                            dto.matchValue = e.matchValue();
+                            dto.matchLocation = e.matchLocation();
+                            dto.method = e.method();
+                            dto.url = e.url();
+                            dto.host = e.host();
+                            dto.path = e.path();
+                            dto.statusCode = e.statusCode();
+                            dto.contentType = e.contentType();
+                            dto.contentLength = e.contentLength();
+                            dto.timeString = e.timeString();
+                            dto.startOffset = e.startOffset();
+                            dto.endOffset = e.endOffset();
+
+                            HttpRequestResponse reqResp = e.requestResponse();
+                            if (reqResp != null) {
+                                if (reqResp.request() != null) {
+                                    HttpRequest req = reqResp.request();
+                                    dto.hasRequest = true;
+                                    HttpService svc = req.httpService();
+                                    dto.requestHost = (svc != null) ? svc.host() : "";
+                                    dto.requestPort = (svc != null) ? svc.port() : 0;
+                                    dto.requestSecure = (svc != null) && svc.secure();
+                                    dto.requestBase64 = Base64.getEncoder().encodeToString(req.toByteArray().getBytes());
+                                }
+                                if (reqResp.hasResponse() && reqResp.response() != null) {
+                                    dto.hasResponse = true;
+                                    dto.responseBase64 = Base64.getEncoder().encodeToString(reqResp.response().toByteArray().getBytes());
+                                }
+                            }
+
+                            if (scm != null && scm.hasIndividualClassification(e)) {
+                                SecretClassification indCl = scm.getIndividualClassification(e);
+                                if (indCl != null) {
+                                    dto.individualClassification = indCl.name();
+                                }
+                            }
+
+                            root.findings.add(dto);
+                        }
+                    }
+                }
+            }
+
+            String json = gson.toJson(root);
+            File parentDir = activeSessionFile.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            File tmpFile = new File(activeSessionFile.getAbsolutePath() + ".tmp");
+            Files.writeString(tmpFile.toPath(), json, StandardCharsets.UTF_8);
+
+            try {
+                Files.move(tmpFile.toPath(), activeSessionFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception e) {
+                Files.move(tmpFile.toPath(), activeSessionFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            dirty.set(false);
+            updateStatusLabel();
+            return true;
+        } catch (Exception ex) {
+            logError("[Response Inspector] Failed to save session to " + activeSessionFile.getAbsolutePath() + ": " + ex.getMessage());
+            return false;
+        }
+    }
+
     public synchronized void scheduleAutoSave() {
         dirty.set(true);
+        if (activeSessionFile == null) {
+            return;
+        }
         if (scheduledSaveTask != null && !scheduledSaveTask.isDone()) {
             scheduledSaveTask.cancel(false);
         }
         scheduledSaveTask = autoSaveExecutor.schedule(this::saveNow, 1500, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Immediately saves all data to disk.
-     */
-    public void saveNow() {
-        if (boundScanEngine == null) return;
-        saveData(boundScanEngine, boundDomainManager);
-        dirty.set(false);
+    public synchronized void saveAs(File file) {
+        if (file == null) return;
+        this.activeSessionFile = file;
+        this.dirty.set(true);
+        saveNow();
+        updateStatusLabel();
     }
 
-    /**
-     * Saves findings, domain configurations, passwords, and classifications atomically to disk.
-     */
-    public synchronized boolean saveData(ResponseScanEngine scanEngine, InScopeDomainManager domainManager) {
-        File dir = getStorageDirectory();
-        if (dir == null) return false;
-        if (!dir.exists() && !dir.mkdirs()) return false;
+    public JPanel createSessionToolbarComponent(Component parent, Runnable onRefresh, Runnable onAnalyzeFile) {
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 
-        boolean success = true;
+        JButton newBtn = new JButton("New Session");
+        newBtn.setToolTipText("Create a new session file in a user-specified directory");
+        newBtn.addActionListener(e -> {
+            if (dirty.get() && activeSessionFile != null) {
+                int res = JOptionPane.showConfirmDialog(parent, "Save current session before creating a new one?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
+                if (res == JOptionPane.YES_OPTION) saveNow();
+                else if (res == JOptionPane.CANCEL_OPTION) return;
+            }
 
-        // 1. Save config and metadata
-        File configFile = new File(dir, CONFIG_FILE);
-        File configTmp = new File(dir, CONFIG_FILE + ".tmp");
-        try {
-            Properties props = new Properties();
-            props.setProperty("format_version", String.valueOf(FORMAT_VERSION));
-            props.setProperty("saved_at", Instant.now().toString());
-
-            if (scanEngine != null && scanEngine.getPasswordScanner() != null) {
-                PasswordScanner ps = scanEngine.getPasswordScanner();
-                props.setProperty("passwords_case_sensitive", String.valueOf(ps.isCaseSensitive()));
-                props.setProperty("passwords_count", String.valueOf(ps.getPasswordCount()));
-                List<String> pws = ps.getPasswords();
-                for (int i = 0; i < pws.size(); i++) {
-                    props.setProperty("password." + i, pws.get(i));
+            JFileChooser dirChooser = new JFileChooser(getLastDirectory());
+            dirChooser.setDialogTitle("Select Directory For New Session");
+            dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            if (dirChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+                File dir = dirChooser.getSelectedFile();
+                rememberDirectory(dir.getAbsolutePath());
+                String name = JOptionPane.showInputDialog(parent, "Enter session filename:", DEFAULT_SESSION_FILENAME);
+                if (name != null && !name.isBlank()) {
+                    String clean = name.trim();
+                    if (!clean.toLowerCase().endsWith(".json")) clean += ".json";
+                    createNewSessionFile(new File(dir, clean));
+                    if (onRefresh != null) onRefresh.run();
                 }
             }
+        });
 
-            if (domainManager != null) {
-                Set<String> allDoms = domainManager.getAllDomains();
-                props.setProperty("domains_count", String.valueOf(allDoms.size()));
-                int idx = 0;
-                for (String dom : allDoms) {
-                    props.setProperty("domain." + idx, dom);
-                    props.setProperty("domain_selected." + idx, String.valueOf(domainManager.isDomainSelected(dom)));
-                    props.setProperty("domain_count." + idx, String.valueOf(domainManager.getFindingCount(dom)));
-                    idx++;
+        JButton openBtn = new JButton("Open Session");
+        openBtn.setToolTipText("Open an existing Response Inspector session JSON file");
+        openBtn.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser(getLastDirectory());
+            chooser.setDialogTitle("Select Session File to Open");
+            chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+            if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+                File sel = chooser.getSelectedFile();
+                rememberDirectory(sel.getParent());
+                openSessionFile(sel);
+                if (onRefresh != null) onRefresh.run();
+            }
+        });
+
+        JButton offboardBtn = new JButton("Offboard Session");
+        offboardBtn.setToolTipText("Unbind active session file and restore fresh extension state");
+        offboardBtn.addActionListener(e -> offboardSession(parent, onRefresh));
+
+        JButton saveAsBtn = new JButton("Save As...");
+        saveAsBtn.setToolTipText("Save current session data to a new JSON file");
+        saveAsBtn.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser(getLastDirectory());
+            chooser.setDialogTitle("Save Session As");
+            chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+            if (chooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
+                File sel = chooser.getSelectedFile();
+                String name = sel.getName();
+                if (!name.toLowerCase().endsWith(".json")) {
+                    sel = new File(sel.getParentFile(), name + ".json");
+                }
+                rememberDirectory(sel.getParent());
+                saveAs(sel);
+                if (onRefresh != null) onRefresh.run();
+            }
+        });
+
+        JButton saveNowBtn = new JButton("Save Now");
+        saveNowBtn.setToolTipText("Immediately write current findings to the bound session file");
+        saveNowBtn.addActionListener(e -> {
+            if (activeSessionFile == null) {
+                saveAsBtn.doClick();
+            } else {
+                dirty.set(true);
+                boolean ok = saveNow();
+                if (ok) {
+                    JOptionPane.showMessageDialog(parent, "Session saved successfully to:\n" + activeSessionFile.getAbsolutePath(), "Saved", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
+        });
 
-            if (scanEngine != null && scanEngine.getSecretClassificationManager() != null) {
-                SecretClassificationManager scm = scanEngine.getSecretClassificationManager();
-                for (String rule : scanEngine.getSecretScanner().getRuleNames()) {
-                    SecretClassification typeCl = scm.getTypeClassification(rule);
-                    if (typeCl != SecretClassification.NOT_VERIFIED) {
-                        props.setProperty("secret_type_class." + rule, typeCl.name());
-                    }
-                }
-            }
-
-            try (FileOutputStream fos = new FileOutputStream(configTmp)) {
-                props.store(fos, "Response Inspector Persistent Configuration");
-            }
-            Files.move(configTmp.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (Exception ex) {
-            success = false;
-            if (api != null && api.logging() != null) {
-                api.logging().logToError("[Persistent Storage] Failed to save config: " + ex.getMessage());
-            }
+        JButton analyzeFileBtn = new JButton("Analyze File...");
+        analyzeFileBtn.setToolTipText("Select and analyze a file from local disk with all Response Inspector scanners");
+        if (onAnalyzeFile != null) {
+            analyzeFileBtn.addActionListener(e -> onAnalyzeFile.run());
         }
 
-        // 2. Save findings binary
-        File findingsFile = new File(dir, FINDINGS_FILE);
-        File findingsTmp = new File(dir, FINDINGS_FILE + ".tmp");
-        try {
-            List<FindingEntry> allFindings = new ArrayList<>();
+        toolbar.add(sessionStatusLabel);
+        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        toolbar.add(newBtn);
+        toolbar.add(openBtn);
+        toolbar.add(offboardBtn);
+        toolbar.add(saveAsBtn);
+        toolbar.add(saveNowBtn);
+        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        toolbar.add(analyzeFileBtn);
+
+        return toolbar;
+    }
+
+    private void resetCurrentState() {
+        if (boundScanEngine != null) {
+            boundScanEngine.clearAll();
+        }
+        if (boundDomainManager != null) {
+            boundDomainManager.deselectAll();
+        }
+    }
+
+    private void updateStatusLabel() {
+        SwingUtilities.invokeLater(() -> {
+            if (activeSessionFile != null) {
+                String dirtyMarker = dirty.get() ? " *" : "";
+                sessionStatusLabel.setText("Session: " + activeSessionFile.getName() + dirtyMarker);
+                sessionStatusLabel.setToolTipText(activeSessionFile.getAbsolutePath());
+            } else {
+                sessionStatusLabel.setText("Session: [Fresh / Unbound]");
+                sessionStatusLabel.setToolTipText("Extension is clean and unbound. Use 'Open Session' or 'New Session' to bind.");
+            }
+        });
+    }
+
+    private File getLastDirectory() {
+        String lastDir = null;
+        if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
+            try {
+                lastDir = api.persistence().preferences().getString(SessionStartupDialog_littlespidy.PREF_LAST_SESSION_DIR);
+            } catch (Exception ignored) {}
+        }
+        if (lastDir != null && !lastDir.isBlank()) {
+            File d = new File(lastDir);
+            if (d.exists()) return d;
+        }
+        return new File(System.getProperty("user.home", "."));
+    }
+
+    private void rememberDirectory(String dirPath) {
+        if (api != null && api.persistence() != null && api.persistence().preferences() != null && dirPath != null) {
+            try {
+                api.persistence().preferences().setString(SessionStartupDialog_littlespidy.PREF_LAST_SESSION_DIR, dirPath);
+            } catch (Exception ignored) {}
+        }
+    }
+
+    public synchronized File getStorageDirectory() {
+        if (activeSessionFile != null) {
+            return activeSessionFile.getParentFile();
+        }
+        return getDefaultStorageDirectory();
+    }
+
+    public synchronized void setStorageDirectory(File newDir) {
+        if (newDir == null) return;
+        newDir.mkdirs();
+        this.activeSessionFile = new File(newDir, DEFAULT_SESSION_FILENAME);
+        rememberDirectory(newDir.getAbsolutePath());
+    }
+
+    public static File getDefaultStorageDirectory() {
+        String userHome = System.getProperty("user.home", ".");
+        File burpDir = new File(userHome, ".BurpSuite");
+        return new File(burpDir, "response-inspector");
+    }
+
+    public boolean isTemporaryProject() {
+        return activeSessionFile == null;
+    }
+
+    public void promptUserIfTemporaryProject(Window parent) {
+        // Handled via initializeSessionOnStartup
+    }
+
+    public synchronized boolean saveData(ResponseScanEngine scanEngine, InScopeDomainManager domainManager) {
+        if (activeSessionFile == null) {
+            File defaultDir = getDefaultStorageDirectory();
+            defaultDir.mkdirs();
+            this.activeSessionFile = new File(defaultDir, DEFAULT_SESSION_FILENAME);
+        }
+        dirty.set(true);
+        return saveNow();
+    }
+
+    public synchronized int loadData(ResponseScanEngine scanEngine, InScopeDomainManager domainManager) {
+        if (activeSessionFile != null && activeSessionFile.exists()) {
+            openSessionFile(activeSessionFile);
+            int total = 0;
             if (scanEngine != null) {
                 for (FindingCategory cat : FindingCategory.values()) {
-                    InspectorDataStore ds = scanEngine.getDataStore(cat);
-                    if (ds != null) {
-                        allFindings.addAll(ds.getAllEntries());
-                    }
+                    total += scanEngine.getDataStore(cat).size();
                 }
             }
-
-            SecretClassificationManager scm = (scanEngine != null) ? scanEngine.getSecretClassificationManager() : null;
-
-            try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(findingsTmp)))) {
-                out.writeInt(MAGIC_HEADER);
-                out.writeInt(FORMAT_VERSION);
-                out.writeInt(allFindings.size());
-
-                for (FindingEntry e : allFindings) {
-                    out.writeInt(e.id());
-                    writeSafeString(out, e.category().name());
-                    writeSafeString(out, e.patternName());
-                    writeSafeString(out, e.matchValue());
-                    writeSafeString(out, e.matchLocation());
-                    writeSafeString(out, e.method());
-                    writeSafeString(out, e.url());
-                    writeSafeString(out, e.host());
-                    writeSafeString(out, e.path());
-                    out.writeShort(e.statusCode());
-                    writeSafeString(out, e.contentType());
-                    out.writeInt(e.contentLength());
-                    writeSafeString(out, e.timeString());
-                    out.writeInt(e.startOffset());
-                    out.writeInt(e.endOffset());
-
-                    // Request / Response bytes
-                    HttpRequestResponse reqResp = e.requestResponse();
-                    boolean hasReq = reqResp != null && reqResp.request() != null;
-                    out.writeBoolean(hasReq);
-                    if (hasReq) {
-                        HttpRequest req = reqResp.request();
-                        HttpService svc = req.httpService();
-                        writeSafeString(out, svc != null ? svc.host() : "");
-                        out.writeInt(svc != null ? svc.port() : 0);
-                        out.writeBoolean(svc != null && svc.secure());
-
-                        byte[] reqBytes = req.toByteArray().getBytes();
-                        out.writeInt(reqBytes.length);
-                        out.write(reqBytes);
-                    }
-
-                    boolean hasResp = reqResp != null && reqResp.response() != null;
-                    out.writeBoolean(hasResp);
-                    if (hasResp) {
-                        HttpResponse resp = reqResp.response();
-                        byte[] respBytes = resp.toByteArray().getBytes();
-                        out.writeInt(respBytes.length);
-                        out.write(respBytes);
-                    }
-
-                    // Explicit individual secret classification override
-                    boolean hasIndivClass = false;
-                    String indivClassStr = null;
-                    if (scm != null && scm.hasIndividualClassification(e)) {
-                        SecretClassification cl = scm.getIndividualClassification(e);
-                        if (cl != null) {
-                            hasIndivClass = true;
-                            indivClassStr = cl.name();
-                        }
-                    }
-                    out.writeBoolean(hasIndivClass);
-                    if (hasIndivClass) {
-                        writeSafeString(out, indivClassStr);
-                    }
-                }
-                out.flush();
-            }
-
-            Files.move(findingsTmp.toPath(), findingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (Exception ex) {
-            success = false;
-            if (api != null && api.logging() != null) {
-                api.logging().logToError("[Persistent Storage] Failed to save findings: " + ex.getMessage());
-            }
+            return total;
         }
-
-        return success;
+        return 0;
     }
 
-    /**
-     * Loads persisted findings, passwords, domains, and classifications from disk.
-     * Returns total findings loaded.
-     */
-    public synchronized int loadData(ResponseScanEngine scanEngine, InScopeDomainManager domainManager) {
-        File dir = getStorageDirectory();
-        if (dir == null || !dir.exists()) return 0;
-
-        int loadedCount = 0;
-
-        // 1. Load config
-        File configFile = new File(dir, CONFIG_FILE);
-        if (configFile.exists()) {
-            try (FileInputStream fis = new FileInputStream(configFile)) {
-                Properties props = new Properties();
-                props.load(fis);
-
-                if (scanEngine != null && scanEngine.getPasswordScanner() != null) {
-                    PasswordScanner ps = scanEngine.getPasswordScanner();
-                    ps.setCaseSensitive(Boolean.parseBoolean(props.getProperty("passwords_case_sensitive", "false")));
-                    int pwCount = Integer.parseInt(props.getProperty("passwords_count", "0"));
-                    for (int i = 0; i < pwCount; i++) {
-                        String pw = props.getProperty("password." + i);
-                        if (pw != null) {
-                            ps.addPassword(pw);
-                        }
-                    }
-                }
-
-                if (domainManager != null) {
-                    int domCount = Integer.parseInt(props.getProperty("domains_count", "0"));
-                    List<String> toSelect = new ArrayList<>();
-                    for (int i = 0; i < domCount; i++) {
-                        String dom = props.getProperty("domain." + i);
-                        if (dom != null && !dom.isBlank()) {
-                            domainManager.addDomain(dom);
-                            boolean isSel = Boolean.parseBoolean(props.getProperty("domain_selected." + i, "true"));
-                            if (isSel) {
-                                toSelect.add(dom);
-                            }
-                            int cnt = Integer.parseInt(props.getProperty("domain_count." + i, "0"));
-                            for (int c = 0; c < cnt; c++) {
-                                domainManager.registerFinding(dom);
-                            }
-                        }
-                    }
-                    if (!toSelect.isEmpty()) {
-                        domainManager.setSelectedDomains(toSelect);
-                    }
-                }
-
-                if (scanEngine != null && scanEngine.getSecretClassificationManager() != null) {
-                    SecretClassificationManager scm = scanEngine.getSecretClassificationManager();
-                    for (String key : props.stringPropertyNames()) {
-                        if (key.startsWith("secret_type_class.")) {
-                            String ruleName = key.substring("secret_type_class.".length());
-                            String clStr = props.getProperty(key);
-                            try {
-                                SecretClassification cl = SecretClassification.valueOf(clStr);
-                                scm.markSecretType(ruleName, cl);
-                            } catch (Exception ignored) {}
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                if (api != null && api.logging() != null) {
-                    api.logging().logToError("[Persistent Storage] Failed to load config: " + ex.getMessage());
-                }
-            }
-        }
-
-        // 2. Load findings binary
-        File findingsFile = new File(dir, FINDINGS_FILE);
-        if (findingsFile.exists()) {
-            SecretClassificationManager scm = (scanEngine != null) ? scanEngine.getSecretClassificationManager() : null;
-
-            try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(findingsFile)))) {
-                int magic = in.readInt();
-                if (magic != MAGIC_HEADER) {
-                    throw new IOException("Invalid storage file magic header: " + Integer.toHexString(magic));
-                }
-                int version = in.readInt();
-                if (version != FORMAT_VERSION) {
-                    throw new IOException("Unsupported storage version: " + version);
-                }
-                int count = in.readInt();
-
-                for (int i = 0; i < count; i++) {
-                    int id = in.readInt();
-                    String catStr = readSafeString(in);
-                    FindingCategory category = FindingCategory.valueOf(catStr);
-                    String patternName = readSafeString(in);
-                    String matchValue = readSafeString(in);
-                    String matchLocation = readSafeString(in);
-                    String method = readSafeString(in);
-                    String url = readSafeString(in);
-                    String host = readSafeString(in);
-                    String path = readSafeString(in);
-                    short statusCode = in.readShort();
-                    String contentType = readSafeString(in);
-                    int contentLength = in.readInt();
-                    String timeString = readSafeString(in);
-                    int startOffset = in.readInt();
-                    int endOffset = in.readInt();
-
-                    HttpRequest req = null;
-                    boolean hasReq = in.readBoolean();
-                    if (hasReq) {
-                        String svcHost = readSafeString(in);
-                        int svcPort = in.readInt();
-                        boolean svcSecure = in.readBoolean();
-                        int reqLen = in.readInt();
-                        byte[] reqBytes = in.readNBytes(reqLen);
-
-                        HttpService svc = (svcHost != null && !svcHost.isEmpty())
-                                ? HttpService.httpService(svcHost, svcPort, svcSecure)
-                                : null;
-                        ByteArray ba = ByteArray.byteArray(reqBytes);
-                        req = svc != null ? HttpRequest.httpRequest(svc, ba) : HttpRequest.httpRequest(ba);
-                    }
-
-                    HttpResponse resp = null;
-                    boolean hasResp = in.readBoolean();
-                    if (hasResp) {
-                        int respLen = in.readInt();
-                        byte[] respBytes = in.readNBytes(respLen);
-                        resp = HttpResponse.httpResponse(ByteArray.byteArray(respBytes));
-                    }
-
-                    HttpRequestResponse reqResp = null;
-                    if (req != null || resp != null) {
-                        HttpRequest effectiveReq = req != null ? req : HttpRequest.httpRequest();
-                        HttpResponse effectiveResp = resp != null ? resp : HttpResponse.httpResponse();
-                        reqResp = HttpRequestResponse.httpRequestResponse(effectiveReq, effectiveResp);
-                    }
-
-                    boolean hasIndivClass = in.readBoolean();
-                    String indivClassStr = null;
-                    if (hasIndivClass) {
-                        indivClassStr = readSafeString(in);
-                    }
-
-                    FindingEntry entry = new FindingEntry(
-                            id,
-                            category,
-                            patternName,
-                            matchValue,
-                            matchLocation,
-                            method,
-                            url,
-                            host,
-                            path,
-                            statusCode,
-                            contentType,
-                            contentLength,
-                            reqResp,
-                            timeString,
-                            startOffset,
-                            endOffset
-                    );
-
-                    if (scanEngine != null) {
-                        InspectorDataStore ds = scanEngine.getDataStore(category);
-                        if (ds != null) {
-                            if (ds.addEntry(entry)) {
-                                loadedCount++;
-                            }
-                        }
-                    }
-
-                    if (hasIndivClass && indivClassStr != null && scm != null) {
-                        try {
-                            scm.markRequest(entry, SecretClassification.valueOf(indivClassStr));
-                        } catch (Exception ignored) {}
-                    }
-                }
-            } catch (Exception ex) {
-                if (api != null && api.logging() != null) {
-                    api.logging().logToError("[Persistent Storage] Failed to load findings: " + ex.getMessage());
-                }
-            }
-        }
-
-        if (api != null && api.logging() != null && loadedCount > 0) {
-            api.logging().logToOutput("[Response Inspector] Loaded " + loadedCount + " persisted findings from: " + dir.getAbsolutePath());
-        }
-
-        return loadedCount;
-    }
-
-    /**
-     * Explicitly deletes stored data files from disk upon user request.
-     */
     public synchronized boolean deleteStoredData() {
-        File dir = getStorageDirectory();
-        if (dir == null || !dir.exists()) return true;
-
-        boolean allDeleted = true;
-        File[] files = dir.listFiles((d, name) ->
-                name.equals(FINDINGS_FILE) || name.equals(CONFIG_FILE)
-                        || name.endsWith(".tmp") || name.endsWith(".bak"));
-
-        if (files != null) {
-            for (File f : files) {
-                if (!f.delete()) {
-                    allDeleted = false;
-                }
-            }
+        if (activeSessionFile != null && activeSessionFile.exists()) {
+            boolean del = activeSessionFile.delete();
+            activeSessionFile = null;
+            updateStatusLabel();
+            return del;
         }
-
-        if (api != null && api.logging() != null) {
-            api.logging().logToOutput("[Response Inspector] Persistent data files explicitly deleted from: " + dir.getAbsolutePath());
-        }
-
-        return allDeleted;
+        return true;
     }
 
     public long getStorageSizeBytes() {
-        File dir = getStorageDirectory();
-        if (dir == null || !dir.exists()) return 0;
-        long total = 0;
-        File f1 = new File(dir, FINDINGS_FILE);
-        if (f1.exists()) total += f1.length();
-        File f2 = new File(dir, CONFIG_FILE);
-        if (f2.exists()) total += f2.length();
-        return total;
+        if (activeSessionFile != null && activeSessionFile.exists()) {
+            return activeSessionFile.length();
+        }
+        return 0;
     }
 
     public String getLastModifiedFormatted() {
-        File dir = getStorageDirectory();
-        if (dir == null || !dir.exists()) return "Never";
-        File f = new File(dir, FINDINGS_FILE);
-        if (!f.exists()) f = new File(dir, CONFIG_FILE);
-        if (!f.exists()) return "Never";
+        if (activeSessionFile != null && activeSessionFile.exists()) {
+            LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(activeSessionFile.lastModified()), ZoneId.systemDefault());
+            return dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+        return "Never";
+    }
 
-        LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(f.lastModified()), ZoneId.systemDefault());
-        return dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    public File getActiveSessionFile() {
+        return activeSessionFile;
     }
 
     public void shutdown() {
-        saveNow();
+        if (activeSessionFile != null && dirty.get()) {
+            saveNow();
+        }
         autoSaveExecutor.shutdown();
         try {
             if (!autoSaveExecutor.awaitTermination(2, TimeUnit.SECONDS)) {
@@ -670,19 +657,15 @@ public class PersistentStorageManager {
         }
     }
 
-    private static void writeSafeString(DataOutputStream out, String val) throws IOException {
-        if (val == null) {
-            out.writeBoolean(false);
-        } else {
-            out.writeBoolean(true);
-            out.writeUTF(val);
+    private void log(String msg) {
+        if (api != null && api.logging() != null) {
+            api.logging().logToOutput(msg);
         }
     }
 
-    private static String readSafeString(DataInputStream in) throws IOException {
-        if (!in.readBoolean()) {
-            return null;
+    private void logError(String msg) {
+        if (api != null && api.logging() != null) {
+            api.logging().logToError(msg);
         }
-        return in.readUTF();
     }
 }

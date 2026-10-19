@@ -15,10 +15,11 @@ A high-performance Burp Suite extension built on the modern **Montoya API** to p
 
 ## Key Features & Architectural Upgrades
 
-- **"Load Proxy" & "Load from Repeater" On-Demand Ingestion**:
+- **"Load Proxy", "Load from Repeater", and "Analyze File..." Ingestion**:
   - **Load Proxy**: Scan HTTP responses from Burp Proxy history with multi-threaded execution.
-  - **Load from Repeater**: Dedicated toolbar button next to `Load Proxy` to scan all HTTP responses dispatched through Burp Repeater (captured live via `HttpHandler`).
-  - **Suite-Wide Context Menu**: Right-click any request/response across Burp (Repeater, Proxy, Logger, SiteMap, Message Editors) and select **"Send to Response Inspector"** to immediately analyze and surface findings.
+  - **Load from Repeater**: Dedicated toolbar button to scan all HTTP responses dispatched through Burp Repeater (captured live via `HttpHandler`).
+  - **Analyze File...**: Dedicated toolbar button to select and scan any local file from disk directly (`.js`, `.json`, `.txt`, `.html`, `.xml`) with all 5 scanner engines.
+  - **Suite-Wide Context Menu**: Right-click any request/response or file across Burp (Repeater, Proxy, Logger, SiteMap, Message Editors) and select **"Send to Response Inspector (Analyze File)"** to immediately inspect response/file contents and surface findings.
 - **Strictly Response Body Only (Header False-Positive Suppression)**:
   - Scanning is performed strictly on **HTTP response bodies**.
   - Response headers (e.g. `Server`, `Via`, `X-Forwarded-For`, `Set-Cookie`, `ETag`, `Cache-Control`) are excluded from scanning to eliminate noisy false positives.
@@ -46,12 +47,15 @@ A high-performance Burp Suite extension built on the modern **Montoya API** to p
 - **TSV Findings Export**: Dedicated **`Export TSV`** toolbar button and right-click context menu item to save currently displayed or filtered findings to a clean Tab-Separated Values (`.tsv`) file for reporting.
 - **Auto-Navigation & Deep-Linking Quad**: Selecting any finding row immediately auto-switches the editor, paints native Burp markers over the match, populates the search bar, and centers the text component.
 - **Inter-Tool Integration**: Right-click context menu on all tables to **Send to Repeater** (with clean `METHOD host/path` tab naming), **Send to Intruder**, **Send to Organizer**, and **Copy Match Excerpt**.
-- **Persistent Data Storage**:
-  - Automatically preserves findings, in-scope domains, configured target passwords, and secret classifications across Burp Suite application restarts and extension reinstallation.
-  - Stored by default in a dedicated directory within Burp Suite's directory (`~/.BurpSuite/response-inspector` or `%USERPROFILE%\.BurpSuite\response-inspector`).
-  - If the project is temporary or lacks a permanent disk location, prompts the user to specify or confirm where data should be stored.
-  - Features a dedicated **Storage...** dialog in the toolbar to inspect disk usage, change directory, save manually, or explicitly delete stored data from disk.
-  - Data persists across application restarts and extension reinstalls unless explicitly deleted by the user.
+- **Interactive Persistent Session Management & State Recovery**:
+  - **Strictly No Auto-Load By Default**: Does not load previously stored data automatically. On extension startup, prompts user with a choice modal:
+    - **Open Previous Session**: Load saved findings, passwords, domains, and classifications from an existing `.json` file.
+    - **Create New Session**: Prompts the user to explicitly specify/select the destination directory and session filename.
+    - **Start Temporary Session**: Work in-memory without binding immediately to a file.
+  - **Session Offboarding & Fresh Reset**: Once a session JSON file is onboarded, the user can click **Offboard Session** on the toolbar to safely flush changes, unbind the session file, stop background auto-saves, and restore the extension to a clean, fresh state without restarting Burp Suite.
+  - **Dedicated Global Session Toolbar**: Top-level toolbar exposing `Session: <filename> (<folder>)` or `Session: [Fresh / Unbound]`, alongside `New Session`, `Open Session`, `Offboard Session`, `Save As...`, `Save Now`, and `Analyze File...`.
+  - **Debounced Atomic Auto-Save Engine**: Automatically flushes updates asynchronously after a 1500ms debounce to a `.tmp` file before atomic replacement, guaranteeing zero data corruption.
+  - **High-Fidelity HTTP Message Preservation**: Serializes raw request and response bytes using Base64 with host, port, and protocol flags for 100% byte-accurate reconstruction.
 
 ---
 

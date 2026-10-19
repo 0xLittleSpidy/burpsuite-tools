@@ -20,9 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +39,7 @@ public class PersistentStorageTest {
     @BeforeEach
     public void setUp() {
         testStorageDir = tempFolder.resolve("test-storage").toFile();
-        // MontoyaApi is null in unit tests; fallback behavior applies
+        testStorageDir.mkdirs();
         storageManager = new PersistentStorageManager(null);
         storageManager.setStorageDirectory(testStorageDir);
     }
@@ -67,7 +66,7 @@ public class PersistentStorageTest {
     }
 
     @Test
-    public void testSaveAndReloadDataFidelity() throws Exception {
+    public void testSaveAndReloadJsonSessionFidelity() throws Exception {
         ResponseScanEngine engine = new ResponseScanEngine();
         InScopeDomainManager domainManager = new InScopeDomainManager();
 
@@ -80,9 +79,11 @@ public class PersistentStorageTest {
         pwScanner.addPassword("SuperSecretP@ss123");
         pwScanner.addPassword("Admin#2026!Key");
 
-        // 3. Setup sample findings with mock/empty HttpRequestResponse
+        // 3. Setup sample findings with mock HttpRequestResponse
         InspectorDataStore secretStore = engine.getDataStore(FindingCategory.SECRET);
         InspectorDataStore errorStore = engine.getDataStore(FindingCategory.ERROR);
+
+        HttpRequestResponse reqResp = null;
 
         FindingEntry secretEntry1 = new FindingEntry(
                 1,
@@ -97,7 +98,7 @@ public class PersistentStorageTest {
                 (short) 200,
                 "application/json",
                 128,
-                null,
+                reqResp,
                 "12:00:00",
                 10,
                 42
@@ -151,54 +152,39 @@ public class PersistentStorageTest {
         // Individual classification overrides type classification
         scm.markRequest(secretEntry1, SecretClassification.TRUE_POSITIVE);
 
-        // 5. Save data
+        // 5. Save data to JSON session file
+        File sessionFile = new File(testStorageDir, "my_session.json");
         storageManager.bindEngines(engine, domainManager);
-        boolean saveOk = storageManager.saveData(engine, domainManager);
-        assertTrue(saveOk, "saveData should return true");
+        storageManager.saveAs(sessionFile);
 
-        // Verify files exist on disk
-        File findingsFile = new File(testStorageDir, "findings.dat");
-        File configFile = new File(testStorageDir, "config.properties");
-        assertTrue(findingsFile.exists(), "findings.dat must exist on disk");
-        assertTrue(configFile.exists(), "config.properties must exist on disk");
-        assertTrue(findingsFile.length() > 0, "findings.dat must not be empty");
+        // Verify JSON session file exists and is populated
+        assertTrue(sessionFile.exists(), "my_session.json must exist on disk");
+        assertTrue(sessionFile.length() > 0, "session file must not be empty");
 
-        // Verify magic header and format version in binary file
-        try (DataInputStream dis = new DataInputStream(new FileInputStream(findingsFile))) {
-            int magic = dis.readInt();
-            assertEquals(0x52494644, magic, "Magic header must be 'RIFD' (0x52494644)");
-            int version = dis.readInt();
-            assertEquals(1, version, "Format version must be 1");
-            int count = dis.readInt();
-            assertEquals(3, count, "Should have stored 3 findings");
-        }
+        String jsonContent = Files.readString(sessionFile.toPath());
+        assertTrue(jsonContent.contains("corp-backup-2026.s3.amazonaws.com"));
+        assertTrue(jsonContent.contains("SuperSecretP@ss123"));
+        assertTrue(jsonContent.contains("example.com"));
 
-        // 6. Reload data into a fresh engine and domain manager
+        // 6. Reload into fresh engine and verify state recovery
         ResponseScanEngine freshEngine = new ResponseScanEngine();
         InScopeDomainManager freshDomainManager = new InScopeDomainManager();
 
         PersistentStorageManager loader = new PersistentStorageManager(null);
-        loader.setStorageDirectory(testStorageDir);
         loader.bindEngines(freshEngine, freshDomainManager);
+        loader.openSessionFile(sessionFile);
 
-        int loadedCount = loader.loadData(freshEngine, freshDomainManager);
-        assertEquals(3, loadedCount, "Should load 3 findings");
-
-        // Verify findings in stores
         assertEquals(2, freshEngine.getDataStore(FindingCategory.SECRET).size());
         assertEquals(1, freshEngine.getDataStore(FindingCategory.ERROR).size());
 
-        // Verify in-scope domains restoration
         Set<String> domains = freshDomainManager.getAllDomains();
         assertTrue(domains.contains("example.com"));
         assertTrue(domains.contains("api.target.com"));
 
-        // Verify passwords restoration
         List<String> passwords = freshEngine.getPasswordScanner().getPasswords();
         assertTrue(passwords.contains("SuperSecretP@ss123"));
         assertTrue(passwords.contains("Admin#2026!Key"));
 
-        // Verify classification restoration & precedence rules
         SecretClassificationManager freshScm = freshEngine.getSecretClassificationManager();
         assertEquals(SecretClassification.FALSE_POSITIVE, freshScm.getTypeClassification("AWS S3 Bucket"));
 
@@ -207,59 +193,68 @@ public class PersistentStorageTest {
                 .findFirst()
                 .orElse(null);
         assertNotNull(loadedSecret1);
-        assertEquals(SecretClassification.TRUE_POSITIVE, freshScm.getEffectiveClassification(loadedSecret1),
-                "Individual classification TP must be preserved over secret type FP");
+        assertEquals(SecretClassification.TRUE_POSITIVE, freshScm.getEffectiveClassification(loadedSecret1));
 
         loader.shutdown();
     }
 
     @Test
-    public void testDeleteStoredData() {
+    public void testSessionOffboardRestoresFreshExtensionState() {
         ResponseScanEngine engine = new ResponseScanEngine();
         InScopeDomainManager domainManager = new InScopeDomainManager();
 
-        domainManager.addDomain("persisted-domain.test");
+        domainManager.addDomain("offboard-test.com");
         engine.getDataStore(FindingCategory.COMMENT).addEntry(new FindingEntry(
                 1,
                 FindingCategory.COMMENT,
-                "TODO Developer Comment",
-                "TODO: remove dev key",
+                "TODO Comment",
+                "TODO: check auth",
                 "Response Body",
                 "GET",
-                "https://persisted-domain.test",
-                "persisted-domain.test",
+                "https://offboard-test.com",
+                "offboard-test.com",
                 "/",
                 (short) 200,
                 "text/html",
-                256,
+                128,
                 null,
                 "12:00:00",
                 0,
-                21
+                16
         ));
 
+        File sessionFile = new File(testStorageDir, "offboard_test.json");
         storageManager.bindEngines(engine, domainManager);
-        storageManager.saveData(engine, domainManager);
+        storageManager.saveAs(sessionFile);
 
-        File findingsFile = new File(testStorageDir, "findings.dat");
-        File configFile = new File(testStorageDir, "config.properties");
-        assertTrue(findingsFile.exists());
-        assertTrue(configFile.exists());
-        assertTrue(storageManager.getStorageSizeBytes() > 0);
+        assertEquals(1, engine.getDataStore(FindingCategory.COMMENT).size());
+        assertNotNull(storageManager.getActiveSessionFile());
 
-        // Explicitly delete stored data
-        boolean deleted = storageManager.deleteStoredData();
-        assertTrue(deleted);
+        // Perform offboard
+        storageManager.offboardSession(null, null);
 
-        assertFalse(findingsFile.exists(), "findings.dat must be deleted");
-        assertFalse(configFile.exists(), "config.properties must be deleted");
-        assertTrue(testStorageDir.exists(), "Storage directory itself should remain intact");
-        assertEquals(0, storageManager.getStorageSizeBytes());
+        // Verify fresh state
+        assertNull(storageManager.getActiveSessionFile(), "Active session file must be null after offboarding");
+        assertEquals(0, engine.getDataStore(FindingCategory.COMMENT).size(), "Data stores must be cleared after offboarding");
+        assertEquals(0, domainManager.getSelectedDomains().size(), "Domains must be deselected");
     }
 
     @Test
-    public void testIsTemporaryProjectFallback() {
-        // When api is null, isTemporaryProject must safely return true without exception
+    public void testTemporarySessionRemainsInMemory() {
+        storageManager.startTemporarySession();
+        assertNull(storageManager.getActiveSessionFile());
         assertTrue(storageManager.isTemporaryProject());
+    }
+
+    @Test
+    public void testDeleteStoredData() {
+        File sessionFile = new File(testStorageDir, "delete_test.json");
+        storageManager.saveAs(sessionFile);
+        assertTrue(sessionFile.exists());
+
+        boolean deleted = storageManager.deleteStoredData();
+        assertTrue(deleted);
+        assertFalse(sessionFile.exists());
+        assertNull(storageManager.getActiveSessionFile());
     }
 }

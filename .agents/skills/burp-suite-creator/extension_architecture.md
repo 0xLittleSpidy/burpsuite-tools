@@ -380,21 +380,32 @@ Every Burp Suite extension must provide robust session storage capabilities so t
      - **Active Session Indicator**: Displays the current session file path or `[Temporary / In-Memory]`.
      - **[New Session]**: Allows creating a new session file (prompting for save confirmation if dirty, then prompting for directory and filename).
      - **[Open Session]**: Opens an existing session file via `JFileChooser`.
+     - **[Offboard Session]**: Unbinds the active session file, prompts to save changes, and resets the extension to a clean, fresh state without restarting Burp.
      - **[Save As...]**: Exports or binds the current session to a new file location.
      - **[Save Now]**: Immediately flushes in-memory data to the bound session file synchronously.
 
-5. **Debounced Atomic Auto-Save Engine**:
+5. **Session Offboarding & Fresh Extension Reset**:
+   - Once a user has onboarded a session JSON file, they must have the ability to **offboard** it at any time.
+   - When offboarded:
+     - Prompt the user if unsaved changes exist: "Save changes to current session before offboarding?" (Yes/No/Cancel).
+     - If approved, flush final changes to the bound file.
+     - Unbind the active session file (`activeSessionFile = null`).
+     - Reset all in-memory findings, tables, filters, and candidate caches so the tester gets a completely clean, fresh extension workspace.
+     - Deactivate debounced auto-saves so no future writes touch the offboarded file.
+     - Update toolbar status to `Session: [Fresh / Unbound]`.
+
+6. **Debounced Atomic Auto-Save Engine**:
    - Never block the Swing Event Dispatch Thread (EDT) or trigger heavy disk I/O on every table event.
    - When a session file is bound, auto-save state changes using a single-threaded daemon `ScheduledExecutorService` with a 1500-2000ms debounce delay.
    - Always write data to a temporary file (`<filename>.tmp`) first, then commit via atomic replacement (`StandardCopyOption.ATOMIC_MOVE` with fallback to `REPLACE_EXISTING`) to guarantee zero file corruption.
 
-6. **High-Fidelity HTTP Message Serialization**:
+7. **High-Fidelity HTTP Message Serialization**:
    - Montoya API `HttpRequest` and `HttpResponse` objects cannot be blindly serialized directly by standard reflection serializers.
    - Convert raw message bytes to Base64 (`Base64.getEncoder().encodeToString(req.toByteArray().getBytes())`).
    - Store the associated `HttpService` metadata (host, port, and secure boolean) alongside the Base64 payload.
    - On deserialization, rebuild exact byte-accurate messages using `HttpRequest.httpRequest(service, ByteArray.byteArray(bytes))` and `HttpResponse.httpResponse(ByteArray.byteArray(bytes))`.
 
-7. **Lifecycle Unloading Hook**:
+8. **Lifecycle Unloading Hook**:
    - Register `api.extension().registerUnloadingHandler(...)` to perform an immediate synchronous save (`saveSync`) before Burp unloads the extension, but only if an active session file is bound.
    - Release background executor threads cleanly on unload.
 

@@ -5,6 +5,7 @@ import com.littlespidy.responseinspector.engine.ResponseScanEngine;
 import com.littlespidy.responseinspector.model.InScopeDomainManager;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 
@@ -90,12 +91,36 @@ public class StorageConfigDialog extends JDialog {
         // Buttons Bar
         JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
 
+        JButton offboardBtn = new JButton("Offboard Session");
+        offboardBtn.setToolTipText("Unbind active session file and restore clean fresh extension state");
+        offboardBtn.addActionListener(e -> {
+            storageManager.offboardSession(this, refreshCallback);
+            pathField.setText(storageManager.getStorageDirectory().getAbsolutePath());
+            updateStats();
+        });
+
         JButton saveNowBtn = new JButton("Save Now");
         saveNowBtn.setToolTipText("Immediately write all current findings and configurations to disk");
         saveNowBtn.addActionListener(e -> {
-            storageManager.saveNow();
-            updateStats();
-            JOptionPane.showMessageDialog(this, "Data successfully saved to:\n" + storageManager.getStorageDirectory().getAbsolutePath(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+            if (storageManager.getActiveSessionFile() == null) {
+                JFileChooser chooser = new JFileChooser(storageManager.getStorageDirectory());
+                chooser.setDialogTitle("Save Session As");
+                chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+                if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    File sel = chooser.getSelectedFile();
+                    if (!sel.getName().toLowerCase().endsWith(".json")) {
+                        sel = new File(sel.getParentFile(), sel.getName() + ".json");
+                    }
+                    storageManager.saveAs(sel);
+                    pathField.setText(storageManager.getStorageDirectory().getAbsolutePath());
+                    updateStats();
+                    JOptionPane.showMessageDialog(this, "Session successfully saved to:\n" + sel.getAbsolutePath(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } else {
+                storageManager.saveNow();
+                updateStats();
+                JOptionPane.showMessageDialog(this, "Data successfully saved to:\n" + storageManager.getActiveSessionFile().getAbsolutePath(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+            }
         });
 
         JButton deleteDataBtn = new JButton("Delete Stored Data");
@@ -106,6 +131,7 @@ public class StorageConfigDialog extends JDialog {
         JButton closeBtn = new JButton("Close");
         closeBtn.addActionListener(e -> dispose());
 
+        bottomBar.add(offboardBtn);
         bottomBar.add(deleteDataBtn);
         bottomBar.add(new JSeparator(JSeparator.VERTICAL));
         bottomBar.add(saveNowBtn);
