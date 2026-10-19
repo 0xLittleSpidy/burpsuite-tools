@@ -24,3 +24,11 @@ All Burp Suite extensions must use the modern Montoya API (net.portswigger.burp.
 
 ### 4. Code Preservation
 Preserve all existing comments, docstrings, and unrelated code functionality unless explicitly instructed otherwise.
+
+### 5. Extension JAR Artifact Requirement
+- Every Burp Suite extension project must include and track its compiled release fat-JAR under `<ExtensionFolder>/build/libs/<name>.jar`.
+- Whenever an extension project is created, modified, or refactored:
+  1. Build the release fat-JAR (`./gradlew clean test build` or `./gradlew jar`).
+  2. Verify that `.gitignore` does not ignore `build/libs/*.jar`.
+  3. Always stage, commit, and push the newly compiled JAR file to the remote repository alongside source code changes.
+  4. Never omit the compiled JAR file from commits.
