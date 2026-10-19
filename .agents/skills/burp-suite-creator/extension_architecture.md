@@ -26,7 +26,10 @@ into any new Burp extension.
 - [Design Philosophy](#design-philosophy)
 - [Montoya API Integration Patterns](#montoya-api-integration-patterns)
 - [UI Architecture Patterns](#ui-architecture-patterns)
+  - [Tab Hierarchy (Multi-Session Model)](#tab-hierarchy-multi-session-model)
+  - [Tab Naming Convention & Double-Click In-Place Header Renaming (No Popups)](#tab-naming-convention--double-click-in-place-header-renaming-no-popups)
   - [Core Toolbar Triage Filters (Status Code, Method, In-Scope, Domain)](#core-toolbar-triage-filters-status-code-method-in-scope-domain)
+  - [Universal Table Column Sorting & Right-Aligned In-Cell Copy Actions](#universal-table-column-sorting--right-aligned-in-cell-copy-actions)
 - [Workflow Methodology](#workflow-methodology)
   - [External Tool Feature Extraction & Integration](#3-external-tool-feature-extraction--integration-porting-methodology)
 - [Results Presentation & Filtering](#results-presentation--filtering)
@@ -144,128 +147,209 @@ Top-level Suite Tab
 - Each "Send to Extension" from the context menu spawns a new session tab with an `x`
   close button (borderless, non-focusable `JButton`).
 - A `SessionRegistry` tracks all controllers so they can be cleaned up on extension unload.
-- Tab title is truncated at 30 characters for readability (e.g., `POST /product/stock`).
-- Close button prompts `JOptionPane.showConfirmDialog()` for user confirmation.
+- Tab title follows a strict default naming convention: `#<ID> <METHOD> <truncated_path>` (e.g., `#1 GET /api/v1/users`).
+- Double-clicking the tab title opens an inline text field directly in the tab header to rename the tab in-place with zero modal popups.
+- Close button prompts `JOptionPane.showConfirmDialog()` for user confirmation if a test is running.
 
 **Why this matters:** Most extensions create a single tab. Supporting multiple concurrent
 sessions — each with its own request, results, and controls — gives the tester
 dramatically better workflow. They can run tests on one endpoint while sweeping another.
 
-### Tab Visual Styling & Symbol Prefixes (Icons & Emojis)
+### Tab Naming Convention & Double-Click In-Place Header Renaming (No Popups)
 
-Burp Suite's top-level tab bar is naturally crowded with default core tools (`Dashboard`, `Target`, `Proxy`, `Intruder`, `Repeater`, `Collaborator`, `Sequencer`, `Decoder`, `Comparer`, `Logger`, `Extensions`) alongside any installed third-party BApps. Within an extension itself, root tabbed panes and master-detail viewers often present between 4 and 8 tabs.
+Burp extensions supporting dynamic multi-session testing (e.g. sending requests from Proxy History, Repeater, Logger, or Scanner into dedicated testing/fuzzing/auditing tabs) must provide a predictable default naming convention and seamless in-place tab renaming.
 
-Adding clean, contextual **symbol or emoji prefixes** before tab names significantly improves visual hierarchy, aesthetic polish, and rapid tool discoverability.
+#### 1. Default Tab Naming Convention When Sending to Extension
 
-#### 1. Benefits & Workflow Value
+Whenever a user sends an HTTP request or traffic item to create a new session tab:
 
-- **Instant Suite Identity:** A distinct symbol (e.g., `🛡️ CSP Inspector`, `⚡ Input Validation Fuzzer`, `🔍 JS Explorer`) makes the extension immediately recognizable in Burp's suite tab bar without requiring the tester to read every text label.
-- **Visual Categorization in Multi-Tab UIs:** Sub-tabs inside an extension (documentation, discovery sweeps, active session runners, findings, raw HTTP editors) are visually partitioned at a glance.
-- **Ambient Status Signaling:** Dynamic session tabs can swap symbols to indicate background execution state in real time (e.g., `⏳ Running...` → `✔ Complete` or `⚠️ Findings`).
+- **Structured Default Name**: Always assign a clean, structured name:
+  `#<ID> <METHOD> <truncated_path>`
+  - Examples: `#1 GET /api/v1/users`, `#2 POST /login`, `#3 PUT /profile/avatar`
+- **Auto-Incrementing Session Counter**: Maintain an atomic session counter (`AtomicInteger sessionCounter = new AtomicInteger(1)`) so every newly dispatched session tab receives a distinct, sequential ID. This allows testers to instantly distinguish between multiple requests sent to identical endpoints (e.g., `#1 POST /api/checkout` vs `#2 POST /api/checkout`).
+- **Clean Path Truncation**: Truncate long URLs or endpoint paths to 20-25 characters with trailing ellipsis (`...`) so the tab bar remains compact, avoiding horizontal tab overflow.
+- **Detailed Tooltip**: Always assign the full, untruncated HTTP method, host, and path as the tab's tooltip via `tabbedPane.setToolTipTextAt(index, fullEndpointDescription)`.
+- **Zero Emojis**: Tab titles, prefixes, and status badges must use plain ASCII text only (e.g., `[Running]`, `[Done]`, `[Alert]`). Never use emojis or decorative unicode symbols.
 
-#### 2. Curated Symbol Catalog for Burp Extensions
+#### 2. Double-Click In-Place Header Renaming (Zero Modal Popups)
 
-Java Swing renders FlatLaf (Burp Suite's modern look-and-feel) across Linux, Windows, and macOS. Use standardized Unicode symbols or cross-platform emojis:
+Testers frequently need to customize session tab names to reflect their specific test context (e.g. `admin-bypass`, `idor-user2`, `sqli-probe`).
 
-| Category | Recommended Symbol | Unicode Escape | Example Tab Title | Description / When to Use |
-|---|---|---|---|---|
-| **Security / Inspection** | `🛡️` or `🛡` | `\uD83D\uDEE1\uFE0F` / `\u26E8` | `🛡️ CSP Inspector` | Security policy auditing, HSTS, CORS, header checks |
-| **Fuzzing / Attacks** | `⚡` | `\u26A1` | `⚡ Validation Fuzzer` | Active probing, fuzzer suites, mutation runners |
-| **Recon / Sweeping** | `🎯` or `🌐` | `\uD83C\uDFAF` / `\uD83C\uDF10` | `🎯 Traffic Sweep` | Broad surface discovery, endpoint scrapers, crawler queues |
-| **Search / Mining** | `🔍` or `🔎` | `\uD83D\uDD0D` / `\uD83D\uDD0E` | `🔍 Recon & Secrets` | Regex extractors, JS secret miners, endpoint finders |
-| **Source / Tree** | `🌲` or `📁` | `\uD83C\uDF32` / `\uD83D\uDCC1` | `📁 Source Tree` | Reconstructed file trees, sitemap explorers, maps |
-| **AI / Intelligence** | `✨` or `🤖` | `\u2728` / `\uD83E\uDD16` | `✨ AI Security Analyst` | LLM-assisted analysis, automated triaging |
-| **Documentation / Guide** | `📖` or `ℹ️` | `\uD83D\uDCD6` / `\u2139\uFE0F` | `📖 Welcome & Guide` | Static onboarding tabs, workflow cheat sheets, cards |
-| **Results / Data** | `📊` or `📋` | `\uD83D\uDCCA` / `\uD83D\uDCCB` | `📊 Findings & Evidence` | Findings tables, vulnerability summaries, audit logs |
-| **HTTP Request** | `📤` or `→` | `\uD83D\uDCE4` / `\u2192` | `📤 Request` | Outgoing HTTP request editor tab |
-| **HTTP Response** | `📥` or `←` | `\uD83D\uDCE5` / `\u2190` | `📥 Response` | Inbound HTTP response editor tab |
-| **Configuration** | `⚙️` or `⚙` | `\u2699\uFE0F` / `\u2699` | `⚙️ Options & Scope` | Settings modals, rate limits, attack configurations |
-| **Dynamic Running** | `⏳` or `🔄` | `\u23F3` / `\uD83D\uDD04` | `⏳ POST /api/v1 (Running)` | Session currently executing in background thread |
-| **Dynamic Finished** | `✔` or `✅` | `\u2714` / `\u2705` | `✔ POST /api/v1 (Done)` | Session completed successfully |
-| **Dynamic Alert** | `⚠️` or `🚨` | `\u26A0\uFE0F` / `\uD83D\uDEA8` | `⚠️ POST /api/v1 (3 Issues)` | Session completed with interesting security signals |
+- **Strict Popup Prohibition**: Never open a modal dialog or popup (`JOptionPane.showInputDialog`, floating dialogs, or prompt windows) when a user wants to rename a tab. Modal popups steal focus, disrupt workflow, and require unnecessary mouse clicks.
+- **In-Place Tab Header Editing**: When the user double-clicks the tab title label, the tab header must switch directly into an inline editing mode inside the tab bar itself, mirroring native Burp Suite tab editing (such as in Repeater).
+- **Interactive Controls**:
+  - **Double-Click Activation**: Double-clicking the `JLabel` title triggers edit mode, swapping the label with an active `JTextField`.
+  - **Auto-Focus & Text Selection**: The text field immediately requests focus (`requestFocusInWindow()`) and pre-selects its content (`selectAll()`).
+  - **Commit on Enter**: Pressing `Enter` commits the new title, updates `titleLabel.setText(newTitle)`, updates `tabbedPane.setTitleAt(tabIndex, newTitle)`, and switches back to the label view.
+  - **Cancel on Escape**: Pressing `Escape` cancels editing without modifying the tab title and restores the label view.
+  - **Focus-Lost Auto-Commit**: Clicking outside or switching away automatically commits the edit gracefully and returns to the label view.
+  - **Persistent Close Action**: The close button (`x`) remains present and functional in the tab header throughout editing.
 
-#### 3. Implementation Code Patterns
-
-**Suite Tab Registration (Top-Level Burp Bar):**
-```java
-// Register with a distinct symbol prefix for instant visual identity
-api.userInterface().registerSuiteTab("🛡️ CSP Inspector", mainPanel);
-```
-
-**Internal Root Tabbed Pane:**
-```java
-JTabbedPane rootTabbedPane = new JTabbedPane();
-
-// Category-distinct tab labels:
-rootTabbedPane.addTab("📖 Welcome & Guide", welcomePanel);
-rootTabbedPane.addTab("🎯 Traffic Sweep", sweepPanel);
-rootTabbedPane.addTab("🔍 Recon & Secrets", reconPanel);
-rootTabbedPane.addTab("⚙️ Settings", settingsPanel);
-```
-
-**Request / Response Editor Sub-Tabs:**
-```java
-JTabbedPane editorTabs = new JTabbedPane();
-editorTabs.addTab("📤 Request", requestEditor.uiComponent());
-editorTabs.addTab("📥 Response", responseEditor.uiComponent());
-editorTabs.addTab("📋 Evidence & Notes", new JScrollPane(evidenceTextArea));
-```
-
-**Dynamic Session Tabs with Close Button & Status Symbol:**
-When launching dynamic session tabs (e.g. per-endpoint attack sessions), provide a custom tab component with an icon/symbol prefix, title truncation, and a close button:
+#### 3. Complete Swing Implementation Pattern
 
 ```java
-public void addSessionTab(String method, String path, JPanel sessionContent) {
-    int index = rootTabbedPane.getTabCount();
-    
-    // Initial tab state with running symbol and safely truncated endpoint
-    String truncatedPath = path.length() > 22 ? path.substring(0, 19) + "..." : path;
-    String titleText = "⏳ " + method + " " + truncatedPath;
-    
-    rootTabbedPane.addTab(titleText, sessionContent);
+// --- 1. Inline Editable Tab Header Component (Zero Popups) ---------
+public class EditableTabHeader extends JPanel {
+    private final JTabbedPane tabbedPane;
+    private final Component tabContent;
+    private final JLabel titleLabel;
+    private final JTextField editField;
+    private final JButton closeButton;
+    private boolean isEditing = false;
 
-    // Custom tab header component
-    JPanel tabHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-    tabHeader.setOpaque(false);
+    public EditableTabHeader(JTabbedPane tabbedPane, Component tabContent, String defaultTitle) {
+        super(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        setOpaque(false);
+        this.tabbedPane = tabbedPane;
+        this.tabContent = tabContent;
 
-    JLabel titleLabel = new JLabel(titleText);
-    JButton closeBtn = new JButton("×");
-    closeBtn.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
-    closeBtn.setContentAreaFilled(false);
-    closeBtn.setFocusable(false);
-    closeBtn.setToolTipText("Close Session");
-    closeBtn.addActionListener(e -> {
-        int tabIdx = rootTabbedPane.indexOfComponent(sessionContent);
-        if (tabIdx != -1) {
-            rootTabbedPane.removeTabAt(tabIdx);
+        // Display label
+        this.titleLabel = new JLabel(defaultTitle);
+        this.titleLabel.setToolTipText("Double-click to rename tab");
+
+        // Inline text field editor (hidden until double-click)
+        this.editField = new JTextField();
+        this.editField.setVisible(false);
+        this.editField.setFont(titleLabel.getFont());
+        this.editField.setColumns(Math.max(10, defaultTitle.length()));
+
+        // Double-click to initiate inline editing
+        this.titleLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    startEditing();
+                }
+            }
+        });
+
+        // Key bindings: Enter to commit, Escape to cancel
+        this.editField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    commitEditing();
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    cancelEditing();
+                }
+            }
+        });
+
+        // Commit on focus loss
+        this.editField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (isEditing) {
+                    commitEditing();
+                }
+            }
+        });
+
+        // Close button (plain ASCII 'x')
+        this.closeButton = new JButton("x");
+        this.closeButton.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 2));
+        this.closeButton.setContentAreaFilled(false);
+        this.closeButton.setFocusable(false);
+        this.closeButton.setToolTipText("Close tab");
+        this.closeButton.addActionListener(e -> {
+            int idx = tabbedPane.indexOfComponent(tabContent);
+            if (idx != -1) {
+                tabbedPane.removeTabAt(idx);
+            }
+        });
+
+        add(titleLabel);
+        add(editField);
+        add(closeButton);
+    }
+
+    private void startEditing() {
+        isEditing = true;
+        editField.setText(titleLabel.getText());
+        editField.setColumns(Math.max(8, titleLabel.getText().length()));
+        titleLabel.setVisible(false);
+        editField.setVisible(true);
+        revalidate();
+        editField.requestFocusInWindow();
+        editField.selectAll();
+    }
+
+    private void commitEditing() {
+        if (!isEditing) return;
+        isEditing = false;
+        String newTitle = editField.getText().trim();
+        if (!newTitle.isEmpty()) {
+            titleLabel.setText(newTitle);
+            int idx = tabbedPane.indexOfComponent(tabContent);
+            if (idx != -1) {
+                tabbedPane.setTitleAt(idx, newTitle);
+            }
         }
-    });
+        editField.setVisible(false);
+        titleLabel.setVisible(true);
+        revalidate();
+        repaint();
+    }
 
-    tabHeader.add(titleLabel);
-    tabHeader.add(closeBtn);
-    rootTabbedPane.setTabComponentAt(index, tabHeader);
+    private void cancelEditing() {
+        if (!isEditing) return;
+        isEditing = false;
+        editField.setVisible(false);
+        titleLabel.setVisible(true);
+        revalidate();
+        repaint();
+    }
+
+    public void updateTitle(String text) {
+        titleLabel.setText(text);
+        int idx = tabbedPane.indexOfComponent(tabContent);
+        if (idx != -1) {
+            tabbedPane.setTitleAt(idx, text);
+        }
+    }
+
+    public String getTitle() {
+        return titleLabel.getText();
+    }
+}
+
+// --- 2. Dispatching Session Tab with Default Naming & Inline Header -
+public class SessionTabManager {
+    private final JTabbedPane rootTabbedPane;
+    private final AtomicInteger sessionCounter = new AtomicInteger(1);
+
+    public SessionTabManager(JTabbedPane rootTabbedPane) {
+        this.rootTabbedPane = rootTabbedPane;
+    }
+
+    public void addSessionTab(String method, String path, JPanel sessionContent) {
+        // Step 1: Apply default naming convention: #<ID> <METHOD> <truncated_path>
+        int sessionId = sessionCounter.getAndIncrement();
+        String truncatedPath = path.length() > 22 ? path.substring(0, 19) + "..." : path;
+        String defaultTitle = "#" + sessionId + " " + method.toUpperCase() + " " + truncatedPath;
+
+        int index = rootTabbedPane.getTabCount();
+        rootTabbedPane.addTab(defaultTitle, sessionContent);
+
+        // Step 2: Attach inline editable tab header (zero popups)
+        EditableTabHeader tabHeader = new EditableTabHeader(rootTabbedPane, sessionContent, defaultTitle);
+        rootTabbedPane.setTabComponentAt(index, tabHeader);
+        rootTabbedPane.setToolTipTextAt(index, method.toUpperCase() + " " + path);
+        rootTabbedPane.setSelectedIndex(index);
+    }
+
+    // Step 3: Status update without emojis (plain ASCII text tags)
+    public void setSessionStatus(Component sessionContent, String statusTag) {
+        int idx = rootTabbedPane.indexOfComponent(sessionContent);
+        if (idx != -1 && rootTabbedPane.getTabComponentAt(idx) instanceof EditableTabHeader header) {
+            String currentTitle = header.getTitle();
+            // Remove previous tag if present, then prepend new ASCII status tag
+            String cleanTitle = currentTitle.replaceAll("\\[.*?\\]", "").trim();
+            header.updateTitle("[" + statusTag + "] " + cleanTitle);
+        }
+    }
 }
 ```
-
-**Live Status Glyphs on Session Completion:**
-When background execution finishes, update the tab's symbol prefix on the Swing EDT to give ambient feedback:
-
-```java
-// Inside worker completion callback (Swing EDT):
-SwingUtilities.invokeLater(() -> {
-    String statusSymbol = findingsCount > 0 ? "⚠️" : "✔";
-    String updatedTitle = statusSymbol + " " + method + " " + truncatedPath;
-    titleLabel.setText(updatedTitle);
-});
-```
-
-#### 4. Formatting & Cross-Platform Best Practices
-
-1. **Always Include a Trailing Space:** Always format as `"🛡️ CSP Inspector"` rather than `"🛡️CSP Inspector"`. Without a space, characters can visually collide or render clipped in certain Swing Look-and-Feels.
-2. **Safe Unicode Characters for Linux Headless / Minimal Fonts:** While FlatLaf handles most emojis gracefully, older Linux distributions with minimal font packages may render high-surrogate color emojis as monochrome or boxes. If maximum universal compatibility is required across all host systems, prefer standard BMP Unicode symbols:
-   - `⚡` (`\u26A1`), `✦` (`\u2726`), `★` (`\u2605`), `▶` (`\u25B6`), `●` (`\u25CF`), `✔` (`\u2714`), `✖` (`\u2716`), `ℹ` (`\u2139`), `⚙` (`\u2699`).
-3. **Preserve Symbol During Truncation:** When truncating long URLs or paths for session tabs (e.g. 30 characters maximum), always truncate the *path string first* before prepending the symbol, ensuring the icon glyph is never sliced or corrupted.
-4. **Consistency Across the Extension:** Keep symbol conventions consistent across the extension — if `📤 Request` and `📥 Response` are used in one panel, use the same symbols in all viewer panels.
 
 ### Collapsible Filter Sidebar
 
@@ -1018,6 +1102,44 @@ private void loadProxyHistory() {
 - **Preserve Filter State:** Loading new history should update the backing data store and re-evaluate active toolbar filters without resetting user-selected filter checkboxes or dropdowns.
 - **Fail-Safe UI State:** Always wrap `done()` logic in `try-finally` to ensure `progressBar.setVisible(false)` and `loadButton.setEnabled(true)` are executed even when an unhandled exception or cancellation occurs.
 
+### Universal Table Column Sorting & Right-Aligned In-Cell Copy Actions
+
+In Burp Suite security workflows, tables (such as HTTP Proxy history, Logger, and Intruder results) serve as the primary triage workbench for testers. Any table displayed by an extension must strictly adhere to Burp Suite's native table architecture standards:
+
+#### 1. Mandatory Universal Column Sorting (HTTP Proxy History Standard)
+- **Always Sortable**: Whenever there is a column in any extension table (candidate endpoints, findings, logs, parameters, headers, or sweep results), **every column must always be interactive and sortable**, exactly mirroring the sorting behavior in Burp Suite's HTTP Proxy History.
+- **Bi-Directional Header Clicking**: Clicking a column header must cycle through ascending sort, descending sort, and restoration of natural order.
+- **Accurate Type-Aware Ordering**: Columns must sort by their underlying semantic data type rather than raw string representations:
+  - Numeric columns (request index `#`, HTTP status code, response length, timing/latency) must sort strictly numerically (`20` before `100`), not lexicographically (`100` before `20`).
+  - String columns (Method, Host, Path, MIME type) sort lexicographically (case-insensitive).
+  - Date/Timestamp columns sort chronologically.
+- **Live Stream Stability**: As background workers stream new traffic or findings into the table, active sort ordering must be preserved automatically (`sorter.setSortsOnUpdates(true)`).
+- **Index Translation**: Every row access for detail views, selection listeners, and right-click context menus must convert view row indices to model row indices via `table.convertRowIndexToModel(viewRow)`.
+
+#### 2. In-Cell Column Copy Button Placement (Right Side Column Border Edge)
+- **Positioned on Right Border Edge**: Whenever an in-cell copy action or button is used within a column (e.g. copying a full URL, endpoint path, secret token, header value, or cell excerpt), the copy symbol/trigger **must always be positioned on the right side of the column border edge**.
+- **Edge Alignment & Padding**: The copy trigger must be pinned flush against the right margin (`BorderLayout.EAST` in the cell layout) with a small, clean padding (e.g., 2 to 4 pixels) from the column border divider line. The primary cell text occupies the center/west region and truncates cleanly so text never collides with or hides behind the copy symbol.
+- **Direct Clipboard Interaction**: Clicking the right-aligned copy trigger immediately copies the cell's raw string or target value to the system clipboard and provides immediate visual feedback (e.g., status bar label update: `"Copied: <value>"`).
+- **Preserve Row Selection**: Triggering the copy action should not inadvertently break row selection or cause erratic editor focus changes.
+
+#### 3. Strict Emoji Prohibition (No Emojis Rule)
+- **Zero Emojis Everywhere**: Under no circumstances should emojis or decorative unicode symbols (such as clipboard icons, document emojis, checkmark emojis, or scissors) be used in column headers, cells, buttons, or tooltips.
+- **Plain ASCII & Java 2D Graphics Only**: The copy symbol on the right border edge must be rendered using:
+  - Plain ASCII text (such as `[Copy]`, `"Copy"`, or `"CP"`), or
+  - Pure Java 2D vector drawing via an `Icon` component (`Graphics2D.drawRect` rendering clean rectangular document outlines), ensuring 100% platform-independent, monochrome rendering with zero unicode font dependencies.
+
+#### 4. Direct In-Place Table Editing (No Modal Edit Dialogs)
+- **Edit Directly in the Row**: Whenever a user needs to edit a column value (e.g. payload templates, target file paths, categories, descriptions, or header values), the table must support direct in-place editing inside the cell. Never force the user to open a modal popup dialog to edit row values.
+- **Double-Click & Keyboard Activation**: Double-clicking a cell or selecting a row and pressing Enter immediately activates the cell's in-place editor.
+- **In-Cell Constrained Selectors**: For columns with constrained choices (such as Platform: `Linux` / `Windows`, HTTP Method: `GET` / `POST`, or Category), bind an in-row `DefaultCellEditor` wrapping a `JComboBox` directly to the column model rather than opening a popup form.
+- **Immediate Model & Persistence Commit**: Committing the edit (`setValueAt`) immediately updates the underlying data model, fires table change events, and persists the update directly to the storage JSON file on disk.
+
+#### 5. Multi-Row Selection & Fast Batch Deletion (Shift + Arrow, Delete Key)
+- **Multiple Interval Selection**: Extension tables must configure `table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)` to allow users to select ranges of rows using `Shift + Up/Down Arrow` or non-contiguous rows using `Ctrl + Click`.
+- **Keyboard Delete Binding**: Tables must bind the `Delete` and `Backspace` keys (`KeyEvent.VK_DELETE`, `KeyEvent.VK_BACK_SPACE`) via `InputMap` / `ActionMap` to invoke the delete routine directly.
+- **Single-Pass Batch Removal**: Batch deletion routines must convert view row indices to model row indices (`table.convertRowIndexToModel`), sort descending, and remove all selected rows from memory in a single pass. The underlying store must provide a batch delete method (e.g. `removeEntries(int[] modelIndices)`) that writes to disk only once after all items are removed, avoiding costly repetitive disk writes.
+- **Safe Confirmation Prompt**: When multiple rows are selected, display a single clear confirmation dialog stating the count of items to be deleted (e.g., `"Delete 5 selected items?"`).
+
 ---
 
 ## Swing Patterns & Layout Reference
@@ -1080,6 +1202,106 @@ if (selectedViewRow != -1) {
 table.setDefaultRenderer(Object.class, customRenderer);
 table.setDefaultRenderer(Integer.class, customRenderer);
 table.setDefaultRenderer(String.class, customRenderer);
+```
+
+### In-Cell Column Copy Action (Right-Aligned Border Edge Pattern)
+
+When rendering an actionable copy button inside a table cell (such as an endpoint URL, path, or secret value), follow this Swing pattern:
+1. **Right Border Edge Alignment**: Place the copy symbol in `BorderLayout.EAST` of the cell renderer panel, pinned against the right column border edge with a small margin (e.g. 4px).
+2. **Zero Emojis**: Never use unicode emoji glyphs. Render the copy symbol via plain ASCII text (such as `[Copy]`) or a lightweight Java 2D vector `Icon` that draws rectangular document outlines.
+3. **Decoupled Click Handling**: Detect mouse clicks inside the rightmost copy region to perform clipboard copying without disrupting row selection or sorting.
+
+```java
+// --- 1. Pure Java 2D Document Copy Icon (Zero Emojis) -------------
+public class AsciiDocCopyIcon implements Icon {
+    private final int width = 12;
+    private final int height = 14;
+
+    @Override
+    public void paintIcon(Component c, Graphics g, int x, int y) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setColor(c.getForeground());
+        // Clean double-sheet outline using standard Java 2D graphics - no emojis!
+        g2.drawRect(x + 3, y, 7, 9);     // Back sheet
+        g2.drawRect(x, y + 3, 7, 9);     // Front sheet
+        g2.dispose();
+    }
+
+    @Override
+    public int getIconWidth() { return width; }
+
+    @Override
+    public int getIconHeight() { return height; }
+}
+
+// --- 2. Cell Renderer with Copy Symbol on Right Border Edge -------
+public class CopyableCellRenderer extends DefaultTableCellRenderer {
+    private final JPanel panel = new JPanel(new BorderLayout(4, 0));
+    private final JLabel textLabel = new JLabel();
+    private final JLabel copySymbolLabel = new JLabel("[Copy]"); // Or: new JLabel(new AsciiDocCopyIcon())
+
+    public CopyableCellRenderer() {
+        panel.setOpaque(true);
+        textLabel.setOpaque(false);
+        copySymbolLabel.setOpaque(false);
+        copySymbolLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+        copySymbolLabel.setToolTipText("Copy value to clipboard");
+        // Pin flush against right column border edge with 4px padding
+        copySymbolLabel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 4));
+
+        panel.add(textLabel, BorderLayout.CENTER);
+        panel.add(copySymbolLabel, BorderLayout.EAST);
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(
+        JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column
+    ) {
+        String text = value == null ? "" : value.toString();
+        textLabel.setText(text);
+
+        if (isSelected) {
+            panel.setBackground(table.getSelectionBackground());
+            textLabel.setForeground(table.getSelectionForeground());
+            copySymbolLabel.setForeground(table.getSelectionForeground());
+        } else {
+            panel.setBackground(table.getBackground());
+            textLabel.setForeground(table.getForeground());
+            copySymbolLabel.setForeground(Color.GRAY);
+        }
+        return panel;
+    }
+}
+
+// --- 3. Right-Edge Click Detection & Clipboard Copy ----------------
+table.addMouseListener(new MouseAdapter() {
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int viewRow = table.rowAtPoint(e.getPoint());
+        int viewCol = table.columnAtPoint(e.getPoint());
+        if (viewRow < 0 || viewCol < 0) return;
+
+        int modelCol = table.convertColumnIndexToModel(viewCol);
+        if (modelCol == TARGET_COPYABLE_COLUMN) {
+            Rectangle cellBounds = table.getCellRect(viewRow, viewCol, false);
+            int triggerWidth = 45; // Width of right-aligned copy trigger region
+            int triggerStartX = cellBounds.x + cellBounds.width - triggerWidth;
+
+            // Trigger copy only when click occurs on right side of column border edge
+            if (e.getX() >= triggerStartX) {
+                int modelRow = table.convertRowIndexToModel(viewRow);
+                Object val = table.getModel().getValueAt(modelRow, modelCol);
+                if (val != null) {
+                    String text = val.toString();
+                    StringSelection selection = new StringSelection(text);
+                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+                    statusLabel.setText("Copied: " + text);
+                }
+            }
+        }
+    }
+});
 ```
 
 ### Dialog Patterns

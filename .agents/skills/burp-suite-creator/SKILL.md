@@ -176,6 +176,26 @@ public Class<?> getColumnClass(int columnIndex) {
 4. Clicking a column header once sorts ascending; clicking a second time reverses the sort order (descending).
 5. Explicitly register custom renderers for typed columns: When `getColumnClass` returns specific classes like `Integer.class`, Swing's default class renderers may override renderers registered only for `Object.class`. Explicitly register custom renderers for `Integer.class`, `String.class`, and other specific types to ensure consistent visual styling (e.g. status code badges) across sorted columns.
 
+### 9. Dynamic Tab Naming Convention & Double-Click Inline Renaming (Zero Popups)
+
+Whenever an extension spawns dynamic session tabs (e.g., when a user sends an HTTP request from context menus, Proxy history, Repeater, or scanner):
+
+1. **Default Naming Convention**:
+   - Always assign a structured, predictable default tab title: `"#<ID> <METHOD> <truncated_path>"` (e.g., `"#1 GET /api/v1/users"`, `"#2 POST /login"`).
+   - Use an auto-incrementing atomic session counter (`AtomicInteger sessionCounter = new AtomicInteger(1)`) so concurrent tabs are clearly numbered and identifiable.
+   - Truncate long URLs/paths cleanly to 20-25 characters with trailing `...` to keep the tab bar compact.
+   - Set the full HTTP method, host, and path on the tab's tooltip via `tabbedPane.setToolTipTextAt(...)`.
+   - Never use emojis in tab titles or status indicators; use plain ASCII text only (e.g., `[Running]`, `[Done]`, `[Alert]`).
+
+2. **Double-Click In-Place Header Renaming (No Modal Popups)**:
+   - When a user double-clicks the tab title in the tab bar header, allow them to edit the tab name **directly inline** inside the tab header.
+   - **Strict Zero-Popup Rule**: Strictly avoid `JOptionPane.showInputDialog` or modal popup dialogs. Modal dialogs interrupt tester flow and require unnecessary mouse clicks.
+   - Provide a custom tab component (`EditableTabHeader`) containing a `JLabel` (display mode), a `JTextField` (inline edit mode), and a close button (`JButton`).
+   - Double-clicking the `JLabel` swaps it for the `JTextField`, populates it with the current title, requests focus (`requestFocusInWindow()`), and selects all text (`selectAll()`).
+   - Pressing `Enter` commits the new title to both the label and `JTabbedPane.setTitleAt(...)`, then switches back to `JLabel`.
+   - Pressing `Escape` cancels the edit without changing the title.
+   - Focus loss (`focusLost`) automatically commits or cancels cleanly.
+
 
 ## Output and Saving
 
