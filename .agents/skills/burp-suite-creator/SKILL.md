@@ -196,6 +196,28 @@ Whenever an extension spawns dynamic session tabs (e.g., when a user sends an HT
    - Pressing `Escape` cancels the edit without changing the title.
    - Focus loss (`focusLost`) automatically commits or cancels cleanly.
 
+### 10. Persistent Session Storage & State Recovery (Zero Data Loss Across Restarts)
+
+Whenever an extension manages user sessions, sub-tabs, inspection results, or audit state:
+
+1. **Prompt on Extension Load**:
+   - On initialization, resolve the storage folder:
+     a) If an active Burp project (`.burp`) is detected, automatically use the project directory.
+     b) If running in a temporary project or no remembered preference exists, prompt the user with a directory chooser dialog (`JFileChooser` with `DIRECTORIES_ONLY`) asking where to store session data.
+     c) Persist the resolved path in Montoya preferences (`api.persistence().preferences().setString(KEY, path)`).
+     d) Provide a `Storage: [folder] [Change Folder]` indicator in the extension toolbar so testers can view and switch directories at any time.
+
+2. **Debounced Atomic Auto-Save**:
+   - Perform asynchronous auto-saves debounced by 1500-2000ms using a single-thread `ScheduledExecutorService`.
+   - Serialize all sub-tabs, custom names, baseline requests/responses, strategy options, and results tables to JSON.
+   - For `HttpRequest` and `HttpResponse`, serialize raw byte arrays to Base64 along with `HttpService` host, port, and secure flag to guarantee 100% byte-accurate reconstruction.
+   - Always write to a `.tmp` file first and perform an atomic replace (`Files.move(..., ATOMIC_MOVE, REPLACE_EXISTING)`) to prevent file corruption.
+
+3. **Clean Shutdown Hook**:
+   - Register `api.extension().registerUnloadingHandler(...)` to perform a synchronous final save before the extension is unloaded or Burp is closed.
+
+4. **Auto-Reload on Startup**:
+   - After resolving the storage directory on initialization, automatically deserialize the session file and restore all sub-tabs, results, and UI states.
 
 ## Output and Saving
 

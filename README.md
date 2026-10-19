@@ -191,6 +191,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
   - Cookie Versioning (`api_version=*`)
 - **Intelligent Diff & Representation Analysis**: Automatically detects active alternative versions, 404-to-200 status shifts, auth bypass shifts (401/403 -> 200), version deprecation errors, and length deltas.
 - **Interactive Workspace & Inspection**: Typed sortable results table (`TableRowSorter`), embedded native Montoya request and response editors, diff breakdown panel, Repeater/Intruder dispatch, and CSV export.
+- **Persistent Session Storage & State Recovery**: Prompts user for storage directory on load, remembers preferences, supports dynamic folder switching via top toolbar, and automatically restores all sub-tabs, configurations, and results across Burp restarts with debounced atomic JSON writes and clean shutdown hooks.
 
 ---
 

@@ -4,6 +4,7 @@ package com.littlespidy.apiinspector.ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.function.Consumer;
 
 /**
  * Custom tab header component providing in-place inline renaming on double-click
@@ -18,6 +19,7 @@ public class EditableTabHeader_littlespidy extends JPanel {
     private final JButton closeButton;
     private boolean isEditing = false;
     private Runnable onCloseCallback;
+    private Consumer<String> onRenameCallback;
 
     public EditableTabHeader_littlespidy(JTabbedPane tabbedPane, Component tabContent, String defaultTitle) {
         super(new FlowLayout(FlowLayout.LEFT, 4, 0));
@@ -92,6 +94,10 @@ public class EditableTabHeader_littlespidy extends JPanel {
         this.onCloseCallback = callback;
     }
 
+    public void setOnRenameCallback(Consumer<String> callback) {
+        this.onRenameCallback = callback;
+    }
+
     public String getTitle() {
         return titleLabel.getText();
     }
@@ -122,6 +128,9 @@ public class EditableTabHeader_littlespidy extends JPanel {
         String newTitle = editField.getText().trim();
         if (!newTitle.isEmpty()) {
             setTitle(newTitle);
+            if (onRenameCallback != null) {
+                onRenameCallback.accept(newTitle);
+            }
         }
         editField.setVisible(false);
         titleLabel.setVisible(true);

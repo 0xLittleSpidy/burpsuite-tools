@@ -28,6 +28,7 @@ into any new Burp extension.
 - [UI Architecture Patterns](#ui-architecture-patterns)
   - [Tab Hierarchy (Multi-Session Model)](#tab-hierarchy-multi-session-model)
   - [Tab Naming Convention & Double-Click In-Place Header Renaming (No Popups)](#tab-naming-convention--double-click-in-place-header-renaming-no-popups)
+  - [Persistent Session Storage & State Recovery (Across Restarts)](#persistent-session-storage--state-recovery-across-restarts)
   - [Core Toolbar Triage Filters (Status Code, Method, In-Scope, Domain)](#core-toolbar-triage-filters-status-code-method-in-scope-domain)
   - [Universal Table Column Sorting & Right-Aligned In-Cell Copy Actions](#universal-table-column-sorting--right-aligned-in-cell-copy-actions)
 - [Workflow Methodology](#workflow-methodology)
@@ -350,6 +351,33 @@ public class SessionTabManager {
     }
 }
 ```
+
+### Persistent Session Storage & State Recovery (Across Restarts)
+
+When an extension maintains multiple request session tabs, audit findings, fuzzer results, or custom configurations, testers expect their workspaces to persist seamlessly across extension reloads, uninstalls/re-adds, and Burp Suite restarts.
+
+#### 1. Core Architecture Principles
+1. **Interactive Directory Prompt on Startup**:
+   - Detect if an active Burp project file (`.burp`) exists on disk (via command-line arguments `--project-file` or the Burp Suite Frame title). If detected, automatically use the project directory.
+   - If running in a Temporary Project (in-memory) or no remembered preference exists, prompt the user with a directory chooser dialog (`JFileChooser` set to `DIRECTORIES_ONLY`) asking where to store extension session data.
+   - Save the user-selected folder in Montoya API preferences:
+     `api.persistence().preferences().setString("extension_storage_dir", chosenDir.getAbsolutePath());`
+   - Provide a persistent indicator and button in the toolbar (`Storage: [folder] [Change Folder]`) allowing testers to view and switch the directory at any time without restarting Burp.
+
+2. **Debounced Atomic Auto-Save Engine**:
+   - Never block the Swing Event Dispatch Thread (EDT) or trigger heavy disk I/O on every table event.
+   - Use a single-threaded daemon `ScheduledExecutorService` with a 1500-2000ms debounce delay.
+   - Always write data to a temporary file (`<filename>.tmp`) first, then commit via atomic replacement (`StandardCopyOption.ATOMIC_MOVE` with fallback to `REPLACE_EXISTING`) to guarantee zero file corruption.
+
+3. **High-Fidelity HTTP Message Serialization**:
+   - Montoya API `HttpRequest` and `HttpResponse` objects cannot be blindly serialized directly by standard reflection serializers.
+   - Convert raw message bytes to Base64 (`Base64.getEncoder().encodeToString(req.toByteArray().getBytes())`).
+   - Store the associated `HttpService` metadata (host, port, and secure boolean) alongside the Base64 payload.
+   - On deserialization, rebuild exact byte-accurate messages using `HttpRequest.httpRequest(service, ByteArray.byteArray(bytes))` and `HttpResponse.httpResponse(ByteArray.byteArray(bytes))`.
+
+4. **Lifecycle Hooks**:
+   - On extension initialization: Resolve directory -> deserialize JSON -> reconstruct all session sub-tabs with their original titles, baselines, and results.
+   - On extension unload: Register `api.extension().registerUnloadingHandler(...)` to perform an immediate synchronous save (`saveSync`) before Burp unloads the extension.
 
 ### Collapsible Filter Sidebar
 

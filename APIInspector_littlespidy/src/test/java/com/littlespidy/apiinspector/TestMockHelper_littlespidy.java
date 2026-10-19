@@ -49,6 +49,18 @@ public class TestMockHelper_littlespidy {
                         return createMockRequest(method, url, path, next, body);
                     }
                     if ("bodyToString".equals(mName)) return body;
+                    if ("toByteArray".equals(mName)) {
+                        byte[] reqBytes = ((method != null ? method : "GET") + " " + path + " HTTP/1.1\r\n\r\n" + (body != null ? body : "")).getBytes(StandardCharsets.UTF_8);
+                        return (ByteArray) Proxy.newProxyInstance(
+                                ByteArray.class.getClassLoader(),
+                                new Class<?>[]{ByteArray.class},
+                                (p, m, a) -> {
+                                    if ("length".equals(m.getName())) return reqBytes.length;
+                                    if ("getBytes".equals(m.getName())) return reqBytes;
+                                    return null;
+                                }
+                        );
+                    }
                     if ("httpService".equals(mName)) {
                         return createMockHttpService("example.com", 443, true);
                     }
@@ -96,6 +108,7 @@ public class TestMockHelper_littlespidy {
                     String name = method.getName();
                     if ("statusCode".equals(name)) return (short) statusCode;
                     if ("body".equals(name)) return mockByteArray;
+                    if ("toByteArray".equals(name)) return mockByteArray;
                     if ("bodyToString".equals(name)) return body;
                     if ("headerValue".equals(name) && args.length == 1) {
                         String target = (String) args[0];

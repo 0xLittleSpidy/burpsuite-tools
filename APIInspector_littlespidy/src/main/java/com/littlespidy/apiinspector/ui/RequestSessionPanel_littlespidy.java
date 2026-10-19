@@ -279,6 +279,9 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
                     SwingUtilities.invokeLater(() -> {
                         updateBaselineDisplay();
                         progressLabel.setText("Baseline updated.");
+                        if (onStateChangedCallback != null) {
+                            onStateChangedCallback.run();
+                        }
                     });
                 }
             } catch (Exception ex) {
@@ -342,6 +345,9 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         tableModel.clear();
         diffDetailsArea.setText("Select a result above to inspect details and diff comparison.");
         progressLabel.setText("Results cleared.");
+        if (onStateChangedCallback != null) {
+            onStateChangedCallback.run();
+        }
     }
 
     private void exportCsv() {
@@ -538,6 +544,9 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
             } else {
                 progressLabel.setText("Probing finished (" + tableModel.getRowCount() + " results).");
             }
+            if (onStateChangedCallback != null) {
+                onStateChangedCallback.run();
+            }
         });
     }
 
@@ -554,6 +563,10 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         return baselineRequest;
     }
 
+    public HttpResponse getBaselineResponse() {
+        return baselineResponse;
+    }
+
     public VersionResultsTableModel_littlespidy getTableModel() {
         return tableModel;
     }
@@ -562,5 +575,96 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         this.baselineRequest = request;
         this.baselineResponse = response;
         updateBaselineDisplay();
+        if (onStateChangedCallback != null) {
+            onStateChangedCallback.run();
+        }
+    }
+
+    private Runnable onStateChangedCallback;
+
+    public void setOnStateChangedCallback(Runnable callback) {
+        this.onStateChangedCallback = callback;
+    }
+
+    public boolean isUriPathSelected() {
+        return uriPathCheck.isSelected();
+    }
+
+    public void setUriPathSelected(boolean sel) {
+        uriPathCheck.setSelected(sel);
+    }
+
+    public boolean isHeadersSelected() {
+        return headerCheck.isSelected();
+    }
+
+    public void setHeadersSelected(boolean sel) {
+        headerCheck.setSelected(sel);
+    }
+
+    public boolean isQueryParamsSelected() {
+        return queryParamCheck.isSelected();
+    }
+
+    public void setQueryParamsSelected(boolean sel) {
+        queryParamCheck.setSelected(sel);
+    }
+
+    public boolean isContentNegotiationSelected() {
+        return contentNegCheck.isSelected();
+    }
+
+    public void setContentNegotiationSelected(boolean sel) {
+        contentNegCheck.setSelected(sel);
+    }
+
+    public boolean isSubdomainsSelected() {
+        return subdomainCheck.isSelected();
+    }
+
+    public void setSubdomainsSelected(boolean sel) {
+        subdomainCheck.setSelected(sel);
+    }
+
+    public boolean isCookiesSelected() {
+        return cookieCheck.isSelected();
+    }
+
+    public void setCookiesSelected(boolean sel) {
+        cookieCheck.setSelected(sel);
+    }
+
+    public String getCandidatesText() {
+        return candidateInput != null ? candidateInput.getText() : "";
+    }
+
+    public void setCandidatesText(String text) {
+        if (candidateInput != null && text != null) {
+            candidateInput.setText(text);
+        }
+    }
+
+    public int getThreadCount() {
+        return threadSpinner != null ? (Integer) threadSpinner.getValue() : 5;
+    }
+
+    public void setThreadCount(int count) {
+        if (threadSpinner != null) {
+            threadSpinner.setValue(Math.max(1, Math.min(count, 20)));
+        }
+    }
+
+    public int getDelayMs() {
+        return delaySpinner != null ? (Integer) delaySpinner.getValue() : 0;
+    }
+
+    public void setDelayMs(int delay) {
+        if (delaySpinner != null) {
+            delaySpinner.setValue(Math.max(0, Math.min(delay, 5000)));
+        }
+    }
+
+    public void addRestoredResult(ProbeResult_littlespidy result) {
+        tableModel.addResult(result);
     }
 }

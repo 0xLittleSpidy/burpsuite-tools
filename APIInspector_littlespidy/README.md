@@ -27,6 +27,14 @@ Modern web applications and APIs frequently maintain legacy, unreleased, depreca
   - Automatic commit on focus loss.
 - Plain ASCII close button (`x`) for individual tabs, plus a "Close All Tabs" action.
 
+### Feature 3: Persistent Session Storage & State Recovery (Across Restarts)
+- **Automatic Directory Prompt on Load**: Prompts the user to select or confirm the session storage directory when the extension is added, or automatically detects open `.burp` project directories.
+- **Preference Memory**: Remembers configured directory in Burp Suite's persistent preferences across sessions.
+- **Toolbar Indicator & Switcher**: Live `Storage: [folder] [Change Folder]` controls in the header allow inspecting the active storage directory and switching locations dynamically.
+- **Full State Reconstitution**: Restores all sub-tabs, custom renamed titles, baseline requests/responses, strategy options, version candidate lists, thread concurrency settings, delay intervals, and probe results tables.
+- **Atomic Debounced Saving**: Asynchronous saving debounced by 1500ms using atomic temporary file moves (`api_inspector_session.json.tmp` -> `api_inspector_session.json`) ensures zero data corruption.
+- **Clean Shutdown Hook**: Registers an `ExtensionUnloadingHandler` ensuring all session data is flushed to disk before the extension or Burp is closed.
+
 ---
 
 ## Discovery Strategies Supported
