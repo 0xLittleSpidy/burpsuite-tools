@@ -56,7 +56,34 @@ Modern web applications and APIs frequently maintain legacy, unreleased, depreca
 - Right-click any HTTP request in Burp Suite (Proxy HTTP history, Repeater, Target site map, Logger, etc.) and access the **API Inspector (littlespidy)** sub-menu:
   - **Send to ResAPI Version Finder**: Spawns a dedicated Version Finder sub-tab.
   - **API Documentation Intruder Strategy**: Progressively removes trailing path segments, generates unauthenticated pairs, and sends all to Intruder.
-  - **API Endpoint Discovery Intruder Strategy**: Progressively removes prefix and path segments, generates unauthenticated pairs, and sends all to Intruder.
+  - **API Endpoint Discovery Strategy**: Progressively removes prefix and path segments, generates unauthenticated pairs, and sends all to Intruder.
+
+### Feature 7: API Import Tab
+- Import API definitions and collections into Burp Suite from local files or remote URLs.
+- Supported specifications:
+  - OpenAPI 3.0.x and 3.1.x (JSON and YAML).
+  - Swagger 2.0 (JSON and YAML).
+  - Postman Collections (v2.0 and v2.1 JSON).
+- File import with multi-file batch selection and format validation.
+- URL import with multi-URL ingestion, HTTP fetching via Montoya/Burp network settings, and error reporting.
+- Collections management table displaying collection name, format, source path/URL, target base URL override, discovered endpoint count, status, and assigned authentication profile.
+- Endpoint inspection sub-table with search filtering and detailed parameter/body viewer.
+- Full session persistence for imported collections and discovered endpoints.
+
+### Feature 8: Authentication Testing Tab
+- Dedicated workspace to configure authentication profiles and execute automated test suites against imported collections.
+- Modular authentication mechanisms supported:
+  - Bearer Token authentication (`Authorization: Bearer <token>`).
+  - API Key authentication (Header or Query Parameter).
+  - HTTP Basic authentication (`Authorization: Basic <base64>`).
+  - Cookie authentication (`Cookie: <name>=<value>`).
+  - Custom Authentication Headers (`<Header-Name>: <value>`).
+- Masked secret credentials in UI with Show/Hide toggle.
+- Comparative unauthenticated testing: automatically sends unauthenticated request pairs to detect endpoints accessible without required authentication (`UNAUTHENTICATED_ACCESSIBLE`).
+- Non-blocking multi-threaded test execution engine with configurable thread concurrency (1-20), delay intervals, and cancellation controls.
+- Comprehensive results table with outcome categorization (`AUTHENTICATED_ONLY`, `UNAUTHENTICATED_ACCESSIBLE`, `AUTH_REJECTED`, `SUCCESS`, `CLIENT_ERROR`, `SERVER_ERROR`, `NETWORK_ERROR`).
+- Embedded Montoya HTTP message viewers for inspecting authenticated and unauthenticated request/response pairs.
+- Export results to CSV and JSON.
 
 ---
 

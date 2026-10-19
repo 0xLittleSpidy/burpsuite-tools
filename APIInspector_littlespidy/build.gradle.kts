@@ -10,6 +10,7 @@ repositories {
 dependencies {
     compileOnly("net.portswigger.burp.extensions:montoya-api:2026.4")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.yaml:snakeyaml:2.2")
     testImplementation("net.portswigger.burp.extensions:montoya-api:2026.4")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

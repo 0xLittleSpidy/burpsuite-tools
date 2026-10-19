@@ -10,11 +10,14 @@ import java.util.List;
 public class SessionStateDTO_littlespidy {
 
     public static class SessionRootDTO {
-        public int version = 1;
+        public int version = 2;
         public long savedAt;
         public List<SessionTabDTO> tabs = new ArrayList<>();
         public List<ReferenceRequestDTO> documentationEntries = new ArrayList<>();
         public List<ReferenceRequestDTO> endpointDiscoveryEntries = new ArrayList<>();
+        public List<ImportedCollectionDTO> importedCollections = new ArrayList<>();
+        public List<AuthProfileDTO> authProfiles = new ArrayList<>();
+        public List<AuthTestResultDTO> authTestResults = new ArrayList<>();
     }
 
     public static class SessionTabDTO {
@@ -78,5 +81,75 @@ public class SessionStateDTO_littlespidy {
         public String intruderStatus;
         public String fullUrl;
         public HttpMessageDTO generatedRequest;
+    }
+
+    public static class ImportedCollectionDTO {
+        public String id;
+        public String name;
+        public String formatType;
+        public String sourceType;
+        public String sourceLocation;
+        public String targetBaseUrl;
+        public String importStatus;
+        public String statusMessage;
+        public long importedAt;
+        public String assignedProfileId;
+        public List<DiscoveredEndpointDTO> endpoints = new ArrayList<>();
+    }
+
+    public static class DiscoveredEndpointDTO {
+        public String id;
+        public String method;
+        public String path;
+        public String summary;
+        public String description;
+        public java.util.Map<String, String> headers;
+        public java.util.Map<String, String> queryParams;
+        public java.util.Map<String, String> pathParams;
+        public String requestBodySample;
+        public String contentType;
+        public boolean requiresAuth;
+        public List<String> authSchemes;
+    }
+
+    public static class AuthProfileDTO {
+        public String id;
+        public String name;
+        public String authType;
+        public String bearerToken;
+        public String apiKeyName;
+        public String apiKeyValue;
+        public String apiKeyLocation;
+        public String basicUsername;
+        public String basicPassword;
+        public String cookieName;
+        public String cookieValue;
+        public String customHeaderName;
+        public String customHeaderValue;
+        public boolean testUnauthenticatedComparison;
+    }
+
+    public static class AuthTestResultDTO {
+        public String id;
+        public String collectionId;
+        public String collectionName;
+        public String method;
+        public String path;
+        public String fullUrl;
+        public String profileId;
+        public String profileName;
+        public int authStatusCode;
+        public int authResponseLength;
+        public long authLatencyMs;
+        public int unauthStatusCode;
+        public int unauthResponseLength;
+        public long unauthLatencyMs;
+        public String outcome;
+        public String errorMessage;
+        public long timestamp;
+        public String authRequestBase64;
+        public String authResponseBase64;
+        public String unauthRequestBase64;
+        public String unauthResponseBase64;
     }
 }

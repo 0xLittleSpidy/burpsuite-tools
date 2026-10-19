@@ -15,6 +15,8 @@ public class APIInspectorTab_littlespidy extends JPanel {
 
     private final JTabbedPane rootTabbedPane;
     private final ResAPIVersionFinderTab_littlespidy versionFinderTab;
+    private final APIImportTab_littlespidy importTab;
+    private final AuthTestingTab_littlespidy authTestingTab;
     private final IntruderStrategyTrackingTab_littlespidy docStrategyTab;
     private final IntruderStrategyTrackingTab_littlespidy endpointDiscoveryTab;
 
@@ -23,10 +25,16 @@ public class APIInspectorTab_littlespidy extends JPanel {
         this.rootTabbedPane = new JTabbedPane();
 
         this.versionFinderTab = new ResAPIVersionFinderTab_littlespidy(api);
+        this.importTab = new APIImportTab_littlespidy(api);
+        this.authTestingTab = new AuthTestingTab_littlespidy(api);
         this.docStrategyTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Documentation Intruder Strategy");
         this.endpointDiscoveryTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Endpoint Discovery Intruder Strategy");
 
+        this.authTestingTab.setImportTabRef(this.importTab);
+
         rootTabbedPane.addTab("ResAPI Version Finder", versionFinderTab);
+        rootTabbedPane.addTab("API Import", importTab);
+        rootTabbedPane.addTab("Authentication Testing", authTestingTab);
         rootTabbedPane.addTab("API Documentation Strategy", docStrategyTab);
         rootTabbedPane.addTab("API Endpoint Discovery Strategy", endpointDiscoveryTab);
 
@@ -35,6 +43,14 @@ public class APIInspectorTab_littlespidy extends JPanel {
 
     public ResAPIVersionFinderTab_littlespidy getVersionFinderTab() {
         return versionFinderTab;
+    }
+
+    public APIImportTab_littlespidy getImportTab() {
+        return importTab;
+    }
+
+    public AuthTestingTab_littlespidy getAuthTestingTab() {
+        return authTestingTab;
     }
 
     public IntruderStrategyTrackingTab_littlespidy getDocStrategyTab() {

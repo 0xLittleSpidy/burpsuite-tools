@@ -26,9 +26,11 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
         persistenceManager.setRootTab(rootTab);
         rootTab.getVersionFinderTab().setPersistenceManager(persistenceManager);
 
-        // Hook persistent auto-save callbacks for Intruder tracking tabs
+        // Hook persistent auto-save callbacks for all workspace tabs
         rootTab.getDocStrategyTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
         rootTab.getEndpointDiscoveryTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
+        rootTab.getImportTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
+        rootTab.getAuthTestingTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
 
         // Register Suite Tab
         api.userInterface().registerSuiteTab("API Inspector", rootTab);
@@ -38,11 +40,11 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
                 new APIInspectorContextMenu_littlespidy(api, rootTab)
         );
 
-        // Resolve storage directory and restore previous sessions
+        // Resolve storage directory and prompt user for session lifecycle choice
         SwingUtilities.invokeLater(() -> {
             persistenceManager.resolveStorageDirectory(null);
             rootTab.getVersionFinderTab().updateStorageDisplay();
-            persistenceManager.loadSession(rootTab);
+            persistenceManager.promptSessionStartup(rootTab, rootTab);
         });
 
         // Register clean shutdown unloading handler
@@ -53,6 +55,6 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
         });
 
         api.logging().logToOutput("[API Inspector] Extension initialized successfully.");
-        api.logging().logToOutput("[API Inspector] ResAPI Version Finder and Intruder Strategies registered with session persistence.");
+        api.logging().logToOutput("[API Inspector] ResAPI Version Finder, API Import, and Authentication Testing registered with session persistence.");
     }
 }

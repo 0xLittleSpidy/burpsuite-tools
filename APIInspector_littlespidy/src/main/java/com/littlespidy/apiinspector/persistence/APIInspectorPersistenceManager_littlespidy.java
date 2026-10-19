@@ -8,9 +8,9 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.littlespidy.apiinspector.model.*;
 import com.littlespidy.apiinspector.model.IntruderStrategyEntry_littlespidy.GeneratedVariationItem;
 import com.littlespidy.apiinspector.model.IntruderStrategyEntry_littlespidy.ReferenceRequestEntry;
-import com.littlespidy.apiinspector.model.ProbeResult_littlespidy;
 import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy.*;
 import com.littlespidy.apiinspector.ui.APIInspectorTab_littlespidy;
 import com.littlespidy.apiinspector.ui.RequestSessionPanel_littlespidy;
@@ -222,20 +222,26 @@ public class APIInspectorPersistenceManager_littlespidy {
             return;
         }
         if (tab == null) return;
-        saveSyncInternal(tab, null, null);
+        saveSyncInternal(tab, null, null, null, null, null);
     }
 
     public void saveSync(APIInspectorTab_littlespidy rootTab) {
         if (rootTab == null) return;
         saveSyncInternal(rootTab.getVersionFinderTab(),
-                rootTab.getDocStrategyTab().getAllEntries(),
-                rootTab.getEndpointDiscoveryTab().getAllEntries());
+                rootTab.getDocStrategyTab() != null ? rootTab.getDocStrategyTab().getAllEntries() : null,
+                rootTab.getEndpointDiscoveryTab() != null ? rootTab.getEndpointDiscoveryTab().getAllEntries() : null,
+                rootTab.getImportTab() != null ? rootTab.getImportTab().getAllCollections() : null,
+                rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getAllProfiles() : null,
+                rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getAllResults() : null);
     }
 
     private void saveSyncInternal(
             ResAPIVersionFinderTab_littlespidy tab,
             List<ReferenceRequestEntry> docEntries,
-            List<ReferenceRequestEntry> endpointEntries) {
+            List<ReferenceRequestEntry> endpointEntries,
+            List<ImportedCollection_littlespidy> collections,
+            List<AuthProfile_littlespidy> profiles,
+            List<AuthTestResult_littlespidy> testResults) {
 
         synchronized (saveLock) {
             try {
@@ -270,6 +276,24 @@ public class APIInspectorPersistenceManager_littlespidy {
                     }
                 }
 
+                if (collections != null) {
+                    for (ImportedCollection_littlespidy c : collections) {
+                        root.importedCollections.add(serializeImportedCollection(c));
+                    }
+                }
+
+                if (profiles != null) {
+                    for (AuthProfile_littlespidy p : profiles) {
+                        root.authProfiles.add(serializeAuthProfile(p));
+                    }
+                }
+
+                if (testResults != null) {
+                    for (AuthTestResult_littlespidy r : testResults) {
+                        root.authTestResults.add(serializeAuthTestResult(r));
+                    }
+                }
+
                 String json = gson.toJson(root);
                 File tmpFile = new File(parentDir, SESSION_FILENAME + ".tmp");
                 Files.writeString(tmpFile.toPath(), json, StandardCharsets.UTF_8);
@@ -284,6 +308,37 @@ public class APIInspectorPersistenceManager_littlespidy {
                 log("[API Inspector] Error saving session to disk: " + ex.getMessage());
             }
         }
+    }
+
+    /**
+     * Prompts the user on extension startup if a previous session exists, allowing them
+     * to choose between restoring the existing session or starting a fresh new session.
+     */
+    public void promptSessionStartup(Component parent, APIInspectorTab_littlespidy rootTab) {
+        File sessionFile = getSessionFile();
+        if (sessionFile.exists() && sessionFile.length() > 0) {
+            if (!GraphicsEnvironment.isHeadless()) {
+                String[] options = {"Open Existing Session", "Start New Session"};
+                int choice = JOptionPane.showOptionDialog(
+                        parent,
+                        "A previous API Inspector session was detected at:\n" + sessionFile.getAbsolutePath() +
+                        "\n\nWould you like to open the existing session or start a new session?",
+                        "Session Lifecycle",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice == 0) {
+                    loadSession(rootTab);
+                } else {
+                    log("[API Inspector] User chose to start a new session. Previous session file preserved until saved.");
+                }
+                return;
+            }
+        }
+        loadSession(rootTab);
     }
 
     /**
@@ -329,6 +384,40 @@ public class APIInspectorPersistenceManager_littlespidy {
                         }
                         rootTab.getEndpointDiscoveryTab().restoreEntries(list);
                     }
+
+                    // 4. Restore Imported Collections
+                    if (root.importedCollections != null && !root.importedCollections.isEmpty()) {
+                        List<ImportedCollection_littlespidy> colList = new ArrayList<>();
+                        for (ImportedCollectionDTO cDto : root.importedCollections) {
+                            ImportedCollection_littlespidy col = deserializeImportedCollection(cDto);
+                            if (col != null) colList.add(col);
+                        }
+                        rootTab.getImportTab().setCollections(colList);
+                    }
+
+                    // 5. Restore Authentication Profiles
+                    if (root.authProfiles != null && !root.authProfiles.isEmpty()) {
+                        List<AuthProfile_littlespidy> profList = new ArrayList<>();
+                        for (AuthProfileDTO pDto : root.authProfiles) {
+                            AuthProfile_littlespidy prof = deserializeAuthProfile(pDto);
+                            if (prof != null) profList.add(prof);
+                        }
+                        rootTab.getAuthTestingTab().setProfiles(profList);
+                    }
+
+                    // 6. Restore Authentication Test Results
+                    if (root.authTestResults != null && !root.authTestResults.isEmpty()) {
+                        List<AuthTestResult_littlespidy> resList = new ArrayList<>();
+                        for (AuthTestResultDTO rDto : root.authTestResults) {
+                            AuthTestResult_littlespidy res = deserializeAuthTestResult(rDto);
+                            if (res != null) resList.add(res);
+                        }
+                        rootTab.getAuthTestingTab().setResults(resList);
+                    }
+
+                    // Resync profile selections across tabs
+                    rootTab.getImportTab().updateAvailableProfiles(rootTab.getAuthTestingTab().getAllProfiles());
+                    rootTab.getAuthTestingTab().refreshCollectionsCombo();
 
                     log("[API Inspector] Successfully restored session data from " + sessionFile.getAbsolutePath());
                 });
@@ -500,6 +589,193 @@ public class APIInspectorPersistenceManager_littlespidy {
         } catch (Exception ex) {
             return null;
         }
+    }
+
+    public static ImportedCollectionDTO serializeImportedCollection(ImportedCollection_littlespidy col) {
+        if (col == null) return null;
+        ImportedCollectionDTO dto = new ImportedCollectionDTO();
+        dto.id = col.getId();
+        dto.name = col.getName();
+        dto.formatType = col.getFormatType();
+        dto.sourceType = col.getSourceType();
+        dto.sourceLocation = col.getSourceLocation();
+        dto.targetBaseUrl = col.getTargetBaseUrl();
+        dto.importStatus = col.getImportStatus();
+        dto.statusMessage = col.getStatusMessage();
+        dto.importedAt = col.getImportedAt();
+        dto.assignedProfileId = col.getAssignedProfileId();
+
+        if (col.getEndpoints() != null) {
+            for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
+                DiscoveredEndpointDTO epDto = new DiscoveredEndpointDTO();
+                epDto.id = ep.getId();
+                epDto.method = ep.getMethod();
+                epDto.path = ep.getPath();
+                epDto.summary = ep.getSummary();
+                epDto.description = ep.getDescription();
+                epDto.headers = ep.getHeaders();
+                epDto.queryParams = ep.getQueryParams();
+                epDto.pathParams = ep.getPathParams();
+                epDto.requestBodySample = ep.getRequestBodySample();
+                epDto.contentType = ep.getContentType();
+                epDto.requiresAuth = ep.isRequiresAuth();
+                epDto.authSchemes = ep.getAuthSchemes();
+                dto.endpoints.add(epDto);
+            }
+        }
+        return dto;
+    }
+
+    public static ImportedCollection_littlespidy deserializeImportedCollection(ImportedCollectionDTO dto) {
+        if (dto == null) return null;
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy(
+                dto.name,
+                dto.formatType,
+                dto.sourceType,
+                dto.sourceLocation
+        );
+        col.setId(dto.id);
+        col.setTargetBaseUrl(dto.targetBaseUrl);
+        col.setImportStatus(dto.importStatus);
+        col.setStatusMessage(dto.statusMessage);
+        col.setImportedAt(dto.importedAt);
+        col.setAssignedProfileId(dto.assignedProfileId);
+
+        List<DiscoveredEndpoint_littlespidy> eps = new ArrayList<>();
+        if (dto.endpoints != null) {
+            for (DiscoveredEndpointDTO epDto : dto.endpoints) {
+                DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy(epDto.method, epDto.path, epDto.summary);
+                ep.setId(epDto.id);
+                ep.setDescription(epDto.description);
+                ep.setHeaders(epDto.headers);
+                ep.setQueryParams(epDto.queryParams);
+                ep.setPathParams(epDto.pathParams);
+                ep.setRequestBodySample(epDto.requestBodySample);
+                ep.setContentType(epDto.contentType);
+                ep.setRequiresAuth(epDto.requiresAuth);
+                ep.setAuthSchemes(epDto.authSchemes);
+                eps.add(ep);
+            }
+        }
+        col.setEndpoints(eps);
+        return col;
+    }
+
+    public static AuthProfileDTO serializeAuthProfile(AuthProfile_littlespidy p) {
+        if (p == null) return null;
+        AuthProfileDTO dto = new AuthProfileDTO();
+        dto.id = p.getId();
+        dto.name = p.getName();
+        dto.authType = p.getAuthType().name();
+        dto.bearerToken = p.getBearerToken();
+        dto.apiKeyName = p.getApiKeyName();
+        dto.apiKeyValue = p.getApiKeyValue();
+        dto.apiKeyLocation = p.getApiKeyLocation().name();
+        dto.basicUsername = p.getBasicUsername();
+        dto.basicPassword = p.getBasicPassword();
+        dto.cookieName = p.getCookieName();
+        dto.cookieValue = p.getCookieValue();
+        dto.customHeaderName = p.getCustomHeaderName();
+        dto.customHeaderValue = p.getCustomHeaderValue();
+        dto.testUnauthenticatedComparison = p.isTestUnauthenticatedComparison();
+        return dto;
+    }
+
+    public static AuthProfile_littlespidy deserializeAuthProfile(AuthProfileDTO dto) {
+        if (dto == null) return null;
+        AuthType_littlespidy at = AuthType_littlespidy.BEARER_TOKEN;
+        try {
+            if (dto.authType != null) at = AuthType_littlespidy.valueOf(dto.authType);
+        } catch (Exception ignored) {}
+
+        AuthProfile_littlespidy p = new AuthProfile_littlespidy(dto.name, at);
+        p.setId(dto.id);
+        p.setBearerToken(dto.bearerToken);
+        p.setApiKeyName(dto.apiKeyName);
+        p.setApiKeyValue(dto.apiKeyValue);
+        try {
+            if (dto.apiKeyLocation != null) p.setApiKeyLocation(ApiKeyLocation_littlespidy.valueOf(dto.apiKeyLocation));
+        } catch (Exception ignored) {}
+        p.setBasicUsername(dto.basicUsername);
+        p.setBasicPassword(dto.basicPassword);
+        p.setCookieName(dto.cookieName);
+        p.setCookieValue(dto.cookieValue);
+        p.setCustomHeaderName(dto.customHeaderName);
+        p.setCustomHeaderValue(dto.customHeaderValue);
+        p.setTestUnauthenticatedComparison(dto.testUnauthenticatedComparison);
+        return p;
+    }
+
+    public static AuthTestResultDTO serializeAuthTestResult(AuthTestResult_littlespidy r) {
+        if (r == null) return null;
+        AuthTestResultDTO dto = new AuthTestResultDTO();
+        dto.id = r.getId();
+        dto.collectionId = r.getCollectionId();
+        dto.collectionName = r.getCollectionName();
+        dto.method = r.getMethod();
+        dto.path = r.getPath();
+        dto.fullUrl = r.getFullUrl();
+        dto.profileId = r.getProfileId();
+        dto.profileName = r.getProfileName();
+        dto.authStatusCode = r.getAuthStatusCode();
+        dto.authResponseLength = r.getAuthResponseLength();
+        dto.authLatencyMs = r.getAuthLatencyMs();
+        dto.unauthStatusCode = r.getUnauthStatusCode();
+        dto.unauthResponseLength = r.getUnauthResponseLength();
+        dto.unauthLatencyMs = r.getUnauthLatencyMs();
+        dto.outcome = r.getOutcome().name();
+        dto.errorMessage = r.getErrorMessage();
+        dto.timestamp = r.getTimestamp();
+        if (r.getAuthRequestBytes() != null) {
+            dto.authRequestBase64 = Base64.getEncoder().encodeToString(r.getAuthRequestBytes());
+        }
+        if (r.getAuthResponseBytes() != null) {
+            dto.authResponseBase64 = Base64.getEncoder().encodeToString(r.getAuthResponseBytes());
+        }
+        if (r.getUnauthRequestBytes() != null) {
+            dto.unauthRequestBase64 = Base64.getEncoder().encodeToString(r.getUnauthRequestBytes());
+        }
+        if (r.getUnauthResponseBytes() != null) {
+            dto.unauthResponseBase64 = Base64.getEncoder().encodeToString(r.getUnauthResponseBytes());
+        }
+        return dto;
+    }
+
+    public static AuthTestResult_littlespidy deserializeAuthTestResult(AuthTestResultDTO dto) {
+        if (dto == null) return null;
+        AuthTestResult_littlespidy r = new AuthTestResult_littlespidy();
+        r.setId(dto.id);
+        r.setCollectionId(dto.collectionId);
+        r.setCollectionName(dto.collectionName);
+        r.setMethod(dto.method);
+        r.setPath(dto.path);
+        r.setFullUrl(dto.fullUrl);
+        r.setProfileId(dto.profileId);
+        r.setProfileName(dto.profileName);
+        r.setAuthStatusCode(dto.authStatusCode);
+        r.setAuthResponseLength(dto.authResponseLength);
+        r.setAuthLatencyMs(dto.authLatencyMs);
+        r.setUnauthStatusCode(dto.unauthStatusCode);
+        r.setUnauthResponseLength(dto.unauthResponseLength);
+        r.setUnauthLatencyMs(dto.unauthLatencyMs);
+        try {
+            if (dto.outcome != null) r.setOutcome(AuthTestOutcome_littlespidy.valueOf(dto.outcome));
+        } catch (Exception ignored) {}
+        r.setErrorMessage(dto.errorMessage);
+        r.setTimestamp(dto.timestamp);
+        if (dto.authRequestBase64 != null) {
+            r.setAuthRequestBytes(Base64.getDecoder().decode(dto.authRequestBase64));
+        }
+        if (dto.authResponseBase64 != null) {
+            r.setAuthResponseBytes(Base64.getDecoder().decode(dto.authResponseBase64));
+        }
+        if (dto.unauthRequestBase64 != null) {
+            r.setUnauthRequestBytes(Base64.getDecoder().decode(dto.unauthRequestBase64));
+        }
+        if (dto.unauthResponseBase64 != null) {
+            r.setUnauthResponseBytes(Base64.getDecoder().decode(dto.unauthResponseBase64));
+        }
+        return r;
     }
 
     private File detectBurpProjectDirectory() {
