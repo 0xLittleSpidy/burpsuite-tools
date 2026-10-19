@@ -48,6 +48,23 @@ public class TestMockHelper_littlespidy {
                         next.put((String) args[0], (String) args[1]);
                         return createMockRequest(method, url, path, next, body);
                     }
+                    if ("headers".equals(mName)) {
+                        java.util.List<burp.api.montoya.http.message.HttpHeader> list = new java.util.ArrayList<>();
+                        for (Map.Entry<String, String> e : headers.entrySet()) {
+                            list.add(createMockHeader(e.getKey(), e.getValue()));
+                        }
+                        return list;
+                    }
+                    if ("withRemovedHeader".equals(mName) && args.length == 1) {
+                        String toRemove = (String) args[0];
+                        Map<String, String> next = new LinkedHashMap<>();
+                        for (Map.Entry<String, String> e : headers.entrySet()) {
+                            if (!e.getKey().equalsIgnoreCase(toRemove)) {
+                                next.put(e.getKey(), e.getValue());
+                            }
+                        }
+                        return createMockRequest(method, url, path, next, body);
+                    }
                     if ("bodyToString".equals(mName)) return body;
                     if ("toByteArray".equals(mName)) {
                         byte[] reqBytes = ((method != null ? method : "GET") + " " + path + " HTTP/1.1\r\n\r\n" + (body != null ? body : "")).getBytes(StandardCharsets.UTF_8);
@@ -84,6 +101,20 @@ public class TestMockHelper_littlespidy {
                     if ("host".equals(name)) return host;
                     if ("port".equals(name)) return port;
                     if ("secure".equals(name)) return secure;
+                    return null;
+                }
+        );
+    }
+
+    public static burp.api.montoya.http.message.HttpHeader createMockHeader(String name, String value) {
+        return (burp.api.montoya.http.message.HttpHeader) Proxy.newProxyInstance(
+                burp.api.montoya.http.message.HttpHeader.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.http.message.HttpHeader.class},
+                (proxy, method, args) -> {
+                    String mName = method.getName();
+                    if ("name".equals(mName)) return name;
+                    if ("value".equals(mName)) return value;
+                    if ("toString".equals(mName)) return name + ": " + value;
                     return null;
                 }
         );

@@ -13,6 +13,8 @@ public class SessionStateDTO_littlespidy {
         public int version = 1;
         public long savedAt;
         public List<SessionTabDTO> tabs = new ArrayList<>();
+        public List<ReferenceRequestDTO> documentationEntries = new ArrayList<>();
+        public List<ReferenceRequestDTO> endpointDiscoveryEntries = new ArrayList<>();
     }
 
     public static class SessionTabDTO {
@@ -55,5 +57,26 @@ public class SessionStateDTO_littlespidy {
         public long latencyMs;
         public HttpMessageDTO request;
         public HttpMessageDTO response;
+    }
+
+    public static class ReferenceRequestDTO {
+        public int id;
+        public long timestamp;
+        public String strategyName;
+        public String method;
+        public String originalPath;
+        public String host;
+        public String fullUrl;
+        public HttpMessageDTO referenceRequest;
+        public List<GeneratedVariationDTO> variations = new ArrayList<>();
+    }
+
+    public static class GeneratedVariationDTO {
+        public int variationIndex;
+        public String pathVariation;
+        public boolean authenticated;
+        public String intruderStatus;
+        public String fullUrl;
+        public HttpMessageDTO generatedRequest;
     }
 }

@@ -108,4 +108,56 @@ public class PersistenceTest_littlespidy {
         assertEquals(200, restoredPr.statusCode);
         assertEquals(1420, restoredPr.responseLength);
     }
+
+    @Test
+    public void testIntruderStrategyPersistenceRoundTrip(@TempDir Path tempDir) throws Exception {
+        SessionRootDTO root = new SessionRootDTO();
+        root.savedAt = System.currentTimeMillis();
+
+        ReferenceRequestDTO refDto = new ReferenceRequestDTO();
+        refDto.id = 1;
+        refDto.timestamp = System.currentTimeMillis();
+        refDto.strategyName = "API Documentation";
+        refDto.method = "GET";
+        refDto.originalPath = "/api/v1/admin";
+        refDto.host = "api.example.com";
+        refDto.fullUrl = "https://api.example.com/api/v1/admin";
+
+        GeneratedVariationDTO var1 = new GeneratedVariationDTO();
+        var1.variationIndex = 1;
+        var1.pathVariation = "/api/v1/";
+        var1.authenticated = true;
+        var1.intruderStatus = "Sent to Intruder";
+        var1.fullUrl = "https://api.example.com/api/v1/";
+
+        GeneratedVariationDTO var2 = new GeneratedVariationDTO();
+        var2.variationIndex = 2;
+        var2.pathVariation = "/api/v1/";
+        var2.authenticated = false;
+        var2.intruderStatus = "Sent to Intruder";
+        var2.fullUrl = "https://api.example.com/api/v1/";
+
+        refDto.variations.add(var1);
+        refDto.variations.add(var2);
+
+        root.documentationEntries.add(refDto);
+
+        String json = gson.toJson(root);
+        assertNotNull(json);
+        assertTrue(json.contains("API Documentation"));
+        assertTrue(json.contains("/api/v1/admin"));
+        assertTrue(json.contains("/api/v1/"));
+
+        SessionRootDTO restored = gson.fromJson(json, SessionRootDTO.class);
+        assertNotNull(restored);
+        assertEquals(1, restored.documentationEntries.size());
+
+        ReferenceRequestDTO restoredRef = restored.documentationEntries.get(0);
+        assertEquals(1, restoredRef.id);
+        assertEquals("API Documentation", restoredRef.strategyName);
+        assertEquals("/api/v1/admin", restoredRef.originalPath);
+        assertEquals(2, restoredRef.variations.size());
+        assertTrue(restoredRef.variations.get(0).authenticated);
+        assertFalse(restoredRef.variations.get(1).authenticated);
+    }
 }

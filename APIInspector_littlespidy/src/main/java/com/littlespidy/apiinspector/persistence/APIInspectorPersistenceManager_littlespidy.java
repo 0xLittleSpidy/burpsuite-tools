@@ -8,8 +8,11 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.littlespidy.apiinspector.model.IntruderStrategyEntry_littlespidy.GeneratedVariationItem;
+import com.littlespidy.apiinspector.model.IntruderStrategyEntry_littlespidy.ReferenceRequestEntry;
 import com.littlespidy.apiinspector.model.ProbeResult_littlespidy;
 import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy.*;
+import com.littlespidy.apiinspector.ui.APIInspectorTab_littlespidy;
 import com.littlespidy.apiinspector.ui.RequestSessionPanel_littlespidy;
 import com.littlespidy.apiinspector.ui.ResAPIVersionFinderTab_littlespidy;
 
@@ -19,7 +22,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -30,8 +32,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Manages persistent storage and state recovery for API Inspector sessions across
- * extension reloads and Burp Suite restarts.
+ * Manages persistent storage and state recovery for API Inspector sessions and
+ * Intruder strategy tracking across extension reloads and Burp Suite restarts.
  */
 public class APIInspectorPersistenceManager_littlespidy {
 
@@ -52,9 +54,15 @@ public class APIInspectorPersistenceManager_littlespidy {
     private ScheduledFuture<?> pendingSaveTask;
     private final Object saveLock = new Object();
 
+    private APIInspectorTab_littlespidy rootTab;
+
     public APIInspectorPersistenceManager_littlespidy(MontoyaApi api) {
         this.api = api;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+    }
+
+    public void setRootTab(APIInspectorTab_littlespidy rootTab) {
+        this.rootTab = rootTab;
     }
 
     /**
@@ -192,8 +200,15 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     /**
-     * Schedules a debounced asynchronous save (1500ms delay).
+     * Schedules a debounced asynchronous save (1500ms delay) for the entire root tab.
      */
+    public synchronized void saveAsync(APIInspectorTab_littlespidy rootTab) {
+        if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
+            pendingSaveTask.cancel(false);
+        }
+        pendingSaveTask = debounceExecutor.schedule(() -> saveSync(rootTab), 1500, TimeUnit.MILLISECONDS);
+    }
+
     public synchronized void saveAsync(ResAPIVersionFinderTab_littlespidy tab) {
         if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
             pendingSaveTask.cancel(false);
@@ -201,11 +216,27 @@ public class APIInspectorPersistenceManager_littlespidy {
         pendingSaveTask = debounceExecutor.schedule(() -> saveSync(tab), 1500, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Synchronously persists all sessions to disk using an atomic file move.
-     */
     public void saveSync(ResAPIVersionFinderTab_littlespidy tab) {
+        if (this.rootTab != null) {
+            saveSync(this.rootTab);
+            return;
+        }
         if (tab == null) return;
+        saveSyncInternal(tab, null, null);
+    }
+
+    public void saveSync(APIInspectorTab_littlespidy rootTab) {
+        if (rootTab == null) return;
+        saveSyncInternal(rootTab.getVersionFinderTab(),
+                rootTab.getDocStrategyTab().getAllEntries(),
+                rootTab.getEndpointDiscoveryTab().getAllEntries());
+    }
+
+    private void saveSyncInternal(
+            ResAPIVersionFinderTab_littlespidy tab,
+            List<ReferenceRequestEntry> docEntries,
+            List<ReferenceRequestEntry> endpointEntries) {
+
         synchronized (saveLock) {
             try {
                 File sessionFile = getSessionFile();
@@ -217,12 +248,26 @@ public class APIInspectorPersistenceManager_littlespidy {
                 SessionRootDTO root = new SessionRootDTO();
                 root.savedAt = System.currentTimeMillis();
 
-                List<RequestSessionPanel_littlespidy> panels = tab.getAllSessionPanels();
-                for (int i = 0; i < panels.size(); i++) {
-                    RequestSessionPanel_littlespidy panel = panels.get(i);
-                    String tabTitle = tab.getTabTitleAt(i);
-                    SessionTabDTO tabDTO = serializeSessionPanel(panel, tabTitle);
-                    root.tabs.add(tabDTO);
+                if (tab != null) {
+                    List<RequestSessionPanel_littlespidy> panels = tab.getAllSessionPanels();
+                    for (int i = 0; i < panels.size(); i++) {
+                        RequestSessionPanel_littlespidy panel = panels.get(i);
+                        String tabTitle = tab.getTabTitleAt(i);
+                        SessionTabDTO tabDTO = serializeSessionPanel(panel, tabTitle);
+                        root.tabs.add(tabDTO);
+                    }
+                }
+
+                if (docEntries != null) {
+                    for (ReferenceRequestEntry ref : docEntries) {
+                        root.documentationEntries.add(serializeReferenceRequest(ref));
+                    }
+                }
+
+                if (endpointEntries != null) {
+                    for (ReferenceRequestEntry ref : endpointEntries) {
+                        root.endpointDiscoveryEntries.add(serializeReferenceRequest(ref));
+                    }
                 }
 
                 String json = gson.toJson(root);
@@ -242,10 +287,10 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     /**
-     * Loads saved sessions from disk and restores them into the given tab.
+     * Loads saved sessions from disk and restores them into the given root tab.
      */
-    public void loadSession(ResAPIVersionFinderTab_littlespidy tab) {
-        if (tab == null) return;
+    public void loadSession(APIInspectorTab_littlespidy rootTab) {
+        if (rootTab == null) return;
         synchronized (saveLock) {
             try {
                 File sessionFile = getSessionFile();
@@ -255,15 +300,37 @@ public class APIInspectorPersistenceManager_littlespidy {
 
                 String json = Files.readString(sessionFile.toPath(), StandardCharsets.UTF_8);
                 SessionRootDTO root = gson.fromJson(json, SessionRootDTO.class);
-                if (root == null || root.tabs == null || root.tabs.isEmpty()) {
-                    return;
-                }
+                if (root == null) return;
 
                 SwingUtilities.invokeLater(() -> {
-                    for (SessionTabDTO tabDTO : root.tabs) {
-                        tab.restoreSession(tabDTO);
+                    // 1. Restore ResAPI Version Finder tabs
+                    if (root.tabs != null) {
+                        for (SessionTabDTO tabDTO : root.tabs) {
+                            rootTab.getVersionFinderTab().restoreSession(tabDTO);
+                        }
                     }
-                    log("[API Inspector] Successfully restored " + root.tabs.size() + " session tabs from " + sessionFile.getAbsolutePath());
+
+                    // 2. Restore API Documentation Strategy entries
+                    if (root.documentationEntries != null && !root.documentationEntries.isEmpty()) {
+                        List<ReferenceRequestEntry> list = new ArrayList<>();
+                        for (ReferenceRequestDTO rDto : root.documentationEntries) {
+                            ReferenceRequestEntry ref = deserializeReferenceRequest(rDto);
+                            if (ref != null) list.add(ref);
+                        }
+                        rootTab.getDocStrategyTab().restoreEntries(list);
+                    }
+
+                    // 3. Restore API Endpoint Discovery Strategy entries
+                    if (root.endpointDiscoveryEntries != null && !root.endpointDiscoveryEntries.isEmpty()) {
+                        List<ReferenceRequestEntry> list = new ArrayList<>();
+                        for (ReferenceRequestDTO rDto : root.endpointDiscoveryEntries) {
+                            ReferenceRequestEntry ref = deserializeReferenceRequest(rDto);
+                            if (ref != null) list.add(ref);
+                        }
+                        rootTab.getEndpointDiscoveryTab().restoreEntries(list);
+                    }
+
+                    log("[API Inspector] Successfully restored session data from " + sessionFile.getAbsolutePath());
                 });
 
             } catch (Exception ex) {
@@ -322,6 +389,62 @@ public class APIInspectorPersistenceManager_littlespidy {
         }
 
         return dto;
+    }
+
+    public static ReferenceRequestDTO serializeReferenceRequest(ReferenceRequestEntry ref) {
+        if (ref == null) return null;
+        ReferenceRequestDTO dto = new ReferenceRequestDTO();
+        dto.id = ref.getId();
+        dto.timestamp = ref.getTimestamp();
+        dto.strategyName = ref.getStrategyName();
+        dto.method = ref.getMethod();
+        dto.originalPath = ref.getOriginalPath();
+        dto.host = ref.getHost();
+        dto.fullUrl = ref.getFullUrl();
+        dto.referenceRequest = serializeHttpRequest(ref.getReferenceRequest());
+
+        for (GeneratedVariationItem var : ref.getVariations()) {
+            GeneratedVariationDTO vDto = new GeneratedVariationDTO();
+            vDto.variationIndex = var.getVariationIndex();
+            vDto.pathVariation = var.getPathVariation();
+            vDto.authenticated = var.isAuthenticated();
+            vDto.intruderStatus = var.getIntruderStatus();
+            vDto.fullUrl = var.getFullUrl();
+            vDto.generatedRequest = serializeHttpRequest(var.getGeneratedRequest());
+            dto.variations.add(vDto);
+        }
+
+        return dto;
+    }
+
+    public static ReferenceRequestEntry deserializeReferenceRequest(ReferenceRequestDTO dto) {
+        if (dto == null) return null;
+        HttpRequest refReq = deserializeHttpRequest(dto.referenceRequest);
+        List<GeneratedVariationItem> vars = new ArrayList<>();
+        if (dto.variations != null) {
+            for (GeneratedVariationDTO vDto : dto.variations) {
+                HttpRequest genReq = deserializeHttpRequest(vDto.generatedRequest);
+                vars.add(new GeneratedVariationItem(
+                        vDto.variationIndex,
+                        vDto.pathVariation,
+                        vDto.authenticated,
+                        vDto.intruderStatus,
+                        vDto.fullUrl,
+                        genReq
+                ));
+            }
+        }
+        return new ReferenceRequestEntry(
+                dto.id,
+                dto.timestamp,
+                dto.strategyName,
+                dto.method,
+                dto.originalPath,
+                dto.host,
+                dto.fullUrl,
+                refReq,
+                vars
+        );
     }
 
     public static HttpMessageDTO serializeHttpRequest(HttpRequest req) {

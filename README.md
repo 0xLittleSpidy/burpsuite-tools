@@ -181,17 +181,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 ### 16. [API Inspector](file:///home/littlespidy/myextra/burpsuite-extensions/APIInspector_littlespidy)
 - **ResAPI Version Finder Tab**: Dedicated workspace for submitting and analyzing API endpoints with rapid manual launcher and right-click context menu integration (`Send to API Inspector (ResAPI Version Finder)`).
 - **Dedicated Sub-Tabs Per Request**: Each endpoint generates an isolated session sub-tab with auto-incrementing naming (`#<ID> <METHOD> <path>`) and double-click in-place inline header renaming with zero modal popups.
-- **Multi-Strategy Version Discovery**: Automated mutation and probing engine across 7 versioning strategies:
-  - URI Path Versioning (segment replacement, path prefix insertion, suffix variations)
-  - Request Header Versioning (`X-API-Version`, `API-Version`, `Accept-Version`, `X-Version`, etc.)
-  - Query Parameter Versioning (`version`, `v`, `api_version`, etc.)
-  - Content Negotiation & Media Type Versioning (`Accept: application/vnd.*`, `Accept: application/json; version=*`)
-  - Content-Type Body Versioning (for POST/PUT/PATCH requests)
-  - Subdomain & Hostname Versioning (`v1.api.*` vs `v2.api.*`)
-  - Cookie Versioning (`api_version=*`)
+- **Multi-Strategy Version Discovery**: Automated mutation and probing engine across 7 versioning strategies (URI path, request headers, query parameters, content negotiation/Accept, Content-Type, subdomains/hosts, and cookies).
+- **API Documentation Intruder Strategy**: Progressively removes path segments from the end of the endpoint towards the root path, automatically derives unauthenticated variants (stripping auth headers and session cookies while preserving benign cookies), and dispatches all variations to Burp Intruder.
+- **API Endpoint Discovery Intruder Strategy**: Progressively trims path prefixes and segments to discover unmapped endpoints, generates authenticated and unauthenticated variants, and sends all to Burp Intruder.
+- **Dedicated Strategy Tracking Tabs**: Master-detail tracking views for both Intruder strategies showing reference endpoints, generated variations, authentication states, dispatch statuses, embedded Montoya viewer, and CSV export.
 - **Intelligent Diff & Representation Analysis**: Automatically detects active alternative versions, 404-to-200 status shifts, auth bypass shifts (401/403 -> 200), version deprecation errors, and length deltas.
 - **Interactive Workspace & Inspection**: Typed sortable results table (`TableRowSorter`), embedded native Montoya request and response editors, diff breakdown panel, Repeater/Intruder dispatch, and CSV export.
-- **Persistent Session Storage & State Recovery**: Prompts user for storage directory on load, remembers preferences, supports dynamic folder switching via top toolbar, and automatically restores all sub-tabs, configurations, and results across Burp restarts with debounced atomic JSON writes and clean shutdown hooks.
+- **Persistent Session Storage & State Recovery**: Prompts user for storage directory on load, remembers preferences, supports dynamic folder switching via top toolbar, and automatically restores all sub-tabs, configurations, results, and Intruder strategy tracking data across Burp restarts with debounced atomic JSON writes and clean shutdown hooks.
 
 ---
 

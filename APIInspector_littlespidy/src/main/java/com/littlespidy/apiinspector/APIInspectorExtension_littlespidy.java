@@ -23,31 +23,36 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
         APIInspectorPersistenceManager_littlespidy persistenceManager = new APIInspectorPersistenceManager_littlespidy(api);
         APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(api);
 
+        persistenceManager.setRootTab(rootTab);
         rootTab.getVersionFinderTab().setPersistenceManager(persistenceManager);
+
+        // Hook persistent auto-save callbacks for Intruder tracking tabs
+        rootTab.getDocStrategyTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
+        rootTab.getEndpointDiscoveryTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
 
         // Register Suite Tab
         api.userInterface().registerSuiteTab("API Inspector", rootTab);
 
         // Register Context Menu Provider
         api.userInterface().registerContextMenuItemsProvider(
-                new APIInspectorContextMenu_littlespidy(rootTab.getVersionFinderTab())
+                new APIInspectorContextMenu_littlespidy(api, rootTab)
         );
 
         // Resolve storage directory and restore previous sessions
         SwingUtilities.invokeLater(() -> {
             persistenceManager.resolveStorageDirectory(null);
             rootTab.getVersionFinderTab().updateStorageDisplay();
-            persistenceManager.loadSession(rootTab.getVersionFinderTab());
+            persistenceManager.loadSession(rootTab);
         });
 
         // Register clean shutdown unloading handler
         api.extension().registerUnloadingHandler(() -> {
             api.logging().logToOutput("[API Inspector] Extension unloading - saving persistent state...");
-            persistenceManager.saveSync(rootTab.getVersionFinderTab());
+            persistenceManager.saveSync(rootTab);
             api.logging().logToOutput("[API Inspector] Persistent state saved successfully.");
         });
 
         api.logging().logToOutput("[API Inspector] Extension initialized successfully.");
-        api.logging().logToOutput("[API Inspector] ResAPI Version Finder tab registered with session persistence.");
+        api.logging().logToOutput("[API Inspector] ResAPI Version Finder and Intruder Strategies registered with session persistence.");
     }
 }

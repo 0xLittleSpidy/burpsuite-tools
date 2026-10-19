@@ -31,9 +31,32 @@ Modern web applications and APIs frequently maintain legacy, unreleased, depreca
 - **Automatic Directory Prompt on Load**: Prompts the user to select or confirm the session storage directory when the extension is added, or automatically detects open `.burp` project directories.
 - **Preference Memory**: Remembers configured directory in Burp Suite's persistent preferences across sessions.
 - **Toolbar Indicator & Switcher**: Live `Storage: [folder] [Change Folder]` controls in the header allow inspecting the active storage directory and switching locations dynamically.
-- **Full State Reconstitution**: Restores all sub-tabs, custom renamed titles, baseline requests/responses, strategy options, version candidate lists, thread concurrency settings, delay intervals, and probe results tables.
+- **Full State Reconstitution**: Restores all sub-tabs, custom renamed titles, baseline requests/responses, strategy options, version candidate lists, thread concurrency settings, delay intervals, probe results tables, and both Intruder strategy tracking views.
 - **Atomic Debounced Saving**: Asynchronous saving debounced by 1500ms using atomic temporary file moves (`api_inspector_session.json.tmp` -> `api_inspector_session.json`) ensures zero data corruption.
 - **Clean Shutdown Hook**: Registers an `ExtensionUnloadingHandler` ensuring all session data is flushed to disk before the extension or Burp is closed.
+
+### Feature 4: API Documentation Intruder Strategy
+- **Progressive Right-to-Left Path Trimming**: Generates requests by progressively removing path segments starting from the last segment until the root path is reached.
+  - Example: For `/api/v1/admin`, generates `/api/v1/`, `/api/`, and `/`.
+  - Preserves query parameters and handles root paths, trailing slashes, and variable path depths.
+- **Automated Unauthenticated Copy Generation**:
+  - Strips authentication headers (`Authorization`, `X-Api-Key`, `Token`, `Bearer`, etc.).
+  - Strips session/auth cookies (`sessionid`, `jwt`, `token`, `connect.sid`, `phpsessid`, etc.) while strictly preserving non-authentication cookies (`theme`, `tracking_id`).
+  - Leaves the original request completely untouched.
+- **Automated Intruder Dispatch**: Automatically sends every generated path variation (both authenticated and unauthenticated) to Burp Intruder.
+- **Dedicated Tracking Tab**: Logs reference endpoints, generated variations, authentication status, and dispatch status with embedded Montoya request viewer, CSV export, and resend controls.
+
+### Feature 5: API Endpoint Discovery Intruder Strategy
+- **Progressive Prefix & Segment Trimming**: Removes path prefixes and segments to discover unmapped or alternative endpoints.
+  - Example: For `/api/v1/admin`, generates `/v1/admin`, `/admin`, `/api/v1/`, `/api/`, `/`.
+- **Authenticated & Unauthenticated Variants**: Dispatches both authenticated requests and cleanly stripped unauthenticated requests directly to Burp Intruder.
+- **Dedicated Tracking Tab**: Master-detail tracking view recording reference endpoints, generated variations, and dispatch outcomes.
+
+### Feature 6: Hierarchical Context Menu Integration
+- Right-click any HTTP request in Burp Suite (Proxy HTTP history, Repeater, Target site map, Logger, etc.) and access the **API Inspector (littlespidy)** sub-menu:
+  - **Send to ResAPI Version Finder**: Spawns a dedicated Version Finder sub-tab.
+  - **API Documentation Intruder Strategy**: Progressively removes trailing path segments, generates unauthenticated pairs, and sends all to Intruder.
+  - **API Endpoint Discovery Intruder Strategy**: Progressively removes prefix and path segments, generates unauthenticated pairs, and sends all to Intruder.
 
 ---
 
