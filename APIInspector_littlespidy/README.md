@@ -1,0 +1,115 @@
+# API Inspector (littlespidy)
+
+Burp Suite extension developed with the modern Montoya API for automated REST API version discovery, representation probing, and endpoint auditing.
+
+## Overview
+
+Modern web applications and APIs frequently maintain legacy, unreleased, deprecated, or undocumented API versions. These older or alternative representations can expose outdated business logic, missing authentication/authorization checks (BOLA/IDOR), or sensitive debug endpoints.
+
+**API Inspector** introduces the **ResAPI Version Finder**, an automated assessment environment inside Burp Suite that probes target API endpoints across multiple versioning strategies and displays results in dedicated, interactive per-request workspaces.
+
+---
+
+## Features
+
+### Feature 1: ResAPI Version Finder Tab
+- Main workspace tab integrated directly into Burp Suite's top tab bar.
+- Rapid launcher bar to manually submit full API URLs with configurable HTTP methods (`GET`, `POST`, `PUT`, `DELETE`, etc.).
+- Right-click context menu integration: Right-click any HTTP request in Proxy History, Repeater, Target site map, or Logger and select **Send to API Inspector (ResAPI Version Finder)**.
+
+### Feature 2: Dedicated Sub-Tabs Per Request
+- Each analyzed endpoint spawns its own isolated session sub-tab.
+- Automatic naming convention: `"#<ID> <METHOD> <truncated_path>"` (e.g. `"#1 GET /api/v1/users"`).
+- Double-click inline renaming on tab headers with zero modal popups:
+  - Double-click to edit directly inside the tab header.
+  - Press `Enter` to commit changes.
+  - Press `Escape` to cancel.
+  - Automatic commit on focus loss.
+- Plain ASCII close button (`x`) for individual tabs, plus a "Close All Tabs" action.
+
+---
+
+## Discovery Strategies Supported
+
+1. **URI Path Versioning (Most Common)**
+   - Automatically detects and replaces existing version segments: `/v1/`, `/v2/`, `/v1.0/`, `/v0/`, `/version/1/`.
+   - Injects versions into clean paths: `/api/users` -> `/api/v1/users`, `/api/v2/users`.
+   - Suffix versioning support: `/users_v1` -> `/users_v2`.
+   - Comprehensive candidate range: `0`, `1`, `2`, `3`, `4`, `5`, `0.1`, `1.0`, `2.0`, `beta`, `alpha`, `latest`, `legacy`, `deprecated`, `internal`, `test`.
+
+2. **Request Header Versioning**
+   - Probes dedicated version headers:
+     - `X-API-Version`
+     - `API-Version`
+     - `X-Version`
+     - `Version`
+     - `Accept-Version`
+     - `X-Accept-Version`
+     - `App-Version`
+     - `Client-Version`
+   - Injects both integer values (`1`, `2`) and prefixed values (`v1`, `v2`).
+
+3. **Query Parameter Versioning**
+   - Discovers version parameters: `version`, `v`, `api_version`, `api-version`, `apiVersion`, `ver`, `v_num`.
+   - Updates existing query parameters or dynamically appends new query parameters.
+
+4. **Content Negotiation / Media Type Versioning (Accept Header)**
+   - Media type version parameters: `Accept: application/json; version=2`, `Accept: application/json; v=2`.
+   - Vendor MIME type detection and substitution: `Accept: application/vnd.<vendor>.v{version}+json`.
+   - Generic vendor probing: `Accept: application/vnd.api.v{version}+json`.
+
+5. **Content-Type Body Versioning**
+   - For state-modifying requests (`POST`, `PUT`, `PATCH`), mutates `Content-Type: application/json; version={version}`.
+
+6. **Subdomain / Host Versioning**
+   - Probes versioned hosts: `v1.api.example.com` -> `v2.api.example.com`, `api-v1.example.com` -> `api-v2.example.com`.
+
+7. **Cookie Versioning**
+   - Probes version cookies: `Cookie: api_version={version}; version={version}`.
+
+---
+
+## Intelligent Diff & Representation Analysis
+
+Every probed response is compared against the baseline endpoint response:
+- `ACTIVE ALTERNATIVE`: High-value finding where the alternative version returned `200 OK` with a different response payload or length delta.
+- `STATUS SHIFT: 404 -> 200`: Discovery of an active API version where the baseline returned Not Found.
+- `AUTH BYPASS SHIFT: 401/403 -> 200`: Alert for potential authorization bypass on legacy or alternative API endpoints.
+- `VERSION ERROR / DEPRECATED`: Identifies deprecation banners or explicit error messages from API gateways.
+- `SAME AS BASELINE`: Identical response structure indicating fallback behavior.
+
+---
+
+## Interactive Workspace Controls
+
+- **Sortable Results Table**: Sort by ID, Strategy, Variation, Status code, Response length, or Latency (numeric sorting enabled).
+- **Embedded Burp Editors**: Native Montoya `HttpRequestEditor` and `HttpResponseEditor` for full syntax highlighting and inspection.
+- **Diff Comparison View**: Direct inspection of status and byte differences.
+- **Context Actions**: Right-click any row to "Send to Repeater", "Send to Intruder", "Copy URL", or "Copy Request".
+- **Export**: Export probe results to CSV for external reporting.
+
+---
+
+## Building and Installation
+
+### Requirements
+- JDK 17 or higher (tested with JDK 21 / 26)
+- Gradle (wrapper included)
+
+### Build the JAR
+```bash
+cd APIInspector_littlespidy
+./gradlew clean test build
+```
+
+The compiled fat-JAR will be generated at:
+```
+build/libs/api-inspector-littlespidy-1.0.0.jar
+```
+
+### Install in Burp Suite
+1. In Burp Suite, navigate to **Extensions** -> **Installed**.
+2. Click **Add**.
+3. Select **Extension type**: `Java`.
+4. Choose the generated JAR file: `APIInspector_littlespidy/build/libs/api-inspector-littlespidy-1.0.0.jar`.
+5. Click **Next**. The extension will load and register the **API Inspector** tab.

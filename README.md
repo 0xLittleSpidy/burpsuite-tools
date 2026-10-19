@@ -25,6 +25,8 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **Active Scan Session Keeper** | [📥 `activescan-session-keeper-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/activescan-session-keeper-littlespidy-1.0.0.jar) | Active scan session timeout interceptor that pauses scan threads on session expiry, prompts for fresh cookies, and auto-retries failed checks |
 | **GWTMap** | [`gwtmap-littlespidy-1.0.0.jar`](https://github.com/0xLittleSpidy/burpsuite-tools/releases/download/v1.0.0/gwtmap-littlespidy-1.0.0.jar) | GWT-RPC reverse engineering, permutation analysis, AST deserializer, automated fuzzer, Base64 long codec, and native Burp request editor tab |
 | **Request Smuggling Inspector** | `request-smuggling-inspector-littlespidy-1.0.0.jar` (build locally) | HTTP request smuggling payload injector — right-click CL.TE, TE.CL, TE.TE variants directly into Repeater |
+| **SSO Inspector** | `sso-inspector-littlespidy-1.0.0.jar` (build locally) | Single Sign-On and OAuth 2.0 / OpenID Connect auditor with interactive OAuth workbench, parameter decoding, flow classifier, and ported oauth-scan checks |
+| **API Inspector** | `api-inspector-littlespidy-1.0.0.jar` (build locally) | REST API version discovery and representation prober with ResAPI Version Finder tab, per-request sub-tabs, and multi-strategy mutation engine |
 
 ---
 
@@ -167,6 +169,28 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Dedicated Independent JSON Stores**: Each tab loads and saves strictly to its own file (`xss_payloads.json`, `csti_payloads.json`, `sql_payloads.json`, `http_request_smuggling_payloads.json`).
 - **In-App Payload Management**: Full UI support for adding (`Add Payload`), editing (`Edit Selected`), deleting (`Delete Selected`), and reloading (`Reload from JSON`) payloads on the fly without restarting Burp.
 - **Dynamic Context Menu Injection**: Injects parameterized payloads into all parameters, selected ranges, or dispatches directly to Repeater with armed payloads, plus direct in-editor HTTP request smuggling desync injection.
+
+### 15. [SSO Inspector](file:///home/littlespidy/myextra/burpsuite-extensions/SSOInspector_littlespidy)
+- **Interactive OAuth Workbench**: Right-click any HTTP request in Proxy, Repeater, Logger, or Target and select **Send to SSO Inspector -> OAuth** to ingest authentication traffic into a dedicated audit workspace.
+- **Row-per-Request Table with Explicit Issue Tracking**: Displays captured requests in a structured table with dedicated columns for `Severity` badge (`HIGH`, `MEDIUM`, `LOW`, `INFO`, `CLEAN`), `Issues` count, and inline semicolon-delimited `Issue Summary`.
+- **Flow Classifier & Deep Parameter Parser**: Automatically identifies OAuth 2.0 / OIDC flows (Auth Code with/without PKCE, Implicit, Hybrid, Client Credentials, ROPC, Token Exchange, JWT Bearer) and extracts parameters with URL decoding and JWT claim parsing.
+- **oauth-scan Feature Integration**: Modernized passive audit engine (secret leakage, missing state/nonce, PKCE plain downgrade, weak entropy, long-lived tokens) and modular active probing engine (Redirect URI open redirects, Scope fuzzing, Code replay, Nonce tampering, Response type coercion, PKCE downgrade, Well-known discovery, Request URI SSRF, ACR confusion).
+- **Dual Attack Modes**: Provides both a one-click **Run All Active Checks** button and a modular **Attack Selection Checklist** with live progress tracking and event logs.
+- **Burp Scanner Integration**: Registers Montoya `ScanCheck` for passive and active scanning during automated audits.
+
+### 16. [API Inspector](file:///home/littlespidy/myextra/burpsuite-extensions/APIInspector_littlespidy)
+- **ResAPI Version Finder Tab**: Dedicated workspace for submitting and analyzing API endpoints with rapid manual launcher and right-click context menu integration (`Send to API Inspector (ResAPI Version Finder)`).
+- **Dedicated Sub-Tabs Per Request**: Each endpoint generates an isolated session sub-tab with auto-incrementing naming (`#<ID> <METHOD> <path>`) and double-click in-place inline header renaming with zero modal popups.
+- **Multi-Strategy Version Discovery**: Automated mutation and probing engine across 7 versioning strategies:
+  - URI Path Versioning (segment replacement, path prefix insertion, suffix variations)
+  - Request Header Versioning (`X-API-Version`, `API-Version`, `Accept-Version`, `X-Version`, etc.)
+  - Query Parameter Versioning (`version`, `v`, `api_version`, etc.)
+  - Content Negotiation & Media Type Versioning (`Accept: application/vnd.*`, `Accept: application/json; version=*`)
+  - Content-Type Body Versioning (for POST/PUT/PATCH requests)
+  - Subdomain & Hostname Versioning (`v1.api.*` vs `v2.api.*`)
+  - Cookie Versioning (`api_version=*`)
+- **Intelligent Diff & Representation Analysis**: Automatically detects active alternative versions, 404-to-200 status shifts, auth bypass shifts (401/403 -> 200), version deprecation errors, and length deltas.
+- **Interactive Workspace & Inspection**: Typed sortable results table (`TableRowSorter`), embedded native Montoya request and response editors, diff breakdown panel, Repeater/Intruder dispatch, and CSV export.
 
 ---
 
