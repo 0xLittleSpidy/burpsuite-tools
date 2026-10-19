@@ -54,7 +54,7 @@ public class AiSecurityAnalystPanel extends JPanel {
         "codellama:latest",
         "mistral:latest"
     });
-    private final JButton fetchModelsBtn = new JButton("🔄 Fetch Models");
+    private final JButton fetchModelsBtn = new JButton("Fetch Models");
 
     // Antigravity CLI Fields
     private final JTextField agyPathField = new JTextField(AiSecurityEngine.resolveAgyPath(null), 20);
@@ -69,8 +69,8 @@ public class AiSecurityAnalystPanel extends JPanel {
     });
 
     // ── Action Buttons ──
-    private final JButton runBtn = new JButton("⚡ Run AI Analysis");
-    private final JButton stopBtn = new JButton("⏹ Stop");
+    private final JButton runBtn = new JButton("Run AI Analysis");
+    private final JButton stopBtn = new JButton("Stop");
     private final JButton exportBtn = new JButton("Export Report (MD)");
     private final JButton copyBtn = new JButton("Copy Analysis");
     private final JButton clearBtn = new JButton("Clear");
@@ -297,7 +297,7 @@ public class AiSecurityAnalystPanel extends JPanel {
                     long duration = System.currentTimeMillis() - startTime;
                     appendOutput(result);
                     appendOutput("\n\n--------------------------------------------------------------------------------\n");
-                    appendOutput(String.format("[✓] Analysis complete in %.2f seconds.\n", duration / 1000.0));
+                    appendOutput(String.format("[OK] Analysis complete in %.2f seconds.\n", duration / 1000.0));
                     statusLabel.setText("Analysis finished in " + (duration / 1000) + "s.");
                     runBtn.setEnabled(true);
                     stopBtn.setEnabled(false);
@@ -329,7 +329,7 @@ public class AiSecurityAnalystPanel extends JPanel {
                 exitCode -> SwingUtilities.invokeLater(() -> {
                     long duration = System.currentTimeMillis() - startTime;
                     appendOutput("\n--------------------------------------------------------------------------------\n");
-                    appendOutput(String.format("[✓] Antigravity CLI process exited with code %d (in %.2fs).\n", exitCode, duration / 1000.0));
+                    appendOutput(String.format("[OK] Antigravity CLI process exited with code %d (in %.2fs).\n", exitCode, duration / 1000.0));
                     statusLabel.setText("Antigravity process complete (exit " + exitCode + ").");
                     runBtn.setEnabled(true);
                     stopBtn.setEnabled(false);
@@ -440,13 +440,13 @@ public class AiSecurityAnalystPanel extends JPanel {
         }
 
         fetchModelsBtn.setEnabled(false);
-        fetchModelsBtn.setText("🔄 Fetching...");
+        fetchModelsBtn.setText("Fetching...");
         statusLabel.setText("Discovering installed models from " + endpoint + "...");
 
         CompletableFuture.supplyAsync(() -> engine.fetchInstalledModels(endpoint))
             .thenAccept(models -> SwingUtilities.invokeLater(() -> {
                 fetchModelsBtn.setEnabled(true);
-                fetchModelsBtn.setText("🔄 Fetch Models");
+                fetchModelsBtn.setText("Fetch Models");
 
                 if (models != null && !models.isEmpty()) {
                     Object currentSelection = modelSelector.isEditable() ? modelSelector.getEditor().getItem() : modelSelector.getSelectedItem();
@@ -498,7 +498,7 @@ public class AiSecurityAnalystPanel extends JPanel {
                     if (userInitiated) {
                         StringBuilder sb = new StringBuilder("Successfully discovered " + models.size() + " model(s):\n\n");
                         for (String m : models) {
-                            sb.append("• ").append(m).append("\n");
+                            sb.append("- ").append(m).append("\n");
                         }
                         JOptionPane.showMessageDialog(this, sb.toString(), "Models Discovered", JOptionPane.INFORMATION_MESSAGE);
                     }
@@ -509,8 +509,8 @@ public class AiSecurityAnalystPanel extends JPanel {
                             this,
                             "Could not discover any models from " + endpoint + ".\n\n"
                                 + "Please check that your local server is running:\n"
-                                + "• Ollama: run 'ollama serve' (default port 11434)\n"
-                                + "• LM Studio: Start Local Server in LM Studio (default port 1234)\n\n"
+                                + "- Ollama: run 'ollama serve' (default port 11434)\n"
+                                + "- LM Studio: Start Local Server in LM Studio (default port 1234)\n\n"
                                 + "You can also type your model name directly into the Model box.",
                             "No Models Discovered",
                             JOptionPane.WARNING_MESSAGE
@@ -521,7 +521,7 @@ public class AiSecurityAnalystPanel extends JPanel {
             .exceptionally(ex -> {
                 SwingUtilities.invokeLater(() -> {
                     fetchModelsBtn.setEnabled(true);
-                    fetchModelsBtn.setText("🔄 Fetch Models");
+                    fetchModelsBtn.setText("Fetch Models");
                     statusLabel.setText("Error fetching models: " + ex.getMessage());
                     if (userInitiated) {
                         JOptionPane.showMessageDialog(

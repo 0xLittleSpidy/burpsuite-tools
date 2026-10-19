@@ -347,15 +347,15 @@ public class ReconMiningPanel extends JPanel {
         requestsPanel.add(new JScrollPane(requestsTable), BorderLayout.CENTER);
 
         // ── Bottom Section: Left (HTTP Request/Response) | Right (Findings Tabs) ──
-        httpEditorsTabs.addTab("📤 Request", requestEditor.uiComponent());
-        httpEditorsTabs.addTab("📥 Response", responseEditor.uiComponent());
+        httpEditorsTabs.addTab("Request", requestEditor.uiComponent());
+        httpEditorsTabs.addTab("Response", responseEditor.uiComponent());
 
-        findingsTabs.addTab("🛣️ Paths", createPathsPanel());
-        findingsTabs.addTab("🔑 Secrets", createSecretsPanel());
-        findingsTabs.addTab("💬 Comments", createCommentsPanel());
-        findingsTabs.addTab("🛡️ Security Bypasses", createSecurityBypassesPanel());
-        findingsTabs.addTab("☁️ Cloud URLs", createCloudUrlsPanel());
-        findingsTabs.addTab("📦 Dependencies", createDependenciesPanel());
+        findingsTabs.addTab("Paths", createPathsPanel());
+        findingsTabs.addTab("Secrets", createSecretsPanel());
+        findingsTabs.addTab("Comments", createCommentsPanel());
+        findingsTabs.addTab("Security Bypasses", createSecurityBypassesPanel());
+        findingsTabs.addTab("Cloud URLs", createCloudUrlsPanel());
+        findingsTabs.addTab("Dependencies", createDependenciesPanel());
 
         JSplitPane detailSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, httpEditorsTabs, findingsTabs);
         detailSplit.setResizeWeight(0.48);
@@ -478,12 +478,12 @@ public class ReconMiningPanel extends JPanel {
         exportBtn.addActionListener(e -> exportTableToTsv(secretsTable, "Secrets"));
         toolbar.add(exportBtn);
 
-        JButton catalogBtn = new JButton("📋 Signatures Catalog (" + SecretAndEndpointMiner.getCuratedSignatures().size() + ")");
+        JButton catalogBtn = new JButton("Signatures Catalog (" + SecretAndEndpointMiner.getCuratedSignatures().size() + ")");
         catalogBtn.setToolTipText("View complete catalog of all curated secret signatures, match patterns, and categories");
         catalogBtn.addActionListener(e -> showSignaturesCatalogDialog());
         toolbar.add(catalogBtn);
 
-        JButton verifyBtn = new JButton("🧪 Verify Secret (Repeater)");
+        JButton verifyBtn = new JButton("Verify Secret (Repeater)");
         verifyBtn.setToolTipText("Send non-destructive verification request directly to Burp Repeater");
         verifyBtn.addActionListener(e -> {
             int row = secretsTable.getSelectedRow();
@@ -773,7 +773,7 @@ public class ReconMiningPanel extends JPanel {
         filterBtn.addActionListener(e -> applyDependencyFilter());
         toolbar.add(filterBtn);
 
-        JButton verifyBtn = new JButton("⚡ Verify Unclaimed (npm)");
+        JButton verifyBtn = new JButton("Verify Unclaimed (npm)");
         verifyBtn.setToolTipText("Check package names on registry.npmjs.org for 404 Dependency Confusion");
         verifyBtn.addActionListener(e -> {
             verifyBtn.setEnabled(false);
@@ -781,7 +781,7 @@ public class ReconMiningPanel extends JPanel {
             dependencyVerifier.verifyAll(currentEntryDependencies, () -> {
                 SwingUtilities.invokeLater(() -> {
                     verifyBtn.setEnabled(true);
-                    verifyBtn.setText("⚡ Verify Unclaimed (npm)");
+                    verifyBtn.setText("Verify Unclaimed (npm)");
                     applyDependencyFilter();
                 });
             });
@@ -1519,7 +1519,7 @@ public class ReconMiningPanel extends JPanel {
                         menu.add(downloadItem);
 
                         if (aiAnalysisOpener != null) {
-                            JMenuItem aiItem = new JMenuItem("🤖 Analyze with AI...");
+                            JMenuItem aiItem = new JMenuItem("Analyze with AI...");
                             aiItem.addActionListener(ev -> {
                                 if (entry.getResponse() != null) {
                                     aiAnalysisOpener.accept(entry.getUrl(), entry.getResponse().bodyToString());
@@ -1663,7 +1663,7 @@ public class ReconMiningPanel extends JPanel {
                         copySecretItem.addActionListener(ev -> copyToClipboard(sec.secretValue()));
                         menu.add(copySecretItem);
 
-                        JMenuItem verifyItem = new JMenuItem("🧪 Verify Secret (Send to Repeater)");
+                        JMenuItem verifyItem = new JMenuItem("Verify Secret (Send to Repeater)");
                         verifyItem.addActionListener(ev -> verifySecret(sec));
                         menu.add(verifyItem);
 
@@ -1718,7 +1718,7 @@ public class ReconMiningPanel extends JPanel {
                         menu.add(locateItem);
 
                         if (aiAnalysisOpener != null) {
-                            JMenuItem aiItem = new JMenuItem("🤖 Analyze Comment with AI...");
+                            JMenuItem aiItem = new JMenuItem("Analyze Comment with AI...");
                             aiItem.addActionListener(ev -> aiAnalysisOpener.accept(comm.sourceLocation(), comm.commentText()));
                             menu.add(aiItem);
                         }
@@ -1782,7 +1782,7 @@ public class ReconMiningPanel extends JPanel {
                         menu.add(locateItem);
 
                         if (aiAnalysisOpener != null) {
-                            JMenuItem aiItem = new JMenuItem("🤖 Analyze Bypass with AI...");
+                            JMenuItem aiItem = new JMenuItem("Analyze Bypass with AI...");
                             aiItem.addActionListener(ev -> {
                                 String context = "Security Bypass Sink: " + bypass.method() + " (" + bypass.framework() + " - " + bypass.risk() + ")\n"
                                     + "Description: " + bypass.description() + "\n"
@@ -1872,7 +1872,7 @@ public class ReconMiningPanel extends JPanel {
                         copyPkgItem.addActionListener(ev -> copyToClipboard(dep.packageName()));
                         menu.add(copyPkgItem);
 
-                        JMenuItem verifyItem = new JMenuItem("⚡ Check on npm");
+                        JMenuItem verifyItem = new JMenuItem("Check on npm");
                         verifyItem.addActionListener(ev -> {
                             dependencyVerifier.verifySingle(dep);
                             applyDependencyFilter();
@@ -1924,7 +1924,7 @@ public class ReconMiningPanel extends JPanel {
     private void showSignaturesCatalogDialog() {
         Window parentWin = SwingUtilities.getWindowAncestor(this);
         List<SecretAndEndpointMiner.SecretSignatureInfo> allSigs = SecretAndEndpointMiner.getCuratedSignatures();
-        JDialog dialog = new JDialog(parentWin, "📋 Curated Secret Signatures & Match Patterns Catalog (" + allSigs.size() + " Signatures)", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(parentWin, "Curated Secret Signatures & Match Patterns Catalog (" + allSigs.size() + " Signatures)", Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setSize(1050, 600);
         dialog.setLocationRelativeTo(parentWin);

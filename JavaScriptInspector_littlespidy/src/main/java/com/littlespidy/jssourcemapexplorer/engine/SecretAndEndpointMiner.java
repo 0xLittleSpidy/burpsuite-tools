@@ -456,8 +456,20 @@ public class SecretAndEndpointMiner {
         List<DiscoveredCloudUrl> cloudUrls,
         List<DiscoveredDependency> dependencies,
         List<DiscoveredComment> comments,
-        List<DiscoveredSecurityBypass> securityBypasses
+        List<DiscoveredSecurityBypass> securityBypasses,
+        List<DiscoveredGraphQLOperation> graphQLOperations
     ) {
+        public MiningResult(
+            List<DiscoveredSecret> secrets,
+            List<DiscoveredEndpoint> endpoints,
+            List<DiscoveredCloudUrl> cloudUrls,
+            List<DiscoveredDependency> dependencies,
+            List<DiscoveredComment> comments,
+            List<DiscoveredSecurityBypass> securityBypasses
+        ) {
+            this(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, Collections.emptyList());
+        }
+
         public MiningResult(
             List<DiscoveredSecret> secrets,
             List<DiscoveredEndpoint> endpoints,
@@ -465,7 +477,7 @@ public class SecretAndEndpointMiner {
             List<DiscoveredDependency> dependencies,
             List<DiscoveredComment> comments
         ) {
-            this(secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList());
+            this(secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList(), Collections.emptyList());
         }
 
         public MiningResult(
@@ -474,7 +486,7 @@ public class SecretAndEndpointMiner {
             List<DiscoveredCloudUrl> cloudUrls,
             List<DiscoveredDependency> dependencies
         ) {
-            this(secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList());
+            this(secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
     }
 
@@ -496,6 +508,7 @@ public class SecretAndEndpointMiner {
         List<DiscoveredDependency> dependencies = new ArrayList<>();
         List<DiscoveredComment> comments = new ArrayList<>();
         List<DiscoveredSecurityBypass> securityBypasses = new ArrayList<>();
+        List<DiscoveredGraphQLOperation> graphQLOperations = new ArrayList<>();
 
         Set<String> seenEndpoints = new HashSet<>();
         Set<String> seenSecrets = new HashSet<>();
@@ -791,7 +804,14 @@ public class SecretAndEndpointMiner {
             }
         }
 
-        return new MiningResult(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses);
+        // 13. Native GraphQL Operation Mining
+        if (System.nanoTime() <= deadline) {
+            try {
+                graphQLOperations.addAll(GraphQLMiner_littlespidy.mine(sourceLocation, sourceType, scannable));
+            } catch (Exception ignored) {}
+        }
+
+        return new MiningResult(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, graphQLOperations);
     }
 
     private static String classifyCloudProvider(String url) {

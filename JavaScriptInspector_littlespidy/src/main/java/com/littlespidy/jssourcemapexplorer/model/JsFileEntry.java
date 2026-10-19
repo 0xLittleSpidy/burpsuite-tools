@@ -39,7 +39,7 @@ public class JsFileEntry {
     private final List<DiscoveredDependency> jsDependencies = new ArrayList<>();
     private final List<DiscoveredComment> jsComments = new ArrayList<>();
     private final List<DiscoveredSecurityBypass> jsSecurityBypasses = new ArrayList<>();
-
+    private final List<DiscoveredGraphQLOperation> jsGraphQLOperations = new ArrayList<>();
     // Raw HTTP messages
     private final HttpRequest request;
     private final HttpResponse response;
@@ -125,7 +125,8 @@ public class JsFileEntry {
         List<DiscoveredCloudUrl> cloudUrls,
         List<DiscoveredDependency> dependencies,
         List<DiscoveredComment> comments,
-        List<DiscoveredSecurityBypass> securityBypasses
+        List<DiscoveredSecurityBypass> securityBypasses,
+        List<DiscoveredGraphQLOperation> graphQLOperations
     ) {
         jsSecrets.clear();
         if (secrets != null) jsSecrets.addAll(secrets);
@@ -139,6 +140,19 @@ public class JsFileEntry {
         if (comments != null) jsComments.addAll(comments);
         jsSecurityBypasses.clear();
         if (securityBypasses != null) jsSecurityBypasses.addAll(securityBypasses);
+        jsGraphQLOperations.clear();
+        if (graphQLOperations != null) jsGraphQLOperations.addAll(graphQLOperations);
+    }
+
+    public synchronized void setJsReconFindings(
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments,
+        List<DiscoveredSecurityBypass> securityBypasses
+    ) {
+        setJsReconFindings(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, Collections.emptyList());
     }
 
     public synchronized void setJsReconFindings(
@@ -186,6 +200,15 @@ public class JsFileEntry {
 
     public synchronized List<DiscoveredSecurityBypass> getJsSecurityBypasses() {
         return Collections.unmodifiableList(jsSecurityBypasses);
+    }
+
+    public synchronized List<DiscoveredGraphQLOperation> getJsGraphQLOperations() {
+        return Collections.unmodifiableList(jsGraphQLOperations);
+    }
+
+    public synchronized void setJsGraphQLOperations(List<DiscoveredGraphQLOperation> ops) {
+        jsGraphQLOperations.clear();
+        if (ops != null) jsGraphQLOperations.addAll(ops);
     }
 
     public synchronized String getJsReconSummary() {

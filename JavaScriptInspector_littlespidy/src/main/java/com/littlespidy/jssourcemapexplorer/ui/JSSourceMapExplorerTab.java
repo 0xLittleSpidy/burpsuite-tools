@@ -55,6 +55,9 @@ public class JSSourceMapExplorerTab extends JPanel {
     // Dedicated Top-Level Recon Mining Panel
     private final ReconMiningPanel reconMiningPanel;
 
+    // Dedicated Top-Level GraphQL Inspector Panel
+    private final GraphQLInspectorPanel_littlespidy graphQLInspectorPanel;
+
     // Dedicated Top-Level AI Security Analyst Panel (Local LLM & Antigravity CLI)
     private final AiSecurityAnalystPanel aiSecurityPanel;
 
@@ -123,6 +126,11 @@ public class JSSourceMapExplorerTab extends JPanel {
                 refreshView();
             }
         });
+
+        this.graphQLInspectorPanel = new GraphQLInspectorPanel_littlespidy(api, dataStore);
+        this.graphQLInspectorPanel.setHistoryLoader(this::loadProxyHistory);
+        this.graphQLInspectorPanel.setInScopeOnly(inScopeOnlyCheckBox.isSelected());
+
         this.aiSecurityPanel = new AiSecurityAnalystPanel(api);
 
         this.codeViewerPanel.setAiReviewListener(file -> {
@@ -149,17 +157,17 @@ public class JSSourceMapExplorerTab extends JPanel {
             needsRefresh = true;
         });
 
-        // Tab 1: Welcome & Guide
-        rootTabbedPane.addTab("📖 Welcome & Guide", createWelcomePanel());
+        // Tab 1: JS and SourceMap Workspace
+        rootTabbedPane.addTab("JS and SourceMap Workspace", createWorkspacePanel());
 
-        // Tab 2: JS & SourceMap Workspace
-        rootTabbedPane.addTab("🗺️ JS & SourceMap Workspace", createWorkspacePanel());
+        // Tab 2: Dedicated Recon and Secret Mining Tab
+        rootTabbedPane.addTab("Recon and Secret Mining", reconMiningPanel);
 
-        // Tab 3: Dedicated Recon & Secret Mining Tab
-        rootTabbedPane.addTab("🔍 Recon & Secret Mining", reconMiningPanel);
+        // Tab 3: Dedicated GraphQL Inspector Tab
+        rootTabbedPane.addTab("GraphQL Inspector", graphQLInspectorPanel);
 
         // Tab 4: AI Security Analyst (Local LLM / Antigravity CLI)
-        rootTabbedPane.addTab("✨ AI Security Analyst", aiSecurityPanel);
+        rootTabbedPane.addTab("AI Security Analyst", aiSecurityPanel);
 
         add(rootTabbedPane, BorderLayout.CENTER);
     }
@@ -208,83 +216,15 @@ public class JSSourceMapExplorerTab extends JPanel {
         var jsMining = SecretAndEndpointMiner.mine(url, "JS File", bodyStr);
         entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies(), jsMining.comments(), jsMining.securityBypasses());
 
+        var gqlOps = DualEngineGraphQLCoordinator_littlespidy.extractOperations(url, "JS File", bodyStr);
+        entry.setJsGraphQLOperations(gqlOps);
+
         dataStore.addEntry(entry);
+        if (graphQLInspectorPanel != null) {
+            graphQLInspectorPanel.refreshFromDataStore();
+        }
     }
 
-    private JComponent createWelcomePanel() {
-        JPanel panel = new JPanel(new BorderLayout(15, 15));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
-
-        JLabel titleLabel = new JLabel("JavaScript Inspector");
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
-
-        JTextArea descArea = new JTextArea();
-        descArea.setEditable(false);
-        descArea.setOpaque(false);
-        descArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-        descArea.setLineWrap(true);
-        descArea.setWrapStyleWord(true);
-        descArea.setText(
-            "JavaScript Inspector helps security testers analyze JavaScript assets, "
-                + "automatically deduplicate script URLs, classify 1st-party vs 3rd-party origins, "
-                + "detect passive and active .map exposures, inspect both JS and .map raw HTTP requests/responses, "
-                + "reconstruct original unminified source code trees, and mine for hidden API endpoints and secrets."
-        );
-
-        JPanel headerPanel = new JPanel(new BorderLayout(5, 10));
-        headerPanel.add(titleLabel, BorderLayout.NORTH);
-        headerPanel.add(descArea, BorderLayout.CENTER);
-
-        JPanel cardGrid = new JPanel(new GridLayout(0, 2, 20, 20));
-
-        cardGrid.add(createCard(
-            "1. URL Deduplication & Classification",
-            "Automatically removes duplicate script URLs and separates target application JavaScript "
-                + "from third-party trackers and CDNs (Google Analytics, Stripe, Sentry, Cloudflare, etc.)."
-        ));
-        cardGrid.add(createCard(
-            "2. Passive vs On-Demand Active Probing",
-            "Clear dedicated columns track passive findings (comments, headers, inline Base64) "
-                + "and on-demand active probing results (Pass 200 OK / Fail 404) for single, selected, or all requests."
-        ));
-        cardGrid.add(createCard(
-            "3. Source Map HTTP Message Inspection",
-            "When a .map file is discovered or probed, view the raw HTTP Request and Response for both the JavaScript "
-                + "script and the .map file in dedicated Pretty/Raw/Hex editors."
-        ));
-        cardGrid.add(createCard(
-            "4. Dedicated Recon & Secret Mining Tab",
-            "Automatically extracts API endpoints (/api/v1/...), tokens, JWTs, AWS keys, and developer notes "
-                + "across both JS assets and unpacked Source Maps in a dedicated Suite Tab with TSV export."
-        ));
-
-        panel.add(headerPanel, BorderLayout.NORTH);
-        panel.add(cardGrid, BorderLayout.CENTER);
-
-        return new JScrollPane(panel);
-    }
-
-    private JPanel createCard(String title, String description) {
-        JPanel card = new JPanel(new BorderLayout(8, 8));
-        card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-
-        JLabel titleLbl = new JLabel(title);
-        titleLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
-
-        JTextArea desc = new JTextArea(description);
-        desc.setEditable(false);
-        desc.setOpaque(false);
-        desc.setLineWrap(true);
-        desc.setWrapStyleWord(true);
-        desc.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
-
-        card.add(titleLbl, BorderLayout.NORTH);
-        card.add(desc, BorderLayout.CENTER);
-        return card;
-    }
 
     private JPanel createWorkspacePanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
@@ -343,19 +283,19 @@ public class JSSourceMapExplorerTab extends JPanel {
             codeViewerPanel
         );
         treeSplit.setResizeWeight(0.30);
-        bottomTabs.addTab("🌲 Reconstructed Source Tree", treeSplit);
+        bottomTabs.addTab("Reconstructed Source Tree", treeSplit);
 
         // Sub-Tab 2: Raw JS HTTP Messages
         JTabbedPane jsHttpTabs = new JTabbedPane();
-        jsHttpTabs.addTab("📤 JS Request", jsRequestEditor.uiComponent());
-        jsHttpTabs.addTab("📥 JS Response", jsResponseEditor.uiComponent());
-        bottomTabs.addTab("📄 JS HTTP Message", jsHttpTabs);
+        jsHttpTabs.addTab("JS Request", jsRequestEditor.uiComponent());
+        jsHttpTabs.addTab("JS Response", jsResponseEditor.uiComponent());
+        bottomTabs.addTab("JS HTTP Message", jsHttpTabs);
 
         // Sub-Tab 3: Raw SourceMap (.map) HTTP Messages
         JTabbedPane mapHttpTabs = new JTabbedPane();
-        mapHttpTabs.addTab("📤 SourceMap Request", mapRequestEditor.uiComponent());
-        mapHttpTabs.addTab("📥 SourceMap Response", mapResponseEditor.uiComponent());
-        bottomTabs.addTab("🗺️ SourceMap (.map) HTTP Message", mapHttpTabs);
+        mapHttpTabs.addTab("SourceMap Request", mapRequestEditor.uiComponent());
+        mapHttpTabs.addTab("SourceMap Response", mapResponseEditor.uiComponent());
+        bottomTabs.addTab("SourceMap (.map) HTTP Message", mapHttpTabs);
 
         // Master Vertical Split: Scripts Table (Top) vs Project Details & Editors (Bottom)
         JSplitPane mainSplit = new JSplitPane(
@@ -381,6 +321,9 @@ public class JSSourceMapExplorerTab extends JPanel {
             boolean s = inScopeOnlyCheckBox.isSelected();
             if (reconMiningPanel != null) {
                 reconMiningPanel.setInScopeOnly(s);
+            }
+            if (graphQLInspectorPanel != null) {
+                graphQLInspectorPanel.setInScopeOnly(s);
             }
             refreshView();
         });
@@ -417,7 +360,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         downloadJsBtn.setToolTipText("Download and save the selected JavaScript file(s) to local disk");
         downloadJsBtn.addActionListener(e -> downloadSelectedJsFiles());
 
-        JButton aiAnalyzeBtn = new JButton("🤖 Analyze with AI...");
+        JButton aiAnalyzeBtn = new JButton("Analyze with AI...");
         aiAnalyzeBtn.setToolTipText("Send selected JavaScript code to Local LLM (Ollama/LM Studio) or Antigravity CLI for security analysis");
         aiAnalyzeBtn.addActionListener(e -> analyzeSelectedWithAi());
 
@@ -677,6 +620,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                         entry.setSourceMapLocation(targetLocation);
                         sourceTreePanel.setProject(project);
                         reconMiningPanel.refreshFromDataStore();
+                        graphQLInspectorPanel.refreshFromDataStore();
                         handleScriptSelection(entry);
                         refreshView();
 
@@ -983,8 +927,12 @@ public class JSSourceMapExplorerTab extends JPanel {
                             if (isCancelled()) return;
                             try {
                                 if (entry.getResponse() != null) {
-                                    var jsMining = SecretAndEndpointMiner.mine(entry.getUrl(), "JS File", entry.getResponse().bodyToString());
+                                    String code = entry.getResponse().bodyToString();
+                                    var jsMining = SecretAndEndpointMiner.mine(entry.getUrl(), "JS File", code);
                                     entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies(), jsMining.comments(), jsMining.securityBypasses());
+
+                                    var gqlOps = DualEngineGraphQLCoordinator_littlespidy.extractOperations(entry.getUrl(), "JS File", code);
+                                    entry.setJsGraphQLOperations(gqlOps);
                                 }
                             } catch (Exception ignored) {}
 
@@ -994,7 +942,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                                     progressBar.setIndeterminate(false);
                                     progressBar.setMaximum(totalToMine);
                                     progressBar.setValue(cur);
-                                    liveStatusLabel.setText(String.format("Stage 2: Mining secrets & endpoints (%d / %d)...", cur, totalToMine));
+                                    liveStatusLabel.setText(String.format("Stage 2: Mining secrets, endpoints & GraphQL (%d / %d)...", cur, totalToMine));
                                     jsTableModel.fireTableDataChanged();
                                 });
                             }
@@ -1027,6 +975,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                     List<JsFileEntry> result = get();
                     refreshView();
                     reconMiningPanel.refreshFromDataStore();
+                    graphQLInspectorPanel.refreshFromDataStore();
                     liveStatusLabel.setText(String.format("Loaded & mined %d new JS assets from Proxy history.", result.size()));
                     JOptionPane.showMessageDialog(
                         JSSourceMapExplorerTab.this,
@@ -1334,7 +1283,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                         downloadItem.addActionListener(ev -> downloadSelectedJsFiles());
                         menu.add(downloadItem);
 
-                        JMenuItem aiItem = new JMenuItem("🤖 Analyze with AI...");
+                        JMenuItem aiItem = new JMenuItem("Analyze with AI...");
                         aiItem.addActionListener(ev -> analyzeSelectedWithAi());
                         menu.add(aiItem);
 

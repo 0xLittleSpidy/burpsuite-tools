@@ -1,7 +1,6 @@
 ---
 trigger: always_on
 ---
-<!-- Created with the help of an AI Agent and littlespidy. -->
 
 # Auto Commit and Push Rule
 

@@ -1,0 +1,26 @@
+# Agent Guidelines and Project Rules
+
+## Core Directives
+
+### 1. Emoji Prohibition Rule
+Never use emojis anywhere in this project. This applies strictly to:
+- Source code (Java, Python, Kotlin, Rust, JavaScript, TypeScript, etc.)
+- User interface components, Swing controls, button text, labels, dialog titles, tooltips
+- Log messages, console output, and exception strings
+- Markdown documentation, README files, walkthroughs, artifacts
+- Code comments and docstrings
+- Commit messages and version control tags
+- Agent chat responses and user communication
+
+Always use plain, professional ASCII text only. Do not use unicode decorative icons or emoji symbols (e.g. plus signs as unicode symbols, checkmarks, arrows, smiley faces). Use standard words such as "Add", "Edit", "Delete", "Reload", "Enabled", "Error", "Warning", etc.
+
+### 2. Montoya API Standard
+All Burp Suite extensions must use the modern Montoya API (net.portswigger.burp.extensions:montoya-api). Do not use the legacy Extender API.
+
+### 3. File Naming and Author Markers
+- Every generated file must include the distinct marker `_littlespidy` at the end of the filename/project name where applicable.
+- Every generated source file must include the comment at the top:
+  `// Created with the help of an AI Agent and littlespidy.`
+
+### 4. Code Preservation
+Preserve all existing comments, docstrings, and unrelated code functionality unless explicitly instructed otherwise.

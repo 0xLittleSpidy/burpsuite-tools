@@ -38,7 +38,7 @@ public class JavaScriptInspectorExtension implements BurpExtension {
 
         // ── 1. Create and Register Suite Tab ──
         this.mainTab = new JSSourceMapExplorerTab(api, dataStore);
-        api.userInterface().registerSuiteTab("🔍 JavaScript Inspector", mainTab);
+        api.userInterface().registerSuiteTab("JavaScript Inspector", mainTab);
 
         // ── 2. Register Context Menu Provider ──
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {

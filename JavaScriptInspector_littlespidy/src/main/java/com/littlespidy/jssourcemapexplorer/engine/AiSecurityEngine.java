@@ -176,9 +176,9 @@ public class AiSecurityEngine {
                     return;
                 }
 
-                outputChunkListener.accept("⚡ Initializing Antigravity CLI (" + resolvedAgy + ")...\n");
-                outputChunkListener.accept("📁 Workspace created: " + tempDir.toAbsolutePath() + "\n");
-                outputChunkListener.accept("📄 Target source written: " + jsFile.getFileName() + " (" + codeContent.length() + " chars)\n\n");
+                outputChunkListener.accept("[INFO] Initializing Antigravity CLI (" + resolvedAgy + ")...\n");
+                outputChunkListener.accept("[INFO] Workspace created: " + tempDir.toAbsolutePath() + "\n");
+                outputChunkListener.accept("[INFO] Target source written: " + jsFile.getFileName() + " (" + codeContent.length() + " chars)\n\n");
 
                 // 3. Build command
                 String promptText = (customPrompt != null && !customPrompt.trim().isEmpty())

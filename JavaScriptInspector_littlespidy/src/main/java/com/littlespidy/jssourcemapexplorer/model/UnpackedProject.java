@@ -5,7 +5,7 @@ import java.util.*;
 
 /**
  * Reconstructed source project tree holding all extracted source files,
- * aggregated endpoints, secrets, comments, cloud URLs, and dependencies.
+ * aggregated endpoints, secrets, comments, cloud URLs, dependencies, and GraphQL operations.
  *
  * @author littlespidy
  */
@@ -18,6 +18,7 @@ public class UnpackedProject {
     private final List<DiscoveredCloudUrl> allCloudUrls = new ArrayList<>();
     private final List<DiscoveredDependency> allDependencies = new ArrayList<>();
     private final List<DiscoveredSecurityBypass> allSecurityBypasses = new ArrayList<>();
+    private final List<DiscoveredGraphQLOperation> allGraphQLOperations = new ArrayList<>();
 
     public UnpackedProject(String sourceMapUrl) {
         this.sourceMapUrl = sourceMapUrl;
@@ -46,6 +47,9 @@ public class UnpackedProject {
         }
         if (file.dependencies() != null) {
             allDependencies.addAll(file.dependencies());
+        }
+        if (file.graphQLOperations() != null) {
+            allGraphQLOperations.addAll(file.graphQLOperations());
         }
     }
 
@@ -83,6 +87,10 @@ public class UnpackedProject {
 
     public synchronized List<DiscoveredDependency> getAllDependencies() {
         return Collections.unmodifiableList(allDependencies);
+    }
+
+    public synchronized List<DiscoveredGraphQLOperation> getAllGraphQLOperations() {
+        return Collections.unmodifiableList(allGraphQLOperations);
     }
 
     public synchronized int getTotalFiles() {

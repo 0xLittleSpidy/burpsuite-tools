@@ -45,7 +45,7 @@ public class SourceCodeViewerPanel extends JPanel {
         pathBox.add(fileStatsLabel);
 
         JPanel actionsBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
-        JButton aiReviewBtn = new JButton("🤖 AI Review");
+        JButton aiReviewBtn = new JButton("AI Review");
         aiReviewBtn.setToolTipText("Send this file to AI Security Analyst (Local LLM / Antigravity)");
         aiReviewBtn.addActionListener(e -> {
             if (currentFile != null && aiReviewListener != null) {

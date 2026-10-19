@@ -161,10 +161,10 @@ public class SourceTreePanel extends JPanel {
             int secretsCount = sourceFile.secrets() != null ? sourceFile.secrets().size() : 0;
             int endpointsCount = sourceFile.endpoints() != null ? sourceFile.endpoints().size() : 0;
             if (secretsCount > 0) {
-                return displayName + " 🔑 [" + secretsCount + "]";
+                return displayName + " [Secrets: " + secretsCount + "]";
             }
             if (endpointsCount > 0) {
-                return displayName + " 🌐 [" + endpointsCount + "]";
+                return displayName + " [Endpoints: " + endpointsCount + "]";
             }
             return displayName;
         }

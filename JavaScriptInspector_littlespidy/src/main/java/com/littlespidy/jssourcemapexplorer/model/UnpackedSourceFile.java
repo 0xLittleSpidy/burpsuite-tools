@@ -20,8 +20,25 @@ public record UnpackedSourceFile(
     List<DiscoveredCloudUrl> cloudUrls,
     List<DiscoveredDependency> dependencies,
     List<DiscoveredComment> comments,
-    List<DiscoveredSecurityBypass> securityBypasses
+    List<DiscoveredSecurityBypass> securityBypasses,
+    List<DiscoveredGraphQLOperation> graphQLOperations
 ) {
+    public UnpackedSourceFile(
+        String relativePath,
+        String fileName,
+        String content,
+        int lineCount,
+        int sizeBytes,
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments,
+        List<DiscoveredSecurityBypass> securityBypasses
+    ) {
+        this(relativePath, fileName, content, lineCount, sizeBytes, secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, Collections.emptyList());
+    }
+
     public UnpackedSourceFile(
         String relativePath,
         String fileName,
@@ -34,7 +51,7 @@ public record UnpackedSourceFile(
         List<DiscoveredDependency> dependencies,
         List<DiscoveredComment> comments
     ) {
-        this(relativePath, fileName, content, lineCount, sizeBytes, secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList());
+        this(relativePath, fileName, content, lineCount, sizeBytes, secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList(), Collections.emptyList());
     }
 
     public UnpackedSourceFile(
@@ -48,6 +65,6 @@ public record UnpackedSourceFile(
         List<DiscoveredCloudUrl> cloudUrls,
         List<DiscoveredDependency> dependencies
     ) {
-        this(relativePath, fileName, content, lineCount, sizeBytes, secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList());
+        this(relativePath, fileName, content, lineCount, sizeBytes, secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     }
 }
