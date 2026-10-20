@@ -1,0 +1,884 @@
+[
+  {
+    "id": "linux-fp-1",
+    "path": "/etc/passwd",
+    "category": "System Accounts",
+    "description": "User account database and system shell specifications",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-2",
+    "path": "/etc/shadow",
+    "category": "System Accounts",
+    "description": "Encrypted password hashes and account expiration details (requires root)",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-3",
+    "path": "/etc/group",
+    "category": "System Accounts",
+    "description": "System user groups and secondary group memberships",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-4",
+    "path": "/etc/security/opasswd",
+    "category": "System Accounts",
+    "description": "Historical password hashes for password reuse enforcement",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-5",
+    "path": "/etc/sudoers",
+    "category": "System Accounts",
+    "description": "Sudo privileges and administrative authorization rules",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-6",
+    "path": "/etc/hosts",
+    "category": "System Configuration",
+    "description": "Static IP to hostname mappings and internal network routing",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-7",
+    "path": "/etc/issue",
+    "category": "System Configuration",
+    "description": "Pre-login banner displaying distribution name and version",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-8",
+    "path": "/etc/os-release",
+    "category": "System Configuration",
+    "description": "Standardized Linux OS identification and distribution details",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-9",
+    "path": "/etc/crontab",
+    "category": "System Configuration",
+    "description": "Scheduled system cron jobs and automated script executions",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-10",
+    "path": "/etc/resolv.conf",
+    "category": "System Configuration",
+    "description": "DNS domain name resolver and nameserver configurations",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-11",
+    "path": "/etc/fstab",
+    "category": "System Configuration",
+    "description": "Filesystem mount points and storage volume configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-12",
+    "path": "/etc/environment",
+    "category": "System Configuration",
+    "description": "System-wide environment variables and path settings",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-13",
+    "path": "/etc/hostname",
+    "category": "System Configuration",
+    "description": "Local machine hostname identifier",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-14",
+    "path": "/etc/timezone",
+    "category": "System Configuration",
+    "description": "System timezone configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-15",
+    "path": "/proc/version",
+    "category": "Process \u0026 Kernel",
+    "description": "Linux kernel version, compiler version, and build timestamp",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-16",
+    "path": "/proc/cmdline",
+    "category": "Process \u0026 Kernel",
+    "description": "Kernel boot parameters and initialization arguments",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-17",
+    "path": "/proc/self/cmdline",
+    "category": "Process \u0026 Kernel",
+    "description": "Command line invocation of the current executing web server process",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-18",
+    "path": "/proc/self/environ",
+    "category": "Process \u0026 Kernel",
+    "description": "Environment variables of the running web application process",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-19",
+    "path": "/proc/self/status",
+    "category": "Process \u0026 Kernel",
+    "description": "Process execution status, UID/GID mapping, and memory limits",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-20",
+    "path": "/proc/net/tcp",
+    "category": "Process \u0026 Kernel",
+    "description": "Active internal TCP listening sockets and open network ports",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-21",
+    "path": "/proc/cpuinfo",
+    "category": "Process \u0026 Kernel",
+    "description": "CPU architecture, model name, and hardware capabilities",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-22",
+    "path": "/proc/meminfo",
+    "category": "Process \u0026 Kernel",
+    "description": "Detailed memory statistics and RAM allocation info",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-23",
+    "path": "/proc/mounts",
+    "category": "Process \u0026 Kernel",
+    "description": "Mounted filesystems and partition device mount options",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-24",
+    "path": "/var/www/html/index.php",
+    "category": "Web Applications",
+    "description": "Default web application entry script",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-25",
+    "path": "/var/www/html/config.php",
+    "category": "Web Applications",
+    "description": "Application database credentials and secret key definitions",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-26",
+    "path": "/var/www/html/wp-config.php",
+    "category": "Web Applications",
+    "description": "WordPress database credentials and authentication salts",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-27",
+    "path": "/var/www/html/.env",
+    "category": "Web Applications",
+    "description": "Modern framework environment file with database and API keys",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-28",
+    "path": "/etc/apache2/apache2.conf",
+    "category": "Web Server Config",
+    "description": "Apache2 main server configuration file",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-29",
+    "path": "/etc/nginx/nginx.conf",
+    "category": "Web Server Config",
+    "description": "Nginx HTTP server configuration and upstream proxies",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-30",
+    "path": "/etc/httpd/conf/httpd.conf",
+    "category": "Web Server Config",
+    "description": "RHEL/CentOS Apache HTTP server configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-31",
+    "path": "/var/log/apache2/access.log",
+    "category": "Server Logs",
+    "description": "Apache web server access log (primary log poisoning candidate)",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-32",
+    "path": "/var/log/apache2/error.log",
+    "category": "Server Logs",
+    "description": "Apache web server runtime error and diagnostic log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-33",
+    "path": "/var/log/nginx/access.log",
+    "category": "Server Logs",
+    "description": "Nginx HTTP request access log (log poisoning candidate)",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-34",
+    "path": "/var/log/nginx/error.log",
+    "category": "Server Logs",
+    "description": "Nginx server runtime error log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-35",
+    "path": "/var/log/auth.log",
+    "category": "Server Logs",
+    "description": "Debian/Ubuntu system authentication and SSH login log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-36",
+    "path": "/var/log/secure",
+    "category": "Server Logs",
+    "description": "RHEL/CentOS system security and authentication log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-37",
+    "path": "/var/log/syslog",
+    "category": "Server Logs",
+    "description": "General system log messages and application events",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-38",
+    "path": "/root/.ssh/id_rsa",
+    "category": "SSH \u0026 User Files",
+    "description": "Root administrative private SSH key",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-39",
+    "path": "/root/.ssh/authorized_keys",
+    "category": "SSH \u0026 User Files",
+    "description": "Root authorized public SSH keys for remote login",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-40",
+    "path": "/root/.bash_history",
+    "category": "SSH \u0026 User Files",
+    "description": "Command history executed by the root administrative user",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-41",
+    "path": "/home/user/.ssh/id_rsa",
+    "category": "SSH \u0026 User Files",
+    "description": "Default user private SSH key",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-42",
+    "path": "/home/user/.bash_history",
+    "category": "SSH \u0026 User Files",
+    "description": "Command history executed by standard users",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-43",
+    "path": "etc/master.passwd",
+    "category": "System Accounts",
+    "description": "BSD and macOS master shadow password database",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-44",
+    "path": "proc/self/cgroup",
+    "category": "Process \u0026 System Info",
+    "description": "Control groups and container isolation info",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-45",
+    "path": "proc/self/mountinfo",
+    "category": "Process \u0026 System Info",
+    "description": "Filesystem mount points and drive mappings",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-46",
+    "path": "proc/self/fd/0",
+    "category": "Process \u0026 System Info",
+    "description": "Process standard input file descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-47",
+    "path": "proc/self/fd/1",
+    "category": "Process \u0026 System Info",
+    "description": "Process standard output file descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-48",
+    "path": "proc/self/fd/2",
+    "category": "Process \u0026 System Info",
+    "description": "Process standard error file descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-49",
+    "path": "home/user/.ssh",
+    "category": "Remote Access \u0026 Keys",
+    "description": "User SSH directory containing keys and configs",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-50",
+    "path": "root/.ssh",
+    "category": "Remote Access \u0026 Keys",
+    "description": "Root user SSH directory containing keys and configs",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-51",
+    "path": "usr/local/apache/conf/httpd.conf",
+    "category": "Web \u0026 App Server",
+    "description": "Source-installed Apache HTTP server configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-52",
+    "path": "conf/server.xml",
+    "category": "Web \u0026 App Server",
+    "description": "Apache Tomcat core server configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-53",
+    "path": "META-INF/context.xml",
+    "category": "Web \u0026 App Server",
+    "description": "Tomcat application context definition",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-54",
+    "path": "WEB-INF/web.xml",
+    "category": "Web \u0026 App Server",
+    "description": "Java Web application deployment descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-55",
+    "path": "WEB-INF/classes/application.properties",
+    "category": "Web \u0026 App Server",
+    "description": "Spring Boot classpath configuration properties",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-56",
+    "path": ".htaccess",
+    "category": "Web \u0026 App Server",
+    "description": "Apache distributed per-directory access configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-57",
+    "path": ".env",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Application environment variables and secret keys",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-58",
+    "path": ".env.local",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Local environment overrides and credentials",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-59",
+    "path": "config.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "PHP application database and general configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-60",
+    "path": "configuration.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Joomla CMS site and database configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-61",
+    "path": "wp-config.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "WordPress database configuration and auth keys",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-62",
+    "path": "settings.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Drupal database and site configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-63",
+    "path": "settings.py",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Django application settings and secret keys",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-64",
+    "path": "manage.py",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Django management script",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-65",
+    "path": "package.json",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Node.js dependencies and script configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-66",
+    "path": "Gemfile",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Ruby dependency specification",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-67",
+    "path": "application.properties",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Spring Boot application properties",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-68",
+    "path": "application-prod.properties",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Spring Boot production profile properties",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-69",
+    "path": "application.yml",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Spring Boot YAML application configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-70",
+    "path": "config/app.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Laravel core application configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-71",
+    "path": "config/database.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Laravel database connection configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-72",
+    "path": "config/database.yml",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Ruby on Rails database configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-73",
+    "path": "config/default.json",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Node.js config module default settings",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-74",
+    "path": "config/packages/security.yaml",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Symfony framework security and authentication settings",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-75",
+    "path": "config/secrets.yml",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Ruby on Rails encrypted credentials configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-76",
+    "path": "backup.sql",
+    "category": "Database \u0026 Backups",
+    "description": "Database SQL dump backup file",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-77",
+    "path": "backup.zip",
+    "category": "Database \u0026 Backups",
+    "description": "Compressed application and database archive",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-78",
+    "path": "database.sql",
+    "category": "Database \u0026 Backups",
+    "description": "Raw SQL database export",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-79",
+    "path": "db.sqlite3",
+    "category": "Database \u0026 Backups",
+    "description": "SQLite 3 relational database file",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-80",
+    "path": "db_backup.sql",
+    "category": "Database \u0026 Backups",
+    "description": "Periodic database backup SQL dump",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-81",
+    "path": "site_backup.tar.gz",
+    "category": "Database \u0026 Backups",
+    "description": "Tarball archive of entire website source",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-82",
+    "path": "var/lib/mysql/mysql/user.MYD",
+    "category": "Database \u0026 Backups",
+    "description": "MySQL MyISAM user account database storage",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-83",
+    "path": "var/lib/postgresql/data/pg_hba.conf",
+    "category": "Database \u0026 Backups",
+    "description": "PostgreSQL client authentication configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-84",
+    "path": "var/lib/mongodb/data/db",
+    "category": "Database \u0026 Backups",
+    "description": "MongoDB database storage directory",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-85",
+    "path": "index.html",
+    "category": "Web Roots \u0026 Tests",
+    "description": "Default static web root page",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-86",
+    "path": "index.php",
+    "category": "Web Roots \u0026 Tests",
+    "description": "Default PHP script entrypoint",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-87",
+    "path": "test.txt",
+    "category": "Web Roots \u0026 Tests",
+    "description": "Diagnostic test file",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-88",
+    "path": "var/log/dev.log",
+    "category": "Log Files",
+    "description": "Application development diagnostic log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-89",
+    "path": "var/log/mail.log",
+    "category": "Log Files",
+    "description": "Mail transfer agent transaction log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-90",
+    "path": "var/log/mysql/error.log",
+    "category": "Log Files",
+    "description": "MySQL database server error log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-91",
+    "path": "storage/logs/laravel.log",
+    "category": "Log Files",
+    "description": "Laravel application exception and audit log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-92",
+    "path": ".git",
+    "category": "Version Control",
+    "description": "Git version control repository directory",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-93",
+    "path": ".hg",
+    "category": "Version Control",
+    "description": "Mercurial version control repository directory",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-94",
+    "path": ".svn",
+    "category": "Version Control",
+    "description": "Subversion version control repository directory",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-95",
+    "path": "Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist",
+    "category": "macOS System",
+    "description": "macOS AirPort Wi-Fi configuration and saved network profiles",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-96",
+    "path": "passwd",
+    "category": "System Accounts",
+    "description": "Base filename of Unix user accounts database",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-97",
+    "path": "shadow",
+    "category": "System Accounts",
+    "description": "Base filename of Unix password hashes file",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-98",
+    "path": "issue",
+    "category": "System Configuration",
+    "description": "Base filename of pre-login OS identification",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-99",
+    "path": "hostname",
+    "category": "System Configuration",
+    "description": "Base filename of system hostname",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-100",
+    "path": "cmdline",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename of Linux process command line",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-101",
+    "path": "environ",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename of Linux process environment",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-102",
+    "path": "cgroup",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename of Linux control group membership",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-103",
+    "path": "mountinfo",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename of Linux mount points table",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-104",
+    "path": "0",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename for standard input file descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-105",
+    "path": "1",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename for standard output file descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-106",
+    "path": "2",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename for standard error file descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-107",
+    "path": "version",
+    "category": "Process \u0026 System Info",
+    "description": "Base filename of kernel version",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-108",
+    "path": "httpd.conf",
+    "category": "Web \u0026 App Server",
+    "description": "Base filename of Apache HTTP server configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-109",
+    "path": "nginx.conf",
+    "category": "Web \u0026 App Server",
+    "description": "Base filename of Nginx server configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-110",
+    "path": "server.xml",
+    "category": "Web \u0026 App Server",
+    "description": "Base filename of Tomcat server configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-111",
+    "path": "context.xml",
+    "category": "Web \u0026 App Server",
+    "description": "Base filename of Tomcat application context",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-112",
+    "path": "web.xml",
+    "category": "Web \u0026 App Server",
+    "description": "Base filename of Java Web deployment descriptor",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-113",
+    "path": "app.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Base filename of application entry or configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-114",
+    "path": "secrets.yml",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Base filename of application secrets YAML file",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-115",
+    "path": "security.yaml",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Base filename of security configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-116",
+    "path": "default.json",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Base filename of default JSON configuration",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-117",
+    "path": "access.log",
+    "category": "Log Files",
+    "description": "Base filename of Web server access log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-118",
+    "path": "error.log",
+    "category": "Log Files",
+    "description": "Base filename of Web server error log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-119",
+    "path": "auth.log",
+    "category": "Log Files",
+    "description": "Base filename of authentication audit log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-120",
+    "path": "syslog",
+    "category": "Log Files",
+    "description": "Base filename of system message log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-121",
+    "path": "laravel.log",
+    "category": "Log Files",
+    "description": "Base filename of Laravel audit log",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-122",
+    "path": "pg_hba.conf",
+    "category": "Database \u0026 Backups",
+    "description": "Base filename of PostgreSQL authentication config",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-123",
+    "path": "user.MYD",
+    "category": "Database \u0026 Backups",
+    "description": "Base filename of MySQL MyISAM user table",
+    "platform": "Linux"
+  },
+  {
+    "id": "linux-fp-124",
+    "path": "db",
+    "category": "Database \u0026 Backups",
+    "description": "Base filename of database directory or file",
+    "platform": "Linux"
+  },
+  {
+    "id": "custom-path-1",
+    "path": "/custom/etc/secret.conf",
+    "category": "Secret",
+    "description": "Test path",
+    "platform": "Linux"
+  },
+  {
+    "id": "custom-path-1",
+    "path": "/custom/etc/secret.conf",
+    "category": "Secret",
+    "description": "Test path",
+    "platform": "Linux"
+  }
+]

@@ -20,8 +20,19 @@ import java.util.Map;
  */
 public class PayloadInjectorTab extends JPanel {
 
+    private com.littlespidy.payloadinjector.storage.PayloadInjectorPersistentStorageManager_littlespidy storageManager;
+
+    public void setStorageManager(com.littlespidy.payloadinjector.storage.PayloadInjectorPersistentStorageManager_littlespidy storageManager) {
+        this.storageManager = storageManager;
+        add(storageManager.createSessionToolbar(), BorderLayout.NORTH);
+        revalidate();
+        repaint();
+    }
+
     public PayloadInjectorTab(Map<String, ParamPayloadStore> paramStores,
                               SmugglingPayloadStore smugglingStore,
+                              com.littlespidy.payloadinjector.model.FilePathStore_littlespidy linuxFilePathStore,
+                              com.littlespidy.payloadinjector.model.FilePathStore_littlespidy windowsFilePathStore,
                               InjectionSettings settings) {
         setLayout(new BorderLayout());
 
@@ -31,14 +42,19 @@ public class PayloadInjectorTab extends JPanel {
         // WRAP_TAB_LAYOUT ensures tabs wrap to multiple rows down below without any scroll bar
         tabbedPane.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
 
-        // Core categories first
-        if (paramStores.containsKey("XSS")) {
+        // File Paths tab as the first tab in the extension's UI
+        if (linuxFilePathStore != null || windowsFilePathStore != null) {
+            tabbedPane.addTab("File Paths", new FilePathsTab_littlespidy(linuxFilePathStore, windowsFilePathStore));
+        }
+
+        // Core categories
+        if (paramStores != null && paramStores.containsKey("XSS")) {
             tabbedPane.addTab("XSS", new ParamPayloadTab("XSS", paramStores.get("XSS"), settings));
         }
-        if (paramStores.containsKey("CSTI")) {
+        if (paramStores != null && paramStores.containsKey("CSTI")) {
             tabbedPane.addTab("CSTI", new ParamPayloadTab("CSTI", paramStores.get("CSTI"), settings));
         }
-        if (paramStores.containsKey("SQL")) {
+        if (paramStores != null && paramStores.containsKey("SQL")) {
             tabbedPane.addTab("SQL", new ParamPayloadTab("SQL", paramStores.get("SQL"), settings));
         }
 
@@ -48,15 +64,23 @@ public class PayloadInjectorTab extends JPanel {
         }
 
         // Append all remaining JSON payload category tabs down below
-        for (Map.Entry<String, ParamPayloadStore> entry : paramStores.entrySet()) {
-            String name = entry.getKey();
-            if ("XSS".equals(name) || "CSTI".equals(name) || "SQL".equals(name)) {
-                continue;
+        if (paramStores != null) {
+            for (Map.Entry<String, ParamPayloadStore> entry : paramStores.entrySet()) {
+                String name = entry.getKey();
+                if ("XSS".equals(name) || "CSTI".equals(name) || "SQL".equals(name)) {
+                    continue;
+                }
+                tabbedPane.addTab(name, new ParamPayloadTab(name, entry.getValue(), settings));
             }
-            tabbedPane.addTab(name, new ParamPayloadTab(name, entry.getValue(), settings));
         }
 
         add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    public PayloadInjectorTab(Map<String, ParamPayloadStore> paramStores,
+                              SmugglingPayloadStore smugglingStore,
+                              InjectionSettings settings) {
+        this(paramStores, smugglingStore, null, null, settings);
     }
 
     public PayloadInjectorTab(ParamPayloadStore xssStore,

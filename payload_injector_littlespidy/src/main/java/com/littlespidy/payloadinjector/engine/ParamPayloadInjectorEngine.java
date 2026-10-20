@@ -87,6 +87,110 @@ public class ParamPayloadInjectorEngine {
         return HttpRequest.httpRequest(request.httpService(), ByteArray.byteArray(newRequestStr.getBytes(StandardCharsets.UTF_8)));
     }
 
+    /**
+     * Replaces file path placeholder (<FILE_PATH>, {filepath}, {FILE_PATH}, <filepath>)
+     * in the given HTTP request with the selected target file path.
+     * Preserves traversal sequences, encoding, parameter names, and trailing extensions.
+     * If no placeholder is found, returns the request unmodified.
+     */
+    public static HttpRequest replaceFilePathPlaceholder(HttpRequest request, String targetFilePath, java.util.Optional<Range> selectionOpt) {
+        if (request == null || targetFilePath == null || targetFilePath.isEmpty()) {
+            return request;
+        }
+
+        // 1. If there is an active selection that contains a placeholder (or is exactly a placeholder)
+        if (selectionOpt != null && selectionOpt.isPresent()) {
+            Range range = selectionOpt.get();
+            int start = range.startIndexInclusive();
+            int end = range.endIndexExclusive();
+            String requestStr = request.toString();
+            if (start >= 0 && end <= requestStr.length() && start < end) {
+                String selectedText = requestStr.substring(start, end);
+                if (containsPlaceholder(selectedText)) {
+                    String replaced = replaceInString(selectedText, targetFilePath);
+                    String newRequestStr = requestStr.substring(0, start) + replaced + requestStr.substring(end);
+                    return buildHttpRequest(request, newRequestStr);
+                } else if ("<FILE_PATH>".equalsIgnoreCase(selectedText) || "{filepath}".equalsIgnoreCase(selectedText)) {
+                    String newRequestStr = requestStr.substring(0, start) + targetFilePath + requestStr.substring(end);
+                    return buildHttpRequest(request, newRequestStr);
+                }
+            }
+        }
+
+        // 2. Search and update parameters if any parameter contains the placeholder
+        List<ParsedHttpParameter> params = null;
+        try {
+            params = request.parameters();
+        } catch (Exception ignored) {
+        }
+        boolean paramReplaced = false;
+        List<HttpParameter> updatedParams = new ArrayList<>();
+
+        if (params != null && !params.isEmpty()) {
+            for (ParsedHttpParameter p : params) {
+                String val = p.value();
+                if (val != null && containsPlaceholder(val)) {
+                    String replacedVal = replaceInString(val, targetFilePath);
+                    updatedParams.add(HttpParameter.parameter(p.name(), replacedVal, p.type()));
+                    paramReplaced = true;
+                }
+            }
+        }
+
+        if (paramReplaced) {
+            try {
+                return request.withUpdatedParameters(updatedParams);
+            } catch (Exception ignored) {
+            }
+        }
+
+        // 3. Fallback: check full raw request string (covers custom headers, non-standard body formats, etc.)
+        String raw = request.toString();
+        if (containsPlaceholder(raw)) {
+            String updatedRaw = replaceInString(raw, targetFilePath);
+            return buildHttpRequest(request, updatedRaw);
+        }
+
+        // 4. If no placeholder was found anywhere, gracefully return original request unmodified
+        return request;
+    }
+
+    private static HttpRequest buildHttpRequest(HttpRequest originalRequest, String newRaw) {
+        ByteArray byteArray = ByteArray.byteArray(newRaw.getBytes(StandardCharsets.UTF_8));
+        return (originalRequest != null && originalRequest.httpService() != null)
+                ? HttpRequest.httpRequest(originalRequest.httpService(), byteArray)
+                : HttpRequest.httpRequest(byteArray);
+    }
+
+    public static boolean containsPlaceholder(String text) {
+        if (text == null) return false;
+        return text.contains("<FILE_PATH>") || text.contains("{filepath}")
+                || text.contains("{FILE_PATH}") || text.contains("<filepath>");
+    }
+
+    public static String replaceInString(String source, String targetFilePath) {
+        if (source == null || targetFilePath == null) return source;
+
+        String[] placeholders = {"<FILE_PATH>", "{filepath}", "{FILE_PATH}", "<filepath>"};
+        String result = source;
+
+        for (String ph : placeholders) {
+            if (!result.contains(ph)) continue;
+
+            if (targetFilePath.startsWith("/") && (result.contains("/" + ph) || result.contains("%2f" + ph) || result.contains("%2F" + ph))) {
+                String cleanPath = targetFilePath.substring(1);
+                result = result.replace(ph, cleanPath);
+            } else if (targetFilePath.startsWith("\\") && (result.contains("\\" + ph) || result.contains("%5c" + ph) || result.contains("%5C" + ph))) {
+                String cleanPath = targetFilePath.substring(1);
+                result = result.replace(ph, cleanPath);
+            } else {
+                result = result.replace(ph, targetFilePath);
+            }
+        }
+
+        return result;
+    }
+
     private static String calculateFinalValue(String originalValue, String payload, InjectionSettings.InjectionMode mode) {
         if (originalValue == null) originalValue = "";
         return switch (mode) {

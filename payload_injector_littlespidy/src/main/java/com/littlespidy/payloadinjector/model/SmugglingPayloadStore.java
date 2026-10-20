@@ -6,7 +6,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,40 +43,75 @@ public class SmugglingPayloadStore {
 
     public synchronized void reload() {
         Path jsonPath = resolveJsonPath();
-        if (jsonPath == null || !Files.exists(jsonPath)) {
-            api.logging().logToOutput("[PayloadInjector] " + JSON_FILENAME + " not found at: " + jsonPath + " — list empty.");
-            entries.clear();
-            notifyListeners();
-            return;
-        }
-
-        try {
-            String json = Files.readString(jsonPath);
-            Gson gson = new Gson();
-            Type listType = new TypeToken<List<RawSmugglingPayload>>() {}.getType();
-            List<RawSmugglingPayload> rawList = gson.fromJson(json, listType);
-
-            List<SmugglingPayloadEntry> loaded = new ArrayList<>();
-            if (rawList != null) {
-                for (RawSmugglingPayload raw : rawList) {
-                    if (raw.name == null || raw.name.isBlank()) continue;
-                    Map<String, String> headers = raw.headers != null ? raw.headers : new LinkedHashMap<>();
-                    loaded.add(new SmugglingPayloadEntry(
-                            raw.name,
-                            raw.description != null ? raw.description : "",
-                            headers,
-                            raw.body != null ? raw.body : "",
-                            raw.sourceType != null ? raw.sourceType : "Manual",
-                            raw.sourceFile != null ? raw.sourceFile : "N/A"
-                    ));
+        if (jsonPath != null && Files.exists(jsonPath)) {
+            try {
+                String json = Files.readString(jsonPath, StandardCharsets.UTF_8);
+                parseAndSet(json, jsonPath.toString());
+                return;
+            } catch (Exception ex) {
+                if (api != null && api.logging() != null) {
+                    api.logging().logToError("[PayloadInjector] Failed to parse " + JSON_FILENAME + ": " + ex.getMessage());
                 }
             }
-            entries.clear();
-            entries.addAll(loaded);
-            api.logging().logToOutput("[PayloadInjector] Loaded " + entries.size() + " smuggling payloads from " + jsonPath);
+        }
+
+        // Classpath resource fallback from bundled JAR
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(JSON_FILENAME)) {
+            if (in != null) {
+                String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                parseAndSet(json, "bundled JAR classpath:" + JSON_FILENAME);
+
+                // Auto-extract to disk next to JAR if writable
+                if (jsonPath != null && !Files.exists(jsonPath)) {
+                    try {
+                        if (jsonPath.getParent() != null) {
+                            Files.createDirectories(jsonPath.getParent());
+                        }
+                        Files.writeString(jsonPath, json, StandardCharsets.UTF_8);
+                        if (api != null && api.logging() != null) {
+                            api.logging().logToOutput("[PayloadInjector] Extracted bundled " + JSON_FILENAME + " to " + jsonPath);
+                        }
+                    } catch (Exception ignored) {}
+                }
+                return;
+            }
         } catch (Exception ex) {
-            api.logging().logToError("[PayloadInjector] Failed to parse " + JSON_FILENAME + ": " + ex.getMessage());
-            entries.clear();
+            if (api != null && api.logging() != null) {
+                api.logging().logToError("[PayloadInjector] Failed to read bundled " + JSON_FILENAME + ": " + ex.getMessage());
+            }
+        }
+
+        if (api != null && api.logging() != null) {
+            api.logging().logToOutput("[PayloadInjector] " + JSON_FILENAME + " not found on disk (" + jsonPath + ") or in JAR resource - list empty.");
+        }
+        entries.clear();
+        notifyListeners();
+    }
+
+    private void parseAndSet(String json, String sourceDesc) {
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<RawSmugglingPayload>>() {}.getType();
+        List<RawSmugglingPayload> rawList = gson.fromJson(json, listType);
+
+        List<SmugglingPayloadEntry> loaded = new ArrayList<>();
+        if (rawList != null) {
+            for (RawSmugglingPayload raw : rawList) {
+                if (raw.name == null || raw.name.isBlank()) continue;
+                Map<String, String> headers = raw.headers != null ? raw.headers : new LinkedHashMap<>();
+                loaded.add(new SmugglingPayloadEntry(
+                        raw.name,
+                        raw.description != null ? raw.description : "",
+                        headers,
+                        raw.body != null ? raw.body : "",
+                        "Manual",
+                        "N/A"
+                ));
+            }
+        }
+        entries.clear();
+        entries.addAll(loaded);
+        if (api != null && api.logging() != null) {
+            api.logging().logToOutput("[PayloadInjector] Loaded " + entries.size() + " smuggling payloads from " + sourceDesc);
         }
         notifyListeners();
     }
@@ -82,7 +119,9 @@ public class SmugglingPayloadStore {
     public synchronized void save() {
         Path jsonPath = resolveJsonPath();
         if (jsonPath == null) {
-            api.logging().logToError("[PayloadInjector] Cannot save " + JSON_FILENAME + " — path unresolvable.");
+            if (api != null && api.logging() != null) {
+                api.logging().logToError("[PayloadInjector] Cannot save " + JSON_FILENAME + " - path unresolvable.");
+            }
             return;
         }
 
@@ -94,20 +133,34 @@ public class SmugglingPayloadStore {
                 r.description = e.getDescription();
                 r.headers = new LinkedHashMap<>(e.getHeaders());
                 r.body = e.getBody();
-                r.sourceType = e.getSourceType();
-                r.sourceFile = e.getSourceFile();
                 return r;
             }).collect(Collectors.toList());
 
-            Files.writeString(jsonPath, gson.toJson(rawList));
-            api.logging().logToOutput("[PayloadInjector] Saved " + entries.size() + " smuggling payloads to " + jsonPath);
+            if (jsonPath.getParent() != null) {
+                Files.createDirectories(jsonPath.getParent());
+            }
+            Files.writeString(jsonPath, gson.toJson(rawList), StandardCharsets.UTF_8);
+            if (api != null && api.logging() != null) {
+                api.logging().logToOutput("[PayloadInjector] Saved " + entries.size() + " smuggling payloads to " + jsonPath);
+            }
         } catch (Exception ex) {
-            api.logging().logToError("[PayloadInjector] Failed to save " + JSON_FILENAME + ": " + ex.getMessage());
+            if (api != null && api.logging() != null) {
+                api.logging().logToError("[PayloadInjector] Failed to save " + JSON_FILENAME + ": " + ex.getMessage());
+            }
         }
     }
 
     public List<SmugglingPayloadEntry> getEntries() {
         return Collections.unmodifiableList(entries);
+    }
+
+    public synchronized void replaceEntries(List<SmugglingPayloadEntry> newEntries) {
+        if (newEntries != null) {
+            entries.clear();
+            entries.addAll(newEntries);
+            save();
+            notifyListeners();
+        }
     }
 
     public synchronized void addEntry(SmugglingPayloadEntry entry) {
@@ -132,6 +185,24 @@ public class SmugglingPayloadStore {
         }
     }
 
+    public synchronized void removeEntries(int[] modelIndices) {
+        if (modelIndices == null || modelIndices.length == 0) return;
+        int[] sorted = modelIndices.clone();
+        java.util.Arrays.sort(sorted);
+        boolean changed = false;
+        for (int i = sorted.length - 1; i >= 0; i--) {
+            int idx = sorted[i];
+            if (idx >= 0 && idx < entries.size()) {
+                entries.remove(idx);
+                changed = true;
+            }
+        }
+        if (changed) {
+            save();
+            notifyListeners();
+        }
+    }
+
     public void addChangeListener(Runnable listener) {
         listeners.add(listener);
     }
@@ -149,13 +220,23 @@ public class SmugglingPayloadStore {
     }
 
     private Path resolveJsonPath() {
-        try {
-            String jarPath = api.extension().filename();
-            return Paths.get(jarPath).getParent().resolve(JSON_FILENAME);
-        } catch (Exception ex) {
-            api.logging().logToError("[PayloadInjector] Could not determine JAR location for " + JSON_FILENAME + ": " + ex.getMessage());
-            return null;
+        if (api != null) {
+            try {
+                String jarPath = api.extension().filename();
+                if (jarPath != null && !jarPath.isBlank()) {
+                    return Paths.get(jarPath).toAbsolutePath().getParent().resolve(JSON_FILENAME);
+                }
+            } catch (Exception ex) {
+                if (api.logging() != null) {
+                    api.logging().logToError("[PayloadInjector] Could not determine JAR location for " + JSON_FILENAME + ": " + ex.getMessage());
+                }
+            }
         }
+        Path currentDir = Paths.get(JSON_FILENAME);
+        if (Files.exists(currentDir)) {
+            return currentDir;
+        }
+        return currentDir;
     }
 
     @SuppressWarnings("unused")
@@ -164,7 +245,5 @@ public class SmugglingPayloadStore {
         String description;
         Map<String, String> headers;
         String body;
-        String sourceType;
-        String sourceFile;
     }
 }

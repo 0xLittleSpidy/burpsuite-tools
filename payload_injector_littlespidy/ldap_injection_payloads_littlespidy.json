@@ -3,2889 +3,1926 @@
     "id": "ldap-injection-owasp-0001",
     "name": "Basic LDAP injection",
     "template": "*",
-    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *"
   },
   {
     "id": "ldap-injection-owasp-0002",
     "name": "Basic LDAP injection #2",
     "template": "*(uid=*)",
-    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *(uid=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *(uid=*)"
   },
   {
     "id": "ldap-injection-owasp-0003",
     "name": "Basic LDAP injection #3",
     "template": "*(cn=*)",
-    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *(cn=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *(cn=*)"
   },
   {
     "id": "ldap-injection-owasp-0004",
     "name": "Basic LDAP injection #4",
     "template": "*(objectClass=*)",
-    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *(objectClass=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Basic LDAP injection probe from OWASP. Tests application handling of: *(objectClass=*)"
   },
   {
     "id": "ldap-injection-owasp-0005",
     "name": "Authentication bypass",
     "template": "*)(uid=*))(|(uid=*",
-    "description": "Authentication bypass probe from OWASP. Tests application handling of: *)(uid=*))(|(uid=*",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Authentication bypass probe from OWASP. Tests application handling of: *)(uid=*))(|(uid=*"
   },
   {
     "id": "ldap-injection-owasp-0006",
     "name": "Authentication bypass #2",
     "template": "*)(|(uid=*))",
-    "description": "Authentication bypass probe from OWASP. Tests application handling of: *)(|(uid=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Authentication bypass probe from OWASP. Tests application handling of: *)(|(uid=*))"
   },
   {
     "id": "ldap-injection-owasp-0007",
     "name": "Authentication bypass #3",
     "template": "*)(cn=admin)(|(cn=*",
-    "description": "Authentication bypass probe from OWASP. Tests application handling of: *)(cn=admin)(|(cn=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Authentication bypass probe from OWASP. Tests application handling of: *)(cn=admin)(|(cn=*"
   },
   {
     "id": "ldap-injection-owasp-0008",
     "name": "Authentication bypass #4",
     "template": "admin)(&(uid=*))",
-    "description": "Authentication bypass probe from OWASP. Tests application handling of: admin)(&(uid=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Authentication bypass probe from OWASP. Tests application handling of: admin)(&(uid=*))"
   },
   {
     "id": "ldap-injection-owasp-0009",
     "name": "Filter bypass",
     "template": "*)(objectClass=*))(&(objectClass=*",
-    "description": "Filter bypass probe from OWASP. Tests application handling of: *)(objectClass=*))(&(objectCla...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Filter bypass probe from OWASP. Tests application handling of: *)(objectClass=*))(&(objectCla..."
   },
   {
     "id": "ldap-injection-owasp-0010",
     "name": "Filter bypass #2",
     "template": "*)(|(password=*))",
-    "description": "Filter bypass probe from OWASP. Tests application handling of: *)(|(password=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Filter bypass probe from OWASP. Tests application handling of: *)(|(password=*))"
   },
   {
     "id": "ldap-injection-owasp-0011",
     "name": "Filter bypass #3",
     "template": "*)(cn=*)(|(cn=*",
-    "description": "Filter bypass probe from OWASP. Tests application handling of: *)(cn=*)(|(cn=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Filter bypass probe from OWASP. Tests application handling of: *)(cn=*)(|(cn=*"
   },
   {
     "id": "ldap-injection-owasp-0012",
     "name": "Blind LDAP injection",
     "template": "*)(cn=a*",
-    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=a*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=a*"
   },
   {
     "id": "ldap-injection-owasp-0013",
     "name": "Blind LDAP injection #2",
     "template": "*)(cn=ad*",
-    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=ad*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=ad*"
   },
   {
     "id": "ldap-injection-owasp-0014",
     "name": "Blind LDAP injection #3",
     "template": "*)(cn=adm*",
-    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=adm*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=adm*"
   },
   {
     "id": "ldap-injection-owasp-0015",
     "name": "Blind LDAP injection #4",
     "template": "*)(cn=admin*",
-    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=admin*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=admin*"
   },
   {
     "id": "ldap-injection-owasp-0016",
     "name": "Boolean-based",
     "template": "(&(uid=admin)(password=*))",
-    "description": "Boolean-based probe from OWASP. Tests application handling of: (&(uid=admin)(password=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Boolean-based probe from OWASP. Tests application handling of: (&(uid=admin)(password=*))"
   },
   {
     "id": "ldap-injection-owasp-0017",
     "name": "Boolean-based #2",
     "template": "(&(uid=admin)(!(password=wrong)))",
-    "description": "Boolean-based probe from OWASP. Tests application handling of: (&(uid=admin)(!(password=wrong...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Boolean-based probe from OWASP. Tests application handling of: (&(uid=admin)(!(password=wrong..."
   },
   {
     "id": "ldap-injection-owasp-0018",
     "name": "Boolean-based #3",
     "template": "(|(uid=admin)(uid=administrator))",
-    "description": "Boolean-based probe from OWASP. Tests application handling of: (|(uid=admin)(uid=administrato...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Boolean-based probe from OWASP. Tests application handling of: (|(uid=admin)(uid=administrato..."
   },
   {
     "id": "ldap-injection-owasp-0019",
     "name": "Wildcard usage",
     "template": "uid=*",
-    "description": "Wildcard usage probe from OWASP. Tests application handling of: uid=*",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Wildcard usage probe from OWASP. Tests application handling of: uid=*"
   },
   {
     "id": "ldap-injection-owasp-0020",
     "name": "Wildcard usage #2",
     "template": "cn=*",
-    "description": "Wildcard usage probe from OWASP. Tests application handling of: cn=*",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Wildcard usage probe from OWASP. Tests application handling of: cn=*"
   },
   {
     "id": "ldap-injection-owasp-0021",
     "name": "Wildcard usage #3",
     "template": "sn=*",
-    "description": "Wildcard usage probe from OWASP. Tests application handling of: sn=*",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Wildcard usage probe from OWASP. Tests application handling of: sn=*"
   },
   {
     "id": "ldap-injection-owasp-0022",
     "name": "Wildcard usage #4",
     "template": "mail=*",
-    "description": "Wildcard usage probe from OWASP. Tests application handling of: mail=*",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Wildcard usage probe from OWASP. Tests application handling of: mail=*"
   },
   {
     "id": "ldap-injection-owasp-0023",
     "name": "Attribute extraction",
     "template": "*)(objectClass=*))(%26(objectClass=*",
-    "description": "Attribute extraction probe from OWASP. Tests application handling of: *)(objectClass=*))(%26(objectC...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Attribute extraction probe from OWASP. Tests application handling of: *)(objectClass=*))(%26(objectC..."
   },
   {
     "id": "ldap-injection-owasp-0024",
     "name": "Attribute extraction #2",
     "template": "*)(uid=*))(%26(uid=*",
-    "description": "Attribute extraction probe from OWASP. Tests application handling of: *)(uid=*))(%26(uid=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Attribute extraction probe from OWASP. Tests application handling of: *)(uid=*))(%26(uid=*"
   },
   {
     "id": "ldap-injection-owasp-0025",
     "name": "Extended filter injection",
     "template": "*)(|(objectClass=*))",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: *)(|(objectClass=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: *)(|(objectClass=*))"
   },
   {
     "id": "ldap-injection-owasp-0026",
     "name": "Extended filter injection #2",
     "template": "*))%00",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: *))%00",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: *))%00"
   },
   {
     "id": "ldap-injection-owasp-0027",
     "name": "Extended filter injection #3",
     "template": "%28%29",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: %28%29",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: %28%29"
   },
   {
     "id": "ldap-injection-owasp-0028",
     "name": "Extended filter injection #4",
     "template": "%26",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: %26",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: %26"
   },
   {
     "id": "ldap-injection-owasp-0029",
     "name": "Extended filter injection #5",
     "template": "%7C",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: %7C",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: %7C"
   },
   {
     "id": "ldap-injection-owasp-0030",
     "name": "Extended filter injection #6",
     "template": "*()|%26'",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: *()|%26'",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: *()|%26'"
   },
   {
     "id": "ldap-injection-owasp-0031",
     "name": "Extended filter injection #7",
     "template": "*()|&'",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: *()|&'",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: *()|&'"
   },
   {
     "id": "ldap-injection-owasp-0032",
     "name": "Extended filter injection #8",
     "template": "*(|(mail=*))",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: *(|(mail=*))",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: *(|(mail=*))"
   },
   {
     "id": "ldap-injection-owasp-0033",
     "name": "Extended filter injection #9",
     "template": "*(|(objectclass=*))",
-    "description": "Extended filter injection probe from OWASP. Tests application handling of: *(|(objectclass=*))",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Extended filter injection probe from OWASP. Tests application handling of: *(|(objectclass=*))"
   },
   {
     "id": "ldap-injection-owasp-0034",
     "name": "Advanced authentication bypass",
     "template": "*)(&(objectClass=*))",
-    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *)(&(objectClass=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *)(&(objectClass=*))"
   },
   {
     "id": "ldap-injection-owasp-0035",
     "name": "Advanced authentication bypass #2",
     "template": "*))%00(cn=administrator",
-    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *))%00(cn=administrator",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *))%00(cn=administrator"
   },
   {
     "id": "ldap-injection-owasp-0036",
     "name": "Advanced authentication bypass #3",
     "template": "admin*)((|userpassword=*)",
-    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: admin*)((|userpassword=*)",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: admin*)((|userpassword=*)"
   },
   {
     "id": "ldap-injection-owasp-0037",
     "name": "Advanced authentication bypass #4",
     "template": "admin*)((|mail=*))",
-    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: admin*)((|mail=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: admin*)((|mail=*))"
   },
   {
     "id": "ldap-injection-owasp-0038",
     "name": "Advanced authentication bypass #5",
     "template": "*)((|(cn=*))",
-    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *)((|(cn=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *)((|(cn=*))"
   },
   {
     "id": "ldap-injection-owasp-0039",
     "name": "Advanced authentication bypass #6",
     "template": "*)(uid=*))(&(uid=*))",
-    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *)(uid=*))(&(uid=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Advanced authentication bypass probe from OWASP. Tests application handling of: *)(uid=*))(&(uid=*))"
   },
   {
     "id": "ldap-injection-owasp-0040",
     "name": "Privilege escalation attempts",
     "template": "*)(userAccountControl:1.2.840.113556.1.4.803:=512)",
-    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(userAccountControl:1.2.840....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(userAccountControl:1.2.840...."
   },
   {
     "id": "ldap-injection-owasp-0041",
     "name": "Privilege escalation attempts #2",
     "template": "*)(adminCount=1)",
-    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(adminCount=1)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(adminCount=1)"
   },
   {
     "id": "ldap-injection-owasp-0042",
     "name": "Privilege escalation attempts #3",
     "template": "*)(memberOf=CN=Domain Admins*)",
-    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(memberOf=CN=Domain Admins*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(memberOf=CN=Domain Admins*)"
   },
   {
     "id": "ldap-injection-owasp-0043",
     "name": "Privilege escalation attempts #4",
     "template": "*)(memberOf=*)",
-    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(memberOf=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Privilege escalation attempts probe from OWASP. Tests application handling of: *)(memberOf=*)"
   },
   {
     "id": "ldap-injection-owasp-0044",
     "name": "Time-based blind LDAP injection",
     "template": "*)(cn=admin))(|(cn=*",
-    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=admin))(|(cn=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=admin))(|(cn=*"
   },
   {
     "id": "ldap-injection-owasp-0045",
     "name": "Time-based blind LDAP injection #2",
     "template": "*)(cn=a*)(|(cn=*",
-    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=a*)(|(cn=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=a*)(|(cn=*"
   },
   {
     "id": "ldap-injection-owasp-0046",
     "name": "Time-based blind LDAP injection #3",
     "template": "*)(cn=ab*)(|(cn=*",
-    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=ab*)(|(cn=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=ab*)(|(cn=*"
   },
   {
     "id": "ldap-injection-owasp-0047",
     "name": "Time-based blind LDAP injection #4",
     "template": "*)(cn=abc*)(|(cn=*",
-    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=abc*)(|(cn=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Time-based blind LDAP injection probe from OWASP. Tests application handling of: *)(cn=abc*)(|(cn=*"
   },
   {
     "id": "ldap-injection-owasp-0048",
     "name": "Special characters and encoding",
     "template": "%2a",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %2a",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %2a"
   },
   {
     "id": "ldap-injection-owasp-0049",
     "name": "Special characters and encoding #2",
     "template": "%28",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %28",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %28"
   },
   {
     "id": "ldap-injection-owasp-0050",
     "name": "Special characters and encoding #3",
     "template": "%29",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %29",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "ldap-injection-payloads.txt, LDAP_FUZZ.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %29"
   },
   {
     "id": "ldap-injection-owasp-0051",
     "name": "Special characters and encoding #4",
     "template": "%7c",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %7c",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %7c"
   },
   {
     "id": "ldap-injection-owasp-0052",
     "name": "Special characters and encoding #5",
     "template": "*%00",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: *%00",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: *%00"
   },
   {
     "id": "ldap-injection-owasp-0053",
     "name": "Special characters and encoding #6",
     "template": "%00*",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %00*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %00*"
   },
   {
     "id": "ldap-injection-owasp-0054",
     "name": "Special characters and encoding #7",
     "template": "*%20",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: *%20",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: *%20"
   },
   {
     "id": "ldap-injection-owasp-0055",
     "name": "Special characters and encoding #8",
     "template": "%20*",
-    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %20*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Special characters and encoding probe from OWASP. Tests application handling of: %20*"
   },
   {
     "id": "ldap-injection-owasp-0056",
     "name": "DN injection",
     "template": "cn=*,ou=*,dc=*",
-    "description": "DN injection probe from OWASP. Tests application handling of: cn=*,ou=*,dc=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "DN injection probe from OWASP. Tests application handling of: cn=*,ou=*,dc=*"
   },
   {
     "id": "ldap-injection-owasp-0057",
     "name": "DN injection #2",
     "template": "cn=admin,ou=*,dc=*",
-    "description": "DN injection probe from OWASP. Tests application handling of: cn=admin,ou=*,dc=*",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "DN injection probe from OWASP. Tests application handling of: cn=admin,ou=*,dc=*"
   },
   {
     "id": "ldap-injection-owasp-0058",
     "name": "DN injection #3",
     "template": "cn=*,ou=users,dc=*",
-    "description": "DN injection probe from OWASP. Tests application handling of: cn=*,ou=users,dc=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "DN injection probe from OWASP. Tests application handling of: cn=*,ou=users,dc=*"
   },
   {
     "id": "ldap-injection-owasp-0059",
     "name": "Multi-attribute injection",
     "template": "(&(uid=admin)(userPassword=*))",
-    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (&(uid=admin)(userPassword=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (&(uid=admin)(userPassword=*))"
   },
   {
     "id": "ldap-injection-owasp-0060",
     "name": "Multi-attribute injection #2",
     "template": "(&(cn=admin)(mail=*))",
-    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (&(cn=admin)(mail=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (&(cn=admin)(mail=*))"
   },
   {
     "id": "ldap-injection-owasp-0061",
     "name": "Multi-attribute injection #3",
     "template": "(&(objectClass=person)(uid=*))",
-    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (&(objectClass=person)(uid=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (&(objectClass=person)(uid=*))"
   },
   {
     "id": "ldap-injection-owasp-0062",
     "name": "Multi-attribute injection #4",
     "template": "(|(&(uid=admin)(userPassword=*))(uid=backup))",
-    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (|(&(uid=admin)(userPassword=*...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Multi-attribute injection probe from OWASP. Tests application handling of: (|(&(uid=admin)(userPassword=*..."
   },
   {
     "id": "ldap-injection-owasp-0063",
     "name": "Error-based injection",
     "template": "()",
-    "description": "Error-based injection probe from OWASP. Tests application handling of: ()",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Error-based injection probe from OWASP. Tests application handling of: ()"
   },
   {
     "id": "ldap-injection-owasp-0064",
     "name": "Error-based injection #2",
     "template": "(&)",
-    "description": "Error-based injection probe from OWASP. Tests application handling of: (&)",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Error-based injection probe from OWASP. Tests application handling of: (&)"
   },
   {
     "id": "ldap-injection-owasp-0065",
     "name": "Error-based injection #3",
     "template": "(|)",
-    "description": "Error-based injection probe from OWASP. Tests application handling of: (|)",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Error-based injection probe from OWASP. Tests application handling of: (|)"
   },
   {
     "id": "ldap-injection-owasp-0066",
     "name": "Error-based injection #4",
     "template": "(!)",
-    "description": "Error-based injection probe from OWASP. Tests application handling of: (!)",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Error-based injection probe from OWASP. Tests application handling of: (!)"
   },
   {
     "id": "ldap-injection-owasp-0067",
     "name": "Error-based injection #5",
     "template": "(&(uid=admin)(!(cn=*)))",
-    "description": "Error-based injection probe from OWASP. Tests application handling of: (&(uid=admin)(!(cn=*)))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Error-based injection probe from OWASP. Tests application handling of: (&(uid=admin)(!(cn=*)))"
   },
   {
     "id": "ldap-injection-owasp-0068",
     "name": "Filter chain attacks",
     "template": "*))(|(objectClass=*",
-    "description": "Filter chain attacks probe from OWASP. Tests application handling of: *))(|(objectClass=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Filter chain attacks probe from OWASP. Tests application handling of: *))(|(objectClass=*"
   },
   {
     "id": "ldap-injection-owasp-0069",
     "name": "Filter chain attacks #2",
     "template": "*))(|(mail=*",
-    "description": "Filter chain attacks probe from OWASP. Tests application handling of: *))(|(mail=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Filter chain attacks probe from OWASP. Tests application handling of: *))(|(mail=*"
   },
   {
     "id": "ldap-injection-owasp-0070",
     "name": "Filter chain attacks #3",
     "template": "*))(|(userPassword=*",
-    "description": "Filter chain attacks probe from OWASP. Tests application handling of: *))(|(userPassword=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Filter chain attacks probe from OWASP. Tests application handling of: *))(|(userPassword=*"
   },
   {
     "id": "ldap-injection-owasp-0071",
     "name": "Attribute enumeration",
     "template": "(uid=*)",
-    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (uid=*)",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (uid=*)"
   },
   {
     "id": "ldap-injection-owasp-0072",
     "name": "Attribute enumeration #2",
     "template": "(cn=*)",
-    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (cn=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (cn=*)"
   },
   {
     "id": "ldap-injection-owasp-0073",
     "name": "Attribute enumeration #3",
     "template": "(sn=*)",
-    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (sn=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (sn=*)"
   },
   {
     "id": "ldap-injection-owasp-0074",
     "name": "Attribute enumeration #4",
     "template": "(mail=*)",
-    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (mail=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (mail=*)"
   },
   {
     "id": "ldap-injection-owasp-0075",
     "name": "Attribute enumeration #5",
     "template": "(telephoneNumber=*)",
-    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (telephoneNumber=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (telephoneNumber=*)"
   },
   {
     "id": "ldap-injection-owasp-0076",
     "name": "Attribute enumeration #6",
     "template": "(userPassword=*)",
-    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (userPassword=*)",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (userPassword=*)"
   },
   {
     "id": "ldap-injection-owasp-0077",
     "name": "Attribute enumeration #7",
     "template": "(description=*)",
-    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (description=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Attribute enumeration probe from OWASP. Tests application handling of: (description=*)"
   },
   {
     "id": "ldap-injection-owasp-0078",
     "name": "Nested filter injection",
     "template": "(&(uid=admin)(&(cn=*)))",
-    "description": "Nested filter injection probe from OWASP. Tests application handling of: (&(uid=admin)(&(cn=*)))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Nested filter injection probe from OWASP. Tests application handling of: (&(uid=admin)(&(cn=*)))"
   },
   {
     "id": "ldap-injection-owasp-0079",
     "name": "Nested filter injection #2",
     "template": "(|(&(uid=admin)(cn=*))(uid=test))",
-    "description": "Nested filter injection probe from OWASP. Tests application handling of: (|(&(uid=admin)(cn=*))(uid=tes...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Nested filter injection probe from OWASP. Tests application handling of: (|(&(uid=admin)(cn=*))(uid=tes..."
   },
   {
     "id": "ldap-injection-owasp-0080",
     "name": "Nested filter injection #3",
     "template": "(&(objectClass=person)(|(uid=admin)(uid=root)))",
-    "description": "Nested filter injection probe from OWASP. Tests application handling of: (&(objectClass=person)(|(uid=a...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Nested filter injection probe from OWASP. Tests application handling of: (&(objectClass=person)(|(uid=a..."
   },
   {
     "id": "ldap-injection-owasp-0081",
     "name": "Comment injection",
     "template": "*);#",
-    "description": "Comment injection probe from OWASP. Tests application handling of: *);#",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Comment injection probe from OWASP. Tests application handling of: *);#"
   },
   {
     "id": "ldap-injection-owasp-0082",
     "name": "Comment injection #2",
     "template": "*);--",
-    "description": "Comment injection probe from OWASP. Tests application handling of: *);--",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Comment injection probe from OWASP. Tests application handling of: *);--"
   },
   {
     "id": "ldap-injection-owasp-0083",
     "name": "Comment injection #3",
     "template": "*)//",
-    "description": "Comment injection probe from OWASP. Tests application handling of: *)//",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Comment injection probe from OWASP. Tests application handling of: *)//"
   },
   {
     "id": "ldap-injection-owasp-0084",
     "name": "Group enumeration",
     "template": "(memberOf=cn=admins*)",
-    "description": "Group enumeration probe from OWASP. Tests application handling of: (memberOf=cn=admins*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Group enumeration probe from OWASP. Tests application handling of: (memberOf=cn=admins*)"
   },
   {
     "id": "ldap-injection-owasp-0085",
     "name": "Group enumeration #2",
     "template": "(memberOf=cn=users*)",
-    "description": "Group enumeration probe from OWASP. Tests application handling of: (memberOf=cn=users*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Group enumeration probe from OWASP. Tests application handling of: (memberOf=cn=users*)"
   },
   {
     "id": "ldap-injection-owasp-0086",
     "name": "Group enumeration #3",
     "template": "(memberOf=*)",
-    "description": "Group enumeration probe from OWASP. Tests application handling of: (memberOf=*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Group enumeration probe from OWASP. Tests application handling of: (memberOf=*)"
   },
   {
     "id": "ldap-injection-owasp-0087",
     "name": "Substring search",
     "template": "(cn=adm*)",
-    "description": "Substring search probe from OWASP. Tests application handling of: (cn=adm*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Substring search probe from OWASP. Tests application handling of: (cn=adm*)"
   },
   {
     "id": "ldap-injection-owasp-0088",
     "name": "Substring search #2",
     "template": "(cn=*admin)",
-    "description": "Substring search probe from OWASP. Tests application handling of: (cn=*admin)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Substring search probe from OWASP. Tests application handling of: (cn=*admin)"
   },
   {
     "id": "ldap-injection-owasp-0089",
     "name": "Substring search #3",
     "template": "(cn=*admin*)",
-    "description": "Substring search probe from OWASP. Tests application handling of: (cn=*admin*)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Substring search probe from OWASP. Tests application handling of: (cn=*admin*)"
   },
   {
     "id": "ldap-injection-owasp-0090",
     "name": "Substring search #4",
     "template": "(uid=a*)",
-    "description": "Substring search probe from OWASP. Tests application handling of: (uid=a*)",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Substring search probe from OWASP. Tests application handling of: (uid=a*)"
   },
   {
     "id": "ldap-injection-owasp-0091",
     "name": "Substring search #5",
     "template": "(mail=*@admin.com)",
-    "description": "Substring search probe from OWASP. Tests application handling of: (mail=*@admin.com)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Substring search probe from OWASP. Tests application handling of: (mail=*@admin.com)"
   },
   {
     "id": "ldap-injection-owasp-0092",
     "name": "Range queries",
     "template": "(uidNumber>=1000)",
-    "description": "Range queries probe from OWASP. Tests application handling of: (uidNumber>=1000)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Range queries probe from OWASP. Tests application handling of: (uidNumber>=1000)"
   },
   {
     "id": "ldap-injection-owasp-0093",
     "name": "Range queries #2",
     "template": "(uidNumber<=5000)",
-    "description": "Range queries probe from OWASP. Tests application handling of: (uidNumber<=5000)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Range queries probe from OWASP. Tests application handling of: (uidNumber<=5000)"
   },
   {
     "id": "ldap-injection-owasp-0094",
     "name": "Range queries #3",
     "template": "(createTimestamp>=20200101000000Z)",
-    "description": "Range queries probe from OWASP. Tests application handling of: (createTimestamp>=202001010000...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Range queries probe from OWASP. Tests application handling of: (createTimestamp>=202001010000..."
   },
   {
     "id": "ldap-injection-owasp-0095",
     "name": "Matching rule and OID-based filters",
     "template": "(userAccountControl:1.2.840.113556.1.4.803:=2)",
-    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (userAccountControl:1.2.840.11...",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (userAccountControl:1.2.840.11..."
   },
   {
     "id": "ldap-injection-owasp-0096",
     "name": "Matching rule and OID-based filters #2",
     "template": "(userAccountControl:1.2.840.113556.1.4.803:=512)",
-    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (userAccountControl:1.2.840.11...",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (userAccountControl:1.2.840.11..."
   },
   {
     "id": "ldap-injection-owasp-0097",
     "name": "Matching rule and OID-based filters #3",
     "template": "(userAccountControl:1.2.840.113556.1.4.804:=2)",
-    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (userAccountControl:1.2.840.11...",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "ldap-injection-payloads.txt, ldap-injection.txt"
+    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (userAccountControl:1.2.840.11..."
   },
   {
     "id": "ldap-injection-owasp-0098",
     "name": "Matching rule and OID-based filters #4",
     "template": "(primaryGroupID:1.2.840.113556.1.4.803:=512)",
-    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (primaryGroupID:1.2.840.113556...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (primaryGroupID:1.2.840.113556..."
   },
   {
     "id": "ldap-injection-owasp-0099",
     "name": "Matching rule and OID-based filters #5",
     "template": "(adminCount:1.2.840.113556.1.4.803:=1)",
-    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (adminCount:1.2.840.113556.1.4...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Matching rule and OID-based filters probe from OWASP. Tests application handling of: (adminCount:1.2.840.113556.1.4..."
   },
   {
     "id": "ldap-injection-owasp-0100",
     "name": "Recursive group membership (AD-specific)",
     "template": "(memberOf:1.2.840.113556.1.4.1941:=CN=Domain Admins,CN=Users,DC=example,DC=com)",
-    "description": "Recursive group membership (AD-specific) probe from OWASP. Tests application handling of: (memberOf:1.2.840.113556.1.4.1...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Recursive group membership (AD-specific) probe from OWASP. Tests application handling of: (memberOf:1.2.840.113556.1.4.1..."
   },
   {
     "id": "ldap-injection-owasp-0101",
     "name": "Recursive group membership (AD-specific) #2",
     "template": "(memberOf:1.2.840.113556.1.4.1941:=CN=Administrators,CN=Builtin,DC=example,DC=com)",
-    "description": "Recursive group membership (AD-specific) probe from OWASP. Tests application handling of: (memberOf:1.2.840.113556.1.4.1...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Recursive group membership (AD-specific) probe from OWASP. Tests application handling of: (memberOf:1.2.840.113556.1.4.1..."
   },
   {
     "id": "ldap-injection-owasp-0102",
     "name": "Recursive group membership (AD-specific) #3",
     "template": "(memberOf:1.2.840.113556.1.4.1941:=CN=Remote Desktop Users,CN=Builtin,DC=example,DC=com)",
-    "description": "Recursive group membership (AD-specific) probe from OWASP. Tests application handling of: (memberOf:1.2.840.113556.1.4.1...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Recursive group membership (AD-specific) probe from OWASP. Tests application handling of: (memberOf:1.2.840.113556.1.4.1..."
   },
   {
     "id": "ldap-injection-owasp-0103",
     "name": "Presence and negation chaining",
     "template": "(&(!(uid=guest))(uid=*))",
-    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (&(!(uid=guest))(uid=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (&(!(uid=guest))(uid=*))"
   },
   {
     "id": "ldap-injection-owasp-0104",
     "name": "Presence and negation chaining #2",
     "template": "(&(!(userPassword=*))(uid=*))",
-    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (&(!(userPassword=*))(uid=*))",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (&(!(userPassword=*))(uid=*))"
   },
   {
     "id": "ldap-injection-owasp-0105",
     "name": "Presence and negation chaining #3",
     "template": "(|(!(mail=*))(mail=*@corp.local))",
-    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (|(!(mail=*))(mail=*@corp.loca...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (|(!(mail=*))(mail=*@corp.loca..."
   },
   {
     "id": "ldap-injection-owasp-0106",
     "name": "Presence and negation chaining #4",
     "template": "(&(!(accountExpires=0))(accountExpires=*))",
-    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (&(!(accountExpires=0))(accoun...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Presence and negation chaining probe from OWASP. Tests application handling of: (&(!(accountExpires=0))(accoun..."
   },
   {
     "id": "ldap-injection-owasp-0107",
     "name": "Escaping and encoded character probes",
     "template": "(\\2a)",
-    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\2a)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\2a)"
   },
   {
     "id": "ldap-injection-owasp-0108",
     "name": "Escaping and encoded character probes #2",
     "template": "(\\28)",
-    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\28)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\28)"
   },
   {
     "id": "ldap-injection-owasp-0109",
     "name": "Escaping and encoded character probes #3",
     "template": "(\\29)",
-    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\29)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\29)"
   },
   {
     "id": "ldap-injection-owasp-0110",
     "name": "Escaping and encoded character probes #4",
     "template": "(\\5c)",
-    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\5c)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\5c)"
   },
   {
     "id": "ldap-injection-owasp-0111",
     "name": "Escaping and encoded character probes #5",
     "template": "(\\00)",
-    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\00)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: (\\00)"
   },
   {
     "id": "ldap-injection-owasp-0112",
     "name": "Escaping and encoded character probes #6",
     "template": "\\2a\\28\\29\\5c\\00",
-    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: \\2a\\28\\29\\5c\\00",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Escaping and encoded character probes probe from OWASP. Tests application handling of: \\2a\\28\\29\\5c\\00"
   },
   {
     "id": "ldap-injection-owasp-0113",
     "name": "Extensible match probes",
     "template": "(cn:caseExactMatch:=Administrator)",
-    "description": "Extensible match probes probe from OWASP. Tests application handling of: (cn:caseExactMatch:=Administra...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Extensible match probes probe from OWASP. Tests application handling of: (cn:caseExactMatch:=Administra..."
   },
   {
     "id": "ldap-injection-owasp-0114",
     "name": "Extensible match probes #2",
     "template": "(uid:caseIgnoreMatch:=admin)",
-    "description": "Extensible match probes probe from OWASP. Tests application handling of: (uid:caseIgnoreMatch:=admin)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Extensible match probes probe from OWASP. Tests application handling of: (uid:caseIgnoreMatch:=admin)"
   },
   {
     "id": "ldap-injection-owasp-0115",
     "name": "Extensible match probes #3",
     "template": "(mail:caseIgnoreIA5Match:=admin@example.com)",
-    "description": "Extensible match probes probe from OWASP. Tests application handling of: (mail:caseIgnoreIA5Match:=admi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Extensible match probes probe from OWASP. Tests application handling of: (mail:caseIgnoreIA5Match:=admi..."
   },
   {
     "id": "ldap-injection-owasp-0116",
     "name": "Extensible match probes #4",
     "template": "(displayName:caseIgnoreSubstringsMatch:=adm*)",
-    "description": "Extensible match probes probe from OWASP. Tests application handling of: (displayName:caseIgnoreSubstri...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Extensible match probes probe from OWASP. Tests application handling of: (displayName:caseIgnoreSubstri..."
   },
   {
     "id": "ldap-injection-owasp-0117",
     "name": "Nested boolean branch expansions",
     "template": "(&(|(uid=admin)(uid=administrator))(!(accountStatus=disabled)))",
-    "description": "Nested boolean branch expansions probe from OWASP. Tests application handling of: (&(|(uid=admin)(uid=administra...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Nested boolean branch expansions probe from OWASP. Tests application handling of: (&(|(uid=admin)(uid=administra..."
   },
   {
     "id": "ldap-injection-owasp-0118",
     "name": "Nested boolean branch expansions #2",
     "template": "(|(&(cn=admin)(!(lockedOut=TRUE)))(&(uid=root)(objectClass=person)))",
-    "description": "Nested boolean branch expansions probe from OWASP. Tests application handling of: (|(&(cn=admin)(!(lockedOut=TRU...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Nested boolean branch expansions probe from OWASP. Tests application handling of: (|(&(cn=admin)(!(lockedOut=TRU..."
   },
   {
     "id": "ldap-injection-owasp-0119",
     "name": "Nested boolean branch expansions #3",
     "template": "(&(|(memberOf=cn=admins*)(memberOf=cn=ops*))(!(pwdAccountLockedTime=*)))",
-    "description": "Nested boolean branch expansions probe from OWASP. Tests application handling of: (&(|(memberOf=cn=admins*)(memb...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Nested boolean branch expansions probe from OWASP. Tests application handling of: (&(|(memberOf=cn=admins*)(memb..."
   },
   {
     "id": "ldap-injection-owasp-0120",
     "name": "Data exfiltration-oriented attribute targeting",
     "template": "(|(description=*)(info=*)(comment=*))",
-    "description": "Data exfiltration-oriented attribute targeting probe from OWASP. Tests application handling of: (|(description=*)(info=*)(comm...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Data exfiltration-oriented attribute targeting probe from OWASP. Tests application handling of: (|(description=*)(info=*)(comm..."
   },
   {
     "id": "ldap-injection-owasp-0121",
     "name": "Data exfiltration-oriented attribute targeting #2",
     "template": "(&(objectClass=person)(|(telephoneNumber=*)(mobile=*)(homePhone=*)))",
-    "description": "Data exfiltration-oriented attribute targeting probe from OWASP. Tests application handling of: (&(objectClass=person)(|(telep...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Data exfiltration-oriented attribute targeting probe from OWASP. Tests application handling of: (&(objectClass=person)(|(telep..."
   },
   {
     "id": "ldap-injection-owasp-0122",
     "name": "Data exfiltration-oriented attribute targeting #3",
     "template": "(&(objectClass=user)(|(lastLogon=*)(pwdLastSet=*)(badPwdCount=*)))",
-    "description": "Data exfiltration-oriented attribute targeting probe from OWASP. Tests application handling of: (&(objectClass=user)(|(lastLog...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ldap-injection-payloads.txt"
+    "description": "Data exfiltration-oriented attribute targeting probe from OWASP. Tests application handling of: (&(objectClass=user)(|(lastLog..."
   },
   {
     "id": "ldap-patt-0123",
     "name": "Ldap Fuzz #2",
     "template": "*)(&",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: *)(&",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: *)(&"
   },
   {
     "id": "ldap-patt-0124",
     "name": "Ldap Fuzz #9",
     "template": "*/*",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: */*",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: */*"
   },
   {
     "id": "ldap-patt-0125",
     "name": "Ldap Fuzz #10",
     "template": "*|",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: *|",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: *|"
   },
   {
     "id": "ldap-patt-0126",
     "name": "Ldap Fuzz #11",
     "template": "/",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: /",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: /"
   },
   {
     "id": "ldap-patt-0127",
     "name": "Ldap Fuzz #12",
     "template": "//",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: //",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: //"
   },
   {
     "id": "ldap-patt-0128",
     "name": "Ldap Fuzz #13",
     "template": "//*",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: //*",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: //*"
   },
   {
     "id": "ldap-patt-0129",
     "name": "Ldap Fuzz #14",
     "template": "@*",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: @*",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: @*"
   },
   {
     "id": "ldap-patt-0130",
     "name": "Ldap Fuzz #15",
     "template": "|",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: |",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: |"
   },
   {
     "id": "ldap-patt-0131",
     "name": "Ldap Fuzz #16",
     "template": "admin*",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: admin*",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings, PayloadBox",
-    "sourceFile": "LDAP_FUZZ.txt, ldap-injection.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: admin*"
   },
   {
     "id": "ldap-patt-0132",
     "name": "Ldap Fuzz #18",
     "template": "admin*)((|userPassword=*)",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: admin*)((|userPassword=*)",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: admin*)((|userPassword=*)"
   },
   {
     "id": "ldap-patt-0133",
     "name": "Ldap Fuzz #19",
     "template": "x' or name()='username' or 'x'='y",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: x' or name()='username' or 'x'='y",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: x' or name()='username' or 'x'='y"
   },
   {
     "id": "ldap-patt-0134",
     "name": "Ldap Fuzz #20",
     "template": "!",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: !",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: !"
   },
   {
     "id": "ldap-patt-0135",
     "name": "Ldap Fuzz #21",
     "template": "%21",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %21",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %21"
   },
   {
     "id": "ldap-patt-0136",
     "name": "Ldap Fuzz #25",
     "template": "%2A%28%7C%28mail%3D%2A%29%29",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %2A%28%7C%28mail%3D%2A%29%29",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %2A%28%7C%28mail%3D%2A%29%29"
   },
   {
     "id": "ldap-patt-0137",
     "name": "Ldap Fuzz #26",
     "template": "%2A%28%7C%28objectclass%3D%2A%29%29",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %2A%28%7C%28objectclass%3D%2A%29%29",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %2A%28%7C%28objectclass%3D%2A%29%29"
   },
   {
     "id": "ldap-patt-0138",
     "name": "Ldap Fuzz #27",
     "template": "%2A%7C",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %2A%7C",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: %2A%7C"
   },
   {
     "id": "ldap-patt-0139",
     "name": "Ldap Fuzz #29",
     "template": "&",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: &",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: &"
   },
   {
     "id": "ldap-patt-0140",
     "name": "Ldap Fuzz #30",
     "template": "(",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: (",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings, PayloadBox",
-    "sourceFile": "LDAP_FUZZ.txt, ldap-injection.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: ("
   },
   {
     "id": "ldap-patt-0141",
     "name": "Ldap Fuzz #31",
     "template": ")",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: )",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings, PayloadBox",
-    "sourceFile": "LDAP_FUZZ.txt, ldap-injection.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: )"
   },
   {
     "id": "ldap-patt-0142",
     "name": "Ldap Fuzz #32",
     "template": ")(cn=))\\x00",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: )(cn=))\\x00",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz). Target: )(cn=))\\x00"
   },
   {
     "id": "ldap-patt-0143",
     "name": "Ldap Fuzz Small #20",
     "template": "x' or name()='username' or 'x'='ys",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz Small). Target: x' or name()='username' or 'x'='ys",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_FUZZ_SMALL.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Fuzz Small). Target: x' or name()='username' or 'x'='ys"
   },
   {
     "id": "ldap-patt-0144",
     "name": "Ldap Attributes #1",
     "template": "c",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: c",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: c"
   },
   {
     "id": "ldap-patt-0145",
     "name": "Ldap Attributes #2",
     "template": "cn",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: cn",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: cn"
   },
   {
     "id": "ldap-patt-0146",
     "name": "Ldap Attributes #3",
     "template": "co",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: co",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: co"
   },
   {
     "id": "ldap-patt-0147",
     "name": "Ldap Attributes #4",
     "template": "commonName",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: commonName",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: commonName"
   },
   {
     "id": "ldap-patt-0148",
     "name": "Ldap Attributes #5",
     "template": "dc",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: dc",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: dc"
   },
   {
     "id": "ldap-patt-0149",
     "name": "Ldap Attributes #6",
     "template": "facsimileTelephoneNumber",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: facsimileTelephoneNumber",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: facsimileTelephoneNumber"
   },
   {
     "id": "ldap-patt-0150",
     "name": "Ldap Attributes #7",
     "template": "givenName",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: givenName",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: givenName"
   },
   {
     "id": "ldap-patt-0151",
     "name": "Ldap Attributes #8",
     "template": "gn",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: gn",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: gn"
   },
   {
     "id": "ldap-patt-0152",
     "name": "Ldap Attributes #9",
     "template": "homePhone",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: homePhone",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: homePhone"
   },
   {
     "id": "ldap-patt-0153",
     "name": "Ldap Attributes #10",
     "template": "id",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: id",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: id"
   },
   {
     "id": "ldap-patt-0154",
     "name": "Ldap Attributes #11",
     "template": "jpegPhoto",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: jpegPhoto",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: jpegPhoto"
   },
   {
     "id": "ldap-patt-0155",
     "name": "Ldap Attributes #12",
     "template": "l",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: l",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: l"
   },
   {
     "id": "ldap-patt-0156",
     "name": "Ldap Attributes #13",
     "template": "mail",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: mail",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: mail"
   },
   {
     "id": "ldap-patt-0157",
     "name": "Ldap Attributes #14",
     "template": "mobile",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: mobile",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: mobile"
   },
   {
     "id": "ldap-patt-0158",
     "name": "Ldap Attributes #15",
     "template": "name",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: name",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: name"
   },
   {
     "id": "ldap-patt-0159",
     "name": "Ldap Attributes #16",
     "template": "o",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: o",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: o"
   },
   {
     "id": "ldap-patt-0160",
     "name": "Ldap Attributes #17",
     "template": "objectClass",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: objectClass",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: objectClass"
   },
   {
     "id": "ldap-patt-0161",
     "name": "Ldap Attributes #18",
     "template": "ou",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: ou",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: ou"
   },
   {
     "id": "ldap-patt-0162",
     "name": "Ldap Attributes #19",
     "template": "owner",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: owner",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: owner"
   },
   {
     "id": "ldap-patt-0163",
     "name": "Ldap Attributes #20",
     "template": "pager",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: pager",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: pager"
   },
   {
     "id": "ldap-patt-0164",
     "name": "Ldap Attributes #21",
     "template": "password",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: password",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: password"
   },
   {
     "id": "ldap-patt-0165",
     "name": "Ldap Attributes #22",
     "template": "sn",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: sn",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: sn"
   },
   {
     "id": "ldap-patt-0166",
     "name": "Ldap Attributes #23",
     "template": "st",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: st",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: st"
   },
   {
     "id": "ldap-patt-0167",
     "name": "Ldap Attributes #24",
     "template": "surname",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: surname",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: surname"
   },
   {
     "id": "ldap-patt-0168",
     "name": "Ldap Attributes #25",
     "template": "uid",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: uid",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: uid"
   },
   {
     "id": "ldap-patt-0169",
     "name": "Ldap Attributes #26",
     "template": "username",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: username",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: username"
   },
   {
     "id": "ldap-patt-0170",
     "name": "Ldap Attributes #27",
     "template": "userPassword",
-    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: userPassword",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "LDAP_attributes.txt"
+    "description": "LDAP Injection payload from PayloadsAllTheThings (Ldap Attributes). Target: userPassword"
   },
   {
     "id": "ldap-injection-pbox-0001",
     "name": "Ldap Injection #1",
     "template": "admin)(&",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(&",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(&"
   },
   {
     "id": "ldap-injection-pbox-0002",
     "name": "Ldap Injection #2",
     "template": "admin*)(&",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin*)(&",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin*)(&"
   },
   {
     "id": "ldap-injection-pbox-0003",
     "name": "Ldap Injection #3",
     "template": "admin)(!(&",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(!(&",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(!(&"
   },
   {
     "id": "ldap-injection-pbox-0004",
     "name": "Ldap Injection #4",
     "template": "admin)(|(password=*))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(|(password=*))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(|(password=*))"
   },
   {
     "id": "ldap-injection-pbox-0005",
     "name": "Ldap Injection #5",
     "template": "(|(uid=*))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(uid=*))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(uid=*))"
   },
   {
     "id": "ldap-injection-pbox-0006",
     "name": "Ldap Injection #6",
     "template": "(|(cn=*))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(cn=*))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(cn=*))"
   },
   {
     "id": "ldap-injection-pbox-0007",
     "name": "Ldap Injection #7",
     "template": "(|(sn=*))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(sn=*))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(sn=*))"
   },
   {
     "id": "ldap-injection-pbox-0008",
     "name": "Ldap Injection #8",
     "template": "(|(objectClass=*))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(objectClass=*))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(objectClass=*))"
   },
   {
     "id": "ldap-injection-pbox-0009",
     "name": "Ldap Injection #9",
     "template": "admin)(|(password=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(|(password=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(|(password=*"
   },
   {
     "id": "ldap-injection-pbox-0010",
     "name": "Ldap Injection #10",
     "template": "admin)(&(password=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(&(password=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(&(password=*"
   },
   {
     "id": "ldap-injection-pbox-0011",
     "name": "Ldap Injection #11",
     "template": "admin)(!(password=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(!(password=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(!(password=*"
   },
   {
     "id": "ldap-injection-pbox-0012",
     "name": "Ldap Injection #12",
     "template": "a*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: a*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: a*"
   },
   {
     "id": "ldap-injection-pbox-0013",
     "name": "Ldap Injection #13",
     "template": "admin%00",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin%00",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin%00"
   },
   {
     "id": "ldap-injection-pbox-0014",
     "name": "Ldap Injection #14",
     "template": "admin#",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin#",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin#"
   },
   {
     "id": "ldap-injection-pbox-0015",
     "name": "Ldap Injection #15",
     "template": "admin)(#",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(#",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(#"
   },
   {
     "id": "ldap-injection-pbox-0016",
     "name": "Ldap Injection #16",
     "template": "userPassword=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: userPassword=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: userPassword=*"
   },
   {
     "id": "ldap-injection-pbox-0017",
     "name": "Ldap Injection #17",
     "template": "objectClass=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: objectClass=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: objectClass=*"
   },
   {
     "id": "ldap-injection-pbox-0018",
     "name": "Ldap Injection #18",
     "template": "distinguishedName=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: distinguishedName=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: distinguishedName=*"
   },
   {
     "id": "ldap-injection-pbox-0019",
     "name": "Ldap Injection #19",
     "template": "memberOf=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: memberOf=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: memberOf=*"
   },
   {
     "id": "ldap-injection-pbox-0020",
     "name": "Ldap Injection #20",
     "template": "adminCount=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: adminCount=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: adminCount=*"
   },
   {
     "id": "ldap-injection-pbox-0021",
     "name": "Ldap Injection #21",
     "template": "(uid=*)(cn=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*)(cn=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*)(cn=*"
   },
   {
     "id": "ldap-injection-pbox-0022",
     "name": "Ldap Injection #22",
     "template": "(cn=*)(sn=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn=*)(sn=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn=*)(sn=*"
   },
   {
     "id": "ldap-injection-pbox-0023",
     "name": "Ldap Injection #23",
     "template": "(mail=*)(uid=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (mail=*)(uid=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (mail=*)(uid=*"
   },
   {
     "id": "ldap-injection-pbox-0024",
     "name": "Ldap Injection #24",
     "template": "(objectClass=*)(uid=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=*)(uid=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=*)(uid=*"
   },
   {
     "id": "ldap-injection-pbox-0025",
     "name": "Ldap Injection #25",
     "template": "(uid=b*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=b*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=b*)"
   },
   {
     "id": "ldap-injection-pbox-0026",
     "name": "Ldap Injection #26",
     "template": "(uid=c*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=c*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=c*)"
   },
   {
     "id": "ldap-injection-pbox-0027",
     "name": "Ldap Injection #27",
     "template": "(uid=ad*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=ad*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=ad*)"
   },
   {
     "id": "ldap-injection-pbox-0028",
     "name": "Ldap Injection #28",
     "template": "(uid=adm*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=adm*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=adm*)"
   },
   {
     "id": "ldap-injection-pbox-0029",
     "name": "Ldap Injection #29",
     "template": "(uid=admi*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=admi*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=admi*)"
   },
   {
     "id": "ldap-injection-pbox-0030",
     "name": "Ldap Injection #30",
     "template": "(uid=admin*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=admin*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=admin*)"
   },
   {
     "id": "ldap-injection-pbox-0031",
     "name": "Ldap Injection #31",
     "template": "(uid=*a*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*a*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*a*)"
   },
   {
     "id": "ldap-injection-pbox-0032",
     "name": "Ldap Injection #32",
     "template": "(uid=*admin*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*admin*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*admin*)"
   },
   {
     "id": "ldap-injection-pbox-0033",
     "name": "Ldap Injection #33",
     "template": "(cn=*test*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn=*test*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn=*test*)"
   },
   {
     "id": "ldap-injection-pbox-0034",
     "name": "Ldap Injection #34",
     "template": "(sn=*user*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (sn=*user*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (sn=*user*)"
   },
   {
     "id": "ldap-injection-pbox-0035",
     "name": "Ldap Injection #35",
     "template": "(uid=Admin)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=Admin)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=Admin)"
   },
   {
     "id": "ldap-injection-pbox-0036",
     "name": "Ldap Injection #36",
     "template": "(uid=ADMIN)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=ADMIN)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=ADMIN)"
   },
   {
     "id": "ldap-injection-pbox-0037",
     "name": "Ldap Injection #37",
     "template": "(uid=AdMiN)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=AdMiN)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=AdMiN)"
   },
   {
     "id": "ldap-injection-pbox-0038",
     "name": "Ldap Injection #38",
     "template": "(cn=Administrator)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn=Administrator)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn=Administrator)"
   },
   {
     "id": "ldap-injection-pbox-0039",
     "name": "Ldap Injection #39",
     "template": "(&(objectClass=*)(uid=admin))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(objectClass=*)(uid=admin))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(objectClass=*)(uid=admin))"
   },
   {
     "id": "ldap-injection-pbox-0040",
     "name": "Ldap Injection #40",
     "template": "(|(&(objectClass=*)(uid=admin))(&(objectClass=*)(uid=test)))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(objectClass=*)(uid=admin))(&(objectClass=*)(uid=test)))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(objectClass=*)(uid=admin))(&(objectClass=*)(uid=test)))"
   },
   {
     "id": "ldap-injection-pbox-0041",
     "name": "Ldap Injection #41",
     "template": "(unicodePwd=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (unicodePwd=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (unicodePwd=*)"
   },
   {
     "id": "ldap-injection-pbox-0042",
     "name": "Ldap Injection #42",
     "template": "(password=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (password=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (password=*)"
   },
   {
     "id": "ldap-injection-pbox-0043",
     "name": "Ldap Injection #43",
     "template": "(credentials=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (credentials=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (credentials=*)"
   },
   {
     "id": "ldap-injection-pbox-0044",
     "name": "Ldap Injection #44",
     "template": "(authPassword=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (authPassword=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (authPassword=*)"
   },
   {
     "id": "ldap-injection-pbox-0045",
     "name": "Ldap Injection #45",
     "template": "cn=admin,dc=company,dc=com",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=admin,dc=company,dc=com",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=admin,dc=company,dc=com"
   },
   {
     "id": "ldap-injection-pbox-0046",
     "name": "Ldap Injection #46",
     "template": "cn=*,dc=*,dc=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=*,dc=*,dc=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=*,dc=*,dc=*"
   },
   {
     "id": "ldap-injection-pbox-0047",
     "name": "Ldap Injection #47",
     "template": "cn=admin*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=admin*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=admin*"
   },
   {
     "id": "ldap-injection-pbox-0048",
     "name": "Ldap Injection #48",
     "template": "cn=*admin*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=*admin*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=*admin*"
   },
   {
     "id": "ldap-injection-pbox-0049",
     "name": "Ldap Injection #49",
     "template": "(objectClass=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=*)"
   },
   {
     "id": "ldap-injection-pbox-0050",
     "name": "Ldap Injection #50",
     "template": "(objectClass=user)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=user)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=user)"
   },
   {
     "id": "ldap-injection-pbox-0051",
     "name": "Ldap Injection #51",
     "template": "(objectClass=person)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=person)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=person)"
   },
   {
     "id": "ldap-injection-pbox-0052",
     "name": "Ldap Injection #52",
     "template": "(objectClass=inetOrgPerson)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=inetOrgPerson)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=inetOrgPerson)"
   },
   {
     "id": "ldap-injection-pbox-0053",
     "name": "Ldap Injection #53",
     "template": "(objectClass=posixAccount)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=posixAccount)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=posixAccount)"
   },
   {
     "id": "ldap-injection-pbox-0054",
     "name": "Ldap Injection #54",
     "template": "(objectClass=organizationalUnit)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=organizationalUnit)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=organizationalUnit)"
   },
   {
     "id": "ldap-injection-pbox-0055",
     "name": "Ldap Injection #55",
     "template": "(objectClass=group)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=group)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=group)"
   },
   {
     "id": "ldap-injection-pbox-0056",
     "name": "Ldap Injection #56",
     "template": "(objectClass=groupOfNames)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=groupOfNames)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=groupOfNames)"
   },
   {
     "id": "ldap-injection-pbox-0057",
     "name": "Ldap Injection #57",
     "template": "(objectClass=computer)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=computer)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=computer)"
   },
   {
     "id": "ldap-injection-pbox-0058",
     "name": "Ldap Injection #58",
     "template": "(adminCount=1)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (adminCount=1)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (adminCount=1)"
   },
   {
     "id": "ldap-injection-pbox-0059",
     "name": "Ldap Injection #59",
     "template": "(memberOf=CN=Administrators*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Administrators*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Administrators*)"
   },
   {
     "id": "ldap-injection-pbox-0060",
     "name": "Ldap Injection #60",
     "template": "(memberOf=CN=Domain Admins*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Domain Admins*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Domain Admins*)"
   },
   {
     "id": "ldap-injection-pbox-0061",
     "name": "Ldap Injection #61",
     "template": "(memberOf=CN=Enterprise Admins*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Enterprise Admins*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Enterprise Admins*)"
   },
   {
     "id": "ldap-injection-pbox-0062",
     "name": "Ldap Injection #62",
     "template": "(primaryGroupID=512)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (primaryGroupID=512)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (primaryGroupID=512)"
   },
   {
     "id": "ldap-injection-pbox-0063",
     "name": "Ldap Injection #63",
     "template": "(primaryGroupID=519)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (primaryGroupID=519)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (primaryGroupID=519)"
   },
   {
     "id": "ldap-injection-pbox-0064",
     "name": "Ldap Injection #64",
     "template": "%2A",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2A",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2A"
   },
   {
     "id": "ldap-injection-pbox-0065",
     "name": "Ldap Injection #65",
     "template": "%28%7C%28uid%3D%2A%29%29",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %28%7C%28uid%3D%2A%29%29",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %28%7C%28uid%3D%2A%29%29"
   },
   {
     "id": "ldap-injection-pbox-0066",
     "name": "Ldap Injection #66",
     "template": "%2a%29%28%7c%28objectClass%3d%2a",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2a%29%28%7c%28objectClass%3d%2a",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2a%29%28%7c%28objectClass%3d%2a"
   },
   {
     "id": "ldap-injection-pbox-0067",
     "name": "Ldap Injection #67",
     "template": "%252A",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %252A",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %252A"
   },
   {
     "id": "ldap-injection-pbox-0068",
     "name": "Ldap Injection #68",
     "template": "%2528%2529",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2528%2529",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2528%2529"
   },
   {
     "id": "ldap-injection-pbox-0069",
     "name": "Ldap Injection #69",
     "template": "%2528uid%253d%252a%2529",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2528uid%253d%252a%2529",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: %2528uid%253d%252a%2529"
   },
   {
     "id": "ldap-injection-pbox-0070",
     "name": "Ldap Injection #70",
     "template": "\\2a",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\2a",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\2a"
   },
   {
     "id": "ldap-injection-pbox-0071",
     "name": "Ldap Injection #71",
     "template": "\\28\\29",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\28\\29",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\28\\29"
   },
   {
     "id": "ldap-injection-pbox-0072",
     "name": "Ldap Injection #72",
     "template": "\\28\\7c\\28uid\\3d\\2a\\29\\29",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\28\\7c\\28uid\\3d\\2a\\29\\29",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\28\\7c\\28uid\\3d\\2a\\29\\29"
   },
   {
     "id": "ldap-injection-pbox-0073",
     "name": "Ldap Injection #73",
     "template": "\\x2a",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\x2a",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\x2a"
   },
   {
     "id": "ldap-injection-pbox-0074",
     "name": "Ldap Injection #74",
     "template": "\\x28\\x29",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\x28\\x29",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\x28\\x29"
   },
   {
     "id": "ldap-injection-pbox-0075",
     "name": "Ldap Injection #75",
     "template": "\\x28\\x7c\\x28uid\\x3d\\x2a\\x29\\x29",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\x28\\x7c\\x28uid\\x3d\\x2a\\x29\\x29",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: \\x28\\x7c\\x28uid\\x3d\\x2a\\x29\\x29"
   },
   {
     "id": "ldap-injection-pbox-0076",
     "name": "Ldap Injection #76",
     "template": "))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: ))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: ))"
   },
   {
     "id": "ldap-injection-pbox-0077",
     "name": "Ldap Injection #77",
     "template": ")))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: )))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: )))"
   },
   {
     "id": "ldap-injection-pbox-0078",
     "name": "Ldap Injection #78",
     "template": "((",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: ((",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (("
   },
   {
     "id": "ldap-injection-pbox-0079",
     "name": "Ldap Injection #79",
     "template": "(((",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (((",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: ((("
   },
   {
     "id": "ldap-injection-pbox-0080",
     "name": "Ldap Injection #80",
     "template": ")(",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: )(",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: )("
   },
   {
     "id": "ldap-injection-pbox-0081",
     "name": "Ldap Injection #81",
     "template": "))(",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: ))(",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: ))("
   },
   {
     "id": "ldap-injection-pbox-0082",
     "name": "Ldap Injection #82",
     "template": "(()",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (()",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (()"
   },
   {
     "id": "ldap-injection-pbox-0083",
     "name": "Ldap Injection #83",
     "template": "(|(&(uid=*)(cn=*)))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(uid=*)(cn=*)))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(uid=*)(cn=*)))"
   },
   {
     "id": "ldap-injection-pbox-0084",
     "name": "Ldap Injection #84",
     "template": "(&(|(uid=*)(cn=*)))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(|(uid=*)(cn=*)))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(|(uid=*)(cn=*)))"
   },
   {
     "id": "ldap-injection-pbox-0085",
     "name": "Ldap Injection #85",
     "template": "(|(&(!(uid=test))))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(!(uid=test))))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(!(uid=test))))"
   },
   {
     "id": "ldap-injection-pbox-0086",
     "name": "Ldap Injection #86",
     "template": "(&(|(&(uid=*))))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(|(&(uid=*))))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(|(&(uid=*))))"
   },
   {
     "id": "ldap-injection-pbox-0087",
     "name": "Ldap Injection #87",
     "template": "admin)(|(uid=*)(cn=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(|(uid=*)(cn=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(|(uid=*)(cn=*"
   },
   {
     "id": "ldap-injection-pbox-0088",
     "name": "Ldap Injection #88",
     "template": "admin)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)"
   },
   {
     "id": "ldap-injection-pbox-0089",
     "name": "Ldap Injection #89",
     "template": "admin))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin))"
   },
   {
     "id": "ldap-injection-pbox-0090",
     "name": "Ldap Injection #90",
     "template": "admin*(",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin*(",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin*("
   },
   {
     "id": "ldap-injection-pbox-0091",
     "name": "Ldap Injection #91",
     "template": "(uid>=a)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid>=a)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid>=a)"
   },
   {
     "id": "ldap-injection-pbox-0092",
     "name": "Ldap Injection #92",
     "template": "(uid<=z)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid<=z)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid<=z)"
   },
   {
     "id": "ldap-injection-pbox-0093",
     "name": "Ldap Injection #93",
     "template": "(uid~=admin)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid~=admin)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid~=admin)"
   },
   {
     "id": "ldap-injection-pbox-0094",
     "name": "Ldap Injection #94",
     "template": "(cn:=admin)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn:=admin)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn:=admin)"
   },
   {
     "id": "ldap-injection-pbox-0095",
     "name": "Ldap Injection #95",
     "template": "(cn:dn:=admin)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn:dn:=admin)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn:dn:=admin)"
   },
   {
     "id": "ldap-injection-pbox-0096",
     "name": "Ldap Injection #96",
     "template": "(uid:1.2.840.113556.1.4.803:=8)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid:1.2.840.113556.1.4.803:=8)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid:1.2.840.113556.1.4.803:=8)"
   },
   {
     "id": "ldap-injection-pbox-0097",
     "name": "Ldap Injection #97",
     "template": "(userAccountControl:1.2.840.113556.1.4.803:=65536)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (userAccountControl:1.2.840.113556.1.4.803:=65536)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (userAccountControl:1.2.840.113556.1.4.803:=65536)"
   },
   {
     "id": "ldap-injection-pbox-0098",
     "name": "Ldap Injection #98",
     "template": "(sAMAccountName=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (sAMAccountName=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (sAMAccountName=*)"
   },
   {
     "id": "ldap-injection-pbox-0099",
     "name": "Ldap Injection #99",
     "template": "(userPrincipalName=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (userPrincipalName=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (userPrincipalName=*)"
   },
   {
     "id": "ldap-injection-pbox-0100",
     "name": "Ldap Injection #100",
     "template": "(distinguishedName=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (distinguishedName=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (distinguishedName=*)"
   },
   {
     "id": "ldap-injection-pbox-0101",
     "name": "Ldap Injection #101",
     "template": "(objectGUID=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectGUID=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectGUID=*)"
   },
   {
     "id": "ldap-injection-pbox-0102",
     "name": "Ldap Injection #102",
     "template": "(objectSid=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectSid=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectSid=*)"
   },
   {
     "id": "ldap-injection-pbox-0103",
     "name": "Ldap Injection #103",
     "template": "(whenCreated>=19700101000000.0Z)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (whenCreated>=19700101000000.0Z)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (whenCreated>=19700101000000.0Z)"
   },
   {
     "id": "ldap-injection-pbox-0104",
     "name": "Ldap Injection #104",
     "template": "(badPwdCount>=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (badPwdCount>=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (badPwdCount>=0)"
   },
   {
     "id": "ldap-injection-pbox-0105",
     "name": "Ldap Injection #105",
     "template": "(logonCount>=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (logonCount>=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (logonCount>=0)"
   },
   {
     "id": "ldap-injection-pbox-0106",
     "name": "Ldap Injection #106",
     "template": "(memberOf=CN=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=*)"
   },
   {
     "id": "ldap-injection-pbox-0107",
     "name": "Ldap Injection #107",
     "template": "(memberOf=CN=Administrators,*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Administrators,*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Administrators,*)"
   },
   {
     "id": "ldap-injection-pbox-0108",
     "name": "Ldap Injection #108",
     "template": "(memberOf=CN=Domain Admins,DC=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Domain Admins,DC=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf=CN=Domain Admins,DC=*)"
   },
   {
     "id": "ldap-injection-pbox-0109",
     "name": "Ldap Injection #109",
     "template": "(member=CN=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (member=CN=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (member=CN=*)"
   },
   {
     "id": "ldap-injection-pbox-0110",
     "name": "Ldap Injection #110",
     "template": "(!(uid=*))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (!(uid=*))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (!(uid=*))"
   },
   {
     "id": "ldap-injection-pbox-0111",
     "name": "Ldap Injection #111",
     "template": "(&(uid=*)(!(uid=test)))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(uid=*)(!(uid=test)))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(uid=*)(!(uid=test)))"
   },
   {
     "id": "ldap-injection-pbox-0112",
     "name": "Ldap Injection #112",
     "template": "(uidNumber>=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uidNumber>=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uidNumber>=0)"
   },
   {
     "id": "ldap-injection-pbox-0113",
     "name": "Ldap Injection #113",
     "template": "(gidNumber>=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (gidNumber>=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (gidNumber>=0)"
   },
   {
     "id": "ldap-injection-pbox-0114",
     "name": "Ldap Injection #114",
     "template": "(uidNumber<=999999)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uidNumber<=999999)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uidNumber<=999999)"
   },
   {
     "id": "ldap-injection-pbox-0115",
     "name": "Ldap Injection #115",
     "template": "(createTimestamp>=19700101000000Z)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (createTimestamp>=19700101000000Z)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (createTimestamp>=19700101000000Z)"
   },
   {
     "id": "ldap-injection-pbox-0116",
     "name": "Ldap Injection #116",
     "template": "(cn~=administrator)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn~=administrator)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (cn~=administrator)"
   },
   {
     "id": "ldap-injection-pbox-0117",
     "name": "Ldap Injection #117",
     "template": "(sn~=smith)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (sn~=smith)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (sn~=smith)"
   },
   {
     "id": "ldap-injection-pbox-0118",
     "name": "Ldap Injection #118",
     "template": "(&(&(uid=*)))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(&(uid=*)))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(&(uid=*)))"
   },
   {
     "id": "ldap-injection-pbox-0119",
     "name": "Ldap Injection #119",
     "template": "(|(&(|(uid=*))))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(|(uid=*))))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (|(&(|(uid=*))))"
   },
   {
     "id": "ldap-injection-pbox-0120",
     "name": "Ldap Injection #120",
     "template": "(&(!(|(uid=test))))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(!(|(uid=test))))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (&(!(|(uid=test))))"
   },
   {
     "id": "ldap-injection-pbox-0121",
     "name": "Ldap Injection #121",
     "template": "a*b*c*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: a*b*c*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: a*b*c*"
   },
   {
     "id": "ldap-injection-pbox-0122",
     "name": "Ldap Injection #122",
     "template": "cn=*,ou=users,dc=company,dc=com",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=*,ou=users,dc=company,dc=com",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=*,ou=users,dc=company,dc=com"
   },
   {
     "id": "ldap-injection-pbox-0123",
     "name": "Ldap Injection #123",
     "template": "cn=admin)(uid=*)),ou=users,dc=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=admin)(uid=*)),ou=users,dc=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: cn=admin)(uid=*)),ou=users,dc=*"
   },
   {
     "id": "ldap-injection-pbox-0124",
     "name": "Ldap Injection #124",
     "template": "(pwdLastSet=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (pwdLastSet=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (pwdLastSet=0)"
   },
   {
     "id": "ldap-injection-pbox-0125",
     "name": "Ldap Injection #125",
     "template": "(pwdLastSet>=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (pwdLastSet>=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (pwdLastSet>=0)"
   },
   {
     "id": "ldap-injection-pbox-0126",
     "name": "Ldap Injection #126",
     "template": "(accountExpires=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (accountExpires=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (accountExpires=0)"
   },
   {
     "id": "ldap-injection-pbox-0127",
     "name": "Ldap Injection #127",
     "template": "(accountExpires>=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (accountExpires>=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (accountExpires>=0)"
   },
   {
     "id": "ldap-injection-pbox-0128",
     "name": "Ldap Injection #128",
     "template": "(servicePrincipalName=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (servicePrincipalName=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (servicePrincipalName=*)"
   },
   {
     "id": "ldap-injection-pbox-0129",
     "name": "Ldap Injection #129",
     "template": "(msDS-ManagedServiceAccount=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (msDS-ManagedServiceAccount=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (msDS-ManagedServiceAccount=*)"
   },
   {
     "id": "ldap-injection-pbox-0130",
     "name": "Ldap Injection #130",
     "template": "(objectCategory=msDS-GroupManagedServiceAccount)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectCategory=msDS-GroupManagedServiceAccount)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectCategory=msDS-GroupManagedServiceAccount)"
   },
   {
     "id": "ldap-injection-pbox-0131",
     "name": "Ldap Injection #131",
     "template": "(operatingSystem=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (operatingSystem=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (operatingSystem=*)"
   },
   {
     "id": "ldap-injection-pbox-0132",
     "name": "Ldap Injection #132",
     "template": "(operatingSystemVersion=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (operatingSystemVersion=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (operatingSystemVersion=*)"
   },
   {
     "id": "ldap-injection-pbox-0133",
     "name": "Ldap Injection #133",
     "template": "(dNSHostName=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (dNSHostName=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (dNSHostName=*)"
   },
   {
     "id": "ldap-injection-pbox-0134",
     "name": "Ldap Injection #134",
     "template": "(trustType=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (trustType=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (trustType=*)"
   },
   {
     "id": "ldap-injection-pbox-0135",
     "name": "Ldap Injection #135",
     "template": "(trustDirection=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (trustDirection=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (trustDirection=*)"
   },
   {
     "id": "ldap-injection-pbox-0136",
     "name": "Ldap Injection #136",
     "template": "(trustPartner=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (trustPartner=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (trustPartner=*)"
   },
   {
     "id": "ldap-injection-pbox-0137",
     "name": "Ldap Injection #137",
     "template": "(objectClass=classSchema)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=classSchema)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=classSchema)"
   },
   {
     "id": "ldap-injection-pbox-0138",
     "name": "Ldap Injection #138",
     "template": "(objectClass=attributeSchema)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=attributeSchema)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=attributeSchema)"
   },
   {
     "id": "ldap-injection-pbox-0139",
     "name": "Ldap Injection #139",
     "template": "(lDAPDisplayName=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (lDAPDisplayName=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (lDAPDisplayName=*)"
   },
   {
     "id": "ldap-injection-pbox-0140",
     "name": "Ldap Injection #140",
     "template": "(uSNChanged>=0)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uSNChanged>=0)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uSNChanged>=0)"
   },
   {
     "id": "ldap-injection-pbox-0141",
     "name": "Ldap Injection #141",
     "template": "(whenChanged>=19700101000000.0Z)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (whenChanged>=19700101000000.0Z)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (whenChanged>=19700101000000.0Z)"
   },
   {
     "id": "ldap-injection-pbox-0142",
     "name": "Ldap Injection #142",
     "template": "(isDeleted=TRUE)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (isDeleted=TRUE)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (isDeleted=TRUE)"
   },
   {
     "id": "ldap-injection-pbox-0143",
     "name": "Ldap Injection #143",
     "template": "admin*)(&(objectClass=user)(uid=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin*)(&(objectClass=user)(uid=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin*)(&(objectClass=user)(uid=*"
   },
   {
     "id": "ldap-injection-pbox-0144",
     "name": "Ldap Injection #144",
     "template": "admin)(&(!(uid=test))(uid=*",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(&(!(uid=test))(uid=*",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)(&(!(uid=test))(uid=*"
   },
   {
     "id": "ldap-injection-pbox-0145",
     "name": "Ldap Injection #145",
     "template": "(objectClass=*)(&(uid=admin))",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=*)(&(uid=admin))",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectClass=*)(&(uid=admin))"
   },
   {
     "id": "ldap-injection-pbox-0146",
     "name": "Ldap Injection #146",
     "template": "(uid=*))(objectClass=user",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*))(objectClass=user",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (uid=*))(objectClass=user"
   },
   {
     "id": "ldap-injection-pbox-0147",
     "name": "Ldap Injection #147",
     "template": "(objectGUID=\\00\\00\\00\\00*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectGUID=\\00\\00\\00\\00*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectGUID=\\00\\00\\00\\00*)"
   },
   {
     "id": "ldap-injection-pbox-0148",
     "name": "Ldap Injection #148",
     "template": "(objectSid=\\01\\05\\00\\00*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectSid=\\01\\05\\00\\00*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (objectSid=\\01\\05\\00\\00*)"
   },
   {
     "id": "ldap-injection-pbox-0149",
     "name": "Ldap Injection #149",
     "template": "(member;range=0-1499=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (member;range=0-1499=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (member;range=0-1499=*)"
   },
   {
     "id": "ldap-injection-pbox-0150",
     "name": "Ldap Injection #150",
     "template": "(memberOf;range=0-*=*)",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf;range=0-*=*)",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: (memberOf;range=0-*=*)"
   },
   {
     "id": "ldap-injection-pbox-0151",
     "name": "Ldap Injection #151",
     "template": "admin)%00",
-    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)%00",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "ldap-injection.txt"
+    "description": "LDAP Injection probe from PayloadBox (ldap-injection.txt). Tests application handling of: admin)%00"
   }
 ]

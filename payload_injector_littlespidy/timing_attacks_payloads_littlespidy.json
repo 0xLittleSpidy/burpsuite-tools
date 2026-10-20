@@ -3,1503 +3,1002 @@
     "id": "timing-attacks-owasp-0001",
     "name": "Test usernames (measure response time differences)",
     "template": "username=admin",
-    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=admin"
   },
   {
     "id": "timing-attacks-owasp-0002",
     "name": "Test usernames (measure response time differences) #2",
     "template": "username=administrator",
-    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=administrator",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=administrator"
   },
   {
     "id": "timing-attacks-owasp-0003",
     "name": "Test usernames (measure response time differences) #3",
     "template": "username=root",
-    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=root",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=root"
   },
   {
     "id": "timing-attacks-owasp-0004",
     "name": "Test usernames (measure response time differences) #4",
     "template": "username=test",
-    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=test",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=test"
   },
   {
     "id": "timing-attacks-owasp-0005",
     "name": "Test usernames (measure response time differences) #5",
     "template": "username=user",
-    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=user",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=user"
   },
   {
     "id": "timing-attacks-owasp-0006",
     "name": "Test usernames (measure response time differences) #6",
     "template": "username=nonexistent_user_12345",
-    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=nonexistent_user_1234...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=nonexistent_user_1234..."
   },
   {
     "id": "timing-attacks-owasp-0007",
     "name": "Test usernames (measure response time differences) #7",
     "template": "username=aaaaaaaaaaaaaaaaaaaa",
-    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=aaaaaaaaaaaaaaaaaaaa",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test usernames (measure response time differences) probe from OWASP. Tests application handling of: username=aaaaaaaaaaaaaaaaaaaa"
   },
   {
     "id": "timing-attacks-owasp-0008",
     "name": "Email enumeration",
     "template": "email=admin@example.com",
-    "description": "Email enumeration probe from OWASP. Tests application handling of: email=admin@example.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Email enumeration probe from OWASP. Tests application handling of: email=admin@example.com"
   },
   {
     "id": "timing-attacks-owasp-0009",
     "name": "Email enumeration #2",
     "template": "email=user@example.com",
-    "description": "Email enumeration probe from OWASP. Tests application handling of: email=user@example.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Email enumeration probe from OWASP. Tests application handling of: email=user@example.com"
   },
   {
     "id": "timing-attacks-owasp-0010",
     "name": "Email enumeration #3",
     "template": "email=nonexistent@example.com",
-    "description": "Email enumeration probe from OWASP. Tests application handling of: email=nonexistent@example.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Email enumeration probe from OWASP. Tests application handling of: email=nonexistent@example.com"
   },
   {
     "id": "timing-attacks-owasp-0011",
     "name": "Email enumeration #4",
     "template": "email=invalid@invalid.invalid",
-    "description": "Email enumeration probe from OWASP. Tests application handling of: email=invalid@invalid.invalid",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Email enumeration probe from OWASP. Tests application handling of: email=invalid@invalid.invalid"
   },
   {
     "id": "timing-attacks-owasp-0012",
     "name": "Try passwords of increasing length",
     "template": "password=a",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=a",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=a"
   },
   {
     "id": "timing-attacks-owasp-0013",
     "name": "Try passwords of increasing length #2",
     "template": "password=ab",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=ab",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=ab"
   },
   {
     "id": "timing-attacks-owasp-0014",
     "name": "Try passwords of increasing length #3",
     "template": "password=abc",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abc",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abc"
   },
   {
     "id": "timing-attacks-owasp-0015",
     "name": "Try passwords of increasing length #4",
     "template": "password=abcd",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcd"
   },
   {
     "id": "timing-attacks-owasp-0016",
     "name": "Try passwords of increasing length #5",
     "template": "password=abcde",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcde",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcde"
   },
   {
     "id": "timing-attacks-owasp-0017",
     "name": "Try passwords of increasing length #6",
     "template": "password=abcdef",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdef",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdef"
   },
   {
     "id": "timing-attacks-owasp-0018",
     "name": "Try passwords of increasing length #7",
     "template": "password=abcdefgh",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefgh",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefgh"
   },
   {
     "id": "timing-attacks-owasp-0019",
     "name": "Try passwords of increasing length #8",
     "template": "password=abcdefghij",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghij",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghij"
   },
   {
     "id": "timing-attacks-owasp-0020",
     "name": "Try passwords of increasing length #9",
     "template": "password=abcdefghijkl",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghijkl",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghijkl"
   },
   {
     "id": "timing-attacks-owasp-0021",
     "name": "Try passwords of increasing length #10",
     "template": "password=abcdefghijklmno",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghijklmno",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghijklmno"
   },
   {
     "id": "timing-attacks-owasp-0022",
     "name": "Try passwords of increasing length #11",
     "template": "password=abcdefghijklmnopqrst",
-    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghijklmnopqrst",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Try passwords of increasing length probe from OWASP. Tests application handling of: password=abcdefghijklmnopqrst"
   },
   {
     "id": "timing-attacks-owasp-0023",
     "name": "Basic sleep-based payloads",
     "template": "' OR SLEEP(5) --",
-    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: ' OR SLEEP(5) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: ' OR SLEEP(5) --"
   },
   {
     "id": "timing-attacks-owasp-0024",
     "name": "Basic sleep-based payloads #2",
     "template": "' OR IF(1=1, SLEEP(5), 0) --",
-    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: ' OR IF(1=1, SLEEP(5), 0) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: ' OR IF(1=1, SLEEP(5), 0) --"
   },
   {
     "id": "timing-attacks-owasp-0025",
     "name": "Basic sleep-based payloads #3",
     "template": "' AND SLEEP(5) --",
-    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: ' AND SLEEP(5) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: ' AND SLEEP(5) --"
   },
   {
     "id": "timing-attacks-owasp-0026",
     "name": "Basic sleep-based payloads #4",
     "template": "admin' AND SLEEP(5) --",
-    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: admin' AND SLEEP(5) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: admin' AND SLEEP(5) --"
   },
   {
     "id": "timing-attacks-owasp-0027",
     "name": "Basic sleep-based payloads #5",
     "template": "admin' OR SLEEP(5) #",
-    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: admin' OR SLEEP(5) #",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Basic sleep-based payloads probe from OWASP. Tests application handling of: admin' OR SLEEP(5) #"
   },
   {
     "id": "timing-attacks-owasp-0028",
     "name": "MySQL time-based blind SQL injection",
     "template": "' OR IF((SELECT COUNT(*) FROM users)>0, SLEEP(5), 0) --",
-    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' OR IF((SELECT COUNT(*) FROM ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' OR IF((SELECT COUNT(*) FROM ..."
   },
   {
     "id": "timing-attacks-owasp-0029",
     "name": "MySQL time-based blind SQL injection #2",
     "template": "' OR IF(SUBSTRING(DATABASE(),1,1)='a', SLEEP(5), 0) --",
-    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' OR IF(SUBSTRING(DATABASE(),1...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' OR IF(SUBSTRING(DATABASE(),1..."
   },
   {
     "id": "timing-attacks-owasp-0030",
     "name": "MySQL time-based blind SQL injection #3",
     "template": "' OR IF(LENGTH(DATABASE())>5, SLEEP(5), 0) --",
-    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' OR IF(LENGTH(DATABASE())>5, ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' OR IF(LENGTH(DATABASE())>5, ..."
   },
   {
     "id": "timing-attacks-owasp-0031",
     "name": "MySQL time-based blind SQL injection #4",
     "template": "' AND IF((SELECT user FROM mysql.user LIMIT 1)='root', SLEEP(5), 0) --",
-    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' AND IF((SELECT user FROM mys...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MySQL time-based blind SQL injection probe from OWASP. Tests application handling of: ' AND IF((SELECT user FROM mys..."
   },
   {
     "id": "timing-attacks-owasp-0032",
     "name": "PostgreSQL time-based",
     "template": "' OR pg_sleep(5) --",
-    "description": "PostgreSQL time-based probe from OWASP. Tests application handling of: ' OR pg_sleep(5) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "PostgreSQL time-based probe from OWASP. Tests application handling of: ' OR pg_sleep(5) --"
   },
   {
     "id": "timing-attacks-owasp-0033",
     "name": "PostgreSQL time-based #2",
     "template": "'; SELECT pg_sleep(5) --",
-    "description": "PostgreSQL time-based probe from OWASP. Tests application handling of: '; SELECT pg_sleep(5) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "PostgreSQL time-based probe from OWASP. Tests application handling of: '; SELECT pg_sleep(5) --"
   },
   {
     "id": "timing-attacks-owasp-0034",
     "name": "PostgreSQL time-based #3",
     "template": "' OR (SELECT CASE WHEN (1=1) THEN pg_sleep(5) ELSE pg_sleep(0) END) --",
-    "description": "PostgreSQL time-based probe from OWASP. Tests application handling of: ' OR (SELECT CASE WHEN (1=1) T...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "PostgreSQL time-based probe from OWASP. Tests application handling of: ' OR (SELECT CASE WHEN (1=1) T..."
   },
   {
     "id": "timing-attacks-owasp-0035",
     "name": "MSSQL time-based",
     "template": "'; WAITFOR DELAY '00:00:05' --",
-    "description": "MSSQL time-based probe from OWASP. Tests application handling of: '; WAITFOR DELAY '00:00:05' --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MSSQL time-based probe from OWASP. Tests application handling of: '; WAITFOR DELAY '00:00:05' --"
   },
   {
     "id": "timing-attacks-owasp-0036",
     "name": "MSSQL time-based #2",
     "template": "' OR WAITFOR DELAY '00:00:05' --",
-    "description": "MSSQL time-based probe from OWASP. Tests application handling of: ' OR WAITFOR DELAY '00:00:05' ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MSSQL time-based probe from OWASP. Tests application handling of: ' OR WAITFOR DELAY '00:00:05' ..."
   },
   {
     "id": "timing-attacks-owasp-0037",
     "name": "MSSQL time-based #3",
     "template": "'; IF (1=1) WAITFOR DELAY '00:00:05' --",
-    "description": "MSSQL time-based probe from OWASP. Tests application handling of: '; IF (1=1) WAITFOR DELAY '00:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MSSQL time-based probe from OWASP. Tests application handling of: '; IF (1=1) WAITFOR DELAY '00:..."
   },
   {
     "id": "timing-attacks-owasp-0038",
     "name": "MSSQL time-based #4",
     "template": "' AND (SELECT COUNT(*) FROM users) > 0; WAITFOR DELAY '00:00:05' --",
-    "description": "MSSQL time-based probe from OWASP. Tests application handling of: ' AND (SELECT COUNT(*) FROM us...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "MSSQL time-based probe from OWASP. Tests application handling of: ' AND (SELECT COUNT(*) FROM us..."
   },
   {
     "id": "timing-attacks-owasp-0039",
     "name": "Oracle time-based",
     "template": "' OR DBMS_LOCK.SLEEP(5) --",
-    "description": "Oracle time-based probe from OWASP. Tests application handling of: ' OR DBMS_LOCK.SLEEP(5) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Oracle time-based probe from OWASP. Tests application handling of: ' OR DBMS_LOCK.SLEEP(5) --"
   },
   {
     "id": "timing-attacks-owasp-0040",
     "name": "Oracle time-based #2",
     "template": "' AND DBMS_LOCK.SLEEP(5) --",
-    "description": "Oracle time-based probe from OWASP. Tests application handling of: ' AND DBMS_LOCK.SLEEP(5) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Oracle time-based probe from OWASP. Tests application handling of: ' AND DBMS_LOCK.SLEEP(5) --"
   },
   {
     "id": "timing-attacks-owasp-0041",
     "name": "SQLite time-based",
     "template": "' OR randomblob(100000000) --",
-    "description": "SQLite time-based probe from OWASP. Tests application handling of: ' OR randomblob(100000000) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "SQLite time-based probe from OWASP. Tests application handling of: ' OR randomblob(100000000) --"
   },
   {
     "id": "timing-attacks-owasp-0042",
     "name": "SQLite time-based #2",
     "template": "' AND randomblob(100000000) --",
-    "description": "SQLite time-based probe from OWASP. Tests application handling of: ' AND randomblob(100000000) --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "SQLite time-based probe from OWASP. Tests application handling of: ' AND randomblob(100000000) --"
   },
   {
     "id": "timing-attacks-owasp-0043",
     "name": "Heavy computation (alternative to SLEEP)",
     "template": "' OR BENCHMARK(5000000, SHA1('test')) --",
-    "description": "Heavy computation (alternative to SLEEP) probe from OWASP. Tests application handling of: ' OR BENCHMARK(5000000, SHA1('...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Heavy computation (alternative to SLEEP) probe from OWASP. Tests application handling of: ' OR BENCHMARK(5000000, SHA1('..."
   },
   {
     "id": "timing-attacks-owasp-0044",
     "name": "Heavy computation (alternative to SLEEP) #2",
     "template": "' AND BENCHMARK(10000000, MD5('test')) --",
-    "description": "Heavy computation (alternative to SLEEP) probe from OWASP. Tests application handling of: ' AND BENCHMARK(10000000, MD5(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Heavy computation (alternative to SLEEP) probe from OWASP. Tests application handling of: ' AND BENCHMARK(10000000, MD5(..."
   },
   {
     "id": "timing-attacks-owasp-0045",
     "name": "Conditional time delays",
     "template": "' OR IF((SELECT COUNT(*) FROM users WHERE username='admin')=1, SLEEP(5), 0) --",
-    "description": "Conditional time delays probe from OWASP. Tests application handling of: ' OR IF((SELECT COUNT(*) FROM ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Conditional time delays probe from OWASP. Tests application handling of: ' OR IF((SELECT COUNT(*) FROM ..."
   },
   {
     "id": "timing-attacks-owasp-0046",
     "name": "Conditional time delays #2",
     "template": "' OR IF(SUBSTRING((SELECT password FROM users LIMIT 1),1,1)='a', SLEEP(5), 0) --",
-    "description": "Conditional time delays probe from OWASP. Tests application handling of: ' OR IF(SUBSTRING((SELECT pass...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Conditional time delays probe from OWASP. Tests application handling of: ' OR IF(SUBSTRING((SELECT pass..."
   },
   {
     "id": "timing-attacks-owasp-0047",
     "name": "Conditional time delays #3",
     "template": "' OR IF(ASCII(SUBSTRING((SELECT password FROM users LIMIT 1),1,1))>96, SLEEP(5), 0) --",
-    "description": "Conditional time delays probe from OWASP. Tests application handling of: ' OR IF(ASCII(SUBSTRING((SELEC...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Conditional time delays probe from OWASP. Tests application handling of: ' OR IF(ASCII(SUBSTRING((SELEC..."
   },
   {
     "id": "timing-attacks-owasp-0048",
     "name": "Data exfiltration via timing",
     "template": "' OR IF((SELECT SUBSTRING(password,1,1) FROM users WHERE username='admin')='a', SLEEP(5), 0) --",
-    "description": "Data exfiltration via timing probe from OWASP. Tests application handling of: ' OR IF((SELECT SUBSTRING(pass...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Data exfiltration via timing probe from OWASP. Tests application handling of: ' OR IF((SELECT SUBSTRING(pass..."
   },
   {
     "id": "timing-attacks-owasp-0049",
     "name": "Data exfiltration via timing #2",
     "template": "' OR IF((SELECT SUBSTRING(password,2,1) FROM users WHERE username='admin')='b', SLEEP(5), 0) --",
-    "description": "Data exfiltration via timing probe from OWASP. Tests application handling of: ' OR IF((SELECT SUBSTRING(pass...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Data exfiltration via timing probe from OWASP. Tests application handling of: ' OR IF((SELECT SUBSTRING(pass..."
   },
   {
     "id": "timing-attacks-owasp-0050",
     "name": "Valid format tokens (will take longer to validate)",
     "template": "token=550e8400-e29b-41d4-a716-446655440000",
-    "description": "Valid format tokens (will take longer to validate) probe from OWASP. Tests application handling of: token=550e8400-e29b-41d4-a716-...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid format tokens (will take longer to validate) probe from OWASP. Tests application handling of: token=550e8400-e29b-41d4-a716-..."
   },
   {
     "id": "timing-attacks-owasp-0051",
     "name": "Valid format tokens (will take longer to validate) #2",
     "template": "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-    "description": "Valid format tokens (will take longer to validate) probe from OWASP. Tests application handling of: token=eyJhbGciOiJIUzI1NiIsInR5...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid format tokens (will take longer to validate) probe from OWASP. Tests application handling of: token=eyJhbGciOiJIUzI1NiIsInR5..."
   },
   {
     "id": "timing-attacks-owasp-0052",
     "name": "Invalid format tokens (will fail fast)",
     "template": "token=invalid",
-    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=invalid",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=invalid"
   },
   {
     "id": "timing-attacks-owasp-0053",
     "name": "Invalid format tokens (will fail fast) #2",
     "template": "token=12345",
-    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=12345",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=12345"
   },
   {
     "id": "timing-attacks-owasp-0054",
     "name": "Invalid format tokens (will fail fast) #3",
     "template": "token=abc123",
-    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=abc123",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=abc123"
   },
   {
     "id": "timing-attacks-owasp-0055",
     "name": "Invalid format tokens (will fail fast) #4",
     "template": "token=test",
-    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=test",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=test"
   },
   {
     "id": "timing-attacks-owasp-0056",
     "name": "Invalid format tokens (will fail fast) #5",
     "template": "token=null",
-    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format tokens (will fail fast) probe from OWASP. Tests application handling of: token=null"
   },
   {
     "id": "timing-attacks-owasp-0057",
     "name": "4-digit PIN testing (measure time for each)",
     "template": "pin=0000",
-    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=0000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=0000"
   },
   {
     "id": "timing-attacks-owasp-0058",
     "name": "4-digit PIN testing (measure time for each) #2",
     "template": "pin=0001",
-    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=0001",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=0001"
   },
   {
     "id": "timing-attacks-owasp-0059",
     "name": "4-digit PIN testing (measure time for each) #3",
     "template": "pin=0002",
-    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=0002",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=0002"
   },
   {
     "id": "timing-attacks-owasp-0060",
     "name": "4-digit PIN testing (measure time for each) #4",
     "template": "pin=1111",
-    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=1111",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=1111"
   },
   {
     "id": "timing-attacks-owasp-0061",
     "name": "4-digit PIN testing (measure time for each) #5",
     "template": "pin=1234",
-    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=1234",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=1234"
   },
   {
     "id": "timing-attacks-owasp-0062",
     "name": "4-digit PIN testing (measure time for each) #6",
     "template": "pin=5555",
-    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=5555",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=5555"
   },
   {
     "id": "timing-attacks-owasp-0063",
     "name": "4-digit PIN testing (measure time for each) #7",
     "template": "pin=9999",
-    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=9999",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "4-digit PIN testing (measure time for each) probe from OWASP. Tests application handling of: pin=9999"
   },
   {
     "id": "timing-attacks-owasp-0064",
     "name": "6-digit OTP testing",
     "template": "otp=000000",
-    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=000000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=000000"
   },
   {
     "id": "timing-attacks-owasp-0065",
     "name": "6-digit OTP testing #2",
     "template": "otp=111111",
-    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=111111",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=111111"
   },
   {
     "id": "timing-attacks-owasp-0066",
     "name": "6-digit OTP testing #3",
     "template": "otp=123456",
-    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=123456",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=123456"
   },
   {
     "id": "timing-attacks-owasp-0067",
     "name": "6-digit OTP testing #4",
     "template": "otp=654321",
-    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=654321",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=654321"
   },
   {
     "id": "timing-attacks-owasp-0068",
     "name": "6-digit OTP testing #5",
     "template": "otp=999999",
-    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=999999",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "6-digit OTP testing probe from OWASP. Tests application handling of: otp=999999"
   },
   {
     "id": "timing-attacks-owasp-0069",
     "name": "Character-by-character timing",
     "template": "otp=100000",
-    "description": "Character-by-character timing probe from OWASP. Tests application handling of: otp=100000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Character-by-character timing probe from OWASP. Tests application handling of: otp=100000"
   },
   {
     "id": "timing-attacks-owasp-0070",
     "name": "Character-by-character timing #2",
     "template": "otp=200000",
-    "description": "Character-by-character timing probe from OWASP. Tests application handling of: otp=200000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Character-by-character timing probe from OWASP. Tests application handling of: otp=200000"
   },
   {
     "id": "timing-attacks-owasp-0071",
     "name": "Character-by-character timing #3",
     "template": "otp=300000",
-    "description": "Character-by-character timing probe from OWASP. Tests application handling of: otp=300000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Character-by-character timing probe from OWASP. Tests application handling of: otp=300000"
   },
   {
     "id": "timing-attacks-owasp-0072",
     "name": "If 1xxxxx takes longer, first digit is 1",
     "template": "otp=110000",
-    "description": "If 1xxxxx takes longer, first digit is 1 probe from OWASP. Tests application handling of: otp=110000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "If 1xxxxx takes longer, first digit is 1 probe from OWASP. Tests application handling of: otp=110000"
   },
   {
     "id": "timing-attacks-owasp-0073",
     "name": "If 1xxxxx takes longer, first digit is 1 #2",
     "template": "otp=120000",
-    "description": "If 1xxxxx takes longer, first digit is 1 probe from OWASP. Tests application handling of: otp=120000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "If 1xxxxx takes longer, first digit is 1 probe from OWASP. Tests application handling of: otp=120000"
   },
   {
     "id": "timing-attacks-owasp-0074",
     "name": "If 1xxxxx takes longer, first digit is 1 #3",
     "template": "otp=130000",
-    "description": "If 1xxxxx takes longer, first digit is 1 probe from OWASP. Tests application handling of: otp=130000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "If 1xxxxx takes longer, first digit is 1 probe from OWASP. Tests application handling of: otp=130000"
   },
   {
     "id": "timing-attacks-owasp-0075",
     "name": "Valid UUID format sessions",
     "template": "session_id=550e8400-e29b-41d4-a716-446655440000",
-    "description": "Valid UUID format sessions probe from OWASP. Tests application handling of: session_id=550e8400-e29b-41d4-...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid UUID format sessions probe from OWASP. Tests application handling of: session_id=550e8400-e29b-41d4-..."
   },
   {
     "id": "timing-attacks-owasp-0076",
     "name": "Valid UUID format sessions #2",
     "template": "session_id=123e4567-e89b-12d3-a456-426614174000",
-    "description": "Valid UUID format sessions probe from OWASP. Tests application handling of: session_id=123e4567-e89b-12d3-...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid UUID format sessions probe from OWASP. Tests application handling of: session_id=123e4567-e89b-12d3-..."
   },
   {
     "id": "timing-attacks-owasp-0077",
     "name": "Invalid format sessions",
     "template": "session_id=invalid",
-    "description": "Invalid format sessions probe from OWASP. Tests application handling of: session_id=invalid",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format sessions probe from OWASP. Tests application handling of: session_id=invalid"
   },
   {
     "id": "timing-attacks-owasp-0078",
     "name": "Invalid format sessions #2",
     "template": "session_id=12345",
-    "description": "Invalid format sessions probe from OWASP. Tests application handling of: session_id=12345",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format sessions probe from OWASP. Tests application handling of: session_id=12345"
   },
   {
     "id": "timing-attacks-owasp-0079",
     "name": "Invalid format sessions #3",
     "template": "session_id=test_session",
-    "description": "Invalid format sessions probe from OWASP. Tests application handling of: session_id=test_session",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid format sessions probe from OWASP. Tests application handling of: session_id=test_session"
   },
   {
     "id": "timing-attacks-owasp-0080",
     "name": "Sequential session IDs",
     "template": "session_id=1",
-    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=1"
   },
   {
     "id": "timing-attacks-owasp-0081",
     "name": "Sequential session IDs #2",
     "template": "session_id=2",
-    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=2",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=2"
   },
   {
     "id": "timing-attacks-owasp-0082",
     "name": "Sequential session IDs #3",
     "template": "session_id=100",
-    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=100",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=100"
   },
   {
     "id": "timing-attacks-owasp-0083",
     "name": "Sequential session IDs #4",
     "template": "session_id=1000",
-    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=1000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Sequential session IDs probe from OWASP. Tests application handling of: session_id=1000"
   },
   {
     "id": "timing-attacks-owasp-0084",
     "name": "Common file paths",
     "template": "file=../../../../../../etc/passwd",
-    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../etc/pas...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../etc/pas..."
   },
   {
     "id": "timing-attacks-owasp-0085",
     "name": "Common file paths #2",
     "template": "file=../../../../../../etc/shadow",
-    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../etc/sha...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../etc/sha..."
   },
   {
     "id": "timing-attacks-owasp-0086",
     "name": "Common file paths #3",
     "template": "file=../../../../../../etc/hosts",
-    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../etc/hos...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../etc/hos..."
   },
   {
     "id": "timing-attacks-owasp-0087",
     "name": "Common file paths #4",
     "template": "file=../../../../../../var/log/apache2/access.log",
-    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../var/log...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../../../../var/log..."
   },
   {
     "id": "timing-attacks-owasp-0088",
     "name": "Common file paths #5",
     "template": "file=../../../config/database.yml",
-    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../config/database....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../config/database...."
   },
   {
     "id": "timing-attacks-owasp-0089",
     "name": "Common file paths #6",
     "template": "file=../../../.env",
-    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../.env",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../.env"
   },
   {
     "id": "timing-attacks-owasp-0090",
     "name": "Common file paths #7",
     "template": "file=../../../.git/config",
-    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../.git/config",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Common file paths probe from OWASP. Tests application handling of: file=../../../.git/config"
   },
   {
     "id": "timing-attacks-owasp-0091",
     "name": "Windows paths",
     "template": "file=C:\\Windows\\System32\\config\\SAM",
-    "description": "Windows paths probe from OWASP. Tests application handling of: file=C:\\Windows\\System32\\confi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Windows paths probe from OWASP. Tests application handling of: file=C:\\Windows\\System32\\confi..."
   },
   {
     "id": "timing-attacks-owasp-0092",
     "name": "Windows paths #2",
     "template": "file=C:\\Windows\\win.ini",
-    "description": "Windows paths probe from OWASP. Tests application handling of: file=C:\\Windows\\win.ini",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Windows paths probe from OWASP. Tests application handling of: file=C:\\Windows\\win.ini"
   },
   {
     "id": "timing-attacks-owasp-0093",
     "name": "Windows paths #3",
     "template": "file=C:\\boot.ini",
-    "description": "Windows paths probe from OWASP. Tests application handling of: file=C:\\boot.ini",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Windows paths probe from OWASP. Tests application handling of: file=C:\\boot.ini"
   },
   {
     "id": "timing-attacks-owasp-0094",
     "name": "RSA signature verification timing",
     "template": "signature=<various_signatures>",
-    "description": "RSA signature verification timing probe from OWASP. Tests application handling of: signature=<various_signatures>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "RSA signature verification timing probe from OWASP. Tests application handling of: signature=<various_signatures>"
   },
   {
     "id": "timing-attacks-owasp-0095",
     "name": "HMAC timing attacks",
     "template": "hmac=correct_hmac_value",
-    "description": "HMAC timing attacks probe from OWASP. Tests application handling of: hmac=correct_hmac_value",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "HMAC timing attacks probe from OWASP. Tests application handling of: hmac=correct_hmac_value"
   },
   {
     "id": "timing-attacks-owasp-0096",
     "name": "HMAC timing attacks #2",
     "template": "hmac=incorrect_hmac_value",
-    "description": "HMAC timing attacks probe from OWASP. Tests application handling of: hmac=incorrect_hmac_value",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "HMAC timing attacks probe from OWASP. Tests application handling of: hmac=incorrect_hmac_value"
   },
   {
     "id": "timing-attacks-owasp-0097",
     "name": "Password hash comparison",
     "template": "password_hash=correct_bcrypt_hash",
-    "description": "Password hash comparison probe from OWASP. Tests application handling of: password_hash=correct_bcrypt_h...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Password hash comparison probe from OWASP. Tests application handling of: password_hash=correct_bcrypt_h..."
   },
   {
     "id": "timing-attacks-owasp-0098",
     "name": "Password hash comparison #2",
     "template": "password_hash=incorrect_bcrypt_hash",
-    "description": "Password hash comparison probe from OWASP. Tests application handling of: password_hash=incorrect_bcrypt...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Password hash comparison probe from OWASP. Tests application handling of: password_hash=incorrect_bcrypt..."
   },
   {
     "id": "timing-attacks-owasp-0099",
     "name": "Request same resource multiple times",
     "template": "GET /api/user/1",
-    "description": "Request same resource multiple times probe from OWASP. Tests application handling of: GET /api/user/1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Request same resource multiple times probe from OWASP. Tests application handling of: GET /api/user/1"
   },
   {
     "id": "timing-attacks-owasp-0100",
     "name": "Resource enumeration via cache",
     "template": "GET /api/user/2",
-    "description": "Resource enumeration via cache probe from OWASP. Tests application handling of: GET /api/user/2",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Resource enumeration via cache probe from OWASP. Tests application handling of: GET /api/user/2"
   },
   {
     "id": "timing-attacks-owasp-0101",
     "name": "Resource enumeration via cache #2",
     "template": "GET /api/user/3",
-    "description": "Resource enumeration via cache probe from OWASP. Tests application handling of: GET /api/user/3",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Resource enumeration via cache probe from OWASP. Tests application handling of: GET /api/user/3"
   },
   {
     "id": "timing-attacks-owasp-0102",
     "name": "Resource enumeration via cache #3",
     "template": "GET /api/user/100",
-    "description": "Resource enumeration via cache probe from OWASP. Tests application handling of: GET /api/user/100",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Resource enumeration via cache probe from OWASP. Tests application handling of: GET /api/user/100"
   },
   {
     "id": "timing-attacks-owasp-0103",
     "name": "Boolean-based timing",
     "template": "query=' OR '1'='1' AND SLEEP(5) --",
-    "description": "Boolean-based timing probe from OWASP. Tests application handling of: query=' OR '1'='1' AND SLEEP(5...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Boolean-based timing probe from OWASP. Tests application handling of: query=' OR '1'='1' AND SLEEP(5..."
   },
   {
     "id": "timing-attacks-owasp-0104",
     "name": "Boolean-based timing #2",
     "template": "query=' OR '1'='2' AND SLEEP(5) --",
-    "description": "Boolean-based timing probe from OWASP. Tests application handling of: query=' OR '1'='2' AND SLEEP(5...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Boolean-based timing probe from OWASP. Tests application handling of: query=' OR '1'='2' AND SLEEP(5..."
   },
   {
     "id": "timing-attacks-owasp-0105",
     "name": "Conditional queries with timing",
     "template": "search=test' AND (SELECT COUNT(*) FROM users)>0 AND SLEEP(5) --",
-    "description": "Conditional queries with timing probe from OWASP. Tests application handling of: search=test' AND (SELECT COUNT...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Conditional queries with timing probe from OWASP. Tests application handling of: search=test' AND (SELECT COUNT..."
   },
   {
     "id": "timing-attacks-owasp-0106",
     "name": "Conditional queries with timing #2",
     "template": "search=test' AND (SELECT COUNT(*) FROM users)>1000 AND SLEEP(5) --",
-    "description": "Conditional queries with timing probe from OWASP. Tests application handling of: search=test' AND (SELECT COUNT...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Conditional queries with timing probe from OWASP. Tests application handling of: search=test' AND (SELECT COUNT..."
   },
   {
     "id": "timing-attacks-owasp-0107",
     "name": "Login timing comparison",
     "template": "username=admin&password=wrongpassword",
-    "description": "Login timing comparison probe from OWASP. Tests application handling of: username=admin&password=wrongp...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Login timing comparison probe from OWASP. Tests application handling of: username=admin&password=wrongp..."
   },
   {
     "id": "timing-attacks-owasp-0108",
     "name": "Login timing comparison #2",
     "template": "username=nonexistent&password=wrongpassword",
-    "description": "Login timing comparison probe from OWASP. Tests application handling of: username=nonexistent&password=...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Login timing comparison probe from OWASP. Tests application handling of: username=nonexistent&password=..."
   },
   {
     "id": "timing-attacks-owasp-0109",
     "name": "Valid vs invalid API keys",
     "template": "Authorization: Bearer valid_format_key_12345678901234567890",
-    "description": "Valid vs invalid API keys probe from OWASP. Tests application handling of: Authorization: Bearer valid_fo...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid vs invalid API keys probe from OWASP. Tests application handling of: Authorization: Bearer valid_fo..."
   },
   {
     "id": "timing-attacks-owasp-0110",
     "name": "Valid vs invalid API keys #2",
     "template": "Authorization: Bearer invalid",
-    "description": "Valid vs invalid API keys probe from OWASP. Tests application handling of: Authorization: Bearer invalid",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid vs invalid API keys probe from OWASP. Tests application handling of: Authorization: Bearer invalid"
   },
   {
     "id": "timing-attacks-owasp-0111",
     "name": "Permission check timing",
     "template": "GET /api/admin/users (with admin token)",
-    "description": "Permission check timing probe from OWASP. Tests application handling of: GET /api/admin/users (with adm...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Permission check timing probe from OWASP. Tests application handling of: GET /api/admin/users (with adm..."
   },
   {
     "id": "timing-attacks-owasp-0112",
     "name": "Permission check timing #2",
     "template": "GET /api/admin/users (with user token)",
-    "description": "Permission check timing probe from OWASP. Tests application handling of: GET /api/admin/users (with use...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Permission check timing probe from OWASP. Tests application handling of: GET /api/admin/users (with use..."
   },
   {
     "id": "timing-attacks-owasp-0113",
     "name": "Search for existing vs non-existing data",
     "template": "search=admin",
-    "description": "Search for existing vs non-existing data probe from OWASP. Tests application handling of: search=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Search for existing vs non-existing data probe from OWASP. Tests application handling of: search=admin"
   },
   {
     "id": "timing-attacks-owasp-0114",
     "name": "Search for existing vs non-existing data #2",
     "template": "search=nonexistent_data_12345",
-    "description": "Search for existing vs non-existing data probe from OWASP. Tests application handling of: search=nonexistent_data_12345",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Search for existing vs non-existing data probe from OWASP. Tests application handling of: search=nonexistent_data_12345"
   },
   {
     "id": "timing-attacks-owasp-0115",
     "name": "Wildcard search timing",
     "template": "search=a%",
-    "description": "Wildcard search timing probe from OWASP. Tests application handling of: search=a%",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Wildcard search timing probe from OWASP. Tests application handling of: search=a%"
   },
   {
     "id": "timing-attacks-owasp-0116",
     "name": "Wildcard search timing #2",
     "template": "search=admin%",
-    "description": "Wildcard search timing probe from OWASP. Tests application handling of: search=admin%",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Wildcard search timing probe from OWASP. Tests application handling of: search=admin%"
   },
   {
     "id": "timing-attacks-owasp-0117",
     "name": "Wildcard search timing #3",
     "template": "search=administrator%",
-    "description": "Wildcard search timing probe from OWASP. Tests application handling of: search=administrator%",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Wildcard search timing probe from OWASP. Tests application handling of: search=administrator%"
   },
   {
     "id": "timing-attacks-owasp-0118",
     "name": "Secret comparison (character-by-character)",
     "template": "secret=a000000000",
-    "description": "Secret comparison (character-by-character) probe from OWASP. Tests application handling of: secret=a000000000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Secret comparison (character-by-character) probe from OWASP. Tests application handling of: secret=a000000000"
   },
   {
     "id": "timing-attacks-owasp-0119",
     "name": "Secret comparison (character-by-character) #2",
     "template": "secret=b000000000",
-    "description": "Secret comparison (character-by-character) probe from OWASP. Tests application handling of: secret=b000000000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Secret comparison (character-by-character) probe from OWASP. Tests application handling of: secret=b000000000"
   },
   {
     "id": "timing-attacks-owasp-0120",
     "name": "Secret comparison (character-by-character) #3",
     "template": "secret=c000000000",
-    "description": "Secret comparison (character-by-character) probe from OWASP. Tests application handling of: secret=c000000000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Secret comparison (character-by-character) probe from OWASP. Tests application handling of: secret=c000000000"
   },
   {
     "id": "timing-attacks-owasp-0121",
     "name": "Token comparison",
     "template": "token=a123456789012345",
-    "description": "Token comparison probe from OWASP. Tests application handling of: token=a123456789012345",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Token comparison probe from OWASP. Tests application handling of: token=a123456789012345"
   },
   {
     "id": "timing-attacks-owasp-0122",
     "name": "Token comparison #2",
     "template": "token=b123456789012345",
-    "description": "Token comparison probe from OWASP. Tests application handling of: token=b123456789012345",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Token comparison probe from OWASP. Tests application handling of: token=b123456789012345"
   },
   {
     "id": "timing-attacks-owasp-0123",
     "name": "Correct HMAC",
     "template": "hmac=2d5f8f5e1c8b9a7f3e4d6c2b1a0f9e8d",
-    "description": "Correct HMAC probe from OWASP. Tests application handling of: hmac=2d5f8f5e1c8b9a7f3e4d6c2b1...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Correct HMAC probe from OWASP. Tests application handling of: hmac=2d5f8f5e1c8b9a7f3e4d6c2b1..."
   },
   {
     "id": "timing-attacks-owasp-0124",
     "name": "Incorrect HMAC (different lengths)",
     "template": "hmac=incorrect",
-    "description": "Incorrect HMAC (different lengths) probe from OWASP. Tests application handling of: hmac=incorrect",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Incorrect HMAC (different lengths) probe from OWASP. Tests application handling of: hmac=incorrect"
   },
   {
     "id": "timing-attacks-owasp-0125",
     "name": "Incorrect HMAC (different lengths) #2",
     "template": "hmac=1234567890abcdef",
-    "description": "Incorrect HMAC (different lengths) probe from OWASP. Tests application handling of: hmac=1234567890abcdef",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Incorrect HMAC (different lengths) probe from OWASP. Tests application handling of: hmac=1234567890abcdef"
   },
   {
     "id": "timing-attacks-owasp-0126",
     "name": "Incorrect HMAC (different lengths) #3",
     "template": "hmac=ffffffffffffffffffffffffffffffff",
-    "description": "Incorrect HMAC (different lengths) probe from OWASP. Tests application handling of: hmac=fffffffffffffffffffffffff...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Incorrect HMAC (different lengths) probe from OWASP. Tests application handling of: hmac=fffffffffffffffffffffffff..."
   },
   {
     "id": "timing-attacks-owasp-0127",
     "name": "Test backup codes",
     "template": "backup_code=ABCD-EFGH-IJKL-MNOP",
-    "description": "Test backup codes probe from OWASP. Tests application handling of: backup_code=ABCD-EFGH-IJKL-MNO...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test backup codes probe from OWASP. Tests application handling of: backup_code=ABCD-EFGH-IJKL-MNO..."
   },
   {
     "id": "timing-attacks-owasp-0128",
     "name": "Test backup codes #2",
     "template": "backup_code=1234-5678-9012-3456",
-    "description": "Test backup codes probe from OWASP. Tests application handling of: backup_code=1234-5678-9012-345...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test backup codes probe from OWASP. Tests application handling of: backup_code=1234-5678-9012-345..."
   },
   {
     "id": "timing-attacks-owasp-0129",
     "name": "Test backup codes #3",
     "template": "backup_code=invalid",
-    "description": "Test backup codes probe from OWASP. Tests application handling of: backup_code=invalid",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Test backup codes probe from OWASP. Tests application handling of: backup_code=invalid"
   },
   {
     "id": "timing-attacks-owasp-0130",
     "name": "Non-existing email addresses",
     "template": "email=invalid@invalid.com",
-    "description": "Non-existing email addresses probe from OWASP. Tests application handling of: email=invalid@invalid.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Non-existing email addresses probe from OWASP. Tests application handling of: email=invalid@invalid.com"
   },
   {
     "id": "timing-attacks-owasp-0131",
     "name": "Access with different permission levels",
     "template": "GET /api/resource/1 (as admin)",
-    "description": "Access with different permission levels probe from OWASP. Tests application handling of: GET /api/resource/1 (as admin)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Access with different permission levels probe from OWASP. Tests application handling of: GET /api/resource/1 (as admin)"
   },
   {
     "id": "timing-attacks-owasp-0132",
     "name": "Access with different permission levels #2",
     "template": "GET /api/resource/1 (as user)",
-    "description": "Access with different permission levels probe from OWASP. Tests application handling of: GET /api/resource/1 (as user)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Access with different permission levels probe from OWASP. Tests application handling of: GET /api/resource/1 (as user)"
   },
   {
     "id": "timing-attacks-owasp-0133",
     "name": "Access with different permission levels #3",
     "template": "GET /api/resource/1 (as guest)",
-    "description": "Access with different permission levels probe from OWASP. Tests application handling of: GET /api/resource/1 (as guest)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Access with different permission levels probe from OWASP. Tests application handling of: GET /api/resource/1 (as guest)"
   },
   {
     "id": "timing-attacks-owasp-0134",
     "name": "Exponential backtracking patterns",
     "template": "input=(a+)+b",
-    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=(a+)+b",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=(a+)+b"
   },
   {
     "id": "timing-attacks-owasp-0135",
     "name": "Exponential backtracking patterns #2",
     "template": "input=aaaaaaaaaaaaaaaaaaaaaaaa!",
-    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=aaaaaaaaaaaaaaaaaaaaaaaa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=aaaaaaaaaaaaaaaaaaaaaaaa..."
   },
   {
     "id": "timing-attacks-owasp-0136",
     "name": "Exponential backtracking patterns #3",
     "template": "input=(a|a)*b",
-    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=(a|a)*b",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=(a|a)*b"
   },
   {
     "id": "timing-attacks-owasp-0137",
     "name": "Exponential backtracking patterns #4",
     "template": "input=(a|ab)*c",
-    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=(a|ab)*c",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Exponential backtracking patterns probe from OWASP. Tests application handling of: input=(a|ab)*c"
   },
   {
     "id": "timing-attacks-owasp-0138",
     "name": "Email validation ReDoS",
     "template": "email=a@a.a....(repeat many times)...@a.a",
-    "description": "Email validation ReDoS probe from OWASP. Tests application handling of: email=a@a.a....(repeat many ti...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Email validation ReDoS probe from OWASP. Tests application handling of: email=a@a.a....(repeat many ti..."
   },
   {
     "id": "timing-attacks-owasp-0139",
     "name": "Email validation ReDoS #2",
     "template": "email=aaaaaaaaaaaaaaaaaaaaaa@aaaaaaaaaa.com",
-    "description": "Email validation ReDoS probe from OWASP. Tests application handling of: email=aaaaaaaaaaaaaaaaaaaaaa@a...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Email validation ReDoS probe from OWASP. Tests application handling of: email=aaaaaaaaaaaaaaaaaaaaaa@a..."
   },
   {
     "id": "timing-attacks-owasp-0140",
     "name": "URL validation ReDoS",
     "template": "url=http://aaaaaaaaaaaaaaaaaaaaa....",
-    "description": "URL validation ReDoS probe from OWASP. Tests application handling of: url=http://aaaaaaaaaaaaaaaaaaa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "URL validation ReDoS probe from OWASP. Tests application handling of: url=http://aaaaaaaaaaaaaaaaaaa..."
   },
   {
     "id": "timing-attacks-owasp-0141",
     "name": "Correct CAPTCHA response",
     "template": "captcha=correct_answer",
-    "description": "Correct CAPTCHA response probe from OWASP. Tests application handling of: captcha=correct_answer",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Correct CAPTCHA response probe from OWASP. Tests application handling of: captcha=correct_answer"
   },
   {
     "id": "timing-attacks-owasp-0142",
     "name": "Incorrect CAPTCHA",
     "template": "captcha=wrong_answer",
-    "description": "Incorrect CAPTCHA probe from OWASP. Tests application handling of: captcha=wrong_answer",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Incorrect CAPTCHA probe from OWASP. Tests application handling of: captcha=wrong_answer"
   },
   {
     "id": "timing-attacks-owasp-0143",
     "name": "Valid webhook URLs",
     "template": "webhook_url=https://attacker.com/callback",
-    "description": "Valid webhook URLs probe from OWASP. Tests application handling of: webhook_url=https://attacker.c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid webhook URLs probe from OWASP. Tests application handling of: webhook_url=https://attacker.c..."
   },
   {
     "id": "timing-attacks-owasp-0144",
     "name": "Invalid webhook URLs",
     "template": "webhook_url=invalid_url",
-    "description": "Invalid webhook URLs probe from OWASP. Tests application handling of: webhook_url=invalid_url",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Invalid webhook URLs probe from OWASP. Tests application handling of: webhook_url=invalid_url"
   },
   {
     "id": "timing-attacks-owasp-0145",
     "name": "Upload allowed file types",
     "template": "file=image.jpg",
-    "description": "Upload allowed file types probe from OWASP. Tests application handling of: file=image.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Upload allowed file types probe from OWASP. Tests application handling of: file=image.jpg"
   },
   {
     "id": "timing-attacks-owasp-0146",
     "name": "Upload disallowed file types",
     "template": "file=shell.php",
-    "description": "Upload disallowed file types probe from OWASP. Tests application handling of: file=shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Upload disallowed file types probe from OWASP. Tests application handling of: file=shell.php"
   },
   {
     "id": "timing-attacks-owasp-0147",
     "name": "25. API VERSION TIMING",
     "template": "GET /api/v1/users (newer version with more checks)",
-    "description": "25. API VERSION TIMING probe from OWASP. Tests application handling of: GET /api/v1/users (newer versi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "25. API VERSION TIMING probe from OWASP. Tests application handling of: GET /api/v1/users (newer versi..."
   },
   {
     "id": "timing-attacks-owasp-0148",
     "name": "25. API VERSION TIMING #2",
     "template": "GET /api/v0/users (older version with fewer checks)",
-    "description": "25. API VERSION TIMING probe from OWASP. Tests application handling of: GET /api/v0/users (older versi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "25. API VERSION TIMING probe from OWASP. Tests application handling of: GET /api/v0/users (older versi..."
   },
   {
     "id": "timing-attacks-owasp-0149",
     "name": "Check subdomain existence via timing",
     "template": "GET https://admin.example.com",
-    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://admin.example.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://admin.example.com"
   },
   {
     "id": "timing-attacks-owasp-0150",
     "name": "Check subdomain existence via timing #2",
     "template": "GET https://api.example.com",
-    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://api.example.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://api.example.com"
   },
   {
     "id": "timing-attacks-owasp-0151",
     "name": "Check subdomain existence via timing #3",
     "template": "GET https://internal.example.com",
-    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://internal.example.c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://internal.example.c..."
   },
   {
     "id": "timing-attacks-owasp-0152",
     "name": "Check subdomain existence via timing #4",
     "template": "GET https://nonexistent.example.com",
-    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://nonexistent.exampl...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Check subdomain existence via timing probe from OWASP. Tests application handling of: GET https://nonexistent.exampl..."
   },
   {
     "id": "timing-attacks-owasp-0153",
     "name": "Valid authentication headers",
     "template": "Authorization: Bearer eyJhbGc...",
-    "description": "Valid authentication headers probe from OWASP. Tests application handling of: Authorization: Bearer eyJhbGc....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Valid authentication headers probe from OWASP. Tests application handling of: Authorization: Bearer eyJhbGc...."
   },
   {
     "id": "timing-attacks-owasp-0154",
     "name": "RSA operations with different keys",
     "template": "public_key=<valid_key>",
-    "description": "RSA operations with different keys probe from OWASP. Tests application handling of: public_key=<valid_key>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "RSA operations with different keys probe from OWASP. Tests application handling of: public_key=<valid_key>"
   },
   {
     "id": "timing-attacks-owasp-0155",
     "name": "RSA operations with different keys #2",
     "template": "public_key=<invalid_key>",
-    "description": "RSA operations with different keys probe from OWASP. Tests application handling of: public_key=<invalid_key>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "RSA operations with different keys probe from OWASP. Tests application handling of: public_key=<invalid_key>"
   },
   {
     "id": "timing-attacks-owasp-0156",
     "name": "AES operations",
     "template": "plaintext=aaaaaaaa",
-    "description": "AES operations probe from OWASP. Tests application handling of: plaintext=aaaaaaaa",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "AES operations probe from OWASP. Tests application handling of: plaintext=aaaaaaaa"
   },
   {
     "id": "timing-attacks-owasp-0157",
     "name": "AES operations #2",
     "template": "plaintext=bbbbbbbb",
-    "description": "AES operations probe from OWASP. Tests application handling of: plaintext=bbbbbbbb",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "AES operations probe from OWASP. Tests application handling of: plaintext=bbbbbbbb"
   },
   {
     "id": "timing-attacks-owasp-0158",
     "name": "Discount code validation",
     "template": "discount_code=VALID2024",
-    "description": "Discount code validation probe from OWASP. Tests application handling of: discount_code=VALID2024",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Discount code validation probe from OWASP. Tests application handling of: discount_code=VALID2024"
   },
   {
     "id": "timing-attacks-owasp-0159",
     "name": "Discount code validation #2",
     "template": "discount_code=INVALID",
-    "description": "Discount code validation probe from OWASP. Tests application handling of: discount_code=INVALID",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Discount code validation probe from OWASP. Tests application handling of: discount_code=INVALID"
   },
   {
     "id": "timing-attacks-owasp-0160",
     "name": "Referral code timing",
     "template": "referral=VALID_REFERRAL",
-    "description": "Referral code timing probe from OWASP. Tests application handling of: referral=VALID_REFERRAL",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Referral code timing probe from OWASP. Tests application handling of: referral=VALID_REFERRAL"
   },
   {
     "id": "timing-attacks-owasp-0161",
     "name": "Referral code timing #2",
     "template": "referral=INVALID_CODE",
-    "description": "Referral code timing probe from OWASP. Tests application handling of: referral=INVALID_CODE",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "Referral code timing probe from OWASP. Tests application handling of: referral=INVALID_CODE"
   },
   {
     "id": "timing-attacks-owasp-0162",
     "name": "XML External Entity with timing",
     "template": "<?xml version=\"1.0\"?>",
-    "description": "XML External Entity with timing probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "XML External Entity with timing probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?>"
   },
   {
     "id": "timing-attacks-owasp-0163",
     "name": "XML External Entity with timing #2",
     "template": "<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>",
-    "description": "XML External Entity with timing probe from OWASP. Tests application handling of: <!DOCTYPE foo [<!ENTITY xxe SY...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "XML External Entity with timing probe from OWASP. Tests application handling of: <!DOCTYPE foo [<!ENTITY xxe SY..."
   },
   {
     "id": "timing-attacks-owasp-0164",
     "name": "XML External Entity with timing #3",
     "template": "<foo>&xxe;</foo>",
-    "description": "XML External Entity with timing probe from OWASP. Tests application handling of: <foo>&xxe;</foo>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "XML External Entity with timing probe from OWASP. Tests application handling of: <foo>&xxe;</foo>"
   },
   {
     "id": "timing-attacks-owasp-0165",
     "name": "SSRF with timing",
     "template": "url=http://localhost:22",
-    "description": "SSRF with timing probe from OWASP. Tests application handling of: url=http://localhost:22",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "SSRF with timing probe from OWASP. Tests application handling of: url=http://localhost:22"
   },
   {
     "id": "timing-attacks-owasp-0166",
     "name": "SSRF with timing #2",
     "template": "url=http://localhost:80",
-    "description": "SSRF with timing probe from OWASP. Tests application handling of: url=http://localhost:80",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "SSRF with timing probe from OWASP. Tests application handling of: url=http://localhost:80"
   },
   {
     "id": "timing-attacks-owasp-0167",
     "name": "SSRF with timing #3",
     "template": "url=http://localhost:3306",
-    "description": "SSRF with timing probe from OWASP. Tests application handling of: url=http://localhost:3306",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "timing-attacks-payloads.txt"
+    "description": "SSRF with timing probe from OWASP. Tests application handling of: url=http://localhost:3306"
   }
 ]

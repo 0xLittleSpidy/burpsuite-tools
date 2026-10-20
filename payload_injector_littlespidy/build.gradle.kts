@@ -31,6 +31,9 @@ tasks.named<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(configurations.runtimeClasspath.get().filter { it.isDirectory })
     from(configurations.runtimeClasspath.get().filterNot { it.isDirectory }.map { zipTree(it) })
+    from(fileTree(projectDir) {
+        include("*.json")
+    })
 }
 
 // ── Copy all JSON payload files into build/libs/ alongside the JAR ──

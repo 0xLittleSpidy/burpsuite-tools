@@ -39,16 +39,29 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
     private final MontoyaApi api;
     private final Map<String, ParamPayloadStore> paramStores;
     private final SmugglingPayloadStore smugglingStore;
+    private final com.littlespidy.payloadinjector.model.FilePathStore_littlespidy linuxFilePathStore;
+    private final com.littlespidy.payloadinjector.model.FilePathStore_littlespidy windowsFilePathStore;
     private final InjectionSettings settings;
 
     public PayloadContextMenuProvider(MontoyaApi api,
                                       Map<String, ParamPayloadStore> paramStores,
                                       SmugglingPayloadStore smugglingStore,
+                                      com.littlespidy.payloadinjector.model.FilePathStore_littlespidy linuxFilePathStore,
+                                      com.littlespidy.payloadinjector.model.FilePathStore_littlespidy windowsFilePathStore,
                                       InjectionSettings settings) {
         this.api = api;
         this.paramStores = (paramStores != null) ? paramStores : Collections.emptyMap();
         this.smugglingStore = smugglingStore;
+        this.linuxFilePathStore = linuxFilePathStore;
+        this.windowsFilePathStore = windowsFilePathStore;
         this.settings = settings;
+    }
+
+    public PayloadContextMenuProvider(MontoyaApi api,
+                                      Map<String, ParamPayloadStore> paramStores,
+                                      SmugglingPayloadStore smugglingStore,
+                                      InjectionSettings settings) {
+        this(api, paramStores, smugglingStore, null, null, settings);
     }
 
     public PayloadContextMenuProvider(MontoyaApi api,
@@ -81,7 +94,7 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
 
         JMenu rootMenu = new JMenu("Payload Injector (littlespidy)");
 
-        // ── 1. Send to Repeater with Armed Payloads ──
+        // -- 1. Send to Repeater with Armed Payloads --
         JMenu sendToRepeaterMenu = new JMenu("Send to Repeater with Armed Payloads");
         for (Map.Entry<String, ParamPayloadStore> entry : paramStores.entrySet()) {
             String category = entry.getKey();
@@ -94,7 +107,7 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
         }
         rootMenu.add(sendToRepeaterMenu);
 
-        // ── 2. Editor In-Place Modifications (if in Message Editor) ──
+        // -- 2. Editor In-Place Modifications (if in Message Editor) --
         Optional<MessageEditorHttpRequestResponse> editorOpt = event.messageEditorRequestResponse();
         if (editorOpt.isPresent()) {
             MessageEditorHttpRequestResponse editor = editorOpt.get();
@@ -127,31 +140,83 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
                 rootMenu.add(inPlaceSelectionMenu);
             }
 
-            // ── 3. HTTP Request Smuggling Injection ──
-            JMenu smugglingMenu = new JMenu("HTTP Request Smuggling");
-            List<SmugglingPayloadEntry> smugglingEntries = smugglingStore.getEntries();
-            if (smugglingEntries.isEmpty()) {
-                JMenuItem noItem = new JMenuItem("No payloads loaded in http_request_smuggling_payloads.json");
-                noItem.setEnabled(false);
-                smugglingMenu.add(noItem);
-            } else {
-                for (SmugglingPayloadEntry smg : smugglingEntries) {
-                    JMenuItem item = new JMenuItem(smg.getName());
-                    if (!smg.getDescription().isEmpty()) {
-                        item.setToolTipText(smg.getDescription());
+            // -- 3. HTTP Request Smuggling Injection --
+            if (smugglingStore != null) {
+                JMenu smugglingMenu = new JMenu("HTTP Request Smuggling");
+                List<SmugglingPayloadEntry> smugglingEntries = smugglingStore.getEntries();
+                if (smugglingEntries.isEmpty()) {
+                    JMenuItem noItem = new JMenuItem("No payloads loaded in http_request_smuggling_payloads.json");
+                    noItem.setEnabled(false);
+                    smugglingMenu.add(noItem);
+                } else {
+                    for (SmugglingPayloadEntry smg : smugglingEntries) {
+                        JMenuItem item = new JMenuItem(smg.getName());
+                        if (!smg.getDescription().isEmpty()) {
+                            item.setToolTipText(smg.getDescription());
+                        }
+                        item.addActionListener(e -> {
+                            HttpRequest mutated = SmugglingInjectorEngine.applyPayload(editor.requestResponse().request(), smg);
+                            editor.setRequest(mutated);
+                        });
+                        smugglingMenu.add(item);
                     }
-                    item.addActionListener(e -> {
-                        HttpRequest mutated = SmugglingInjectorEngine.applyPayload(editor.requestResponse().request(), smg);
+                }
+                rootMenu.add(smugglingMenu);
+            }
+
+            // -- 4. Target File Path Substitution (<FILE_PATH>) --
+            if (linuxFilePathStore != null || windowsFilePathStore != null) {
+                JMenu filePathMenu = new JMenu("Replace Target File Path (<FILE_PATH>)");
+
+                if (linuxFilePathStore != null) {
+                    populateFilePathSubmenu(filePathMenu, "Linux File Paths", linuxFilePathStore, fp -> {
+                        HttpRequest mutated = ParamPayloadInjectorEngine.replaceFilePathPlaceholder(
+                                editor.requestResponse().request(), fp.getPath(), editor.selectionOffsets());
                         editor.setRequest(mutated);
                     });
-                    smugglingMenu.add(item);
                 }
+
+                if (windowsFilePathStore != null) {
+                    populateFilePathSubmenu(filePathMenu, "Windows File Paths", windowsFilePathStore, fp -> {
+                        HttpRequest mutated = ParamPayloadInjectorEngine.replaceFilePathPlaceholder(
+                                editor.requestResponse().request(), fp.getPath(), editor.selectionOffsets());
+                        editor.setRequest(mutated);
+                    });
+                }
+
+                rootMenu.add(filePathMenu);
             }
-            rootMenu.add(smugglingMenu);
         }
 
         menuItems.add(rootMenu);
         return menuItems;
+    }
+
+    private void populateFilePathSubmenu(JMenu parentMenu, String title, com.littlespidy.payloadinjector.model.FilePathStore_littlespidy store, java.util.function.Consumer<com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy> onSelect) {
+        List<com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy> entries = store.getEntries();
+        if (entries.isEmpty()) return;
+
+        JMenu menu = new JMenu(title);
+        Map<String, List<com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy>> grouped = new LinkedHashMap<>();
+        for (var e : entries) {
+            String cat = (e.getCategory() != null && !e.getCategory().isBlank()) ? e.getCategory() : "General";
+            grouped.computeIfAbsent(cat, k -> new ArrayList<>()).add(e);
+        }
+
+        for (Map.Entry<String, List<com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy>> group : grouped.entrySet()) {
+            JMenu catSubmenu = new JMenu(group.getKey());
+            for (var entry : group.getValue()) {
+                JMenuItem item = new JMenuItem(entry.getPath());
+                if (!entry.getDescription().isEmpty()) {
+                    item.setToolTipText(entry.getDescription());
+                }
+                item.addActionListener(e -> onSelect.accept(entry));
+                catSubmenu.add(item);
+            }
+            menu.add(catSubmenu);
+        }
+
+        parentMenu.add(menu);
     }
 
     private void populateCategorySubmenu(JMenu parentMenu, String categoryName, ParamPayloadStore store, java.util.function.Consumer<ParamPayloadEntry> onSelect) {

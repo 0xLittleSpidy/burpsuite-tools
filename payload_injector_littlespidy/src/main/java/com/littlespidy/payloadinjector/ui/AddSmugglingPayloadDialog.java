@@ -47,12 +47,12 @@ public class AddSmugglingPayloadDialog extends JDialog {
         GridBagConstraints lc = labelConstraints();
         GridBagConstraints fc = fieldConstraints();
 
-        // Row 0 — Name
+        // Row 0 - Name
         form.add(bold("Name *"), row(lc, 0));
         nameField = new JTextField(isEdit ? existing.getName() : "", 40);
         form.add(nameField, row(fc, 0));
 
-        // Row 1 — Error Label
+        // Row 1 - Error Label
         nameErrorLabel = new JLabel(" ");
         nameErrorLabel.setForeground(new Color(200, 0, 0));
         nameErrorLabel.setFont(nameErrorLabel.getFont().deriveFont(11f));
@@ -60,12 +60,12 @@ public class AddSmugglingPayloadDialog extends JDialog {
         ec.insets = new Insets(0, 4, 4, 4);
         form.add(nameErrorLabel, ec);
 
-        // Row 2 — Description
+        // Row 2 - Description
         form.add(bold("Description"), row(lc, 2));
         descField = new JTextField(isEdit ? existing.getDescription() : "", 40);
         form.add(descField, row(fc, 2));
 
-        // Row 3 — Headers
+        // Row 3 - Headers
         JPanel headersLabel = new JPanel(new BorderLayout());
         headersLabel.setOpaque(false);
         headersLabel.add(bold("Headers"), BorderLayout.NORTH);
@@ -81,7 +81,7 @@ public class AddSmugglingPayloadDialog extends JDialog {
         headersArea.setTabSize(4);
         form.add(scrollWrap(headersArea), row(fc, 3));
 
-        // Row 4 — Body
+        // Row 4 - Body
         JPanel bodyLabel = new JPanel(new BorderLayout());
         bodyLabel.setOpaque(false);
         bodyLabel.add(bold("Body"), BorderLayout.NORTH);

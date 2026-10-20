@@ -3,1305 +3,870 @@
     "id": "business-logic-owasp-0001",
     "name": "Price manipulation",
     "template": "price=-1",
-    "description": "Price manipulation probe from OWASP. Tests application handling of: price=-1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Price manipulation probe from OWASP. Tests application handling of: price=-1"
   },
   {
     "id": "business-logic-owasp-0002",
     "name": "Price manipulation #2",
     "template": "price=0",
-    "description": "Price manipulation probe from OWASP. Tests application handling of: price=0",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Price manipulation probe from OWASP. Tests application handling of: price=0"
   },
   {
     "id": "business-logic-owasp-0003",
     "name": "Price manipulation #3",
     "template": "price=0.01",
-    "description": "Price manipulation probe from OWASP. Tests application handling of: price=0.01",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Price manipulation probe from OWASP. Tests application handling of: price=0.01"
   },
   {
     "id": "business-logic-owasp-0004",
     "name": "Price manipulation #4",
     "template": "amount=-1000",
-    "description": "Price manipulation probe from OWASP. Tests application handling of: amount=-1000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Price manipulation probe from OWASP. Tests application handling of: amount=-1000"
   },
   {
     "id": "business-logic-owasp-0005",
     "name": "Price manipulation #5",
     "template": "quantity=-5",
-    "description": "Price manipulation probe from OWASP. Tests application handling of: quantity=-5",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Price manipulation probe from OWASP. Tests application handling of: quantity=-5"
   },
   {
     "id": "business-logic-owasp-0006",
     "name": "Discount abuse",
     "template": "discount=100",
-    "description": "Discount abuse probe from OWASP. Tests application handling of: discount=100",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Discount abuse probe from OWASP. Tests application handling of: discount=100"
   },
   {
     "id": "business-logic-owasp-0007",
     "name": "Discount abuse #2",
     "template": "discount=999",
-    "description": "Discount abuse probe from OWASP. Tests application handling of: discount=999",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Discount abuse probe from OWASP. Tests application handling of: discount=999"
   },
   {
     "id": "business-logic-owasp-0008",
     "name": "Discount abuse #3",
     "template": "coupon=UNLIMITED",
-    "description": "Discount abuse probe from OWASP. Tests application handling of: coupon=UNLIMITED",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Discount abuse probe from OWASP. Tests application handling of: coupon=UNLIMITED"
   },
   {
     "id": "business-logic-owasp-0009",
     "name": "Discount abuse #4",
     "template": "promo_code=TEST999",
-    "description": "Discount abuse probe from OWASP. Tests application handling of: promo_code=TEST999",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Discount abuse probe from OWASP. Tests application handling of: promo_code=TEST999"
   },
   {
     "id": "business-logic-owasp-0010",
     "name": "Send multiple simultaneous requests to:",
     "template": "POST /transfer (with same account balance)",
-    "description": "Send multiple simultaneous requests to: probe from OWASP. Tests application handling of: POST /transfer (with same acco...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Send multiple simultaneous requests to: probe from OWASP. Tests application handling of: POST /transfer (with same acco..."
   },
   {
     "id": "business-logic-owasp-0011",
     "name": "Send multiple simultaneous requests to: #2",
     "template": "POST /redeem (with same coupon code)",
-    "description": "Send multiple simultaneous requests to: probe from OWASP. Tests application handling of: POST /redeem (with same coupon...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Send multiple simultaneous requests to: probe from OWASP. Tests application handling of: POST /redeem (with same coupon..."
   },
   {
     "id": "business-logic-owasp-0012",
     "name": "Send multiple simultaneous requests to: #3",
     "template": "POST /purchase (with same limited item)",
-    "description": "Send multiple simultaneous requests to: probe from OWASP. Tests application handling of: POST /purchase (with same limi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Send multiple simultaneous requests to: probe from OWASP. Tests application handling of: POST /purchase (with same limi..."
   },
   {
     "id": "business-logic-owasp-0013",
     "name": "Workflow bypass attempts",
     "template": "step=1",
-    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: step=1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: step=1"
   },
   {
     "id": "business-logic-owasp-0014",
     "name": "Workflow bypass attempts #2",
     "template": "step=3",
-    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: step=3",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: step=3"
   },
   {
     "id": "business-logic-owasp-0015",
     "name": "Workflow bypass attempts #3",
     "template": "skip_step=true",
-    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: skip_step=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: skip_step=true"
   },
   {
     "id": "business-logic-owasp-0016",
     "name": "Workflow bypass attempts #4",
     "template": "status=completed",
-    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: status=completed",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: status=completed"
   },
   {
     "id": "business-logic-owasp-0017",
     "name": "Workflow bypass attempts #5",
     "template": "payment_status=paid",
-    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: payment_status=paid",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Workflow bypass attempts probe from OWASP. Tests application handling of: payment_status=paid"
   },
   {
     "id": "business-logic-owasp-0018",
     "name": "Account enumeration",
     "template": "username=admin",
-    "description": "Account enumeration probe from OWASP. Tests application handling of: username=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Account enumeration probe from OWASP. Tests application handling of: username=admin"
   },
   {
     "id": "business-logic-owasp-0019",
     "name": "Account enumeration #2",
     "template": "username=administrator",
-    "description": "Account enumeration probe from OWASP. Tests application handling of: username=administrator",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Account enumeration probe from OWASP. Tests application handling of: username=administrator"
   },
   {
     "id": "business-logic-owasp-0020",
     "name": "Account enumeration #3",
     "template": "username=test",
-    "description": "Account enumeration probe from OWASP. Tests application handling of: username=test",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Account enumeration probe from OWASP. Tests application handling of: username=test"
   },
   {
     "id": "business-logic-owasp-0021",
     "name": "Account enumeration #4",
     "template": "email=admin@example.com",
-    "description": "Account enumeration probe from OWASP. Tests application handling of: email=admin@example.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Account enumeration probe from OWASP. Tests application handling of: email=admin@example.com"
   },
   {
     "id": "business-logic-owasp-0022",
     "name": "Account enumeration #5",
     "template": "reset_token=00000000-0000-0000-0000-000000000000",
-    "description": "Account enumeration probe from OWASP. Tests application handling of: reset_token=00000000-0000-0000...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Account enumeration probe from OWASP. Tests application handling of: reset_token=00000000-0000-0000..."
   },
   {
     "id": "business-logic-owasp-0023",
     "name": "Authentication bypass patterns",
     "template": "2fa_enabled=false",
-    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: 2fa_enabled=false",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: 2fa_enabled=false"
   },
   {
     "id": "business-logic-owasp-0024",
     "name": "Authentication bypass patterns #2",
     "template": "verified=true",
-    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: verified=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: verified=true"
   },
   {
     "id": "business-logic-owasp-0025",
     "name": "Authentication bypass patterns #3",
     "template": "is_admin=true",
-    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: is_admin=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: is_admin=true"
   },
   {
     "id": "business-logic-owasp-0026",
     "name": "Authentication bypass patterns #4",
     "template": "role=admin",
-    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: role=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: role=admin"
   },
   {
     "id": "business-logic-owasp-0027",
     "name": "Authentication bypass patterns #5",
     "template": "skip_verification=true",
-    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: skip_verification=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Authentication bypass patterns probe from OWASP. Tests application handling of: skip_verification=true"
   },
   {
     "id": "business-logic-pbox-0001",
     "name": "Business Logic Payloads #1",
     "template": "0",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0"
   },
   {
     "id": "business-logic-pbox-0002",
     "name": "Business Logic Payloads #2",
     "template": "1",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 1",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 1"
   },
   {
     "id": "business-logic-pbox-0003",
     "name": "Business Logic Payloads #3",
     "template": "-1",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -1",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -1"
   },
   {
     "id": "business-logic-pbox-0004",
     "name": "Business Logic Payloads #4",
     "template": "0.0",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0.0",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0.0"
   },
   {
     "id": "business-logic-pbox-0005",
     "name": "Business Logic Payloads #5",
     "template": "0.00",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0.00",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0.00"
   },
   {
     "id": "business-logic-pbox-0006",
     "name": "Business Logic Payloads #6",
     "template": "-0",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -0",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -0"
   },
   {
     "id": "business-logic-pbox-0007",
     "name": "Business Logic Payloads #7",
     "template": "+0",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: +0",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: +0"
   },
   {
     "id": "business-logic-pbox-0008",
     "name": "Business Logic Payloads #8",
     "template": "2147483647",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 2147483647",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 2147483647"
   },
   {
     "id": "business-logic-pbox-0009",
     "name": "Business Logic Payloads #9",
     "template": "2147483648",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 2147483648",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 2147483648"
   },
   {
     "id": "business-logic-pbox-0010",
     "name": "Business Logic Payloads #10",
     "template": "-2147483648",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -2147483648",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -2147483648"
   },
   {
     "id": "business-logic-pbox-0011",
     "name": "Business Logic Payloads #11",
     "template": "-2147483649",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -2147483649",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -2147483649"
   },
   {
     "id": "business-logic-pbox-0012",
     "name": "Business Logic Payloads #12",
     "template": "9223372036854775807",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 9223372036854775807",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 9223372036854775807"
   },
   {
     "id": "business-logic-pbox-0013",
     "name": "Business Logic Payloads #13",
     "template": "9223372036854775808",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 9223372036854775808",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 9223372036854775808"
   },
   {
     "id": "business-logic-pbox-0014",
     "name": "Business Logic Payloads #14",
     "template": "-9223372036854775808",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -9223372036854775808",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -9223372036854775808"
   },
   {
     "id": "business-logic-pbox-0015",
     "name": "Business Logic Payloads #15",
     "template": "-9223372036854775809",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -9223372036854775809",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -9223372036854775809"
   },
   {
     "id": "business-logic-pbox-0016",
     "name": "Business Logic Payloads #16",
     "template": "00000000",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 00000000",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 00000000"
   },
   {
     "id": "business-logic-pbox-0017",
     "name": "Business Logic Payloads #17",
     "template": "99999999999999999999999999999999999999999999999",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 99999999999999999999999999999999999999999999999",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 99999999999999999999999999999999999999999999999"
   },
   {
     "id": "business-logic-pbox-0018",
     "name": "Business Logic Payloads #18",
     "template": "1e100",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 1e100",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 1e100"
   },
   {
     "id": "business-logic-pbox-0019",
     "name": "Business Logic Payloads #19",
     "template": "1.0#INF",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 1.0#INF",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 1.0#INF"
   },
   {
     "id": "business-logic-pbox-0020",
     "name": "Business Logic Payloads #20",
     "template": "-1.0#INF",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -1.0#INF",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: -1.0#INF"
   },
   {
     "id": "business-logic-pbox-0021",
     "name": "Business Logic Payloads #21",
     "template": "NaN",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: NaN",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: NaN"
   },
   {
     "id": "business-logic-pbox-0022",
     "name": "Business Logic Payloads #22",
     "template": "true",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: true",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: true"
   },
   {
     "id": "business-logic-pbox-0023",
     "name": "Business Logic Payloads #23",
     "template": "false",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: false",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: false"
   },
   {
     "id": "business-logic-pbox-0024",
     "name": "Business Logic Payloads #24",
     "template": "True",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: True",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: True"
   },
   {
     "id": "business-logic-pbox-0025",
     "name": "Business Logic Payloads #25",
     "template": "False",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: False",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: False"
   },
   {
     "id": "business-logic-pbox-0026",
     "name": "Business Logic Payloads #26",
     "template": "TRUE",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: TRUE",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: TRUE"
   },
   {
     "id": "business-logic-pbox-0027",
     "name": "Business Logic Payloads #27",
     "template": "FALSE",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: FALSE",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: FALSE"
   },
   {
     "id": "business-logic-pbox-0028",
     "name": "Business Logic Payloads #28",
     "template": "null",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: null",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: null"
   },
   {
     "id": "business-logic-pbox-0029",
     "name": "Business Logic Payloads #29",
     "template": "NULL",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: NULL",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: NULL"
   },
   {
     "id": "business-logic-pbox-0030",
     "name": "Business Logic Payloads #30",
     "template": "nil",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: nil",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: nil"
   },
   {
     "id": "business-logic-pbox-0031",
     "name": "Business Logic Payloads #31",
     "template": "undefined",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: undefined",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: undefined"
   },
   {
     "id": "business-logic-pbox-0032",
     "name": "Business Logic Payloads #32",
     "template": "[]",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: []",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: []"
   },
   {
     "id": "business-logic-pbox-0033",
     "name": "Business Logic Payloads #33",
     "template": "{}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {}",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {}"
   },
   {
     "id": "business-logic-pbox-0034",
     "name": "Business Logic Payloads #34",
     "template": "%00",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %00",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %00"
   },
   {
     "id": "business-logic-pbox-0035",
     "name": "Business Logic Payloads #35",
     "template": "%20",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %20",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %20"
   },
   {
     "id": "business-logic-pbox-0036",
     "name": "Business Logic Payloads #36",
     "template": "%0d%0a",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %0d%0a",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %0d%0a"
   },
   {
     "id": "business-logic-pbox-0037",
     "name": "Business Logic Payloads #37",
     "template": "/",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: /",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: /"
   },
   {
     "id": "business-logic-pbox-0038",
     "name": "Business Logic Payloads #38",
     "template": "..",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ..",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: .."
   },
   {
     "id": "business-logic-pbox-0039",
     "name": "Business Logic Payloads #39",
     "template": "...",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ...",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ..."
   },
   {
     "id": "business-logic-pbox-0040",
     "name": "Business Logic Payloads #40",
     "template": "....",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ....",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ...."
   },
   {
     "id": "business-logic-pbox-0041",
     "name": "Business Logic Payloads #41",
     "template": "admin",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin"
   },
   {
     "id": "business-logic-pbox-0042",
     "name": "Business Logic Payloads #42",
     "template": "administrator",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: administrator",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: administrator"
   },
   {
     "id": "business-logic-pbox-0043",
     "name": "Business Logic Payloads #43",
     "template": "root",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: root",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: root"
   },
   {
     "id": "business-logic-pbox-0044",
     "name": "Business Logic Payloads #44",
     "template": "system",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: system",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: system"
   },
   {
     "id": "business-logic-pbox-0045",
     "name": "Business Logic Payloads #45",
     "template": "guest",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: guest",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: guest"
   },
   {
     "id": "business-logic-pbox-0046",
     "name": "Business Logic Payloads #46",
     "template": "test",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: test",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: test"
   },
   {
     "id": "business-logic-pbox-0047",
     "name": "Business Logic Payloads #47",
     "template": "user",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: user",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: user"
   },
   {
     "id": "business-logic-pbox-0048",
     "name": "Business Logic Payloads #48",
     "template": "%00admin",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %00admin",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %00admin"
   },
   {
     "id": "business-logic-pbox-0049",
     "name": "Business Logic Payloads #49",
     "template": "admin%00",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin%00",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin%00"
   },
   {
     "id": "business-logic-pbox-0050",
     "name": "Business Logic Payloads #50",
     "template": "admin'",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin'",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin'"
   },
   {
     "id": "business-logic-pbox-0051",
     "name": "Business Logic Payloads #51",
     "template": "'admin",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 'admin",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 'admin"
   },
   {
     "id": "business-logic-pbox-0052",
     "name": "Business Logic Payloads #52",
     "template": "\"admin\"",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \"admin\"",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \"admin\""
   },
   {
     "id": "business-logic-pbox-0053",
     "name": "Business Logic Payloads #53",
     "template": "admin\"",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin\"",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin\""
   },
   {
     "id": "business-logic-pbox-0054",
     "name": "Business Logic Payloads #54",
     "template": "admin' --",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin' --",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin' --"
   },
   {
     "id": "business-logic-pbox-0055",
     "name": "Business Logic Payloads #55",
     "template": "' or 1=1--",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ' or 1=1--",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ' or 1=1--"
   },
   {
     "id": "business-logic-pbox-0056",
     "name": "Business Logic Payloads #56",
     "template": "\" or 1=1--",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \" or 1=1--",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \" or 1=1--"
   },
   {
     "id": "business-logic-pbox-0057",
     "name": "Business Logic Payloads #57",
     "template": "0 or 1=1",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0 or 1=1",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: 0 or 1=1"
   },
   {
     "id": "business-logic-pbox-0058",
     "name": "Business Logic Payloads #58",
     "template": "test@test.com",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: test@test.com",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: test@test.com"
   },
   {
     "id": "business-logic-pbox-0059",
     "name": "Business Logic Payloads #59",
     "template": "admin@example.com",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin@example.com",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin@example.com"
   },
   {
     "id": "business-logic-pbox-0060",
     "name": "Business Logic Payloads #60",
     "template": "admin@generated.com",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin@generated.com",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: admin@generated.com"
   },
   {
     "id": "business-logic-pbox-0061",
     "name": "Business Logic Payloads #61",
     "template": "<script>alert(1)</script>",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: <script>alert(1)</script>",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: <script>alert(1)</script>"
   },
   {
     "id": "business-logic-pbox-0062",
     "name": "Business Logic Payloads #62",
     "template": "{{7*7}}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {{7*7}}",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {{7*7}}"
   },
   {
     "id": "business-logic-pbox-0063",
     "name": "Business Logic Payloads #63",
     "template": "${7*7}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ${7*7}",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ${7*7}"
   },
   {
     "id": "business-logic-pbox-0064",
     "name": "Business Logic Payloads #64",
     "template": "<%= 7*7 %>",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: <%= 7*7 %>",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: <%= 7*7 %>"
   },
   {
     "id": "business-logic-pbox-0065",
     "name": "Business Logic Payloads #65",
     "template": "item=1&item=2",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: item=1&item=2",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: item=1&item=2"
   },
   {
     "id": "business-logic-pbox-0066",
     "name": "Business Logic Payloads #66",
     "template": "quantity=1&quantity=100",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: quantity=1&quantity=100",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: quantity=1&quantity=100"
   },
   {
     "id": "business-logic-pbox-0067",
     "name": "Business Logic Payloads #67",
     "template": "price=10&price=0",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: price=10&price=0",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: price=10&price=0"
   },
   {
     "id": "business-logic-pbox-0068",
     "name": "Business Logic Payloads #68",
     "template": "discount=0",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: discount=0",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: discount=0"
   },
   {
     "id": "business-logic-pbox-0069",
     "name": "Business Logic Payloads #69",
     "template": "coupon=FREE",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: coupon=FREE",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: coupon=FREE"
   },
   {
     "id": "business-logic-pbox-0070",
     "name": "Business Logic Payloads #70",
     "template": "coupon=TEST",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: coupon=TEST",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: coupon=TEST"
   },
   {
     "id": "business-logic-pbox-0071",
     "name": "Business Logic Payloads #71",
     "template": "transfer=0",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: transfer=0",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: transfer=0"
   },
   {
     "id": "business-logic-pbox-0072",
     "name": "Business Logic Payloads #72",
     "template": "transfer=-100",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: transfer=-100",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: transfer=-100"
   },
   {
     "id": "business-logic-pbox-0073",
     "name": "Business Logic Payloads #73",
     "template": "amount=0.0000001",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: amount=0.0000001",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: amount=0.0000001"
   },
   {
     "id": "business-logic-pbox-0074",
     "name": "Business Logic Payloads #74",
     "template": "amount=0,1",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: amount=0,1",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: amount=0,1"
   },
   {
     "id": "business-logic-pbox-0075",
     "name": "Business Logic Payloads #75",
     "template": "amount=1,000,000",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: amount=1,000,000",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: amount=1,000,000"
   },
   {
     "id": "business-logic-pbox-0076",
     "name": "Business Logic Payloads #76",
     "template": "uuid=00000000-0000-0000-0000-000000000000",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: uuid=00000000-0000-0000-0000-000000000000",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: uuid=00000000-0000-0000-0000-000000000000"
   },
   {
     "id": "business-logic-pbox-0077",
     "name": "Business Logic Payloads #77",
     "template": "{\"id\":1}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\":1}",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\":1}"
   },
   {
     "id": "business-logic-pbox-0078",
     "name": "Business Logic Payloads #78",
     "template": "{\"id\": \"1\"}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\": \"1\"}",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\": \"1\"}"
   },
   {
     "id": "business-logic-pbox-0079",
     "name": "Business Logic Payloads #79",
     "template": "{\"id\": [1]}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\": [1]}",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\": [1]}"
   },
   {
     "id": "business-logic-pbox-0080",
     "name": "Business Logic Payloads #80",
     "template": "{\"id\": {\"id\": 1}}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\": {\"id\": 1}}",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {\"id\": {\"id\": 1}}"
   },
   {
     "id": "business-logic-pbox-0081",
     "name": "Business Logic Payloads #81",
     "template": "A",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: A",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: A"
   },
   {
     "id": "business-logic-pbox-0082",
     "name": "Business Logic Payloads #82",
     "template": "AA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AA"
   },
   {
     "id": "business-logic-pbox-0083",
     "name": "Business Logic Payloads #83",
     "template": "AAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAA"
   },
   {
     "id": "business-logic-pbox-0084",
     "name": "Business Logic Payloads #84",
     "template": "AAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAA"
   },
   {
     "id": "business-logic-pbox-0085",
     "name": "Business Logic Payloads #85",
     "template": "AAAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAA"
   },
   {
     "id": "business-logic-pbox-0086",
     "name": "Business Logic Payloads #86",
     "template": "AAAAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAA"
   },
   {
     "id": "business-logic-pbox-0087",
     "name": "Business Logic Payloads #87",
     "template": "AAAAAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAA"
   },
   {
     "id": "business-logic-pbox-0088",
     "name": "Business Logic Payloads #88",
     "template": "AAAAAAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAA"
   },
   {
     "id": "business-logic-pbox-0089",
     "name": "Business Logic Payloads #89",
     "template": "AAAAAAAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAAA"
   },
   {
     "id": "business-logic-pbox-0090",
     "name": "Business Logic Payloads #90",
     "template": "AAAAAAAAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAAAA",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAAAA"
   },
   {
     "id": "business-logic-pbox-0091",
     "name": "Business Logic Payloads #91",
     "template": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..."
   },
   {
     "id": "business-logic-pbox-0092",
     "name": "Business Logic Payloads #92",
     "template": "%ff",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %ff",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %ff"
   },
   {
     "id": "business-logic-pbox-0093",
     "name": "Business Logic Payloads #93",
     "template": "%25",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %25",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: %25"
   },
   {
     "id": "business-logic-pbox-0094",
     "name": "Business Logic Payloads #94",
     "template": "&",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: &",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: &"
   },
   {
     "id": "business-logic-pbox-0095",
     "name": "Business Logic Payloads #95",
     "template": "?",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ?",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ?"
   },
   {
     "id": "business-logic-pbox-0096",
     "name": "Business Logic Payloads #96",
     "template": ";",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ;",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ;"
   },
   {
     "id": "business-logic-pbox-0097",
     "name": "Business Logic Payloads #97",
     "template": ":",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: :",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: :"
   },
   {
     "id": "business-logic-pbox-0098",
     "name": "Business Logic Payloads #98",
     "template": ",",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ,",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ,"
   },
   {
     "id": "business-logic-pbox-0099",
     "name": "Business Logic Payloads #99",
     "template": "|",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: |",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: |"
   },
   {
     "id": "business-logic-pbox-0100",
     "name": "Business Logic Payloads #100",
     "template": "^",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ^",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ^"
   },
   {
     "id": "business-logic-pbox-0101",
     "name": "Business Logic Payloads #101",
     "template": "$",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: $",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: $"
   },
   {
     "id": "business-logic-pbox-0102",
     "name": "Business Logic Payloads #102",
     "template": "+",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: +",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: +"
   },
   {
     "id": "business-logic-pbox-0103",
     "name": "Business Logic Payloads #103",
     "template": "=",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: =",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ="
   },
   {
     "id": "business-logic-pbox-0104",
     "name": "Business Logic Payloads #104",
     "template": "<",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: <",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: <"
   },
   {
     "id": "business-logic-pbox-0105",
     "name": "Business Logic Payloads #105",
     "template": ">",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: >",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: >"
   },
   {
     "id": "business-logic-pbox-0106",
     "name": "Business Logic Payloads #106",
     "template": "'",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: '",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: '"
   },
   {
     "id": "business-logic-pbox-0107",
     "name": "Business Logic Payloads #107",
     "template": "\"",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \"",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \""
   },
   {
     "id": "business-logic-pbox-0108",
     "name": "Business Logic Payloads #108",
     "template": "`",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: `",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: `"
   },
   {
     "id": "business-logic-pbox-0109",
     "name": "Business Logic Payloads #109",
     "template": "~",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ~",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ~"
   },
   {
     "id": "business-logic-pbox-0110",
     "name": "Business Logic Payloads #110",
     "template": "!",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: !",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: !"
   },
   {
     "id": "business-logic-pbox-0111",
     "name": "Business Logic Payloads #111",
     "template": "@",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: @",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: @"
   },
   {
     "id": "business-logic-pbox-0112",
     "name": "Business Logic Payloads #112",
     "template": "\\",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \\",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: \\"
   },
   {
     "id": "business-logic-pbox-0113",
     "name": "Business Logic Payloads #113",
     "template": "(",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: (",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ("
   },
   {
     "id": "business-logic-pbox-0114",
     "name": "Business Logic Payloads #114",
     "template": ")",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: )",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: )"
   },
   {
     "id": "business-logic-pbox-0115",
     "name": "Business Logic Payloads #115",
     "template": "[",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: [",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ["
   },
   {
     "id": "business-logic-pbox-0116",
     "name": "Business Logic Payloads #116",
     "template": "]",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ]",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: ]"
   },
   {
     "id": "business-logic-pbox-0117",
     "name": "Business Logic Payloads #117",
     "template": "{",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: {"
   },
   {
     "id": "business-logic-pbox-0118",
     "name": "Business Logic Payloads #118",
     "template": "}",
-    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: }",
-    "enabled": true,
-    "sourceType": "PayloadBox",
-    "sourceFile": "business-logic-payloads.txt"
+    "description": "Business Logic probe from PayloadBox (business-logic-payloads.txt). Tests application handling of: }"
   }
 ]

@@ -1,2675 +1,1352 @@
 [
   {
     "id": "authentication-bypass-owasp-0001",
-    "name": "Authentication Bypass",
-    "template": "X-Forwarded-Server: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Server: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0002",
-    "name": "Authentication Bypass #2",
-    "template": "Referer: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Referer: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0003",
-    "name": "Authentication Bypass #3",
-    "template": "X-Http-Host-Override: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Http-Host-Override: 127.0.0....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0004",
-    "name": "Authentication Bypass #4",
-    "template": "X-Forwarded-Port: 8443",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 8443",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0005",
-    "name": "Authentication Bypass #5",
-    "template": "Proxy-Url: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Proxy-Url: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0006",
-    "name": "Authentication Bypass #6",
-    "template": "X-Forwarded-By: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-By: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0007",
-    "name": "Authentication Bypass #7",
-    "template": "X-Originating-IP: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Originating-IP: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0008",
-    "name": "Authentication Bypass #8",
-    "template": "X-Forwarded-Scheme: https",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Scheme: https",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0009",
-    "name": "Authentication Bypass #9",
-    "template": "Client-IP: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Client-IP: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0010",
-    "name": "Authentication Bypass #10",
-    "template": "X-Real-Ip: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Real-Ip: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0011",
-    "name": "Authentication Bypass #11",
-    "template": "X-Forward-For: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forward-For: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0012",
-    "name": "Authentication Bypass #12",
-    "template": "X-Rewrite-Url: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Rewrite-Url: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0013",
-    "name": "Authentication Bypass #13",
-    "template": "Http-Url: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Http-Url: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0014",
-    "name": "Authentication Bypass #14",
-    "template": "X-Forwarded-Port: 443",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 443",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0015",
-    "name": "Authentication Bypass #15",
-    "template": "X-Client-IP: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Client-IP: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0016",
-    "name": "Authentication Bypass #16",
-    "template": "Base-Url: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Base-Url: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0017",
-    "name": "Authentication Bypass #17",
-    "template": "X-Original-Url: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Original-Url: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0018",
-    "name": "Authentication Bypass #18",
-    "template": "X-Forwarder-For: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarder-For: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0019",
-    "name": "Authentication Bypass #19",
-    "template": "X-Forwarded-Port: 8080",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 8080",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0020",
-    "name": "Authentication Bypass #20",
-    "template": "X-Forwarded: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0021",
-    "name": "Authentication Bypass #21",
-    "template": "X-True-IP: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-True-IP: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0022",
-    "name": "Authentication Bypass #22",
-    "template": "X-Original-Remote-Addr: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Original-Remote-Addr: 127.0....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0023",
-    "name": "Authentication Bypass #23",
-    "template": "Real-Ip: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Real-Ip: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0024",
-    "name": "Authentication Bypass #24",
-    "template": "Uri: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Uri: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0025",
-    "name": "Authentication Bypass #25",
-    "template": "X-Forwarded-Host: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Host: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0026",
-    "name": "Authentication Bypass #26",
-    "template": "X-Remote-IP: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Remote-IP: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0027",
-    "name": "Authentication Bypass #27",
-    "template": "Redirect: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Redirect: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0028",
-    "name": "Authentication Bypass #28",
-    "template": "X-Custom-IP-Authorization: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Custom-IP-Authorization: 127...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0029",
-    "name": "Authentication Bypass #29",
-    "template": "Referrer: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Referrer: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0030",
-    "name": "Authentication Bypass #30",
-    "template": "Proxy-Host: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Proxy-Host: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0031",
-    "name": "Authentication Bypass #31",
-    "template": "X-Forwarded-Port: 80",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Port: 80",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0032",
-    "name": "Authentication Bypass #32",
-    "template": "X-Forwarded-Scheme: http",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-Scheme: http",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0033",
-    "name": "Authentication Bypass #33",
-    "template": "Url: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Url: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0034",
-    "name": "Authentication Bypass #34",
-    "template": "X-Http-Destinationurl: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Http-Destinationurl: 127.0.0...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0035",
-    "name": "Authentication Bypass #35",
-    "template": "Request-Uri: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Request-Uri: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0036",
-    "name": "Authentication Bypass #36",
-    "template": "Refferer: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: Refferer: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0037",
-    "name": "Authentication Bypass #37",
-    "template": "X-Proxy-Url: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Proxy-Url: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0038",
-    "name": "Authentication Bypass #38",
-    "template": "X-Host: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Host: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0039",
-    "name": "Authentication Bypass #39",
-    "template": "X-Forwarded-For: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-For: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0040",
-    "name": "Authentication Bypass #40",
-    "template": "X-Forwarded-For-Original: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Forwarded-For-Original: 127....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0041",
-    "name": "Authentication Bypass #41",
-    "template": "X-Remote-Addr: 127.0.0.1",
-    "description": "Authentication Bypass probe from OWASP. Tests application handling of: X-Remote-Addr: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "403_bypass_headers.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0001",
     "name": "SQL injection authentication bypass",
     "template": "admin' --",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin' --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin' --"
   },
   {
     "id": "authentication-bypass-owasp-0002",
     "name": "SQL injection authentication bypass #2",
     "template": "admin' #",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin' #",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin' #"
   },
   {
     "id": "authentication-bypass-owasp-0003",
     "name": "SQL injection authentication bypass #3",
     "template": "admin'/*",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin'/*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin'/*"
   },
   {
     "id": "authentication-bypass-owasp-0004",
     "name": "SQL injection authentication bypass #4",
     "template": "' OR '1'='1' --",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ' OR '1'='1' --",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ' OR '1'='1' --"
   },
   {
     "id": "authentication-bypass-owasp-0005",
     "name": "SQL injection authentication bypass #5",
     "template": "' OR 1=1--",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ' OR 1=1--",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ' OR 1=1--"
   },
   {
     "id": "authentication-bypass-owasp-0006",
     "name": "SQL injection authentication bypass #6",
     "template": "admin' OR '1'='1",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin' OR '1'='1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin' OR '1'='1"
   },
   {
     "id": "authentication-bypass-owasp-0007",
     "name": "SQL injection authentication bypass #7",
     "template": "') OR ('1'='1",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ') OR ('1'='1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ') OR ('1'='1"
   },
   {
     "id": "authentication-bypass-owasp-0008",
     "name": "SQL injection authentication bypass #8",
     "template": "' OR 'x'='x",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ' OR 'x'='x",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: ' OR 'x'='x"
   },
   {
     "id": "authentication-bypass-owasp-0009",
     "name": "SQL injection authentication bypass #9",
     "template": "admin') OR ('1'='1'--",
-    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin') OR ('1'='1'--",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SQL injection authentication bypass probe from OWASP. Tests application handling of: admin') OR ('1'='1'--"
   },
   {
     "id": "authentication-bypass-owasp-0010",
     "name": "NoSQL authentication bypass",
     "template": "{\"username\": {\"$gt\": \"\"}, \"password\": {\"$gt\": \"\"}}",
-    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": {\"$gt\": \"\"}, \"pas...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": {\"$gt\": \"\"}, \"pas..."
   },
   {
     "id": "authentication-bypass-owasp-0011",
     "name": "NoSQL authentication bypass #2",
     "template": "{\"username\": {\"$ne\": null}, \"password\": {\"$ne\": null}}",
-    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": {\"$ne\": null}, \"p...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": {\"$ne\": null}, \"p..."
   },
   {
     "id": "authentication-bypass-owasp-0012",
     "name": "NoSQL authentication bypass #3",
     "template": "{\"username\": \"admin\", \"password\": {\"$gt\": \"\"}}",
-    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": \"admin\", \"passwor..."
   },
   {
     "id": "authentication-bypass-owasp-0013",
     "name": "NoSQL authentication bypass #4",
     "template": "{\"username\": {\"$in\": [\"admin\", \"administrator\"]}, \"password\": {\"$gt\": \"\"}}",
-    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": {\"$in\": [\"admin\",...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "NoSQL authentication bypass probe from OWASP. Tests application handling of: {\"username\": {\"$in\": [\"admin\",..."
   },
   {
     "id": "authentication-bypass-owasp-0014",
     "name": "JSON payload manipulation",
     "template": "{\"username\":\"admin\",\"password\":\"admin\",\"role\":\"admin\"}",
-    "description": "JSON payload manipulation probe from OWASP. Tests application handling of: {\"username\":\"admin\",\"password\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "JSON payload manipulation probe from OWASP. Tests application handling of: {\"username\":\"admin\",\"password\"..."
   },
   {
     "id": "authentication-bypass-owasp-0015",
     "name": "JSON payload manipulation #2",
     "template": "{\"username\":\"admin\",\"password\":\"wrong\",\"isAdmin\":true}",
-    "description": "JSON payload manipulation probe from OWASP. Tests application handling of: {\"username\":\"admin\",\"password\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "JSON payload manipulation probe from OWASP. Tests application handling of: {\"username\":\"admin\",\"password\"..."
   },
   {
     "id": "authentication-bypass-owasp-0016",
     "name": "JSON payload manipulation #3",
     "template": "{\"username\":\"admin\",\"is_authenticated\":true}",
-    "description": "JSON payload manipulation probe from OWASP. Tests application handling of: {\"username\":\"admin\",\"is_authen...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "JSON payload manipulation probe from OWASP. Tests application handling of: {\"username\":\"admin\",\"is_authen..."
   },
   {
     "id": "authentication-bypass-owasp-0017",
     "name": "Session manipulation",
     "template": "PHPSESSID=admin",
-    "description": "Session manipulation probe from OWASP. Tests application handling of: PHPSESSID=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session manipulation probe from OWASP. Tests application handling of: PHPSESSID=admin"
   },
   {
     "id": "authentication-bypass-owasp-0018",
     "name": "Session manipulation #2",
     "template": "session_id=00000000-0000-0000-0000-000000000001",
-    "description": "Session manipulation probe from OWASP. Tests application handling of: session_id=00000000-0000-0000-...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session manipulation probe from OWASP. Tests application handling of: session_id=00000000-0000-0000-..."
   },
   {
     "id": "authentication-bypass-owasp-0019",
     "name": "Session manipulation #3",
     "template": "token=admin_token",
-    "description": "Session manipulation probe from OWASP. Tests application handling of: token=admin_token",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session manipulation probe from OWASP. Tests application handling of: token=admin_token"
   },
   {
     "id": "authentication-bypass-owasp-0020",
     "name": "Session manipulation #4",
     "template": "auth=true",
-    "description": "Session manipulation probe from OWASP. Tests application handling of: auth=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session manipulation probe from OWASP. Tests application handling of: auth=true"
   },
   {
     "id": "authentication-bypass-owasp-0021",
     "name": "Parameter pollution",
     "template": "username=attacker&username=admin",
-    "description": "Parameter pollution probe from OWASP. Tests application handling of: username=attacker&username=adm...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Parameter pollution probe from OWASP. Tests application handling of: username=attacker&username=adm..."
   },
   {
     "id": "authentication-bypass-owasp-0022",
     "name": "Parameter pollution #2",
     "template": "user=normal&user=admin",
-    "description": "Parameter pollution probe from OWASP. Tests application handling of: user=normal&user=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Parameter pollution probe from OWASP. Tests application handling of: user=normal&user=admin"
   },
   {
     "id": "authentication-bypass-owasp-0023",
     "name": "Cookie manipulation",
     "template": "admin=true",
-    "description": "Cookie manipulation probe from OWASP. Tests application handling of: admin=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Cookie manipulation probe from OWASP. Tests application handling of: admin=true"
   },
   {
     "id": "authentication-bypass-owasp-0024",
     "name": "Cookie manipulation #2",
     "template": "isAdmin=1",
-    "description": "Cookie manipulation probe from OWASP. Tests application handling of: isAdmin=1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Cookie manipulation probe from OWASP. Tests application handling of: isAdmin=1"
   },
   {
     "id": "authentication-bypass-owasp-0025",
     "name": "Cookie manipulation #3",
     "template": "role=admin",
-    "description": "Cookie manipulation probe from OWASP. Tests application handling of: role=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Cookie manipulation probe from OWASP. Tests application handling of: role=admin"
   },
   {
     "id": "authentication-bypass-owasp-0026",
     "name": "Cookie manipulation #4",
     "template": "authenticated=true",
-    "description": "Cookie manipulation probe from OWASP. Tests application handling of: authenticated=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Cookie manipulation probe from OWASP. Tests application handling of: authenticated=true"
   },
   {
     "id": "authentication-bypass-owasp-0027",
     "name": "Cookie manipulation #5",
     "template": "user_level=admin",
-    "description": "Cookie manipulation probe from OWASP. Tests application handling of: user_level=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0029",
-    "name": "Header injection #2",
-    "template": "X-Original-URL: /admin",
-    "description": "Header injection probe from OWASP. Tests application handling of: X-Original-URL: /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0030",
-    "name": "Header injection #3",
-    "template": "X-Rewrite-URL: /admin",
-    "description": "Header injection probe from OWASP. Tests application handling of: X-Rewrite-URL: /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0035",
-    "name": "Header injection #8",
-    "template": "X-Real-IP: 127.0.0.1",
-    "description": "Header injection probe from OWASP. Tests application handling of: X-Real-IP: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0036",
-    "name": "Header injection #9",
-    "template": "X-Host: localhost",
-    "description": "Header injection probe from OWASP. Tests application handling of: X-Host: localhost",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0037",
-    "name": "Header injection #10",
-    "template": "X-Forwarded-Host: localhost",
-    "description": "Header injection probe from OWASP. Tests application handling of: X-Forwarded-Host: localhost",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Cookie manipulation probe from OWASP. Tests application handling of: user_level=admin"
   },
   {
     "id": "authentication-bypass-owasp-0038",
     "name": "URL path manipulation",
     "template": "/admin/..;/",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin/..;/",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin/..;/"
   },
   {
     "id": "authentication-bypass-owasp-0039",
     "name": "URL path manipulation #2",
     "template": "/admin/%2e%2e%3b/",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin/%2e%2e%3b/",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin/%2e%2e%3b/"
   },
   {
     "id": "authentication-bypass-owasp-0040",
     "name": "URL path manipulation #3",
     "template": "/./admin/./",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /./admin/./",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /./admin/./"
   },
   {
     "id": "authentication-bypass-owasp-0041",
     "name": "URL path manipulation #4",
     "template": "/admin;/",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin;/",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin;/"
   },
   {
     "id": "authentication-bypass-owasp-0042",
     "name": "URL path manipulation #5",
     "template": "/admin..",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin..",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin.."
   },
   {
     "id": "authentication-bypass-owasp-0043",
     "name": "URL path manipulation #6",
     "template": "//admin//",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: //admin//",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: //admin//"
   },
   {
     "id": "authentication-bypass-owasp-0044",
     "name": "URL path manipulation #7",
     "template": "/./admin/./panel",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /./admin/./panel",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /./admin/./panel"
   },
   {
     "id": "authentication-bypass-owasp-0045",
     "name": "URL path manipulation #8",
     "template": "/%2e/admin",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /%2e/admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /%2e/admin"
   },
   {
     "id": "authentication-bypass-owasp-0046",
     "name": "URL path manipulation #9",
     "template": "/admin/~",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin/~",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin/~"
   },
   {
     "id": "authentication-bypass-owasp-0047",
     "name": "URL path manipulation #10",
     "template": "/admin#",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin#",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin#"
   },
   {
     "id": "authentication-bypass-owasp-0048",
     "name": "URL path manipulation #11",
     "template": "/admin?",
-    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin?",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "URL path manipulation probe from OWASP. Tests application handling of: /admin?"
   },
   {
     "id": "authentication-bypass-owasp-0049",
     "name": "HTTP verb tampering",
     "template": "GET /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: GET /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: GET /admin"
   },
   {
     "id": "authentication-bypass-owasp-0050",
     "name": "HTTP verb tampering #2",
     "template": "POST /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: POST /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: POST /admin"
   },
   {
     "id": "authentication-bypass-owasp-0051",
     "name": "HTTP verb tampering #3",
     "template": "HEAD /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: HEAD /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: HEAD /admin"
   },
   {
     "id": "authentication-bypass-owasp-0052",
     "name": "HTTP verb tampering #4",
     "template": "PUT /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: PUT /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: PUT /admin"
   },
   {
     "id": "authentication-bypass-owasp-0053",
     "name": "HTTP verb tampering #5",
     "template": "DELETE /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: DELETE /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: DELETE /admin"
   },
   {
     "id": "authentication-bypass-owasp-0054",
     "name": "HTTP verb tampering #6",
     "template": "OPTIONS /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: OPTIONS /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: OPTIONS /admin"
   },
   {
     "id": "authentication-bypass-owasp-0055",
     "name": "HTTP verb tampering #7",
     "template": "TRACE /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: TRACE /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: TRACE /admin"
   },
   {
     "id": "authentication-bypass-owasp-0056",
     "name": "HTTP verb tampering #8",
     "template": "PATCH /admin",
-    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: PATCH /admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "HTTP verb tampering probe from OWASP. Tests application handling of: PATCH /admin"
   },
   {
     "id": "authentication-bypass-owasp-0057",
     "name": "Case manipulation",
     "template": "/Admin",
-    "description": "Case manipulation probe from OWASP. Tests application handling of: /Admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Case manipulation probe from OWASP. Tests application handling of: /Admin"
   },
   {
     "id": "authentication-bypass-owasp-0058",
     "name": "Case manipulation #2",
     "template": "/ADMIN",
-    "description": "Case manipulation probe from OWASP. Tests application handling of: /ADMIN",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Case manipulation probe from OWASP. Tests application handling of: /ADMIN"
   },
   {
     "id": "authentication-bypass-owasp-0059",
     "name": "Case manipulation #3",
     "template": "/AdMiN",
-    "description": "Case manipulation probe from OWASP. Tests application handling of: /AdMiN",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Case manipulation probe from OWASP. Tests application handling of: /AdMiN"
   },
   {
     "id": "authentication-bypass-owasp-0060",
     "name": "Case manipulation #4",
     "template": "/aDmIn",
-    "description": "Case manipulation probe from OWASP. Tests application handling of: /aDmIn",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Case manipulation probe from OWASP. Tests application handling of: /aDmIn"
   },
   {
     "id": "authentication-bypass-owasp-0061",
     "name": "Unicode bypass",
     "template": "/admin%c0%af",
-    "description": "Unicode bypass probe from OWASP. Tests application handling of: /admin%c0%af",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Unicode bypass probe from OWASP. Tests application handling of: /admin%c0%af"
   },
   {
     "id": "authentication-bypass-owasp-0062",
     "name": "Unicode bypass #2",
     "template": "/admin%e0%80%af",
-    "description": "Unicode bypass probe from OWASP. Tests application handling of: /admin%e0%80%af",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Unicode bypass probe from OWASP. Tests application handling of: /admin%e0%80%af"
   },
   {
     "id": "authentication-bypass-owasp-0063",
     "name": "Unicode bypass #3",
     "template": "/admin%c0%ae%c0%ae/",
-    "description": "Unicode bypass probe from OWASP. Tests application handling of: /admin%c0%ae%c0%ae/",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Unicode bypass probe from OWASP. Tests application handling of: /admin%c0%ae%c0%ae/"
   },
   {
     "id": "authentication-bypass-owasp-0064",
     "name": "Unicode bypass #4",
     "template": "/%61dmin",
-    "description": "Unicode bypass probe from OWASP. Tests application handling of: /%61dmin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Unicode bypass probe from OWASP. Tests application handling of: /%61dmin"
   },
   {
     "id": "authentication-bypass-owasp-0065",
     "name": "Double encoding",
     "template": "/%252e%252e%252fadmin",
-    "description": "Double encoding probe from OWASP. Tests application handling of: /%252e%252e%252fadmin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Double encoding probe from OWASP. Tests application handling of: /%252e%252e%252fadmin"
   },
   {
     "id": "authentication-bypass-owasp-0066",
     "name": "Double encoding #2",
     "template": "/%252e%252e/admin",
-    "description": "Double encoding probe from OWASP. Tests application handling of: /%252e%252e/admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Double encoding probe from OWASP. Tests application handling of: /%252e%252e/admin"
   },
   {
     "id": "authentication-bypass-owasp-0067",
     "name": "Null byte injection",
     "template": "/admin%00",
-    "description": "Null byte injection probe from OWASP. Tests application handling of: /admin%00",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Null byte injection probe from OWASP. Tests application handling of: /admin%00"
   },
   {
     "id": "authentication-bypass-owasp-0068",
     "name": "Null byte injection #2",
     "template": "/admin%00.html",
-    "description": "Null byte injection probe from OWASP. Tests application handling of: /admin%00.html",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Null byte injection probe from OWASP. Tests application handling of: /admin%00.html"
   },
   {
     "id": "authentication-bypass-owasp-0069",
     "name": "Null byte injection #3",
     "template": "/admin%00.jpg",
-    "description": "Null byte injection probe from OWASP. Tests application handling of: /admin%00.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Null byte injection probe from OWASP. Tests application handling of: /admin%00.jpg"
   },
   {
     "id": "authentication-bypass-owasp-0070",
     "name": "Credential stuffing patterns",
     "template": "admin:admin",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:admin"
   },
   {
     "id": "authentication-bypass-owasp-0071",
     "name": "Credential stuffing patterns #2",
     "template": "administrator:administrator",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: administrator:administrator",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: administrator:administrator"
   },
   {
     "id": "authentication-bypass-owasp-0072",
     "name": "Credential stuffing patterns #3",
     "template": "root:root",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: root:root",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: root:root"
   },
   {
     "id": "authentication-bypass-owasp-0073",
     "name": "Credential stuffing patterns #4",
     "template": "admin:password",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:password",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:password"
   },
   {
     "id": "authentication-bypass-owasp-0074",
     "name": "Credential stuffing patterns #5",
     "template": "admin:123456",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:123456",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:123456"
   },
   {
     "id": "authentication-bypass-owasp-0075",
     "name": "Credential stuffing patterns #6",
     "template": "admin:admin123",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:admin123",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: admin:admin123"
   },
   {
     "id": "authentication-bypass-owasp-0076",
     "name": "Credential stuffing patterns #7",
     "template": "test:test",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: test:test",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: test:test"
   },
   {
     "id": "authentication-bypass-owasp-0077",
     "name": "Credential stuffing patterns #8",
     "template": "guest:guest",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: guest:guest",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: guest:guest"
   },
   {
     "id": "authentication-bypass-owasp-0078",
     "name": "Credential stuffing patterns #9",
     "template": "user:user",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: user:user",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: user:user"
   },
   {
     "id": "authentication-bypass-owasp-0079",
     "name": "Credential stuffing patterns #10",
     "template": "demo:demo",
-    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: demo:demo",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Credential stuffing patterns probe from OWASP. Tests application handling of: demo:demo"
   },
   {
     "id": "authentication-bypass-owasp-0080",
     "name": "Default credentials bypass",
     "template": "username=admin&password=",
-    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=admin&password=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=admin&password="
   },
   {
     "id": "authentication-bypass-owasp-0081",
     "name": "Default credentials bypass #2",
     "template": "username=&password=",
-    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=&password=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=&password="
   },
   {
     "id": "authentication-bypass-owasp-0082",
     "name": "Default credentials bypass #3",
     "template": "username=admin&password=%20",
-    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=admin&password=%20",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=admin&password=%20"
   },
   {
     "id": "authentication-bypass-owasp-0083",
     "name": "Default credentials bypass #4",
     "template": "username=admin&password=*",
-    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=admin&password=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default credentials bypass probe from OWASP. Tests application handling of: username=admin&password=*"
   },
   {
     "id": "authentication-bypass-owasp-0084",
     "name": "Password reset bypass",
     "template": "email=victim@example.com&email=attacker@example.com",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: email=victim@example.com&email...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: email=victim@example.com&email..."
   },
   {
     "id": "authentication-bypass-owasp-0085",
     "name": "Password reset bypass #2",
     "template": "token=&email=attacker@example.com",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=&email=attacker@example....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=&email=attacker@example...."
   },
   {
     "id": "authentication-bypass-owasp-0086",
     "name": "Password reset bypass #3",
     "template": "token=0",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=0",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=0"
   },
   {
     "id": "authentication-bypass-owasp-0087",
     "name": "Password reset bypass #4",
     "template": "token=null",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=null"
   },
   {
     "id": "authentication-bypass-owasp-0088",
     "name": "Password reset bypass #5",
     "template": "token=false",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=false",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=false"
   },
   {
     "id": "authentication-bypass-owasp-0089",
     "name": "Password reset bypass #6",
     "template": "token=undefined",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=undefined",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=undefined"
   },
   {
     "id": "authentication-bypass-owasp-0090",
     "name": "Password reset bypass #7",
     "template": "token=%20",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=%20",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=%20"
   },
   {
     "id": "authentication-bypass-owasp-0091",
     "name": "Password reset bypass #8",
     "template": "token=true",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: token=true"
   },
   {
     "id": "authentication-bypass-owasp-0092",
     "name": "Password reset bypass #9",
     "template": "email[]=victim@example.com&email[]=attacker@example.com",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: email[]=victim@example.com&ema...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: email[]=victim@example.com&ema..."
   },
   {
     "id": "authentication-bypass-owasp-0093",
     "name": "Password reset bypass #10",
     "template": "email=victim@example.com%0Acc:attacker@example.com",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: email=victim@example.com%0Acc:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: email=victim@example.com%0Acc:..."
   },
   {
     "id": "authentication-bypass-owasp-0094",
     "name": "Password reset bypass #11",
     "template": "email=victim@example.com%0Abcc:attacker@example.com",
-    "description": "Password reset bypass probe from OWASP. Tests application handling of: email=victim@example.com%0Abcc...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset bypass probe from OWASP. Tests application handling of: email=victim@example.com%0Abcc..."
   },
   {
     "id": "authentication-bypass-owasp-0095",
     "name": "Password reset token manipulation",
     "template": "reset_token=' OR '1'='1",
-    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token=' OR '1'='1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token=' OR '1'='1"
   },
   {
     "id": "authentication-bypass-owasp-0096",
     "name": "Password reset token manipulation #2",
     "template": "reset_token={\"$gt\": \"\"}",
-    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token={\"$gt\": \"\"}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token={\"$gt\": \"\"}"
   },
   {
     "id": "authentication-bypass-owasp-0097",
     "name": "Password reset token manipulation #3",
     "template": "reset_token=*",
-    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token=*"
   },
   {
     "id": "authentication-bypass-owasp-0098",
     "name": "Password reset token manipulation #4",
     "template": "reset_token=admin'--",
-    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token=admin'--",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: reset_token=admin'--"
   },
   {
     "id": "authentication-bypass-owasp-0099",
     "name": "Password reset token manipulation #5",
     "template": "user_id=1&token=valid_token",
-    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: user_id=1&token=valid_token",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: user_id=1&token=valid_token"
   },
   {
     "id": "authentication-bypass-owasp-0100",
     "name": "Password reset token manipulation #6",
     "template": "user_id=999&token=valid_token",
-    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: user_id=999&token=valid_token",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0101",
-    "name": "Host header injection for password reset poisoning",
-    "template": "Host: attacker.com",
-    "description": "Host header injection for password reset poisoning probe from OWASP. Tests application handling of: Host: attacker.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0102",
-    "name": "Host header injection for password reset poisoning #2",
-    "template": "X-Forwarded-Host: attacker.com",
-    "description": "Host header injection for password reset poisoning probe from OWASP. Tests application handling of: X-Forwarded-Host: attacker.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0103",
-    "name": "Host header injection for password reset poisoning #3",
-    "template": "X-Host: attacker.com",
-    "description": "Host header injection for password reset poisoning probe from OWASP. Tests application handling of: X-Host: attacker.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset token manipulation probe from OWASP. Tests application handling of: user_id=999&token=valid_token"
   },
   {
     "id": "authentication-bypass-owasp-0104",
     "name": "Password reset without verification",
     "template": "new_password=Pass123&confirm_password=Pass123",
-    "description": "Password reset without verification probe from OWASP. Tests application handling of: new_password=Pass123&confirm_p...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset without verification probe from OWASP. Tests application handling of: new_password=Pass123&confirm_p..."
   },
   {
     "id": "authentication-bypass-owasp-0105",
     "name": "Password reset endpoint enumeration",
     "template": "POST /api/password/reset",
-    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /api/password/reset",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /api/password/reset"
   },
   {
     "id": "authentication-bypass-owasp-0106",
     "name": "Password reset endpoint enumeration #2",
     "template": "POST /api/v1/auth/password-reset",
-    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /api/v1/auth/password-res...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /api/v1/auth/password-res..."
   },
   {
     "id": "authentication-bypass-owasp-0107",
     "name": "Password reset endpoint enumeration #3",
     "template": "POST /password-reset",
-    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /password-reset",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /password-reset"
   },
   {
     "id": "authentication-bypass-owasp-0108",
     "name": "Password reset endpoint enumeration #4",
     "template": "POST /forgot-password",
-    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /forgot-password",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /forgot-password"
   },
   {
     "id": "authentication-bypass-owasp-0109",
     "name": "Password reset endpoint enumeration #5",
     "template": "POST /reset-password",
-    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /reset-password",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: POST /reset-password"
   },
   {
     "id": "authentication-bypass-owasp-0110",
     "name": "Password reset endpoint enumeration #6",
     "template": "PUT /api/users/password",
-    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: PUT /api/users/password",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: PUT /api/users/password"
   },
   {
     "id": "authentication-bypass-owasp-0111",
     "name": "Password reset endpoint enumeration #7",
     "template": "PATCH /account/password",
-    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: PATCH /account/password",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password reset endpoint enumeration probe from OWASP. Tests application handling of: PATCH /account/password"
   },
   {
     "id": "authentication-bypass-owasp-0112",
     "name": "Weak token brute force",
     "template": "token=000000",
-    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=000000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=000000"
   },
   {
     "id": "authentication-bypass-owasp-0113",
     "name": "Weak token brute force #2",
     "template": "token=111111",
-    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=111111",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=111111"
   },
   {
     "id": "authentication-bypass-owasp-0114",
     "name": "Weak token brute force #3",
     "template": "token=123456",
-    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=123456",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=123456"
   },
   {
     "id": "authentication-bypass-owasp-0115",
     "name": "Weak token brute force #4",
     "template": "token=0000",
-    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=0000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=0000"
   },
   {
     "id": "authentication-bypass-owasp-0116",
     "name": "Weak token brute force #5",
     "template": "token=1234",
-    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=1234",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Weak token brute force probe from OWASP. Tests application handling of: token=1234"
   },
   {
     "id": "authentication-bypass-owasp-0117",
     "name": "Bypass email verification in reset",
     "template": "email_verified=true",
-    "description": "Bypass email verification in reset probe from OWASP. Tests application handling of: email_verified=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Bypass email verification in reset probe from OWASP. Tests application handling of: email_verified=true"
   },
   {
     "id": "authentication-bypass-owasp-0118",
     "name": "Bypass email verification in reset #2",
     "template": "verified=true",
-    "description": "Bypass email verification in reset probe from OWASP. Tests application handling of: verified=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Bypass email verification in reset probe from OWASP. Tests application handling of: verified=true"
   },
   {
     "id": "authentication-bypass-owasp-0119",
     "name": "Bypass email verification in reset #3",
     "template": "skip_verification=true",
-    "description": "Bypass email verification in reset probe from OWASP. Tests application handling of: skip_verification=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Bypass email verification in reset probe from OWASP. Tests application handling of: skip_verification=true"
   },
   {
     "id": "authentication-bypass-owasp-0120",
     "name": "OTP/2FA bypass",
     "template": "otp=000000",
-    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=000000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=000000"
   },
   {
     "id": "authentication-bypass-owasp-0121",
     "name": "OTP/2FA bypass #2",
     "template": "otp=123456",
-    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=123456",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=123456"
   },
   {
     "id": "authentication-bypass-owasp-0122",
     "name": "OTP/2FA bypass #3",
     "template": "otp=111111",
-    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=111111",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=111111"
   },
   {
     "id": "authentication-bypass-owasp-0123",
     "name": "OTP/2FA bypass #4",
     "template": "otp=",
-    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp="
   },
   {
     "id": "authentication-bypass-owasp-0124",
     "name": "OTP/2FA bypass #5",
     "template": "otp=%20",
-    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=%20",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=%20"
   },
   {
     "id": "authentication-bypass-owasp-0125",
     "name": "OTP/2FA bypass #6",
     "template": "otp=null",
-    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0126",
-    "name": "JWT manipulation (see JWT-Vulnerabilities for more)",
-    "template": "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4ifQ.",
-    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization: Bearer eyJhbGci...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0127",
-    "name": "JWT manipulation (see JWT-Vulnerabilities for more) #2",
-    "template": "Authorization: Bearer null",
-    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization: Bearer null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0128",
-    "name": "JWT manipulation (see JWT-Vulnerabilities for more) #3",
-    "template": "Authorization: Bearer",
-    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization: Bearer",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0129",
-    "name": "JWT manipulation (see JWT-Vulnerabilities for more) #4",
-    "template": "Authorization:",
-    "description": "JWT manipulation (see JWT-Vulnerabilities for more) probe from OWASP. Tests application handling of: Authorization:",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OTP/2FA bypass probe from OWASP. Tests application handling of: otp=null"
   },
   {
     "id": "authentication-bypass-owasp-0130",
     "name": "GraphQL authentication bypass",
     "template": "{\"query\":\"mutation{login(username:\\\"admin\\\",password:\\\"' OR '1'='1\\\"){token}}\"}",
-    "description": "GraphQL authentication bypass probe from OWASP. Tests application handling of: {\"query\":\"mutation{login(usern...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "GraphQL authentication bypass probe from OWASP. Tests application handling of: {\"query\":\"mutation{login(usern..."
   },
   {
     "id": "authentication-bypass-owasp-0131",
     "name": "GraphQL authentication bypass #2",
     "template": "{\"query\":\"{users{id username password}}\"}",
-    "description": "GraphQL authentication bypass probe from OWASP. Tests application handling of: {\"query\":\"{users{id username p...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "GraphQL authentication bypass probe from OWASP. Tests application handling of: {\"query\":\"{users{id username p..."
   },
   {
     "id": "authentication-bypass-owasp-0132",
     "name": "XML authentication bypass",
     "template": "<user><username>admin</username><password>' OR '1'='1</password></user>",
-    "description": "XML authentication bypass probe from OWASP. Tests application handling of: <user><username>admin</usernam...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "XML authentication bypass probe from OWASP. Tests application handling of: <user><username>admin</usernam..."
   },
   {
     "id": "authentication-bypass-owasp-0133",
     "name": "LDAP authentication bypass",
     "template": "username=*",
-    "description": "LDAP authentication bypass probe from OWASP. Tests application handling of: username=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "LDAP authentication bypass probe from OWASP. Tests application handling of: username=*"
   },
   {
     "id": "authentication-bypass-owasp-0134",
     "name": "LDAP authentication bypass #2",
     "template": "username=admin)(|(password=*",
-    "description": "LDAP authentication bypass probe from OWASP. Tests application handling of: username=admin)(|(password=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "LDAP authentication bypass probe from OWASP. Tests application handling of: username=admin)(|(password=*"
   },
   {
     "id": "authentication-bypass-owasp-0135",
     "name": "LDAP authentication bypass #3",
     "template": "username=*)(uid=*))(|(uid=*",
-    "description": "LDAP authentication bypass probe from OWASP. Tests application handling of: username=*)(uid=*))(|(uid=*",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "LDAP authentication bypass probe from OWASP. Tests application handling of: username=*)(uid=*))(|(uid=*"
   },
   {
     "id": "authentication-bypass-owasp-0136",
     "name": "OAuth/OIDC bypass",
     "template": "redirect_uri=https://attacker.com",
-    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: redirect_uri=https://attacker....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: redirect_uri=https://attacker...."
   },
   {
     "id": "authentication-bypass-owasp-0137",
     "name": "OAuth/OIDC bypass #2",
     "template": "state=",
-    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: state=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: state="
   },
   {
     "id": "authentication-bypass-owasp-0138",
     "name": "OAuth/OIDC bypass #3",
     "template": "nonce=",
-    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: nonce=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: nonce="
   },
   {
     "id": "authentication-bypass-owasp-0139",
     "name": "OAuth/OIDC bypass #4",
     "template": "code=",
-    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: code=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "OAuth/OIDC bypass probe from OWASP. Tests application handling of: code="
   },
   {
     "id": "authentication-bypass-owasp-0140",
     "name": "API key bypass",
     "template": "api_key=",
-    "description": "API key bypass probe from OWASP. Tests application handling of: api_key=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0141",
-    "name": "API key bypass #2",
-    "template": "X-API-Key:",
-    "description": "API key bypass probe from OWASP. Tests application handling of: X-API-Key:",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "API key bypass probe from OWASP. Tests application handling of: api_key="
   },
   {
     "id": "authentication-bypass-owasp-0142",
     "name": "API key bypass #3",
     "template": "apikey=null",
-    "description": "API key bypass probe from OWASP. Tests application handling of: apikey=null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "API key bypass probe from OWASP. Tests application handling of: apikey=null"
   },
   {
     "id": "authentication-bypass-owasp-0143",
     "name": "Session fixation",
     "template": "PHPSESSID=attacker_controlled_session",
-    "description": "Session fixation probe from OWASP. Tests application handling of: PHPSESSID=attacker_controlled_...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session fixation probe from OWASP. Tests application handling of: PHPSESSID=attacker_controlled_..."
   },
   {
     "id": "authentication-bypass-owasp-0144",
     "name": "Session fixation #2",
     "template": "jsessionid=12345",
-    "description": "Session fixation probe from OWASP. Tests application handling of: jsessionid=12345",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session fixation probe from OWASP. Tests application handling of: jsessionid=12345"
   },
   {
     "id": "authentication-bypass-owasp-0145",
     "name": "CAPTCHA bypass",
     "template": "captcha=",
-    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: captcha=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: captcha="
   },
   {
     "id": "authentication-bypass-owasp-0146",
     "name": "CAPTCHA bypass #2",
     "template": "g-recaptcha-response=",
-    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: g-recaptcha-response=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: g-recaptcha-response="
   },
   {
     "id": "authentication-bypass-owasp-0147",
     "name": "CAPTCHA bypass #3",
     "template": "h-captcha-response=",
-    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: h-captcha-response=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: h-captcha-response="
   },
   {
     "id": "authentication-bypass-owasp-0148",
     "name": "CAPTCHA bypass #4",
     "template": "captcha_response=03AAYGu2...",
-    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: captcha_response=03AAYGu2...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: captcha_response=03AAYGu2..."
   },
   {
     "id": "authentication-bypass-owasp-0149",
     "name": "CAPTCHA bypass #5",
     "template": "recaptcha=",
-    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: recaptcha=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0150",
-    "name": "Rate limiting bypass",
-    "template": "X-Forwarded-For: random_ip_each_request",
-    "description": "Rate limiting bypass probe from OWASP. Tests application handling of: X-Forwarded-For: random_ip_eac...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0151",
-    "name": "Rate limiting bypass #2",
-    "template": "X-Originating-IP: random_ip_each_request",
-    "description": "Rate limiting bypass probe from OWASP. Tests application handling of: X-Originating-IP: random_ip_ea...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0152",
-    "name": "Rate limiting bypass #3",
-    "template": "X-Remote-IP: random_ip_each_request",
-    "description": "Rate limiting bypass probe from OWASP. Tests application handling of: X-Remote-IP: random_ip_each_re...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "CAPTCHA bypass probe from OWASP. Tests application handling of: recaptcha="
   },
   {
     "id": "authentication-bypass-owasp-0153",
     "name": "Account enumeration",
     "template": "username=admin&password=wrong",
-    "description": "Account enumeration probe from OWASP. Tests application handling of: username=admin&password=wrong",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Account enumeration probe from OWASP. Tests application handling of: username=admin&password=wrong"
   },
   {
     "id": "authentication-bypass-owasp-0154",
     "name": "Account enumeration #2",
     "template": "username=nonexistent&password=wrong",
-    "description": "Account enumeration probe from OWASP. Tests application handling of: username=nonexistent&password=...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Account enumeration probe from OWASP. Tests application handling of: username=nonexistent&password=..."
   },
   {
     "id": "authentication-bypass-owasp-0155",
     "name": "Login form variations",
     "template": "user[admin]=1",
-    "description": "Login form variations probe from OWASP. Tests application handling of: user[admin]=1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login form variations probe from OWASP. Tests application handling of: user[admin]=1"
   },
   {
     "id": "authentication-bypass-owasp-0156",
     "name": "Login form variations #2",
     "template": "user[role]=admin",
-    "description": "Login form variations probe from OWASP. Tests application handling of: user[role]=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login form variations probe from OWASP. Tests application handling of: user[role]=admin"
   },
   {
     "id": "authentication-bypass-owasp-0157",
     "name": "Login form variations #3",
     "template": "username[]=admin",
-    "description": "Login form variations probe from OWASP. Tests application handling of: username[]=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login form variations probe from OWASP. Tests application handling of: username[]=admin"
   },
   {
     "id": "authentication-bypass-owasp-0158",
     "name": "Login form variations #4",
     "template": "password[]=anything",
-    "description": "Login form variations probe from OWASP. Tests application handling of: password[]=anything",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login form variations probe from OWASP. Tests application handling of: password[]=anything"
   },
   {
     "id": "authentication-bypass-owasp-0159",
     "name": "Time-based bypass",
     "template": "wait_for_rate_limit=true",
-    "description": "Time-based bypass probe from OWASP. Tests application handling of: wait_for_rate_limit=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Time-based bypass probe from OWASP. Tests application handling of: wait_for_rate_limit=true"
   },
   {
     "id": "authentication-bypass-owasp-0160",
     "name": "Time-based bypass #2",
     "template": "timestamp=future_date",
-    "description": "Time-based bypass probe from OWASP. Tests application handling of: timestamp=future_date",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Time-based bypass probe from OWASP. Tests application handling of: timestamp=future_date"
   },
   {
     "id": "authentication-bypass-owasp-0161",
     "name": "Time-based bypass #3",
     "template": "valid_until=9999999999",
-    "description": "Time-based bypass probe from OWASP. Tests application handling of: valid_until=9999999999",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Time-based bypass probe from OWASP. Tests application handling of: valid_until=9999999999"
   },
   {
     "id": "authentication-bypass-owasp-0162",
     "name": "0e291242476940776845150308577824 == 0",
     "template": "password=0e215962017",
-    "description": "0e291242476940776845150308577824 == 0 probe from OWASP. Tests application handling of: password=0e215962017",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "0e291242476940776845150308577824 == 0 probe from OWASP. Tests application handling of: password=0e215962017"
   },
   {
     "id": "authentication-bypass-owasp-0163",
     "name": "0e291242476940776845150308577824 == 0 #2",
     "template": "password=240610708",
-    "description": "0e291242476940776845150308577824 == 0 probe from OWASP. Tests application handling of: password=240610708",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "0e291242476940776845150308577824 == 0 probe from OWASP. Tests application handling of: password=240610708"
   },
   {
     "id": "authentication-bypass-owasp-0164",
     "name": "Unicode normalization",
     "template": "username=\u24d0\u24d3\u24dc\u24d8\u24dd",
-    "description": "Unicode normalization probe from OWASP. Tests application handling of: username=\u24d0\u24d3\u24dc\u24d8\u24dd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Unicode normalization probe from OWASP. Tests application handling of: username=\u24d0\u24d3\u24dc\u24d8\u24dd"
   },
   {
     "id": "authentication-bypass-owasp-0165",
     "name": "Unicode normalization #2",
     "template": "username=\ud835\udcb6\ud835\udcb9\ud835\udcc2\ud835\udcbe\ud835\udcc3",
-    "description": "Unicode normalization probe from OWASP. Tests application handling of: username=\ud835\udcb6\ud835\udcb9\ud835\udcc2\ud835\udcbe\ud835\udcc3",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Unicode normalization probe from OWASP. Tests application handling of: username=\ud835\udcb6\ud835\udcb9\ud835\udcc2\ud835\udcbe\ud835\udcc3"
   },
   {
     "id": "authentication-bypass-owasp-0166",
     "name": "Unicode normalization #3",
     "template": "username=\uff41\uff44\uff4d\uff49\uff4e",
-    "description": "Unicode normalization probe from OWASP. Tests application handling of: username=\uff41\uff44\uff4d\uff49\uff4e",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Unicode normalization probe from OWASP. Tests application handling of: username=\uff41\uff44\uff4d\uff49\uff4e"
   },
   {
     "id": "authentication-bypass-owasp-0167",
     "name": "Homograph attack",
     "template": "username=\u03b1dmin (Greek alpha)",
-    "description": "Homograph attack probe from OWASP. Tests application handling of: username=\u03b1dmin (Greek alpha)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Homograph attack probe from OWASP. Tests application handling of: username=\u03b1dmin (Greek alpha)"
   },
   {
     "id": "authentication-bypass-owasp-0168",
     "name": "Homograph attack #2",
     "template": "username=\u0430dmin (Cyrillic \u0430)",
-    "description": "Homograph attack probe from OWASP. Tests application handling of: username=\u0430dmin (Cyrillic \u0430)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Homograph attack probe from OWASP. Tests application handling of: username=\u0430dmin (Cyrillic \u0430)"
   },
   {
     "id": "authentication-bypass-owasp-0169",
     "name": "Whitespace bypass",
     "template": "username= admin",
-    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username= admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username= admin"
   },
   {
     "id": "authentication-bypass-owasp-0170",
     "name": "Whitespace bypass #2",
     "template": "username=admin",
-    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username=admin"
   },
   {
     "id": "authentication-bypass-owasp-0171",
     "name": "Whitespace bypass #3",
     "template": "username=%20admin",
-    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username=%20admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username=%20admin"
   },
   {
     "id": "authentication-bypass-owasp-0172",
     "name": "Whitespace bypass #4",
     "template": "username=admin%20",
-    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username=admin%20",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Whitespace bypass probe from OWASP. Tests application handling of: username=admin%20"
   },
   {
     "id": "authentication-bypass-owasp-0173",
     "name": "Special characters",
     "template": "username=admin'",
-    "description": "Special characters probe from OWASP. Tests application handling of: username=admin'",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: username=admin'"
   },
   {
     "id": "authentication-bypass-owasp-0174",
     "name": "Special characters #2",
     "template": "username=admin\"",
-    "description": "Special characters probe from OWASP. Tests application handling of: username=admin\"",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: username=admin\""
   },
   {
     "id": "authentication-bypass-owasp-0175",
     "name": "Special characters #3",
     "template": "username=admin`",
-    "description": "Special characters probe from OWASP. Tests application handling of: username=admin`",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: username=admin`"
   },
   {
     "id": "authentication-bypass-owasp-0176",
     "name": "Special characters #4",
     "template": "username=admin\\",
-    "description": "Special characters probe from OWASP. Tests application handling of: username=admin\\",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Special characters probe from OWASP. Tests application handling of: username=admin\\"
   },
   {
     "id": "authentication-bypass-owasp-0177",
     "name": "Email bypass for authentication",
     "template": "email=admin@localhost",
-    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=admin@localhost",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=admin@localhost"
   },
   {
     "id": "authentication-bypass-owasp-0178",
     "name": "Email bypass for authentication #2",
     "template": "email=admin@127.0.0.1",
-    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=admin@127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=admin@127.0.0.1"
   },
   {
     "id": "authentication-bypass-owasp-0179",
     "name": "Email bypass for authentication #3",
     "template": "email=@example.com",
-    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=@example.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=@example.com"
   },
   {
     "id": "authentication-bypass-owasp-0180",
     "name": "Email bypass for authentication #4",
     "template": "email=victim@attacker.com",
-    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=victim@attacker.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0181",
-    "name": "Host header authentication bypass",
-    "template": "Host: localhost",
-    "description": "Host header authentication bypass probe from OWASP. Tests application handling of: Host: localhost",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0182",
-    "name": "Host header authentication bypass #2",
-    "template": "Host: 127.0.0.1",
-    "description": "Host header authentication bypass probe from OWASP. Tests application handling of: Host: 127.0.0.1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0183",
-    "name": "Host header authentication bypass #3",
-    "template": "Host: internal.company.com",
-    "description": "Host header authentication bypass probe from OWASP. Tests application handling of: Host: internal.company.com",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0184",
-    "name": "Referer bypass",
-    "template": "Referer: https://trusted-site.com",
-    "description": "Referer bypass probe from OWASP. Tests application handling of: Referer: https://trusted-site....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0185",
-    "name": "Referer bypass #2",
-    "template": "Referer: https://localhost",
-    "description": "Referer bypass probe from OWASP. Tests application handling of: Referer: https://localhost",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0186",
-    "name": "Origin bypass",
-    "template": "Origin: https://trusted-site.com",
-    "description": "Origin bypass probe from OWASP. Tests application handling of: Origin: https://trusted-site.c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0187",
-    "name": "Origin bypass #2",
-    "template": "Origin: null",
-    "description": "Origin bypass probe from OWASP. Tests application handling of: Origin: null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Email bypass for authentication probe from OWASP. Tests application handling of: email=victim@attacker.com"
   },
   {
     "id": "authentication-bypass-owasp-0188",
     "name": "Authentication via GET instead of POST",
     "template": "GET /api/login?username=admin&password=admin123",
-    "description": "Authentication via GET instead of POST probe from OWASP. Tests application handling of: GET /api/login?username=admin&...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication via GET instead of POST probe from OWASP. Tests application handling of: GET /api/login?username=admin&..."
   },
   {
     "id": "authentication-bypass-owasp-0189",
     "name": "File inclusion for authentication bypass",
     "template": "/etc/passwd",
-    "description": "File inclusion for authentication bypass probe from OWASP. Tests application handling of: /etc/passwd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "File inclusion for authentication bypass probe from OWASP. Tests application handling of: /etc/passwd"
   },
   {
     "id": "authentication-bypass-owasp-0190",
     "name": "File inclusion for authentication bypass #2",
     "template": "../../../../../../etc/passwd",
-    "description": "File inclusion for authentication bypass probe from OWASP. Tests application handling of: ../../../../../../etc/passwd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "File inclusion for authentication bypass probe from OWASP. Tests application handling of: ../../../../../../etc/passwd"
   },
   {
     "id": "authentication-bypass-owasp-0191",
     "name": "SSRF to bypass authentication",
     "template": "url=http://localhost/admin",
-    "description": "SSRF to bypass authentication probe from OWASP. Tests application handling of: url=http://localhost/admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SSRF to bypass authentication probe from OWASP. Tests application handling of: url=http://localhost/admin"
   },
   {
     "id": "authentication-bypass-owasp-0192",
     "name": "SSRF to bypass authentication #2",
     "template": "url=http://127.0.0.1/admin",
-    "description": "SSRF to bypass authentication probe from OWASP. Tests application handling of: url=http://127.0.0.1/admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SSRF to bypass authentication probe from OWASP. Tests application handling of: url=http://127.0.0.1/admin"
   },
   {
     "id": "authentication-bypass-owasp-0193",
     "name": "SSRF to bypass authentication #3",
     "template": "url=http://169.254.169.254/latest/meta-data/",
-    "description": "SSRF to bypass authentication probe from OWASP. Tests application handling of: url=http://169.254.169.254/lat...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0194",
-    "name": "Request smuggling for authentication bypass",
-    "template": "Content-Length: 0",
-    "description": "Request smuggling for authentication bypass probe from OWASP. Tests application handling of: Content-Length: 0",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0195",
-    "name": "Request smuggling for authentication bypass #2",
-    "template": "Transfer-Encoding: chunked",
-    "description": "Request smuggling for authentication bypass probe from OWASP. Tests application handling of: Transfer-Encoding: chunked",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "SSRF to bypass authentication probe from OWASP. Tests application handling of: url=http://169.254.169.254/lat..."
   },
   {
     "id": "authentication-bypass-owasp-0196",
     "name": "Business logic bypass",
     "template": "step=1&step=3",
-    "description": "Business logic bypass probe from OWASP. Tests application handling of: step=1&step=3",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Business logic bypass probe from OWASP. Tests application handling of: step=1&step=3"
   },
   {
     "id": "authentication-bypass-owasp-0197",
     "name": "Business logic bypass #2",
     "template": "status=pending&status=approved",
-    "description": "Business logic bypass probe from OWASP. Tests application handling of: status=pending&status=approved",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Business logic bypass probe from OWASP. Tests application handling of: status=pending&status=approved"
   },
   {
     "id": "authentication-bypass-owasp-0198",
     "name": "Business logic bypass #3",
     "template": "verified=false&verified=true",
-    "description": "Business logic bypass probe from OWASP. Tests application handling of: verified=false&verified=true",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0199",
-    "name": "JWT \"none\" algorithm bypass",
-    "template": "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJhZG1pbiJ9.",
-    "description": "JWT \"none\" algorithm bypass probe from OWASP. Tests application handling of: Authorization: Bearer eyJhbGci...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0200",
-    "name": "JWT \"none\" algorithm bypass #2",
-    "template": "alg: none",
-    "description": "JWT \"none\" algorithm bypass probe from OWASP. Tests application handling of: alg: none",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Business logic bypass probe from OWASP. Tests application handling of: verified=false&verified=true"
   },
   {
     "id": "authentication-bypass-owasp-0201",
     "name": "Account takeover via email change",
     "template": "email=victim@example.com&new_email=attacker@example.com",
-    "description": "Account takeover via email change probe from OWASP. Tests application handling of: email=victim@example.com&new_e...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Account takeover via email change probe from OWASP. Tests application handling of: email=victim@example.com&new_e..."
   },
   {
     "id": "authentication-bypass-owasp-0202",
     "name": "Broken access control via UUID manipulation",
     "template": "user_id=550e8400-e29b-41d4-a716-446655440000",
-    "description": "Broken access control via UUID manipulation probe from OWASP. Tests application handling of: user_id=550e8400-e29b-41d4-a71...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Broken access control via UUID manipulation probe from OWASP. Tests application handling of: user_id=550e8400-e29b-41d4-a71..."
   },
   {
     "id": "authentication-bypass-owasp-0203",
     "name": "Authentication bypass via forced browsing",
     "template": "/admin/dashboard",
-    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /admin/dashboard",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /admin/dashboard"
   },
   {
     "id": "authentication-bypass-owasp-0204",
     "name": "Authentication bypass via forced browsing #2",
     "template": "/api/v1/admin/users",
-    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /api/v1/admin/users",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /api/v1/admin/users"
   },
   {
     "id": "authentication-bypass-owasp-0205",
     "name": "Authentication bypass via forced browsing #3",
     "template": "/internal/admin",
-    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /internal/admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /internal/admin"
   },
   {
     "id": "authentication-bypass-owasp-0206",
     "name": "Authentication bypass via forced browsing #4",
     "template": "/console",
-    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /console",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /console"
   },
   {
     "id": "authentication-bypass-owasp-0207",
     "name": "Authentication bypass via forced browsing #5",
     "template": "/actuator",
-    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /actuator",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /actuator"
   },
   {
     "id": "authentication-bypass-owasp-0208",
     "name": "Authentication bypass via forced browsing #6",
     "template": "/swagger-ui.html",
-    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /swagger-ui.html",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /swagger-ui.html"
   },
   {
     "id": "authentication-bypass-owasp-0209",
     "name": "Authentication bypass via forced browsing #7",
     "template": "/debug",
-    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /debug",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via forced browsing probe from OWASP. Tests application handling of: /debug"
   },
   {
     "id": "authentication-bypass-owasp-0210",
     "name": "User enumeration via timing attacks",
     "template": "username=existing_user (slower response)",
-    "description": "User enumeration via timing attacks probe from OWASP. Tests application handling of: username=existing_user (slower...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "User enumeration via timing attacks probe from OWASP. Tests application handling of: username=existing_user (slower..."
   },
   {
     "id": "authentication-bypass-owasp-0211",
     "name": "User enumeration via timing attacks #2",
     "template": "username=nonexistent (faster response)",
-    "description": "User enumeration via timing attacks probe from OWASP. Tests application handling of: username=nonexistent (faster r...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "User enumeration via timing attacks probe from OWASP. Tests application handling of: username=nonexistent (faster r..."
   },
   {
     "id": "authentication-bypass-owasp-0212",
     "name": "Password policy bypass",
     "template": "password=Pass123!@#$%^&*()_+{}[]|:;<>,.?/~`",
-    "description": "Password policy bypass probe from OWASP. Tests application handling of: password=Pass123!@#$%^&*()_+{}...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Password policy bypass probe from OWASP. Tests application handling of: password=Pass123!@#$%^&*()_+{}..."
   },
   {
     "id": "authentication-bypass-owasp-0213",
     "name": "Very long password that might bypass length checks",
     "template": "password=AAAAA....(10000 chars)",
-    "description": "Very long password that might bypass length checks probe from OWASP. Tests application handling of: password=AAAAA....(10000 chars...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Very long password that might bypass length checks probe from OWASP. Tests application handling of: password=AAAAA....(10000 chars..."
   },
   {
     "id": "authentication-bypass-owasp-0214",
     "name": "Multi-account linking exploitation",
     "template": "link_account=victim@example.com",
-    "description": "Multi-account linking exploitation probe from OWASP. Tests application handling of: link_account=victim@example.co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Multi-account linking exploitation probe from OWASP. Tests application handling of: link_account=victim@example.co..."
   },
   {
     "id": "authentication-bypass-owasp-0215",
     "name": "Multi-account linking exploitation #2",
     "template": "oauth_connect=victim_account_id",
-    "description": "Multi-account linking exploitation probe from OWASP. Tests application handling of: oauth_connect=victim_account_i...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Multi-account linking exploitation probe from OWASP. Tests application handling of: oauth_connect=victim_account_i..."
   },
   {
     "id": "authentication-bypass-owasp-0216",
     "name": "Session fixation via URL",
     "template": "?PHPSESSID=attacker_session_id",
-    "description": "Session fixation via URL probe from OWASP. Tests application handling of: ?PHPSESSID=attacker_session_id",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session fixation via URL probe from OWASP. Tests application handling of: ?PHPSESSID=attacker_session_id"
   },
   {
     "id": "authentication-bypass-owasp-0217",
     "name": "Session fixation via URL #2",
     "template": "?session=attacker_controlled_value",
-    "description": "Session fixation via URL probe from OWASP. Tests application handling of: ?session=attacker_controlled_v...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session fixation via URL probe from OWASP. Tests application handling of: ?session=attacker_controlled_v..."
   },
   {
     "id": "authentication-bypass-owasp-0218",
     "name": "Session fixation via URL #3",
     "template": "?token=known_token",
-    "description": "Session fixation via URL probe from OWASP. Tests application handling of: ?token=known_token",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Session fixation via URL probe from OWASP. Tests application handling of: ?token=known_token"
   },
   {
     "id": "authentication-bypass-owasp-0219",
     "name": "Authentication via social login manipulation",
     "template": "oauth_id=victim_oauth_id",
-    "description": "Authentication via social login manipulation probe from OWASP. Tests application handling of: oauth_id=victim_oauth_id",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication via social login manipulation probe from OWASP. Tests application handling of: oauth_id=victim_oauth_id"
   },
   {
     "id": "authentication-bypass-owasp-0220",
     "name": "Authentication via social login manipulation #2",
     "template": "provider=google&user_id=victim_id",
-    "description": "Authentication via social login manipulation probe from OWASP. Tests application handling of: provider=google&user_id=victim...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication via social login manipulation probe from OWASP. Tests application handling of: provider=google&user_id=victim..."
   },
   {
     "id": "authentication-bypass-owasp-0221",
     "name": "Account takeover via referral code",
     "template": "referral_code=victim_referral",
-    "description": "Account takeover via referral code probe from OWASP. Tests application handling of: referral_code=victim_referral",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Account takeover via referral code probe from OWASP. Tests application handling of: referral_code=victim_referral"
   },
   {
     "id": "authentication-bypass-owasp-0222",
     "name": "Account takeover via referral code #2",
     "template": "invite_code=admin_invite",
-    "description": "Account takeover via referral code probe from OWASP. Tests application handling of: invite_code=admin_invite",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Account takeover via referral code probe from OWASP. Tests application handling of: invite_code=admin_invite"
   },
   {
     "id": "authentication-bypass-owasp-0223",
     "name": "Authentication bypass via API version manipulation",
     "template": "/api/v1/login (with strict auth)",
-    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/v1/login (with strict aut...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/v1/login (with strict aut..."
   },
   {
     "id": "authentication-bypass-owasp-0224",
     "name": "Authentication bypass via API version manipulation #2",
     "template": "/api/v0/login (might have weak auth)",
-    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/v0/login (might have weak...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/v0/login (might have weak..."
   },
   {
     "id": "authentication-bypass-owasp-0225",
     "name": "Authentication bypass via API version manipulation #3",
     "template": "/api/beta/login",
-    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/beta/login",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/beta/login"
   },
   {
     "id": "authentication-bypass-owasp-0226",
     "name": "Authentication bypass via API version manipulation #4",
     "template": "/api/internal/login",
-    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/internal/login",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication bypass via API version manipulation probe from OWASP. Tests application handling of: /api/internal/login"
   },
   {
     "id": "authentication-bypass-owasp-0227",
     "name": "Backup authentication endpoints",
     "template": "/login.php.bak",
-    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /login.php.bak",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /login.php.bak"
   },
   {
     "id": "authentication-bypass-owasp-0228",
     "name": "Backup authentication endpoints #2",
     "template": "/auth.php~",
-    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /auth.php~",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /auth.php~"
   },
   {
     "id": "authentication-bypass-owasp-0229",
     "name": "Backup authentication endpoints #3",
     "template": "/login.php.old",
-    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /login.php.old",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /login.php.old"
   },
   {
     "id": "authentication-bypass-owasp-0230",
     "name": "Backup authentication endpoints #4",
     "template": "/authentication.php.backup",
-    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /authentication.php.backup",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Backup authentication endpoints probe from OWASP. Tests application handling of: /authentication.php.backup"
   },
   {
     "id": "authentication-bypass-owasp-0231",
     "name": "Default development credentials",
     "template": "username=dev&password=dev",
-    "description": "Default development credentials probe from OWASP. Tests application handling of: username=dev&password=dev",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default development credentials probe from OWASP. Tests application handling of: username=dev&password=dev"
   },
   {
     "id": "authentication-bypass-owasp-0232",
     "name": "Default development credentials #2",
     "template": "username=developer&password=developer123",
-    "description": "Default development credentials probe from OWASP. Tests application handling of: username=developer&password=de...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default development credentials probe from OWASP. Tests application handling of: username=developer&password=de..."
   },
   {
     "id": "authentication-bypass-owasp-0233",
     "name": "Default development credentials #3",
     "template": "username=staging&password=staging123",
-    "description": "Default development credentials probe from OWASP. Tests application handling of: username=staging&password=stag...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default development credentials probe from OWASP. Tests application handling of: username=staging&password=stag..."
   },
   {
     "id": "authentication-bypass-owasp-0234",
     "name": "Default development credentials #4",
     "template": "username=debug&password=debug",
-    "description": "Default development credentials probe from OWASP. Tests application handling of: username=debug&password=debug",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Default development credentials probe from OWASP. Tests application handling of: username=debug&password=debug"
   },
   {
     "id": "authentication-bypass-owasp-0235",
     "name": "Privilege escalation via user role manipulation",
     "template": "role=user&role=admin",
-    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: role=user&role=admin",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: role=user&role=admin"
   },
   {
     "id": "authentication-bypass-owasp-0236",
     "name": "Privilege escalation via user role manipulation #2",
     "template": "user_type=regular&user_type=administrator",
-    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: user_type=regular&user_type=ad...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: user_type=regular&user_type=ad..."
   },
   {
     "id": "authentication-bypass-owasp-0237",
     "name": "Privilege escalation via user role manipulation #3",
     "template": "is_privileged=false&is_privileged=true",
-    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: is_privileged=false&is_privile...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: is_privileged=false&is_privile..."
   },
   {
     "id": "authentication-bypass-owasp-0238",
     "name": "Privilege escalation via user role manipulation #4",
     "template": "access_level=1&access_level=99",
-    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: access_level=1&access_level=99",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Privilege escalation via user role manipulation probe from OWASP. Tests application handling of: access_level=1&access_level=99"
   },
   {
     "id": "authentication-bypass-owasp-0239",
     "name": "Login CSRF to force login as attacker",
     "template": "<form action=\"https://victim.com/login\" method=\"POST\">",
-    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: <form action=\"https://victim.c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: <form action=\"https://victim.c..."
   },
   {
     "id": "authentication-bypass-owasp-0240",
     "name": "Login CSRF to force login as attacker #2",
     "template": "<input name=\"username\" value=\"attacker\">",
-    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: <input name=\"username\" value=\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: <input name=\"username\" value=\"..."
   },
   {
     "id": "authentication-bypass-owasp-0241",
     "name": "Login CSRF to force login as attacker #3",
     "template": "<input name=\"password\" value=\"attacker_password\">",
-    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: <input name=\"password\" value=\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: <input name=\"password\" value=\"..."
   },
   {
     "id": "authentication-bypass-owasp-0242",
     "name": "Login CSRF to force login as attacker #4",
     "template": "</form>",
-    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: </form>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Login CSRF to force login as attacker probe from OWASP. Tests application handling of: </form>"
   },
   {
     "id": "authentication-bypass-owasp-0243",
     "name": "Insecure direct object reference in auth",
     "template": "/auth/verify/USER_ID_1",
-    "description": "Insecure direct object reference in auth probe from OWASP. Tests application handling of: /auth/verify/USER_ID_1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Insecure direct object reference in auth probe from OWASP. Tests application handling of: /auth/verify/USER_ID_1"
   },
   {
     "id": "authentication-bypass-owasp-0244",
     "name": "Insecure direct object reference in auth #2",
     "template": "/auth/verify/USER_ID_2",
-    "description": "Insecure direct object reference in auth probe from OWASP. Tests application handling of: /auth/verify/USER_ID_2",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Insecure direct object reference in auth probe from OWASP. Tests application handling of: /auth/verify/USER_ID_2"
   },
   {
     "id": "authentication-bypass-owasp-0245",
     "name": "Insecure direct object reference in auth #3",
     "template": "/auth/activate/TOKEN_1",
-    "description": "Insecure direct object reference in auth probe from OWASP. Tests application handling of: /auth/activate/TOKEN_1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0246",
-    "name": "Authentication via header injection",
-    "template": "Cookie: authenticated=true; admin=true",
-    "description": "Authentication via header injection probe from OWASP. Tests application handling of: Cookie: authenticated=true; ad...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0247",
-    "name": "Authentication via header injection #2",
-    "template": "Cookie: PHPSESSID=admin_session; role=administrator",
-    "description": "Authentication via header injection probe from OWASP. Tests application handling of: Cookie: PHPSESSID=admin_sessio...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Insecure direct object reference in auth probe from OWASP. Tests application handling of: /auth/activate/TOKEN_1"
   },
   {
     "id": "authentication-bypass-owasp-0248",
     "name": "Set system time to future/past to bypass token expiration",
     "template": "timestamp=9999999999",
-    "description": "Set system time to future/past to bypass token expiration probe from OWASP. Tests application handling of: timestamp=9999999999",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Set system time to future/past to bypass token expiration probe from OWASP. Tests application handling of: timestamp=9999999999"
   },
   {
     "id": "authentication-bypass-owasp-0249",
     "name": "Set system time to future/past to bypass token expiration #2",
     "template": "valid_until=2099-01-01",
-    "description": "Set system time to future/past to bypass token expiration probe from OWASP. Tests application handling of: valid_until=2099-01-01",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Set system time to future/past to bypass token expiration probe from OWASP. Tests application handling of: valid_until=2099-01-01"
   },
   {
     "id": "authentication-bypass-owasp-0250",
     "name": "Set system time to future/past to bypass token expiration #3",
     "template": "expires=253402300799",
-    "description": "Set system time to future/past to bypass token expiration probe from OWASP. Tests application handling of: expires=253402300799",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Set system time to future/past to bypass token expiration probe from OWASP. Tests application handling of: expires=253402300799"
   },
   {
     "id": "authentication-bypass-owasp-0251",
     "name": "Send empty biometric data",
     "template": "fingerprint=",
-    "description": "Send empty biometric data probe from OWASP. Tests application handling of: fingerprint=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Send empty biometric data probe from OWASP. Tests application handling of: fingerprint="
   },
   {
     "id": "authentication-bypass-owasp-0252",
     "name": "Send empty biometric data #2",
     "template": "face_id=null",
-    "description": "Send empty biometric data probe from OWASP. Tests application handling of: face_id=null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Send empty biometric data probe from OWASP. Tests application handling of: face_id=null"
   },
   {
     "id": "authentication-bypass-owasp-0253",
     "name": "Send empty biometric data #3",
     "template": "biometric_token=",
-    "description": "Send empty biometric data probe from OWASP. Tests application handling of: biometric_token=",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Send empty biometric data probe from OWASP. Tests application handling of: biometric_token="
   },
   {
     "id": "authentication-bypass-owasp-0254",
     "name": "MFA bypass via backup codes",
     "template": "backup_code=000000",
-    "description": "MFA bypass via backup codes probe from OWASP. Tests application handling of: backup_code=000000",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "MFA bypass via backup codes probe from OWASP. Tests application handling of: backup_code=000000"
   },
   {
     "id": "authentication-bypass-owasp-0255",
     "name": "MFA bypass via backup codes #2",
     "template": "recovery_code=111111",
-    "description": "MFA bypass via backup codes probe from OWASP. Tests application handling of: recovery_code=111111",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "MFA bypass via backup codes probe from OWASP. Tests application handling of: recovery_code=111111"
   },
   {
     "id": "authentication-bypass-owasp-0256",
     "name": "MFA bypass via backup codes #3",
     "template": "emergency_code=123456",
-    "description": "MFA bypass via backup codes probe from OWASP. Tests application handling of: emergency_code=123456",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "MFA bypass via backup codes probe from OWASP. Tests application handling of: emergency_code=123456"
   },
   {
     "id": "authentication-bypass-owasp-0257",
     "name": "Authentication via registration endpoint abuse",
     "template": "/register?username=admin&password=new_pass&force=true",
-    "description": "Authentication via registration endpoint abuse probe from OWASP. Tests application handling of: /register?username=admin&passw...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication via registration endpoint abuse probe from OWASP. Tests application handling of: /register?username=admin&passw..."
   },
   {
     "id": "authentication-bypass-owasp-0258",
     "name": "Authentication via registration endpoint abuse #2",
     "template": "/signup?email=admin@example.com&override=true",
-    "description": "Authentication via registration endpoint abuse probe from OWASP. Tests application handling of: /signup?email=admin@example.co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Authentication via registration endpoint abuse probe from OWASP. Tests application handling of: /signup?email=admin@example.co..."
   },
   {
     "id": "authentication-bypass-owasp-0259",
     "name": "Cross-site authentication via postMessage",
     "template": "postMessage({type:'auth',token:'admin_token'}, '*')",
-    "description": "Cross-site authentication via postMessage probe from OWASP. Tests application handling of: postMessage({type:'auth',token...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0260",
-    "name": "Authentication bypass via request method override",
-    "template": "X-HTTP-Method-Override: GET",
-    "description": "Authentication bypass via request method override probe from OWASP. Tests application handling of: X-HTTP-Method-Override: GET",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
-  },
-  {
-    "id": "authentication-bypass-owasp-0261",
-    "name": "Authentication bypass via request method override #2",
-    "template": "X-Method-Override: GET",
-    "description": "Authentication bypass via request method override probe from OWASP. Tests application handling of: X-Method-Override: GET",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "auth-bypass-payloads.txt"
+    "description": "Cross-site authentication via postMessage probe from OWASP. Tests application handling of: postMessage({type:'auth',token..."
   }
 ]

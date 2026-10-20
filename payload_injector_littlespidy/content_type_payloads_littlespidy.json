@@ -1,0 +1,134 @@
+[
+  {
+    "id": "file-upload-owasp-0080",
+    "name": "Legitimate looking but with malicious content",
+    "template": "Content-Type: image/jpeg",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/jpeg"
+  },
+  {
+    "id": "file-upload-owasp-0081",
+    "name": "Legitimate looking but with malicious content #2",
+    "template": "Content-Type: image/png",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/png"
+  },
+  {
+    "id": "file-upload-owasp-0082",
+    "name": "Legitimate looking but with malicious content #3",
+    "template": "Content-Type: image/gif",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/gif"
+  },
+  {
+    "id": "file-upload-owasp-0083",
+    "name": "Legitimate looking but with malicious content #4",
+    "template": "Content-Type: image/bmp",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/bmp"
+  },
+  {
+    "id": "file-upload-owasp-0084",
+    "name": "Legitimate looking but with malicious content #5",
+    "template": "Content-Type: image/svg+xml",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/svg+xml"
+  },
+  {
+    "id": "file-upload-owasp-0085",
+    "name": "Legitimate looking but with malicious content #6",
+    "template": "Content-Type: application/pdf",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: application/pdf"
+  },
+  {
+    "id": "file-upload-owasp-0086",
+    "name": "Legitimate looking but with malicious content #7",
+    "template": "Content-Type: application/zip",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: application/zip"
+  },
+  {
+    "id": "file-upload-owasp-0087",
+    "name": "Legitimate looking but with malicious content #8",
+    "template": "Content-Type: text/plain",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: text/plain"
+  },
+  {
+    "id": "file-upload-owasp-0088",
+    "name": "Legitimate looking but with malicious content #9",
+    "template": "Content-Type: text/csv",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: text/csv"
+  },
+  {
+    "id": "file-upload-owasp-0089",
+    "name": "Legitimate looking but with malicious content #10",
+    "template": "Content-Type: application/octet-stream",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: application/octe..."
+  },
+  {
+    "id": "file-upload-owasp-0090",
+    "name": "Legitimate looking but with malicious content #11",
+    "template": "Content-Type: video/mp4",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: video/mp4"
+  },
+  {
+    "id": "file-upload-owasp-0091",
+    "name": "Legitimate looking but with malicious content #12",
+    "template": "Content-Type: audio/mpeg",
+    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: audio/mpeg"
+  },
+  {
+    "id": "file-upload-owasp-0092",
+    "name": "Empty or null",
+    "template": "Content-Type:",
+    "description": "Empty or null probe from OWASP. Tests application handling of: Content-Type:"
+  },
+  {
+    "id": "file-upload-owasp-0093",
+    "name": "Empty or null #2",
+    "template": "Content-Type: null",
+    "description": "Empty or null probe from OWASP. Tests application handling of: Content-Type: null"
+  },
+  {
+    "id": "file-upload-owasp-0094",
+    "name": "Empty or null #3",
+    "template": "Content-Type: undefined",
+    "description": "Empty or null probe from OWASP. Tests application handling of: Content-Type: undefined"
+  },
+  {
+    "id": "file-upload-owasp-0095",
+    "name": "Malformed",
+    "template": "Content-Type: image/jpeg; charset=binary",
+    "description": "Malformed probe from OWASP. Tests application handling of: Content-Type: image/jpeg; char..."
+  },
+  {
+    "id": "file-upload-owasp-0096",
+    "name": "Malformed #2",
+    "template": "Content-Type: multipart/form-data; boundary=something",
+    "description": "Malformed probe from OWASP. Tests application handling of: Content-Type: multipart/form-d..."
+  },
+  {
+    "id": "file-upload-owasp-0258",
+    "name": "Upload with different MIME types",
+    "template": "Content-Type: application/x-php",
+    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: application/x-ph..."
+  },
+  {
+    "id": "file-upload-owasp-0259",
+    "name": "Upload with different MIME types #2",
+    "template": "Content-Type: application/x-httpd-php",
+    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: application/x-ht..."
+  },
+  {
+    "id": "file-upload-owasp-0260",
+    "name": "Upload with different MIME types #3",
+    "template": "Content-Type: application/php",
+    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: application/php"
+  },
+  {
+    "id": "file-upload-owasp-0261",
+    "name": "Upload with different MIME types #4",
+    "template": "Content-Type: text/php",
+    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: text/php"
+  },
+  {
+    "id": "file-upload-owasp-0262",
+    "name": "Upload with different MIME types #5",
+    "template": "Content-Type: text/x-php",
+    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: text/x-php"
+  }
+]

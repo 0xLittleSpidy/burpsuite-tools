@@ -31,6 +31,10 @@ public class PayloadCategoryRegistry_littlespidy {
             new CategoryInfo_littlespidy("CSTI", "csti_payloads.json"),
             new CategoryInfo_littlespidy("SQL", "sql_payloads.json"),
 
+            // Dedicated request testing categories
+            new CategoryInfo_littlespidy("Content-Type", "content_type_payloads_littlespidy.json"),
+            new CategoryInfo_littlespidy("Headers", "headers_payloads_littlespidy.json"),
+
             // OWASP-Hunting categories
             new CategoryInfo_littlespidy("Authentication Bypass", "authentication_bypass_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("Business Logic", "business_logic_payloads_littlespidy.json"),
@@ -40,8 +44,6 @@ public class PayloadCategoryRegistry_littlespidy {
             new CategoryInfo_littlespidy("CSV Injection", "csv_injection_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("Deserialization", "deserialization_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("File Upload", "file_upload_payloads_littlespidy.json"),
-            new CategoryInfo_littlespidy("IDOR", "idor_payloads_littlespidy.json"),
-            new CategoryInfo_littlespidy("JWT Vulnerabilities", "jwt_vulnerabilities_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("LDAP Injection", "ldap_injection_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("Log Injection", "log_injection_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("NoSQL Injection", "nosql_injection_payloads_littlespidy.json"),
@@ -50,14 +52,9 @@ public class PayloadCategoryRegistry_littlespidy {
             new CategoryInfo_littlespidy("Path Traversal", "path_traversal_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("Prompt Injection", "prompt_injection_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("Prototype Pollution", "prototype_pollution_payloads_littlespidy.json"),
-            new CategoryInfo_littlespidy("Security Misconfiguration", "security_misconfiguration_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("SSJI", "ssji_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("SSRF", "ssrf_payloads_littlespidy.json"),
-            new CategoryInfo_littlespidy("Symbolic Link Attacks", "symbolic_link_attacks_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("Timing Attacks", "timing_attacks_payloads_littlespidy.json"),
-            new CategoryInfo_littlespidy("Tor-Based Attacks", "tor_based_attacks_payloads_littlespidy.json"),
-            new CategoryInfo_littlespidy("Vulnerable Components", "vulnerable_components_payloads_littlespidy.json"),
-            new CategoryInfo_littlespidy("Weak Cryptography", "weak_cryptography_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("Weak Passwords", "weak_passwords_payloads_littlespidy.json"),
             new CategoryInfo_littlespidy("XML Injection", "xml_injection_payloads_littlespidy.json"),
 

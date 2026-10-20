@@ -9,16 +9,21 @@ import com.littlespidy.payloadinjector.model.PayloadFileService_littlespidy;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created with the help of an AI Agent and littlespidy.
@@ -38,6 +43,9 @@ public class ParamPayloadTab extends JPanel {
 
     private final PayloadTableModel tableModel;
     private final JTable table;
+    private final TableRowSorter<PayloadTableModel> sorter;
+    private final JTextField searchField;
+    private final JComboBox<String> platformFilterBox;
     private final JLabel statusLabel;
 
     public ParamPayloadTab(String categoryTitle, ParamPayloadStore store, InjectionSettings settings) {
@@ -49,7 +57,7 @@ public class ParamPayloadTab extends JPanel {
         setLayout(new BorderLayout(5, 5));
         setBorder(new EmptyBorder(8, 8, 8, 8));
 
-        // ── Top Section: Action Toolbar & Injection Settings ──
+        // -- Top Section: Action Toolbar & Injection Settings --
         JPanel topContainer = new JPanel(new BorderLayout(0, 4));
 
         // 1. Actions Toolbar
@@ -94,14 +102,46 @@ public class ParamPayloadTab extends JPanel {
         dedupBtn.addActionListener(e -> deduplicatePayloads());
         actionsBar.add(dedupBtn);
 
-        actionsBar.addSeparator(new Dimension(12, 0));
+        actionsBar.addSeparator(new Dimension(10, 0));
 
         JButton reloadBtn = new JButton("Reload from JSON");
         reloadBtn.addActionListener(e -> {
             store.reload();
+            applySearchFilter();
             updateStatusLabel();
         });
         actionsBar.add(reloadBtn);
+
+        actionsBar.addSeparator(new Dimension(10, 0));
+
+        // -- Platform Filter (Path Traversal) --
+        if (isPathTraversal) {
+            actionsBar.add(new JLabel("Platform: "));
+            platformFilterBox = new JComboBox<>(new String[]{"All Platforms", "Linux", "Windows"});
+            platformFilterBox.setMaximumSize(new Dimension(120, 26));
+            platformFilterBox.addActionListener(e -> applySearchFilter());
+            actionsBar.add(platformFilterBox);
+            actionsBar.addSeparator(new Dimension(8, 0));
+        } else {
+            platformFilterBox = null;
+        }
+
+        // -- Search Bar --
+        actionsBar.add(new JLabel("Search: "));
+        searchField = new JTextField(15);
+        searchField.setToolTipText("Search both payload name and payload value");
+        searchField.setMaximumSize(new Dimension(200, 26));
+        actionsBar.add(searchField);
+
+        actionsBar.addSeparator(new Dimension(4, 0));
+
+        JButton clearBtn = new JButton("Clear");
+        clearBtn.setToolTipText("Clear active search filter");
+        clearBtn.addActionListener(e -> {
+            searchField.setText("");
+            searchField.requestFocusInWindow();
+        });
+        actionsBar.add(clearBtn);
 
         actionsBar.addSeparator(new Dimension(12, 0));
 
@@ -120,31 +160,30 @@ public class ParamPayloadTab extends JPanel {
 
         add(topContainer, BorderLayout.NORTH);
 
-        // ── Center Section: Payloads Table ──
+        // -- Center Section: Payloads Table --
         tableModel = new PayloadTableModel();
         table = new JTable(tableModel);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.setRowHeight(24);
         table.setFont(table.getFont().deriveFont(13f));
         table.getTableHeader().setFont(table.getFont().deriveFont(Font.BOLD, 13f));
 
         if (isPathTraversal) {
-            table.getColumnModel().getColumn(0).setPreferredWidth(160); // Name
-            table.getColumnModel().getColumn(1).setPreferredWidth(90);  // Platform
-            table.getColumnModel().getColumn(2).setPreferredWidth(300); // Payload Value
-            table.getColumnModel().getColumn(3).setPreferredWidth(200); // Description
-            table.getColumnModel().getColumn(4).setPreferredWidth(100); // Source Type
-            table.getColumnModel().getColumn(5).setPreferredWidth(130); // Source File
+            table.getColumnModel().getColumn(0).setPreferredWidth(180); // Name
+            table.getColumnModel().getColumn(1).setPreferredWidth(100); // Platform
+            table.getColumnModel().getColumn(2).setPreferredWidth(380); // Payload Value
+            table.getColumnModel().getColumn(3).setPreferredWidth(260); // Description
+
+            JComboBox<String> platformBox = new JComboBox<>(new String[]{"Linux", "Windows"});
+            table.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(platformBox));
         } else {
-            table.getColumnModel().getColumn(0).setPreferredWidth(160); // Name
-            table.getColumnModel().getColumn(1).setPreferredWidth(320); // Payload Value
-            table.getColumnModel().getColumn(2).setPreferredWidth(220); // Description
-            table.getColumnModel().getColumn(3).setPreferredWidth(100); // Source Type
-            table.getColumnModel().getColumn(4).setPreferredWidth(130); // Source File
+            table.getColumnModel().getColumn(0).setPreferredWidth(200); // Name
+            table.getColumnModel().getColumn(1).setPreferredWidth(450); // Payload Value
+            table.getColumnModel().getColumn(2).setPreferredWidth(280); // Description
         }
 
         // Burp-style sorting: toggle between ASCENDING and DESCENDING
-        TableRowSorter<PayloadTableModel> sorter = new TableRowSorter<>(tableModel) {
+        sorter = new TableRowSorter<>(tableModel) {
             @Override
             public void toggleSortOrder(int column) {
                 List<? extends SortKey> sortKeys = getSortKeys();
@@ -166,25 +205,34 @@ public class ParamPayloadTab extends JPanel {
         }
         table.setRowSorter(sorter);
 
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { applySearchFilter(); }
+            @Override public void removeUpdate(DocumentEvent e) { applySearchFilter(); }
+            @Override public void changedUpdate(DocumentEvent e) { applySearchFilter(); }
+        });
+
         // Custom Header Renderer for "Payload Value" column with "Copy All" button
         setupPayloadColumnHeaderButton();
 
-        // Double click to edit
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && table.getSelectedRow() != -1) {
-                    openEditDialog();
-                }
+        // Keyboard Delete shortcut
+        table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteSelectedPayloads");
+        table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "deleteSelectedPayloads");
+        table.getActionMap().put("deleteSelectedPayloads", new AbstractAction() {
+            @Override public void actionPerformed(ActionEvent e) {
+                deleteSelected();
             }
         });
 
         store.addChangeListener(() -> SwingUtilities.invokeLater(() -> {
             tableModel.fireTableDataChanged();
+            applySearchFilter();
             updateStatusLabel();
         }));
 
         add(new JScrollPane(table), BorderLayout.CENTER);
+        applySearchFilter();
         updateStatusLabel();
     }
 
@@ -263,15 +311,6 @@ public class ParamPayloadTab extends JPanel {
 
         panel.add(new JSeparator(SwingConstants.VERTICAL));
 
-        // Encoding mode
-        panel.add(new JLabel("Encoding:"));
-        JComboBox<InjectionSettings.EncodingMode> encCombo = new JComboBox<>(InjectionSettings.EncodingMode.values());
-        encCombo.setSelectedItem(settings.getEncodingMode());
-        encCombo.addActionListener(e -> settings.setEncodingMode((InjectionSettings.EncodingMode) encCombo.getSelectedItem()));
-        panel.add(encCombo);
-
-        panel.add(new JSeparator(SwingConstants.VERTICAL));
-
         // Parameter type checkboxes
         panel.add(new JLabel("Targets:"));
         JCheckBox cbUrl = new JCheckBox("URL", settings.isTargetUrlParams());
@@ -311,37 +350,36 @@ public class ParamPayloadTab extends JPanel {
             return;
         }
 
-        int modelRow = table.convertRowIndexToModel(viewRow);
-        ParamPayloadEntry existing = store.getEntries().get(modelRow);
-
-        Window owner = SwingUtilities.getWindowAncestor(this);
-        AddEditParamPayloadDialog dialog = new AddEditParamPayloadDialog(owner, categoryTitle, existing);
-        dialog.setVisible(true);
-
-        ParamPayloadEntry result = dialog.getResult();
-        if (result != null) {
-            store.updateEntry(modelRow, result);
+        int editCol = isPathTraversal ? 2 : 1;
+        table.editCellAt(viewRow, editCol);
+        if (table.getEditorComponent() != null) {
+            table.getEditorComponent().requestFocusInWindow();
         }
     }
 
     private void deleteSelected() {
-        int viewRow = table.getSelectedRow();
-        if (viewRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a payload to delete.", "Notice", JOptionPane.INFORMATION_MESSAGE);
+        int[] viewRows = table.getSelectedRows();
+        if (viewRows.length == 0) {
+            JOptionPane.showMessageDialog(this, "Please select at least one payload to delete.", "Notice", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        int modelRow = table.convertRowIndexToModel(viewRow);
-        ParamPayloadEntry entry = store.getEntries().get(modelRow);
+        String confirmMsg = (viewRows.length == 1)
+                ? "Delete " + categoryTitle + " payload \"" + store.getEntries().get(table.convertRowIndexToModel(viewRows[0])).getName() + "\"?"
+                : "Delete " + viewRows.length + " selected " + categoryTitle + " payloads?";
 
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Delete " + categoryTitle + " payload \"" + entry.getName() + "\"?",
+                confirmMsg,
                 "Confirm Delete",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            store.removeEntry(modelRow);
+            int[] modelRows = new int[viewRows.length];
+            for (int i = 0; i < viewRows.length; i++) {
+                modelRows[i] = table.convertRowIndexToModel(viewRows[i]);
+            }
+            store.removeEntries(modelRows);
         }
     }
 
@@ -455,9 +493,58 @@ public class ParamPayloadTab extends JPanel {
         }
     }
 
+    public void applySearchFilter() {
+        if (sorter == null) return;
+        List<RowFilter<PayloadTableModel, Integer>> filters = new ArrayList<>();
+
+        // Platform filter for Path Traversal
+        if (isPathTraversal && platformFilterBox != null) {
+            String selectedPlatform = (String) platformFilterBox.getSelectedItem();
+            if (selectedPlatform != null && !"All Platforms".equalsIgnoreCase(selectedPlatform)) {
+                // Column 1 is "Platform" in Path Traversal
+                filters.add(RowFilter.regexFilter("(?i)^" + Pattern.quote(selectedPlatform) + "$", 1));
+            }
+        }
+
+        // Search text: specifically search both Name and Payload Value columns
+        String text = (searchField != null) ? searchField.getText().trim() : "";
+        if (!text.isEmpty()) {
+            int nameCol = 0;
+            int payloadCol = isPathTraversal ? 2 : 1;
+            filters.add(RowFilter.regexFilter("(?i)" + Pattern.quote(text), nameCol, payloadCol));
+        }
+
+        if (filters.isEmpty()) {
+            sorter.setRowFilter(null);
+        } else if (filters.size() == 1) {
+            sorter.setRowFilter(filters.get(0));
+        } else {
+            sorter.setRowFilter(RowFilter.andFilter(filters));
+        }
+        updateStatusLabel();
+    }
+
     private void updateStatusLabel() {
-        int count = store.getEntries().size();
-        statusLabel.setText(count + " payload" + (count == 1 ? "" : "s") + " loaded");
+        if (statusLabel == null) return;
+        int total = tableModel.getRowCount();
+        int filtered = table.getRowCount();
+        boolean hasText = searchField != null && !searchField.getText().trim().isEmpty();
+        boolean hasPlatform = isPathTraversal && platformFilterBox != null
+                && !"All Platforms".equalsIgnoreCase((String) platformFilterBox.getSelectedItem());
+
+        if (hasText || hasPlatform) {
+            statusLabel.setText("Showing " + filtered + " of " + total + " payloads");
+        } else {
+            statusLabel.setText(total + " payload" + (total == 1 ? "" : "s") + " loaded");
+        }
+    }
+
+    public JTextField getSearchField() {
+        return searchField;
+    }
+
+    public JComboBox<String> getPlatformFilterBox() {
+        return platformFilterBox;
     }
 
     public JTable getTable() {
@@ -468,16 +555,16 @@ public class ParamPayloadTab extends JPanel {
         return tableModel;
     }
 
-    // ── Inner Table Model ──
+    // -- Inner Table Model --
 
     public class PayloadTableModel extends AbstractTableModel {
         private final String[] columns;
 
         public PayloadTableModel() {
             if (isPathTraversal) {
-                this.columns = new String[]{"Name", "Platform", "Payload Value", "Description", "Source Type", "Source File"};
+                this.columns = new String[]{"Name", "Platform", "Payload Value", "Description"};
             } else {
-                this.columns = new String[]{"Name", "Payload Value", "Description", "Source Type", "Source File"};
+                this.columns = new String[]{"Name", "Payload Value", "Description"};
             }
         }
 
@@ -492,7 +579,40 @@ public class ParamPayloadTab extends JPanel {
 
         @Override
         public boolean isCellEditable(int row, int col) {
-            return false;
+            return true;
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int row, int col) {
+            List<ParamPayloadEntry> list = store.getEntries();
+            if (row < 0 || row >= list.size()) return;
+            ParamPayloadEntry e = list.get(row);
+            String val = (aValue != null) ? aValue.toString().trim() : "";
+
+            if (isPathTraversal) {
+                switch (col) {
+                    case 0 -> {
+                        if (!val.isEmpty()) e.setName(val);
+                    }
+                    case 1 -> e.setPlatform("Windows".equalsIgnoreCase(val) ? "Windows" : "Linux");
+                    case 2 -> {
+                        if (!val.isEmpty()) e.setTemplate(val);
+                    }
+                    case 3 -> e.setDescription(val);
+                }
+            } else {
+                switch (col) {
+                    case 0 -> {
+                        if (!val.isEmpty()) e.setName(val);
+                    }
+                    case 1 -> {
+                        if (!val.isEmpty()) e.setTemplate(val);
+                    }
+                    case 2 -> e.setDescription(val);
+                }
+            }
+            store.save();
+            fireTableCellUpdated(row, col);
         }
 
         @Override
@@ -506,8 +626,6 @@ public class ParamPayloadTab extends JPanel {
                     case 1 -> (e.getPlatform() != null) ? e.getPlatform() : "";
                     case 2 -> e.getTemplate();
                     case 3 -> e.getDescription();
-                    case 4 -> e.getSourceType();
-                    case 5 -> e.getSourceFile();
                     default -> null;
                 };
             } else {
@@ -515,8 +633,6 @@ public class ParamPayloadTab extends JPanel {
                     case 0 -> e.getName();
                     case 1 -> e.getTemplate();
                     case 2 -> e.getDescription();
-                    case 3 -> e.getSourceType();
-                    case 4 -> e.getSourceFile();
                     default -> null;
                 };
             }

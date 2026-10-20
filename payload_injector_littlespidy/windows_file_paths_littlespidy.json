@@ -1,0 +1,436 @@
+[
+  {
+    "id": "win-fp-1",
+    "path": "windows/win.ini",
+    "category": "System Configuration",
+    "description": "Windows initialization file containing environment and driver settings",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-2",
+    "path": "win.ini",
+    "category": "System Configuration",
+    "description": "Direct relative path to Windows initialization file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-3",
+    "path": "boot.ini",
+    "category": "System Configuration",
+    "description": "Windows NT/2000/XP/2003 boot loader configuration",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-4",
+    "path": "windows/system.ini",
+    "category": "System Configuration",
+    "description": "Windows system configuration and device drivers settings",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-5",
+    "path": "windows/debug/netsetup.log",
+    "category": "System Configuration",
+    "description": "Domain join and network setup diagnostic log (may leak domain credentials)",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-6",
+    "path": "windows/system32/drivers/etc/hosts",
+    "category": "Networking \u0026 Drivers",
+    "description": "Windows static IP to hostname mappings",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-7",
+    "path": "windows/system32/drivers/etc/networks",
+    "category": "Networking \u0026 Drivers",
+    "description": "Windows network name to network ID translation",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-8",
+    "path": "windows/system32/drivers/etc/services",
+    "category": "Networking \u0026 Drivers",
+    "description": "Internet network services and port numbers configuration",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-9",
+    "path": "windows/system32/drivers/etc/protocol",
+    "category": "Networking \u0026 Drivers",
+    "description": "Internet protocol suite numbers definition",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-10",
+    "path": "windows/system32/config/SAM",
+    "category": "SAM \u0026 Registry",
+    "description": "Security Accounts Manager database holding local account password hashes",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-11",
+    "path": "windows/system32/config/SYSTEM",
+    "category": "SAM \u0026 Registry",
+    "description": "Windows SYSTEM registry hive needed to decrypt SAM database",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-12",
+    "path": "windows/system32/config/SOFTWARE",
+    "category": "SAM \u0026 Registry",
+    "description": "Windows SOFTWARE registry hive containing installed app secrets",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-13",
+    "path": "windows/system32/config/SECURITY",
+    "category": "SAM \u0026 Registry",
+    "description": "Windows SECURITY registry hive storing LSA secrets and cached hashes",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-14",
+    "path": "windows/repair/SAM",
+    "category": "SAM \u0026 Registry",
+    "description": "Backup SAM database created during system setup or recovery",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-15",
+    "path": "windows/repair/system",
+    "category": "SAM \u0026 Registry",
+    "description": "Backup SYSTEM registry hive from initial setup",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-16",
+    "path": "windows/panther/unattend.xml",
+    "category": "Unattended Setup",
+    "description": "Automated setup answer file often containing plaintext administrator passwords",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-17",
+    "path": "windows/panther/autounattend.xml",
+    "category": "Unattended Setup",
+    "description": "Pre-installation answer file with administrator credentials",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-18",
+    "path": "windows/panther/sysprep.inf",
+    "category": "Unattended Setup",
+    "description": "Sysprep configuration script containing local administrator account info",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-19",
+    "path": "inetpub/wwwroot/web.config",
+    "category": "IIS \u0026 Web Apps",
+    "description": "ASP.NET and IIS web application configuration (connection strings \u0026 machine keys)",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-20",
+    "path": "windows/system32/inetsrv/config/applicationHost.config",
+    "category": "IIS \u0026 Web Apps",
+    "description": "Master IIS configuration defining all hosted sites, bindings, and app pools",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-21",
+    "path": "inetpub/logs/LogFiles/W3SVC1/u_ex.log",
+    "category": "IIS \u0026 Web Apps",
+    "description": "Default W3C HTTP access log for IIS web site 1",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-22",
+    "path": "inetpub/wwwroot/global.asax",
+    "category": "IIS \u0026 Web Apps",
+    "description": "ASP.NET application global event handler and setup file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-23",
+    "path": "windows/system32/license.rtf",
+    "category": "System Files",
+    "description": "Windows end-user license agreement text (reliable non-destructive read test)",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-24",
+    "path": "windows/windowsupdate.log",
+    "category": "System Files",
+    "description": "Windows Update operational log file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-25",
+    "path": "pagefile.sys",
+    "category": "System Files",
+    "description": "Virtual memory paging file potentially storing unencrypted memory contents",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-26",
+    "path": "winnt/desktop.ini",
+    "category": "System Configuration",
+    "description": "Windows NT desktop folder customization configuration",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-27",
+    "path": "winnt/system32/cmd.exe",
+    "category": "System Binaries",
+    "description": "Windows NT command interpreter executable",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-28",
+    "path": "Windows/System32/winevt/Logs/Application.evtx",
+    "category": "Event Logs",
+    "description": "Windows application event log binary evtx format",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-29",
+    "path": "Windows/System32/winevt/Logs/Security.evtx",
+    "category": "Event Logs",
+    "description": "Windows security audit and logon events log",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-30",
+    "path": "Windows/System32/winevt/Logs/System.evtx",
+    "category": "Event Logs",
+    "description": "Windows system kernel and service events log",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-31",
+    "path": "inetpub/wwwroot/global.asa",
+    "category": "IIS \u0026 ASP.NET",
+    "description": "Classic Active Server Pages global application file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-32",
+    "path": "localstart.asp",
+    "category": "IIS \u0026 ASP.NET",
+    "description": "Default IIS local startup page",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-33",
+    "path": "web.config",
+    "category": "IIS \u0026 ASP.NET",
+    "description": "IIS ASP.NET application configuration file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-34",
+    "path": "appsettings.json",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "ASP.NET Core application settings and connection strings",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-35",
+    "path": "appsettings.Production.json",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "ASP.NET Core production settings and secrets",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-36",
+    "path": ".env",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Application environment variables and secret keys",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-37",
+    "path": ".env.local",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Local environment overrides and credentials",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-38",
+    "path": "config.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "PHP application database and general configuration",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-39",
+    "path": "wp-config.php",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "WordPress database configuration and auth keys",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-40",
+    "path": "settings.py",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Django application settings and secret keys",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-41",
+    "path": "manage.py",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Django management script",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-42",
+    "path": "package.json",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Node.js dependencies and script configuration",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-43",
+    "path": "application.properties",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Spring Boot application properties",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-44",
+    "path": "application.yml",
+    "category": "Application Configs \u0026 Secrets",
+    "description": "Spring Boot YAML application configuration",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-45",
+    "path": "database.sql",
+    "category": "Database \u0026 Backups",
+    "description": "Raw SQL database export",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-46",
+    "path": "backup.sql",
+    "category": "Database \u0026 Backups",
+    "description": "Database SQL dump backup file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-47",
+    "path": "backup.zip",
+    "category": "Database \u0026 Backups",
+    "description": "Compressed application and database archive",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-48",
+    "path": "db.sqlite3",
+    "category": "Database \u0026 Backups",
+    "description": "SQLite 3 relational database file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-49",
+    "path": "index.html",
+    "category": "Web Roots \u0026 Tests",
+    "description": "Default static web root page",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-50",
+    "path": "index.php",
+    "category": "Web Roots \u0026 Tests",
+    "description": "Default PHP script entrypoint",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-51",
+    "path": "test.txt",
+    "category": "Web Roots \u0026 Tests",
+    "description": "Diagnostic test file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-52",
+    "path": ".git",
+    "category": "Version Control",
+    "description": "Git version control repository directory",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-53",
+    "path": "desktop.ini",
+    "category": "System Configuration",
+    "description": "Base filename of Windows desktop customization",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-54",
+    "path": "cmd.exe",
+    "category": "System Binaries",
+    "description": "Base filename of Windows command interpreter",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-55",
+    "path": "Application.evtx",
+    "category": "Event Logs",
+    "description": "Base filename of Windows application event log",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-56",
+    "path": "Security.evtx",
+    "category": "Event Logs",
+    "description": "Base filename of Windows security event log",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-57",
+    "path": "System.evtx",
+    "category": "Event Logs",
+    "description": "Base filename of Windows system event log",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-58",
+    "path": "global.asa",
+    "category": "IIS \u0026 ASP.NET",
+    "description": "Base filename of Classic ASP global file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-59",
+    "path": "hosts",
+    "category": "Networking \u0026 Drivers",
+    "description": "Base filename of static hosts file",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-60",
+    "path": "sam",
+    "category": "Registry \u0026 SAM Databases",
+    "description": "Base filename of Security Account Manager database",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-61",
+    "path": "system",
+    "category": "Registry \u0026 SAM Databases",
+    "description": "Base filename of SYSTEM registry hive",
+    "platform": "Windows"
+  },
+  {
+    "id": "win-fp-62",
+    "path": "system.ini",
+    "category": "System Configuration",
+    "description": "Base filename of Windows system initialization file",
+    "platform": "Windows"
+  }
+]

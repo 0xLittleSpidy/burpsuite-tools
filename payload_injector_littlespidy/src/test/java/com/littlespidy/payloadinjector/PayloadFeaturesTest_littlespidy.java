@@ -1,12 +1,14 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.payloadinjector.model;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +27,164 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class PayloadFeaturesTest_littlespidy {
 
+    @BeforeAll
+    static void setUpMontoyaFactory() {
+        if (burp.api.montoya.internal.ObjectFactoryLocator.FACTORY == null) {
+            burp.api.montoya.internal.ObjectFactoryLocator.FACTORY = createMockMontoyaObjectFactory();
+        }
+    }
+
+    private static burp.api.montoya.internal.MontoyaObjectFactory createMockMontoyaObjectFactory() {
+        return (burp.api.montoya.internal.MontoyaObjectFactory) Proxy.newProxyInstance(
+                PayloadFeaturesTest_littlespidy.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.internal.MontoyaObjectFactory.class},
+                (proxy, method, args) -> {
+                    String methodName = method.getName();
+                    if ("httpRequest".equals(methodName)) {
+                        if (args == null || args.length == 0) {
+                            return createMockHttpRequest("");
+                        }
+                        if (args.length == 1) {
+                            if (args[0] instanceof String s) {
+                                return createMockHttpRequest(s);
+                            }
+                            if (args[0] instanceof burp.api.montoya.core.ByteArray ba) {
+                                return createMockHttpRequest(new String(ba.getBytes(), StandardCharsets.UTF_8));
+                            }
+                        }
+                        if (args.length == 2) {
+                            burp.api.montoya.http.HttpService service = (burp.api.montoya.http.HttpService) args[0];
+                            if (args[1] instanceof burp.api.montoya.core.ByteArray ba) {
+                                return createMockHttpRequest(new String(ba.getBytes(), StandardCharsets.UTF_8), service);
+                            }
+                            if (args[1] instanceof String s) {
+                                return createMockHttpRequest(s, service);
+                            }
+                        }
+                    }
+                    if ("byteArray".equals(methodName)) {
+                        if (args != null && args.length > 0) {
+                            if (args[0] instanceof byte[] b) return createMockByteArray(b);
+                            if (args[0] instanceof String s) return createMockByteArray(s.getBytes(StandardCharsets.UTF_8));
+                        }
+                        return createMockByteArray(new byte[0]);
+                    }
+                    if ("parameter".equals(methodName)) {
+                        String name = (String) args[0];
+                        String value = (String) args[1];
+                        burp.api.montoya.http.message.params.HttpParameterType type = (burp.api.montoya.http.message.params.HttpParameterType) args[2];
+                        return createMockHttpParameter(name, value, type);
+                    }
+                    return null;
+                }
+        );
+    }
+
+    private static burp.api.montoya.http.message.requests.HttpRequest createMockHttpRequest(String raw) {
+        return createMockHttpRequest(raw, null);
+    }
+
+    private static burp.api.montoya.http.message.requests.HttpRequest createMockHttpRequest(String raw, burp.api.montoya.http.HttpService service) {
+        return (burp.api.montoya.http.message.requests.HttpRequest) Proxy.newProxyInstance(
+                PayloadFeaturesTest_littlespidy.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.http.message.requests.HttpRequest.class},
+                (proxy, method, args) -> {
+                    String name = method.getName();
+                    if ("toString".equals(name)) return raw;
+                    if ("httpService".equals(name)) return service;
+                    if ("toByteArray".equals(name)) return createMockByteArray(raw.getBytes(StandardCharsets.UTF_8));
+                    if ("parameters".equals(name)) {
+                        List<burp.api.montoya.http.message.params.ParsedHttpParameter> params = new ArrayList<>();
+                        int qIdx = raw.indexOf('?');
+                        int spaceIdx = raw.indexOf(' ', qIdx > 0 ? qIdx : 0);
+                        if (qIdx != -1 && spaceIdx > qIdx) {
+                            String query = raw.substring(qIdx + 1, spaceIdx);
+                            String[] pairs = query.split("&");
+                            for (String pair : pairs) {
+                                int eq = pair.indexOf('=');
+                                String pName = eq != -1 ? pair.substring(0, eq) : pair;
+                                String pVal = eq != -1 ? pair.substring(eq + 1) : "";
+                                params.add(createMockParsedHttpParameter(pName, pVal, burp.api.montoya.http.message.params.HttpParameterType.URL));
+                            }
+                        }
+                        return params;
+                    }
+                    if ("withUpdatedParameters".equals(name)) {
+                        List<?> updated = (List<?>) args[0];
+                        String updatedRaw = raw;
+                        for (Object obj : updated) {
+                            burp.api.montoya.http.message.params.HttpParameter p = (burp.api.montoya.http.message.params.HttpParameter) obj;
+                            int qIdx = updatedRaw.indexOf('?');
+                            int spaceIdx = updatedRaw.indexOf(' ', qIdx > 0 ? qIdx : 0);
+                            if (qIdx != -1 && spaceIdx > qIdx) {
+                                String reqStart = updatedRaw.substring(0, qIdx + 1);
+                                String query = updatedRaw.substring(qIdx + 1, spaceIdx);
+                                String reqEnd = updatedRaw.substring(spaceIdx);
+                                String[] pairs = query.split("&");
+                                List<String> newPairs = new ArrayList<>();
+                                for (String pair : pairs) {
+                                    int eq = pair.indexOf('=');
+                                    String k = eq != -1 ? pair.substring(0, eq) : pair;
+                                    if (k.equals(p.name())) {
+                                        newPairs.add(k + "=" + p.value());
+                                    } else {
+                                        newPairs.add(pair);
+                                    }
+                                }
+                                updatedRaw = reqStart + String.join("&", newPairs) + reqEnd;
+                            }
+                        }
+                        return createMockHttpRequest(updatedRaw, service);
+                    }
+                    return null;
+                }
+        );
+    }
+
+    private static burp.api.montoya.core.ByteArray createMockByteArray(byte[] bytes) {
+        return (burp.api.montoya.core.ByteArray) Proxy.newProxyInstance(
+                PayloadFeaturesTest_littlespidy.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.core.ByteArray.class},
+                (proxy, method, args) -> {
+                    String name = method.getName();
+                    if ("getBytes".equals(name)) return bytes;
+                    if ("length".equals(name)) return bytes.length;
+                    if ("toString".equals(name)) return new String(bytes, StandardCharsets.UTF_8);
+                    return null;
+                }
+        );
+    }
+
+    private static burp.api.montoya.http.message.params.HttpParameter createMockHttpParameter(
+            String name, String value, burp.api.montoya.http.message.params.HttpParameterType type) {
+        return (burp.api.montoya.http.message.params.HttpParameter) Proxy.newProxyInstance(
+                PayloadFeaturesTest_littlespidy.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.http.message.params.HttpParameter.class},
+                (proxy, method, args) -> {
+                    String m = method.getName();
+                    if ("name".equals(m)) return name;
+                    if ("value".equals(m)) return value;
+                    if ("type".equals(m)) return type;
+                    return null;
+                }
+        );
+    }
+
+    private static burp.api.montoya.http.message.params.ParsedHttpParameter createMockParsedHttpParameter(
+            String name, String value, burp.api.montoya.http.message.params.HttpParameterType type) {
+        return (burp.api.montoya.http.message.params.ParsedHttpParameter) Proxy.newProxyInstance(
+                PayloadFeaturesTest_littlespidy.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.http.message.params.ParsedHttpParameter.class},
+                (proxy, method, args) -> {
+                    String m = method.getName();
+                    if ("name".equals(m)) return name;
+                    if ("value".equals(m)) return value;
+                    if ("type".equals(m)) return type;
+                    return null;
+                }
+        );
+    }
+
     @TempDir
     Path tempDir;
 
@@ -38,7 +198,7 @@ public class PayloadFeaturesTest_littlespidy {
         sampleEntries.add(new ParamPayloadEntry("id-3", "Payload Three", "{{7*7}}", "Jinja expression", true, "Imported", "test_payloads.txt"));
     }
 
-    // ── Import Feature Tests ──
+    // -- Import Feature Tests --
 
     @Test
     void testImportValidTxtFile() throws IOException {
@@ -129,7 +289,7 @@ public class PayloadFeaturesTest_littlespidy {
                 PayloadFileService_littlespidy.importPayloadsFromTxt(null));
     }
 
-    // ── Copy All Feature Tests ──
+    // -- Copy All Feature Tests --
 
     @Test
     void testCopyPayloadsToClipboardEmptyList() {
@@ -156,7 +316,7 @@ public class PayloadFeaturesTest_littlespidy {
         }
     }
 
-    // ── Deduplication Feature Tests ──
+    // -- Deduplication Feature Tests --
 
     @Test
     void testDeduplicateRetainsEntryWithDescriptionWhenDuplicateLacksDescription() throws IOException {
@@ -274,7 +434,7 @@ public class PayloadFeaturesTest_littlespidy {
         assertNull(result.deduplicatedFilePath());
     }
 
-    // ── Metadata and Model Tests ──
+    // -- Metadata and Model Tests --
 
     @Test
     void testSourceMetadataDefaultsAndSetters() {
@@ -387,7 +547,7 @@ public class PayloadFeaturesTest_littlespidy {
         assertEquals("Alpha", model.getValueAt(sorter.convertRowIndexToModel(0), 0));
     }
 
-    // ── OWASP Payload Integration Tests ──
+    // -- OWASP Payload Integration Tests --
 
     @Test
     void testOwaspPayloadsInStandardJsonFiles() throws IOException {
@@ -398,23 +558,19 @@ public class PayloadFeaturesTest_littlespidy {
         Path xssPath = Path.of("xss_payloads.json");
         assertTrue(Files.exists(xssPath), "xss_payloads.json must exist");
         List<java.util.Map<String, Object>> xssList = gson.fromJson(Files.readString(xssPath), listType);
-        assertTrue(xssList.size() >= 500, "XSS payloads list should contain >= 500 entries after OWASP import");
-        long owaspXssCount = xssList.stream().filter(e -> {
-            String src = (String) e.get("sourceType");
-            return src != null && src.contains("OWASP");
-        }).count();
-        assertTrue(owaspXssCount > 500, "Should have > 500 OWASP XSS payloads");
+        assertTrue(xssList.size() >= 500, "XSS payloads list should contain >= 500 entries");
+        assertNull(xssList.get(0).get("sourceType"), "JSON must not contain sourceType");
+        assertNull(xssList.get(0).get("sourceFile"), "JSON must not contain sourceFile");
+        assertNull(xssList.get(0).get("enabled"), "JSON must not contain enabled");
 
         // 2. Verify SQL payloads
         Path sqlPath = Path.of("sql_payloads.json");
         assertTrue(Files.exists(sqlPath), "sql_payloads.json must exist");
         List<java.util.Map<String, Object>> sqlList = gson.fromJson(Files.readString(sqlPath), listType);
-        assertTrue(sqlList.size() >= 150, "SQL payloads list should contain >= 150 entries after OWASP import");
-        long owaspSqlCount = sqlList.stream().filter(e -> {
-            String src = (String) e.get("sourceType");
-            return src != null && src.contains("OWASP");
-        }).count();
-        assertTrue(owaspSqlCount > 100, "Should have > 100 OWASP SQL payloads");
+        assertTrue(sqlList.size() >= 150, "SQL payloads list should contain >= 150 entries");
+        assertNull(sqlList.get(0).get("sourceType"), "JSON must not contain sourceType");
+        assertNull(sqlList.get(0).get("sourceFile"), "JSON must not contain sourceFile");
+        assertNull(sqlList.get(0).get("enabled"), "JSON must not contain enabled");
 
         // 3. Verify CSTI payloads
         Path cstiPath = Path.of("csti_payloads.json");
@@ -465,8 +621,8 @@ public class PayloadFeaturesTest_littlespidy {
 
     @Test
     void testCategoryRegistryCompleteness() {
-        assertEquals(34, PayloadCategoryRegistry_littlespidy.ALL_CATEGORIES.length,
-                "Registry must define all 34 parameter payload categories");
+        assertEquals(29, PayloadCategoryRegistry_littlespidy.ALL_CATEGORIES.length,
+                "Registry must define all 29 parameter payload categories");
 
         for (var cat : PayloadCategoryRegistry_littlespidy.ALL_CATEGORIES) {
             assertNotNull(cat.displayName());
@@ -512,7 +668,7 @@ public class PayloadFeaturesTest_littlespidy {
         assertNotNull(tabbedPane, "Tabbed pane must be present");
         assertEquals(javax.swing.JTabbedPane.WRAP_TAB_LAYOUT, tabbedPane.getTabLayoutPolicy(),
                 "Tab layout policy must be WRAP_TAB_LAYOUT (no scroll bar, append down below)");
-        assertEquals(34, tabbedPane.getTabCount(), "Should have exactly 34 parameter tabs");
+        assertEquals(29, tabbedPane.getTabCount(), "Should have exactly 29 parameter tabs");
         assertEquals("XSS", tabbedPane.getTitleAt(0));
         assertEquals("CSTI", tabbedPane.getTitleAt(1));
         assertEquals("SQL", tabbedPane.getTitleAt(2));
@@ -523,16 +679,10 @@ public class PayloadFeaturesTest_littlespidy {
         com.google.gson.Gson gson = new com.google.gson.Gson();
         java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<java.util.Map<String, Object>>>() {}.getType();
 
-        // Verify XSS payloads that appear in both OWASP and PayloadsAllTheThings
+        // Verify XSS payloads are loaded and clean
         Path xssPath = Path.of("xss_payloads.json");
         List<java.util.Map<String, Object>> xssList = gson.fromJson(Files.readString(xssPath), listType);
-
-        long dualSourceCount = xssList.stream().filter(e -> {
-            String src = (String) e.get("sourceType");
-            return src != null && src.contains("OWASP") && src.contains("PayloadsAllTheThings");
-        }).count();
-
-        assertTrue(dualSourceCount > 100, "Should have > 100 payloads reflecting both OWASP and PayloadsAllTheThings");
+        assertTrue(xssList.size() > 500, "Should have > 500 XSS payloads");
 
         // Verify newly added PayloadsAllTheThings categories
         Path crlfPath = Path.of("crlf_injection_payloads_littlespidy.json");
@@ -548,46 +698,23 @@ public class PayloadFeaturesTest_littlespidy {
         com.google.gson.Gson gson = new com.google.gson.Gson();
         java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<java.util.Map<String, Object>>>() {}.getType();
 
-        // 1. Verify XSS payloads include PayloadBox entries and multi-source tracking
+        // 1. Verify XSS payloads include entries and are stripped of obsolete fields
         Path xssPath = Path.of("xss_payloads.json");
         List<java.util.Map<String, Object>> xssList = gson.fromJson(Files.readString(xssPath), listType);
+        assertTrue(xssList.size() > 500, "Should have > 500 XSS payloads");
+        assertNull(xssList.get(0).get("sourceType"));
+        assertNull(xssList.get(0).get("sourceFile"));
+        assertNull(xssList.get(0).get("enabled"));
 
-        long payloadBoxXssCount = xssList.stream().filter(e -> {
-            String src = (String) e.get("sourceType");
-            return src != null && src.contains("PayloadBox");
-        }).count();
-        assertTrue(payloadBoxXssCount > 500, "Should have > 500 XSS payloads from PayloadBox");
-
-        long multiSourceXssCount = xssList.stream().filter(e -> {
-            String src = (String) e.get("sourceType");
-            return src != null && src.contains("PayloadBox") && (src.contains("OWASP") || src.contains("PayloadsAllTheThings"));
-        }).count();
-        assertTrue(multiSourceXssCount > 100, "Should have > 100 duplicate XSS payloads tracked across multiple sources");
-
-        // Verify sourceFile has multiple files for duplicates
-        long multiFileCount = xssList.stream().filter(e -> {
-            String sf = (String) e.get("sourceFile");
-            return sf != null && sf.contains(",");
-        }).count();
-        assertTrue(multiFileCount > 100, "Duplicate payloads should have combined sourceFile values");
-
-        // 2. Verify Command Injection payloads from PayloadBox
+        // 2. Verify Command Injection payloads
         Path cmdPath = Path.of("command_injection_payloads_littlespidy.json");
         List<java.util.Map<String, Object>> cmdList = gson.fromJson(Files.readString(cmdPath), listType);
-        long pboxCmdCount = cmdList.stream().filter(e -> {
-            String src = (String) e.get("sourceType");
-            return src != null && src.contains("PayloadBox");
-        }).count();
-        assertTrue(pboxCmdCount > 1000, "Should have > 1000 Command Injection payloads with PayloadBox source");
+        assertTrue(cmdList.size() > 1000, "Should have > 1000 Command Injection payloads");
 
-        // 3. Verify SQL payloads from PayloadBox
+        // 3. Verify SQL payloads
         Path sqlPath = Path.of("sql_payloads.json");
         List<java.util.Map<String, Object>> sqlList = gson.fromJson(Files.readString(sqlPath), listType);
-        long pboxSqlCount = sqlList.stream().filter(e -> {
-            String src = (String) e.get("sourceType");
-            return src != null && src.contains("PayloadBox");
-        }).count();
-        assertTrue(pboxSqlCount > 200, "Should have > 200 SQL payloads with PayloadBox source");
+        assertTrue(sqlList.size() > 200, "Should have > 200 SQL payloads");
     }
 
     @Test
@@ -601,34 +728,16 @@ public class PayloadFeaturesTest_littlespidy {
 
         assertTrue(smugList.size() >= 400, "Should have >= 400 total smuggling payloads after PayloadBox import");
 
-        long pboxSmugCount = 0;
-        long multiSourceSmugCount = 0;
-
         for (var entry : smugList) {
             String name = (String) entry.get("name");
             String desc = (String) entry.get("description");
-            String srcType = (String) entry.get("sourceType");
-            String srcFile = (String) entry.get("sourceFile");
 
-            assertNotNull(srcType, "Smuggling payload sourceType must not be null: " + name);
-            assertFalse(srcType.isBlank(), "Smuggling payload sourceType must not be blank: " + name);
-
-            assertNotNull(srcFile, "Smuggling payload sourceFile must not be null: " + name);
-            assertFalse(srcFile.isBlank(), "Smuggling payload sourceFile must not be blank: " + name);
-
+            assertNotNull(name, "Smuggling payload name must not be null");
             assertNotNull(desc, "Smuggling payload description must not be null: " + name);
             assertFalse(desc.isBlank(), "Smuggling payload description must not be blank: " + name);
-
-            if (srcType.contains("PayloadBox")) {
-                pboxSmugCount++;
-                if (srcType.contains("OWASP") || srcType.contains("PayloadsAllTheThings") || srcType.contains("Manual")) {
-                    multiSourceSmugCount++;
-                }
-            }
+            assertNull(entry.get("sourceType"), "JSON must not contain sourceType");
+            assertNull(entry.get("sourceFile"), "JSON must not contain sourceFile");
         }
-
-        assertTrue(pboxSmugCount > 300, "Should have > 300 smuggling payloads with PayloadBox source");
-        assertTrue(multiSourceSmugCount >= 2, "Should have duplicate smuggling payloads with combined sourceType");
 
         // Verify Java model SmugglingPayloadEntry getters
         com.littlespidy.payloadinjector.model.SmugglingPayloadEntry testEntry =
@@ -654,13 +763,15 @@ public class PayloadFeaturesTest_littlespidy {
         assertTrue(Files.exists(path), "path_traversal_payloads_littlespidy.json must exist");
 
         List<java.util.Map<String, Object>> list = gson.fromJson(Files.readString(path), listType);
-        assertEquals(23070, list.size(), "Should have exactly 23070 path traversal payloads");
+        assertTrue(list.size() >= 6000, "Should have >= 6000 consolidated path traversal payloads");
 
         long windowsCount = 0;
         long linuxCount = 0;
+        long placeholderCount = 0;
 
         for (var entry : list) {
             String platform = (String) entry.get("platform");
+            String template = (String) entry.get("template");
             assertNotNull(platform, "Platform must not be null for payload: " + entry.get("name"));
             assertFalse(platform.isBlank(), "Platform must not be blank for payload: " + entry.get("name"));
             assertTrue("Windows".equals(platform) || "Linux".equals(platform),
@@ -671,11 +782,16 @@ public class PayloadFeaturesTest_littlespidy {
             } else if ("Linux".equals(platform)) {
                 linuxCount++;
             }
+
+            if (template != null && template.contains("<FILE_PATH>")) {
+                placeholderCount++;
+            }
         }
 
-        assertTrue(windowsCount >= 13000, "Should have >= 13000 Windows payloads, found: " + windowsCount);
-        assertTrue(linuxCount >= 9000, "Should have >= 9000 Linux payloads, found: " + linuxCount);
-        assertEquals(23070, windowsCount + linuxCount, "Total Windows + Linux count must equal total payloads");
+        assertTrue(windowsCount >= 2000, "Should have >= 2000 Windows payloads, found: " + windowsCount);
+        assertTrue(linuxCount >= 4000, "Should have >= 4000 Linux payloads, found: " + linuxCount);
+        assertEquals(list.size(), windowsCount + linuxCount, "Total Windows + Linux count must equal total payloads");
+        assertTrue(placeholderCount > 5000, "Should have > 5000 reusable payloads with <FILE_PATH> placeholder, found: " + placeholderCount);
     }
 
     @Test
@@ -692,18 +808,16 @@ public class PayloadFeaturesTest_littlespidy {
                 new com.littlespidy.payloadinjector.ui.ParamPayloadTab("Path Traversal", pathStore, settings);
 
         com.littlespidy.payloadinjector.ui.ParamPayloadTab.PayloadTableModel ptModel = ptTab.getTableModel();
-        assertEquals(6, ptModel.getColumnCount(), "Path Traversal tab must have exactly 6 columns");
+        assertEquals(4, ptModel.getColumnCount(), "Path Traversal tab must have exactly 4 columns");
         assertEquals("Name", ptModel.getColumnName(0));
         assertEquals("Platform", ptModel.getColumnName(1), "Second column must be Platform");
         assertEquals("Payload Value", ptModel.getColumnName(2));
         assertEquals("Description", ptModel.getColumnName(3));
-        assertEquals("Source Type", ptModel.getColumnName(4));
-        assertEquals("Source File", ptModel.getColumnName(5));
 
         assertEquals("Linux", ptModel.getValueAt(0, 1));
         assertEquals("Windows", ptModel.getValueAt(1, 1));
 
-        // Verify standard categories retain 5 columns
+        // Verify standard categories retain 3 columns
         ParamPayloadStore xssStore = new ParamPayloadStore(null, "xss_payloads.json") {
             @Override public synchronized void reload() {}
             @Override public synchronized void save() {}
@@ -711,7 +825,7 @@ public class PayloadFeaturesTest_littlespidy {
         xssStore.addEntry(new ParamPayloadEntry("xss-1", "XSS Payload", "<script>alert(1)</script>", "XSS probe", true));
         com.littlespidy.payloadinjector.ui.ParamPayloadTab xssTab =
                 new com.littlespidy.payloadinjector.ui.ParamPayloadTab("XSS", xssStore, settings);
-        assertEquals(5, xssTab.getTableModel().getColumnCount(), "XSS tab must retain 5 columns");
+        assertEquals(3, xssTab.getTableModel().getColumnCount(), "XSS tab must retain 3 columns");
         assertEquals("Payload Value", xssTab.getTableModel().getColumnName(1));
     }
 
@@ -810,5 +924,542 @@ public class PayloadFeaturesTest_littlespidy {
         assertEquals(1, linuxSubmenu.getItemCount(), "Linux submenu should contain 1 item");
         assertTrue(linuxSubmenu.getItem(0).getText().contains("Linux Traversal"));
     }
+
+    @Test
+    void testFilePathsTabIsFirstTab() {
+        com.littlespidy.payloadinjector.model.FilePathStore_littlespidy linuxStore =
+                new com.littlespidy.payloadinjector.model.FilePathStore_littlespidy(null, "linux_file_paths_littlespidy.json", "Linux") {
+                    @Override public synchronized void reload() {}
+                    @Override public synchronized void save() {}
+                };
+        com.littlespidy.payloadinjector.model.FilePathStore_littlespidy windowsStore =
+                new com.littlespidy.payloadinjector.model.FilePathStore_littlespidy(null, "windows_file_paths_littlespidy.json", "Windows") {
+                    @Override public synchronized void reload() {}
+                    @Override public synchronized void save() {}
+                };
+
+        java.util.Map<String, ParamPayloadStore> dummyStores = new java.util.LinkedHashMap<>();
+        dummyStores.put("XSS", new ParamPayloadStore(null, "xss_payloads.json") {
+            @Override public synchronized void reload() {}
+        });
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.PayloadInjectorTab tab =
+                new com.littlespidy.payloadinjector.ui.PayloadInjectorTab(dummyStores, null, linuxStore, windowsStore, settings);
+
+        javax.swing.JTabbedPane tabbedPane = null;
+        for (java.awt.Component comp : tab.getComponents()) {
+            if (comp instanceof javax.swing.JTabbedPane tp) {
+                tabbedPane = tp;
+                break;
+            }
+        }
+
+        assertNotNull(tabbedPane, "Tabbed pane must be present");
+        assertTrue(tabbedPane.getTabCount() >= 2);
+        assertEquals("File Paths", tabbedPane.getTitleAt(0), "File Paths must be the first tab (index 0)");
+        assertEquals("XSS", tabbedPane.getTitleAt(1));
+
+        java.awt.Component comp0 = tabbedPane.getComponentAt(0);
+        assertTrue(comp0 instanceof com.littlespidy.payloadinjector.ui.FilePathsTab_littlespidy);
+        com.littlespidy.payloadinjector.ui.FilePathsTab_littlespidy fpTab = (com.littlespidy.payloadinjector.ui.FilePathsTab_littlespidy) comp0;
+        assertNotNull(fpTab.getLinuxPanel(), "Linux subtab panel must exist");
+        assertNotNull(fpTab.getWindowsPanel(), "Windows subtab panel must exist");
+    }
+
+    @Test
+    void testFilePathsJsonStores() {
+        com.littlespidy.payloadinjector.model.FilePathStore_littlespidy linuxStore =
+                new com.littlespidy.payloadinjector.model.FilePathStore_littlespidy(null, "linux_file_paths_littlespidy.json", "Linux");
+        List<com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy> linuxList = linuxStore.getEntries();
+        assertTrue(linuxList.size() >= 100, "Should have at least 100 Linux file paths");
+        assertTrue(linuxList.stream().anyMatch(e -> e.getPath().contains("etc/passwd")), "Should contain /etc/passwd");
+        assertTrue(linuxList.stream().anyMatch(e -> e.getPath().contains("proc/")), "Should contain proc entries");
+        assertTrue(linuxList.stream().anyMatch(e -> e.getPath().equals(".env")), "Should contain .env");
+        assertTrue(linuxList.stream().anyMatch(e -> e.getPath().equals("wp-config.php")), "Should contain wp-config.php");
+        assertTrue(linuxList.stream().anyMatch(e -> e.getPath().equals("backup.sql")), "Should contain backup.sql");
+
+        com.littlespidy.payloadinjector.model.FilePathStore_littlespidy winStore =
+                new com.littlespidy.payloadinjector.model.FilePathStore_littlespidy(null, "windows_file_paths_littlespidy.json", "Windows");
+        List<com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy> winList = winStore.getEntries();
+        assertTrue(winList.size() >= 50, "Should have at least 50 Windows file paths");
+        assertTrue(winList.stream().anyMatch(e -> e.getPath().contains("win.ini")), "Should contain win.ini");
+        assertTrue(winList.stream().anyMatch(e -> e.getPath().contains("SAM")), "Should contain SAM entry");
+        assertTrue(winList.stream().anyMatch(e -> e.getPath().equals("web.config")), "Should contain web.config");
+        assertTrue(winList.stream().anyMatch(e -> e.getPath().equals("appsettings.json")), "Should contain appsettings.json");
+    }
+
+    @Test
+    void testReplaceFilePathPlaceholderInParameter() {
+        burp.api.montoya.http.message.requests.HttpRequest request =
+                burp.api.montoya.http.message.requests.HttpRequest.httpRequest("GET /download?file=../../../../<FILE_PATH> HTTP/1.1\r\nHost: example.com\r\n\r\n");
+
+        burp.api.montoya.http.message.requests.HttpRequest mutated =
+                com.littlespidy.payloadinjector.engine.ParamPayloadInjectorEngine.replaceFilePathPlaceholder(
+                        request, "/etc/passwd", java.util.Optional.empty());
+
+        assertNotNull(mutated);
+        String mutatedStr = mutated.toString();
+        assertTrue(mutatedStr.contains("file=../../../../etc/passwd"), "Should normalize slash boundary to avoid double slash: " + mutatedStr);
+        assertFalse(mutatedStr.contains("<FILE_PATH>"), "Placeholder should be replaced");
+    }
+
+    @Test
+    void testReplaceFilePathPlaceholderPreservesExtensionsAndNullBytes() {
+        burp.api.montoya.http.message.requests.HttpRequest request =
+                burp.api.montoya.http.message.requests.HttpRequest.httpRequest("GET /view?path=../../<FILE_PATH>%00.png HTTP/1.1\r\nHost: example.com\r\n\r\n");
+
+        burp.api.montoya.http.message.requests.HttpRequest mutated =
+                com.littlespidy.payloadinjector.engine.ParamPayloadInjectorEngine.replaceFilePathPlaceholder(
+                        request, "etc/passwd", java.util.Optional.empty());
+
+        assertNotNull(mutated);
+        String mutatedStr = mutated.toString();
+        assertTrue(mutatedStr.contains("path=../../etc/passwd%00.png"), "Should preserve %00 and extension: " + mutatedStr);
+    }
+
+    @Test
+    void testReplaceFilePathPlaceholderGracefulNoOp() {
+        burp.api.montoya.http.message.requests.HttpRequest request =
+                burp.api.montoya.http.message.requests.HttpRequest.httpRequest("GET /search?q=normalValue HTTP/1.1\r\nHost: example.com\r\n\r\n");
+
+        burp.api.montoya.http.message.requests.HttpRequest mutated =
+                com.littlespidy.payloadinjector.engine.ParamPayloadInjectorEngine.replaceFilePathPlaceholder(
+                        request, "/etc/passwd", java.util.Optional.empty());
+
+        assertNotNull(mutated);
+        assertEquals(request.toString(), mutated.toString(), "Request without placeholder must remain unchanged");
+    }
+
+    @Test
+    void testContextMenuContainsFilePathReplacementSubmenus() {
+        com.littlespidy.payloadinjector.model.FilePathStore_littlespidy linuxStore =
+                new com.littlespidy.payloadinjector.model.FilePathStore_littlespidy(null, "linux_file_paths_littlespidy.json", "Linux") {
+                    @Override public synchronized void reload() {}
+                    @Override public synchronized void save() {}
+                };
+        linuxStore.addEntry(new com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy(
+                "lp-1", "/etc/passwd", "System Accounts", "Passwd file", "Linux", true, "Default", "test.json"));
+
+        com.littlespidy.payloadinjector.model.FilePathStore_littlespidy winStore =
+                new com.littlespidy.payloadinjector.model.FilePathStore_littlespidy(null, "windows_file_paths_littlespidy.json", "Windows") {
+                    @Override public synchronized void reload() {}
+                    @Override public synchronized void save() {}
+                };
+        winStore.addEntry(new com.littlespidy.payloadinjector.model.FilePathEntry_littlespidy(
+                "wp-1", "windows/win.ini", "System Configuration", "Win ini file", "Windows", true, "Default", "test.json"));
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.PayloadContextMenuProvider provider =
+                new com.littlespidy.payloadinjector.ui.PayloadContextMenuProvider(null, java.util.Collections.emptyMap(), null, linuxStore, winStore, settings);
+
+        burp.api.montoya.http.message.requests.HttpRequest mockRequest =
+                burp.api.montoya.http.message.requests.HttpRequest.httpRequest("GET /view?path=../../<FILE_PATH> HTTP/1.1\r\nHost: test.com\r\n\r\n");
+
+        burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse mockEditor =
+                (burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse) java.lang.reflect.Proxy.newProxyInstance(
+                        getClass().getClassLoader(),
+                        new Class<?>[]{burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse.class},
+                        (p, m, a) -> {
+                            if ("selectionOffsets".equals(m.getName())) return java.util.Optional.empty();
+                            if ("requestResponse".equals(m.getName())) {
+                                return (burp.api.montoya.http.message.HttpRequestResponse) java.lang.reflect.Proxy.newProxyInstance(
+                                        getClass().getClassLoader(),
+                                        new Class<?>[]{burp.api.montoya.http.message.HttpRequestResponse.class},
+                                        (p2, m2, a2) -> {
+                                            if ("request".equals(m2.getName())) return mockRequest;
+                                            return null;
+                                        }
+                                );
+                            }
+                            return null;
+                        }
+                );
+
+        burp.api.montoya.ui.contextmenu.ContextMenuEvent mockEvent =
+                (burp.api.montoya.ui.contextmenu.ContextMenuEvent) java.lang.reflect.Proxy.newProxyInstance(
+                        getClass().getClassLoader(),
+                        new Class<?>[]{burp.api.montoya.ui.contextmenu.ContextMenuEvent.class},
+                        (p, m, a) -> {
+                            if ("messageEditorRequestResponse".equals(m.getName())) return java.util.Optional.of(mockEditor);
+                            if ("selectedRequestResponses".equals(m.getName())) return java.util.List.of();
+                            return null;
+                        }
+                );
+
+        java.util.List<java.awt.Component> menuItems = provider.provideMenuItems(mockEvent);
+        assertFalse(menuItems.isEmpty());
+        javax.swing.JMenu rootMenu = (javax.swing.JMenu) menuItems.get(0);
+
+        javax.swing.JMenu fpMenu = null;
+        for (int i = 0; i < rootMenu.getItemCount(); i++) {
+            javax.swing.JMenuItem it = rootMenu.getItem(i);
+            if (it instanceof javax.swing.JMenu m && "Replace Target File Path (<FILE_PATH>)".equals(m.getText())) {
+                fpMenu = m;
+                break;
+            }
+        }
+
+        assertNotNull(fpMenu, "Replace Target File Path menu must be present in editor context menu");
+        assertTrue(fpMenu.getItemCount() >= 2);
+    }
+
+    @Test
+    void testSearchBarFiltersParamPayloadTab() {
+        ParamPayloadStore testStore = new ParamPayloadStore(null, "xss_payloads.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        testStore.addEntry(new ParamPayloadEntry("1", "Alert Alpha", "<script>alert('alpha')</script>", "Test alpha", true));
+        testStore.addEntry(new ParamPayloadEntry("2", "Prompt Beta", "<script>prompt('beta')</script>", "Test beta", true));
+        testStore.addEntry(new ParamPayloadEntry("3", "Confirm Gamma", "<svg onload=confirm('gamma')>", "Test gamma", true));
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab tab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("XSS", testStore, settings);
+
+        assertEquals(3, tab.getTable().getRowCount());
+
+        // Filter by 'alpha'
+        tab.getSearchField().setText("alpha");
+        assertEquals(1, tab.getTable().getRowCount());
+
+        // Clear filter
+        tab.getSearchField().setText("");
+        assertEquals(3, tab.getTable().getRowCount());
+    }
+
+    @Test
+    void testSearchBarPreservesFilterAcrossReload() {
+        ParamPayloadStore testStore = new ParamPayloadStore(null, "xss_payloads.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        testStore.addEntry(new ParamPayloadEntry("1", "Alert Alpha", "<script>alert('alpha')</script>", "Test alpha", true));
+        testStore.addEntry(new ParamPayloadEntry("2", "Prompt Beta", "<script>prompt('beta')</script>", "Test beta", true));
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab tab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("XSS", testStore, settings);
+
+        tab.getSearchField().setText("beta");
+        assertEquals(1, tab.getTable().getRowCount());
+
+        // Add an entry and notify change
+        testStore.addEntry(new ParamPayloadEntry("3", "Another Beta", "<script>alert('beta 2')</script>", "Test beta 2", true));
+        tab.applySearchFilter();
+
+        // Should filter reloaded data showing 2 matching rows
+        assertEquals(2, tab.getTable().getRowCount());
+    }
+
+    @Test
+    void testSearchBarSpecialCharactersSafe() {
+        ParamPayloadStore testStore = new ParamPayloadStore(null, "xss_payloads.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        testStore.addEntry(new ParamPayloadEntry("1", "Regex Payload", "{{[test*?]}}", "Bracket probe", true));
+        testStore.addEntry(new ParamPayloadEntry("2", "Normal Payload", "normal", "Normal probe", true));
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab tab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("XSS", testStore, settings);
+
+        // Search with special regex characters that would throw PatternSyntaxException if not quoted
+        assertDoesNotThrow(() -> tab.getSearchField().setText("[test*?]"));
+        assertEquals(1, tab.getTable().getRowCount());
+    }
+
+    @Test
+    void testParamPayloadTabInPlaceEditingAndBatchDeletion() {
+        ParamPayloadStore store = new ParamPayloadStore(null, "xss_payloads.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        store.addEntry(new ParamPayloadEntry("1", "Payload A", "<script>1</script>", "Desc A", true));
+        store.addEntry(new ParamPayloadEntry("2", "Payload B", "<script>2</script>", "Desc B", true));
+        store.addEntry(new ParamPayloadEntry("3", "Payload C", "<script>3</script>", "Desc C", true));
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab tab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("XSS", store, settings);
+
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab.PayloadTableModel model = tab.getTableModel();
+        assertEquals(3, model.getColumnCount(), "Standard ParamPayloadTab should have 3 columns");
+        assertTrue(model.isCellEditable(0, 0), "Cells must be editable inline without popup dialogs");
+        assertTrue(model.isCellEditable(0, 1));
+        assertTrue(model.isCellEditable(0, 2));
+
+        // Test in-place edit on Name
+        model.setValueAt("Payload A Updated", 0, 0);
+        assertEquals("Payload A Updated", store.getEntries().get(0).getName());
+
+        // Test in-place edit on Template / Payload Value
+        model.setValueAt("<script>updated</script>", 0, 1);
+        assertEquals("<script>updated</script>", store.getEntries().get(0).getTemplate());
+
+        // Test multi-row batch deletion (e.g. deleting rows 0 and 2)
+        store.removeEntries(new int[]{0, 2});
+        assertEquals(1, store.getEntries().size());
+        assertEquals("Payload B", store.getEntries().get(0).getName());
+    }
+
+    @Test
+    void testFilePathsTabInPlaceEditingAndBatchDeletion() {
+        FilePathStore_littlespidy store = new FilePathStore_littlespidy(null, "linux_file_paths_littlespidy.json", "Linux") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        store.addEntry(new FilePathEntry_littlespidy("1", "/etc/passwd", "Credentials", "Accounts", "Linux", true, "Default", "N/A"));
+        store.addEntry(new FilePathEntry_littlespidy("2", "/etc/shadow", "Credentials", "Hashes", "Linux", true, "Default", "N/A"));
+        store.addEntry(new FilePathEntry_littlespidy("3", "/etc/hosts", "Network", "Host map", "Linux", true, "Default", "N/A"));
+
+        com.littlespidy.payloadinjector.ui.FilePathsTab_littlespidy.FilePathPanel panel =
+                new com.littlespidy.payloadinjector.ui.FilePathsTab_littlespidy.FilePathPanel("Linux", store);
+
+        com.littlespidy.payloadinjector.ui.FilePathsTab_littlespidy.FilePathPanel.FilePathTableModel model = panel.getTableModel();
+        assertEquals(3, model.getColumnCount(), "FilePathTab must have 3 columns: Path, Category, Description");
+        assertEquals("Path", model.getColumnName(0));
+        assertEquals("Category", model.getColumnName(1));
+        assertEquals("Description", model.getColumnName(2));
+
+        assertTrue(model.isCellEditable(0, 0), "FilePath cells must be editable inline");
+        model.setValueAt("/etc/passwd_edited", 0, 0);
+        assertEquals("/etc/passwd_edited", store.getEntries().get(0).getPath());
+
+        model.setValueAt("NewCategory", 0, 1);
+        assertEquals("NewCategory", store.getEntries().get(0).getCategory());
+
+        // Batch deletion of indices 0 and 1
+        store.removeEntries(new int[]{0, 1});
+        assertEquals(1, store.getEntries().size());
+        assertEquals("/etc/hosts", store.getEntries().get(0).getPath());
+    }
+
+    @Test
+    void testSmugglingTabInPlaceEditingAndBatchDeletion() {
+        SmugglingPayloadStore store = new SmugglingPayloadStore(null) {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        store.addEntry(new SmugglingPayloadEntry("CL.TE Basic", "Probe 1", java.util.Map.of(), "0\\r\\n\\r\\n"));
+        store.addEntry(new SmugglingPayloadEntry("TE.CL Basic", "Probe 2", java.util.Map.of(), "Transfer-Encoding: chunked"));
+        store.addEntry(new SmugglingPayloadEntry("TE.TE Obfuscation", "Probe 3", java.util.Map.of(), "Transfer-Encoding: xchunked"));
+
+        com.littlespidy.payloadinjector.ui.SmugglingPayloadTab tab =
+                new com.littlespidy.payloadinjector.ui.SmugglingPayloadTab(store);
+
+        com.littlespidy.payloadinjector.ui.SmugglingPayloadTab.SmugglingPayloadTableModel model = tab.getTableModel();
+        assertEquals(3, model.getColumnCount(), "Smuggling tab must have 3 columns: Name, Payload Value, Description");
+        assertEquals("Name", model.getColumnName(0));
+        assertEquals("Payload Value", model.getColumnName(1));
+        assertEquals("Description", model.getColumnName(2));
+
+        assertTrue(model.isCellEditable(0, 0), "Smuggling cells must be editable inline");
+        model.setValueAt("CL.TE Updated", 0, 0);
+        assertEquals("CL.TE Updated", store.getEntries().get(0).getName());
+
+        model.setValueAt("NEW_PAYLOAD", 0, 1);
+        assertEquals("NEW_PAYLOAD", store.getEntries().get(0).getBody());
+
+        // Multi-row deletion of rows 0 and 2
+        store.removeEntries(new int[]{0, 2});
+        assertEquals(1, store.getEntries().size());
+        assertEquals("TE.CL Basic", store.getEntries().get(0).getName());
+    }
+
+    @Test
+    void testSearchBarMatchesNameAndPayloadValue() {
+        ParamPayloadStore store = new ParamPayloadStore(null, "xss_payloads.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        store.addEntry(new ParamPayloadEntry("1", "AlphaXSS", "<script>alpha()</script>", "Basic desc", true));
+        store.addEntry(new ParamPayloadEntry("2", "BetaSQLi", "UNION SELECT secret_token", "Auth desc", true));
+        store.addEntry(new ParamPayloadEntry("3", "GammaOther", "normal_probe_val", "Contains secret_token in desc", true));
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab tab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("XSS", store, settings);
+
+        // Search matching Name column only
+        tab.getSearchField().setText("AlphaXSS");
+        assertEquals(1, tab.getTable().getRowCount());
+        assertEquals("AlphaXSS", tab.getTable().getValueAt(0, 0));
+
+        // Search matching Payload Value column only
+        tab.getSearchField().setText("secret_token");
+        assertEquals(1, tab.getTable().getRowCount(), "Should match Payload Value column but NOT Description column");
+        assertEquals("BetaSQLi", tab.getTable().getValueAt(0, 0));
+
+        // Case-insensitive match on Name
+        tab.getSearchField().setText("betasqli");
+        assertEquals(1, tab.getTable().getRowCount());
+        assertEquals("BetaSQLi", tab.getTable().getValueAt(0, 0));
+
+        // Non-matching query
+        tab.getSearchField().setText("nonexistent_pattern");
+        assertEquals(0, tab.getTable().getRowCount());
+
+        // Clear search
+        tab.getSearchField().setText("");
+        assertEquals(3, tab.getTable().getRowCount());
+    }
+
+    @Test
+    void testPathTraversalPlatformFilterAndDualSearch() {
+        ParamPayloadStore store = new ParamPayloadStore(null, "path_traversal_payloads_littlespidy.json") {
+            @Override public synchronized void reload() {}
+            @Override public synchronized void save() {}
+        };
+        ParamPayloadEntry p1 = new ParamPayloadEntry("1", "Linux Traversal Passwd", "../../../etc/passwd", "Linux desc", true);
+        p1.setPlatform("Linux");
+        store.addEntry(p1);
+
+        ParamPayloadEntry p2 = new ParamPayloadEntry("2", "Windows Traversal Ini", "..\\..\\win.ini", "Windows desc", true);
+        p2.setPlatform("Windows");
+        store.addEntry(p2);
+
+        ParamPayloadEntry p3 = new ParamPayloadEntry("3", "Linux Traversal Shadow", "....//....//etc/shadow", "Linux shadow desc", true);
+        p3.setPlatform("Linux");
+        store.addEntry(p3);
+
+        InjectionSettings settings = new InjectionSettings();
+        com.littlespidy.payloadinjector.ui.ParamPayloadTab tab =
+                new com.littlespidy.payloadinjector.ui.ParamPayloadTab("Path Traversal", store, settings);
+
+        assertNotNull(tab.getPlatformFilterBox(), "Path Traversal tab must have a platform filter box");
+        assertEquals(3, tab.getTable().getRowCount());
+
+        // Filter by Linux platform
+        tab.getPlatformFilterBox().setSelectedItem("Linux");
+        assertEquals(2, tab.getTable().getRowCount());
+
+        // Filter by Windows platform
+        tab.getPlatformFilterBox().setSelectedItem("Windows");
+        assertEquals(1, tab.getTable().getRowCount());
+        assertEquals("Windows Traversal Ini", tab.getTable().getValueAt(0, 0));
+
+        // Filter by All Platforms
+        tab.getPlatformFilterBox().setSelectedItem("All Platforms");
+        assertEquals(3, tab.getTable().getRowCount());
+
+        // Combined Platform + Search: Linux + search for "shadow"
+        tab.getPlatformFilterBox().setSelectedItem("Linux");
+        tab.getSearchField().setText("shadow");
+        assertEquals(1, tab.getTable().getRowCount());
+        assertEquals("Linux Traversal Shadow", tab.getTable().getValueAt(0, 0));
+
+        // Combined Platform + Search: Linux + search for "Windows" -> 0 matches
+        tab.getSearchField().setText("Windows");
+        assertEquals(0, tab.getTable().getRowCount());
+
+        // Combined Platform + Search: Windows + search for "ini"
+        tab.getPlatformFilterBox().setSelectedItem("Windows");
+        tab.getSearchField().setText("ini");
+        assertEquals(1, tab.getTable().getRowCount());
+        assertEquals("Windows Traversal Ini", tab.getTable().getValueAt(0, 0));
+    }
+
+    @Test
+    void testJsonStoresLoadWithoutEnabledSourceTypeSourceFile() throws IOException {
+        // ParamPayloadStore serialization and deserialization
+        Path jsonFile = tempDir.resolve("test_param_payloads.json");
+        String jsonContent = "[\n" +
+                "  {\n" +
+                "    \"id\": \"test-1\",\n" +
+                "    \"name\": \"Test Clean JSON\",\n" +
+                "    \"template\": \"<script>clean</script>\",\n" +
+                "    \"description\": \"Clean entry without obsolete fields\",\n" +
+                "    \"platform\": \"Linux\"\n" +
+                "  }\n" +
+                "]";
+        Files.writeString(jsonFile, jsonContent, StandardCharsets.UTF_8);
+
+        ParamPayloadStore paramStore = new ParamPayloadStore(null, jsonFile.toAbsolutePath().toString());
+        assertEquals(1, paramStore.getEntries().size());
+        ParamPayloadEntry entry = paramStore.getEntries().get(0);
+        assertEquals("test-1", entry.getId());
+        assertEquals("Test Clean JSON", entry.getName());
+        assertEquals("<script>clean</script>", entry.getTemplate());
+        assertEquals("Linux", entry.getPlatform());
+        assertTrue(entry.isEnabled());
+        assertEquals("Manual", entry.getSourceType());
+        assertEquals("N/A", entry.getSourceFile());
+
+        // Save back and verify saved JSON does not contain enabled, sourceType, or sourceFile
+        paramStore.save();
+        String savedJson = Files.readString(jsonFile, StandardCharsets.UTF_8);
+        assertFalse(savedJson.contains("\"enabled\""), "Saved JSON must not contain enabled");
+        assertFalse(savedJson.contains("\"sourceType\""), "Saved JSON must not contain sourceType");
+        assertFalse(savedJson.contains("\"sourceFile\""), "Saved JSON must not contain sourceFile");
+
+        // FilePathStore serialization and deserialization
+        Path fpFile = tempDir.resolve("test_file_paths.json");
+        String fpJson = "[\n" +
+                "  {\n" +
+                "    \"id\": \"fp-1\",\n" +
+                "    \"path\": \"/etc/passwd\",\n" +
+                "    \"category\": \"Credentials\",\n" +
+                "    \"description\": \"Clean file path\",\n" +
+                "    \"platform\": \"Linux\"\n" +
+                "  }\n" +
+                "]";
+        Files.writeString(fpFile, fpJson, StandardCharsets.UTF_8);
+
+        FilePathStore_littlespidy fpStore = new FilePathStore_littlespidy(null, fpFile.toAbsolutePath().toString(), "Linux");
+        assertEquals(1, fpStore.getEntries().size());
+        FilePathEntry_littlespidy fpEntry = fpStore.getEntries().get(0);
+        assertEquals("/etc/passwd", fpEntry.getPath());
+        assertEquals("Linux", fpEntry.getPlatform());
+
+        fpStore.save();
+        String savedFpJson = Files.readString(fpFile, StandardCharsets.UTF_8);
+        assertFalse(savedFpJson.contains("\"enabled\""), "Saved FilePath JSON must not contain enabled");
+        assertFalse(savedFpJson.contains("\"sourceType\""), "Saved FilePath JSON must not contain sourceType");
+        assertFalse(savedFpJson.contains("\"sourceFile\""), "Saved FilePath JSON must not contain sourceFile");
+    }
+
+    @Test
+    void testContentTypeAndHeadersCategoriesAndDeletedFiles() {
+        // Verify deleted files no longer exist on disk
+        String[] deletedFiles = {
+                "jwt_vulnerabilities_payloads_littlespidy.json",
+                "vulnerable_components_payloads_littlespidy.json",
+                "tor_based_attacks_payloads_littlespidy.json",
+                "weak_cryptography_payloads_littlespidy.json",
+                "symbolic_link_attacks_payloads_littlespidy.json",
+                "security_misconfiguration_payloads_littlespidy.json",
+                "idor_payloads_littlespidy.json"
+        };
+        for (String f : deletedFiles) {
+            assertFalse(Files.exists(Path.of(f)), "Deleted category file must not exist: " + f);
+        }
+
+        // Verify Content-Type category file exists and has entries
+        Path ctPath = Path.of("content_type_payloads_littlespidy.json");
+        assertTrue(Files.exists(ctPath), "content_type_payloads_littlespidy.json must exist");
+        ParamPayloadStore ctStore = new ParamPayloadStore(null, "content_type_payloads_littlespidy.json");
+        assertTrue(ctStore.getEntries().size() >= 20, "Content-Type category should have >= 20 payloads");
+
+        // Verify Headers category file exists and has entries
+        Path hdrPath = Path.of("headers_payloads_littlespidy.json");
+        assertTrue(Files.exists(hdrPath), "headers_payloads_littlespidy.json must exist");
+        ParamPayloadStore hdrStore = new ParamPayloadStore(null, "headers_payloads_littlespidy.json");
+        assertTrue(hdrStore.getEntries().size() >= 70, "Headers category should have >= 70 payloads");
+
+        // Verify both appear in ALL_CATEGORIES
+        boolean hasContentType = false;
+        boolean hasHeaders = false;
+        for (var cat : PayloadCategoryRegistry_littlespidy.ALL_CATEGORIES) {
+            if ("Content-Type".equals(cat.displayName())) hasContentType = true;
+            if ("Headers".equals(cat.displayName())) hasHeaders = true;
+        }
+        assertTrue(hasContentType, "Registry must contain Content-Type category");
+        assertTrue(hasHeaders, "Registry must contain Headers category");
+    }
 }
+
+
 

