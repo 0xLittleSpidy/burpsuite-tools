@@ -87,6 +87,19 @@ public class FuzzerResultsTableModel extends AbstractTableModel {
         }
     }
 
+    public synchronized void addResults(List<FuzzResult> results) {
+        if (results == null || results.isEmpty()) return;
+        for (FuzzResult r : results) {
+            if (r != null) {
+                allResults.add(r);
+                if (currentFilter.test(r)) {
+                    filteredResults.add(r);
+                }
+            }
+        }
+        fireTableDataChanged();
+    }
+
     public synchronized void setFilter(Predicate<FuzzResult> filter) {
         this.currentFilter = (filter != null) ? filter : r -> true;
         filteredResults.clear();

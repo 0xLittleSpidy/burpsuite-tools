@@ -1,7 +1,10 @@
 package com.littlespidy.inputvalidationfuzzer.ui;
 
+import com.littlespidy.inputvalidationfuzzer.model.ConfiguredHeader;
+import com.littlespidy.inputvalidationfuzzer.model.FuzzResult;
 import com.littlespidy.inputvalidationfuzzer.model.FuzzerConfig;
 import com.littlespidy.inputvalidationfuzzer.model.TrafficCandidate;
+import com.littlespidy.inputvalidationfuzzer.storage.FuzzerPersistentStorageManager_littlespidy;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -24,15 +27,24 @@ import java.util.List;
 public class InputValidationFuzzerTab extends JPanel {
     private final MontoyaApi api;
     private final FuzzerConfig config;
+    private final FuzzerPersistentStorageManager_littlespidy storageManager;
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
     private final List<FuzzingSessionPanel> activeSessions = new ArrayList<>();
     private final TrafficSweepPanel trafficSweepPanel;
 
     public InputValidationFuzzerTab(MontoyaApi api, FuzzerConfig config) {
+        this(api, config, null);
+    }
+
+    public InputValidationFuzzerTab(MontoyaApi api, FuzzerConfig config, FuzzerPersistentStorageManager_littlespidy storageManager) {
         this.api = api;
         this.config = config;
+        this.storageManager = storageManager;
 
         setLayout(new BorderLayout());
+        if (storageManager != null) {
+            add(storageManager.createSessionToolbarComponent(this, () -> {}), BorderLayout.NORTH);
+        }
         rootTabbedPane.addTab("Welcome & Guide", createWelcomePanel());
 
         this.trafficSweepPanel = new TrafficSweepPanel(api, config, this::addNewBatchSessionTab);
@@ -87,6 +99,7 @@ public class InputValidationFuzzerTab extends JPanel {
             candidates,
             this::closeSession
         );
+        sessionPanel.setSessionTitle(title);
 
         activeSessions.add(sessionPanel);
         rootTabbedPane.addTab(title, sessionPanel);
@@ -97,7 +110,7 @@ public class InputValidationFuzzerTab extends JPanel {
         tabHeader.setOpaque(false);
         JLabel titleLabel = new JLabel(title);
 
-        JButton closeBtn = new JButton("×");
+        JButton closeBtn = new JButton("X");
         closeBtn.setMargin(new Insets(0, 4, 0, 4));
         closeBtn.setBorder(BorderFactory.createEmptyBorder());
         closeBtn.setContentAreaFilled(false);
@@ -110,6 +123,66 @@ public class InputValidationFuzzerTab extends JPanel {
         rootTabbedPane.setTabComponentAt(tabIndex, tabHeader);
 
         rootTabbedPane.setSelectedComponent(sessionPanel);
+        if (storageManager != null) {
+            storageManager.scheduleAutoSave();
+        }
+    }
+
+    public FuzzingSessionPanel restoreSessionTab(String title, List<TrafficCandidate> candidates, List<ConfiguredHeader> headers, List<FuzzResult> results) {
+        if (candidates == null) candidates = Collections.emptyList();
+        FuzzingSessionPanel sessionPanel = new FuzzingSessionPanel(
+            api,
+            config,
+            candidates,
+            this::closeSession
+        );
+        String finalTitle = (title != null && !title.isBlank()) ? title : "Attack Session";
+        sessionPanel.setSessionTitle(finalTitle);
+        if (headers != null) {
+            sessionPanel.setSessionHeaders(headers);
+        }
+        if (results != null) {
+            sessionPanel.restoreResults(results);
+        }
+
+        activeSessions.add(sessionPanel);
+        rootTabbedPane.addTab(finalTitle, sessionPanel);
+        int tabIndex = rootTabbedPane.indexOfComponent(sessionPanel);
+
+        JPanel tabHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        tabHeader.setOpaque(false);
+        JLabel titleLabel = new JLabel(finalTitle);
+
+        JButton closeBtn = new JButton("X");
+        closeBtn.setMargin(new Insets(0, 4, 0, 4));
+        closeBtn.setBorder(BorderFactory.createEmptyBorder());
+        closeBtn.setContentAreaFilled(false);
+        closeBtn.setFocusable(false);
+        closeBtn.setToolTipText("Close this session");
+        closeBtn.addActionListener(e -> closeSession(sessionPanel));
+
+        tabHeader.add(titleLabel);
+        tabHeader.add(closeBtn);
+        rootTabbedPane.setTabComponentAt(tabIndex, tabHeader);
+
+        return sessionPanel;
+    }
+
+    public TrafficSweepPanel getTrafficSweepPanel() {
+        return trafficSweepPanel;
+    }
+
+    public List<FuzzingSessionPanel> getActiveSessions() {
+        return new ArrayList<>(activeSessions);
+    }
+
+    public void clearAll() {
+        for (FuzzingSessionPanel session : new ArrayList<>(activeSessions)) {
+            session.cleanup();
+            rootTabbedPane.remove(session);
+        }
+        activeSessions.clear();
+        trafficSweepPanel.clear();
     }
 
     private void closeSession(FuzzingSessionPanel session) {
@@ -124,6 +197,9 @@ public class InputValidationFuzzerTab extends JPanel {
             session.cleanup();
             activeSessions.remove(session);
             rootTabbedPane.remove(session);
+            if (storageManager != null) {
+                storageManager.scheduleAutoSave();
+            }
         }
     }
 

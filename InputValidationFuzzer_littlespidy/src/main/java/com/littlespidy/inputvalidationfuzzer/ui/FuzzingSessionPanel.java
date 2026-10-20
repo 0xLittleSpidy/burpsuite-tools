@@ -40,7 +40,7 @@ public class FuzzingSessionPanel extends JPanel {
 
     private final FilterPanel filterPanel;
     private final JPanel sidebarContainer = new JPanel(new BorderLayout());
-    private final JButton toggleSidebarBtn = new JButton("◀");
+    private final JButton toggleSidebarBtn = new JButton("<");
     private boolean sidebarVisible = true;
 
     private final JButton startButton = new JButton("Start Fuzzing");
@@ -151,11 +151,11 @@ public class FuzzingSessionPanel extends JPanel {
         if (sidebarVisible) {
             sidebarContainer.setPreferredSize(new Dimension(280, 500));
             filterPanel.setVisible(true);
-            toggleSidebarBtn.setText("◀");
+            toggleSidebarBtn.setText("<");
         } else {
             sidebarContainer.setPreferredSize(new Dimension(38, 500));
             filterPanel.setVisible(false);
-            toggleSidebarBtn.setText("▶");
+            toggleSidebarBtn.setText(">");
         }
         sidebarContainer.revalidate();
     }
@@ -435,5 +435,42 @@ public class FuzzingSessionPanel extends JPanel {
 
     public void cleanup() {
         engine.stop();
+    }
+
+    private String sessionTitle;
+
+    public String getSessionTitle() {
+        return sessionTitle != null ? sessionTitle : "Attack Session";
+    }
+
+    public void setSessionTitle(String title) {
+        this.sessionTitle = title;
+    }
+
+    public List<TrafficCandidate> getTargetCandidates() {
+        return new ArrayList<>(targetCandidates);
+    }
+
+    public List<ConfiguredHeader> getSessionHeaders() {
+        return new ArrayList<>(sessionHeaders);
+    }
+
+    public void setSessionHeaders(List<ConfiguredHeader> headers) {
+        sessionHeaders.clear();
+        if (headers != null) {
+            sessionHeaders.addAll(headers);
+        }
+        customHeadersButton.setText("Custom Headers & Auth... (" + sessionHeaders.size() + ")");
+    }
+
+    public List<FuzzResult> getResults() {
+        return tableModel.getAllResults();
+    }
+
+    public void restoreResults(List<FuzzResult> results) {
+        tableModel.clear();
+        if (results != null) {
+            tableModel.addResults(results);
+        }
     }
 }

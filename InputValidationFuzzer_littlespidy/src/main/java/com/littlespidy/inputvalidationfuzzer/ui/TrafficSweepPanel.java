@@ -561,4 +561,23 @@ public class TrafficSweepPanel extends JPanel {
         dialog.add(new JScrollPane(textArea));
         dialog.setVisible(true);
     }
+
+    public synchronized List<TrafficCandidate> getCandidates() {
+        return new ArrayList<>(rawLoadedCandidates);
+    }
+
+    public synchronized void setCandidates(List<TrafficCandidate> candidates) {
+        rawLoadedCandidates.clear();
+        if (candidates != null) {
+            rawLoadedCandidates.addAll(candidates);
+        }
+        candidatesTableModel.setCandidates(rawLoadedCandidates);
+        applyFilters();
+    }
+
+    public synchronized void clear() {
+        rawLoadedCandidates.clear();
+        candidatesTableModel.setCandidates(Collections.emptyList());
+        applyFilters();
+    }
 }

@@ -2,6 +2,7 @@ package com.littlespidy.inputvalidationfuzzer;
 
 import com.littlespidy.inputvalidationfuzzer.model.FuzzerConfig;
 import com.littlespidy.inputvalidationfuzzer.scanner.InputValidationScanCheck;
+import com.littlespidy.inputvalidationfuzzer.storage.FuzzerPersistentStorageManager_littlespidy;
 import com.littlespidy.inputvalidationfuzzer.ui.InputValidationFuzzerTab;
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
@@ -29,15 +30,22 @@ public class InputValidationFuzzerExtension implements BurpExtension {
     private MontoyaApi api;
     private final FuzzerConfig config = new FuzzerConfig();
     private InputValidationFuzzerTab mainTab;
+    private FuzzerPersistentStorageManager_littlespidy storageManager;
 
     @Override
     public void initialize(MontoyaApi api) {
         this.api = api;
         api.extension().setName("Input Validation Fuzzer (littlespidy)");
 
-        // ── 1. Create and Register Suite Tab ──
-        this.mainTab = new InputValidationFuzzerTab(api, config);
-        api.userInterface().registerSuiteTab("Input Validation Fuzzer", mainTab);
+        // ── 1. Create Storage Manager and UI Suite Tab ──
+        this.storageManager = new FuzzerPersistentStorageManager_littlespidy(api);
+        this.mainTab = new InputValidationFuzzerTab(api, config, storageManager);
+        this.storageManager.bindTab(mainTab);
+
+        SwingUtilities.invokeLater(() -> {
+            api.userInterface().registerSuiteTab("Input Validation Fuzzer", mainTab);
+            storageManager.initializeSessionOnStartup(mainTab, () -> {});
+        });
 
         // ── 2. Register Context Menu Item: "Send to Fuzzer" ──
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
@@ -60,6 +68,9 @@ public class InputValidationFuzzerExtension implements BurpExtension {
         api.extension().registerUnloadingHandler(() -> {
             if (mainTab != null) {
                 mainTab.cleanupAll();
+            }
+            if (storageManager != null) {
+                storageManager.shutdown();
             }
             api.logging().logToOutput("Input Validation Fuzzer extension unloaded successfully.");
         });
