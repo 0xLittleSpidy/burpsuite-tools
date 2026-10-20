@@ -3,6 +3,7 @@ package com.littlespidy.jssourcemapexplorer.ui;
 
 import com.littlespidy.jssourcemapexplorer.engine.*;
 import com.littlespidy.jssourcemapexplorer.model.*;
+import com.littlespidy.jssourcemapexplorer.storage.JsPersistentStorageManager_littlespidy;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
@@ -41,6 +42,7 @@ public class JSSourceMapExplorerTab extends JPanel {
     private final MontoyaApi api;
     private final JsDataStore dataStore;
     private final SourceMapProber prober;
+    private final JsPersistentStorageManager_littlespidy storageManager;
 
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
 
@@ -106,8 +108,13 @@ public class JSSourceMapExplorerTab extends JPanel {
     private ExecutorService probeExecutor;
 
     public JSSourceMapExplorerTab(MontoyaApi api, JsDataStore dataStore) {
+        this(api, dataStore, null);
+    }
+
+    public JSSourceMapExplorerTab(MontoyaApi api, JsDataStore dataStore, JsPersistentStorageManager_littlespidy storageManager) {
         this.api = api;
         this.dataStore = dataStore;
+        this.storageManager = storageManager;
         this.prober = new SourceMapProber(api);
 
         this.domainFilterBtn = new MultiSelectFilterButton("Domains", List.of("All Domains"), sel -> refreshView());
@@ -223,6 +230,9 @@ public class JSSourceMapExplorerTab extends JPanel {
         if (graphQLInspectorPanel != null) {
             graphQLInspectorPanel.refreshFromDataStore();
         }
+        if (storageManager != null) {
+            storageManager.scheduleAutoSave();
+        }
     }
 
 
@@ -232,7 +242,14 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         // ── Top Toolbar ──
         JPanel topContainer = new JPanel(new BorderLayout(4, 4));
-        topContainer.add(createMainToolbar(), BorderLayout.NORTH);
+        if (storageManager != null) {
+            JPanel headerStack = new JPanel(new BorderLayout());
+            headerStack.add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
+            headerStack.add(createMainToolbar(), BorderLayout.SOUTH);
+            topContainer.add(headerStack, BorderLayout.NORTH);
+        } else {
+            topContainer.add(createMainToolbar(), BorderLayout.NORTH);
+        }
         topContainer.add(createFilterToolbar(), BorderLayout.CENTER);
 
         // ── Status Strip ──
@@ -378,6 +395,9 @@ public class JSSourceMapExplorerTab extends JPanel {
                 codeViewerPanel.displayFile(null);
                 reconMiningPanel.refreshFromDataStore();
                 refreshView();
+                if (storageManager != null) {
+                    storageManager.scheduleAutoSave();
+                }
             }
         });
 
@@ -552,6 +572,9 @@ public class JSSourceMapExplorerTab extends JPanel {
                 SwingUtilities.invokeLater(() -> {
                     refreshView();
                     reconMiningPanel.refreshFromDataStore();
+                    if (storageManager != null) {
+                        storageManager.scheduleAutoSave();
+                    }
                     JOptionPane.showMessageDialog(
                         JSSourceMapExplorerTab.this,
                         "Probing complete across " + total + " scripts.\nDiscovered " + foundCount.get() + " exposed .map files!",
@@ -623,6 +646,9 @@ public class JSSourceMapExplorerTab extends JPanel {
                         graphQLInspectorPanel.refreshFromDataStore();
                         handleScriptSelection(entry);
                         refreshView();
+                        if (storageManager != null) {
+                            storageManager.scheduleAutoSave();
+                        }
 
                         JOptionPane.showMessageDialog(
                             JSSourceMapExplorerTab.this,
@@ -976,6 +1002,9 @@ public class JSSourceMapExplorerTab extends JPanel {
                     refreshView();
                     reconMiningPanel.refreshFromDataStore();
                     graphQLInspectorPanel.refreshFromDataStore();
+                    if (storageManager != null) {
+                        storageManager.scheduleAutoSave();
+                    }
                     liveStatusLabel.setText(String.format("Loaded & mined %d new JS assets from Proxy history.", result.size()));
                     JOptionPane.showMessageDialog(
                         JSSourceMapExplorerTab.this,

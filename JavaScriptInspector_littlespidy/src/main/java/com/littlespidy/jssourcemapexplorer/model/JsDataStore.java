@@ -21,6 +21,10 @@ public class JsDataStore {
         return idCounter.getAndIncrement();
     }
 
+    public synchronized void setNextId(int nextId) {
+        idCounter.set(Math.max(1, nextId));
+    }
+
     public synchronized boolean isKnownUrl(String url) {
         if (url == null) return false;
         return knownUrls.contains(normalizeUrl(url));

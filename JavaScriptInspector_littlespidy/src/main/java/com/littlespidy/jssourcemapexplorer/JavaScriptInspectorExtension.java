@@ -2,6 +2,7 @@
 package com.littlespidy.jssourcemapexplorer;
 
 import com.littlespidy.jssourcemapexplorer.model.JsDataStore;
+import com.littlespidy.jssourcemapexplorer.storage.JsPersistentStorageManager_littlespidy;
 import com.littlespidy.jssourcemapexplorer.ui.JSSourceMapExplorerTab;
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
@@ -30,15 +31,22 @@ public class JavaScriptInspectorExtension implements BurpExtension {
     private MontoyaApi api;
     private final JsDataStore dataStore = new JsDataStore();
     private JSSourceMapExplorerTab mainTab;
+    private JsPersistentStorageManager_littlespidy storageManager;
 
     @Override
     public void initialize(MontoyaApi api) {
         this.api = api;
         api.extension().setName("JavaScript Inspector (littlespidy)");
 
-        // ── 1. Create and Register Suite Tab ──
-        this.mainTab = new JSSourceMapExplorerTab(api, dataStore);
-        api.userInterface().registerSuiteTab("JavaScript Inspector", mainTab);
+        // ── 1. Create Storage Manager and UI Suite Tab ──
+        this.storageManager = new JsPersistentStorageManager_littlespidy(api);
+        this.storageManager.bindDataStore(dataStore);
+
+        this.mainTab = new JSSourceMapExplorerTab(api, dataStore, storageManager);
+        SwingUtilities.invokeLater(() -> {
+            api.userInterface().registerSuiteTab("JavaScript Inspector", mainTab);
+            storageManager.initializeSessionOnStartup(mainTab, mainTab::refreshView);
+        });
 
         // ── 2. Register Context Menu Provider ──
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
@@ -58,6 +66,9 @@ public class JavaScriptInspectorExtension implements BurpExtension {
         api.extension().registerUnloadingHandler(() -> {
             if (mainTab != null) {
                 mainTab.cleanup();
+            }
+            if (storageManager != null) {
+                storageManager.shutdown();
             }
             api.logging().logToOutput("JavaScript Inspector extension unloaded successfully.");
         });
