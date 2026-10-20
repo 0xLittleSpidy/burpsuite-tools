@@ -4,6 +4,7 @@ package com.littlespidy.hstsinspector.ui;
 import com.littlespidy.hstsinspector.model.HSTSDataStore;
 import com.littlespidy.hstsinspector.model.HSTSEntry;
 import com.littlespidy.hstsinspector.model.HSTSParser;
+import com.littlespidy.hstsinspector.storage.HSTSPersistentStorageManager_littlespidy;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
@@ -42,6 +43,7 @@ public class HSTSInspectorTab extends JPanel {
 
     private final MontoyaApi api;
     private final HSTSDataStore dataStore;
+    private final HSTSPersistentStorageManager_littlespidy storageManager;
 
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
 
@@ -97,8 +99,13 @@ public class HSTSInspectorTab extends JPanel {
     // ── Constructor ───────────────────────────────────────────────────────────
 
     public HSTSInspectorTab(MontoyaApi api, HSTSDataStore dataStore) {
-        this.api       = api;
-        this.dataStore = dataStore;
+        this(api, dataStore, null);
+    }
+
+    public HSTSInspectorTab(MontoyaApi api, HSTSDataStore dataStore, HSTSPersistentStorageManager_littlespidy storageManager) {
+        this.api            = api;
+        this.dataStore      = dataStore;
+        this.storageManager = storageManager;
         this.requestEditor  = api.userInterface().createHttpRequestEditor();
         this.responseEditor = api.userInterface().createHttpResponseEditor();
 
@@ -192,7 +199,14 @@ public class HSTSInspectorTab extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
+        if (storageManager != null) {
+            JPanel headerBars = new JPanel(new BorderLayout());
+            headerBars.add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
+            headerBars.add(createMainToolbar(), BorderLayout.SOUTH);
+            topContainer.add(headerBars, BorderLayout.NORTH);
+        } else {
+            topContainer.add(createMainToolbar(), BorderLayout.NORTH);
+        }
         topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
         panel.add(topContainer, BorderLayout.NORTH);
 
@@ -305,6 +319,9 @@ public class HSTSInspectorTab extends JPanel {
                 dataStore.clear();
                 selectedSummaryValue = null;
                 refreshView();
+                if (storageManager != null) {
+                    storageManager.scheduleAutoSave();
+                }
             }
         });
 
@@ -467,6 +484,9 @@ public class HSTSInspectorTab extends JPanel {
                     List<HSTSEntry> result = get();
                     dataStore.addEntries(result);
                     refreshView();
+                    if (storageManager != null) {
+                        storageManager.scheduleAutoSave();
+                    }
                     JOptionPane.showMessageDialog(HSTSInspectorTab.this,
                         "Imported " + result.size() + " unique endpoints from Proxy history.",
                         "Import Complete", JOptionPane.INFORMATION_MESSAGE);
