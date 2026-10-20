@@ -122,6 +122,7 @@ public class ImportPanel_littlespidy extends CenterPanel {
 			importTableModel.clear();
 		}
 		importedSessions.clear();
+		domainFilterDropDown.clear();
 		columnsContainer.removeAll();
 		columnsContainer.revalidate();
 		columnsContainer.repaint();

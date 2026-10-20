@@ -44,6 +44,7 @@ import com.protect7.authanalyzer.entities.Session;
 import com.protect7.authanalyzer.gui.dialog.DataExportDialog;
 import com.protect7.authanalyzer.gui.util.BypassCellRenderer;
 import com.protect7.authanalyzer.gui.util.CustomRowSorter;
+import com.protect7.authanalyzer.gui.util.DomainFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.MethodFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.PlaceholderTextField;
 import com.protect7.authanalyzer.gui.util.RequestTableModel;
@@ -72,6 +73,7 @@ public class CenterPanel extends JPanel {
 	protected final JPanel messageViewPanel;
 	protected CustomRowSorter sorter;
 	protected final MethodFilterDropDown_littlespidy methodFilterDropDown = new MethodFilterDropDown_littlespidy();
+	protected final DomainFilterDropDown_littlespidy domainFilterDropDown = new DomainFilterDropDown_littlespidy();
 	protected final JPanel topActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 	protected final JButton clearTableButton;
 	protected final JButton exportDataButton;
@@ -126,7 +128,11 @@ public class CenterPanel extends JPanel {
 
 		JPanel tableControlPanel = new JPanel(new BorderLayout(10, 4));
 		tableControlPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		tableControlPanel.add(methodFilterDropDown, BorderLayout.WEST);
+
+		JPanel leftFiltersPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+		leftFiltersPanel.add(methodFilterDropDown);
+		leftFiltersPanel.add(domainFilterDropDown);
+		tableControlPanel.add(leftFiltersPanel, BorderLayout.WEST);
 
 		filterText = new PlaceholderTextField(20);
 		filterText.setPlaceholder("Enter Search Pattern...");
@@ -364,6 +370,7 @@ public class CenterPanel extends JPanel {
 	public void clearTable() {
 		tableModel.clearRequestMap();
 		selectedId = -1;
+		domainFilterDropDown.clear();
 		columnsContainer.removeAll();
 		columnViews.clear();
 		columnsContainer.revalidate();
@@ -388,7 +395,7 @@ public class CenterPanel extends JPanel {
 		}
 		sorter = new CustomRowSorter(this, tableModel, showOnlyMarked, showDuplicates, showBypassed, 
 				showPotentialBypassed, showNotBypassed, showNA, filterText, searchInPath, searchInRequest, searchInResponse, negativeSearch,
-				methodFilterDropDown);
+				methodFilterDropDown, domainFilterDropDown);
 		sorter.addRowSorterListener(new RowSorterListener() {
 			@Override
 			public void sorterChanged(RowSorterEvent e) {
@@ -431,6 +438,15 @@ public class CenterPanel extends JPanel {
 		int totalRows = tableModel.getRowCount();
 		int shownRows = table.getRowCount();
 		tableFilterInfoLabel.setText("Showing " + shownRows + " of " + totalRows + " Requests");
+		if (tableModel != null) {
+			HashSet<String> hosts = new HashSet<String>();
+			for (OriginalRequestResponse req : tableModel.getOriginalRequestResponseList()) {
+				if (req != null && req.getHost() != null) {
+					hosts.add(req.getHost());
+				}
+			}
+			domainFilterDropDown.updateDomains(hosts);
+		}
 	}
 
 	public void toggleSearchButtonText() {
@@ -672,6 +688,10 @@ public class CenterPanel extends JPanel {
 
 	public MethodFilterDropDown_littlespidy getMethodFilterDropDown() {
 		return methodFilterDropDown;
+	}
+
+	public DomainFilterDropDown_littlespidy getDomainFilterDropDown() {
+		return domainFilterDropDown;
 	}
 
 	public JLabel getPendingRequestsLabel() {

@@ -15,8 +15,14 @@ import com.protect7.authanalyzer.entities.CustomHttpRequestResponse_littlespidy;
 import com.protect7.authanalyzer.entities.CustomHttpService_littlespidy;
 import com.protect7.authanalyzer.entities.OriginalRequestResponse;
 import com.protect7.authanalyzer.entities.Session;
+import com.protect7.authanalyzer.cors.CorsEngine_littlespidy;
+import com.protect7.authanalyzer.cors.CorsTestResult_littlespidy;
+import com.protect7.authanalyzer.cors.CorsTestResult_littlespidy.CorsSeverity;
+import com.protect7.authanalyzer.gui.cors.CorsHistoryPanel_littlespidy;
+import com.protect7.authanalyzer.gui.cors.CorsImportPanel_littlespidy;
 import com.protect7.authanalyzer.gui.main.HistoryPanel_littlespidy;
 import com.protect7.authanalyzer.gui.main.ImportPanel_littlespidy;
+import com.protect7.authanalyzer.gui.util.DomainFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.ImportRequestTableModel_littlespidy;
 import com.protect7.authanalyzer.gui.util.MethodFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.persistence.SessionStartupDialog_littlespidy;
@@ -254,5 +260,50 @@ public class AuthAnalyzerTest_littlespidy {
 		HistoryPanel_littlespidy panel = new HistoryPanel_littlespidy(null);
 		assertNotNull(panel.getTable().getModel());
 		assertEquals(panel.getTableModel(), panel.getTable().getModel());
+	}
+
+	@Test
+	public void testDomainFilterDropDown() {
+		DomainFilterDropDown_littlespidy dropdown = new DomainFilterDropDown_littlespidy();
+		assertEquals("Domains: All", dropdown.getText());
+		assertTrue(dropdown.isDomainSelected("api.target.com"));
+
+		dropdown.updateDomains(List.of("api.target.com", "auth.target.com"));
+		assertEquals("Domains: All", dropdown.getText());
+		assertTrue(dropdown.isDomainSelected("api.target.com"));
+		assertTrue(dropdown.isDomainSelected("auth.target.com"));
+
+		dropdown.setDomainSelected("api.target.com", false);
+		assertFalse(dropdown.isDomainSelected("api.target.com"));
+		assertTrue(dropdown.isDomainSelected("auth.target.com"));
+	}
+
+	@Test
+	public void testCorsTestVectorsGeneration() {
+		List<CorsEngine_littlespidy.TestVector> vectors = CorsEngine_littlespidy.generateTestVectors("example.com", "evil.com");
+		assertTrue(vectors.size() >= 8);
+
+		boolean hasArbitrary = false;
+		boolean hasNull = false;
+		boolean hasTrustHttp = false;
+		for (CorsEngine_littlespidy.TestVector v : vectors) {
+			if (v.origin.equals("https://evil.com")) hasArbitrary = true;
+			if (v.origin.equals("null")) hasNull = true;
+			if (v.origin.equals("http://example.com")) hasTrustHttp = true;
+		}
+		assertTrue(hasArbitrary, "Should have arbitrary reflection vector");
+		assertTrue(hasNull, "Should have null origin vector");
+		assertTrue(hasTrustHttp, "Should have trust HTTP vector");
+	}
+
+	@Test
+	public void testCorsPanelsInitialization() {
+		CorsHistoryPanel_littlespidy historyPanel = new CorsHistoryPanel_littlespidy(null);
+		assertNotNull(historyPanel.getTable().getModel());
+		assertEquals(0, historyPanel.getTableModel().getRowCount());
+
+		CorsImportPanel_littlespidy importPanel = new CorsImportPanel_littlespidy(null);
+		assertNotNull(importPanel.getTable().getModel());
+		assertEquals(0, importPanel.getTableModel().getRowCount());
 	}
 }

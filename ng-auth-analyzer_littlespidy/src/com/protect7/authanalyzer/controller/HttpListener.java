@@ -1,6 +1,7 @@
 package com.protect7.authanalyzer.controller;
 
 import com.protect7.authanalyzer.filter.RequestFilter;
+import com.protect7.authanalyzer.gui.cors.CorsHistoryPanel_littlespidy;
 import com.protect7.authanalyzer.util.CurrentConfig;
 import burp.BurpExtender;
 import burp.IBurpExtenderCallbacks;
@@ -20,6 +21,21 @@ public class HttpListener implements IHttpListener, IProxyListener {
 		if(config.isRunning() && (!messageIsRequest || (messageIsRequest && config.isDropOriginal() && toolFlag == IBurpExtenderCallbacks.TOOL_PROXY))) {		
 			if(!isFiltered(toolFlag, messageInfo)) {
 				config.performAuthAnalyzerRequest(messageInfo);
+			}
+		}
+
+		if (!messageIsRequest && toolFlag == IBurpExtenderCallbacks.TOOL_PROXY) {
+			if (BurpExtender.mainPanel != null && BurpExtender.mainPanel.getCorsHistoryPanel() != null) {
+				CorsHistoryPanel_littlespidy corsPanel = BurpExtender.mainPanel.getCorsHistoryPanel();
+				if (corsPanel.isActivateCorsTesting()) {
+					IRequestInfo reqInfo = BurpExtender.callbacks.getHelpers().analyzeRequest(messageInfo);
+					if (reqInfo != null && reqInfo.getUrl() != null) {
+						boolean inScope = !corsPanel.isInScopeOnly() || BurpExtender.callbacks.isInScope(reqInfo.getUrl());
+						if (inScope && !corsPanel.shouldIgnoreExtension(reqInfo.getUrl().getPath())) {
+							corsPanel.analyzeRequestAsync(messageInfo);
+						}
+					}
+				}
 			}
 		}
 	}

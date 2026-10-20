@@ -21,16 +21,28 @@ public class CustomRowSorter extends TableRowSorter<RequestTableModel> {
 			JCheckBox showPotentialBypassed, JCheckBox showNotBypassed, JCheckBox showNA, PlaceholderTextField filterText,
 			JCheckBox searchInPath, JCheckBox searchInRequest, JCheckBox searchInResponse, JCheckBox negativeSearch) {
 		this(centerPanel, tableModel, showOnlyMarked, showDuplicates, showBypassed, showPotentialBypassed, showNotBypassed, showNA, filterText,
-				searchInPath, searchInRequest, searchInResponse, negativeSearch, null);
+				searchInPath, searchInRequest, searchInResponse, negativeSearch, null, null);
 	}
 
 	public CustomRowSorter(CenterPanel centerPanel, RequestTableModel tableModel, JCheckBox showOnlyMarked, JCheckBox showDuplicates, JCheckBox showBypassed, 
 			JCheckBox showPotentialBypassed, JCheckBox showNotBypassed, JCheckBox showNA, PlaceholderTextField filterText,
 			JCheckBox searchInPath, JCheckBox searchInRequest, JCheckBox searchInResponse, JCheckBox negativeSearch,
 			MethodFilterDropDown_littlespidy methodFilterDropDown) {
+		this(centerPanel, tableModel, showOnlyMarked, showDuplicates, showBypassed, showPotentialBypassed, showNotBypassed, showNA, filterText,
+				searchInPath, searchInRequest, searchInResponse, negativeSearch, methodFilterDropDown, null);
+	}
+
+	public CustomRowSorter(CenterPanel centerPanel, RequestTableModel tableModel, JCheckBox showOnlyMarked, JCheckBox showDuplicates, JCheckBox showBypassed, 
+			JCheckBox showPotentialBypassed, JCheckBox showNotBypassed, JCheckBox showNA, PlaceholderTextField filterText,
+			JCheckBox searchInPath, JCheckBox searchInRequest, JCheckBox searchInResponse, JCheckBox negativeSearch,
+			MethodFilterDropDown_littlespidy methodFilterDropDown,
+			DomainFilterDropDown_littlespidy domainFilterDropDown) {
 		super(tableModel);
 		if (methodFilterDropDown != null) {
 			methodFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
+		}
+		if (domainFilterDropDown != null) {
+			domainFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
 		}
 		showOnlyMarked.addActionListener(e -> tableModel.fireTableDataChanged());
 		showDuplicates.addActionListener(e -> tableModel.fireTableDataChanged());
@@ -49,6 +61,12 @@ public class CustomRowSorter extends TableRowSorter<RequestTableModel> {
 				if (methodFilterDropDown != null) {
 					String method = entry.getStringValue(1);
 					if (!methodFilterDropDown.isMethodSelected(method)) {
+						return false;
+					}
+				}
+				if (domainFilterDropDown != null) {
+					String host = entry.getStringValue(2);
+					if (!domainFilterDropDown.isDomainSelected(host)) {
 						return false;
 					}
 				}

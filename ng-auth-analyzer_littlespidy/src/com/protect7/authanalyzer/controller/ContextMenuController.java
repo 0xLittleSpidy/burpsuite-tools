@@ -13,6 +13,7 @@ import com.protect7.authanalyzer.gui.main.ConfigurationPanel;
 import com.protect7.authanalyzer.util.ExtractionHelper;
 import com.protect7.authanalyzer.util.GenericHelper;
 import com.protect7.authanalyzer.util.Globals;
+import burp.BurpExtender;
 import burp.IContextMenuFactory;
 import burp.IContextMenuInvocation;
 import burp.IHttpRequestResponse;
@@ -44,6 +45,16 @@ public class ContextMenuController implements IContextMenuFactory {
 			authAnalyzerMenu.addSeparator();
 			// Set Token Auto Add Menu
 			addAutoSetTokenMenu(authAnalyzerMenu, invocation);
+			authAnalyzerMenu.addSeparator();
+			JMenuItem testCorsItem = new JMenuItem("Test CORS with " + Globals.EXTENSION_NAME);
+			testCorsItem.addActionListener(e -> {
+				if (BurpExtender.mainPanel != null && BurpExtender.mainPanel.getCorsHistoryPanel() != null) {
+					for (IHttpRequestResponse message : invocation.getSelectedMessages()) {
+						BurpExtender.mainPanel.getCorsHistoryPanel().analyzeRequestAsync(message);
+					}
+				}
+			});
+			authAnalyzerMenu.add(testCorsItem);
 		}
 		if (selection != null && selection[0] != selection[1]) {
 			if (iContext == IContextMenuInvocation.CONTEXT_MESSAGE_EDITOR_REQUEST

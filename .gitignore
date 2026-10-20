@@ -19,3 +19,5 @@ upload-scanner/
 .playwright-mcp/
 csp-evaluator/
 reshaper/
+additional-cors-checks/
+oauth-scan/

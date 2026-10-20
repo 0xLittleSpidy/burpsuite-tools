@@ -8,6 +8,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import burp.BurpExtender;
 import com.protect7.authanalyzer.controller.ContextMenuController;
+import com.protect7.authanalyzer.gui.cors.CorsHistoryPanel_littlespidy;
+import com.protect7.authanalyzer.gui.cors.CorsImportPanel_littlespidy;
 import com.protect7.authanalyzer.persistence.PersistenceManager_littlespidy;
 
 public class MainPanel extends JPanel {
@@ -16,6 +18,8 @@ public class MainPanel extends JPanel {
 	private final ConfigurationPanel configurationPanel;
 	private final HistoryPanel_littlespidy historyPanel;
 	private final ImportPanel_littlespidy importPanel;
+	private final CorsHistoryPanel_littlespidy corsHistoryPanel;
+	private final CorsImportPanel_littlespidy corsImportPanel;
 	private final JTabbedPane rootTabbedPane;
 	private final PersistenceManager_littlespidy persistenceManager;
 
@@ -29,14 +33,18 @@ public class MainPanel extends JPanel {
 		configurationPanel = new ConfigurationPanel(this);
 		historyPanel = new HistoryPanel_littlespidy(this);
 		importPanel = new ImportPanel_littlespidy(this);
+		corsHistoryPanel = new CorsHistoryPanel_littlespidy(this);
+		corsImportPanel = new CorsImportPanel_littlespidy(this);
 
 		rootTabbedPane = new JTabbedPane();
 		JScrollPane scrollPane = new JScrollPane(configurationPanel);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 
 		rootTabbedPane.addTab("Configuration", scrollPane);
-		rootTabbedPane.addTab("History", historyPanel);
-		rootTabbedPane.addTab("Import", importPanel);
+		rootTabbedPane.addTab("Auth History", historyPanel);
+		rootTabbedPane.addTab("Auth Import", importPanel);
+		rootTabbedPane.addTab("CORS History", corsHistoryPanel);
+		rootTabbedPane.addTab("CORS Import", corsImportPanel);
 
 		add(persistenceManager.createToolbar(), BorderLayout.NORTH);
 		add(rootTabbedPane, BorderLayout.CENTER);
@@ -64,6 +72,14 @@ public class MainPanel extends JPanel {
 
 	public ImportPanel_littlespidy getImportPanel() {
 		return importPanel;
+	}
+
+	public CorsHistoryPanel_littlespidy getCorsHistoryPanel() {
+		return corsHistoryPanel;
+	}
+
+	public CorsImportPanel_littlespidy getCorsImportPanel() {
+		return corsImportPanel;
 	}
 
 	public ConfigurationPanel getConfigurationPanel() {
