@@ -110,7 +110,7 @@ public class CookieStoreTab extends JPanel {
     private void initComponents() {
         setBorder(new EmptyBorder(6, 8, 6, 8));
 
-        // ── 1. Top Toolbar ──────────────────────────────────────────────────
+        // -- 1. Top Toolbar --------------------------------------------------
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
 
@@ -138,7 +138,7 @@ public class CookieStoreTab extends JPanel {
 
         add(toolbar, BorderLayout.NORTH);
 
-        // ── 2. Center SplitPane: Left (Cookie Names) / Right (Values & Editors) ──
+        // -- 2. Center SplitPane: Left (Cookie Names) / Right (Values & Editors) --
         JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         mainSplit.setDividerLocation(400);
         mainSplit.setResizeWeight(0.35);
@@ -216,7 +216,7 @@ public class CookieStoreTab extends JPanel {
 
         add(mainSplit, BorderLayout.CENTER);
 
-        // ── 3. Bottom Status Strip ──────────────────────────────────────────
+        // -- 3. Bottom Status Strip ------------------------------------------
         JPanel statusPanel = new JPanel(new BorderLayout(6, 2));
         statusPanel.setBorder(new EmptyBorder(4, 2, 2, 2));
         progressBar.setVisible(false);

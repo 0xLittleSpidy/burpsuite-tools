@@ -51,7 +51,7 @@ public class CookieDocPanel extends JPanel {
     }
 
     private void initComponents() {
-        // ── 1. Top Header Banner ─────────────────────────────────────────────
+        // -- 1. Top Header Banner ---------------------------------------------
         JPanel topContainer = new JPanel(new BorderLayout(4, 4));
         topContainer.setOpaque(false);
 
@@ -131,7 +131,7 @@ public class CookieDocPanel extends JPanel {
         topContainer.add(statusIndicator, BorderLayout.SOUTH);
         add(topContainer, BorderLayout.NORTH);
 
-        // ── 2. Content Center Area ───────────────────────────────────────────
+        // -- 2. Content Center Area -------------------------------------------
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setOpaque(false);

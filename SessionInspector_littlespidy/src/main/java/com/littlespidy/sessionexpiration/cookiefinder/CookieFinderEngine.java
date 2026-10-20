@@ -142,7 +142,7 @@ public class CookieFinderEngine {
                 Set<String> sessionTokens = new LinkedHashSet<>();
                 AtomicInteger testId = new AtomicInteger(1);
 
-                // ── STEP 0: Authenticated Baseline Request ──────────────────
+                // -- STEP 0: Authenticated Baseline Request ------------------
                 api.logging().logToOutput("[CookieFinder] Sending authenticated baseline request...");
                 long startBase = System.currentTimeMillis();
                 HttpRequestResponse baselineRR = api.http().sendRequest(originalRequest);
@@ -179,7 +179,7 @@ public class CookieFinderEngine {
                     return;
                 }
 
-                // ── STEP 1: Anonymous Benchmark (All Auth/Cookies Removed) ──
+                // -- STEP 1: Anonymous Benchmark (All Auth/Cookies Removed) --
                 HttpResponse anonResp = null;
                 long anonLen = -1;
                 if (includeAnonymous) {
@@ -217,7 +217,7 @@ public class CookieFinderEngine {
                     return;
                 }
 
-                // ── STEP 2: Systematic Single Cookie Removal ─────────────────
+                // -- STEP 2: Systematic Single Cookie Removal -----------------
                 for (Map.Entry<String, String> entry : cookies.entrySet()) {
                     if (cancelled.get()) break;
 
@@ -247,7 +247,7 @@ public class CookieFinderEngine {
                     notifyResult(listener, result);
                 }
 
-                // ── STEP 3: Systematic Standard Auth Header Removal ───────────
+                // -- STEP 3: Systematic Standard Auth Header Removal -----------
                 for (HttpHeader authHdr : authHeadersPresent) {
                     if (cancelled.get()) break;
 
@@ -275,7 +275,7 @@ public class CookieFinderEngine {
                     notifyResult(listener, result);
                 }
 
-                // ── STEP 4: Systematic Custom Header Removal ──────────────────
+                // -- STEP 4: Systematic Custom Header Removal ------------------
                 for (HttpHeader customHdr : customHeadersPresent) {
                     if (cancelled.get()) break;
 
@@ -303,7 +303,7 @@ public class CookieFinderEngine {
                     notifyResult(listener, result);
                 }
 
-                // ── STEP 5: Group Isolation Tests (Optional) ──────────────────
+                // -- STEP 5: Group Isolation Tests (Optional) ------------------
                 if (includeGroupTests && !cancelled.get()) {
                     // Test A: All cookies removed (preserving auth headers)
                     if (!cookies.isEmpty()) {

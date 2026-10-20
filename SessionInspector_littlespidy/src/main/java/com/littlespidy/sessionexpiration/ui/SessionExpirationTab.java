@@ -81,12 +81,17 @@ public class SessionExpirationTab extends JPanel {
     private final Timer filterDebounceTimer;
     private final Timer countdownTimer;
 
+    // Session Toolbar
+    private final JPanel topContainer = new JPanel(new BorderLayout());
+    private com.littlespidy.sessionexpiration.storage.SessionInspectorPersistentStorageManager_littlespidy storageManager;
+
     public SessionExpirationTab(MontoyaApi api, SessionDataStore dataStore, SessionTimerEngine timerEngine) {
         this.api = api;
         this.dataStore = dataStore;
         this.timerEngine = timerEngine;
 
         setLayout(new BorderLayout());
+        add(topContainer, BorderLayout.NORTH);
 
         // Create Montoya Editors
         this.probeRequestEditor = api.userInterface().createHttpRequestEditor();
@@ -166,7 +171,20 @@ public class SessionExpirationTab extends JPanel {
         return cookieFinderTab;
     }
 
+    public void setStorageManager(com.littlespidy.sessionexpiration.storage.SessionInspectorPersistentStorageManager_littlespidy storageManager) {
+        this.storageManager = storageManager;
+        topContainer.removeAll();
+        if (storageManager != null) {
+            topContainer.add(storageManager.createSessionToolbar(), BorderLayout.NORTH);
+        }
+        topContainer.revalidate();
+        topContainer.repaint();
+    }
+
     public void triggerAutoSave() {
+        if (storageManager != null) {
+            storageManager.markDirty();
+        }
         com.littlespidy.sessionexpiration.persistence.SessionInspectorPersistence.saveAsync(
                 dataStore, cookieStoreDataStore, cookieFinderTab
         );

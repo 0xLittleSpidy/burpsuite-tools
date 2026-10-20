@@ -44,11 +44,13 @@ import javax.swing.SwingUtilities;
  */
 public class SessionInspectorPersistence {
 
+    public static final String PREF_KEY_GLOBAL_DIR = "burpsuite_extensions_last_session_dir_littlespidy";
     public static final String PREF_KEY_STORAGE_DIR = "session_inspector_storage_dir";
     public static final String FILE_NAME = "session_inspector_store.json";
     private static final String DEFAULT_FALLBACK_DIR = ".burp_session_inspector";
 
     private static Path currentStorageDirectory = null;
+    private static volatile Path activeSessionFilePath = null;
 
     private static final ScheduledExecutorService DEBOUNCE_EXECUTOR = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "SessionInspector-Persistence-Thread");
@@ -73,10 +75,21 @@ public class SessionInspectorPersistence {
         }
     }
 
+    public static Path getActiveSessionFilePath() {
+        return activeSessionFilePath;
+    }
+
+    public static void setActiveSessionFilePath(Path path) {
+        activeSessionFilePath = path;
+    }
+
     /**
      * Returns the absolute Path to the persistent storage file.
      */
     public static Path getStoragePath() {
+        if (activeSessionFilePath != null) {
+            return activeSessionFilePath;
+        }
         return getStorageDirectory().resolve(FILE_NAME);
     }
 
@@ -250,19 +263,22 @@ public class SessionInspectorPersistence {
     }
 
     /**
-     * Schedules a debounced asynchronous save (2000ms delay) to coalesce rapid updates.
+     * Schedules a debounced asynchronous save (1500ms delay) to coalesce rapid updates.
      */
     public static synchronized void saveAsync(
             SessionDataStore sessionStore,
             CookieStoreDataStore cookieStore,
             SessionCookieFinderTab finderTab
     ) {
+        if (activeSessionFilePath == null) {
+            return;
+        }
         if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
             pendingSaveTask.cancel(false);
         }
         pendingSaveTask = DEBOUNCE_EXECUTOR.schedule(() -> {
-            saveSync(sessionStore, cookieStore, finderTab);
-        }, 2000, TimeUnit.MILLISECONDS);
+            saveSync(sessionStore, cookieStore, finderTab, activeSessionFilePath);
+        }, 1500, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -273,9 +289,23 @@ public class SessionInspectorPersistence {
             CookieStoreDataStore cookieStore,
             SessionCookieFinderTab finderTab
     ) {
+        saveSync(sessionStore, cookieStore, finderTab, getStoragePath());
+    }
+
+    /**
+     * Synchronously persists all extension data to a specified target file using an atomic move.
+     */
+    public static void saveSync(
+            SessionDataStore sessionStore,
+            CookieStoreDataStore cookieStore,
+            SessionCookieFinderTab finderTab,
+            Path targetPath
+    ) {
+        if (targetPath == null) {
+            targetPath = getStoragePath();
+        }
         synchronized (SAVE_LOCK) {
             try {
-                Path targetPath = getStoragePath();
                 Path parentDir = targetPath.getParent();
                 if (parentDir != null && !Files.exists(parentDir)) {
                     Files.createDirectories(parentDir);
@@ -304,7 +334,7 @@ public class SessionInspectorPersistence {
                 root.put("cookieSearchCache", serializeKnowledgeCache());
 
                 String json = SimpleJson.serialize(root);
-                Path tmpPath = targetPath.resolveSibling(FILE_NAME + ".tmp");
+                Path tmpPath = targetPath.resolveSibling(targetPath.getFileName().toString() + ".tmp");
 
                 Files.writeString(tmpPath, json, StandardCharsets.UTF_8,
                         StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -327,15 +357,30 @@ public class SessionInspectorPersistence {
      *
      * @return Summary message of restored items
      */
-    @SuppressWarnings("unchecked")
     public static String load(
             SessionDataStore sessionStore,
             CookieStoreDataStore cookieStore,
             SessionCookieFinderTab finderTab,
             MontoyaApi api
     ) {
+        return load(sessionStore, cookieStore, finderTab, api, getStoragePath());
+    }
+
+    /**
+     * Loads and restores all persisted state from a specific path into the provided data stores.
+     */
+    @SuppressWarnings("unchecked")
+    public static String load(
+            SessionDataStore sessionStore,
+            CookieStoreDataStore cookieStore,
+            SessionCookieFinderTab finderTab,
+            MontoyaApi api,
+            Path targetPath
+    ) {
+        if (targetPath == null) {
+            targetPath = getStoragePath();
+        }
         synchronized (SAVE_LOCK) {
-            Path targetPath = getStoragePath();
             if (!Files.exists(targetPath)) {
                 return "No existing persistent state found.";
             }
@@ -411,7 +456,7 @@ public class SessionInspectorPersistence {
         }
     }
 
-    // ── Serialization Helpers ────────────────────────────────────────────────
+    // -- Serialization Helpers ------------------------------------------------
 
     private static Map<String, Object> serializeCookieStore(CookieStoreDataStore cookieStore) {
         Map<String, Object> map = new LinkedHashMap<>();
@@ -618,7 +663,7 @@ public class SessionInspectorPersistence {
         }
     }
 
-    // ── Deserialization Helpers ──────────────────────────────────────────────
+    // -- Deserialization Helpers ----------------------------------------------
 
     @SuppressWarnings("unchecked")
     private static int deserializeCookieStore(Map<String, Object> csMap, CookieStoreDataStore store, MontoyaApi api) {

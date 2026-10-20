@@ -46,29 +46,20 @@ public class SessionInspectorExtension implements BurpExtension {
                 new SessionContextMenuProvider(api, dataStore, timerEngine, mainTab)
         );
 
-        // 5. Restore Persistent State (across extension reload or Burp restart)
-        try {
-            SessionInspectorPersistence.resolveStorageDirectory(api);
-            String restoreSummary = SessionInspectorPersistence.load(
-                    dataStore, mainTab.getCookieStoreDataStore(), mainTab.getCookieFinderTab(), api
-            );
-            mainTab.refreshAllTabs();
-            api.logging().logToOutput("[Session Inspector] " + restoreSummary);
-        } catch (Exception ex) {
-            api.logging().logToError("[Session Inspector] Failed to restore persistent state: " + ex.getMessage());
-        }
+        // 5. Initialize persistent storage manager and attach to mainTab
+        com.littlespidy.sessionexpiration.storage.SessionInspectorPersistentStorageManager_littlespidy storageManager =
+                new com.littlespidy.sessionexpiration.storage.SessionInspectorPersistentStorageManager_littlespidy(api);
+        storageManager.bindContext(mainTab, dataStore, mainTab.getCookieStoreDataStore(), mainTab.getCookieFinderTab());
+        mainTab.setStorageManager(storageManager);
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            storageManager.initializeSessionOnStartup(mainTab, () -> mainTab.refreshAllTabs());
+        });
 
         // 6. Register Extension Unloading Handler
         api.extension().registerUnloadingHandler(() -> {
             api.logging().logToOutput("[Session Inspector] Unloading extension: saving state & terminating timers...");
-            try {
-                SessionInspectorPersistence.saveSync(
-                        dataStore, mainTab.getCookieStoreDataStore(), mainTab.getCookieFinderTab()
-                );
-                api.logging().logToOutput("[Session Inspector] Saved persistent state to disk.");
-            } catch (Exception ex) {
-                api.logging().logToError("[Session Inspector] Error saving persistent state on unload: " + ex.getMessage());
-            }
+            storageManager.shutdown();
 
             if (mainTab != null) {
                 mainTab.cleanup();

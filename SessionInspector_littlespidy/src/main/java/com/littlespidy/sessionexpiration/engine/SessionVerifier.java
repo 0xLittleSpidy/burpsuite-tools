@@ -83,19 +83,19 @@ public class SessionVerifier {
         int probeStatus = probe.statusCode();
         int baselineStatus = (baseline != null) ? baseline.statusCode() : 200;
 
-        // ── 1. HTTP 401 Unauthorized ─────────────────────────────────────────
+        // -- 1. HTTP 401 Unauthorized -----------------------------------------
         if (probeStatus == 401) {
             return new VerificationVerdict(true, "Expired (401 Unauthorized)",
                     "Server returned HTTP 401 Unauthorized, indicating credentials/session are rejected.");
         }
 
-        // ── 2. HTTP 403 Forbidden (when baseline was not 403) ────────────────
+        // -- 2. HTTP 403 Forbidden (when baseline was not 403) ----------------
         if (probeStatus == 403 && baselineStatus != 403) {
             return new VerificationVerdict(true, "Expired (403 Forbidden)",
                     "Status changed from baseline " + baselineStatus + " to 403 Forbidden.");
         }
 
-        // ── 3. Redirect to Login / Auth Endpoint ──────────────────────────────
+        // -- 3. Redirect to Login / Auth Endpoint ------------------------------
         if (probeStatus >= 300 && probeStatus < 400) {
             String location = probe.headerValue("Location");
             if (location != null) {
@@ -113,7 +113,7 @@ public class SessionVerifier {
             }
         }
 
-        // ── 4. Set-Cookie Invalidation (Max-Age=0 / expired 1970) ───────────
+        // -- 4. Set-Cookie Invalidation (Max-Age=0 / expired 1970) -----------
         for (HttpHeader header : probe.headers()) {
             if (header.name().equalsIgnoreCase("Set-Cookie")) {
                 String val = header.value().toLowerCase(Locale.ROOT);
@@ -124,7 +124,7 @@ public class SessionVerifier {
             }
         }
 
-        // ── 5. Response Body Keyword Analysis ────────────────────────────────
+        // -- 5. Response Body Keyword Analysis --------------------------------
         String probeBody = probe.bodyToString();
         String baselineBody = (baseline != null) ? baseline.bodyToString() : "";
 
@@ -140,13 +140,13 @@ public class SessionVerifier {
             }
         }
 
-        // ── 6. Significant Status Code Shift ─────────────────────────────────
+        // -- 6. Significant Status Code Shift ---------------------------------
         if (baselineStatus == 200 && (probeStatus == 400 || probeStatus == 404 || probeStatus == 500)) {
             return new VerificationVerdict(true, "Expired? (Status 200 -> " + probeStatus + ")",
                     "Status changed unexpectedly from 200 OK to " + probeStatus + ".");
         }
 
-        // ── 7. Session appears Active ─────────────────────────────────────────
+        // -- 7. Session appears Active -----------------------------------------
         long probeLen = probe.toByteArray().length();
         long baseLen = (baseline != null) ? baseline.toByteArray().length() : probeLen;
         long delta = probeLen - baseLen;

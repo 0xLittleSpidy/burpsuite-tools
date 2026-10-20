@@ -32,7 +32,7 @@ public class TimerConfigDialog extends JDialog {
         setSize(580, 520);
         setLocationRelativeTo(owner);
 
-        // ── Top Header / Target Details ─────────────────────────────────────
+        // -- Top Header / Target Details -------------------------------------
         JPanel topPanel = new JPanel(new BorderLayout(5, 5));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 12, 5, 12));
 
@@ -48,7 +48,7 @@ public class TimerConfigDialog extends JDialog {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // ── Center: Presets, Custom Input & Table ───────────────────────────
+        // -- Center: Presets, Custom Input & Table ---------------------------
         JPanel centerPanel = new JPanel(new BorderLayout(8, 8));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(0, 12, 5, 12));
 
@@ -151,7 +151,7 @@ public class TimerConfigDialog extends JDialog {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // ── Bottom Panel: Checkboxes & Confirmation ─────────────────────────
+        // -- Bottom Panel: Checkboxes & Confirmation -------------------------
         JPanel bottomPanel = new JPanel(new BorderLayout(6, 6));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(6, 12, 10, 12));
 
