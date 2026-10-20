@@ -4,6 +4,7 @@ package com.littlespidy.cspinspector.ui;
 import com.littlespidy.cspinspector.model.CSPDataStore;
 import com.littlespidy.cspinspector.model.CSPEntry;
 import com.littlespidy.cspinspector.model.CSPParser;
+import com.littlespidy.cspinspector.storage.CSPPersistentStorageManager_littlespidy;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
@@ -49,6 +50,7 @@ public class CSPInspectorTab extends JPanel {
 
     private final MontoyaApi api;
     private final CSPDataStore dataStore;
+    private final CSPPersistentStorageManager_littlespidy storageManager;
 
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
 
@@ -130,8 +132,13 @@ public class CSPInspectorTab extends JPanel {
     private String selectedSummaryValue = null;
 
     public CSPInspectorTab(MontoyaApi api, CSPDataStore dataStore) {
+        this(api, dataStore, null);
+    }
+
+    public CSPInspectorTab(MontoyaApi api, CSPDataStore dataStore, CSPPersistentStorageManager_littlespidy storageManager) {
         this.api = api;
         this.dataStore = dataStore;
+        this.storageManager = storageManager;
         this.requestEditor = api.userInterface().createHttpRequestEditor();
         this.responseEditor = api.userInterface().createHttpResponseEditor();
 
@@ -244,8 +251,13 @@ public class CSPInspectorTab extends JPanel {
 
         // Top Toolbars
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
-        topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
+        if (storageManager != null) {
+            topContainer.add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
+        }
+        JPanel subTop = new JPanel(new BorderLayout(5, 5));
+        subTop.add(createMainToolbar(),   BorderLayout.NORTH);
+        subTop.add(createStatusToolbar(), BorderLayout.SOUTH);
+        topContainer.add(subTop, BorderLayout.CENTER);
         panel.add(topContainer, BorderLayout.NORTH);
 
         // Center Workspaces
@@ -376,6 +388,9 @@ public class CSPInspectorTab extends JPanel {
                 dataStore.clear();
                 selectedSummaryValue = null;
                 refreshView();
+                if (storageManager != null) {
+                    storageManager.scheduleAutoSave();
+                }
             }
         });
 
@@ -588,6 +603,9 @@ public class CSPInspectorTab extends JPanel {
                     List<CSPEntry> result = get();
                     dataStore.addEntries(result);
                     refreshView();
+                    if (storageManager != null) {
+                        storageManager.scheduleAutoSave();
+                    }
                     JOptionPane.showMessageDialog(
                         CSPInspectorTab.this,
                         "Successfully imported " + result.size() + " unique URLs from Proxy history.",
