@@ -1029,7 +1029,7 @@ class UploadScannerTest {
         assertEquals("EXIF", StageType.EXIF_PROBE.getDisplayName());
     }
 
-    // ── Helper methods for mocking Montoya HttpRequest & HttpHeader ──
+    // -- Helper methods for mocking Montoya HttpRequest & HttpHeader --
 
     private static HttpHeader createHeader(String name, String value) {
         return new HttpHeader() {

@@ -55,7 +55,7 @@ public class ExecutionLogPanel extends JPanel {
     }
 
     private void initUI() {
-        // ── 1. Top Filter Toolbar ──
+        // -- 1. Top Filter Toolbar --
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
         toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(180, 180, 180, 80)));
 
@@ -126,7 +126,7 @@ public class ExecutionLogPanel extends JPanel {
 
         add(toolbar, BorderLayout.NORTH);
 
-        // ── 2. Table Setup & Styling ──
+        // -- 2. Table Setup & Styling --
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         table.setRowHeight(22);
@@ -196,7 +196,7 @@ public class ExecutionLogPanel extends JPanel {
         table.setDefaultRenderer(Integer.class, customRenderer);
         table.setDefaultRenderer(String.class, customRenderer);
 
-        // ── 3. Detail View (Montoya Editors) ──
+        // -- 3. Detail View (Montoya Editors) --
         requestEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
         responseEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
 
@@ -253,6 +253,17 @@ public class ExecutionLogPanel extends JPanel {
             tableModel.addEntry(entry);
             updateCountLabel();
         });
+    }
+
+    public void addLogEntries(List<UploadEntry> entries) {
+        SwingUtilities.invokeLater(() -> {
+            tableModel.addEntries(entries);
+            updateCountLabel();
+        });
+    }
+
+    public UploadLogTableModel getTableModel() {
+        return tableModel;
     }
 
     private void refreshFilter() {

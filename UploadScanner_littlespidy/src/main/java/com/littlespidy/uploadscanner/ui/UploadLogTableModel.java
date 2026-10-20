@@ -41,6 +41,17 @@ public class UploadLogTableModel extends AbstractTableModel {
         }
     }
 
+    public synchronized void addEntries(List<UploadEntry> entries) {
+        if (entries == null || entries.isEmpty()) return;
+        for (UploadEntry entry : entries) {
+            allEntries.add(entry);
+            if (matches(entry)) {
+                displayedEntries.add(entry);
+            }
+        }
+        fireTableDataChanged();
+    }
+
     public synchronized void clear() {
         allEntries.clear();
         displayedEntries.clear();

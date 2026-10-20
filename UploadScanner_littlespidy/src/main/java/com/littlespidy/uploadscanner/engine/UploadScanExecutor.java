@@ -196,7 +196,7 @@ public class UploadScanExecutor {
             int currentStep = i + 1;
             statusConsumer.accept(String.format("Testing [%d/%d]: %s", currentStep, total, payload.getName()));
 
-            // ── Step 1: Preflight Request (if configured) ──
+            // -- Step 1: Preflight Request (if configured) --
             HttpRequestResponse preflightPair = null;
             if (config.getRedownloaderConfig().isEnabled() &&
                     !config.getRedownloaderConfig().getPreflightUrl().isEmpty()) {
@@ -223,7 +223,7 @@ public class UploadScanExecutor {
                 }
             }
 
-            // ── Step 2: Build & Send Upload Request ──
+            // -- Step 2: Build & Send Upload Request --
             HttpRequest uploadReq = injectPayload(baseRequest, payload);
             HttpRequestResponse uploadPair = api.http().sendRequest(uploadReq);
 
@@ -305,7 +305,7 @@ public class UploadScanExecutor {
                 }
             }
 
-            // ── Step 3: ReDownloader Request (if URL was extracted or static URL is active) ──
+            // -- Step 3: ReDownloader Request (if URL was extracted or static URL is active) --
             if (config.getRedownloaderConfig().isEnabled() && extraction.isFound()) {
                 HttpRequest redlReq = redlEngine.buildRedownloadRequest(baseRequest, extraction.getExtractedText());
                 if (redlReq != null) {
@@ -336,7 +336,7 @@ public class UploadScanExecutor {
                         );
                         publishEntry(redlEntry);
 
-                        // ── EXIF Leakage & Stripping Verification in ReDownloaded Content ──
+                        // -- EXIF Leakage & Stripping Verification in ReDownloaded Content --
                         if (redlPair.hasResponse() && "EXIF".equalsIgnoreCase(payload.getCategory())) {
                             String redlBody = redlPair.response().bodyToString();
                             boolean canaryFound = redlBody.contains("LittleSpidy Security Canary") ||
@@ -385,7 +385,7 @@ public class UploadScanExecutor {
                 }
             }
 
-            // ── Throttling ──
+            // -- Throttling --
             if (config.getThrottleMs() > 0) {
                 try {
                     Thread.sleep(config.getThrottleMs());
@@ -396,7 +396,7 @@ public class UploadScanExecutor {
             }
         }
 
-        // ── Step 4: Poll Out-of-Band Collaborator Interactions ──
+        // -- Step 4: Poll Out-of-Band Collaborator Interactions --
         if (collaboratorClient != null) {
             try {
                 // Brief pause to allow DNS/HTTP propagation

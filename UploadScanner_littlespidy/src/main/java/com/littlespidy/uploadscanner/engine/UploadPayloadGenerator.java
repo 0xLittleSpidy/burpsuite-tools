@@ -47,9 +47,9 @@ public class UploadPayloadGenerator {
                 ? collaboratorDomain.trim()
                 : "collab-test.burpcollaborator.net";
 
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         // CATEGORY 1: SERVER-SIDE CODE EXECUTION (RCE)
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
 
         // 1. PHP Web Shells & Bypasses
         if (config.isTestPhp()) {
@@ -316,9 +316,9 @@ public class UploadPayloadGenerator {
             ));
         }
 
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         // CATEGORY 2: IMAGE LIBRARY EXPLOITS & CVES
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
 
         // 8. ImageTragick (CVE-2016-3714 RCE, CVE-2016-3718 SSRF, Bad Manners XBM)
         if (config.isTestImageTragick()) {
@@ -448,9 +448,9 @@ public class UploadPayloadGenerator {
             ));
         }
 
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         // CATEGORY 3: XML & DOCUMENT ATTACKS
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
 
         // 12. XXE SVG
         if (config.isTestXxeSvg()) {
@@ -602,9 +602,9 @@ public class UploadPayloadGenerator {
             ));
         }
 
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         // CATEGORY 4: CLIENT-SIDE & CSP POLYGLOTS
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
 
         // 18. HTML XSS
         if (config.isTestXssHtml()) {
@@ -685,9 +685,9 @@ public class UploadPayloadGenerator {
             ));
         }
 
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         // CATEGORY 5: ARCHIVES, QUIRKS & DOS
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
 
         // 23. Zip Slip Archive Traversal
         if (config.isTestZipSlip()) {
@@ -793,16 +793,16 @@ public class UploadPayloadGenerator {
             ));
         }
 
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         // CATEGORY 6: ALLOWED EXTENSIONS MATRIX PROBE
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         if (config.isTestAllowedExtensions()) {
             payloads.addAll(generateAllowedExtensionPayloads(config, baseFilename, token));
         }
 
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         // CATEGORY 7: VALIDATION, FILE SIZES & EXIF METADATA
-        // ══════════════════════════════════════════════════════════════════
+        // ==================================================================
         if (config.isTestContentTypeValidation() || config.isTestMimeSpoofing()) {
             payloads.addAll(generateContentTypePayloads(config, baseFilename, config.isTestSecListsWordlist(), token));
         }
@@ -1021,9 +1021,9 @@ public class UploadPayloadGenerator {
         };
     }
 
-    // ──────────────────────────────────────────────────────────────────
+    // ------------------------------------------------------------------
     // In-Memory Binary & Archive Builders
-    // ──────────────────────────────────────────────────────────────────
+    // ------------------------------------------------------------------
 
     /**
      * Builds a valid Microsoft Word (.docx) ZIP package embedding an XXE payload in word/document.xml.
@@ -1198,9 +1198,9 @@ public class UploadPayloadGenerator {
         return swf;
     }
 
-    // ──────────────────────────────────────────────────────────────────
+    // ------------------------------------------------------------------
     // Allowed Extension Probe Binary Builders
-    // ──────────────────────────────────────────────────────────────────
+    // ------------------------------------------------------------------
 
     public static byte[] createMinimalJpeg() {
         return new byte[] {
@@ -1597,9 +1597,9 @@ public class UploadPayloadGenerator {
         };
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ==================================================================
     // CATEGORY 7: VALIDATION, FILE SIZES & EXIF METADATA
-    // ══════════════════════════════════════════════════════════════════
+    // ==================================================================
 
     public static List<PayloadDefinition> generateContentTypePayloadsOnly(UploadScannerConfig config, String baseFilename) {
         long timestamp = System.currentTimeMillis();

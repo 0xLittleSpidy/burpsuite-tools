@@ -66,11 +66,11 @@ public class WelcomeGuidePanel extends JPanel {
         // Section 4: Attack Categories
         content.add(createCard("Supported Attack Vectors",
                 "<html>" +
-                        "<b>• Web Shells:</b> PHP system/phpinfo shells, PHTML, JSP Runtime execution, ASPX test files.<br>" +
-                        "<b>• Image Polyglots:</b> Valid GIF89a headers and PNG IHDR chunks containing embedded PHP code to bypass strict magic-byte validation.<br>" +
-                        "<b>• Path Traversal:</b> Directory climbing filenames (<code>../../shell.php</code>, <code>%2e%2e%2f</code>) to escape upload directories.<br>" +
-                        "<b>• Extension & MIME Bypasses:</b> Double extensions (<code>.php.jpg</code>), case variations (<code>.PhP</code>), trailing dots (<code>.php.</code>), and null-bytes (<code>%00</code>).<br>" +
-                        "<b>• Client-Side & AV:</b> Stored SVG XSS payloads and the standard EICAR anti-virus test file to check malware gateway inspection.</html>"));
+                        "<b>- Web Shells:</b> PHP system/phpinfo shells, PHTML, JSP Runtime execution, ASPX test files.<br>" +
+                        "<b>- Image Polyglots:</b> Valid GIF89a headers and PNG IHDR chunks containing embedded PHP code to bypass strict magic-byte validation.<br>" +
+                        "<b>- Path Traversal:</b> Directory climbing filenames (<code>../../shell.php</code>, <code>%2e%2e%2f</code>) to escape upload directories.<br>" +
+                        "<b>- Extension & MIME Bypasses:</b> Double extensions (<code>.php.jpg</code>), case variations (<code>.PhP</code>), trailing dots (<code>.php.</code>), and null-bytes (<code>%00</code>).<br>" +
+                        "<b>- Client-Side & AV:</b> Stored SVG XSS payloads and the standard EICAR anti-virus test file to check malware gateway inspection.</html>"));
 
         JScrollPane scrollPane = new JScrollPane(content);
         scrollPane.setBorder(null);

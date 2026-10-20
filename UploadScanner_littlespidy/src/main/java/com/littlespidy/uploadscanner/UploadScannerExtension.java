@@ -1,3 +1,4 @@
+// Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.uploadscanner;
 
 import burp.api.montoya.BurpExtension;
@@ -8,6 +9,7 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import com.littlespidy.uploadscanner.scanner.UploadScanCheck;
+import com.littlespidy.uploadscanner.storage.UploadPersistentStorageManager_littlespidy;
 import com.littlespidy.uploadscanner.ui.UploadScannerTab;
 
 import javax.swing.*;
@@ -16,11 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with the help of an AI Agent and littlespidy.
- *
  * Main extension entry point implementing BurpExtension for Upload Scanner.
  * Registers the Upload Scanner suite tab, context menu integration,
- * scanner audit check, and unloading cleanup handler.
+ * scanner audit check, persistent session manager, and unloading cleanup handler.
+ * Plain ASCII text only.
  *
  * @author littlespidy
  */
@@ -28,17 +29,27 @@ public class UploadScannerExtension implements BurpExtension {
 
     private MontoyaApi api;
     private UploadScannerTab mainTab;
+    private UploadPersistentStorageManager_littlespidy storageManager;
 
     @Override
     public void initialize(MontoyaApi api) {
         this.api = api;
         api.extension().setName("Upload Scanner (littlespidy)");
 
-        // ── 1. Create and Register Suite Tab ──
+        // 1. Create and Register Suite Tab with Persistent Storage Manager
         this.mainTab = new UploadScannerTab(api);
+        this.storageManager = new UploadPersistentStorageManager_littlespidy(api);
+        this.storageManager.bindTab(mainTab);
+        this.mainTab.setStorageManager(storageManager);
+
         api.userInterface().registerSuiteTab("Upload Scanner", mainTab);
 
-        // ── 2. Register Context Menu Provider ──
+        // 2. Initialize Session via Startup Dialog
+        SwingUtilities.invokeLater(() -> {
+            storageManager.initializeSessionOnStartup(mainTab, () -> mainTab.revalidate());
+        });
+
+        // 3. Register Context Menu Provider
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
             @Override
             public List<Component> provideMenuItems(ContextMenuEvent event) {
@@ -52,11 +63,14 @@ public class UploadScannerExtension implements BurpExtension {
             }
         });
 
-        // ── 3. Register Active/Passive ScanCheck ──
+        // 4. Register Active/Passive ScanCheck
         api.scanner().registerScanCheck(new UploadScanCheck(api));
 
-        // ── 4. Register Unloading Handler ──
+        // 5. Register Unloading Handler
         api.extension().registerUnloadingHandler(() -> {
+            if (storageManager != null) {
+                storageManager.shutdown();
+            }
             if (mainTab != null) {
                 mainTab.cleanupAll();
             }
@@ -65,7 +79,7 @@ public class UploadScannerExtension implements BurpExtension {
 
         api.logging().logToOutput("=================================================");
         api.logging().logToOutput("Upload Scanner (Montoya Edition) by littlespidy");
-        api.logging().logToOutput("ReDownloader Visual Markers & Triage Log Ready!");
+        api.logging().logToOutput("Persistent Session Management Ready!");
         api.logging().logToOutput("=================================================");
     }
 
