@@ -3,6 +3,7 @@ package com.littlespidy.headerinspector;
 
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
+import com.littlespidy.headerinspector.storage.HeaderPersistentStorageManager_littlespidy;
 import com.littlespidy.headerinspector.cache.model.CacheDataStore;
 import com.littlespidy.headerinspector.cache.model.CacheEntry;
 import com.littlespidy.headerinspector.cache.ui.CacheInspectorTab;
@@ -52,6 +53,7 @@ public class ProxyHistoryCoordinator {
     private CacheInspectorTab cacheInspectorTab;
     private CSPInspectorTab cspInspectorTab;
     private HSTSInspectorTab hstsInspectorTab;
+    private HeaderPersistentStorageManager_littlespidy storageManager;
 
     private final AtomicBoolean isLoading = new AtomicBoolean(false);
 
@@ -78,6 +80,10 @@ public class ProxyHistoryCoordinator {
         this.cacheDataStore = cacheDataStore;
         this.cspDataStore = cspDataStore;
         this.hstsDataStore = hstsDataStore;
+    }
+
+    public void setStorageManager(HeaderPersistentStorageManager_littlespidy storageManager) {
+        this.storageManager = storageManager;
     }
 
     public void registerTabs(
@@ -224,6 +230,10 @@ public class ProxyHistoryCoordinator {
 
                     refreshAllTabs();
 
+                    if (storageManager != null) {
+                        storageManager.scheduleAutoSave();
+                    }
+
                     String statusMsg = "Loaded " + result.processedCount() + " messages into all inspectors.";
                     if (inScopeOnly && result.skippedCount() > 0) {
                         statusMsg += " (Skipped " + result.skippedCount() + " out-of-scope items)";
@@ -232,12 +242,12 @@ public class ProxyHistoryCoordinator {
                     JOptionPane.showMessageDialog(
                         headerCollectorTab,
                         statusMsg + "\n\n"
-                            + "• Header Collector: " + headerCollectorDataStore.totalUniqueValuesCount() + " unique values across " + headerCollectorDataStore.totalDomainsCount() + " domains\n"
-                            + "• Method Collector: " + methodCollectorDataStore.totalMethodsCount() + " HTTP methods (" + methodCollectorDataStore.totalRequestsCount() + " requests across " + methodCollectorDataStore.totalDomainsCount() + " domains)\n"
-                            + "• Status Collector: " + statusCollectorDataStore.totalStatusCodesCount() + " status codes (" + statusCollectorDataStore.totalResponsesCount() + " responses across " + statusCollectorDataStore.totalDomainsCount() + " domains)\n"
-                            + "• Cache Inspector: " + cacheDataStore.size() + " unique endpoints\n"
-                            + "• CSP Inspector: " + cspDataStore.size() + " unique endpoints\n"
-                            + "• HSTS Inspector: " + hstsDataStore.size() + " unique endpoints",
+                            + "- Header Collector: " + headerCollectorDataStore.totalUniqueValuesCount() + " unique values across " + headerCollectorDataStore.totalDomainsCount() + " domains\n"
+                            + "- Method Collector: " + methodCollectorDataStore.totalMethodsCount() + " HTTP methods (" + methodCollectorDataStore.totalRequestsCount() + " requests across " + methodCollectorDataStore.totalDomainsCount() + " domains)\n"
+                            + "- Status Collector: " + statusCollectorDataStore.totalStatusCodesCount() + " status codes (" + statusCollectorDataStore.totalResponsesCount() + " responses across " + statusCollectorDataStore.totalDomainsCount() + " domains)\n"
+                            + "- Cache Inspector: " + cacheDataStore.size() + " unique endpoints\n"
+                            + "- CSP Inspector: " + cspDataStore.size() + " unique endpoints\n"
+                            + "- HSTS Inspector: " + hstsDataStore.size() + " unique endpoints",
                         "Proxy History Ingested (All Tabs)",
                         JOptionPane.INFORMATION_MESSAGE
                     );

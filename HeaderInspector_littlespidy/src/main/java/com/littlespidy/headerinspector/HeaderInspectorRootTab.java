@@ -2,6 +2,7 @@
 package com.littlespidy.headerinspector;
 
 import burp.api.montoya.MontoyaApi;
+import com.littlespidy.headerinspector.storage.HeaderPersistentStorageManager_littlespidy;
 import com.littlespidy.headerinspector.cache.model.CacheDataStore;
 import com.littlespidy.headerinspector.cache.ui.CacheInspectorTab;
 import com.littlespidy.headerinspector.collector.model.HeaderCollectorDataStore;
@@ -54,10 +55,16 @@ public class HeaderInspectorRootTab extends JPanel {
     private final HSTSInspectorTab hstsTab;
 
     private final ProxyHistoryCoordinator coordinator;
+    private final HeaderPersistentStorageManager_littlespidy storageManager;
 
     public HeaderInspectorRootTab(MontoyaApi api) {
+        this(api, null);
+    }
+
+    public HeaderInspectorRootTab(MontoyaApi api, HeaderPersistentStorageManager_littlespidy storageManager) {
         super(new BorderLayout());
         this.api = api;
+        this.storageManager = storageManager;
 
         // Instantiate Tabs
         this.collectorTab = new HeaderCollectorTab(api, collectorDataStore);
@@ -77,6 +84,17 @@ public class HeaderInspectorRootTab extends JPanel {
                 cspDataStore,
                 hstsDataStore
         );
+        if (storageManager != null) {
+            this.coordinator.setStorageManager(storageManager);
+            this.storageManager.bindDataStores(
+                    collectorDataStore,
+                    methodDataStore,
+                    statusDataStore,
+                    cacheDataStore,
+                    cspDataStore,
+                    hstsDataStore
+            );
+        }
         this.coordinator.registerTabs(collectorTab, methodTab, statusTab, cacheTab, cspTab, hstsTab);
 
         collectorTab.setCoordinator(coordinator);
@@ -86,16 +104,28 @@ public class HeaderInspectorRootTab extends JPanel {
         cspTab.setCoordinator(coordinator);
         hstsTab.setCoordinator(coordinator);
 
-        // Add sub-tabs: Welcome & Guide followed by the five inspector/collector workspaces
-        mainTabbedPane.addTab("📖 Welcome & Guide", createWelcomePanel());
-        mainTabbedPane.addTab("📋 Header Collector", collectorTab);
-        mainTabbedPane.addTab("⚡ Method Collector", methodTab);
-        mainTabbedPane.addTab("🔢 Status Collector", statusTab);
-        mainTabbedPane.addTab("🗄️ Cache Inspector", cacheTab);
-        mainTabbedPane.addTab("🛡️ CSP Inspector", cspTab);
-        mainTabbedPane.addTab("🔒 HSTS Inspector", hstsTab);
+        // Add sub-tabs: Welcome & Guide followed by the five inspector/collector workspaces (No Emojis)
+        mainTabbedPane.addTab("Welcome & Guide", createWelcomePanel());
+        mainTabbedPane.addTab("Header Collector", collectorTab);
+        mainTabbedPane.addTab("Method Collector", methodTab);
+        mainTabbedPane.addTab("Status Collector", statusTab);
+        mainTabbedPane.addTab("Cache Inspector", cacheTab);
+        mainTabbedPane.addTab("CSP Inspector", cspTab);
+        mainTabbedPane.addTab("HSTS Inspector", hstsTab);
 
+        if (storageManager != null) {
+            add(storageManager.createSessionToolbarComponent(this, this::refreshAllTabs), BorderLayout.NORTH);
+        }
         add(mainTabbedPane, BorderLayout.CENTER);
+    }
+
+    public void refreshAllTabs() {
+        if (collectorTab != null) collectorTab.refreshView();
+        if (methodTab != null) methodTab.refreshView();
+        if (statusTab != null) statusTab.refreshView();
+        if (cacheTab != null) cacheTab.refreshView();
+        if (cspTab != null) cspTab.refreshView();
+        if (hstsTab != null) hstsTab.refreshView();
     }
 
     private JComponent createWelcomePanel() {
@@ -107,7 +137,7 @@ public class HeaderInspectorRootTab extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout(8, 8));
         headerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel titleLabel = new JLabel("📋 Header & Protocol Inspector Suite");
+        JLabel titleLabel = new JLabel("Header and Protocol Inspector Suite");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
 
         JTextArea descArea = new JTextArea(
