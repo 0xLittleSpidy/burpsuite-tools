@@ -27,6 +27,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **Request Smuggling Inspector** | `request-smuggling-inspector-littlespidy-1.0.0.jar` (build locally) | HTTP request smuggling payload injector — right-click CL.TE, TE.CL, TE.TE variants directly into Repeater |
 | **SSO Inspector** | `sso-inspector-littlespidy-1.0.0.jar` (build locally) | Single Sign-On and OAuth 2.0 / OpenID Connect auditor with interactive OAuth workbench, parameter decoding, flow classifier, and ported oauth-scan checks |
 | **API Inspector** | `api-inspector-littlespidy-1.0.0.jar` (build locally) | REST API version discovery and representation prober with ResAPI Version Finder tab, per-request sub-tabs, and multi-strategy mutation engine |
+| **ng-auth-analyzer_littlespidy** | `ng-auth-analyzer_littlespidy-1.1.14.jar` (build locally) | Automated authorization testing with Configuration, History, and Import tabs, synchronized multi-user request/response toggle, and persistent session management |
 
 ---
 

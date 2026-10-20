@@ -1,0 +1,41 @@
+// Created with the help of an AI Agent and littlespidy.
+package com.protect7.authanalyzer.persistence;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class SessionStateDTO_littlespidy {
+
+	public String version;
+	public long timestamp;
+	public String configSetupJson;
+	public String tableSettings;
+	public List<MessageEntryDTO> liveMessages = new ArrayList<MessageEntryDTO>();
+	public List<String> importedSessionNames = new ArrayList<String>();
+	public List<MessageEntryDTO> importedMessages = new ArrayList<MessageEntryDTO>();
+
+	public static class MessageEntryDTO {
+		public int id;
+		public String method;
+		public String host;
+		public String url;
+		public String comment;
+		public boolean marked;
+		public int statusCode;
+		public int responseContentLength;
+		public String requestBase64;
+		public String responseBase64;
+		public Map<String, SessionMessageDTO> sessionData = new HashMap<String, SessionMessageDTO>();
+	}
+
+	public static class SessionMessageDTO {
+		public String status;
+		public int statusCode;
+		public int responseContentLength;
+		public String infoText;
+		public String requestBase64;
+		public String responseBase64;
+	}
+}
