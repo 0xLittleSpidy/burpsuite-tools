@@ -384,7 +384,7 @@ public class RpcFuzzerPanel extends JPanel {
         }
     }
 
-    // ── Table Model ──────────────────────────────────────────────────────────
+    // -- Table Model ----------------------------------------------------------
 
     private static class FuzzResultTableModel extends AbstractTableModel {
         private final String[] columns = {"ID", "Type", "Payload", "Status", "Length", "Time (ms)", "GWT Exception", "Error Details"};

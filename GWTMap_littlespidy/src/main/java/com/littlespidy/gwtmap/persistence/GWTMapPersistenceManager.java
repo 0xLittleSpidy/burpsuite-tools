@@ -12,8 +12,10 @@ import com.littlespidy.gwtmap.model.GWTMethod;
 import com.littlespidy.gwtmap.model.GWTModuleInfo;
 import com.littlespidy.gwtmap.model.GWTService;
 import com.littlespidy.gwtmap.model.GwtHttpHistoryEntry;
+import com.littlespidy.gwtmap.ui.GWTMapTab;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -31,16 +33,28 @@ import java.util.regex.Pattern;
  */
 public class GWTMapPersistenceManager {
 
-    private static final String PREF_STORAGE_DIR = "gwtmap_storage_dir";
-    private static final String SESSION_FILENAME = "gwtmap_session.json";
+    public static final String PREF_KEY_GLOBAL_DIR = "burpsuite_extensions_last_session_dir_littlespidy";
+    public static final String PREF_STORAGE_DIR = "gwtmap_storage_dir";
+    public static final String SESSION_FILENAME = "gwtmap_session.json";
 
     private final MontoyaApi api;
     private final Gson gson;
     private File storageDirectory;
+    private volatile File activeSessionFile = null;
+    private final JLabel sessionStatusLabel;
+    private GWTMapTab mainTab;
+    private GWTDataStore dataStore;
 
     public GWTMapPersistenceManager(MontoyaApi api) {
         this.api = api;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+        this.sessionStatusLabel = new JLabel("Session: [Fresh / Unbound]");
+        this.sessionStatusLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+    }
+
+    public void bindContext(GWTMapTab mainTab, GWTDataStore dataStore) {
+        this.mainTab = mainTab;
+        this.dataStore = dataStore;
     }
 
     /**
@@ -211,18 +225,264 @@ public class GWTMapPersistenceManager {
     }
 
     public File getSessionFile() {
+        if (activeSessionFile != null) {
+            return activeSessionFile;
+        }
         if (storageDirectory == null) {
             resolveStorageDirectory(null);
         }
         return new File(storageDirectory, SESSION_FILENAME);
     }
 
+    public File getActiveSessionFile() {
+        return activeSessionFile;
+    }
+
+    public void setActiveSessionFile(File file) {
+        this.activeSessionFile = file;
+    }
+
+    public void initializeSessionOnStartup(Component parent, Runnable onRefresh) {
+        SessionStartupDialog_littlespidy.StartupResult result = SessionStartupDialog_littlespidy.promptUser(api, parent);
+        switch (result.action()) {
+            case OPEN_EXISTING -> openSessionFile(result.sessionFile());
+            case CREATE_NEW -> createNewSessionFile(result.sessionFile());
+            case TEMPORARY -> startTemporarySession();
+        }
+        if (onRefresh != null) {
+            SwingUtilities.invokeLater(onRefresh);
+        }
+    }
+
+    public synchronized void openSessionFile(File file) {
+        if (file == null || !file.exists()) return;
+        this.activeSessionFile = file;
+        this.storageDirectory = file.getParentFile();
+        SessionSnapshot snapshot = loadFromFile(dataStore, file);
+        if (snapshot != null && mainTab != null) {
+            mainTab.applySnapshot(snapshot);
+        }
+        updateStatusLabel("Session: " + file.getName() + " (Auto-save Enabled)");
+    }
+
+    public synchronized void createNewSessionFile(File file) {
+        if (file == null) return;
+        this.activeSessionFile = file;
+        this.storageDirectory = file.getParentFile();
+        if (mainTab != null) {
+            save(dataStore, mainTab.getTargetUrl(), mainTab.getBaseUrl(), mainTab.getCustomHeaders());
+        }
+        updateStatusLabel("Session: " + file.getName() + " (Auto-save Enabled)");
+    }
+
+    public synchronized void startTemporarySession() {
+        this.activeSessionFile = null;
+        updateStatusLabel("Session: [In-Memory / Temporary]");
+    }
+
+    public synchronized void saveActiveSession() {
+        if (activeSessionFile != null) {
+            if (mainTab != null) {
+                save(dataStore, mainTab.getTargetUrl(), mainTab.getBaseUrl(), mainTab.getCustomHeaders());
+            }
+            updateStatusLabel("Session: " + activeSessionFile.getName() + " (Auto-save Enabled)");
+        } else {
+            saveAsSession(mainTab);
+        }
+    }
+
+    public synchronized void saveAsSession(Component parent) {
+        File lastDir = getLastDirectory();
+        JFileChooser chooser = new JFileChooser(lastDir);
+        chooser.setDialogTitle("Save GWTMap Session As...");
+        chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+        chooser.setSelectedFile(new File(lastDir, "gwtmap_session.json"));
+
+        int res = chooser.showSaveDialog(parent);
+        if (res == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+            File sel = chooser.getSelectedFile();
+            if (!sel.getName().toLowerCase().endsWith(".json")) {
+                sel = new File(sel.getParentFile(), sel.getName() + ".json");
+            }
+            rememberDirectory(sel.getParent());
+            this.activeSessionFile = sel;
+            this.storageDirectory = sel.getParentFile();
+            if (mainTab != null) {
+                save(dataStore, mainTab.getTargetUrl(), mainTab.getBaseUrl(), mainTab.getCustomHeaders());
+            }
+            updateStatusLabel("Session: " + sel.getName() + " (Auto-save Enabled)");
+            if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+                JOptionPane.showMessageDialog(parent, "Session saved successfully to:\n" + sel.getAbsolutePath(),
+                        "Session Saved", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+
+    public synchronized void loadSessionPrompt(Component parent) {
+        File lastDir = getLastDirectory();
+        JFileChooser chooser = new JFileChooser(lastDir);
+        chooser.setDialogTitle("Open GWTMap Session File");
+        chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+
+        int res = chooser.showOpenDialog(parent);
+        if (res == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+            File sel = chooser.getSelectedFile();
+            rememberDirectory(sel.getParent());
+            openSessionFile(sel);
+        }
+    }
+
+    public synchronized void offboardSession(Component parent) {
+        if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+            int confirm = JOptionPane.showConfirmDialog(
+                    parent,
+                    "Offboarding will save pending changes to the active session (if any),\n" +
+                            "reset all services, methods, HTTP history, and fuzzer state to a completely fresh state,\n" +
+                            "and unbind the current session file.\n\n" +
+                            "Are you sure you want to offboard this session?",
+                    "Confirm Session Offboard",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        if (activeSessionFile != null && mainTab != null) {
+            save(dataStore, mainTab.getTargetUrl(), mainTab.getBaseUrl(), mainTab.getCustomHeaders());
+        }
+
+        if (mainTab != null) {
+            mainTab.resetAll();
+        }
+
+        this.activeSessionFile = null;
+        updateStatusLabel("Session: [In-Memory / Temporary]");
+
+        if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+            JOptionPane.showMessageDialog(
+                    parent,
+                    "Session successfully offboarded.\nWorkspace reset to a clean state.",
+                    "Session Offboarded",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        }
+    }
+
+    public JComponent createSessionToolbar() {
+        JPanel bar = new JPanel(new BorderLayout(8, 0));
+        bar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        JLabel titleLabel = new JLabel("Session:");
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
+        leftPanel.add(titleLabel);
+
+        JButton newBtn = new JButton("New Session");
+        newBtn.setToolTipText("Create a new session file and bind to it");
+        newBtn.addActionListener(e -> {
+            File lastDir = getLastDirectory();
+            JFileChooser chooser = new JFileChooser(lastDir);
+            chooser.setDialogTitle("Select Directory to Save New Session");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int res = chooser.showOpenDialog(bar);
+            if (res == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+                File dir = chooser.getSelectedFile();
+                rememberDirectory(dir.getAbsolutePath());
+                String name = JOptionPane.showInputDialog(bar, "Enter session filename:", "gwtmap_session.json");
+                if (name != null && !name.isBlank()) {
+                    if (!name.toLowerCase().endsWith(".json")) name = name + ".json";
+                    createNewSessionFile(new File(dir, name.trim()));
+                }
+            }
+        });
+
+        JButton saveBtn = new JButton("Save Now");
+        saveBtn.setToolTipText("Save current session state to the active file");
+        saveBtn.addActionListener(e -> saveActiveSession());
+
+        JButton saveAsBtn = new JButton("Save As...");
+        saveAsBtn.setToolTipText("Save current session to a new file");
+        saveAsBtn.addActionListener(e -> saveAsSession(bar));
+
+        JButton loadBtn = new JButton("Load Session...");
+        loadBtn.setToolTipText("Load a previously saved session file");
+        loadBtn.addActionListener(e -> loadSessionPrompt(bar));
+
+        JButton offboardBtn = new JButton("Offboard Session");
+        offboardBtn.setToolTipText("Reset workspace and unbind the active session file");
+        offboardBtn.addActionListener(e -> offboardSession(bar));
+
+        leftPanel.add(newBtn);
+        leftPanel.add(saveBtn);
+        leftPanel.add(saveAsBtn);
+        leftPanel.add(loadBtn);
+        leftPanel.add(offboardBtn);
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        rightPanel.add(sessionStatusLabel);
+
+        bar.add(leftPanel, BorderLayout.WEST);
+        bar.add(rightPanel, BorderLayout.EAST);
+
+        return bar;
+    }
+
+    private void updateStatusLabel(String text) {
+        SwingUtilities.invokeLater(() -> sessionStatusLabel.setText(text));
+    }
+
+    private File getLastDirectory() {
+        String lastDir = null;
+        if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
+            try {
+                lastDir = api.persistence().preferences().getString(PREF_KEY_GLOBAL_DIR);
+                if (lastDir == null || lastDir.isBlank()) {
+                    lastDir = api.persistence().preferences().getString("burp_extensions_last_session_dir_littlespidy");
+                }
+                if (lastDir == null || lastDir.isBlank()) {
+                    lastDir = api.persistence().preferences().getString(PREF_STORAGE_DIR);
+                }
+            } catch (Exception ignored) {}
+        }
+        if (lastDir != null && !lastDir.isBlank()) {
+            File d = new File(lastDir);
+            if (d.exists() && d.isDirectory()) return d;
+        }
+        if (storageDirectory != null && storageDirectory.exists()) {
+            return storageDirectory;
+        }
+        return new File(System.getProperty("user.home", "."));
+    }
+
+    private void rememberDirectory(String dirPath) {
+        if (api != null && api.persistence() != null && api.persistence().preferences() != null && dirPath != null) {
+            try {
+                api.persistence().preferences().setString(PREF_KEY_GLOBAL_DIR, dirPath);
+                api.persistence().preferences().setString(PREF_STORAGE_DIR, dirPath);
+            } catch (Exception ignored) {}
+        }
+    }
+
+    public void shutdown() {
+        if (activeSessionFile != null && mainTab != null) {
+            save(dataStore, mainTab.getTargetUrl(), mainTab.getBaseUrl(), mainTab.getCustomHeaders());
+        }
+    }
+
     /**
      * Saves complete session data to gwtmap_session.json.
      */
     public synchronized boolean save(GWTDataStore dataStore, String targetUrl, String permutationUrl, String customHeaders) {
+        return saveToFile(getSessionFile(), dataStore, targetUrl, permutationUrl, customHeaders);
+    }
+
+    public synchronized boolean saveToFile(File file, GWTDataStore dataStore, String targetUrl, String permutationUrl, String customHeaders) {
         try {
-            File file = getSessionFile();
             if (file.getParentFile() != null && !file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -310,9 +570,12 @@ public class GWTMapPersistenceManager {
      * Returns SessionSnapshot with UI field values (or null if no file).
      */
     public synchronized SessionSnapshot load(GWTDataStore dataStore) {
+        return loadFromFile(dataStore, getSessionFile());
+    }
+
+    public synchronized SessionSnapshot loadFromFile(GWTDataStore dataStore, File file) {
         try {
-            File file = getSessionFile();
-            if (!file.exists()) {
+            if (file == null || !file.exists()) {
                 return null;
             }
 
@@ -419,7 +682,7 @@ public class GWTMapPersistenceManager {
         }
     }
 
-    // ── DTOs ─────────────────────────────────────────────────────────────────
+    // -- DTOs -----------------------------------------------------------------
 
     public static class SessionSnapshot {
         public String targetUrl = "";

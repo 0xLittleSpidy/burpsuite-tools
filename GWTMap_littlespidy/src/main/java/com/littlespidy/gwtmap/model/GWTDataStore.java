@@ -102,7 +102,7 @@ public class GWTDataStore {
         this.cleanedCode = code != null ? code : "";
     }
 
-    // ── Filtering Logic ──────────────────────────────────────────────────────
+    // -- Filtering Logic ------------------------------------------------------
 
     public static boolean matchesMethod(String method, Set<String> selectedMethods) {
         if (selectedMethods == null || selectedMethods.isEmpty()) return true;

@@ -70,7 +70,7 @@ public class GWTScanEngine {
         executor.shutdownNow();
     }
 
-    // ── Target Analysis ──────────────────────────────────────────────────────
+    // -- Target Analysis ------------------------------------------------------
 
     public void analyzeUrl(String targetUrl, String baseOverride,
                            Consumer<String> statusListener, Runnable onCompletion) {
@@ -361,7 +361,7 @@ public class GWTScanEngine {
         }
     }
 
-    // ── HTTP Probing Engine ──────────────────────────────────────────────────
+    // -- HTTP Probing Engine --------------------------------------------------
 
     public static String extractMatchingCookies(MontoyaApi api, String targetUrl, String customHeaders) {
         StringBuilder cookieHeader = new StringBuilder();

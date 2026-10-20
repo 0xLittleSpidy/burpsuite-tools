@@ -215,7 +215,7 @@ public class GWTRpcDeserializer {
         return "idx_" + idx;
     }
 
-    // ── Arming & Delimiting Methods ──────────────────────────────────────────
+    // -- Arming & Delimiting Methods ------------------------------------------
 
     /**
      * Surrounds all identified fuzzable values with Burp Intruder section symbols (§...§).
@@ -278,7 +278,7 @@ public class GWTRpcDeserializer {
         return sb.toString();
     }
 
-    // ── AST Tree Formatting ──────────────────────────────────────────────────
+    // -- AST Tree Formatting --------------------------------------------------
 
     /**
      * Produces a clean, formatted ASCII text representation of the deserialized payload AST.

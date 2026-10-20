@@ -62,10 +62,10 @@ public class GWTMapTab extends JPanel {
     // Custom headers buffer
     private String customHeaders = "";
 
-    // ── Main Top-Level Tabs ──────────────────────────────────────────────────
+    // -- Main Top-Level Tabs --------------------------------------------------
     private final JTabbedPane mainTabbedPane = new JTabbedPane();
 
-    // ── GWT Analysis Sub-Tabs ────────────────────────────────────────────────
+    // -- GWT Analysis Sub-Tabs ------------------------------------------------
     private final JTabbedPane analysisTabbedPane = new JTabbedPane();
 
     // Subtab: Methods & Payloads
@@ -130,6 +130,7 @@ public class GWTMapTab extends JPanel {
         this.dataStore = dataStore;
         this.engine = engine;
         this.persistenceManager = new GWTMapPersistenceManager(api);
+        this.persistenceManager.bindContext(this, dataStore);
         this.deserializerPanel = new RpcDeserializerPanel(api);
         this.fuzzerPanel = new RpcFuzzerPanel(api);
         this.proxyHistoryPanel = new GwtProxyHistoryPanel(api, this);
@@ -159,6 +160,7 @@ public class GWTMapTab extends JPanel {
         commonStoragePanel.add(storageBtn);
 
         JPanel topBar = new JPanel(new BorderLayout());
+        topBar.add(persistenceManager.createSessionToolbar(), BorderLayout.CENTER);
         topBar.add(commonStoragePanel, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
@@ -181,7 +183,7 @@ public class GWTMapTab extends JPanel {
         return proxyHistoryPanel;
     }
 
-    // ── Top Toolbar (Target Acquisition) ─────────────────────────────────────
+    // -- Top Toolbar (Target Acquisition) -------------------------------------
 
     private JPanel createTopPanel() {
         JPanel panel = new JPanel(new BorderLayout(6, 4));
@@ -221,7 +223,7 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    // ── GWT Analysis Sub-Tabs ────────────────────────────────────────────────
+    // -- GWT Analysis Sub-Tabs ------------------------------------------------
     // Order: HTTP History (1st), Module Info (2nd), Methods & Payloads (3rd), Services & Policies (4th), Deobfuscated Code (5th)
 
     private JComponent createAnalysisSubTabs() {
@@ -233,7 +235,7 @@ public class GWTMapTab extends JPanel {
         return analysisTabbedPane;
     }
 
-    // ── Tab: HTTP History ────────────────────────────────────────────────────
+    // -- Tab: HTTP History ----------------------------------------------------
 
     private JPanel createHttpHistoryPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
@@ -345,7 +347,7 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    // ── Tab: Module Info ─────────────────────────────────────────────────────
+    // -- Tab: Module Info -----------------------------------------------------
 
     private JPanel createModuleInfoPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
@@ -357,7 +359,7 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    // ── Tab: Methods & Payloads ──────────────────────────────────────────────
+    // -- Tab: Methods & Payloads ----------------------------------------------
 
     private JPanel createMethodsPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
@@ -546,7 +548,7 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    // ── Tab: Services & Policies ─────────────────────────────────────────────
+    // -- Tab: Services & Policies ---------------------------------------------
 
     private JPanel createServicesPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
@@ -561,7 +563,7 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    // ── Tab: Deobfuscated Code ───────────────────────────────────────────────
+    // -- Tab: Deobfuscated Code -----------------------------------------------
 
     private JPanel createCodeViewerPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
@@ -591,12 +593,12 @@ public class GWTMapTab extends JPanel {
         });
         searchBar.add(codeSearchField);
 
-        JButton prevBtn = new JButton("▲");
+        JButton prevBtn = new JButton("Prev");
         prevBtn.setToolTipText("Previous Match (Shift+Enter)");
         prevBtn.addActionListener(e -> navigateCodeMatch(-1));
         searchBar.add(prevBtn);
 
-        JButton nextBtn = new JButton("▼");
+        JButton nextBtn = new JButton("Next");
         nextBtn.setToolTipText("Next Match (Enter)");
         nextBtn.addActionListener(e -> navigateCodeMatch(1));
         searchBar.add(nextBtn);
@@ -741,7 +743,7 @@ public class GWTMapTab extends JPanel {
         } catch (Throwable ignored) {}
     }
 
-    // ── Status Bar & Progress ────────────────────────────────────────────────
+    // -- Status Bar & Progress ------------------------------------------------
 
     private JPanel createBottomStatusPanel() {
         JPanel panel = new JPanel(new BorderLayout(6, 4));
@@ -755,7 +757,7 @@ public class GWTMapTab extends JPanel {
         return panel;
     }
 
-    // ── Actions & Workflow ───────────────────────────────────────────────────
+    // -- Actions & Workflow ---------------------------------------------------
 
     public void setTargetUrl(String url) {
         urlField.setText(url != null ? url.trim() : "");
@@ -1293,15 +1295,20 @@ public class GWTMapTab extends JPanel {
         codeViewerArea.setText("");
         counterLabel.setText("Showing 0/0 Services | 0/0 Methods");
         statusLabel.setText("Reset complete. Ready.");
-        persistenceManager.clear();
     }
+
+    public String getTargetUrl() { return urlField.getText(); }
+    public String getBaseUrl() { return baseField.getText(); }
+    public String getCustomHeaders() { return customHeaders; }
+    public GWTMapPersistenceManager getPersistenceManager() { return persistenceManager; }
 
     public void saveSession() {
-        persistenceManager.save(dataStore, urlField.getText(), baseField.getText(), customHeaders);
+        if (persistenceManager.getActiveSessionFile() != null) {
+            persistenceManager.save(dataStore, urlField.getText(), baseField.getText(), customHeaders);
+        }
     }
 
-    public void loadSavedSession() {
-        GWTMapPersistenceManager.SessionSnapshot snap = persistenceManager.load(dataStore);
+    public void applySnapshot(GWTMapPersistenceManager.SessionSnapshot snap) {
         if (snap != null) {
             if (snap.targetUrl != null && !snap.targetUrl.isBlank()) {
                 urlField.setText(snap.targetUrl);
@@ -1328,6 +1335,11 @@ public class GWTMapTab extends JPanel {
         }
     }
 
+    public void loadSavedSession() {
+        GWTMapPersistenceManager.SessionSnapshot snap = persistenceManager.load(dataStore);
+        applySnapshot(snap);
+    }
+
     public void loadPayloadIntoDeserializer(String rawPayload) {
         if (rawPayload != null) {
             deserializerPanel.setPayload(rawPayload);
@@ -1346,7 +1358,7 @@ public class GWTMapTab extends JPanel {
         mainTabbedPane.setSelectedComponent(fuzzerPanel);
     }
 
-    // ── Helper DocumentListener ──────────────────────────────────────────────
+    // -- Helper DocumentListener ----------------------------------------------
 
     private static class SimpleDocListener implements DocumentListener {
         private final Runnable onChange;

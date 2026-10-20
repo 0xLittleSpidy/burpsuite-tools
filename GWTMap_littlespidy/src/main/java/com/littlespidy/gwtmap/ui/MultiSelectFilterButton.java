@@ -35,7 +35,7 @@ public class MultiSelectFilterButton extends JButton {
         addActionListener(e -> showPopup());
     }
 
-    // ── Public API ──────────────────────────────────────────────────────────
+    // -- Public API ----------------------------------------------------------
 
     /** Returns a snapshot of currently checked options (excluding the "All" sentinel). */
     public Set<String> getSelected() {
@@ -62,7 +62,7 @@ public class MultiSelectFilterButton extends JButton {
         updateButtonText();
     }
 
-    // ── Private helpers ─────────────────────────────────────────────────────
+    // -- Private helpers -----------------------------------------------------
 
     private void buildCheckBoxes() {
         for (String opt : options) {

@@ -123,7 +123,7 @@ public class GWTMethod {
         this.fullEndpointUrl = fullEndpointUrl;
     }
 
-    // ── Probe Accessors ──────────────────────────────────────────────────────
+    // -- Probe Accessors ------------------------------------------------------
 
     public boolean isProbed() {
         return probed;

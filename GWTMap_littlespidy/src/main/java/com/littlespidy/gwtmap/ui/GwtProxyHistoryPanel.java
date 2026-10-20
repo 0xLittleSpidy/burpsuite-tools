@@ -471,7 +471,7 @@ public class GwtProxyHistoryPanel extends JPanel {
         gwtResponseBanner.setBorder(new LineBorder(Color.GRAY, 1));
     }
 
-    // ── Data Acquisition & Live Proxy Hook ───────────────────────────────────
+    // -- Data Acquisition & Live Proxy Hook -----------------------------------
 
     public void fetchHistoryFromProxy() {
         fetchBtn.setEnabled(false);
@@ -712,7 +712,7 @@ public class GwtProxyHistoryPanel extends JPanel {
         };
     }
 
-    // ── Filtering Logic ──────────────────────────────────────────────────────
+    // -- Filtering Logic ------------------------------------------------------
 
     private synchronized void updateFilterOptions() {
         isUpdatingCombos = true;

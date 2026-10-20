@@ -66,7 +66,7 @@ public class GWTParser {
 
     private static final Pattern LIST_OBJECT_PATTERN = Pattern.compile("(java\\.util\\.(?:[A-Za-z]+)?List(?:[0-9/]+)?)<([a-zA-Z0-9./]+)[<>]?(?:(.*[^>]))?>");
 
-    // ── Permutations & Fragments ─────────────────────────────────────────────
+    // -- Permutations & Fragments ---------------------------------------------
 
     public static List<String> extractPermutations(List<String> code, GWTClassifier.CodeType codeType) {
         List<String> permutations = new ArrayList<>();
@@ -122,7 +122,7 @@ public class GWTParser {
         return false;
     }
 
-    // ── Module Info ──────────────────────────────────────────────────────────
+    // -- Module Info ----------------------------------------------------------
 
     public static void extractModuleInfo(List<String> code, GWTModuleInfo info) {
         if (code == null || info == null) return;
@@ -155,7 +155,7 @@ public class GWTParser {
         }
     }
 
-    // ── Variable & Parameter Resolution ──────────────────────────────────────
+    // -- Variable & Parameter Resolution --------------------------------------
 
     public static boolean isNumber(String value) {
         if (value == null || value.isBlank()) return false;
@@ -250,7 +250,7 @@ public class GWTParser {
         return -1;
     }
 
-    // ── Service Enumeration ──────────────────────────────────────────────────
+    // -- Service Enumeration --------------------------------------------------
 
     public static List<GWTService> extractServiceInfo(List<String> code, Map<String, String> varMap) {
         List<GWTService> services = new ArrayList<>();
@@ -280,7 +280,7 @@ public class GWTParser {
         return extractServiceInfo(code, buildVariableMap(code));
     }
 
-    // ── Method Enumeration ───────────────────────────────────────────────────
+    // -- Method Enumeration ---------------------------------------------------
 
     public static List<String> extractMethodSignature(List<String> code, Map<String, String> varMap, int line) {
         line += 5;

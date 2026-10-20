@@ -130,4 +130,67 @@ public class PersistenceTest {
         assertEquals("var uncleaned = 1;", freshStore.getRawCode());
         assertEquals("function testDeobfuscated() { return true; }", freshStore.getCleanedCode());
     }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T mock(Class<T> type) {
+        return (T) java.lang.reflect.Proxy.newProxyInstance(
+                type.getClassLoader(),
+                new Class<?>[]{type},
+                (proxy, method, args) -> {
+                    if (method.getReturnType().equals(java.awt.Component.class) || method.getReturnType().equals(javax.swing.JComponent.class)) {
+                        return new javax.swing.JPanel();
+                    }
+                    if (method.getReturnType().equals(String.class)) return "";
+                    if (method.getReturnType().equals(boolean.class)) return false;
+                    if (method.getReturnType().equals(int.class)) return 0;
+                    if (method.getReturnType().isInterface()) return mock(method.getReturnType());
+                    return null;
+                }
+        );
+    }
+
+    @Test
+    public void testSessionManagementLifecycle(@TempDir Path tempDir) throws Exception {
+        burp.api.montoya.MontoyaApi api = mock(burp.api.montoya.MontoyaApi.class);
+
+        GWTDataStore dataStore = new GWTDataStore();
+        com.littlespidy.gwtmap.engine.GWTScanEngine engine = new com.littlespidy.gwtmap.engine.GWTScanEngine(api, dataStore);
+        com.littlespidy.gwtmap.ui.GWTMapTab mainTab = new com.littlespidy.gwtmap.ui.GWTMapTab(api, dataStore, engine);
+        GWTMapPersistenceManager manager = mainTab.getPersistenceManager();
+
+        File sessionFile = tempDir.resolve("test_gwtmap_session.json").toFile();
+        manager.createNewSessionFile(sessionFile);
+
+        assertEquals(sessionFile, manager.getActiveSessionFile());
+        assertTrue(sessionFile.exists());
+
+        // Add a service
+        GWTService svc = new GWTService("customService", "STRONG_HASH");
+        dataStore.addService(svc);
+        assertEquals(1, dataStore.getAllServices().size());
+
+        // Save active session
+        manager.saveActiveSession();
+        assertTrue(sessionFile.length() > 0);
+
+        String jsonContent = java.nio.file.Files.readString(sessionFile.toPath());
+        assertTrue(jsonContent.contains("customService"));
+
+        // Clear in-memory state
+        mainTab.resetAll();
+        assertEquals(0, dataStore.getAllServices().size());
+
+        // Re-open session
+        manager.openSessionFile(sessionFile);
+        assertEquals(sessionFile, manager.getActiveSessionFile());
+        assertEquals(1, dataStore.getAllServices().size());
+
+        // Test offboard session
+        manager.offboardSession(mainTab);
+        assertNull(manager.getActiveSessionFile());
+        assertEquals(0, dataStore.getAllServices().size());
+
+        manager.shutdown();
+        engine.shutdown();
+    }
 }

@@ -44,12 +44,12 @@ public class GWTMapExtension_littlespidy implements BurpExtension {
         this.scanEngine = new GWTScanEngine(api, dataStore);
         this.mainTab = new GWTMapTab(api, dataStore, scanEngine);
 
-        // Load persisted session if available
+        // Prompt session startup choice
         SwingUtilities.invokeLater(() -> {
             try {
-                mainTab.loadSavedSession();
+                mainTab.getPersistenceManager().initializeSessionOnStartup(mainTab, null);
             } catch (Exception e) {
-                api.logging().logToError("[GWTMap] Error loading saved session: " + e.getMessage());
+                api.logging().logToError("[GWTMap] Error initializing session: " + e.getMessage());
             }
         });
 
@@ -115,7 +115,7 @@ public class GWTMapExtension_littlespidy implements BurpExtension {
         api.extension().registerUnloadingHandler(() -> {
             api.logging().logToOutput("[-] Unloading GWTMap extension and terminating thread pool...");
             try {
-                mainTab.saveSession();
+                mainTab.getPersistenceManager().shutdown();
             } catch (Exception e) {
                 api.logging().logToError("[-] Error saving session on unload: " + e.getMessage());
             }
