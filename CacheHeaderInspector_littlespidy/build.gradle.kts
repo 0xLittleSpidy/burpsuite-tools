@@ -1,3 +1,4 @@
+// Created with the help of an AI Agent and littlespidy.
 plugins {
     id("java")
 }
@@ -8,6 +9,14 @@ repositories {
 
 dependencies {
     compileOnly("net.portswigger.burp.extensions:montoya-api:2023.12.1")
+    implementation("com.google.code.gson:gson:2.10.1")
+    testImplementation("net.portswigger.burp.extensions:montoya-api:2023.12.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform()
 }
 
 tasks.withType<JavaCompile>().configureEach {

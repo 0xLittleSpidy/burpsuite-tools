@@ -15,6 +15,7 @@ import java.io.File;
  */
 public class SessionStartupDialog_littlespidy {
 
+    public static final String PREF_GLOBAL_LAST_SESSION_DIR = "burp_extensions_last_session_dir_littlespidy";
     public static final String PREF_LAST_SESSION_DIR = "response_inspector_last_session_dir";
 
     public enum StartupAction {
@@ -33,7 +34,10 @@ public class SessionStartupDialog_littlespidy {
         String lastDir = null;
         if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
             try {
-                lastDir = api.persistence().preferences().getString(PREF_LAST_SESSION_DIR);
+                lastDir = api.persistence().preferences().getString(PREF_GLOBAL_LAST_SESSION_DIR);
+                if (lastDir == null || lastDir.isBlank()) {
+                    lastDir = api.persistence().preferences().getString(PREF_LAST_SESSION_DIR);
+                }
             } catch (Exception ignored) {}
         }
         File defaultDir = (lastDir != null && !lastDir.isBlank() && new File(lastDir).exists())
@@ -107,6 +111,7 @@ public class SessionStartupDialog_littlespidy {
     private static void rememberDirectory(MontoyaApi api, String dirPath) {
         if (api != null && api.persistence() != null && api.persistence().preferences() != null && dirPath != null) {
             try {
+                api.persistence().preferences().setString(PREF_GLOBAL_LAST_SESSION_DIR, dirPath);
                 api.persistence().preferences().setString(PREF_LAST_SESSION_DIR, dirPath);
             } catch (Exception ignored) {}
         }

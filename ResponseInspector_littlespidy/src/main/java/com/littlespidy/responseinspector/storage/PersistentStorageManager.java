@@ -544,7 +544,10 @@ public class PersistentStorageManager {
         String lastDir = null;
         if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
             try {
-                lastDir = api.persistence().preferences().getString(SessionStartupDialog_littlespidy.PREF_LAST_SESSION_DIR);
+                lastDir = api.persistence().preferences().getString(SessionStartupDialog_littlespidy.PREF_GLOBAL_LAST_SESSION_DIR);
+                if (lastDir == null || lastDir.isBlank()) {
+                    lastDir = api.persistence().preferences().getString(SessionStartupDialog_littlespidy.PREF_LAST_SESSION_DIR);
+                }
             } catch (Exception ignored) {}
         }
         if (lastDir != null && !lastDir.isBlank()) {
@@ -557,6 +560,7 @@ public class PersistentStorageManager {
     private void rememberDirectory(String dirPath) {
         if (api != null && api.persistence() != null && api.persistence().preferences() != null && dirPath != null) {
             try {
+                api.persistence().preferences().setString(SessionStartupDialog_littlespidy.PREF_GLOBAL_LAST_SESSION_DIR, dirPath);
                 api.persistence().preferences().setString(SessionStartupDialog_littlespidy.PREF_LAST_SESSION_DIR, dirPath);
             } catch (Exception ignored) {}
         }

@@ -3,6 +3,7 @@ package com.littlespidy.cacheheaderinspector.ui;
 
 import com.littlespidy.cacheheaderinspector.model.CacheDataStore;
 import com.littlespidy.cacheheaderinspector.model.CacheEntry;
+import com.littlespidy.cacheheaderinspector.storage.CachePersistentStorageManager_littlespidy;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
@@ -45,6 +46,7 @@ public class CacheInspectorTab extends JPanel {
 
     private final MontoyaApi api;
     private final CacheDataStore dataStore;
+    private final CachePersistentStorageManager_littlespidy storageManager;
 
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
 
@@ -99,8 +101,13 @@ public class CacheInspectorTab extends JPanel {
     private String selectedDirectiveValue = null;
 
     public CacheInspectorTab(MontoyaApi api, CacheDataStore dataStore) {
-        this.api       = api;
-        this.dataStore = dataStore;
+        this(api, dataStore, null);
+    }
+
+    public CacheInspectorTab(MontoyaApi api, CacheDataStore dataStore, CachePersistentStorageManager_littlespidy storageManager) {
+        this.api            = api;
+        this.dataStore      = dataStore;
+        this.storageManager = storageManager;
         this.requestEditor  = api.userInterface().createHttpRequestEditor();
         this.responseEditor = api.userInterface().createHttpResponseEditor();
 
@@ -191,8 +198,13 @@ public class CacheInspectorTab extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
-        topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
+        if (storageManager != null) {
+            topContainer.add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
+        }
+        JPanel subTop = new JPanel(new BorderLayout(5, 5));
+        subTop.add(createMainToolbar(),   BorderLayout.NORTH);
+        subTop.add(createStatusToolbar(), BorderLayout.SOUTH);
+        topContainer.add(subTop, BorderLayout.CENTER);
         panel.add(topContainer, BorderLayout.NORTH);
 
         // Summary table
@@ -305,6 +317,9 @@ public class CacheInspectorTab extends JPanel {
                 dataStore.clear();
                 selectedDirectiveValue = null;
                 refreshView();
+                if (storageManager != null) {
+                    storageManager.scheduleAutoSave();
+                }
             }
         });
 
@@ -456,6 +471,9 @@ public class CacheInspectorTab extends JPanel {
                     List<CacheEntry> result = get();
                     dataStore.addEntries(result);
                     refreshView();
+                    if (storageManager != null) {
+                        storageManager.scheduleAutoSave();
+                    }
                     JOptionPane.showMessageDialog(CacheInspectorTab.this,
                         "Successfully imported " + result.size() + " unique URLs from Proxy history.",
                         "Import Complete", JOptionPane.INFORMATION_MESSAGE);
