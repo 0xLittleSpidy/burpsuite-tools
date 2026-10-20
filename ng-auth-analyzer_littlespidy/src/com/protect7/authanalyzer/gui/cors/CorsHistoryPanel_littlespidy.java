@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -62,21 +63,12 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 	protected final PlaceholderTextField filterText = new PlaceholderTextField(16);
 	protected final JButton searchButton = new JButton("Search");
 
-	protected final JCheckBox activateCorsTesting = new JCheckBox("Activate CORS Testing", false);
-	protected final JCheckBox inScopeOnly = new JCheckBox("Only in Scope", true);
-	protected final JTextField attackerUrlField = new JTextField("evil.com", 12);
-	protected final JTextField ignoreExtField = new JTextField("ico, svg, js, css, png, jpg, woff, woff2", 16);
-	protected final JPanel optionsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 2));
-
 	protected final JButton testSelectedButton = new JButton("Test Selected");
 	protected final JButton clearTableButton = new JButton("Clear Table");
 	protected final JButton exportDataButton = new JButton("Export Table Data");
 	protected final JPanel topActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 
-	private final JToggleButton requestToggleButton = new JToggleButton("Request");
-	private final JToggleButton responseToggleButton = new JToggleButton("Response");
-	private final CardLayout viewerCardLayout = new CardLayout();
-	private final JPanel viewerCardPanel = new JPanel(viewerCardLayout);
+	private final JTabbedPane viewerTabbedPane = new javax.swing.JTabbedPane();
 	private IMessageEditor requestEditor;
 	private IMessageEditor responseEditor;
 	private final JLabel viewerInfoLabel = new JLabel("Select a CORS test result above to view details");
@@ -93,16 +85,6 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new BorderLayout(5, 4));
 		topPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-
-		// Options row
-		optionsRow.removeAll();
-		optionsRow.add(activateCorsTesting);
-		optionsRow.add(inScopeOnly);
-		optionsRow.add(new JLabel("Attacker URL:"));
-		optionsRow.add(attackerUrlField);
-		optionsRow.add(new JLabel("Ignore Ext:"));
-		optionsRow.add(ignoreExtField);
-		topPanel.add(optionsRow, BorderLayout.NORTH);
 
 		// Filter and actions row
 		JPanel controlsRow = new JPanel(new BorderLayout(8, 2));
@@ -170,29 +152,15 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		tableContainer.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 		tableContainer.add(new JScrollPane(table), BorderLayout.CENTER);
 
-		// Bottom viewer setup
+		// Bottom viewer setup: standard Burp Suite Request / Response JTabbedPane
 		JPanel messageViewPanel = new JPanel(new BorderLayout());
 		messageViewPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-		JPanel viewerHeader = new JPanel(new BorderLayout());
-		viewerInfoLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
-		viewerHeader.add(viewerInfoLabel, BorderLayout.WEST);
-
-		JPanel switchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
-		ButtonGroup viewGroup = new ButtonGroup();
-		viewGroup.add(requestToggleButton);
-		viewGroup.add(responseToggleButton);
-		requestToggleButton.setSelected(true);
-		requestToggleButton.addActionListener(e -> setViewMode(0));
-		responseToggleButton.addActionListener(e -> setViewMode(1));
-		switchPanel.add(new JLabel("View:"));
-		switchPanel.add(requestToggleButton);
-		switchPanel.add(responseToggleButton);
-		viewerHeader.add(switchPanel, BorderLayout.EAST);
-		messageViewPanel.add(viewerHeader, BorderLayout.NORTH);
+		viewerInfoLabel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+		messageViewPanel.add(viewerInfoLabel, BorderLayout.NORTH);
 
 		initMessageEditors();
-		messageViewPanel.add(viewerCardPanel, BorderLayout.CENTER);
+		messageViewPanel.add(viewerTabbedPane, BorderLayout.CENTER);
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableContainer, messageViewPanel);
 		splitPane.setDividerSize(6);
@@ -237,21 +205,11 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 			};
 			requestEditor = BurpExtender.callbacks.createMessageEditor(controller, false);
 			responseEditor = BurpExtender.callbacks.createMessageEditor(controller, false);
-			viewerCardPanel.add(requestEditor.getComponent(), "REQ");
-			viewerCardPanel.add(responseEditor.getComponent(), "RESP");
+			viewerTabbedPane.addTab("Request", requestEditor.getComponent());
+			viewerTabbedPane.addTab("Response", responseEditor.getComponent());
 		} else {
-			viewerCardPanel.add(new JLabel("Request Viewer", JLabel.CENTER), "REQ");
-			viewerCardPanel.add(new JLabel("Response Viewer", JLabel.CENTER), "RESP");
-		}
-	}
-
-	public void setViewMode(int mode) {
-		if (mode == 0) {
-			requestToggleButton.setSelected(true);
-			viewerCardLayout.show(viewerCardPanel, "REQ");
-		} else {
-			responseToggleButton.setSelected(true);
-			viewerCardLayout.show(viewerCardPanel, "RESP");
+			viewerTabbedPane.addTab("Request", new JLabel("Request Viewer", JLabel.CENTER));
+			viewerTabbedPane.addTab("Response", new JLabel("Response Viewer", JLabel.CENTER));
 		}
 	}
 
@@ -296,7 +254,7 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 	public void analyzeRequestAsync(IHttpRequestResponse messageInfo) {
 		if (messageInfo == null) return;
 		new Thread(() -> {
-			String attacker = attackerUrlField.getText();
+			String attacker = getAttackerUrl();
 			List<CorsTestResult_littlespidy> testResults = CorsEngine_littlespidy.executeCorsTests(
 					messageInfo, attacker, BurpExtender.callbacks, nextResultId);
 			nextResultId += testResults.size();
@@ -350,29 +308,23 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		}
 	}
 
-	public boolean isActivateCorsTesting() {
-		return activateCorsTesting.isSelected();
-	}
-
-	public boolean isInScopeOnly() {
-		return inScopeOnly.isSelected();
-	}
-
-	public boolean shouldIgnoreExtension(String path) {
-		if (path == null) return false;
-		String extList = ignoreExtField.getText();
-		if (extList == null || extList.trim().isEmpty()) return false;
-		String[] exts = extList.split(",");
-		int dotIdx = path.lastIndexOf('.');
-		if (dotIdx > 0 && dotIdx < path.length() - 1) {
-			String ext = path.substring(dotIdx + 1).toLowerCase(Locale.ROOT);
-			for (String ignored : exts) {
-				if (ignored.trim().toLowerCase(Locale.ROOT).equals(ext)) {
-					return true;
-				}
-			}
+	public String getAttackerUrl() {
+		if (mainPanel != null && mainPanel.getConfigurationPanel() != null) {
+			return mainPanel.getConfigurationPanel().getAttackerUrl();
 		}
-		return false;
+		return "evil.com";
+	}
+
+	public JTabbedPane getViewerTabbedPane() {
+		return viewerTabbedPane;
+	}
+
+	public IMessageEditor getRequestEditor() {
+		return requestEditor;
+	}
+
+	public IMessageEditor getResponseEditor() {
+		return responseEditor;
 	}
 
 	public CorsTableModel_littlespidy getTableModel() {

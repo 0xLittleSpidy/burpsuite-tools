@@ -27,7 +27,6 @@ public class CorsImportPanel_littlespidy extends CorsHistoryPanel_littlespidy {
 
 	public CorsImportPanel_littlespidy(MainPanel mainPanel) {
 		super(mainPanel);
-		optionsRow.setVisible(false);
 	}
 
 	@Override

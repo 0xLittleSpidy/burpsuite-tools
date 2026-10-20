@@ -301,9 +301,28 @@ public class AuthAnalyzerTest_littlespidy {
 		CorsHistoryPanel_littlespidy historyPanel = new CorsHistoryPanel_littlespidy(null);
 		assertNotNull(historyPanel.getTable().getModel());
 		assertEquals(0, historyPanel.getTableModel().getRowCount());
+		assertNotNull(historyPanel.getViewerTabbedPane());
+		assertEquals(2, historyPanel.getViewerTabbedPane().getTabCount());
+		assertEquals("Request", historyPanel.getViewerTabbedPane().getTitleAt(0));
+		assertEquals("Response", historyPanel.getViewerTabbedPane().getTitleAt(1));
+		assertEquals("evil.com", historyPanel.getAttackerUrl());
 
 		CorsImportPanel_littlespidy importPanel = new CorsImportPanel_littlespidy(null);
 		assertNotNull(importPanel.getTable().getModel());
 		assertEquals(0, importPanel.getTableModel().getRowCount());
+		assertNotNull(importPanel.getViewerTabbedPane());
+		assertEquals(2, importPanel.getViewerTabbedPane().getTabCount());
+		assertEquals("Request", importPanel.getViewerTabbedPane().getTitleAt(0));
+		assertEquals("Response", importPanel.getViewerTabbedPane().getTitleAt(1));
+	}
+
+	@Test
+	public void testSessionAttackerUrlAndCorsSettings() {
+		Session session = new Session("TestSession");
+		assertEquals("evil.com", session.getAttackerUrl());
+		session.setAttackerUrl("custom-attacker.org");
+		assertEquals("custom-attacker.org", session.getAttackerUrl());
+		session.setTestCors(true);
+		assertTrue(session.isTestCors());
 	}
 }

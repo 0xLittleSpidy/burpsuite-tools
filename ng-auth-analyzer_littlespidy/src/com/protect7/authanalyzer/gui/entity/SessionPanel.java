@@ -40,6 +40,8 @@ public class SessionPanel extends JPanel {
 	private final JCheckBox filterRequestsWithSameHeader;
 	private final HintCheckBox restrictToScope;
 	private final HintCheckBox testCors;
+	private final JLabel attackerUrlLabel = new JLabel("Attacker URL:");
+	private final PlaceholderTextField attackerUrlText = new PlaceholderTextField();
 	private final JLabel headerToRemoveLabel = new JLabel("Header(s) to Remove");
 	private final PlaceholderTextArea headersToRemoveText = new PlaceholderTextArea(3, textFieldWidth);
 	private final JLabel restrictToScopeLabel = new JLabel("Restrict to Scope");
@@ -90,8 +92,10 @@ public class SessionPanel extends JPanel {
 		c.gridx = 2;
 		sessionPanel.add(restrictToScope, c);
 		
-		//testCors = new JCheckBox("Test CORS", false);
-		testCors = new HintCheckBox("Test CORS", false, "HTTP Method will be set to OPTIONS");
+		testCors = new HintCheckBox("Test CORS", false, 
+				"<html>Analyzes Cross-Origin Resource Sharing (CORS) misconfigurations using 9 Origin test vectors.<br>" +
+				"Tests for arbitrary origin reflection, null origin trust, subdomain bypasses,<br>" +
+				"prefix/suffix matching, and Access-Control-Allow-Credentials: true handling.</html>");
 		c.gridx = 3;
 		sessionPanel.add(testCors, c);
 		
@@ -117,6 +121,18 @@ public class SessionPanel extends JPanel {
 		restrictToScopeText.setVisible(false);
 		sessionPanel.add(restrictToScopeText, c);
 		restrictToScope.addActionListener(e -> updateGui());
+
+		c.gridy++;
+		c.insets = new Insets(5, 0, 0, 0);
+		attackerUrlLabel.setVisible(false);
+		sessionPanel.add(attackerUrlLabel, c);
+		c.gridy++;
+		c.insets = new Insets(0, 0, 0, 0);
+		attackerUrlText.setPlaceholder("evil.com");
+		attackerUrlText.setText("evil.com");
+		attackerUrlText.setVisible(false);
+		sessionPanel.add(attackerUrlText, c);
+		testCors.addActionListener(e -> updateGui());
 		
 		c.gridy++;
 		c.insets = new Insets(5, 0, 0, 0);
@@ -164,6 +180,14 @@ public class SessionPanel extends JPanel {
 		else {
 			restrictToScopeLabel.setVisible(false);
 			restrictToScopeText.setVisible(false);
+		}
+		if(testCors.isSelected()) {
+			attackerUrlLabel.setVisible(true);
+			attackerUrlText.setVisible(true);
+		}
+		else {
+			attackerUrlLabel.setVisible(false);
+			attackerUrlText.setVisible(false);
 		}
 		revalidate();
 		mainPanel.updateDividerLocation();
@@ -421,10 +445,20 @@ public class SessionPanel extends JPanel {
 	
 	public void setTestCors(boolean testCors) {
 		this.testCors.setSelected(testCors);
+		updateGui();
 	}
 	
 	public boolean isTestCors() {
 		return testCors.isSelected();
+	}
+
+	public void setAttackerUrl(String attackerUrl) {
+		this.attackerUrlText.setText((attackerUrl != null && !attackerUrl.trim().isEmpty()) ? attackerUrl.trim() : "evil.com");
+	}
+
+	public String getAttackerUrl() {
+		String text = attackerUrlText.getText();
+		return (text != null && !text.trim().isEmpty()) ? text.trim() : "evil.com";
 	}
 	
 	public void setRestrictToScope(boolean restrictToScope) {

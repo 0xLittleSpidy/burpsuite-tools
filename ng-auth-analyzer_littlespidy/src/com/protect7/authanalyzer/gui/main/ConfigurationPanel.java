@@ -376,6 +376,7 @@ public class ConfigurationPanel extends JPanel {
 			sessionPanel.setRestrictToScope(sessionPanelToClone.isRestrictToScope());
 			sessionPanel.setRestrictToScopeText(sessionPanelToClone.getRestrictToScopeText());
 			sessionPanel.setTestCors(sessionPanelToClone.isTestCors());
+			sessionPanel.setAttackerUrl(sessionPanelToClone.getAttackerUrl());
 			sessionPanel.setMatchAndReplaceList(sessionPanelToClone.getMatchAndReplaceList());
 			for (TokenPanel tokenPanel : sessionPanelToClone.getTokenPanelList()) {
 				TokenPanel newTokenPanel = sessionPanel.addToken(tokenPanel.getTokenName());
@@ -580,6 +581,7 @@ public class ConfigurationPanel extends JPanel {
 				newSession = new Session(session, sessionPanel.getHeadersToReplaceText(), sessionPanel.isRemoveHeaders(),
 						sessionPanel.getHeadersToRemoveText(), sessionPanel.isFilterRequestsWithSameHeader(), sessionPanel.isRestrictToScope(),
 						sessionPanel.getScopeUrl(), sessionPanel.isTestCors(), tokenList, sessionPanel.getMatchAndReplaceList(), sessionPanel.getStatusPanel());
+				newSession.setAttackerUrl(sessionPanel.getAttackerUrl());
 				config.addSession(newSession);
 			} else {
 				newSession = config.getSessionByName(session);
@@ -590,6 +592,7 @@ public class ConfigurationPanel extends JPanel {
 				newSession.setRestrictToScope(sessionPanel.isRestrictToScope());
 				newSession.setScopeUrl(sessionPanel.getScopeUrl());
 				newSession.setTestCors(sessionPanel.isTestCors());
+				newSession.setAttackerUrl(sessionPanel.getAttackerUrl());
 				newSession.setMatchAndReplaceList(sessionPanel.getMatchAndReplaceList());
 				for (Token newToken : tokenList) {
 					for (Token oldToken : newSession.getTokens()) {
@@ -638,6 +641,9 @@ public class ConfigurationPanel extends JPanel {
 			}
 			if (sessionObject.get("testCors") != null) {
 				sessionPanel.setTestCors(sessionObject.get("testCors").getAsBoolean());
+			}
+			if (sessionObject.get("attackerUrl") != null) {
+				sessionPanel.setAttackerUrl(sessionObject.get("attackerUrl").getAsString());
 			}
 			if(sessionObject.get("matchAndReplaceList") != null) {
 				JsonArray matchAndReplaceArray = sessionObject.get("matchAndReplaceList").getAsJsonArray();
@@ -745,5 +751,31 @@ public class ConfigurationPanel extends JPanel {
 			inputs[i] = userInputParts[i].trim();
 		}
 		return inputs;
+	}
+
+	public String getAttackerUrl() {
+		for (SessionPanel sp : sessionPanelMap.values()) {
+			if (sp.isTestCors() && sp.getAttackerUrl() != null && !sp.getAttackerUrl().trim().isEmpty()) {
+				return sp.getAttackerUrl().trim();
+			}
+		}
+		if (!sessionPanelMap.isEmpty()) {
+			String url = sessionPanelMap.values().iterator().next().getAttackerUrl();
+			if (url != null && !url.trim().isEmpty()) {
+				return url.trim();
+			}
+		}
+		return "evil.com";
+	}
+
+	public boolean isCorsTestingActive() {
+		if (CurrentConfig.getCurrentConfig().isRunning()) {
+			for (SessionPanel sp : sessionPanelMap.values()) {
+				if (sp.isTestCors()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

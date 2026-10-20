@@ -24,6 +24,7 @@ public class Session {
 	private boolean filterRequestsWithSameHeader;
 	private boolean restrictToScope = false;
 	private boolean testCors = false;
+	private String attackerUrl = "evil.com";
 	private URL scopeUrl;
 	private int tabbedPaneRequestIndex;
 	private int tabbedPaneResponseIndex;
@@ -189,6 +190,14 @@ public class Session {
 
 	public void setTestCors(boolean testCors) {
 		this.testCors = testCors;
+	}
+
+	public String getAttackerUrl() {
+		return (attackerUrl != null && !attackerUrl.trim().isEmpty()) ? attackerUrl.trim() : "evil.com";
+	}
+
+	public void setAttackerUrl(String attackerUrl) {
+		this.attackerUrl = (attackerUrl != null && !attackerUrl.trim().isEmpty()) ? attackerUrl.trim() : "evil.com";
 	}
 
 	public ArrayList<MatchAndReplace> getMatchAndReplaceList() {
