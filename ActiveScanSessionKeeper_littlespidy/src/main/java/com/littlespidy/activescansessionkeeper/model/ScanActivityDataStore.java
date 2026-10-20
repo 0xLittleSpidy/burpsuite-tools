@@ -36,6 +36,14 @@ public class ScanActivityDataStore {
         notifyListeners(null);
     }
 
+    public synchronized void setEntries(List<ScanActivityEntry> newEntries) {
+        entries.clear();
+        if (newEntries != null) {
+            entries.addAll(newEntries);
+        }
+        notifyListeners(null);
+    }
+
     public synchronized List<ScanActivityEntry> getEntries() {
         return new ArrayList<>(entries);
     }

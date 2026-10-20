@@ -21,7 +21,7 @@ public class SessionKeeperConfig {
     private volatile boolean inScopeOnly = false;
     private volatile String targetHostFilter = "*";
 
-    // ── Cookie Configuration ──
+    // -- Cookie Configuration --
     private volatile CookieMode cookieMode = CookieMode.FULL_COOKIE_HEADER;
     private volatile String targetCookieNames = "JSESSIONID, PHPSESSID, token, session, connect.sid, sessionid";
     private volatile String cookieValue = "";
@@ -29,11 +29,11 @@ public class SessionKeeperConfig {
     private volatile boolean updateAuthBearer = false;
     private volatile String authBearerToken = "";
 
-    // ── Scanner Behavior ──
+    // -- Scanner Behavior --
     private volatile boolean autoRetryOnExpire = true;
     private volatile boolean soundAlertOnExpire = true;
 
-    // ── Expiration Criteria ──
+    // -- Expiration Criteria --
     private volatile boolean checkStatusCodes = true;
     private volatile String statusCodes = "401, 403, 419, 440, 498";
 
@@ -90,7 +90,7 @@ public class SessionKeeperConfig {
         }
     }
 
-    // ── Helpers ──
+    // -- Helpers --
 
     public Set<Integer> parseStatusCodes() {
         Set<Integer> codes = new HashSet<>();
@@ -152,7 +152,7 @@ public class SessionKeeperConfig {
         return h.equalsIgnoreCase(target) || h.endsWith("." + target);
     }
 
-    // ── Getters and Setters ──
+    // -- Getters and Setters --
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; notifyChanged(); }

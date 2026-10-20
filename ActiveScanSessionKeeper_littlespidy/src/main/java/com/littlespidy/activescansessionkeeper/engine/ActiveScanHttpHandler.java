@@ -44,7 +44,7 @@ public class ActiveScanHttpHandler implements HttpHandler {
 
     @Override
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent requestToBeSent) {
-        // ── Sniff Proxy requests when cookie prompt is actively open ──
+        // -- Sniff Proxy requests when cookie prompt is actively open --
         if (requestToBeSent.toolSource().toolType() == ToolType.PROXY && coordinator.isPromptOpen()) {
             if (config.matchesHost(requestToBeSent.httpService().host()) && requestToBeSent.hasHeader("Cookie")) {
                 String cookieVal = requestToBeSent.headerValue("Cookie");
@@ -81,7 +81,7 @@ public class ActiveScanHttpHandler implements HttpHandler {
 
     @Override
     public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived responseReceived) {
-        // ── Sniff Proxy responses when cookie prompt is actively open ──
+        // -- Sniff Proxy responses when cookie prompt is actively open --
         if (responseReceived.toolSource().toolType() == ToolType.PROXY && coordinator.isPromptOpen()) {
             HttpRequest initReq = responseReceived.initiatingRequest();
             if (initReq != null && config.matchesHost(initReq.httpService().host())) {

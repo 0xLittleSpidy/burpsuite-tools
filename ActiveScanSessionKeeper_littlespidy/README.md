@@ -1,25 +1,25 @@
-# 🍪 Active Scan Session Keeper (littlespidy)
+#  Active Scan Session Keeper (littlespidy)
 
 > **Created with the help of an AI Agent and littlespidy.**
 
 A powerful Burp Suite extension built on the **Montoya API** designed to prevent Burp's Active Scanner from failing when target application session cookies expire during long-running security audits.
 
-When scanning authenticated web applications, sessions often expire due to idle or absolute timeouts (e.g. 15–30 minutes). When this happens, Burp Scanner unknowingly continues sending hundreds or thousands of attack payloads against an unauthenticated session, leading to missed vulnerabilities and wasted scan time.
+When scanning authenticated web applications, sessions often expire due to idle or absolute timeouts (e.g. 15-30 minutes). When this happens, Burp Scanner unknowingly continues sending hundreds or thousands of attack payloads against an unauthenticated session, leading to missed vulnerabilities and wasted scan time.
 
 **Active Scan Session Keeper** continuously monitors active scanner traffic. When session expiration is detected across customizable multi-factor criteria, it **immediately pauses all active scan threads**, sounds an alert, and prompts the tester with an interactive modal dialog to supply fresh cookies. Once updated, it automatically retries the failed request with the fresh credentials and seamlessly resumes the scan without losing a single payload check.
 
 ---
 
-## 🎯 Key Features
+##  Key Features
 
-### 1. 🚦 Automated Active Scan Interception
+### 1.  Automated Active Scan Interception
 - **Zero Configuration Necessary**: Registers natively as a Montoya `HttpHandler` that monitors traffic from Burp's Active Scanner.
 - **Selective Tool Monitoring**: Easily toggle monitoring for **Scanner** (default), **Repeater**, **Intruder**, and other **Extensions**.
 - **Scope & Host Gating**:
   - `Burp In-Scope Only`: Confines session monitoring strictly to in-scope targets.
   - `Target Host Filter`: Supports wildcard domain matching (e.g. `*.target.com` or `target.com`).
 
-### 2. 🔍 Multi-Factor Expiration Detection Engine
+### 2. Search Multi-Factor Expiration Detection Engine
 Includes a comprehensive suite of expiration checks that can be toggled and configured individually:
 - **HTTP Status Codes**:
   - Detects `401 Unauthorized`, `403 Forbidden`, `419 Page Expired` (Laravel), `440 Login Timeout` (IIS), `498 Invalid Token`, and arbitrary custom codes.
@@ -39,29 +39,29 @@ Includes a comprehensive suite of expiration checks that can be toggled and conf
 - **Custom Regex**:
   - Allows testers to define arbitrary regex patterns evaluated against the full HTTP response.
 
-### 3. 🛑 Thread-Safe Scanner Pausing & Interactive Browser Login
-- **Single-Prompt Coordination**: Active scans often run with 10–20 concurrent threads. When session expiration occurs, an atomic lock ensures **only one prompt dialog opens**; all other threads gracefully wait on a condition variable without deadlocks or UI freezes.
+### 3.  Thread-Safe Scanner Pausing & Interactive Browser Login
+- **Single-Prompt Coordination**: Active scans often run with 10-20 concurrent threads. When session expiration occurs, an atomic lock ensures **only one prompt dialog opens**; all other threads gracefully wait on a condition variable without deadlocks or UI freezes.
 - **Audio / System Beep Alert**: Emits an audible chime via `Toolkit.beep()` to alert the tester immediately when the scan pauses.
-- **🌐 "Open in Browser" Launcher**:
+- ** "Open in Browser" Launcher**:
   - One-click **`Open in Browser`** button inside the modal dialog.
   - Automatically spawns an isolated Chromium/Chrome instance configured with `--proxy-server=http://127.0.0.1:8080` and a temporary user profile, routing all authentication traffic directly through Burp Proxy without altering user settings.
-  - Seamlessly falls back to system browser or Burp's built-in Chromium browser (**Proxy → Open browser**).
-- **📡 Real-Time Live Proxy Cookie Sniffer**:
+  - Seamlessly falls back to system browser or Burp's built-in Chromium browser (**Proxy -> Open browser**).
+- ** Real-Time Live Proxy Cookie Sniffer**:
   - While the prompt modal is open, the extension actively sniffs Burp Proxy traffic for responses/requests matching the target host.
   - Captures `Set-Cookie` headers from login endpoints (e.g. `POST /login`) or subsequent `Cookie:` headers.
   - Automatically flashes a live confirmation banner in the dialog:
-    `🎉 Fresh Cookie Captured from Proxy: POST /login at 18:05:22`
+    ` Fresh Cookie Captured from Proxy: POST /login at 18:05:22`
   - Instantly populates the credentials input with the new cookie.
 - **Interactive Actions**:
-  - **`✅ Confirm & Resume Scan` / `✅ Confirm & Use Captured Cookies`**: Applies the new session credentials, unblocks all worker threads, and retries the failed check.
-  - **`⏭ Ignore Once & Resume`**: Bypasses the pause and lets threads continue.
-  - **`❌ Disable Keeper for this Scan`**: Disables interception so the scanner runs unhindered.
+  - **`[OK] Confirm & Resume Scan` / `[OK] Confirm & Use Captured Cookies`**: Applies the new session credentials, unblocks all worker threads, and retries the failed check.
+  - **`[Skip] Ignore Once & Resume`**: Bypasses the pause and lets threads continue.
+  - **`[X] Disable Keeper for this Scan`**: Disables interception so the scanner runs unhindered.
 
-### 4. 🔄 Automated Request Retries
+### 4. [Reload] Automated Request Retries
 - When enabled, the request that triggered the session expiration is automatically re-sent with the newly supplied session cookie.
 - The fresh, successful response is returned directly to the Burp Scanner engine via `ResponseReceivedAction.continueWith(retryResponse)`. Burp Scanner never sees the 401/302, ensuring zero false negatives and preserving scan accuracy.
 
-### 5. 📊 Live Activity Log & Native Montoya HTTP Inspectors
+### 5.  Live Activity Log & Native Montoya HTTP Inspectors
 - **Live Activity Log**: Displays timestamped events (`SESSION_EXPIRED`, `SCAN_PAUSED`, `COOKIE_UPDATED`, `REQUEST_RETRIED`, `COOKIE_INJECTED`, `TEST_PROBE`).
 - **Triage Filtering Toolbar**:
   - `MultiSelectFilterButton` for **Tool** (`All`, `Scanner`, `Repeater`, `Intruder`, `Manual`, `User`).
@@ -71,15 +71,15 @@ Includes a comprehensive suite of expiration checks that can be toggled and conf
   - **Export TSV**: Copies activity history to system clipboard for reporting.
 - **Montoya Message Editors**: Master-detail view with embedded native **Request** and **Response** message viewers for inspecting any logged event.
 
-### 6. 🖱️ Context Menu Integration
+### 6.  Context Menu Integration
 Right-click any request in Burp (**Proxy History**, **Repeater**, **Logger**, **Scanner**):
-- **`🍪 Set as Active Scan Session Cookie`**: Instantly captures the `Cookie:` header and host from the selected request and populates the Session Keeper.
-- **`🎯 Set Target Host Scope`**: Configures the host filter to match the selected target.
-- **`⏸ Pause / ▶ Resume Active Scanner`**: Manually pause or resume active scanner threads on-demand.
+- **` Set as Active Scan Session Cookie`**: Instantly captures the `Cookie:` header and host from the selected request and populates the Session Keeper.
+- **` Set Target Host Scope`**: Configures the host filter to match the selected target.
+- **`[Paused] Pause / [Resume] Resume Active Scanner`**: Manually pause or resume active scanner threads on-demand.
 
 ---
 
-## 🏗️ Architecture & Technical Specs
+##  Architecture & Technical Specs
 
 - **Montoya API**: Built using `net.portswigger.burp.extensions:montoya-api:2023.12.1`.
 - **Concurrency & Zero-Freeze UI**:
@@ -90,7 +90,7 @@ Right-click any request in Burp (**Proxy History**, **Repeater**, **Logger**, **
 
 ---
 
-## 🚀 Building the Extension
+##  Building the Extension
 
 ### Using Gradle (Recommended):
 ```bash
@@ -114,10 +114,10 @@ target/activescan-session-keeper-littlespidy-1.0.0.jar
 
 ---
 
-## 🔌 Installing into Burp Suite
+##  Installing into Burp Suite
 
 1. Open **Burp Suite**.
-2. Navigate to **Extensions** → **Installed**.
+2. Navigate to **Extensions** -> **Installed**.
 3. Click **Add**.
 4. Configure the installer dialog:
    - **Extension type**: `Java`
@@ -127,11 +127,11 @@ target/activescan-session-keeper-littlespidy-1.0.0.jar
 
 ---
 
-## 📖 Recommended Workflow
+##  Recommended Workflow
 
 1. **Ingest Initial Session**:
    - Perform an authenticated request in your browser through Burp Proxy.
-   - Right-click the authenticated request in **Proxy HTTP history** and select **`🍪 Set as Active Scan Session Cookie`**.
+   - Right-click the authenticated request in **Proxy HTTP history** and select **` Set as Active Scan Session Cookie`**.
 2. **Start Active Scan**:
    - Right-click any authenticated target URL or endpoint and choose **`Scan`** (Active Scan / Audit).
 3. **Wait for Timeout**:
@@ -139,6 +139,6 @@ target/activescan-session-keeper-littlespidy-1.0.0.jar
    - When the session expires, the extension alerts you with a chime and pops up the modal prompt dialog.
 4. **Supply Fresh Cookie**:
    - Refresh your authenticated session in the browser, copy the new cookie, and paste it into the prompt.
-   - Click **`✅ Update Cookie & Resume Scan`**.
+   - Click **`[OK] Update Cookie & Resume Scan`**.
 5. **Seamless Continuation**:
    - The extension retries the expired check and automatically updates all subsequent scanner payloads with the fresh cookie!

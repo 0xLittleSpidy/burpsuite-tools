@@ -59,6 +59,10 @@ public class ActiveScanSessionKeeperTab extends JPanel {
     private HttpRequestEditor requestEditor;
     private HttpResponseEditor responseEditor;
 
+    private JPanel topContainer;
+    private JSplitPane mainSplit;
+    private com.littlespidy.activescansessionkeeper.storage.ActiveScanSessionKeeperPersistentStorageManager_littlespidy storageManager;
+
     // Counters
     private final AtomicInteger interceptedCount = new AtomicInteger(0);
     private final AtomicInteger expiredCount = new AtomicInteger(0);
@@ -83,11 +87,14 @@ public class ActiveScanSessionKeeperTab extends JPanel {
     private void initComponents() {
         setBorder(new EmptyBorder(8, 8, 8, 8));
 
-        // ── 1. Top Status & Control Banner ──────────────────────────────────
-        add(createStatusBanner(), BorderLayout.NORTH);
+        // -- 1. Top Status & Control Banner ----------------------------------
+        topContainer = new JPanel();
+        topContainer.setLayout(new BoxLayout(topContainer, BoxLayout.Y_AXIS));
+        topContainer.add(createStatusBanner());
+        add(topContainer, BorderLayout.NORTH);
 
-        // ── 2. Split Workspace: Left (Settings) / Right (Log & Inspector) ──
-        JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        // -- 2. Split Workspace: Left (Settings) / Right (Log & Inspector) --
+        mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         mainSplit.setDividerLocation(420);
         mainSplit.setResizeWeight(0.3);
 
@@ -99,6 +106,24 @@ public class ActiveScanSessionKeeperTab extends JPanel {
         updateStatusBanner();
     }
 
+    public void setStorageManager(com.littlespidy.activescansessionkeeper.storage.ActiveScanSessionKeeperPersistentStorageManager_littlespidy storageManager) {
+        this.storageManager = storageManager;
+        topContainer.add(storageManager.createSessionToolbar(), 0);
+        revalidate();
+        repaint();
+    }
+
+    public void refreshUI() {
+        if (mainSplit != null) {
+            int divLoc = mainSplit.getDividerLocation();
+            mainSplit.setLeftComponent(createSettingsPanel());
+            mainSplit.setDividerLocation(divLoc);
+        }
+        updateStatusBanner();
+        revalidate();
+        repaint();
+    }
+
     private JPanel createStatusBanner() {
         JPanel banner = new JPanel(new BorderLayout(8, 6));
         banner.setBorder(BorderFactory.createCompoundBorder(
@@ -108,7 +133,7 @@ public class ActiveScanSessionKeeperTab extends JPanel {
 
         JPanel leftInfo = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
 
-        statusBadge = new JLabel("🟢 MONITORING (Active)");
+        statusBadge = new JLabel("[Active] MONITORING (Active)");
         statusBadge.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
 
         countersBadge = new JLabel("Intercepted: 0 | Expired: 0 | Retried: 0");
@@ -128,7 +153,7 @@ public class ActiveScanSessionKeeperTab extends JPanel {
             updateStatusBanner();
         });
 
-        pauseResumeBtn = new JButton("⏸ Pause Scanner");
+        pauseResumeBtn = new JButton("[Paused] Pause Scanner");
         pauseResumeBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         pauseResumeBtn.addActionListener(e -> {
             if (coordinator.isPaused()) {
@@ -139,7 +164,7 @@ public class ActiveScanSessionKeeperTab extends JPanel {
             updateStatusBanner();
         });
 
-        JButton updateCookieBtn = new JButton("🍪 Update Cookie...");
+        JButton updateCookieBtn = new JButton(" Update Cookie...");
         updateCookieBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         updateCookieBtn.addActionListener(e -> {
             Window win = api.userInterface().swingUtils().suiteFrame();
@@ -147,7 +172,7 @@ public class ActiveScanSessionKeeperTab extends JPanel {
             dialog.setVisible(true);
         });
 
-        JButton testCookieBtn = new JButton("🧪 Test Cookie");
+        JButton testCookieBtn = new JButton(" Test Cookie");
         testCookieBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         testCookieBtn.addActionListener(e -> runCookieTest());
 
@@ -166,9 +191,9 @@ public class ActiveScanSessionKeeperTab extends JPanel {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
 
-        tabbedPane.addTab("🍪 Cookie & Scope", createCookieAndScopeTab());
-        tabbedPane.addTab("🔍 Expiration Rules", createExpirationRulesTab());
-        tabbedPane.addTab("📖 Guide", createGuideTab());
+        tabbedPane.addTab(" Cookie & Scope", createCookieAndScopeTab());
+        tabbedPane.addTab("Search Expiration Rules", createExpirationRulesTab());
+        tabbedPane.addTab(" Guide", createGuideTab());
 
         return tabbedPane;
     }
@@ -399,11 +424,11 @@ public class ActiveScanSessionKeeperTab extends JPanel {
         guidePane.setContentType("text/html");
         guidePane.setEditable(false);
         guidePane.setText("<html><body style='font-family:sans-serif; font-size:11px; padding:6px;'>"
-                + "<h3 style='margin-top:0;'>🍪 Active Scan Session Keeper Guide</h3>"
+                + "<h3 style='margin-top:0;'> Active Scan Session Keeper Guide</h3>"
                 + "<p>This extension prevents Burp Active Scans from failing when web application sessions expire.</p>"
                 + "<h4>Workflow:</h4>"
                 + "<ol>"
-                + "<li><b>Set Initial Cookie:</b> Right-click your authenticated request in Proxy/Repeater and select <i>'🍪 Set as Session Keeper Cookie'</i>, or paste it in the Cookie tab.</li>"
+                + "<li><b>Set Initial Cookie:</b> Right-click your authenticated request in Proxy/Repeater and select <i>' Set as Session Keeper Cookie'</i>, or paste it in the Cookie tab.</li>"
                 + "<li><b>Launch Active Scan:</b> Start your Burp Active Scan as usual. The extension will automatically inject fresh cookies and monitor every response.</li>"
                 + "<li><b>Automated Pause & Prompt:</b> When the session expires (e.g. 401, redirect to login, or 'session expired' text), the extension <b>pauses all scan threads</b> and pops up a modal dialog.</li>"
                 + "<li><b>Resume with Fresh Cookie:</b> Copy a new cookie from your browser, paste it into the prompt, and click <i>'Update & Resume'</i>. The scanner retries the failed check and continues scanning seamlessly!</li>"
@@ -424,7 +449,7 @@ public class ActiveScanSessionKeeperTab extends JPanel {
     private JPanel createLogAndInspectorPanel() {
         JPanel panel = new JPanel(new BorderLayout(4, 4));
 
-        // ── Triage Toolbar ──
+        // -- Triage Toolbar --
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
 
@@ -477,14 +502,14 @@ public class ActiveScanSessionKeeperTab extends JPanel {
         toolbar.add(toolFilterBtn);
         toolbar.add(statusFilterBtn);
         toolbar.add(eventFilterBtn);
-        toolbar.add(new JLabel("🔍"));
+        toolbar.add(new JLabel("Search"));
         toolbar.add(searchField);
         toolbar.add(clearBtn);
         toolbar.add(exportBtn);
 
         panel.add(toolbar, BorderLayout.NORTH);
 
-        // ── Table & Montoya Editors SplitPane ──
+        // -- Table & Montoya Editors SplitPane --
         JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         verticalSplit.setDividerLocation(260);
         verticalSplit.setResizeWeight(0.45);
@@ -530,8 +555,8 @@ public class ActiveScanSessionKeeperTab extends JPanel {
         responseEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
 
         JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("📤 Request", requestEditor.uiComponent());
-        editorTabs.addTab("📥 Response", responseEditor.uiComponent());
+        editorTabs.addTab("Request Request", requestEditor.uiComponent());
+        editorTabs.addTab("Response Response", responseEditor.uiComponent());
 
         verticalSplit.setBottomComponent(editorTabs);
 
@@ -565,25 +590,25 @@ public class ActiveScanSessionKeeperTab extends JPanel {
 
     private void updateStatusBanner() {
         if (!config.isEnabled()) {
-            statusBadge.setText("⚪ DISABLED");
+            statusBadge.setText("[Disabled] DISABLED");
             statusBadge.setForeground(Color.GRAY);
             enableToggle.setSelected(false);
             enableToggle.setText("Disabled");
             pauseResumeBtn.setEnabled(false);
         } else if (coordinator.isPaused()) {
-            statusBadge.setText("⏸️ PAUSED (Waiting for Fresh Cookie)");
+            statusBadge.setText("[Paused] PAUSED (Waiting for Fresh Cookie)");
             statusBadge.setForeground(new Color(180, 83, 9)); // Amber
             enableToggle.setSelected(true);
             enableToggle.setText("Enabled");
             pauseResumeBtn.setEnabled(true);
-            pauseResumeBtn.setText("▶ Resume Scanner");
+            pauseResumeBtn.setText("[Resume] Resume Scanner");
         } else {
-            statusBadge.setText("🟢 MONITORING (Active)");
+            statusBadge.setText("[Active] MONITORING (Active)");
             statusBadge.setForeground(new Color(22, 101, 52)); // Green
             enableToggle.setSelected(true);
             enableToggle.setText("Enabled");
             pauseResumeBtn.setEnabled(true);
-            pauseResumeBtn.setText("⏸ Pause Scanner");
+            pauseResumeBtn.setText("[Paused] Pause Scanner");
         }
 
         countersBadge.setText("Intercepted: " + interceptedCount.get() +

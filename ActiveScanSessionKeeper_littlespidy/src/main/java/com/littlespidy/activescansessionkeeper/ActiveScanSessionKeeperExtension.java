@@ -41,24 +41,35 @@ public class ActiveScanSessionKeeperExtension implements BurpExtension {
         ActiveScanSessionKeeperTab mainTab = new ActiveScanSessionKeeperTab(api, config, coordinator, dataStore);
         api.userInterface().registerSuiteTab("Session Keeper", mainTab);
 
+        // 4.1 Initialize persistent storage manager and attach to mainTab
+        com.littlespidy.activescansessionkeeper.storage.ActiveScanSessionKeeperPersistentStorageManager_littlespidy storageManager =
+                new com.littlespidy.activescansessionkeeper.storage.ActiveScanSessionKeeperPersistentStorageManager_littlespidy(api);
+        storageManager.bindContext(mainTab, config, dataStore);
+        mainTab.setStorageManager(storageManager);
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            storageManager.initializeSessionOnStartup(mainTab, () -> mainTab.refreshUI());
+        });
+
         // 5. Register Context Menu Provider
         SessionKeeperContextMenuProvider contextMenu = new SessionKeeperContextMenuProvider(api, config, coordinator, mainTab);
         api.userInterface().registerContextMenuItemsProvider(contextMenu);
 
         // 6. Register Unload Handler
         api.extension().registerUnloadingHandler(() -> {
+            storageManager.shutdown();
             // Unpause any blocked threads to prevent scanner lockup on unload
             coordinator.resumeScan();
             api.logging().logToOutput("Active Scan Session Keeper (littlespidy) unloaded successfully.");
         });
 
         api.logging().logToOutput("===============================================================");
-        api.logging().logToOutput("🍪 Active Scan Session Keeper (littlespidy) loaded successfully!");
+        api.logging().logToOutput(" Active Scan Session Keeper (littlespidy) loaded successfully!");
         api.logging().logToOutput("---------------------------------------------------------------");
-        api.logging().logToOutput("• Monitoring: Burp Active Scanner traffic");
-        api.logging().logToOutput("• Status: Active");
-        api.logging().logToOutput("• Tab: 'Session Keeper' added to top suite bar");
-        api.logging().logToOutput("• Context Menu: Right-click any request to set session cookies");
+        api.logging().logToOutput("- Monitoring: Burp Active Scanner traffic");
+        api.logging().logToOutput("- Status: Active");
+        api.logging().logToOutput("- Tab: 'Session Keeper' added to top suite bar");
+        api.logging().logToOutput("- Context Menu: Right-click any request to set session cookies");
         api.logging().logToOutput("===============================================================");
     }
 }

@@ -37,7 +37,7 @@ public class ExpirationDetector {
 
         int statusCode = response.statusCode();
 
-        // ── 1. Status Code Criteria ──
+        // -- 1. Status Code Criteria --
         if (config.isCheckStatusCodes()) {
             Set<Integer> codes = config.parseStatusCodes();
             if (codes.contains(statusCode)) {
@@ -48,7 +48,7 @@ public class ExpirationDetector {
             }
         }
 
-        // ── 2. Redirect to Login / Authentication Endpoint ──
+        // -- 2. Redirect to Login / Authentication Endpoint --
         if (config.isCheckRedirects() && statusCode >= 300 && statusCode < 400) {
             String location = response.headerValue("Location");
             if (location != null && !location.isEmpty()) {
@@ -74,7 +74,7 @@ public class ExpirationDetector {
             }
         }
 
-        // ── 3. Set-Cookie Invalidation Headers ──
+        // -- 3. Set-Cookie Invalidation Headers --
         if (config.isCheckSetCookieInvalidation()) {
             for (HttpHeader header : response.headers()) {
                 if (header.name().equalsIgnoreCase("Set-Cookie")) {
@@ -93,7 +93,7 @@ public class ExpirationDetector {
             }
         }
 
-        // ── 4. Response Body Expiration Patterns ──
+        // -- 4. Response Body Expiration Patterns --
         if (config.isCheckBodyKeywords()) {
             String body = response.bodyToString();
             if (body != null && !body.isEmpty()) {
@@ -121,7 +121,7 @@ public class ExpirationDetector {
             }
         }
 
-        // ── 5. Body Length Drop Threshold ──
+        // -- 5. Body Length Drop Threshold --
         if (config.isCheckBodyLengthDrop()) {
             int bodyLen = response.body().length();
             if (bodyLen > 0 && bodyLen <= config.getBodyLengthDropThreshold() && statusCode != 204 && statusCode != 304) {
@@ -132,7 +132,7 @@ public class ExpirationDetector {
             }
         }
 
-        // ── 6. Custom Regex on Entire Response ──
+        // -- 6. Custom Regex on Entire Response --
         if (config.isCheckCustomRegex()) {
             String customRegex = config.getCustomRegexPattern();
             if (customRegex != null && !customRegex.trim().isEmpty()) {

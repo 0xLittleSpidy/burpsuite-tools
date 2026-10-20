@@ -23,7 +23,7 @@ public class ManualCookieDialog extends JDialog {
     private JRadioButton bearerRadio;
 
     public ManualCookieDialog(Window parent, SessionKeeperConfig config) {
-        super(parent, "🍪 Configure Active Scan Session Cookie", ModalityType.APPLICATION_MODAL);
+        super(parent, " Configure Active Scan Session Cookie", ModalityType.APPLICATION_MODAL);
         this.config = config;
 
         initComponents();

@@ -53,7 +53,7 @@ public class SessionKeeperContextMenuProvider implements ContextMenuItemsProvide
 
             if (req != null) {
                 // 1. Set as Active Scan Cookie
-                JMenuItem setCookieItem = new JMenuItem("🍪 Set as Active Scan Session Cookie");
+                JMenuItem setCookieItem = new JMenuItem(" Set as Active Scan Session Cookie");
                 setCookieItem.addActionListener(e -> {
                     String host = req.httpService().host();
                     String cookieHeader = req.hasHeader("Cookie") ? req.headerValue("Cookie") : "";
@@ -73,7 +73,7 @@ public class SessionKeeperContextMenuProvider implements ContextMenuItemsProvide
                 items.add(setCookieItem);
 
                 // 2. Set Host Filter
-                JMenuItem setHostItem = new JMenuItem("🎯 Set Target Host Scope (" + req.httpService().host() + ")");
+                JMenuItem setHostItem = new JMenuItem(" Set Target Host Scope (" + req.httpService().host() + ")");
                 setHostItem.addActionListener(e -> {
                     String host = req.httpService().host();
                     config.setTargetHostFilter(host);
@@ -87,11 +87,11 @@ public class SessionKeeperContextMenuProvider implements ContextMenuItemsProvide
 
         // Pause / Resume Menu Items
         if (coordinator.isPaused()) {
-            JMenuItem resumeItem = new JMenuItem("▶ Resume Active Scanner");
+            JMenuItem resumeItem = new JMenuItem("[Resume] Resume Active Scanner");
             resumeItem.addActionListener(e -> coordinator.resumeScan());
             items.add(resumeItem);
         } else {
-            JMenuItem pauseItem = new JMenuItem("⏸ Pause Active Scanner");
+            JMenuItem pauseItem = new JMenuItem("[Paused] Pause Active Scanner");
             pauseItem.addActionListener(e -> coordinator.pauseScanManually());
             items.add(pauseItem);
         }
