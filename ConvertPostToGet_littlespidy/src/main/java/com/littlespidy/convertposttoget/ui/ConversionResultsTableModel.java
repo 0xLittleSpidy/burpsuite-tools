@@ -95,6 +95,12 @@ public class ConversionResultsTableModel extends AbstractTableModel {
         }
     }
 
+    public synchronized void addResults(List<ConversionResult> results) {
+        if (results == null || results.isEmpty()) return;
+        allResults.addAll(results);
+        applyCurrentFilter();
+    }
+
     // ── Row Pinning ──────────────────────────────────────────────────────────
 
     public synchronized boolean isPinned(int resultId) {

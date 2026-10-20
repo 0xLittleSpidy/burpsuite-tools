@@ -1,8 +1,11 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.convertposttoget.ui;
 
+import com.littlespidy.convertposttoget.model.ConfiguredHeader;
+import com.littlespidy.convertposttoget.model.ConversionResult;
 import com.littlespidy.convertposttoget.model.ConvertPostToGetConfig;
 import com.littlespidy.convertposttoget.model.PostCandidate;
+import com.littlespidy.convertposttoget.storage.ConvertPersistentStorageManager_littlespidy;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.message.params.HttpParameterType;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
@@ -29,15 +32,24 @@ import java.util.stream.Collectors;
 public class ConvertPostToGetTab extends JPanel {
     private final MontoyaApi api;
     private final ConvertPostToGetConfig config;
+    private final ConvertPersistentStorageManager_littlespidy storageManager;
     private final JTabbedPane rootTabbedPane = new JTabbedPane();
     private final List<ConvertSessionPanel> activeSessions = new ArrayList<>();
     private final PostTrafficSweepPanel postTrafficSweepPanel;
 
     public ConvertPostToGetTab(MontoyaApi api, ConvertPostToGetConfig config) {
+        this(api, config, null);
+    }
+
+    public ConvertPostToGetTab(MontoyaApi api, ConvertPostToGetConfig config, ConvertPersistentStorageManager_littlespidy storageManager) {
         this.api = api;
         this.config = config;
+        this.storageManager = storageManager;
 
         setLayout(new BorderLayout());
+        if (storageManager != null) {
+            add(storageManager.createSessionToolbarComponent(this, () -> {}), BorderLayout.NORTH);
+        }
         rootTabbedPane.addTab("Welcome & Guide", createWelcomePanel());
 
         this.postTrafficSweepPanel = new PostTrafficSweepPanel(api, config, this::addNewBatchSessionTab);
@@ -119,24 +131,25 @@ public class ConvertPostToGetTab extends JPanel {
             this::closeSession
         );
 
+        sessionPanel.setSessionTitle(baseTitle);
         activeSessions.add(sessionPanel);
         rootTabbedPane.addTab(baseTitle, sessionPanel);
         int tabIndex = rootTabbedPane.indexOfComponent(sessionPanel);
 
-        // ── Custom Tab Header with Close Button and Live Ambient Status Glyphs ──
+        // ── Custom Tab Header with Close Button ──
         JPanel tabHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         tabHeader.setOpaque(false);
         JLabel titleLabel = new JLabel(baseTitle);
 
-        // Wire ambient status glyph on session completion per extension_architecture.md
+        // Wire ambient status tag on session completion
         sessionPanel.setCompletionGlyphCallback(findingsCount -> {
             SwingUtilities.invokeLater(() -> {
-                String glyph = findingsCount > 0 ? "⚠️" : "✔";
-                titleLabel.setText(glyph + " " + baseTitle);
+                String tag = findingsCount > 0 ? "[!] " : "[OK] ";
+                titleLabel.setText(tag + baseTitle);
             });
         });
 
-        JButton closeBtn = new JButton("×");
+        JButton closeBtn = new JButton("X");
         closeBtn.setMargin(new Insets(0, 4, 0, 4));
         closeBtn.setBorder(BorderFactory.createEmptyBorder());
         closeBtn.setContentAreaFilled(false);
@@ -149,6 +162,73 @@ public class ConvertPostToGetTab extends JPanel {
         rootTabbedPane.setTabComponentAt(tabIndex, tabHeader);
 
         rootTabbedPane.setSelectedComponent(sessionPanel);
+        if (storageManager != null) {
+            storageManager.scheduleAutoSave();
+        }
+    }
+
+    public ConvertSessionPanel restoreSessionTab(String title, List<PostCandidate> candidates, List<ConfiguredHeader> headers, List<ConversionResult> results) {
+        if (candidates == null) candidates = Collections.emptyList();
+        ConvertSessionPanel sessionPanel = new ConvertSessionPanel(
+            api,
+            config,
+            candidates,
+            this::closeSession
+        );
+        String finalTitle = (title != null && !title.isBlank()) ? title : "Attack Session";
+        sessionPanel.setSessionTitle(finalTitle);
+        if (headers != null) {
+            sessionPanel.setSessionHeaders(headers);
+        }
+        if (results != null) {
+            sessionPanel.restoreResults(results);
+        }
+
+        activeSessions.add(sessionPanel);
+        rootTabbedPane.addTab(finalTitle, sessionPanel);
+        int tabIndex = rootTabbedPane.indexOfComponent(sessionPanel);
+
+        JPanel tabHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        tabHeader.setOpaque(false);
+        JLabel titleLabel = new JLabel(finalTitle);
+
+        sessionPanel.setCompletionGlyphCallback(findingsCount -> {
+            SwingUtilities.invokeLater(() -> {
+                String tag = findingsCount > 0 ? "[!] " : "[OK] ";
+                titleLabel.setText(tag + finalTitle);
+            });
+        });
+
+        JButton closeBtn = new JButton("X");
+        closeBtn.setMargin(new Insets(0, 4, 0, 4));
+        closeBtn.setBorder(BorderFactory.createEmptyBorder());
+        closeBtn.setContentAreaFilled(false);
+        closeBtn.setFocusable(false);
+        closeBtn.setToolTipText("Close this session");
+        closeBtn.addActionListener(e -> closeSession(sessionPanel));
+
+        tabHeader.add(titleLabel);
+        tabHeader.add(closeBtn);
+        rootTabbedPane.setTabComponentAt(tabIndex, tabHeader);
+
+        return sessionPanel;
+    }
+
+    public PostTrafficSweepPanel getTrafficSweepPanel() {
+        return postTrafficSweepPanel;
+    }
+
+    public List<ConvertSessionPanel> getActiveSessions() {
+        return new ArrayList<>(activeSessions);
+    }
+
+    public void clearAll() {
+        for (ConvertSessionPanel session : new ArrayList<>(activeSessions)) {
+            session.cleanup();
+            rootTabbedPane.remove(session);
+        }
+        activeSessions.clear();
+        postTrafficSweepPanel.clear();
     }
 
     private void closeSession(ConvertSessionPanel session) {
@@ -163,6 +243,9 @@ public class ConvertPostToGetTab extends JPanel {
             session.cleanup();
             activeSessions.remove(session);
             rootTabbedPane.remove(session);
+            if (storageManager != null) {
+                storageManager.scheduleAutoSave();
+            }
         }
     }
 
@@ -189,7 +272,7 @@ public class ConvertPostToGetTab extends JPanel {
             + "How to use:\n"
             + "1. Switch to 'POST Traffic Discovery' and click 'Load from Proxy History'.\n"
             + "2. Use the Core Triage Filters (Domain, Multi-Select Status, Content-Type, Param Types, In-Scope, and Regex Search) to isolate target endpoints.\n"
-            + "3. Select candidates with checkboxes [x] (or 'Pin Selected') and click '\u26A1 Attack'.\n"
+            + "3. Select candidates with checkboxes [x] (or 'Pin Selected') and click 'Attack'.\n"
             + "4. In the session tab, inject fresh auth tokens via 'Custom Headers & Auth...' if needed, then run conversion tests.\n"
             + "5. Leverage the Collapsible Smart Filter Sidebar (500px) and Deep-Linking Quad in Montoya editors to triage findings."
         );
@@ -210,7 +293,7 @@ public class ConvertPostToGetTab extends JPanel {
         );
         JPanel card4 = createFeatureCard(
             "Burp Suite Interoperability",
-            "Right-click context menu integration for Send to Repeater, Intruder, and Organizer, plus row pinning and live status glyphs (⚠️ / ✔)."
+            "Right-click context menu integration for Send to Repeater, Intruder, and Organizer, plus row pinning and live status tags ([!] / [OK])."
         );
 
         contentPanel.add(card1);

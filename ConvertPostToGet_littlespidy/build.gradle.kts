@@ -8,6 +8,15 @@ repositories {
 
 dependencies {
     compileOnly("net.portswigger.burp.extensions:montoya-api:2023.12.1")
+    implementation("com.google.code.gson:gson:2.10.1")
+    testImplementation("net.portswigger.burp.extensions:montoya-api:2023.12.1")
+    testImplementation("com.google.code.gson:gson:2.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform()
 }
 
 tasks.withType<JavaCompile>().configureEach {

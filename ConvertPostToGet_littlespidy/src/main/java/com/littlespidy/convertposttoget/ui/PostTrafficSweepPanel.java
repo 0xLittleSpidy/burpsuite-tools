@@ -841,4 +841,23 @@ public class PostTrafficSweepPanel extends JPanel {
 
         openBatchSessionCallback.accept(selected);
     }
+
+    public synchronized List<PostCandidate> getCandidates() {
+        return new ArrayList<>(rawLoadedCandidates);
+    }
+
+    public synchronized void setCandidates(List<PostCandidate> candidates) {
+        rawLoadedCandidates.clear();
+        if (candidates != null) {
+            rawLoadedCandidates.addAll(candidates);
+        }
+        candidatesTableModel.setCandidates(rawLoadedCandidates);
+        applyFilters();
+    }
+
+    public synchronized void clear() {
+        rawLoadedCandidates.clear();
+        candidatesTableModel.setCandidates(Collections.emptyList());
+        applyFilters();
+    }
 }

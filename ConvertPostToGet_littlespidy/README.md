@@ -38,7 +38,7 @@ Follows the architectural specifications and UI/filtering standards defined in `
 ---
 
 ### 2. Dedicated Multi-Target Attack Session Workspace
-- **Checkbox-Driven `⚡ Attack` Launcher**: Launches isolated session tabs for checked candidates (`Attack (3 targets) ×` or `POST /profile ×`).
+- **Checkbox-Driven Attack Launcher**: Launches isolated session tabs for checked candidates (`Attack (3 targets)` or `POST /profile`).
 - **Collapsible Filter Sidebar (380px/500px)**:
   - **Smart Pattern Suppression**: Automatically hashes and suppresses repetitive response signatures (`status:length:contentType`) to highlight unique behaviors.
   - **Multi-Select Outcome / Signal Filter**: Isolate `Bypass Detected (403/401 -> 200)`, `Method Permitted / CSRF Potential`, `5xx Server Error`, `Redirect Maintained`, or `405 Method Not Allowed`.
@@ -57,15 +57,15 @@ Follows the architectural specifications and UI/filtering standards defined in `
   - `Send Original POST to Repeater`
   - `Send Converted GET to Intruder`
   - `Send Converted Result to Organizer`
-- **Live Ambient Status Glyphs**:
-  - Session tab header automatically updates on completion with ambient status symbols: `⚠️` if High/Medium bypasses or CSRF vectors were found, or `✔` if all conversions were cleanly blocked.
+- **Live Ambient Status Tags**:
+  - Session tab header automatically updates on completion with ambient status tags: `[!]` if High/Medium bypasses or CSRF vectors were found, or `[OK]` if all conversions were cleanly blocked.
 - **Custom Headers & Auth Token Injection**:
   - Click `Custom Headers & Auth... (N)` to inject fresh session cookies, Bearer tokens, or API keys when auditing expired sessions.
 
 ---
 
 ### 3. Burp Active Scanner Integration
-- Automatically registers an active `ScanCheck` (`activeAudit()`) to test POST $\rightarrow$ GET conversions during Burp Suite active scans.
+- Automatically registers an active `ScanCheck` (`activeAudit()`) to test POST to GET conversions during Burp Suite active scans.
 
 ---
 
@@ -97,7 +97,7 @@ The compiled JAR file is located at:
 
 1. Go to **POST Traffic Discovery** and click **Load from Proxy History**.
 2. Use the **Core Four Triage Filters** (Domain, Status, Content-Type, Param Types, In-Scope, and Regex Search) or **Preset Chips** to isolate target endpoints.
-3. Check target candidates `[x]` (or click `Pin Selected`) and click **⚡ Attack**.
+3. Check target candidates `[x]` (or click `Pin Selected`) and click **Attack**.
 4. In the session tab:
    - Optionally inject updated authentication via **Custom Headers & Auth...**.
    - Click **Start Conversion Test**.

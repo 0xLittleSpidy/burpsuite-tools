@@ -33,7 +33,7 @@ import java.util.function.Consumer;
  * - Multi-selection table with Row Pinning (Pin Selected / Clear Pins)
  * - Deep-Linking Quad: tab auto-switching, native Montoya Markers, search bar populating, caret auto-scroll
  * - Complete Burp Suite tool interoperability: Send to Repeater, Intruder, and Organizer
- * - Live Status Glyphs on session completion (⚠️ findings vs ✔ clear)
+ * - Live Status Tags on session completion ([!] findings vs [OK] clear)
  * - Thread-safe streaming results with pause/resume controller
  *
  * @author littlespidy
@@ -649,5 +649,42 @@ public class ConvertSessionPanel extends JPanel {
 
     public void cleanup() {
         engine.stop();
+    }
+
+    private String sessionTitle;
+
+    public String getSessionTitle() {
+        return sessionTitle != null ? sessionTitle : "Attack Session";
+    }
+
+    public void setSessionTitle(String title) {
+        this.sessionTitle = title;
+    }
+
+    public List<PostCandidate> getTargetCandidates() {
+        return new ArrayList<>(targetCandidates);
+    }
+
+    public List<ConfiguredHeader> getSessionHeaders() {
+        return new ArrayList<>(sessionHeaders);
+    }
+
+    public void setSessionHeaders(List<ConfiguredHeader> headers) {
+        sessionHeaders.clear();
+        if (headers != null) {
+            sessionHeaders.addAll(headers);
+        }
+        customHeadersButton.setText("Custom Headers & Auth... (" + sessionHeaders.size() + ")");
+    }
+
+    public List<ConversionResult> getResults() {
+        return tableModel.getAllResults();
+    }
+
+    public void restoreResults(List<ConversionResult> results) {
+        tableModel.clear();
+        if (results != null) {
+            tableModel.addResults(results);
+        }
     }
 }

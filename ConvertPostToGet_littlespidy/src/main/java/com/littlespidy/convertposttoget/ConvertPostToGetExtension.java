@@ -2,6 +2,7 @@ package com.littlespidy.convertposttoget;
 
 import com.littlespidy.convertposttoget.model.ConvertPostToGetConfig;
 import com.littlespidy.convertposttoget.scanner.ConvertPostToGetScanCheck;
+import com.littlespidy.convertposttoget.storage.ConvertPersistentStorageManager_littlespidy;
 import com.littlespidy.convertposttoget.ui.ConvertPostToGetTab;
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
@@ -27,15 +28,22 @@ public class ConvertPostToGetExtension implements BurpExtension {
     private MontoyaApi api;
     private final ConvertPostToGetConfig config = new ConvertPostToGetConfig();
     private ConvertPostToGetTab mainTab;
+    private ConvertPersistentStorageManager_littlespidy storageManager;
 
     @Override
     public void initialize(MontoyaApi api) {
         this.api = api;
         api.extension().setName("Convert POST to GET (littlespidy)");
 
-        // ── 1. Create and Register Suite Tab ──
-        this.mainTab = new ConvertPostToGetTab(api, config);
-        api.userInterface().registerSuiteTab("Convert POST to GET", mainTab);
+        // ── 1. Create Storage Manager and UI Suite Tab ──
+        this.storageManager = new ConvertPersistentStorageManager_littlespidy(api);
+        this.mainTab = new ConvertPostToGetTab(api, config, storageManager);
+        this.storageManager.bindTab(mainTab);
+
+        SwingUtilities.invokeLater(() -> {
+            api.userInterface().registerSuiteTab("Convert POST to GET", mainTab);
+            storageManager.initializeSessionOnStartup(mainTab, () -> {});
+        });
 
         // ── 2. Register Context Menu Item ──
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
@@ -58,6 +66,9 @@ public class ConvertPostToGetExtension implements BurpExtension {
         api.extension().registerUnloadingHandler(() -> {
             if (mainTab != null) {
                 mainTab.cleanupAll();
+            }
+            if (storageManager != null) {
+                storageManager.shutdown();
             }
             api.logging().logToOutput("Convert POST to GET extension unloaded successfully.");
         });
