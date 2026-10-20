@@ -15,6 +15,8 @@ import com.protect7.authanalyzer.entities.CustomHttpRequestResponse_littlespidy;
 import com.protect7.authanalyzer.entities.CustomHttpService_littlespidy;
 import com.protect7.authanalyzer.entities.OriginalRequestResponse;
 import com.protect7.authanalyzer.entities.Session;
+import com.protect7.authanalyzer.gui.main.HistoryPanel_littlespidy;
+import com.protect7.authanalyzer.gui.main.ImportPanel_littlespidy;
 import com.protect7.authanalyzer.gui.util.ImportRequestTableModel_littlespidy;
 import com.protect7.authanalyzer.persistence.SessionStartupDialog_littlespidy;
 import com.protect7.authanalyzer.persistence.SessionStateDTO_littlespidy;
@@ -182,5 +184,20 @@ public class AuthAnalyzerTest_littlespidy {
 		assertNotNull(res);
 		assertEquals(SessionStartupDialog_littlespidy.StartupAction.TEMPORARY, res.getAction());
 		assertNull(res.getSessionFile());
+	}
+
+	@Test
+	public void testImportPanelInitializationWithoutNullTableModel() {
+		ImportPanel_littlespidy panel = new ImportPanel_littlespidy(null);
+		assertNotNull(panel.getImportTableModel());
+		assertNotNull(panel.getTable().getModel());
+		assertEquals(panel.getImportTableModel(), panel.getTable().getModel());
+	}
+
+	@Test
+	public void testHistoryPanelInitialization() {
+		HistoryPanel_littlespidy panel = new HistoryPanel_littlespidy(null);
+		assertNotNull(panel.getTable().getModel());
+		assertEquals(panel.getTableModel(), panel.getTable().getModel());
 	}
 }

@@ -296,7 +296,10 @@ public class CenterPanel extends JPanel {
 	}
 
 	private void loadTableSettings() {
-		String savedSettings = BurpExtender.callbacks.loadExtensionSetting(TABLE_SETTINGS);
+		String savedSettings = null;
+		if (BurpExtender.callbacks != null) {
+			savedSettings = BurpExtender.callbacks.loadExtensionSetting(TABLE_SETTINGS);
+		}
 		if (savedSettings != null) {
 			String[] split = savedSettings.split(",");
 			for (String columnAsString : split) {
@@ -583,6 +586,9 @@ public class CenterPanel extends JPanel {
 
 	protected void initTableWithModel() {
 		tableModel = createTableModel();
+		if (tableModel == null) {
+			tableModel = new RequestTableModel();
+		}
 		table.setModel(tableModel);
 		if (isLiveHistory()) {
 			config.setTableModel(tableModel);
@@ -835,7 +841,9 @@ public class CenterPanel extends JPanel {
 		}
 		JOptionPane.showConfirmDialog(parent, inputPanel, "Show / Hide Columns", JOptionPane.CLOSED_OPTION);
 		String saveString = columnSet.toString().replaceAll(" ", "").replace("[", "").replace("]", "");
-		BurpExtender.callbacks.saveExtensionSetting(TABLE_SETTINGS, saveString);
+		if (BurpExtender.callbacks != null) {
+			BurpExtender.callbacks.saveExtensionSetting(TABLE_SETTINGS, saveString);
+		}
 	}
 
 	public ArrayList<Session> getSessionsForExport() {

@@ -24,7 +24,7 @@ import com.protect7.authanalyzer.util.XMLImportHelper_littlespidy;
 public class ImportPanel_littlespidy extends CenterPanel {
 
 	private static final long serialVersionUID = 1L;
-	private final ImportRequestTableModel_littlespidy importTableModel = new ImportRequestTableModel_littlespidy();
+	private ImportRequestTableModel_littlespidy importTableModel;
 	private final ArrayList<Session> importedSessions = new ArrayList<Session>();
 	private final JButton uploadButton;
 	private int importSelectedId = -1;
@@ -42,6 +42,9 @@ public class ImportPanel_littlespidy extends CenterPanel {
 
 	@Override
 	protected RequestTableModel createTableModel() {
+		if (importTableModel == null) {
+			importTableModel = new ImportRequestTableModel_littlespidy();
+		}
 		return importTableModel;
 	}
 
@@ -60,6 +63,9 @@ public class ImportPanel_littlespidy extends CenterPanel {
 	}
 
 	public ImportRequestTableModel_littlespidy getImportTableModel() {
+		if (importTableModel == null) {
+			importTableModel = new ImportRequestTableModel_littlespidy();
+		}
 		return importTableModel;
 	}
 
