@@ -18,6 +18,7 @@ import com.protect7.authanalyzer.entities.Session;
 import com.protect7.authanalyzer.gui.main.HistoryPanel_littlespidy;
 import com.protect7.authanalyzer.gui.main.ImportPanel_littlespidy;
 import com.protect7.authanalyzer.gui.util.ImportRequestTableModel_littlespidy;
+import com.protect7.authanalyzer.gui.util.MethodFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.persistence.SessionStartupDialog_littlespidy;
 import com.protect7.authanalyzer.persistence.SessionStateDTO_littlespidy;
 import com.protect7.authanalyzer.util.BypassConstants;
@@ -140,6 +141,60 @@ public class AuthAnalyzerTest_littlespidy {
 
 		assertEquals(orig, model.getOriginalRequestResponse(0));
 		assertEquals(orig, model.getOriginalRequestResponseById(10));
+
+		assertEquals("Original Status Code", model.getColumnName(4));
+		assertEquals("User 1 Status Code", model.getColumnName(5));
+		assertEquals("Original Length", model.getColumnName(6));
+		assertEquals("User 1 Length", model.getColumnName(7));
+		assertEquals("User 1 Diff", model.getColumnName(8));
+		assertEquals("User 1 Status", model.getColumnName(9));
+	}
+
+	@Test
+	public void testMethodFilterDropDown() {
+		MethodFilterDropDown_littlespidy dropdown = new MethodFilterDropDown_littlespidy();
+		assertEquals("Methods: All", dropdown.getText());
+		assertTrue(dropdown.isMethodSelected("GET"));
+		assertTrue(dropdown.isMethodSelected("POST"));
+
+		dropdown.setMethodSelected("GET", false);
+		assertFalse(dropdown.isMethodSelected("GET"));
+		assertTrue(dropdown.isMethodSelected("POST"));
+
+		dropdown.selectAll();
+		assertEquals("Methods: All", dropdown.getText());
+		assertTrue(dropdown.isMethodSelected("GET"));
+
+		dropdown.selectNone();
+		assertEquals("Methods: None", dropdown.getText());
+		assertFalse(dropdown.isMethodSelected("GET"));
+	}
+
+	@Test
+	public void testImportPanelSetImportedDataDoesNotThrowRowIndexOutOfRange() {
+		ImportPanel_littlespidy panel = new ImportPanel_littlespidy(null);
+		CustomHttpService_littlespidy service = new CustomHttpService_littlespidy("example.com", 443, "https");
+		CustomHttpRequestResponse_littlespidy reqResp = new CustomHttpRequestResponse_littlespidy(
+				"GET /test HTTP/1.1\r\n\r\n".getBytes(StandardCharsets.UTF_8),
+				"HTTP/1.1 200 OK\r\n\r\nhello".getBytes(StandardCharsets.UTF_8),
+				service
+		);
+		OriginalRequestResponse orig = new OriginalRequestResponse(1, reqResp, "GET", "/test", "", 200, 5);
+		Session s = new Session("User 1");
+		s.getRequestResponseMap().put(1, new AnalyzerRequestResponse(reqResp, BypassConstants.SAME, "", 200, 5));
+
+		List<OriginalRequestResponse> originals = new ArrayList<>();
+		originals.add(orig);
+		List<Session> sessions = new ArrayList<>();
+		sessions.add(s);
+
+		assertDoesNotThrow(() -> {
+			panel.setImportedData(originals, sessions);
+		});
+
+		assertDoesNotThrow(() -> {
+			panel.setImportedData(new ArrayList<>(), new ArrayList<>());
+		});
 	}
 
 	@Test

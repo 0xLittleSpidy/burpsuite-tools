@@ -26,12 +26,11 @@ public class ImportRequestTableModel_littlespidy extends RequestTableModel {
 		if (importedSessions != null) {
 			sessions.addAll(importedSessions);
 		}
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				fireTableStructureChanged();
-			}
-		});
+		if (SwingUtilities.isEventDispatchThread()) {
+			fireTableStructureChanged();
+		} else {
+			SwingUtilities.invokeLater(this::fireTableStructureChanged);
+		}
 	}
 
 	@Override
@@ -163,25 +162,25 @@ public class ImportRequestTableModel_littlespidy extends RequestTableModel {
 		if(column == 1) return Column.Method.toString();
 		if(column == 2) return Column.Host.toString();
 		if(column == 3) return Column.Path.toString();
-		if(column == 4) return Column.Code.toString();
+		if(column == 4) return "Original Status Code";
 		for(int i=0; i<sessions.size(); i++) {
 			tempColunmIndex++;
 			if(column == tempColunmIndex) {
-				return sessions.get(i).getName() + " " + Column.Code;
+				return sessions.get(i).getName() + " Status Code";
 			}
 		}
 		tempColunmIndex++;
-		if(column == tempColunmIndex) return Column.Length.toString();
+		if(column == tempColunmIndex) return "Original Length";
 		for(int i=0; i<sessions.size(); i++) {
 			tempColunmIndex++;
 			if(column == tempColunmIndex) {
-				return sessions.get(i).getName() + " " + Column.Length;
+				return sessions.get(i).getName() + " Length";
 			}
 		}
 		for(int i=0; i<sessions.size(); i++) {
 			tempColunmIndex++;
 			if(column == tempColunmIndex) {
-				return sessions.get(i).getName() + " " + Column.Diff;
+				return sessions.get(i).getName() + " Diff";
 			}
 		}
 		for(int i=0; i<sessions.size(); i++) {

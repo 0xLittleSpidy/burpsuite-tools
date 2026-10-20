@@ -7,5 +7,8 @@ public class HistoryPanel_littlespidy extends CenterPanel {
 
 	public HistoryPanel_littlespidy(MainPanel mainPanel) {
 		super(mainPanel);
+		topActionsPanel.removeAll();
+		topActionsPanel.add(clearTableButton);
+		topActionsPanel.add(exportDataButton);
 	}
 }

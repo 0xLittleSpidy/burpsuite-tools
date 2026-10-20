@@ -2,17 +2,17 @@
 package com.protect7.authanalyzer.gui.main;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -20,14 +20,12 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -39,21 +37,20 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
+import javax.swing.table.TableCellRenderer;
 import com.protect7.authanalyzer.entities.AnalyzerRequestResponse;
 import com.protect7.authanalyzer.entities.OriginalRequestResponse;
 import com.protect7.authanalyzer.entities.Session;
 import com.protect7.authanalyzer.gui.dialog.DataExportDialog;
 import com.protect7.authanalyzer.gui.util.BypassCellRenderer;
 import com.protect7.authanalyzer.gui.util.CustomRowSorter;
+import com.protect7.authanalyzer.gui.util.MethodFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.PlaceholderTextField;
 import com.protect7.authanalyzer.gui.util.RequestTableModel;
 import com.protect7.authanalyzer.gui.util.RequestTableModel.Column;
 import com.protect7.authanalyzer.util.BypassConstants;
 import com.protect7.authanalyzer.util.CurrentConfig;
-import com.protect7.authanalyzer.util.Diff_match_patch;
 import com.protect7.authanalyzer.util.GenericHelper;
-import com.protect7.authanalyzer.util.Diff_match_patch.Diff;
-import com.protect7.authanalyzer.util.Diff_match_patch.LinesToCharsResult;
 import burp.BurpExtender;
 import burp.IHttpRequestResponse;
 import burp.IHttpService;
@@ -74,22 +71,10 @@ public class CenterPanel extends JPanel {
 	protected RequestTableModel tableModel;
 	protected final JPanel messageViewPanel;
 	protected CustomRowSorter sorter;
-	private final String BUTTON_TEXT_COMPARE_VIEW = "Compare View";
-	private final String BUTTON_TEXT_SINGLE_VIEW = "Single View";
-	private final String BUTTON_TEXT_EXPAND_DIFF = "Expand Diff View";
-	private final String BUTTON_TEXT_COLLAPSE_DIFF = "Collapse Diff View";
-	protected final RequestResponsePanel tabbedPanel1;
-	protected final RequestResponsePanel tabbedPanel2;
-	private final String TEXT_DIFF_VIEW_DEFAULT = "<strong>Diff View</strong>";
-	private final JEditorPane diffPane = new JEditorPane("text/html", TEXT_DIFF_VIEW_DEFAULT);
-	private final JButton changeMessageViewButton = new JButton(BUTTON_TEXT_COMPARE_VIEW);
-	private final JButton expandDiffButton = new JButton(BUTTON_TEXT_EXPAND_DIFF);
-	private final JCheckBox syncTabCheckBox = new JCheckBox("Sync Tabs      ", true);
-	private final JCheckBox showDiffCheckBox = new JCheckBox("Show Diff", false);
-	private final JScrollPane comparisonScrollPane = new JScrollPane(diffPane);
-	private final JSplitPane splitPane;
+	protected final MethodFilterDropDown_littlespidy methodFilterDropDown = new MethodFilterDropDown_littlespidy();
+	protected final JPanel topActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 	protected final JButton clearTableButton;
-	protected final JPanel tableConfigPanel = new JPanel();
+	protected final JButton exportDataButton;
 	private final JToggleButton requestToggleButton = new JToggleButton("Request");
 	private final JToggleButton responseToggleButton = new JToggleButton("Response");
 	private int activeViewMode = 0;
@@ -110,28 +95,61 @@ public class CenterPanel extends JPanel {
 	private final JButton searchButton = new JButton("Search");
 	private int selectedId = -1;
 
+	protected final JPanel columnsContainer;
+	protected final JScrollPane columnsScrollPane;
+	private final List<SessionColumnView> columnViews = new ArrayList<SessionColumnView>();
+	private final JSplitPane splitPane;
+
 	public CenterPanel(MainPanel mainPanel) {
 		this.mainPanel = mainPanel;
 		setLayout(new BorderLayout());
 		table = new JTable();
 		tablePanel.setBorder(BorderFactory.createLineBorder(Color.gray));
-		JPanel tableControlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 5));
-		JButton filterButton = new JButton();
-		filterButton.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("filter.png")));
-		filterButton.addActionListener(e -> showTableFilterDialog(tableControlPanel));
+
+		clearTableButton = new JButton("Clear Table");
+		clearTableButton.addActionListener(e -> clearTablePressed());
+
+		exportDataButton = new JButton("Export Table Data");
+		exportDataButton.addActionListener(e -> { 
+			exportDataButton.setIcon(loaderImageIcon);
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					new DataExportDialog(CenterPanel.this);
+					exportDataButton.setIcon(null);
+				}
+			}).start();			
+		});
+
+		topActionsPanel.add(clearTableButton);
+		topActionsPanel.add(exportDataButton);
+
+		JPanel tableControlPanel = new JPanel(new BorderLayout(10, 4));
+		tableControlPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		tableControlPanel.add(methodFilterDropDown, BorderLayout.WEST);
+
 		filterText = new PlaceholderTextField(20);
 		filterText.setPlaceholder("Enter Search Pattern...");
 		searchButton.addActionListener(e -> tableModel.fireTableDataChanged());
-		JPanel searchPanel = new JPanel();
-		searchPanel.add(filterText);
-		searchPanel.add(searchButton);
-		tableControlPanel.add(searchPanel);
-		tableControlPanel.add(filterButton);
+
+		JButton filterButton = new JButton();
+		filterButton.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("filter.png")));
+		filterButton.addActionListener(e -> showTableFilterDialog(tableControlPanel));
+
 		JButton settingsButton = new JButton();
 		settingsButton.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("settings.png")));
 		settingsButton.addActionListener(e -> showTableSettingsDialog(tableControlPanel));
-		tableControlPanel.add(settingsButton);
+
+		JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+		searchPanel.add(filterText);
+		searchPanel.add(searchButton);
+		searchPanel.add(filterButton);
+		searchPanel.add(settingsButton);
+		tableControlPanel.add(searchPanel, BorderLayout.CENTER);
+
+		tableControlPanel.add(topActionsPanel, BorderLayout.EAST);
 		topPanel.add(tableControlPanel, BorderLayout.NORTH);
+
 		tableFilterInfoLabel.putClientProperty("html.disable", null);
 		topPanel.add(tableFilterInfoLabel, BorderLayout.CENTER);
 		pendingRequestsLabel.setForeground(new Color(240, 110, 0));
@@ -146,36 +164,11 @@ public class CenterPanel extends JPanel {
 		table.setDefaultRenderer(String.class, new BypassCellRenderer());
 		table.setDefaultRenderer(BypassConstants.class, new BypassCellRenderer());	
 		tablePanel.add(new JScrollPane(table), BorderLayout.CENTER);
-		
-		clearTableButton = new JButton("Clear Table");
-		clearTableButton.addActionListener(e -> clearTablePressed());
-		tableConfigPanel.add(clearTableButton);
-		JButton exportDataButton = new JButton("Export Table Data");
-		exportDataButton.addActionListener(e -> { 
-			exportDataButton.setIcon(loaderImageIcon);
-			new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					new DataExportDialog(CenterPanel.this);
-					exportDataButton.setIcon(null);
-				}
-			}).start();			
-			});
-		tableConfigPanel.add(exportDataButton);
-		tablePanel.add(tableConfigPanel, BorderLayout.SOUTH);
-		
-		tabbedPanel1 = new RequestResponsePanel(0, this);
-		tabbedPanel2 = new RequestResponsePanel(1, this);
 
+		// Multi-Column Compare Viewer
 		JPanel messageViewHeaderPanel = new JPanel(new BorderLayout());
-		JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
-		leftControls.add(changeMessageViewButton);
-		syncTabCheckBox.setEnabled(false);
-		leftControls.add(syncTabCheckBox);
-		showDiffCheckBox.setEnabled(false);
-		leftControls.add(showDiffCheckBox);
-		leftControls.add(expandDiffButton);
+		JLabel compareTitleLabel = new JLabel("Compare View (Side-by-Side User Columns)");
+		compareTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
 
 		JPanel rightSwitchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
 		JLabel switchLabel = new JLabel("View:");
@@ -189,94 +182,31 @@ public class CenterPanel extends JPanel {
 		rightSwitchPanel.add(requestToggleButton);
 		rightSwitchPanel.add(responseToggleButton);
 
-		messageViewHeaderPanel.add(leftControls, BorderLayout.WEST);
+		messageViewHeaderPanel.add(compareTitleLabel, BorderLayout.WEST);
 		messageViewHeaderPanel.add(rightSwitchPanel, BorderLayout.EAST);
 
-		messageViewPanel = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		messageViewPanel.add(messageViewHeaderPanel, c);
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1.0;
-		c.weighty = 1.0;
-		c.gridy++;
-		messageViewPanel.add(tabbedPanel1, c);
-		c.gridy++;
-		messageViewPanel.add(tabbedPanel2, c);
-		tabbedPanel2.setVisible(false);
-		c.gridy++;
-		diffPane.setEditable(false);
-		diffPane.putClientProperty("html.disable", null);
-		comparisonScrollPane.setVisible(false);
-		messageViewPanel.add(comparisonScrollPane, c);
-		expandDiffButton.setEnabled(false);
-		changeMessageViewButton.addActionListener(e -> {
-			if(changeMessageViewButton.getText().equals(BUTTON_TEXT_COMPARE_VIEW)) {
-				changeMessageViewButton.setText(BUTTON_TEXT_SINGLE_VIEW);
-				tabbedPanel2.setVisible(true);
-				if(showDiffCheckBox.isSelected()) {
-					comparisonScrollPane.setVisible(true);
-					expandDiffButton.setEnabled(true);
-				}
-				syncTabCheckBox.setEnabled(true);
-				showDiffCheckBox.setEnabled(true);
-				changeRequestResponseView(true);
-				updateDiffPane();
+		columnsContainer = new JPanel(new GridLayout(1, 0, 8, 0)) {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public Dimension getPreferredSize() {
+				int colCount = Math.max(1, getComponentCount());
+				int minWidth = colCount * 360;
+				int viewWidth = columnsScrollPane != null && columnsScrollPane.getViewport() != null ?
+						columnsScrollPane.getViewport().getWidth() : 0;
+				int w = Math.max(minWidth, viewWidth);
+				int h = columnsScrollPane != null && columnsScrollPane.getViewport() != null ?
+						Math.max(200, columnsScrollPane.getViewport().getHeight()) : 200;
+				return new Dimension(w, h);
 			}
-			else {
-				changeMessageViewButton.setText(BUTTON_TEXT_COMPARE_VIEW);
-				tabbedPanel1.setVisible(true);
-				tabbedPanel2.setVisible(false);
-				comparisonScrollPane.setVisible(false);
-				syncTabCheckBox.setEnabled(false);
-				showDiffCheckBox.setEnabled(false);
-				expandDiffButton.setText(BUTTON_TEXT_EXPAND_DIFF);
-				expandDiffButton.setEnabled(false);
-			}
-		});
-		expandDiffButton.addActionListener(e -> {
-			if(expandDiffButton.getText().equals(BUTTON_TEXT_EXPAND_DIFF)) {
-				expandDiffButton.setText(BUTTON_TEXT_COLLAPSE_DIFF);
-				tabbedPanel1.setVisible(false);
-				tabbedPanel2.setVisible(false);
-				syncTabCheckBox.setEnabled(false);
-				showDiffCheckBox.setEnabled(false);
-				showDiffCheckBox.setSelected(true);
-				comparisonScrollPane.setVisible(true);
-			}
-			else {
-				expandDiffButton.setText(BUTTON_TEXT_EXPAND_DIFF);
-				tabbedPanel1.setVisible(true);
-				tabbedPanel2.setVisible(true);
-				syncTabCheckBox.setEnabled(true);
-				showDiffCheckBox.setEnabled(true);
-			}
-		});
-		showDiffCheckBox.addActionListener(e -> {
-			if(showDiffCheckBox.isSelected()) {
-				comparisonScrollPane.setVisible(true);
-				expandDiffButton.setEnabled(true);
-				updateDiffPane();
-			}
-			else {
-				comparisonScrollPane.setVisible(false);
-				expandDiffButton.setEnabled(false);
-			}
-			SwingUtilities.invokeLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					messageViewPanel.revalidate();
-				}
-			});
-		});
-		
-		
+		};
+
+		columnsScrollPane = new JScrollPane(columnsContainer, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		columnsScrollPane.getHorizontalScrollBar().setUnitIncrement(16);
+
+		messageViewPanel = new JPanel(new BorderLayout());
 		messageViewPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		tabbedPanel1.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		tabbedPanel2.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		messageViewPanel.add(messageViewHeaderPanel, BorderLayout.NORTH);
+		messageViewPanel.add(columnsScrollPane, BorderLayout.CENTER);
 
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tablePanel, messageViewPanel);
 		splitPane.setDividerSize(6);
@@ -285,12 +215,10 @@ public class CenterPanel extends JPanel {
 
 		selectionModel = table.getSelectionModel();
 		selectionModel.addListSelectionListener(new ListSelectionListener() {
-
 			@Override
 			public void valueChanged(ListSelectionEvent e) { 
 				changeRequestResponseView(false);
 			}
-			
 		});
 		setupTableContextMenu();
 	}
@@ -323,136 +251,29 @@ public class CenterPanel extends JPanel {
 		} else {
 			responseToggleButton.setSelected(true);
 		}
-		if (tabbedPanel1 != null) {
-			tabbedPanel1.setViewMode(mode);
+		for (SessionColumnView view : columnViews) {
+			view.setViewMode(mode);
 		}
-		if (tabbedPanel2 != null) {
-			tabbedPanel2.setViewMode(mode);
-		}
-		updateDiffPane();
-		if (messageViewPanel != null) {
-			messageViewPanel.revalidate();
-			messageViewPanel.repaint();
+		if (columnsContainer != null) {
+			columnsContainer.revalidate();
+			columnsContainer.repaint();
 		}
 	}
 
 	public void notifyViewModeChanged(int mode) {
-		if (this.activeViewMode != mode) {
-			this.activeViewMode = mode;
-			if (mode == 0) {
-				requestToggleButton.setSelected(true);
-			} else {
-				responseToggleButton.setSelected(true);
-			}
-			if (tabbedPanel1 != null && tabbedPanel1.getViewMode() != mode) {
-				tabbedPanel1.setViewMode(mode);
-			}
-			if (tabbedPanel2 != null && tabbedPanel2.getViewMode() != mode) {
-				tabbedPanel2.setViewMode(mode);
-			}
-			updateDiffPane();
-		}
+		setViewMode(mode);
 	}
 
 	public int getActiveViewMode() {
 		return activeViewMode;
 	}
 
-	public void updateOtherTabbedPane(int tabbedPaneId, int index) {
-		if (syncTabCheckBox.isSelected()) {
-			boolean pending = false;
-			if (tabbedPaneId == 0) {
-				pending = tabbedPanel2.setTabbedPaneIndex(index);
-			}
-			if (tabbedPaneId == 1) {
-				pending = tabbedPanel1.setTabbedPaneIndex(index);
-			}
-			if (!pending) {
-				updateDiffPane();
-			}
-		} else {
-			updateDiffPane();
-		}
+	public List<Session> getSessions() {
+		return CurrentConfig.getCurrentConfig().getSessions();
 	}
 
-	public void updateDiffPane() {
-		if (changeMessageViewButton.getText().equals(BUTTON_TEXT_SINGLE_VIEW) && showDiffCheckBox.isSelected()) {
-			String msg1 = tabbedPanel1.getCurrentMessageString();
-			String msg2 = tabbedPanel2.getCurrentMessageString();
-			if (msg1 == null || msg2 == null) {
-				diffPane.setText(TEXT_DIFF_VIEW_DEFAULT);
-			} else {
-				// On test machine it took approx. 3s to calc two msg with 200KB
-				if (msg1.length() > 200000 || msg2.length() > 200000) {
-					diffPane.setText(getHTMLCenterText("Message is too big. Can not calculate differences."));
-				} else {
-					diffPane.setText(getHTMLCenterText("Calculating differences..."));
-					new Thread(new Runnable() {
-
-						@Override
-						public void run() {
-							Diff_match_patch dmp = new Diff_match_patch();
-							LinesToCharsResult a = dmp.diff_linesToChars(msg1, msg2);
-							String lineText1 = a.getChars1();
-							String lineText2 = a.getChars2();
-							List<String> lineArray = a.getLineArray();
-							LinkedList<Diff> diffs = dmp.diff_main(lineText1, lineText2, false);
-							dmp.diff_charsToLines(diffs, lineArray);
-							final String diffPaneText = getHTMLfromDiff(diffs);
-							diffPane.setText(diffPaneText);
-							SwingUtilities.invokeLater(new Runnable() {
-
-								@Override
-								public void run() {
-									comparisonScrollPane.getVerticalScrollBar().setValue(0);
-									comparisonScrollPane.getHorizontalScrollBar().setValue(0);
-									messageViewPanel.revalidate();
-								}
-							});
-						}
-					}).start();
-				}
-			}
-		}
-	}
-
-	private String getHTMLfromDiff(LinkedList<Diff_match_patch.Diff> diff) {
-		int inserts = 0;
-		int deletes = 0;
-		StringBuilder document = new StringBuilder();
-		for (Diff_match_patch.Diff currentDiff : diff) {
-			String text = currentDiff.text.replace("<", "&lt;").replace("\n", "<br>");
-			if (currentDiff.operation == Diff_match_patch.Operation.INSERT) {
-				document.append("<span style='background-color:#c2f9c2;color:#000000;'>").append(text)
-						.append("</span>");
-				inserts++;
-			}
-			if (currentDiff.operation == Diff_match_patch.Operation.DELETE) {
-				document.append("<span style='background-color:#ffb2b2;color:#000000;'>").append(text)
-						.append("</span>");
-				deletes++;
-			}
-			if (currentDiff.operation == Diff_match_patch.Operation.EQUAL) {
-				document.append("<span>").append(text).append("</span>");
-			}
-		}
-		String headerText = "";
-		String selectedSession1 = tabbedPanel1.getSelectedSession();
-		String selectedMsg1 = tabbedPanel1.getSelectedMessage();
-		String selectedSession2 = tabbedPanel2.getSelectedSession();
-		String selectedMsg2 = tabbedPanel2.getSelectedMessage();
-		if (selectedSession1 != null && selectedSession2 != null && selectedMsg1 != null && selectedMsg2 != null) {
-			headerText = "<span><strong>Diff: " + selectedSession1 + " (" + selectedMsg1 + ") -> "
-					+ selectedSession2 + " (" + selectedMsg2 + ")</strong></span>";
-			headerText += "<p><span style='background-color:#c2f9c2;color:#000000;'>Inserts: " + inserts
-					+ "</span>&nbsp;&nbsp;&nbsp;<span style='background:#ffb2b2;color:#000000;'>Deletes: " + deletes
-					+ "</span></p>";
-		}
-		return headerText + "<p style ='font-family: Courier New,font-size:13pt;'>" + document.toString() + "</p>";
-	}
-
-	private String getHTMLCenterText(String content) {
-		return "<br><br><br><center>" + content + "</center>";
+	public ArrayList<Session> getSessionsForExport() {
+		return new ArrayList<Session>(getSessions());
 	}
 
 	private void setupTableContextMenu() {
@@ -461,39 +282,39 @@ public class CenterPanel extends JPanel {
 			public void mouseReleased(MouseEvent event) {
 				if (event.getButton() == MouseEvent.BUTTON3) {
 					int[] rows = table.getSelectedRows();
-					if (rows.length > 0) {
+					ArrayList<OriginalRequestResponse> requestResponseList = new ArrayList<OriginalRequestResponse>();
+					for (int row : rows) {
+						int modelRow = table.convertRowIndexToModel(row);
+						requestResponseList.add(tableModel.getOriginalRequestResponse(modelRow));
+					}
+					if (requestResponseList.size() > 0) {
 						JPopupMenu contextMenu = new JPopupMenu();
-						final ArrayList<OriginalRequestResponse> requestResponseList = new ArrayList<OriginalRequestResponse>();
-						String appendix = "";
-						if (rows.length > 1) {
-							appendix = "s";
-						}
-						for (int row : rows) {
-							requestResponseList
-									.add(tableModel.getOriginalRequestResponse(table.convertRowIndexToModel(row)));
-						}
-						JMenuItem unmarkRowItem = new JMenuItem("Unmark Row" + appendix);
-						unmarkRowItem.addActionListener(e -> {
-							for (OriginalRequestResponse requestResponse : requestResponseList) {
-								requestResponse.setMarked(false);
-							}
-						});
-						JMenuItem markRowItem = new JMenuItem("Mark Row" + appendix);
+						JMenuItem markRowItem = new JMenuItem("Mark Row");
 						markRowItem.addActionListener(e -> {
 							for (OriginalRequestResponse requestResponse : requestResponseList) {
 								requestResponse.setMarked(true);
 							}
+							tableModel.fireTableDataChanged();
 						});
-						JMenuItem repeatRequestItem = new JMenuItem("Repeat Request" + appendix);
+						JMenuItem unmarkRowItem = new JMenuItem("Unmark Row");
+						unmarkRowItem.addActionListener(e -> {
+							for (OriginalRequestResponse requestResponse : requestResponseList) {
+								requestResponse.setMarked(false);
+							}
+							tableModel.fireTableDataChanged();
+						});
+						JMenuItem repeatRequestItem = new JMenuItem("Repeat Request");
 						repeatRequestItem.addActionListener(e -> {
 							Collections.sort(requestResponseList);
 							IHttpRequestResponse[] messages = new IHttpRequestResponse[requestResponseList.size()];
 							for (int i=0; i<requestResponseList.size(); i++) {
 								messages[i] = requestResponseList.get(i).getRequestResponse();
 							}
-							GenericHelper.repeatRequests(messages, mainPanel.getConfigurationPanel());
+							if (mainPanel != null && mainPanel.getConfigurationPanel() != null) {
+								GenericHelper.repeatRequests(messages, mainPanel.getConfigurationPanel());
+							}
 						});
-						JMenuItem deleteRowItem = new JMenuItem("Delete Row" + appendix);
+						JMenuItem deleteRowItem = new JMenuItem("Delete Row");
 						deleteRowItem.addActionListener(e -> {
 							for (OriginalRequestResponse requestResponse : requestResponseList) {
 								tableModel.deleteRequestResponse(requestResponse);
@@ -531,56 +352,28 @@ public class CenterPanel extends JPanel {
 		});
 	}
 
-	// Paint center panel according to session list
 	public void initCenterPanel() {
 		initTableWithModel();
-		tabbedPanel1.init();
-		tabbedPanel2.init();
 		selectedId = -1;
-		diffPane.setText(TEXT_DIFF_VIEW_DEFAULT);
-		splitPane.setResizeWeight(0.5d);
-	}
-
-	public void clearTablePressed() {
-		clearTableButton.setIcon(loaderImageIcon);
-		if (config.isRunning()) {
-			config.getAnalyzerThreadExecutor().execute(new Runnable() {
-
-				@Override
-				public void run() {
-					clearTable();
-					clearTableButton.setIcon(null);
-				}
-			});
-		} else {
-			clearTable();
-			clearTableButton.setIcon(null);
-		}
+		columnsContainer.removeAll();
+		columnViews.clear();
+		columnsContainer.revalidate();
+		columnsContainer.repaint();
 	}
 
 	public void clearTable() {
-		config.clearSessionRequestMaps();
 		tableModel.clearRequestMap();
 		selectedId = -1;
-		diffPane.setText(TEXT_DIFF_VIEW_DEFAULT);
+		columnsContainer.removeAll();
+		columnViews.clear();
+		columnsContainer.revalidate();
+		columnsContainer.repaint();
 	}
 
-	public ArrayList<OriginalRequestResponse> getFilteredRequestResponseList() {
-		ArrayList<OriginalRequestResponse> list = new ArrayList<OriginalRequestResponse>();
-		for (int row = 0; row < table.getRowCount(); row++) {
-			OriginalRequestResponse requestResponse = tableModel
-					.getOriginalRequestResponse(table.convertRowIndexToModel(row));
-			list.add(requestResponse);
-		}
-		return list;
-	}
-	
-	public void toggleSearchButtonText() {
-		if(searchButton.getIcon() == null) {
-			searchButton.setIcon(loaderImageIcon);
-		}
-		else {
-			searchButton.setIcon(null);
+	private void clearTablePressed() {
+		int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear table?", "Warning", JOptionPane.YES_NO_OPTION);
+		if(result == JOptionPane.YES_OPTION) {
+			clearTable();
 		}
 	}
 
@@ -594,7 +387,8 @@ public class CenterPanel extends JPanel {
 			config.setTableModel(tableModel);
 		}
 		sorter = new CustomRowSorter(this, tableModel, showOnlyMarked, showDuplicates, showBypassed, 
-				showPotentialBypassed, showNotBypassed, showNA, filterText, searchInPath, searchInRequest, searchInResponse, negativeSearch);
+				showPotentialBypassed, showNotBypassed, showNA, filterText, searchInPath, searchInRequest, searchInResponse, negativeSearch,
+				methodFilterDropDown);
 		sorter.addRowSorterListener(new RowSorterListener() {
 			@Override
 			public void sorterChanged(RowSorterEvent e) {
@@ -602,6 +396,26 @@ public class CenterPanel extends JPanel {
 			}
 		});
         table.setRowSorter(sorter);
+
+		TableCellRenderer defaultHeaderRenderer = table.getTableHeader().getDefaultRenderer();
+		table.getTableHeader().setDefaultRenderer(new TableCellRenderer() {
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+				Component c = defaultHeaderRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				if (value != null) {
+					String valStr = value.toString();
+					if (valStr.endsWith("Status Code") || valStr.equals("Original Status Code")) {
+						c.setBackground(new Color(64, 150, 255, 60));
+					} else if (valStr.endsWith("Length") || valStr.equals("Original Length")) {
+						c.setBackground(new Color(46, 204, 113, 60));
+					} else if (valStr.endsWith("Diff") || valStr.equals("Original Diff")) {
+						c.setBackground(new Color(243, 156, 18, 60));
+					}
+				}
+				return c;
+			}
+		});
+
         updateColumnWidths();
 	}
 
@@ -613,19 +427,25 @@ public class CenterPanel extends JPanel {
 		return true;
 	}
 
-	protected void updateTableFilterInfo() {
-		if(table.getRowCount() < tableModel.getRowCount()) {
-			String text = "<html><h3 style='color:red;'>Table Filtered: " + table.getRowCount() + "/"+
-					tableModel.getRowCount()+" Entries Visible...</h3></html>";
-			tableFilterInfoLabel.setText(text);
-			tableFilterInfoLabel.setVisible(true);
+	public void updateTableFilterInfo() {
+		int totalRows = tableModel.getRowCount();
+		int shownRows = table.getRowCount();
+		tableFilterInfoLabel.setText("Showing " + shownRows + " of " + totalRows + " Requests");
+	}
+
+	public void toggleSearchButtonText() {
+		if(filterText.getText() != null && !filterText.getText().equals("")) {
+			searchButton.setIcon(loaderImageIcon);
 		}
 		else {
-			tableFilterInfoLabel.setVisible(false);
+			searchButton.setIcon(null);
 		}
-		tablePanel.revalidate();
 	}
-	
+
+	public void setAmountOfPendingRequests(int amountOfPendingRequests) {
+		updateAmountOfPendingRequests(amountOfPendingRequests);
+	}
+
 	public void updateAmountOfPendingRequests(int amountOfPendingRequests) {
 		if(amountOfPendingRequests == 0) {
 			pendingRequestsLabel.setVisible(false);
@@ -634,126 +454,116 @@ public class CenterPanel extends JPanel {
 			pendingRequestsLabel.setVisible(true);
 			pendingRequestsLabel.setText("Pending Requests Queue: " + amountOfPendingRequests);
 		}
-	} 
-	
-	protected void changeRequestResponseView(boolean force) {
-		if (table.getSelectedRow() != -1) {
-			int modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow());
-			OriginalRequestResponse originalRequestResponse = tableModel.getOriginalRequestResponse(modelRowIndex);
-			if (force || (originalRequestResponse != null && selectedId != originalRequestResponse.getId())) {
-				selectedId = originalRequestResponse.getId();
-				boolean compareViewVisible = changeMessageViewButton.getText().equals(BUTTON_TEXT_SINGLE_VIEW);
-				IMessageEditorController controllerOriginal = new CustomIMessageEditorController(
-						originalRequestResponse.getRequestResponse().getHttpService(),
-						originalRequestResponse.getRequestResponse().getRequest(),
-						originalRequestResponse.getRequestResponse().getResponse());
-				IMessageEditor requestMessageEditorOriginal = BurpExtender.callbacks
-						.createMessageEditor(controllerOriginal, false);
-				requestMessageEditorOriginal.setMessage(originalRequestResponse.getRequestResponse().getRequest(),
-						true);
-				tabbedPanel1.setRequestMessage(tabbedPanel1.TITLE_ORIGINAL, requestMessageEditorOriginal.getComponent(),
-						requestMessageEditorOriginal);
-				if (compareViewVisible) {
-					IMessageEditor requestMessageEditorOriginal2 = BurpExtender.callbacks
-							.createMessageEditor(controllerOriginal, false);
-					requestMessageEditorOriginal2.setMessage(originalRequestResponse.getRequestResponse().getRequest(),
-							true);
-					tabbedPanel2.setRequestMessage(tabbedPanel1.TITLE_ORIGINAL,
-							requestMessageEditorOriginal2.getComponent(), requestMessageEditorOriginal2);
-				}
-				if (originalRequestResponse.getRequestResponse().getResponse() != null) {
-					IMessageEditor responseMessageEditorOriginal = BurpExtender.callbacks
-							.createMessageEditor(controllerOriginal, false);
-					responseMessageEditorOriginal.setMessage(originalRequestResponse.getRequestResponse().getResponse(),
-							false);
-					tabbedPanel1.setResponseMessage(tabbedPanel1.TITLE_ORIGINAL,
-							responseMessageEditorOriginal.getComponent(), responseMessageEditorOriginal);
-					if (compareViewVisible) {
-						IMessageEditor responseMessageEditorOriginal2 = BurpExtender.callbacks
-								.createMessageEditor(controllerOriginal, false);
-						responseMessageEditorOriginal2
-								.setMessage(originalRequestResponse.getRequestResponse().getResponse(), false);
-						tabbedPanel2.setResponseMessage(tabbedPanel1.TITLE_ORIGINAL,
-								responseMessageEditorOriginal2.getComponent(), responseMessageEditorOriginal2);
-					}
-				} else {
-					tabbedPanel1.setResponseMessage(tabbedPanel1.TITLE_ORIGINAL,
-							getMessageViewLabel(originalRequestResponse.getInfoText()), null);
-					if (compareViewVisible) {
-						tabbedPanel2.setResponseMessage(tabbedPanel1.TITLE_ORIGINAL,
-								getMessageViewLabel(originalRequestResponse.getInfoText()), null);
-					}
-				}
-
-				for (Session session : config.getSessions()) {
-					AnalyzerRequestResponse analyzerRequestResponse = session.getRequestResponseMap()
-							.get(originalRequestResponse.getId());
-					IHttpRequestResponse sessionRequestResponse = analyzerRequestResponse.getRequestResponse();
-					if (sessionRequestResponse != null) {
-						IMessageEditorController controller = new CustomIMessageEditorController(
-								sessionRequestResponse.getHttpService(), sessionRequestResponse.getRequest(),
-								sessionRequestResponse.getResponse());
-
-						IMessageEditor requestMessageEditor = BurpExtender.callbacks.createMessageEditor(controller,
-								false);
-						requestMessageEditor.setMessage(sessionRequestResponse.getRequest(), true);
-						tabbedPanel1.setRequestMessage(session.getName(), requestMessageEditor.getComponent(),
-								requestMessageEditor);
-						if (compareViewVisible) {
-							IMessageEditor requestMessageEditor2 = BurpExtender.callbacks
-									.createMessageEditor(controller, false);
-							requestMessageEditor2.setMessage(sessionRequestResponse.getRequest(), true);
-							tabbedPanel2.setRequestMessage(session.getName(), requestMessageEditor2.getComponent(),
-									requestMessageEditor2);
-						}
-
-						IMessageEditor responseMessageEditor = BurpExtender.callbacks.createMessageEditor(controller,
-								false);
-						responseMessageEditor.setMessage(sessionRequestResponse.getResponse(), false);
-						tabbedPanel1.setResponseMessage(session.getName(), responseMessageEditor.getComponent(),
-								responseMessageEditor);
-						if (compareViewVisible) {
-							IMessageEditor responseMessageEditor2 = BurpExtender.callbacks
-									.createMessageEditor(controller, false);
-							responseMessageEditor2.setMessage(sessionRequestResponse.getResponse(), false);
-							tabbedPanel2.setResponseMessage(session.getName(), responseMessageEditor2.getComponent(),
-									responseMessageEditor2);
-						}
-					} else {
-						tabbedPanel1.setRequestMessage(session.getName(),
-								getMessageViewLabel(analyzerRequestResponse.getInfoText()), null);
-						tabbedPanel1.setResponseMessage(session.getName(),
-								getMessageViewLabel(analyzerRequestResponse.getInfoText()), null);
-						if (compareViewVisible) {
-							tabbedPanel2.setRequestMessage(session.getName(),
-									getMessageViewLabel(analyzerRequestResponse.getInfoText()), null);
-							tabbedPanel2.setResponseMessage(session.getName(),
-									getMessageViewLabel(analyzerRequestResponse.getInfoText()), null);
-						}
-					}
-				}
-				tabbedPanel1.setViewMode(activeViewMode);
-				if (compareViewVisible) {
-					tabbedPanel2.setViewMode(activeViewMode);
-				}
-				updateDiffPane();
-				SwingUtilities.invokeLater(new Runnable() {
-
-					@Override
-					public void run() {
-						messageViewPanel.revalidate();
-					}
-				});
-			}
-		}
+		tablePanel.revalidate();
 	}
 
-	protected JLabel getMessageViewLabel(String text) {
-		String labelText = "";
-		if (text != null) {
-			labelText = text;
+	public ArrayList<OriginalRequestResponse> getFilteredRequestResponseList() {
+		ArrayList<OriginalRequestResponse> list = new ArrayList<OriginalRequestResponse>();
+		for (int row = 0; row < table.getRowCount(); row++) {
+			OriginalRequestResponse requestResponse = tableModel
+					.getOriginalRequestResponse(table.convertRowIndexToModel(row));
+			list.add(requestResponse);
 		}
-		return new JLabel(labelText, JLabel.CENTER);
+		return list;
+	}
+
+	public void updateDiffPane() {
+		// Diff pane replaced by side-by-side columns
+	}
+
+	public void updateOtherTabbedPane(int tabbedPaneId, int index) {
+		// Replaced by side-by-side columns
+	} 
+
+	protected void changeRequestResponseView(boolean force) {
+		if (table.getSelectedRow() != -1) {
+			int modelRowIndex = -1;
+			try {
+				modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow());
+			} catch (Exception ex) {
+				return;
+			}
+			OriginalRequestResponse originalRequestResponse = tableModel.getOriginalRequestResponse(modelRowIndex);
+			if (force || (originalRequestResponse != null && selectedId != originalRequestResponse.getId())) {
+				if (originalRequestResponse == null) {
+					return;
+				}
+				selectedId = originalRequestResponse.getId();
+				columnsContainer.removeAll();
+				columnViews.clear();
+
+				// 1. Column for Original
+				Component reqOrigComp = null;
+				Component respOrigComp = null;
+				if (originalRequestResponse.getRequestResponse() != null) {
+					IMessageEditorController controllerOriginal = new CustomIMessageEditorController(
+							originalRequestResponse.getRequestResponse().getHttpService(),
+							originalRequestResponse.getRequestResponse().getRequest(),
+							originalRequestResponse.getRequestResponse().getResponse());
+					if (BurpExtender.callbacks != null) {
+						IMessageEditor reqEd = BurpExtender.callbacks.createMessageEditor(controllerOriginal, false);
+						reqEd.setMessage(originalRequestResponse.getRequestResponse().getRequest(), true);
+						reqOrigComp = reqEd.getComponent();
+
+						if (originalRequestResponse.getRequestResponse().getResponse() != null) {
+							IMessageEditor respEd = BurpExtender.callbacks.createMessageEditor(controllerOriginal, false);
+							respEd.setMessage(originalRequestResponse.getRequestResponse().getResponse(), false);
+							respOrigComp = respEd.getComponent();
+						}
+					}
+				}
+				String origInfo = originalRequestResponse.getStatusCode() + " | " + originalRequestResponse.getResponseContentLength() + " B";
+				SessionColumnView origCol = new SessionColumnView("Original", origInfo, new Color(225, 238, 255), reqOrigComp, respOrigComp);
+				columnViews.add(origCol);
+				columnsContainer.add(origCol.panel);
+
+				// 2. Columns for each user session
+				for (Session session : getSessions()) {
+					AnalyzerRequestResponse arr = session.getRequestResponseMap().get(originalRequestResponse.getId());
+					Component reqComp = null;
+					Component respComp = null;
+					String info = "No Data";
+					Color colHeaderBg = null;
+					if (arr != null && arr.getRequestResponse() != null) {
+						IHttpRequestResponse srr = arr.getRequestResponse();
+						IMessageEditorController controller = new CustomIMessageEditorController(
+								srr.getHttpService(), srr.getRequest(), srr.getResponse());
+						if (BurpExtender.callbacks != null) {
+							IMessageEditor reqEd = BurpExtender.callbacks.createMessageEditor(controller, false);
+							reqEd.setMessage(srr.getRequest(), true);
+							reqComp = reqEd.getComponent();
+
+							if (srr.getResponse() != null) {
+								IMessageEditor respEd = BurpExtender.callbacks.createMessageEditor(controller, false);
+								respEd.setMessage(srr.getResponse(), false);
+								respComp = respEd.getComponent();
+							}
+						}
+						int diff = originalRequestResponse.getResponseContentLength() - arr.getResponseContentLength();
+						info = arr.getStatus().getName() + " | " + arr.getStatusCode() + " | " + arr.getResponseContentLength() + " B | Diff: " + diff;
+						if (arr.getStatus() == BypassConstants.SAME) {
+							colHeaderBg = new Color(255, 120, 120, 90);
+						} else if (arr.getStatus() == BypassConstants.SIMILAR) {
+							colHeaderBg = new Color(255, 190, 70, 90);
+						} else if (arr.getStatus() == BypassConstants.DIFFERENT) {
+							colHeaderBg = new Color(90, 225, 110, 90);
+						}
+					} else if (arr != null) {
+						info = arr.getInfoText();
+					}
+					SessionColumnView sessionCol = new SessionColumnView(session.getName(), info, colHeaderBg, reqComp, respComp);
+					columnViews.add(sessionCol);
+					columnsContainer.add(sessionCol.panel);
+				}
+
+				// Apply active view mode to all columns
+				for (SessionColumnView view : columnViews) {
+					view.setViewMode(activeViewMode);
+				}
+				columnsContainer.revalidate();
+				columnsContainer.repaint();
+			}
+		}
 	}
 
 	protected void updateColumnWidths() {		
@@ -788,47 +598,33 @@ public class CenterPanel extends JPanel {
 			}
 		}
 	}
-	
-	private int getColumnIdByName(Column columnName) {
+
+	private int getColumnIdByName(Column column) {
 		for(int i=0; i<table.getColumnModel().getColumnCount(); i++) {
-			String currentColumnName = table.getColumnModel().getColumn(i).getHeaderValue().toString();
-			if(currentColumnName.endsWith(columnName.toString())) {
+			if(table.getColumnModel().getColumn(i).getHeaderValue().toString().equals(column.toString())) {
 				return i;
 			}
 		}
 		return -1;
 	}
-	
+
 	private void showTableFilterDialog(Component parent) {
 		JPanel inputPanel = new JPanel();
-		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.PAGE_AXIS));
-		inputPanel.add(new JLabel("Table Filters"));
+		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 		inputPanel.add(showOnlyMarked);
 		inputPanel.add(showDuplicates);
 		inputPanel.add(showBypassed);
 		inputPanel.add(showPotentialBypassed);
 		inputPanel.add(showNotBypassed);
 		inputPanel.add(showNA);
-		
-		inputPanel.add(new JLabel(" "));
-		inputPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
-		inputPanel.add(new JLabel(" "));
-		inputPanel.add(new JLabel("Search Options"));
-		inputPanel.add(searchInPath);
-		inputPanel.add(searchInRequest);
-		inputPanel.add(searchInResponse);	
-		inputPanel.add(negativeSearch);
-		JOptionPane.showConfirmDialog(parent, inputPanel, "Table Filters", JOptionPane.CLOSED_OPTION);
-		
+		JOptionPane.showConfirmDialog(parent, inputPanel, "Filter Table", JOptionPane.CLOSED_OPTION);
 	}
-	
+
 	private void showTableSettingsDialog(Component parent) {
 		JPanel inputPanel = new JPanel();
-		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.PAGE_AXIS));
-		inputPanel.add(new JLabel("Show Columns"));
+		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 		for (Column column : Column.values()) {
-			JCheckBox columnCheckBox = new JCheckBox(column.toString());
-			columnCheckBox.setSelected(columnSet.contains(column));
+			JCheckBox columnCheckBox = new JCheckBox(column.toString(), columnSet.contains(column));
 			columnCheckBox.addActionListener(e -> {
 				if (columnCheckBox.isSelected()) {
 					columnSet.add(column);
@@ -846,24 +642,12 @@ public class CenterPanel extends JPanel {
 		}
 	}
 
-	public ArrayList<Session> getSessionsForExport() {
-		return CurrentConfig.getCurrentConfig().getSessions();
-	}
-
 	public JTable getTable() {
 		return table;
 	}
 
 	public RequestTableModel getTableModel() {
 		return tableModel;
-	}
-
-	public RequestResponsePanel getTabbedPanel1() {
-		return tabbedPanel1;
-	}
-
-	public RequestResponsePanel getTabbedPanel2() {
-		return tabbedPanel2;
 	}
 
 	public JPanel getTablePanel() {
@@ -880,6 +664,14 @@ public class CenterPanel extends JPanel {
 
 	public JButton getClearTableButton() {
 		return clearTableButton;
+	}
+
+	public JButton getExportDataButton() {
+		return exportDataButton;
+	}
+
+	public MethodFilterDropDown_littlespidy getMethodFilterDropDown() {
+		return methodFilterDropDown;
 	}
 
 	public JLabel getPendingRequestsLabel() {
@@ -915,6 +707,41 @@ public class CenterPanel extends JPanel {
 		@Override
 		public byte[] getResponse() {
 			return response;
+		}
+	}
+
+	public static class SessionColumnView {
+		final JPanel panel = new JPanel(new BorderLayout());
+		final CardLayout cardLayout = new CardLayout();
+		final JPanel cardPanel = new JPanel(cardLayout);
+
+		public SessionColumnView(String title, String info, Color headerBg, Component reqComp, Component respComp) {
+			JPanel header = new JPanel(new BorderLayout(5, 2));
+			header.setBorder(BorderFactory.createCompoundBorder(
+					BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+					BorderFactory.createEmptyBorder(4, 6, 4, 6)));
+			if (headerBg != null) {
+				header.setBackground(headerBg);
+			}
+			JLabel titleLabel = new JLabel(title);
+			JLabel infoLabel = new JLabel(info);
+			header.add(titleLabel, BorderLayout.WEST);
+			header.add(infoLabel, BorderLayout.EAST);
+
+			cardPanel.add(reqComp != null ? reqComp : new JLabel("No Request Available", JLabel.CENTER), "REQ");
+			cardPanel.add(respComp != null ? respComp : new JLabel("No Response Available", JLabel.CENTER), "RESP");
+
+			panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+			panel.add(header, BorderLayout.NORTH);
+			panel.add(cardPanel, BorderLayout.CENTER);
+		}
+
+		public void setViewMode(int mode) {
+			if (mode == 0) {
+				cardLayout.show(cardPanel, "REQ");
+			} else {
+				cardLayout.show(cardPanel, "RESP");
+			}
 		}
 	}
 }

@@ -158,28 +158,28 @@ public class RequestTableModel extends AbstractTableModel {
 			return Column.Path.toString();
 		}
 		if(column == 4) {
-			return Column.Code.toString();
+			return "Original Status Code";
 		}
 		for(int i=0; i<config.getSessions().size(); i++) {
 			tempColunmIndex++;
 			if(column == tempColunmIndex) {
-				return config.getSessions().get(i).getName() + " " + Column.Code;
+				return config.getSessions().get(i).getName() + " Status Code";
 			}
 		}
 		tempColunmIndex++;
 		if(column == tempColunmIndex) {
-			return Column.Length.toString();
+			return "Original Length";
 		}
 		for(int i=0; i<config.getSessions().size(); i++) {
 			tempColunmIndex++;
 			if(column == tempColunmIndex) {
-				return config.getSessions().get(i).getName() + " " + Column.Length;
+				return config.getSessions().get(i).getName() + " Length";
 			}
 		}
 		for(int i=0; i<config.getSessions().size(); i++) {
 			tempColunmIndex++;
 			if(column == tempColunmIndex) {
-				return config.getSessions().get(i).getName() + " " + Column.Diff;
+				return config.getSessions().get(i).getName() + " Diff";
 			}
 		}
 		for(int i=0; i<config.getSessions().size(); i++) {
@@ -249,11 +249,29 @@ public class RequestTableModel extends AbstractTableModel {
 	}
 	
 	public enum Column {
-		ID, Method, Host, Path, Code, Length, Diff, Status, Comment;
-		
-		public static EnumSet<Column> getDefaultSet() {
-			return EnumSet.of(ID, Method, Host, Path, Status);
+		ID("ID"),
+		Method("Method"),
+		Host("Host"),
+		Path("Path"),
+		Code("Status Code"),
+		Length("Length"),
+		Diff("Diff"),
+		Status("Status"),
+		Comment("Comment");
+
+		private final String name;
+
+		Column(String name) {
+			this.name = name;
 		}
-		
+
+		@Override
+		public String toString() {
+			return name;
+		}
+
+		public static EnumSet<Column> getDefaultSet() {
+			return EnumSet.of(ID, Method, Host, Path, Code, Length, Diff, Status);
+		}
 	}
 }
