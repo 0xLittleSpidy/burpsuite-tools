@@ -19,6 +19,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
     private final AuthTestingTab_littlespidy authTestingTab;
     private final IntruderStrategyTrackingTab_littlespidy docStrategyTab;
     private final IntruderStrategyTrackingTab_littlespidy endpointDiscoveryTab;
+    private final JPanel topContainer = new JPanel(new BorderLayout());
 
     public APIInspectorTab_littlespidy(MontoyaApi api) {
         super(new BorderLayout());
@@ -38,7 +39,36 @@ public class APIInspectorTab_littlespidy extends JPanel {
         rootTabbedPane.addTab("API Documentation Strategy", docStrategyTab);
         rootTabbedPane.addTab("API Endpoint Discovery Strategy", endpointDiscoveryTab);
 
+        add(topContainer, BorderLayout.NORTH);
         add(rootTabbedPane, BorderLayout.CENTER);
+    }
+
+    public void setPersistenceManager(com.littlespidy.apiinspector.persistence.APIInspectorPersistenceManager_littlespidy persistenceManager) {
+        topContainer.removeAll();
+        if (persistenceManager != null) {
+            topContainer.add(persistenceManager.createSessionToolbar(), BorderLayout.NORTH);
+        }
+        topContainer.revalidate();
+        topContainer.repaint();
+    }
+
+    public void resetWorkspace() {
+        if (versionFinderTab != null) {
+            versionFinderTab.closeAllTabs();
+        }
+        if (importTab != null) {
+            importTab.setCollections(java.util.Collections.emptyList());
+        }
+        if (authTestingTab != null) {
+            authTestingTab.setProfiles(java.util.Collections.emptyList());
+            authTestingTab.setResults(java.util.Collections.emptyList());
+        }
+        if (docStrategyTab != null) {
+            docStrategyTab.restoreEntries(java.util.Collections.emptyList());
+        }
+        if (endpointDiscoveryTab != null) {
+            endpointDiscoveryTab.restoreEntries(java.util.Collections.emptyList());
+        }
     }
 
     public ResAPIVersionFinderTab_littlespidy getVersionFinderTab() {

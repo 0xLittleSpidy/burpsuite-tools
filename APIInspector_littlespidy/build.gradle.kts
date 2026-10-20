@@ -24,6 +24,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    systemProperty("java.awt.headless", "true")
 }
 
 tasks.named<Jar>("jar") {

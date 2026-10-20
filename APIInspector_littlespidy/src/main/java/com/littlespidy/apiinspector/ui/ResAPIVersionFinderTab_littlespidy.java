@@ -269,13 +269,16 @@ public class ResAPIVersionFinderTab_littlespidy extends JPanel {
         }
     }
 
-    private void closeAllTabs() {
+    public void closeAllTabs() {
         if (sessionTabbedPane.getTabCount() == 0) return;
-        int opt = JOptionPane.showConfirmDialog(this, "Close all " + sessionTabbedPane.getTabCount() + " session tabs?", "Confirm Close All", JOptionPane.YES_NO_OPTION);
-        if (opt == JOptionPane.YES_OPTION) {
-            sessionTabbedPane.removeAll();
-            notifyStateChanged();
+        if (!GraphicsEnvironment.isHeadless()) {
+            int opt = JOptionPane.showConfirmDialog(this, "Close all " + sessionTabbedPane.getTabCount() + " session tabs?", "Confirm Close All", JOptionPane.YES_NO_OPTION);
+            if (opt != JOptionPane.YES_OPTION) {
+                return;
+            }
         }
+        sessionTabbedPane.removeAll();
+        notifyStateChanged();
     }
 
     private String truncatePath(String path, int maxLen) {

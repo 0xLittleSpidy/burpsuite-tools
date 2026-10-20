@@ -24,6 +24,7 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
         APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(api);
 
         persistenceManager.setRootTab(rootTab);
+        rootTab.setPersistenceManager(persistenceManager);
         rootTab.getVersionFinderTab().setPersistenceManager(persistenceManager);
 
         // Hook persistent auto-save callbacks for all workspace tabs
@@ -42,15 +43,15 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
 
         // Resolve storage directory and prompt user for session lifecycle choice
         SwingUtilities.invokeLater(() -> {
-            persistenceManager.resolveStorageDirectory(null);
-            rootTab.getVersionFinderTab().updateStorageDisplay();
-            persistenceManager.promptSessionStartup(rootTab, rootTab);
+            persistenceManager.initializeSessionOnStartup(rootTab, () -> {
+                rootTab.getVersionFinderTab().updateStorageDisplay();
+            });
         });
 
         // Register clean shutdown unloading handler
         api.extension().registerUnloadingHandler(() -> {
             api.logging().logToOutput("[API Inspector] Extension unloading - saving persistent state...");
-            persistenceManager.saveSync(rootTab);
+            persistenceManager.shutdown();
             api.logging().logToOutput("[API Inspector] Persistent state saved successfully.");
         });
 

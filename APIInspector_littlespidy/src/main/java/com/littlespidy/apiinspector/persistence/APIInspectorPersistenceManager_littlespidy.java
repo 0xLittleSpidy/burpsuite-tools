@@ -17,6 +17,7 @@ import com.littlespidy.apiinspector.ui.RequestSessionPanel_littlespidy;
 import com.littlespidy.apiinspector.ui.ResAPIVersionFinderTab_littlespidy;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class APIInspectorPersistenceManager_littlespidy {
 
+    public static final String PREF_KEY_GLOBAL_DIR = "burpsuite_extensions_last_session_dir_littlespidy";
     public static final String PREF_KEY_STORAGE_DIR = "api_inspector_storage_dir";
     public static final String SESSION_FILENAME = "api_inspector_session.json";
     private static final String DEFAULT_FALLBACK_DIR = ".burp_api_inspector";
@@ -44,6 +46,8 @@ public class APIInspectorPersistenceManager_littlespidy {
     private final MontoyaApi api;
     private final Gson gson;
     private File storageDirectory;
+    private volatile File activeSessionFile = null;
+    private final JLabel sessionStatusLabel;
 
     private final ScheduledExecutorService debounceExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "APIInspector-Persistence-Thread");
@@ -59,6 +63,8 @@ public class APIInspectorPersistenceManager_littlespidy {
     public APIInspectorPersistenceManager_littlespidy(MontoyaApi api) {
         this.api = api;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+        this.sessionStatusLabel = new JLabel("Session: [Fresh / Unbound]");
+        this.sessionStatusLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
     }
 
     public void setRootTab(APIInspectorTab_littlespidy rootTab) {
@@ -196,13 +202,27 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     public File getSessionFile() {
+        if (activeSessionFile != null) {
+            return activeSessionFile;
+        }
         return new File(getStorageDirectory(), SESSION_FILENAME);
+    }
+
+    public File getActiveSessionFile() {
+        return activeSessionFile;
+    }
+
+    public void setActiveSessionFile(File file) {
+        this.activeSessionFile = file;
     }
 
     /**
      * Schedules a debounced asynchronous save (1500ms delay) for the entire root tab.
      */
     public synchronized void saveAsync(APIInspectorTab_littlespidy rootTab) {
+        if (activeSessionFile == null) {
+            return;
+        }
         if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
             pendingSaveTask.cancel(false);
         }
@@ -210,6 +230,9 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     public synchronized void saveAsync(ResAPIVersionFinderTab_littlespidy tab) {
+        if (activeSessionFile == null) {
+            return;
+        }
         if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
             pendingSaveTask.cancel(false);
         }
@@ -311,34 +334,252 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     /**
+     * Standardized session initialization invoked on startup.
+     */
+    public void initializeSessionOnStartup(Component parent, Runnable onRefresh) {
+        SessionStartupDialog_littlespidy.StartupResult result = SessionStartupDialog_littlespidy.promptUser(api, parent);
+        switch (result.action()) {
+            case OPEN_EXISTING -> openSessionFile(result.sessionFile());
+            case CREATE_NEW -> createNewSessionFile(result.sessionFile());
+            case TEMPORARY -> startTemporarySession();
+        }
+        if (onRefresh != null) {
+            SwingUtilities.invokeLater(onRefresh);
+        }
+    }
+
+    public synchronized void openSessionFile(File file) {
+        if (file == null || !file.exists()) return;
+        this.activeSessionFile = file;
+        this.storageDirectory = file.getParentFile();
+        loadSession(this.rootTab);
+        updateStatusLabel("Session: " + file.getName() + " (Auto-save Enabled)");
+    }
+
+    public synchronized void createNewSessionFile(File file) {
+        if (file == null) return;
+        this.activeSessionFile = file;
+        this.storageDirectory = file.getParentFile();
+        if (this.rootTab != null) {
+            saveSync(this.rootTab);
+        }
+        updateStatusLabel("Session: " + file.getName() + " (Auto-save Enabled)");
+    }
+
+    public synchronized void startTemporarySession() {
+        this.activeSessionFile = null;
+        updateStatusLabel("Session: [In-Memory / Temporary]");
+    }
+
+    public synchronized void saveActiveSession() {
+        if (activeSessionFile != null) {
+            if (this.rootTab != null) {
+                saveSync(this.rootTab);
+            }
+            updateStatusLabel("Session: " + activeSessionFile.getName() + " (Auto-save Enabled)");
+        } else {
+            saveAsSession(this.rootTab);
+        }
+    }
+
+    public synchronized void saveAsSession(Component parent) {
+        File lastDir = getLastDirectory();
+        JFileChooser chooser = new JFileChooser(lastDir);
+        chooser.setDialogTitle("Save API Inspector Session As...");
+        chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+        chooser.setSelectedFile(new File(lastDir, "api_inspector_session.json"));
+
+        int res = chooser.showSaveDialog(parent);
+        if (res == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+            File sel = chooser.getSelectedFile();
+            if (!sel.getName().toLowerCase().endsWith(".json")) {
+                sel = new File(sel.getParentFile(), sel.getName() + ".json");
+            }
+            rememberDirectory(sel.getParent());
+            this.activeSessionFile = sel;
+            this.storageDirectory = sel.getParentFile();
+            if (rootTab != null) {
+                saveSync(rootTab);
+            }
+            updateStatusLabel("Session: " + sel.getName() + " (Auto-save Enabled)");
+            if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+                JOptionPane.showMessageDialog(parent, "Session saved successfully to:\n" + sel.getAbsolutePath(),
+                        "Session Saved", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+
+    public synchronized void loadSessionPrompt(Component parent) {
+        File lastDir = getLastDirectory();
+        JFileChooser chooser = new JFileChooser(lastDir);
+        chooser.setDialogTitle("Open API Inspector Session File");
+        chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
+
+        int res = chooser.showOpenDialog(parent);
+        if (res == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+            File sel = chooser.getSelectedFile();
+            rememberDirectory(sel.getParent());
+            openSessionFile(sel);
+        }
+    }
+
+    public synchronized void offboardSession(Component parent) {
+        if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+            int confirm = JOptionPane.showConfirmDialog(
+                    parent,
+                    "Offboarding will save pending changes to the active session (if any),\n" +
+                            "reset all version tabs, imported collections, and auth profiles to a completely fresh state,\n" +
+                            "and unbind the current session file.\n\n" +
+                            "Are you sure you want to offboard this session?",
+                    "Confirm Session Offboard",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        if (activeSessionFile != null && rootTab != null) {
+            saveSync(rootTab);
+        }
+
+        if (rootTab != null) {
+            rootTab.resetWorkspace();
+        }
+
+        this.activeSessionFile = null;
+        updateStatusLabel("Session: [In-Memory / Temporary]");
+
+        if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+            JOptionPane.showMessageDialog(
+                    parent,
+                    "Session successfully offboarded.\nWorkspace reset to a clean state.",
+                    "Session Offboarded",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        }
+    }
+
+    public JComponent createSessionToolbar() {
+        JPanel bar = new JPanel(new BorderLayout(8, 0));
+        bar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        JLabel titleLabel = new JLabel("Session:");
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
+        leftPanel.add(titleLabel);
+
+        JButton newBtn = new JButton("New Session");
+        newBtn.setToolTipText("Create a new session file and bind to it");
+        newBtn.addActionListener(e -> {
+            File lastDir = getLastDirectory();
+            JFileChooser chooser = new JFileChooser(lastDir);
+            chooser.setDialogTitle("Select Directory to Save New Session");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int res = chooser.showOpenDialog(bar);
+            if (res == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+                File dir = chooser.getSelectedFile();
+                rememberDirectory(dir.getAbsolutePath());
+                String name = JOptionPane.showInputDialog(bar, "Enter session filename:", "api_inspector_session.json");
+                if (name != null && !name.isBlank()) {
+                    if (!name.toLowerCase().endsWith(".json")) name = name + ".json";
+                    createNewSessionFile(new File(dir, name.trim()));
+                }
+            }
+        });
+
+        JButton saveBtn = new JButton("Save Now");
+        saveBtn.setToolTipText("Save current session state to the active file");
+        saveBtn.addActionListener(e -> saveActiveSession());
+
+        JButton saveAsBtn = new JButton("Save As...");
+        saveAsBtn.setToolTipText("Save current session to a new file");
+        saveAsBtn.addActionListener(e -> saveAsSession(bar));
+
+        JButton loadBtn = new JButton("Load Session...");
+        loadBtn.setToolTipText("Load a previously saved session file");
+        loadBtn.addActionListener(e -> loadSessionPrompt(bar));
+
+        JButton offboardBtn = new JButton("Offboard Session");
+        offboardBtn.setToolTipText("Reset workspace and unbind the active session file");
+        offboardBtn.addActionListener(e -> offboardSession(bar));
+
+        leftPanel.add(newBtn);
+        leftPanel.add(saveBtn);
+        leftPanel.add(saveAsBtn);
+        leftPanel.add(loadBtn);
+        leftPanel.add(offboardBtn);
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        rightPanel.add(sessionStatusLabel);
+
+        bar.add(leftPanel, BorderLayout.WEST);
+        bar.add(rightPanel, BorderLayout.EAST);
+
+        return bar;
+    }
+
+    private void updateStatusLabel(String text) {
+        SwingUtilities.invokeLater(() -> sessionStatusLabel.setText(text));
+    }
+
+    private File getLastDirectory() {
+        String lastDir = null;
+        if (api != null && api.persistence() != null && api.persistence().preferences() != null) {
+            try {
+                lastDir = api.persistence().preferences().getString(PREF_KEY_GLOBAL_DIR);
+                if (lastDir == null || lastDir.isBlank()) {
+                    lastDir = api.persistence().preferences().getString("burp_extensions_last_session_dir_littlespidy");
+                }
+                if (lastDir == null || lastDir.isBlank()) {
+                    lastDir = api.persistence().preferences().getString(PREF_KEY_STORAGE_DIR);
+                }
+            } catch (Exception ignored) {}
+        }
+        if (lastDir != null && !lastDir.isBlank()) {
+            File d = new File(lastDir);
+            if (d.exists() && d.isDirectory()) return d;
+        }
+        if (storageDirectory != null && storageDirectory.exists()) {
+            return storageDirectory;
+        }
+        return new File(System.getProperty("user.home", "."));
+    }
+
+    private void rememberDirectory(String dirPath) {
+        if (api != null && api.persistence() != null && api.persistence().preferences() != null && dirPath != null) {
+            try {
+                api.persistence().preferences().setString(PREF_KEY_GLOBAL_DIR, dirPath);
+                api.persistence().preferences().setString(PREF_KEY_STORAGE_DIR, dirPath);
+            } catch (Exception ignored) {}
+        }
+    }
+
+    public void shutdown() {
+        if (activeSessionFile != null && rootTab != null) {
+            saveSync(rootTab);
+        }
+        debounceExecutor.shutdown();
+        try {
+            if (!debounceExecutor.awaitTermination(2, TimeUnit.SECONDS)) {
+                debounceExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            debounceExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
      * Prompts the user on extension startup if a previous session exists, allowing them
      * to choose between restoring the existing session or starting a fresh new session.
      */
     public void promptSessionStartup(Component parent, APIInspectorTab_littlespidy rootTab) {
-        File sessionFile = getSessionFile();
-        if (sessionFile.exists() && sessionFile.length() > 0) {
-            if (!GraphicsEnvironment.isHeadless()) {
-                String[] options = {"Open Existing Session", "Start New Session"};
-                int choice = JOptionPane.showOptionDialog(
-                        parent,
-                        "A previous API Inspector session was detected at:\n" + sessionFile.getAbsolutePath() +
-                        "\n\nWould you like to open the existing session or start a new session?",
-                        "Session Lifecycle",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.QUESTION_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice == 0) {
-                    loadSession(rootTab);
-                } else {
-                    log("[API Inspector] User chose to start a new session. Previous session file preserved until saved.");
-                }
-                return;
-            }
-        }
-        loadSession(rootTab);
+        initializeSessionOnStartup(parent, null);
     }
 
     /**
