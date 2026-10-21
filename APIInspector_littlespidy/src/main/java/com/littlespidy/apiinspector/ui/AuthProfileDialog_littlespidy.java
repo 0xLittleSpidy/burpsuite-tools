@@ -22,7 +22,6 @@ public class AuthProfileDialog_littlespidy extends JDialog {
 
     private JTextField nameField;
     private JComboBox<AuthType_littlespidy> authTypeCombo;
-    private JCheckBox unauthCompareCheck;
 
     // Card Layout container for mechanism fields
     private JPanel cardPanel;
@@ -93,10 +92,7 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
         topForm.add(authTypeCombo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        unauthCompareCheck = new JCheckBox("Execute unauthenticated comparison test for each endpoint");
-        unauthCompareCheck.setToolTipText("Sends both authenticated and unauthenticated requests to detect accessible endpoints");
-        topForm.add(unauthCompareCheck, gbc);
+
 
         contentPane.add(topForm, BorderLayout.NORTH);
 
@@ -273,7 +269,6 @@ public class AuthProfileDialog_littlespidy extends JDialog {
     private void populateFields() {
         nameField.setText(profile.getName());
         authTypeCombo.setSelectedItem(profile.getAuthType());
-        unauthCompareCheck.setSelected(profile.isTestUnauthenticatedComparison());
 
         bearerTokenField.setText(profile.getBearerToken());
 
@@ -303,7 +298,6 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         profile.setName(name);
         AuthType_littlespidy selType = (AuthType_littlespidy) authTypeCombo.getSelectedItem();
         profile.setAuthType(selType != null ? selType : AuthType_littlespidy.BEARER_TOKEN);
-        profile.setTestUnauthenticatedComparison(unauthCompareCheck.isSelected());
 
         profile.setBearerToken(new String(bearerTokenField.getPassword()).trim());
 

@@ -45,6 +45,25 @@ public class ColumnGatheringPanel extends JPanel {
         setLayout(new BorderLayout(0, 8));
         setBorder(new EmptyBorder(8, 10, 10, 10));
 
+        // Top bar: Quick Presets
+        JPanel presetsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
+        presetsPanel.add(SwingUtils.createBoldLabel("Quick Presets:"));
+
+        String[] presets = {"SSN", "Account", "Social", "Security", "number", "pass", "user", "email", "token", "secret"};
+        for (String preset : presets) {
+            JButton btn = SwingUtils.createStyledButton(preset);
+            btn.setMargin(new Insets(1, 6, 1, 6));
+            btn.addActionListener(e -> applyPreset(preset));
+            presetsPanel.add(btn);
+        }
+
+        JButton btnClearPreset = SwingUtils.createStyledButton("Clear");
+        btnClearPreset.setMargin(new Insets(1, 6, 1, 6));
+        btnClearPreset.addActionListener(e -> applyPreset(""));
+        presetsPanel.add(btnClearPreset);
+
+        add(presetsPanel, BorderLayout.NORTH);
+
         // Master-Detail Split Pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setResizeWeight(0.35);
@@ -204,6 +223,13 @@ public class ColumnGatheringPanel extends JPanel {
         occurrencesHeaderLabel.setText("Column: '" + colName + "' found in " + occs.size() + " table(s):");
     }
 
+    private void applyPreset(String preset) {
+        filterColumnsField.setText(preset);
+        if (columnsTable.getRowCount() > 0) {
+            columnsTable.setRowSelectionInterval(0, 0);
+        }
+    }
+
     private void applyColumnFilter() {
         if (columnRowSorter == null) return;
         String query = filterColumnsField.getText().trim();
@@ -211,11 +237,31 @@ public class ColumnGatheringPanel extends JPanel {
             columnRowSorter.setRowFilter(null);
         } else {
             try {
-                columnRowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + query));
+                columnRowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + PatternQuote(query)));
             } catch (Exception e) {
                 columnRowSorter.setRowFilter(null);
             }
         }
+
+        if (columnsTable.getRowCount() > 0) {
+            columnsTable.setRowSelectionInterval(0, 0);
+        } else {
+            columnsTable.clearSelection();
+            occurrencesTableModel.setRowCount(0);
+            occurrencesHeaderLabel.setText("No column matches filter.");
+        }
+    }
+
+    private static String PatternQuote(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if ("\\.^$|?*+()[]{}".indexOf(c) != -1) {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     private void navigateToOccurrence() {

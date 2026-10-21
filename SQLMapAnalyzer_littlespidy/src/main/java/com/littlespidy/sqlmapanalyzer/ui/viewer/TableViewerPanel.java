@@ -152,7 +152,7 @@ public class TableViewerPanel extends JPanel {
             dbComboBox.removeAllItems();
             List<DatabaseModel> dbs = dataStore.getAllDatabases();
             for (DatabaseModel db : dbs) {
-                dbComboBox.addItem(db.getDisplayName());
+                dbComboBox.addItem(db.getName());
             }
 
             if (dbComboBox.getItemCount() > 0) {
@@ -203,7 +203,7 @@ public class TableViewerPanel extends JPanel {
         try {
             for (int i = 0; i < dbComboBox.getItemCount(); i++) {
                 String item = dbComboBox.getItemAt(i);
-                if (item.equalsIgnoreCase(dbName) || item.endsWith(" / " + dbName) || item.toLowerCase().contains(dbName.toLowerCase())) {
+                if (item.equalsIgnoreCase(dbName)) {
                     dbComboBox.setSelectedIndex(i);
                     break;
                 }
@@ -331,9 +331,41 @@ public class TableViewerPanel extends JPanel {
                 " | " + visibleColumns.size() + "/" + allHeaders.size() + " Columns Visible" +
                 " | " + currentFullData.getRowCount() + " Rows");
 
-        // Set reasonable column widths
-        for (int i = 0; i < dataTable.getColumnCount(); i++) {
-            dataTable.getColumnModel().getColumn(i).setPreferredWidth(140);
+        // Auto-fit column widths dynamically based on header and cell content
+        autoFitColumnWidths(dataTable);
+    }
+
+    private void autoFitColumnWidths(JTable table) {
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int col = 0; col < table.getColumnCount(); col++) {
+            javax.swing.table.TableColumn tableColumn = table.getColumnModel().getColumn(col);
+            int preferredWidth = 60;
+
+            Object headerValue = tableColumn.getHeaderValue();
+            if (headerValue != null && table.getTableHeader() != null) {
+                javax.swing.table.TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
+                if (headerRenderer != null) {
+                    Component headerComp = headerRenderer.getTableCellRendererComponent(
+                            table, headerValue, false, false, -1, col);
+                    if (headerComp != null) {
+                        preferredWidth = Math.max(preferredWidth, headerComp.getPreferredSize().width + 16);
+                    }
+                }
+            }
+
+            int maxRow = Math.min(table.getRowCount(), 100);
+            for (int row = 0; row < maxRow; row++) {
+                javax.swing.table.TableCellRenderer cellRenderer = table.getCellRenderer(row, col);
+                if (cellRenderer != null) {
+                    Component comp = table.prepareRenderer(cellRenderer, row, col);
+                    if (comp != null) {
+                        preferredWidth = Math.max(preferredWidth, comp.getPreferredSize().width + 16);
+                    }
+                }
+            }
+
+            preferredWidth = Math.min(preferredWidth, 450);
+            tableColumn.setPreferredWidth(preferredWidth);
         }
     }
 

@@ -53,7 +53,9 @@ Penetration testers can launch, configure, monitor in real time, and cancel SQLM
 - **Smart Directory Scanning**:
   - Auto-detects OS default SQLMap output directories (`~/.local/share/sqlmap/output/` on Linux/macOS and `%LOCALAPPDATA%\sqlmap\output\` on Windows).
   - Handles direct `<db>/<table>.csv` or target dump structures (`<target>/dump/<db>/<table>.csv`).
+- **Clean Database Dropdown**: Displays only the clean database name in the dropdown (removing path/host directory prefixes for optimal readability).
 - **Dynamic Dropdowns**: Populated with discovered databases and dynamically updating table lists.
+- **Dynamic Column Auto-Fit**: Table columns automatically calculate and fit their optimal width based on header text and sample cell contents with horizontal scrolling.
 - **Breadcrumb Statistics**: Displays active database, table, total rows, and visible/total column counts.
 - **Column Visibility Manager**: Dedicated modal dialog allowing users to toggle visible columns on or off with Select All and Deselect All controls.
 - **Real-Time Data Filtering**: High-speed row search supporting case-insensitive matching across table contents.
@@ -65,17 +67,13 @@ Penetration testers can launch, configure, monitor in real time, and cancel SQLM
   - Global catalog of all discovered tables across all databases with column count, row count, file size, and target host.
   - Search filter for rapid table discovery.
   - Double-click navigation: Double-clicking any table row immediately switches to Tab 2 with that database and table loaded.
-- **Column Gathering**:
+- **Column Gathering & Quick Presets**:
   - Aggregates unique column names across all databases.
+  - **Quick Presets Toolbar**: One-click filter presets for high-value targets including `SSN`, `Account`, `Social`, `Security`, `number`, `pass`, `user`, `email`, `token`, and `secret`, plus `Clear`.
   - Grouped master-detail split layout:
     - Master list on the left displays unique column names and occurrence counts (e.g. `username (5 occurrences)`).
     - Detail table on the right displays every occurrence (database, table name, total rows, target host).
   - Double-click navigation: Double-clicking an occurrence immediately opens that table in Tab 2.
-- **Column Keyword Search**:
-  - Case-insensitive partial matching and regex support.
-  - Quick audit presets: `pass`, `user`, `email`, `token`, `secret`, `number`, `admin`, `hash`.
-  - Results table displaying column name, database, table, rows, and host.
-  - Double-click navigation: Double-clicking any search result immediately opens that table in Tab 2.
 
 ### 4. Persistent Session Storage & State Recovery
 - **No Auto-Load By Default**: Prompts the user on startup with three explicit choices:

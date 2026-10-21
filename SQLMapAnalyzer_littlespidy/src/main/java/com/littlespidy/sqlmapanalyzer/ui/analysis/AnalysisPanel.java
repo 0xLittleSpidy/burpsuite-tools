@@ -8,14 +8,13 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Tab 2: Analysis container hosting Table Gathering, Column Gathering, and Keyword Search.
+ * Tab 2: Analysis container hosting Table Gathering and Column Gathering.
  * Plain ASCII text only.
  */
 public class AnalysisPanel extends JPanel {
 
     private final TableGatheringPanel tableGatheringPanel;
     private final ColumnGatheringPanel columnGatheringPanel;
-    private final ColumnKeywordSearchPanel keywordSearchPanel;
 
     public AnalysisPanel(SqlmapDataStore dataStore, SQLMapAnalyzerTab mainTab) {
         setLayout(new BorderLayout());
@@ -24,11 +23,9 @@ public class AnalysisPanel extends JPanel {
 
         tableGatheringPanel = new TableGatheringPanel(dataStore, mainTab);
         columnGatheringPanel = new ColumnGatheringPanel(dataStore, mainTab);
-        keywordSearchPanel = new ColumnKeywordSearchPanel(dataStore, mainTab);
 
         analysisTabs.addTab("Table Gathering", tableGatheringPanel);
         analysisTabs.addTab("Column Gathering", columnGatheringPanel);
-        analysisTabs.addTab("Column Keyword Search", keywordSearchPanel);
 
         add(analysisTabs, BorderLayout.CENTER);
     }
@@ -36,6 +33,5 @@ public class AnalysisPanel extends JPanel {
     public void refreshAll() {
         tableGatheringPanel.refreshData();
         columnGatheringPanel.refreshData();
-        keywordSearchPanel.refreshData();
     }
 }

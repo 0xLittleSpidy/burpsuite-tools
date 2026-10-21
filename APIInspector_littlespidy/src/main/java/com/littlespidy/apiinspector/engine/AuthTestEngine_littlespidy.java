@@ -146,13 +146,63 @@ public class AuthTestEngine_littlespidy {
         result.setCollectionName(col != null ? col.getName() : "Collection");
         result.setMethod(ep.getMethod());
         result.setPath(ep.getPath());
-        result.setProfileId(profile != null ? profile.getId() : "");
-        result.setProfileName(profile != null ? profile.getName() : "[None]");
+        result.setProfileId(profile != null ? profile.getId() : "unauthenticated");
+        result.setProfileName(profile != null ? profile.getName() : "Unauthenticated request");
         result.setTimestamp(System.currentTimeMillis());
 
         String targetBaseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
                 ? col.getTargetBaseUrl()
                 : "https://localhost";
+
+        // Handle standalone unauthenticated test configuration
+        if (profile == null) {
+            try {
+                HttpRequest unauthReq = buildRequest(targetBaseUrl, ep, null, false);
+                result.setFullUrl(unauthReq.url());
+                if (unauthReq.toByteArray() != null) {
+                    result.setAuthRequestBytes(unauthReq.toByteArray().getBytes());
+                    result.setUnauthRequestBytes(unauthReq.toByteArray().getBytes());
+                }
+
+                if (http != null) {
+                    long startUnauth = System.currentTimeMillis();
+                    HttpRequestResponse unauthReqResp = http.sendRequest(unauthReq);
+                    long latency = System.currentTimeMillis() - startUnauth;
+                    result.setAuthLatencyMs(latency);
+                    result.setUnauthLatencyMs(latency);
+
+                    if (unauthReqResp != null && unauthReqResp.hasResponse()) {
+                        HttpResponse unauthResp = unauthReqResp.response();
+                        result.setAuthStatusCode(unauthResp.statusCode());
+                        result.setUnauthStatusCode(unauthResp.statusCode());
+                        int len = unauthResp.body() != null ? unauthResp.body().length() : 0;
+                        result.setAuthResponseLength(len);
+                        result.setUnauthResponseLength(len);
+                        if (unauthResp.toByteArray() != null) {
+                            result.setAuthResponseBytes(unauthResp.toByteArray().getBytes());
+                            result.setUnauthResponseBytes(unauthResp.toByteArray().getBytes());
+                        }
+                    }
+                }
+
+                int code = result.getAuthStatusCode();
+                if (code == 0) {
+                    result.setOutcome(AuthTestOutcome_littlespidy.NETWORK_ERROR);
+                } else if (code >= 200 && code < 300) {
+                    result.setOutcome(AuthTestOutcome_littlespidy.UNAUTHENTICATED_ACCESSIBLE);
+                } else if (code == 401 || code == 403) {
+                    result.setOutcome(AuthTestOutcome_littlespidy.AUTHENTICATED_ONLY);
+                } else if (code >= 500) {
+                    result.setOutcome(AuthTestOutcome_littlespidy.SERVER_ERROR);
+                } else {
+                    result.setOutcome(AuthTestOutcome_littlespidy.CLIENT_ERROR);
+                }
+            } catch (Exception ex) {
+                result.setOutcome(AuthTestOutcome_littlespidy.NETWORK_ERROR);
+                result.setErrorMessage("Unauthenticated request error: " + ex.getMessage());
+            }
+            return result;
+        }
 
         // 1. Build and execute Authenticated Request
         HttpRequest authReq = null;

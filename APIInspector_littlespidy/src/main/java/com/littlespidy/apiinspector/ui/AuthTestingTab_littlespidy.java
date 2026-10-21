@@ -3,6 +3,8 @@ package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.ByteArray;
+import burp.api.montoya.http.message.requests.HttpRequest;
+import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.ui.editor.EditorOptions;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
@@ -29,12 +31,14 @@ import java.util.List;
 /**
  * Tab for configuring authentication profiles, executing automated authentication/authorization
  * test suites across imported API collections, and inspecting comparative results.
+ * Follows the architecture, component structure, and design patterns of ng-auth-analyzer_littlespidy.
  */
 public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgressListener_littlespidy {
 
     private final MontoyaApi api;
     private final AuthTestEngine_littlespidy testEngine;
     private final List<AuthProfile_littlespidy> profiles = new ArrayList<>();
+    private final Set<String> activeProfileIds = new HashSet<>();
     private final List<AuthTestResult_littlespidy> results = new ArrayList<>();
 
     private APIImportTab_littlespidy importTabRef;
@@ -55,21 +59,23 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     private JButton cancelBtn;
     private JSpinner threadSpinner;
     private JSpinner delaySpinner;
-    private JCheckBox unauthCompareToggle;
     private JProgressBar progressBar;
     private JLabel progressStatusLabel;
 
     // Results UI
+    private JCheckBox unauthCompareToggle;
     private ResultsTableModel resultsTableModel;
     private JTable resultsTable;
     private TableRowSorter<ResultsTableModel> resultsSorter;
     private JComboBox<String> outcomeFilterCombo;
 
-    // Message Editors
-    private HttpRequestEditor authReqEditor;
-    private HttpResponseEditor authRespEditor;
-    private HttpRequestEditor unauthReqEditor;
-    private HttpResponseEditor unauthRespEditor;
+    // HTTP Message Inspector (Compare View following ng-auth-analyzer_littlespidy)
+    private JToggleButton requestToggleButton;
+    private JToggleButton responseToggleButton;
+    private int activeInspectorViewMode = 0; // 0 = Request, 1 = Response
+    private JPanel columnsContainer;
+    private JScrollPane columnsScrollPane;
+    private final List<ProfileColumnView> columnViews = new ArrayList<>();
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -115,6 +121,8 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         profileTableModel = new ProfileTableModel();
         profileTable = new JTable(profileTableModel);
         profileTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        profileTable.getColumnModel().getColumn(0).setMaxWidth(45);
+        profileTable.getColumnModel().getColumn(0).setPreferredWidth(45);
         JScrollPane profileScroll = new JScrollPane(profileTable);
         profileScroll.setPreferredSize(new Dimension(380, 140));
         profilesPanel.add(profileScroll, BorderLayout.CENTER);
@@ -128,11 +136,17 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         dupProfBtn.addActionListener(e -> onDuplicateProfile());
         JButton delProfBtn = new JButton("Delete");
         delProfBtn.addActionListener(e -> onDeleteProfile());
+        JButton selectAllProfBtn = new JButton("Select All");
+        selectAllProfBtn.addActionListener(e -> selectAllProfiles(true));
+        JButton deselectAllProfBtn = new JButton("Deselect All");
+        deselectAllProfBtn.addActionListener(e -> selectAllProfiles(false));
 
         profileActions.add(addProfBtn);
         profileActions.add(editProfBtn);
         profileActions.add(dupProfBtn);
         profileActions.add(delProfBtn);
+        profileActions.add(selectAllProfBtn);
+        profileActions.add(deselectAllProfBtn);
         profilesPanel.add(profileActions, BorderLayout.SOUTH);
 
         // 2. Center Left: Collection & Endpoints Selection Panel
@@ -193,10 +207,6 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 0.5;
         execControlsPanel.add(delaySpinner, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 4;
-        unauthCompareToggle = new JCheckBox("Run unauthenticated comparison test for each endpoint", true);
-        execControlsPanel.add(unauthCompareToggle, gbc);
-
         JPanel runBtnBox = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 2));
         runAllBtn = new JButton("Run Authentication Tests");
         runAllBtn.setFont(runAllBtn.getFont().deriveFont(Font.BOLD));
@@ -211,7 +221,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         runBtnBox.add(runSelectedBtn);
         runBtnBox.add(cancelBtn);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 4;
         execControlsPanel.add(runBtnBox, gbc);
 
         // Progress status
@@ -221,23 +231,24 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         progressStatusLabel = new JLabel("Ready");
         progressStatusLabel.setFont(progressStatusLabel.getFont().deriveFont(Font.PLAIN, 11f));
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 4;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4;
         execControlsPanel.add(progressStatusLabel, gbc);
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 4;
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 4;
         execControlsPanel.add(progressBar, gbc);
 
         leftPane.add(execControlsPanel, BorderLayout.SOUTH);
         mainSplit.setLeftComponent(leftPane);
 
-        // --- RIGHT PANE: Results Table & Request/Response Inspector ---
+        // --- RIGHT PANE: Results Table & Side-by-Side HTTP Message Inspector ---
         JSplitPane rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        rightSplit.setResizeWeight(0.52);
+        rightSplit.setResizeWeight(0.50);
         rightSplit.setContinuousLayout(true);
 
         // Top Right: Results Table
         JPanel resultsPanel = new JPanel(new BorderLayout(4, 4));
         resultsPanel.setBorder(new TitledBorder("Authentication Test Results"));
 
+        // Results Filter Bar located above results table
         JPanel resultsFilterBar = new JPanel(new BorderLayout(6, 2));
         JPanel leftFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
         leftFilter.add(new JLabel("Filter Outcome:"));
@@ -251,6 +262,13 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         });
         outcomeFilterCombo.addActionListener(e -> applyOutcomeFilter());
         leftFilter.add(outcomeFilterCombo);
+
+        // Unauthenticated comparison option prominently positioned above results table
+        unauthCompareToggle = new JCheckBox("Run unauthenticated comparison test for each endpoint", true);
+        unauthCompareToggle.setFont(unauthCompareToggle.getFont().deriveFont(Font.BOLD));
+        unauthCompareToggle.setToolTipText("When enabled, includes unauthenticated test results alongside each profile for comparative analysis");
+        leftFilter.add(unauthCompareToggle);
+
         resultsFilterBar.add(leftFilter, BorderLayout.WEST);
 
         JPanel rightResultsActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
@@ -281,52 +299,79 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             }
         });
 
-        // Custom status/outcome column renderer
-        resultsTable.getColumnModel().getColumn(5).setCellRenderer(new OutcomeCellRenderer());
+        // Custom status/outcome column renderer at column index 6
+        resultsTable.getColumnModel().getColumn(6).setCellRenderer(new OutcomeCellRenderer());
 
         JScrollPane resScroll = new JScrollPane(resultsTable);
         resultsPanel.add(resScroll, BorderLayout.CENTER);
         rightSplit.setTopComponent(resultsPanel);
 
-        // Bottom Right: Request & Response Inspector
+        // Bottom Right: Multi-Column Compare Viewer (HTTP Message Inspector following ng-auth-analyzer)
+        JPanel messageViewHeaderPanel = new JPanel(new BorderLayout());
+        JLabel compareTitleLabel = new JLabel("HTTP Message Inspector (Side-by-Side Profile Comparison)");
+        compareTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+
+        JPanel rightSwitchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
+        JLabel switchLabel = new JLabel("View:");
+        ButtonGroup viewGroup = new ButtonGroup();
+        requestToggleButton = new JToggleButton("Request");
+        responseToggleButton = new JToggleButton("Response");
+        viewGroup.add(requestToggleButton);
+        viewGroup.add(responseToggleButton);
+        requestToggleButton.setSelected(true);
+        requestToggleButton.addActionListener(e -> setInspectorViewMode(0));
+        responseToggleButton.addActionListener(e -> setInspectorViewMode(1));
+
+        rightSwitchPanel.add(switchLabel);
+        rightSwitchPanel.add(requestToggleButton);
+        rightSwitchPanel.add(responseToggleButton);
+
+        messageViewHeaderPanel.add(compareTitleLabel, BorderLayout.WEST);
+        messageViewHeaderPanel.add(rightSwitchPanel, BorderLayout.EAST);
+
+        columnsContainer = new JPanel(new GridLayout(1, 0, 8, 0)) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Dimension getPreferredSize() {
+                int colCount = Math.max(1, getComponentCount());
+                int minWidth = colCount * 360;
+                int viewWidth = columnsScrollPane != null && columnsScrollPane.getViewport() != null ?
+                        columnsScrollPane.getViewport().getWidth() : 0;
+                int w = Math.max(minWidth, viewWidth);
+                int h = columnsScrollPane != null && columnsScrollPane.getViewport() != null ?
+                        Math.max(200, columnsScrollPane.getViewport().getHeight()) : 200;
+                return new Dimension(w, h);
+            }
+        };
+
+        columnsScrollPane = new JScrollPane(columnsContainer, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        columnsScrollPane.getHorizontalScrollBar().setUnitIncrement(16);
+
         JPanel inspectorPanel = new JPanel(new BorderLayout());
-        inspectorPanel.setBorder(new TitledBorder("HTTP Message Inspector"));
+        inspectorPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        inspectorPanel.add(messageViewHeaderPanel, BorderLayout.NORTH);
+        inspectorPanel.add(columnsScrollPane, BorderLayout.CENTER);
 
-        JTabbedPane inspectorTabs = new JTabbedPane();
-        if (api != null && api.userInterface() != null) {
-            authReqEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
-            authRespEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
-            unauthReqEditor = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
-            unauthRespEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
-
-            JSplitPane authMsgSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                    wrapInTitled(authReqEditor.uiComponent(), "Authenticated Request"),
-                    wrapInTitled(authRespEditor.uiComponent(), "Authenticated Response"));
-            authMsgSplit.setResizeWeight(0.5);
-
-            JSplitPane unauthMsgSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                    wrapInTitled(unauthReqEditor.uiComponent(), "Unauthenticated Request"),
-                    wrapInTitled(unauthRespEditor.uiComponent(), "Unauthenticated Response"));
-            unauthMsgSplit.setResizeWeight(0.5);
-
-            inspectorTabs.addTab("Authenticated Messages", authMsgSplit);
-            inspectorTabs.addTab("Unauthenticated Comparison Messages", unauthMsgSplit);
-        } else {
-            inspectorTabs.addTab("Message Inspector", new JLabel("Editor unavailable in mock/headless environment."));
-        }
-
-        inspectorPanel.add(inspectorTabs, BorderLayout.CENTER);
         rightSplit.setBottomComponent(inspectorPanel);
 
         mainSplit.setRightComponent(rightSplit);
         add(mainSplit, BorderLayout.CENTER);
     }
 
-    private JPanel wrapInTitled(Component c, String title) {
-        JPanel p = new JPanel(new BorderLayout());
-        p.setBorder(new TitledBorder(title));
-        p.add(c, BorderLayout.CENTER);
-        return p;
+    public void setInspectorViewMode(int mode) {
+        this.activeInspectorViewMode = mode;
+        if (mode == 0) {
+            requestToggleButton.setSelected(true);
+        } else {
+            responseToggleButton.setSelected(true);
+        }
+        for (ProfileColumnView view : columnViews) {
+            view.setViewMode(mode);
+        }
+        if (columnsContainer != null) {
+            columnsContainer.revalidate();
+            columnsContainer.repaint();
+        }
     }
 
     // --- Profile Management Actions ---
@@ -337,7 +382,9 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         dialog.setVisible(true);
 
         if (dialog.isConfirmed()) {
-            profiles.add(dialog.getProfile());
+            AuthProfile_littlespidy p = dialog.getProfile();
+            profiles.add(p);
+            activeProfileIds.add(p.getId());
             profileTableModel.fireTableDataChanged();
             notifyStateChanged();
         }
@@ -368,6 +415,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         }
         AuthProfile_littlespidy copy = profiles.get(row).copy();
         profiles.add(copy);
+        activeProfileIds.add(copy.getId());
         profileTableModel.fireTableDataChanged();
         notifyStateChanged();
     }
@@ -385,10 +433,32 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
+            activeProfileIds.remove(p.getId());
             profiles.remove(row);
             profileTableModel.fireTableDataChanged();
             notifyStateChanged();
         }
+    }
+
+    private void selectAllProfiles(boolean select) {
+        if (select) {
+            for (AuthProfile_littlespidy p : profiles) {
+                activeProfileIds.add(p.getId());
+            }
+        } else {
+            activeProfileIds.clear();
+        }
+        profileTableModel.fireTableDataChanged();
+    }
+
+    public List<AuthProfile_littlespidy> getActiveProfiles() {
+        List<AuthProfile_littlespidy> active = new ArrayList<>();
+        for (AuthProfile_littlespidy p : profiles) {
+            if (activeProfileIds.contains(p.getId())) {
+                active.add(p);
+            }
+        }
+        return active;
     }
 
     // --- Collection & Endpoints Selection Actions ---
@@ -448,18 +518,32 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     private void executeTestsForItems(List<EndpointSelectionItem> items) {
         if (items.isEmpty()) return;
 
+        List<AuthProfile_littlespidy> activeProfiles = getActiveProfiles();
+        boolean runUnauth = unauthCompareToggle.isSelected();
+
+        if (activeProfiles.isEmpty() && !runUnauth) {
+            JOptionPane.showMessageDialog(this,
+                    "Please select at least one authentication profile or enable unauthenticated comparison testing.",
+                    "Configuration Required",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         List<EndpointTestTarget> targets = new ArrayList<>();
         for (EndpointSelectionItem it : items) {
-            AuthProfile_littlespidy resolvedProfile = resolveProfileForCollection(it.collection);
-            targets.add(new EndpointTestTarget(it.collection, it.endpoint, resolvedProfile));
+            for (AuthProfile_littlespidy p : activeProfiles) {
+                targets.add(new EndpointTestTarget(it.collection, it.endpoint, p));
+            }
+            if (runUnauth) {
+                targets.add(new EndpointTestTarget(it.collection, it.endpoint, null));
+            }
         }
 
         int threads = (Integer) threadSpinner.getValue();
         int delay = (Integer) delaySpinner.getValue();
-        boolean runUnauth = unauthCompareToggle.isSelected();
 
         setExecutionUIState(true);
-        testEngine.startTesting(targets, threads, delay, runUnauth, this);
+        testEngine.startTesting(targets, threads, delay, false, this);
     }
 
     private void onCancelRun() {
@@ -478,7 +562,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 ImportedCollection_littlespidy col = findCollectionById(res.getCollectionId());
                 DiscoveredEndpoint_littlespidy ep = findEndpoint(col, res.getMethod(), res.getPath());
                 if (col != null && ep != null) {
-                    AuthProfile_littlespidy p = resolveProfileForCollection(col);
+                    AuthProfile_littlespidy p = findProfileById(res.getProfileId());
                     targetsToRetry.add(new EndpointTestTarget(col, ep, p));
                 }
             }
@@ -491,10 +575,9 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
         int threads = (Integer) threadSpinner.getValue();
         int delay = (Integer) delaySpinner.getValue();
-        boolean runUnauth = unauthCompareToggle.isSelected();
 
         setExecutionUIState(true);
-        testEngine.startTesting(targetsToRetry, threads, delay, runUnauth, this);
+        testEngine.startTesting(targetsToRetry, threads, delay, false, this);
     }
 
     private void onClearResults() {
@@ -519,7 +602,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             progressBar.setMinimum(0);
             progressBar.setMaximum(totalEndpoints);
             progressBar.setValue(0);
-            progressStatusLabel.setText("Testing 0 of " + totalEndpoints + " endpoints...");
+            progressStatusLabel.setText("Testing 0 of " + totalEndpoints + " configurations...");
         });
     }
 
@@ -529,7 +612,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             results.add(result);
             resultsTableModel.fireTableDataChanged();
             progressBar.setValue(completedCount);
-            progressStatusLabel.setText("Completed " + completedCount + " of " + totalCount + " endpoints");
+            progressStatusLabel.setText("Completed " + completedCount + " of " + totalCount + " configurations");
             notifyStateChanged();
         });
     }
@@ -553,7 +636,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         });
     }
 
-    // --- Result Selection & Inspection ---
+    // --- Result Selection & Multi-Column Inspector Inspection ---
 
     private void onResultRowSelected() {
         int row = resultsTable.getSelectedRow();
@@ -561,39 +644,76 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             clearInspector();
             return;
         }
+
         int modelRow = resultsTable.convertRowIndexToModel(row);
-        AuthTestResult_littlespidy res = results.get(modelRow);
+        AuthTestResult_littlespidy selectedRes = results.get(modelRow);
 
-        if (authReqEditor != null && res.getAuthRequestBytes() != null) {
-            authReqEditor.setRequest(burp.api.montoya.http.message.requests.HttpRequest.httpRequest(ByteArray.byteArray(res.getAuthRequestBytes())));
-        } else if (authReqEditor != null) {
-            authReqEditor.setRequest(null);
+        // Find all test configurations for this endpoint (same collection, method, and path)
+        List<AuthTestResult_littlespidy> endpointResults = new ArrayList<>();
+        for (AuthTestResult_littlespidy r : results) {
+            if (r.getMethod().equalsIgnoreCase(selectedRes.getMethod())
+                    && r.getPath().equalsIgnoreCase(selectedRes.getPath())
+                    && r.getCollectionId().equals(selectedRes.getCollectionId())) {
+                endpointResults.add(r);
+            }
         }
 
-        if (authRespEditor != null && res.getAuthResponseBytes() != null) {
-            authRespEditor.setResponse(burp.api.montoya.http.message.responses.HttpResponse.httpResponse(ByteArray.byteArray(res.getAuthResponseBytes())));
-        } else if (authRespEditor != null) {
-            authRespEditor.setResponse(null);
+        if (endpointResults.isEmpty()) {
+            endpointResults.add(selectedRes);
         }
 
-        if (unauthReqEditor != null && res.getUnauthRequestBytes() != null) {
-            unauthReqEditor.setRequest(burp.api.montoya.http.message.requests.HttpRequest.httpRequest(ByteArray.byteArray(res.getUnauthRequestBytes())));
-        } else if (unauthReqEditor != null) {
-            unauthReqEditor.setRequest(null);
+        columnsContainer.removeAll();
+        columnViews.clear();
+
+        for (AuthTestResult_littlespidy r : endpointResults) {
+            Component reqComp = null;
+            Component respComp = null;
+
+            if (api != null && api.userInterface() != null) {
+                HttpRequestEditor reqEd = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
+                if (r.getAuthRequestBytes() != null && r.getAuthRequestBytes().length > 0) {
+                    reqEd.setRequest(HttpRequest.httpRequest(ByteArray.byteArray(r.getAuthRequestBytes())));
+                }
+                reqComp = reqEd.uiComponent();
+
+                HttpResponseEditor respEd = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
+                if (r.getAuthResponseBytes() != null && r.getAuthResponseBytes().length > 0) {
+                    respEd.setResponse(HttpResponse.httpResponse(ByteArray.byteArray(r.getAuthResponseBytes())));
+                }
+                respComp = respEd.uiComponent();
+            }
+
+            int code = r.getAuthStatusCode();
+            int len = r.getAuthResponseLength();
+            long lat = r.getAuthLatencyMs();
+            String info = (code > 0 ? code : "-") + " | " + len + " B | " + lat + " ms | " + r.getOutcome().name();
+
+            Color colHeaderBg = null;
+            if (r.getOutcome() == AuthTestOutcome_littlespidy.UNAUTHENTICATED_ACCESSIBLE) {
+                colHeaderBg = new Color(255, 180, 70, 90);
+            } else if (r.getOutcome() == AuthTestOutcome_littlespidy.SUCCESS || r.getOutcome() == AuthTestOutcome_littlespidy.AUTHENTICATED_ONLY) {
+                colHeaderBg = new Color(90, 225, 110, 90);
+            } else if (r.getOutcome() == AuthTestOutcome_littlespidy.AUTH_REJECTED) {
+                colHeaderBg = new Color(255, 120, 120, 90);
+            } else {
+                colHeaderBg = new Color(225, 238, 255);
+            }
+
+            ProfileColumnView colView = new ProfileColumnView(r.getProfileName(), info, colHeaderBg, reqComp, respComp);
+            colView.setViewMode(activeInspectorViewMode);
+            columnViews.add(colView);
+            columnsContainer.add(colView.panel);
         }
 
-        if (unauthRespEditor != null && res.getUnauthResponseBytes() != null) {
-            unauthRespEditor.setResponse(burp.api.montoya.http.message.responses.HttpResponse.httpResponse(ByteArray.byteArray(res.getUnauthResponseBytes())));
-        } else if (unauthRespEditor != null) {
-            unauthRespEditor.setResponse(null);
-        }
+        columnsContainer.revalidate();
+        columnsContainer.repaint();
     }
 
     private void clearInspector() {
-        if (authReqEditor != null) authReqEditor.setRequest(null);
-        if (authRespEditor != null) authRespEditor.setResponse(null);
-        if (unauthReqEditor != null) unauthReqEditor.setRequest(null);
-        if (unauthRespEditor != null) unauthRespEditor.setResponse(null);
+        columnsContainer.removeAll();
+        columnViews.clear();
+        columnsContainer.revalidate();
+        columnsContainer.repaint();
     }
 
     private void applyOutcomeFilter() {
@@ -601,15 +721,15 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         if (sel == null || "All Outcomes".equals(sel)) {
             resultsSorter.setRowFilter(null);
         } else if ("Unauthenticated Accessible".equals(sel)) {
-            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)UNAUTHENTICATED_ACCESSIBLE", 5));
+            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)UNAUTHENTICATED_ACCESSIBLE", 6));
         } else if ("Authenticated Only".equals(sel)) {
-            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)AUTHENTICATED_ONLY", 5));
+            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)AUTHENTICATED_ONLY", 6));
         } else if ("Auth Rejected".equals(sel)) {
-            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)AUTH_REJECTED", 5));
+            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)AUTH_REJECTED", 6));
         } else if ("Success".equals(sel)) {
-            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)SUCCESS", 5));
+            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)SUCCESS", 6));
         } else if ("Errors".equals(sel)) {
-            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)(ERROR|CLIENT_ERROR|SERVER_ERROR|NETWORK_ERROR)", 5));
+            resultsSorter.setRowFilter(RowFilter.regexFilter("(?i)(ERROR|CLIENT_ERROR|SERVER_ERROR|NETWORK_ERROR)", 6));
         }
     }
 
@@ -626,7 +746,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             File target = chooser.getSelectedFile();
             try (FileWriter fw = new FileWriter(target)) {
-                fw.write("Collection,Method,Path,FullUrl,Profile,AuthStatus,UnauthStatus,Outcome,LatencyMs,Timestamp,Error\n");
+                fw.write("Collection,Method,Path,FullUrl,Profile,StatusCode,Length,Outcome,LatencyMs,Timestamp,Error\n");
                 for (AuthTestResult_littlespidy r : results) {
                     fw.write(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",%d,\"%s\",\"%s\"\n",
                             escapeCsv(r.getCollectionName()),
@@ -635,7 +755,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                             escapeCsv(r.getFullUrl()),
                             escapeCsv(r.getProfileName()),
                             r.getAuthStatusCode(),
-                            r.getUnauthStatusCode(),
+                            r.getAuthResponseLength(),
                             r.getOutcome().name(),
                             r.getAuthLatencyMs(),
                             dateFormat.format(new Date(r.getTimestamp())),
@@ -676,16 +796,6 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
     // --- Helpers ---
 
-    private AuthProfile_littlespidy resolveProfileForCollection(ImportedCollection_littlespidy col) {
-        if (col != null && col.getAssignedProfileId() != null) {
-            for (AuthProfile_littlespidy p : profiles) {
-                if (col.getAssignedProfileId().equals(p.getId())) return p;
-            }
-        }
-        // Fallback to first profile if available, or null
-        return !profiles.isEmpty() ? profiles.get(0) : null;
-    }
-
     private ImportedCollection_littlespidy findCollectionById(String id) {
         if (importTabRef == null || id == null) return null;
         for (ImportedCollection_littlespidy c : importTabRef.getAllCollections()) {
@@ -704,6 +814,14 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         return null;
     }
 
+    private AuthProfile_littlespidy findProfileById(String id) {
+        if (id == null || "unauthenticated".equalsIgnoreCase(id)) return null;
+        for (AuthProfile_littlespidy p : profiles) {
+            if (id.equals(p.getId())) return p;
+        }
+        return null;
+    }
+
     // --- State Getters and Setters for Persistence ---
 
     public List<AuthProfile_littlespidy> getAllProfiles() {
@@ -712,8 +830,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
     public void setProfiles(List<AuthProfile_littlespidy> list) {
         profiles.clear();
+        activeProfileIds.clear();
         if (list != null) {
             profiles.addAll(list);
+            for (AuthProfile_littlespidy p : profiles) {
+                activeProfileIds.add(p.getId());
+            }
         }
         profileTableModel.fireTableDataChanged();
         if (importTabRef != null) {
@@ -736,20 +858,35 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     // --- Table Models & Renderers ---
 
     private class ProfileTableModel extends AbstractTableModel {
-        private final String[] columns = {"Profile Name", "Auth Type", "Credentials / Details", "Unauth Compare"};
+        private final String[] columns = {"Test", "Profile Name", "Auth Type", "Credentials / Details"};
 
         @Override public int getRowCount() { return profiles.size(); }
         @Override public int getColumnCount() { return columns.length; }
         @Override public String getColumnName(int col) { return columns[col]; }
+        @Override public Class<?> getColumnClass(int col) { return col == 0 ? Boolean.class : String.class; }
+        @Override public boolean isCellEditable(int row, int col) { return col == 0; }
+
+        @Override
+        public void setValueAt(Object aValue, int row, int col) {
+            if (col == 0 && aValue instanceof Boolean) {
+                AuthProfile_littlespidy p = profiles.get(row);
+                if ((Boolean) aValue) {
+                    activeProfileIds.add(p.getId());
+                } else {
+                    activeProfileIds.remove(p.getId());
+                }
+                fireTableCellUpdated(row, col);
+            }
+        }
 
         @Override
         public Object getValueAt(int row, int col) {
             AuthProfile_littlespidy p = profiles.get(row);
             switch (col) {
-                case 0: return p.getName();
-                case 1: return p.getAuthType().getDisplayName();
-                case 2: return p.getMaskedSummary();
-                case 3: return p.isTestUnauthenticatedComparison() ? "Enabled" : "Disabled";
+                case 0: return activeProfileIds.contains(p.getId());
+                case 1: return p.getName();
+                case 2: return p.getAuthType().getDisplayName();
+                case 3: return p.getMaskedSummary();
                 default: return "";
             }
         }
@@ -823,7 +960,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     }
 
     private class ResultsTableModel extends AbstractTableModel {
-        private final String[] columns = {"Collection", "Method", "Path", "Profile", "Auth Code", "Outcome", "Unauth Code", "Latency (ms)", "Time"};
+        private final String[] columns = {"Collection", "Method", "Path", "Profile / Test Configuration", "Status Code", "Length", "Outcome", "Latency (ms)", "Time"};
 
         @Override public int getRowCount() { return results.size(); }
         @Override public int getColumnCount() { return columns.length; }
@@ -838,8 +975,8 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 case 2: return r.getPath();
                 case 3: return r.getProfileName();
                 case 4: return r.getAuthStatusCode() > 0 ? r.getAuthStatusCode() : "-";
-                case 5: return r.getOutcome().name();
-                case 6: return r.getUnauthStatusCode() > 0 ? r.getUnauthStatusCode() : "-";
+                case 5: return r.getAuthResponseLength() > 0 ? r.getAuthResponseLength() + " B" : "-";
+                case 6: return r.getOutcome().name();
                 case 7: return r.getAuthLatencyMs();
                 case 8: return dateFormat.format(new Date(r.getTimestamp()));
                 default: return "";
@@ -856,7 +993,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 if ("UNAUTHENTICATED_ACCESSIBLE".equalsIgnoreCase(str)) {
                     c.setForeground(new Color(204, 102, 0)); // Amber / Orange
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
-                } else if ("AUTHENTICATED_ONLY".equalsIgnoreCase(str)) {
+                } else if ("AUTHENTICATED_ONLY".equalsIgnoreCase(str) || "SUCCESS".equalsIgnoreCase(str)) {
                     c.setForeground(new Color(0, 128, 0)); // Green
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                 } else if ("AUTH_REJECTED".equalsIgnoreCase(str)) {
@@ -886,6 +1023,46 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         @Override
         public String toString() {
             return label;
+        }
+    }
+
+    /**
+     * Side-by-side profile column viewer following the architecture and design patterns
+     * from ng-auth-analyzer_littlespidy (SessionColumnView).
+     */
+    public static class ProfileColumnView {
+        final JPanel panel = new JPanel(new BorderLayout());
+        final CardLayout cardLayout = new CardLayout();
+        final JPanel cardPanel = new JPanel(cardLayout);
+
+        public ProfileColumnView(String title, String info, Color headerBg, Component reqComp, Component respComp) {
+            JPanel header = new JPanel(new BorderLayout(5, 2));
+            header.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                    BorderFactory.createEmptyBorder(4, 6, 4, 6)));
+            if (headerBg != null) {
+                header.setBackground(headerBg);
+            }
+            JLabel titleLabel = new JLabel(title);
+            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
+            JLabel infoLabel = new JLabel(info);
+            header.add(titleLabel, BorderLayout.WEST);
+            header.add(infoLabel, BorderLayout.EAST);
+
+            cardPanel.add(reqComp != null ? reqComp : new JLabel("No Request Available", JLabel.CENTER), "REQ");
+            cardPanel.add(respComp != null ? respComp : new JLabel("No Response Available", JLabel.CENTER), "RESP");
+
+            panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+            panel.add(header, BorderLayout.NORTH);
+            panel.add(cardPanel, BorderLayout.CENTER);
+        }
+
+        public void setViewMode(int mode) {
+            if (mode == 0) {
+                cardLayout.show(cardPanel, "REQ");
+            } else {
+                cardLayout.show(cardPanel, "RESP");
+            }
         }
     }
 }

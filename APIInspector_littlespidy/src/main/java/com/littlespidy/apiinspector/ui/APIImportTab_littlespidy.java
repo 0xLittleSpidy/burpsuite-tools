@@ -19,7 +19,7 @@ import java.awt.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -43,7 +43,10 @@ public class APIImportTab_littlespidy extends JPanel {
     private JLabel collectionCountLabel;
     private JLabel endpointCountLabel;
     private JTextField endpointSearchField;
-    private JComboBox<ProfileItem> profileAssignCombo;
+    private MethodFilterDropDown_littlespidy endpointMethodFilter;
+    private AuthFilterDropDown_littlespidy endpointAuthFilter;
+    private JLabel endpointMethodSummaryLabel;
+    private JLabel endpointAuthSummaryLabel;
     private JTextField baseUrlField;
 
     private Runnable onStateChangedCallback;
@@ -131,10 +134,10 @@ public class APIImportTab_littlespidy extends JPanel {
         JScrollPane colScroll = new JScrollPane(collectionTable);
         collectionsPanel.add(colScroll, BorderLayout.CENTER);
 
-        // Target Base URL & Profile Association Bar under collections table
+        // Target Base URL Bar under collections table
         JPanel colConfigBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
         colConfigBar.add(new JLabel("Target Base URL:"));
-        baseUrlField = new JTextField(26);
+        baseUrlField = new JTextField(30);
         baseUrlField.setToolTipText("Target host override for constructing requests during testing");
         baseUrlField.addActionListener(e -> onBaseUrlChanged());
         colConfigBar.add(baseUrlField);
@@ -143,12 +146,6 @@ public class APIImportTab_littlespidy extends JPanel {
         saveUrlBtn.addActionListener(e -> onBaseUrlChanged());
         colConfigBar.add(saveUrlBtn);
 
-        colConfigBar.add(Box.createHorizontalStrut(16));
-        colConfigBar.add(new JLabel("Assigned Profile:"));
-        profileAssignCombo = new JComboBox<>();
-        profileAssignCombo.addActionListener(e -> onProfileAssigned());
-        colConfigBar.add(profileAssignCombo);
-
         collectionsPanel.add(colConfigBar, BorderLayout.SOUTH);
         splitPane.setTopComponent(collectionsPanel);
 
@@ -156,10 +153,14 @@ public class APIImportTab_littlespidy extends JPanel {
         JPanel endpointsPanel = new JPanel(new BorderLayout(6, 6));
         endpointsPanel.setBorder(new TitledBorder("Discovered Endpoints for Selected Collection"));
 
-        JPanel endpointHeader = new JPanel(new BorderLayout(8, 2));
+        JPanel endpointHeader = new JPanel();
+        endpointHeader.setLayout(new BoxLayout(endpointHeader, BoxLayout.Y_AXIS));
+
+        // Filters row: Search + Method Filter + Auth Filter + Clear
+        JPanel filterRow = new JPanel(new BorderLayout(8, 2));
         JPanel searchBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         searchBox.add(new JLabel("Filter Endpoints:"));
-        endpointSearchField = new JTextField(22);
+        endpointSearchField = new JTextField(18);
         endpointSearchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { filterEndpoints(); }
             @Override public void removeUpdate(DocumentEvent e) { filterEndpoints(); }
@@ -167,13 +168,41 @@ public class APIImportTab_littlespidy extends JPanel {
         });
         searchBox.add(endpointSearchField);
 
-        JButton clearFilterBtn = new JButton("Clear");
-        clearFilterBtn.addActionListener(e -> endpointSearchField.setText(""));
+        endpointMethodFilter = new MethodFilterDropDown_littlespidy();
+        endpointMethodFilter.addFilterChangeListener(this::filterEndpoints);
+        searchBox.add(endpointMethodFilter);
+
+        endpointAuthFilter = new AuthFilterDropDown_littlespidy();
+        endpointAuthFilter.addFilterChangeListener(this::filterEndpoints);
+        searchBox.add(endpointAuthFilter);
+
+        JButton clearFilterBtn = new JButton("Clear Filters");
+        clearFilterBtn.addActionListener(e -> {
+            endpointSearchField.setText("");
+            endpointMethodFilter.selectAll(true);
+            endpointAuthFilter.selectAll(true);
+            filterEndpoints();
+        });
         searchBox.add(clearFilterBtn);
-        endpointHeader.add(searchBox, BorderLayout.WEST);
+        filterRow.add(searchBox, BorderLayout.WEST);
 
         endpointCountLabel = new JLabel("Endpoints: 0");
-        endpointHeader.add(endpointCountLabel, BorderLayout.EAST);
+        filterRow.add(endpointCountLabel, BorderLayout.EAST);
+        endpointHeader.add(filterRow);
+
+        // Summary row: Method breakdown & Auth breakdown
+        JPanel summaryRow = new JPanel(new BorderLayout(6, 2));
+        summaryRow.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+
+        endpointMethodSummaryLabel = new JLabel("Methods: None");
+        endpointMethodSummaryLabel.setFont(endpointMethodSummaryLabel.getFont().deriveFont(Font.PLAIN, 11f));
+        summaryRow.add(endpointMethodSummaryLabel, BorderLayout.WEST);
+
+        endpointAuthSummaryLabel = new JLabel("Auth Status: None");
+        endpointAuthSummaryLabel.setFont(endpointAuthSummaryLabel.getFont().deriveFont(Font.PLAIN, 11f));
+        summaryRow.add(endpointAuthSummaryLabel, BorderLayout.EAST);
+
+        endpointHeader.add(summaryRow);
         endpointsPanel.add(endpointHeader, BorderLayout.NORTH);
 
         endpointTableModel = new EndpointTableModel();
@@ -184,13 +213,6 @@ public class APIImportTab_littlespidy extends JPanel {
 
         JScrollPane epScroll = new JScrollPane(endpointTable);
         endpointsPanel.add(epScroll, BorderLayout.CENTER);
-
-        // Endpoint Detail Inspection Panel
-        JPanel epDetailBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        JButton viewEndpointDetailsBtn = new JButton("Inspect Endpoint Details");
-        viewEndpointDetailsBtn.addActionListener(e -> onInspectEndpointDetails());
-        epDetailBar.add(viewEndpointDetailsBtn);
-        endpointsPanel.add(epDetailBar, BorderLayout.SOUTH);
 
         splitPane.setBottomComponent(endpointsPanel);
         add(splitPane, BorderLayout.CENTER);
@@ -357,6 +379,7 @@ public class APIImportTab_littlespidy extends JPanel {
             endpointTableModel.setEndpoints(null);
             baseUrlField.setText("");
             updateStats();
+            updateEndpointSummary(Collections.emptyList());
             notifyStateChanged();
         }
     }
@@ -367,17 +390,57 @@ public class APIImportTab_littlespidy extends JPanel {
             endpointTableModel.setEndpoints(null);
             endpointCountLabel.setText("Endpoints: 0");
             baseUrlField.setText("");
+            updateEndpointSummary(Collections.emptyList());
             return;
         }
         int modelRow = collectionTable.convertRowIndexToModel(row);
         ImportedCollection_littlespidy col = collections.get(modelRow);
 
         endpointTableModel.setEndpoints(col.getEndpoints());
-        endpointCountLabel.setText("Endpoints: " + col.getEndpointCount());
         baseUrlField.setText(col.getTargetBaseUrl() != null ? col.getTargetBaseUrl() : "");
 
-        // Sync Profile combobox
-        syncProfileComboSelection(col.getAssignedProfileId());
+        // Register any methods discovered in this collection
+        for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
+            endpointMethodFilter.registerMethod(ep.getMethod());
+        }
+
+        updateEndpointSummary(col.getEndpoints());
+        filterEndpoints();
+    }
+
+    private void updateEndpointSummary(List<DiscoveredEndpoint_littlespidy> endpoints) {
+        if (endpoints == null || endpoints.isEmpty()) {
+            endpointMethodSummaryLabel.setText("Methods: None");
+            endpointAuthSummaryLabel.setText("Authentication: None");
+            endpointCountLabel.setText("Endpoints: 0");
+            return;
+        }
+
+        Map<String, Integer> methodCounts = new LinkedHashMap<>();
+        int authRequiredCount = 0;
+        int noAuthCount = 0;
+
+        for (DiscoveredEndpoint_littlespidy ep : endpoints) {
+            String m = ep.getMethod() != null ? ep.getMethod().toUpperCase(Locale.ROOT) : "GET";
+            methodCounts.put(m, methodCounts.getOrDefault(m, 0) + 1);
+
+            if (ep.isRequiresAuth()) {
+                authRequiredCount++;
+            } else {
+                noAuthCount++;
+            }
+        }
+
+        StringBuilder methodSb = new StringBuilder("Methods: ");
+        List<String> methodParts = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : methodCounts.entrySet()) {
+            methodParts.add(e.getKey() + ": " + e.getValue());
+        }
+        methodSb.append(String.join(" | ", methodParts));
+        endpointMethodSummaryLabel.setText(methodSb.toString());
+
+        endpointAuthSummaryLabel.setText(String.format("Auth: Required (%d) | No Auth (%d) | Total: %d",
+                authRequiredCount, noAuthCount, endpoints.size()));
     }
 
     private void onBaseUrlChanged() {
@@ -390,65 +453,46 @@ public class APIImportTab_littlespidy extends JPanel {
         notifyStateChanged();
     }
 
-    private void onProfileAssigned() {
-        int row = collectionTable.getSelectedRow();
-        if (row < 0) return;
-        int modelRow = collectionTable.convertRowIndexToModel(row);
-        ImportedCollection_littlespidy col = collections.get(modelRow);
-
-        ProfileItem item = (ProfileItem) profileAssignCombo.getSelectedItem();
-        col.setAssignedProfileId(item != null ? item.id : null);
-        collectionTableModel.fireTableCellUpdated(modelRow, 6);
-        notifyStateChanged();
-    }
-
-    private void onInspectEndpointDetails() {
-        int row = endpointTable.getSelectedRow();
-        if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Please select an endpoint to inspect.", "Selection Required", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int modelRow = endpointTable.convertRowIndexToModel(row);
-        DiscoveredEndpoint_littlespidy ep = endpointTableModel.getEndpointAt(modelRow);
-        if (ep == null) return;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Method: ").append(ep.getMethod()).append("\n");
-        sb.append("Path: ").append(ep.getPath()).append("\n");
-        sb.append("Summary: ").append(ep.getSummary()).append("\n");
-        sb.append("Description: ").append(ep.getDescription()).append("\n");
-        sb.append("Requires Authentication: ").append(ep.isRequiresAuth()).append("\n\n");
-
-        sb.append("--- Path Parameters ---\n");
-        if (ep.getPathParams().isEmpty()) sb.append("None\n");
-        else ep.getPathParams().forEach((k, v) -> sb.append(k).append(" = ").append(v).append("\n"));
-
-        sb.append("\n--- Query Parameters ---\n");
-        if (ep.getQueryParams().isEmpty()) sb.append("None\n");
-        else ep.getQueryParams().forEach((k, v) -> sb.append(k).append(" = ").append(v).append("\n"));
-
-        sb.append("\n--- Headers ---\n");
-        if (ep.getHeaders().isEmpty()) sb.append("None\n");
-        else ep.getHeaders().forEach((k, v) -> sb.append(k).append(": ").append(v).append("\n"));
-
-        sb.append("\n--- Request Body Sample (").append(ep.getContentType()).append(") ---\n");
-        sb.append(ep.getRequestBodySample().isEmpty() ? "None" : ep.getRequestBodySample()).append("\n");
-
-        JTextArea ta = new JTextArea(sb.toString(), 18, 50);
-        ta.setEditable(false);
-        ta.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        JScrollPane sp = new JScrollPane(ta);
-
-        JOptionPane.showMessageDialog(this, sp, "Endpoint Details: " + ep.getMethod() + " " + ep.getPath(), JOptionPane.INFORMATION_MESSAGE);
-    }
-
     private void filterEndpoints() {
-        String query = endpointSearchField.getText().trim();
-        if (query.isEmpty()) {
-            endpointSorter.setRowFilter(null);
-        } else {
-            endpointSorter.setRowFilter(RowFilter.regexFilter("(?i)" + java.util.regex.Pattern.quote(query)));
-        }
+        if (endpointSorter == null) return;
+
+        endpointSorter.setRowFilter(new RowFilter<>() {
+            @Override
+            public boolean include(Entry<? extends EndpointTableModel, ? extends Integer> entry) {
+                int modelRow = entry.getIdentifier();
+                DiscoveredEndpoint_littlespidy ep = endpointTableModel.getEndpointAt(modelRow);
+                if (ep == null) return false;
+
+                // 1. HTTP Method multi-select filter
+                if (endpointMethodFilter != null && !endpointMethodFilter.isMethodSelected(ep.getMethod())) {
+                    return false;
+                }
+
+                // 2. Authentication requirement multi-select filter
+                if (endpointAuthFilter != null && !endpointAuthFilter.isAuthOptionSelected(ep.isRequiresAuth())) {
+                    return false;
+                }
+
+                // 3. Search text query
+                String query = endpointSearchField.getText().trim();
+                if (!query.isEmpty()) {
+                    String q = query.toLowerCase(Locale.ROOT);
+                    boolean matches = ep.getPath().toLowerCase(Locale.ROOT).contains(q)
+                            || ep.getMethod().toLowerCase(Locale.ROOT).contains(q)
+                            || ep.getSummary().toLowerCase(Locale.ROOT).contains(q)
+                            || ep.getParametersSummary().toLowerCase(Locale.ROOT).contains(q);
+                    if (!matches) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        });
+
+        int displayed = endpointTable.getRowCount();
+        int total = endpointTableModel.getRowCount();
+        endpointCountLabel.setText("Showing " + displayed + " of " + total + " Endpoints");
     }
 
     public void updateAvailableProfiles(List<AuthProfile_littlespidy> profiles) {
@@ -456,34 +500,7 @@ public class APIImportTab_littlespidy extends JPanel {
         if (profiles != null) {
             this.availableProfiles.addAll(profiles);
         }
-
-        // Rebuild combo box
-        profileAssignCombo.removeAllItems();
-        profileAssignCombo.addItem(new ProfileItem(null, "[None]"));
-        for (AuthProfile_littlespidy p : availableProfiles) {
-            profileAssignCombo.addItem(new ProfileItem(p.getId(), p.getName()));
-        }
-
         collectionTableModel.fireTableDataChanged();
-
-        // Resync current selection
-        int row = collectionTable.getSelectedRow();
-        if (row >= 0 && row < collections.size()) {
-            int modelRow = collectionTable.convertRowIndexToModel(row);
-            syncProfileComboSelection(collections.get(modelRow).getAssignedProfileId());
-        }
-    }
-
-    private void syncProfileComboSelection(String assignedProfileId) {
-        for (int i = 0; i < profileAssignCombo.getItemCount(); i++) {
-            ProfileItem item = profileAssignCombo.getItemAt(i);
-            if ((assignedProfileId == null && item.id == null) ||
-                (assignedProfileId != null && assignedProfileId.equals(item.id))) {
-                profileAssignCombo.setSelectedIndex(i);
-                return;
-            }
-        }
-        profileAssignCombo.setSelectedIndex(0);
     }
 
     public void updateStats() {
@@ -503,6 +520,8 @@ public class APIImportTab_littlespidy extends JPanel {
         endpointTableModel.setEndpoints(null);
         baseUrlField.setText("");
         updateStats();
+        updateEndpointSummary(Collections.emptyList());
+        notifyStateChanged();
     }
 
     public ImportedCollection_littlespidy getSelectedCollection() {
@@ -515,7 +534,7 @@ public class APIImportTab_littlespidy extends JPanel {
     // --- Table Models ---
 
     private class CollectionTableModel extends AbstractTableModel {
-        private final String[] columns = {"Name", "Format", "Source", "Target Base URL", "Endpoints", "Status", "Profile"};
+        private final String[] columns = {"Name", "Format", "Source", "Target Base URL", "Endpoints", "Status"};
 
         @Override public int getRowCount() { return collections.size(); }
         @Override public int getColumnCount() { return columns.length; }
@@ -531,7 +550,6 @@ public class APIImportTab_littlespidy extends JPanel {
                 case 3: return c.getTargetBaseUrl();
                 case 4: return c.getEndpointCount();
                 case 5: return c.getImportStatus();
-                case 6: return resolveProfileName(c.getAssignedProfileId());
                 default: return "";
             }
         }
@@ -540,14 +558,6 @@ public class APIImportTab_littlespidy extends JPanel {
             if (s == null) return "";
             if (s.length() <= max) return s;
             return "..." + s.substring(s.length() - max);
-        }
-
-        private String resolveProfileName(String profileId) {
-            if (profileId == null || profileId.isBlank()) return "[None]";
-            for (AuthProfile_littlespidy p : availableProfiles) {
-                if (profileId.equals(p.getId())) return p.getName();
-            }
-            return "[Unknown]";
         }
     }
 
@@ -580,21 +590,6 @@ public class APIImportTab_littlespidy extends JPanel {
                 case 4: return ep.isRequiresAuth() ? "Yes" : "No";
                 default: return "";
             }
-        }
-    }
-
-    public static class ProfileItem {
-        public final String id;
-        public final String name;
-
-        public ProfileItem(String id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
         }
     }
 }
