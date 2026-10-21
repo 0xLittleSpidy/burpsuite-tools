@@ -140,7 +140,7 @@ public class UIEnhancementsTest_littlespidy {
 
     @Test
     @DisplayName("Verify Request & Response Viewer Tab structure and collection multi-select filter")
-    public void testRequestResponseViewerTab() {
+    public void testRequestResponseViewerTab() throws Exception {
         RequestResponseViewerTab_littlespidy viewerTab = new RequestResponseViewerTab_littlespidy(mockApi);
 
         ImportedCollection_littlespidy col1 = new ImportedCollection_littlespidy("Col A", "OpenAPI 3.0", "FILE", "/test/a.json");
@@ -150,7 +150,54 @@ public class UIEnhancementsTest_littlespidy {
         col2.setEndpoints(List.of(new DiscoveredEndpoint_littlespidy("POST", "/b", "Endpoint B")));
 
         viewerTab.updateCollections(List.of(col1, col2));
-        assertNotNull(viewerTab);
+
+        Field tableField = RequestResponseViewerTab_littlespidy.class.getDeclaredField("requestsTable");
+        tableField.setAccessible(true);
+        JTable table = (JTable) tableField.get(viewerTab);
+        assertEquals(2, table.getRowCount(), "Requests table should display endpoints from both collections");
+    }
+
+    @Test
+    @DisplayName("Verify collections imported in APIImportTab automatically propagate to Parameter Collector and Request & Response Viewer")
+    public void testImportTabSyncToOtherTabs() throws Exception {
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+
+        // Simulate external subscriber (e.g. PersistenceManager) attaching listener
+        boolean[] persistenceHookFired = new boolean[]{false};
+        rootTab.getImportTab().addStateChangedListener(() -> persistenceHookFired[0] = true);
+
+        // Create and import a test collection
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy("Payment Gateway API", "OpenAPI 3.0", "FILE", "/test/payment.json");
+        DiscoveredEndpoint_littlespidy ep1 = new DiscoveredEndpoint_littlespidy("POST", "/v1/charges", "Create Charge");
+        ep1.setQueryParams(Map.of("currency", "USD", "amount", "100"));
+        DiscoveredEndpoint_littlespidy ep2 = new DiscoveredEndpoint_littlespidy("GET", "/v1/charges/{chargeId}", "Get Charge");
+        ep2.setPathParams(Map.of("chargeId", "ch_123"));
+        col.setEndpoints(List.of(ep1, ep2));
+
+        // Set collections on import tab
+        rootTab.getImportTab().setCollections(List.of(col));
+
+        assertTrue(persistenceHookFired[0], "External listener should be triggered");
+
+        // Verify Parameter Collector received collection and extracted params
+        ParameterCollectorTab_littlespidy paramTab = rootTab.getParameterCollectorTab();
+        Field queryAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("queryListTextArea");
+        queryAreaField.setAccessible(true);
+        JTextArea queryArea = (JTextArea) queryAreaField.get(paramTab);
+        assertTrue(queryArea.getText().contains("currency\n"), "Query parameters should be present");
+        assertTrue(queryArea.getText().contains("amount\n"), "Query parameters should be present");
+
+        Field pathAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("pathListTextArea");
+        pathAreaField.setAccessible(true);
+        JTextArea pathArea = (JTextArea) pathAreaField.get(paramTab);
+        assertTrue(pathArea.getText().contains("chargeId\n"), "Path parameters should be present");
+
+        // Verify Request & Response Viewer received collection and displays requests
+        RequestResponseViewerTab_littlespidy viewerTab = rootTab.getRequestResponseViewerTab();
+        Field viewerTableField = RequestResponseViewerTab_littlespidy.class.getDeclaredField("requestsTable");
+        viewerTableField.setAccessible(true);
+        JTable viewerTable = (JTable) viewerTableField.get(viewerTab);
+        assertEquals(2, viewerTable.getRowCount(), "Viewer table should display all 2 endpoints");
     }
 
     @Test

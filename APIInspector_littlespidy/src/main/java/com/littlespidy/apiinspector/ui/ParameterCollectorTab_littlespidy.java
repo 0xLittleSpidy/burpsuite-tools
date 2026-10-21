@@ -262,11 +262,21 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
             collections.addAll(cols);
         }
 
-        // Rebuild combobox
+        // Temporarily detach action listeners during combo rebuild
+        java.awt.event.ActionListener[] listeners = collectionSelector.getActionListeners();
+        for (java.awt.event.ActionListener al : listeners) {
+            collectionSelector.removeActionListener(al);
+        }
+
         collectionSelector.removeAllItems();
         collectionSelector.addItem(new CollectionComboItem(null, "[All Imported Collections]"));
         for (ImportedCollection_littlespidy c : collections) {
             collectionSelector.addItem(new CollectionComboItem(c, c.getName() + " (" + c.getEndpointCount() + ")"));
+        }
+        collectionSelector.setSelectedIndex(0);
+
+        for (java.awt.event.ActionListener al : listeners) {
+            collectionSelector.addActionListener(al);
         }
 
         rebuildParameterLists();
@@ -291,7 +301,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
             for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
                 String epDesc = ep.getMethod() + " " + ep.getPath();
 
-                // 1. Query parameters
+                // 1. Query parameters from endpoint queryParams map
                 if (ep.getQueryParams() != null) {
                     for (Map.Entry<String, String> qEntry : ep.getQueryParams().entrySet()) {
                         String name = qEntry.getKey();
@@ -307,7 +317,27 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                     }
                 }
 
-                // 2. Path parameters from explicit map
+                // 2. Query parameters embedded in URL path (e.g. /search?query=test&limit=10)
+                if (ep.getPath() != null && ep.getPath().contains("?")) {
+                    String qStr = ep.getPath().substring(ep.getPath().indexOf('?') + 1);
+                    String[] pairs = qStr.split("&");
+                    for (String pair : pairs) {
+                        if (!pair.isBlank()) {
+                            int eq = pair.indexOf('=');
+                            String qName = eq > 0 ? pair.substring(0, eq).trim() : pair.trim();
+                            String qVal = eq > 0 && eq < pair.length() - 1 ? pair.substring(eq + 1).trim() : "";
+                            if (!qName.isBlank()) {
+                                ParameterEntry p = queryMap.computeIfAbsent(qName, ParameterEntry::new);
+                                p.addEndpoint(epDesc);
+                                if (p.sampleValue.isEmpty() && !qVal.isEmpty()) {
+                                    p.sampleValue = qVal;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Path parameters from explicit map
                 if (ep.getPathParams() != null) {
                     for (Map.Entry<String, String> pEntry : ep.getPathParams().entrySet()) {
                         String name = pEntry.getKey();
@@ -323,9 +353,10 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                     }
                 }
 
-                // 3. Extract path parameters from template variables in path (e.g. /users/{id} or /items/:code)
+                // 4. Extract path parameters from template variables in path (e.g. /users/{id} or /items/:code)
                 if (ep.getPath() != null) {
-                    Matcher m = PATH_VARIABLE_PATTERN.matcher(ep.getPath());
+                    String cleanPath = ep.getPath().contains("?") ? ep.getPath().substring(0, ep.getPath().indexOf('?')) : ep.getPath();
+                    Matcher m = PATH_VARIABLE_PATTERN.matcher(cleanPath);
                     while (m.find()) {
                         String name = m.group(1) != null ? m.group(1) : m.group(2);
                         if (name != null && !name.isBlank()) {

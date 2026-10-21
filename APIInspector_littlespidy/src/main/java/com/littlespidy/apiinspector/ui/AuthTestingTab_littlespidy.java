@@ -42,7 +42,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     private final List<AuthTestResult_littlespidy> results = new ArrayList<>();
 
     private APIImportTab_littlespidy importTabRef;
-    private Runnable onStateChangedCallback;
+    private final List<Runnable> stateChangedListeners = new ArrayList<>();
 
     // Profiles UI
     private ProfileTableModel profileTableModel;
@@ -92,13 +92,24 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         this.importTabRef = importTabRef;
     }
 
+    public void addStateChangedListener(Runnable listener) {
+        if (listener != null) {
+            this.stateChangedListeners.add(listener);
+        }
+    }
+
     public void setOnStateChangedCallback(Runnable callback) {
-        this.onStateChangedCallback = callback;
+        if (callback != null) {
+            this.stateChangedListeners.add(callback);
+        }
     }
 
     private void notifyStateChanged() {
-        if (onStateChangedCallback != null) {
-            onStateChangedCallback.run();
+        for (Runnable r : new ArrayList<>(stateChangedListeners)) {
+            try {
+                r.run();
+            } catch (Exception ignored) {
+            }
         }
         if (importTabRef != null) {
             importTabRef.updateAvailableProfiles(profiles);

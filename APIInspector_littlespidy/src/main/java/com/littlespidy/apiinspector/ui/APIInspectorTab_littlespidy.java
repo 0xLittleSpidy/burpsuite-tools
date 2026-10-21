@@ -39,10 +39,22 @@ public class APIInspectorTab_littlespidy extends JPanel {
         this.authTestingTab.setImportTabRef(this.importTab);
 
         // Sync tabs when API Import changes
-        this.importTab.setOnStateChangedCallback(() -> {
+        this.importTab.addStateChangedListener(() -> {
             parameterCollectorTab.updateCollections(importTab.getAllCollections());
             requestResponseViewerTab.updateCollections(importTab.getAllCollections());
             authTestingTab.refreshCollectionsCombo();
+        });
+
+        // Sync fresh collections whenever the user selects a tab
+        this.rootTabbedPane.addChangeListener(e -> {
+            Component selected = rootTabbedPane.getSelectedComponent();
+            if (selected == parameterCollectorTab) {
+                parameterCollectorTab.updateCollections(importTab.getAllCollections());
+            } else if (selected == requestResponseViewerTab) {
+                requestResponseViewerTab.updateCollections(importTab.getAllCollections());
+            } else if (selected == authTestingTab) {
+                authTestingTab.refreshCollectionsCombo();
+            }
         });
 
         rootTabbedPane.addTab("ResAPI Version Finder", versionFinderTab);

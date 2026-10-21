@@ -98,11 +98,13 @@ public class CollectionFilterDropDown_littlespidy extends JButton {
             notifyListeners();
         };
 
+        boolean hadAny = !collectionCheckBoxMap.isEmpty();
         for (ImportedCollection_littlespidy c : collections) {
             String id = c.getId();
             String label = c.getName() + " (" + c.getEndpointCount() + ")";
             if (!collectionCheckBoxMap.containsKey(id)) {
-                JCheckBox cb = new JCheckBox(label, selectAllCheckBox.isSelected());
+                boolean defaultSelected = !hadAny || selectAllCheckBox.isSelected();
+                JCheckBox cb = new JCheckBox(label, defaultSelected);
                 cb.setToolTipText(c.getName());
                 cb.addActionListener(itemListener);
                 collectionCheckBoxMap.put(id, cb);
@@ -126,13 +128,13 @@ public class CollectionFilterDropDown_littlespidy extends JButton {
             }
         }
         updatingProgrammatically = true;
-        selectAllCheckBox.setSelected(!collectionCheckBoxMap.isEmpty() && selectedCount == collectionCheckBoxMap.size());
+        selectAllCheckBox.setSelected(collectionCheckBoxMap.isEmpty() || selectedCount == collectionCheckBoxMap.size());
         updatingProgrammatically = false;
     }
 
     private void updateButtonLabel() {
         if (collectionCheckBoxMap.isEmpty()) {
-            setText("Collections: None");
+            setText("Collections: All");
             return;
         }
 
@@ -162,6 +164,9 @@ public class CollectionFilterDropDown_littlespidy extends JButton {
     public boolean isCollectionSelected(String collectionId) {
         if (collectionId == null) {
             return false;
+        }
+        if (collectionCheckBoxMap.isEmpty()) {
+            return true;
         }
         JCheckBox cb = collectionCheckBoxMap.get(collectionId);
         if (cb != null) {

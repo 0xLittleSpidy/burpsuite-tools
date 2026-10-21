@@ -49,7 +49,7 @@ public class APIImportTab_littlespidy extends JPanel {
     private JLabel endpointAuthSummaryLabel;
     private JTextField baseUrlField;
 
-    private Runnable onStateChangedCallback;
+    private final List<Runnable> stateChangedListeners = new ArrayList<>();
 
     public APIImportTab_littlespidy(MontoyaApi api) {
         super(new BorderLayout(8, 8));
@@ -59,13 +59,24 @@ public class APIImportTab_littlespidy extends JPanel {
         initComponents();
     }
 
+    public void addStateChangedListener(Runnable listener) {
+        if (listener != null) {
+            this.stateChangedListeners.add(listener);
+        }
+    }
+
     public void setOnStateChangedCallback(Runnable callback) {
-        this.onStateChangedCallback = callback;
+        if (callback != null) {
+            this.stateChangedListeners.add(callback);
+        }
     }
 
     private void notifyStateChanged() {
-        if (onStateChangedCallback != null) {
-            onStateChangedCallback.run();
+        for (Runnable r : new ArrayList<>(stateChangedListeners)) {
+            try {
+                r.run();
+            } catch (Exception ignored) {
+            }
         }
     }
 

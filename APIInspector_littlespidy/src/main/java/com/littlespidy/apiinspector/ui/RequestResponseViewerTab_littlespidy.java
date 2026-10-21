@@ -230,6 +230,10 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
         int rowCount = requestsTable.getRowCount();
         requestCountLabel.setText("Requests: " + rowCount + " of " + endpointItems.size());
+
+        if (rowCount > 0 && requestsTable.getSelectedRow() < 0) {
+            requestsTable.setRowSelectionInterval(0, 0);
+        }
     }
 
     private void onEndpointRowSelected() {
