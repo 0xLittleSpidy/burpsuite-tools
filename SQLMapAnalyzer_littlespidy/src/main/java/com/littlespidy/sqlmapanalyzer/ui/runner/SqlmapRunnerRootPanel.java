@@ -65,7 +65,7 @@ public class SqlmapRunnerRootPanel extends JPanel {
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
         inner.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel title = new JLabel("SQLMap Scanner (Montoya Java Integration)");
+        JLabel title = new JLabel("ng-sqlmap littlespidy (Montoya Java Integration)");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 16));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         inner.add(title);
@@ -75,7 +75,7 @@ public class SqlmapRunnerRootPanel extends JPanel {
         info1.setAlignmentX(Component.CENTER_ALIGNMENT);
         inner.add(info1);
 
-        JLabel info2 = new JLabel("Right-click any request in Proxy History, Repeater, or Logger and select 'Send to SQLMap Scanner'.");
+        JLabel info2 = new JLabel("Right-click any request in Proxy History, Repeater, or Logger and select 'Send to ng-sqlmap'.");
         info2.setForeground(Color.DARK_GRAY);
         info2.setAlignmentX(Component.CENTER_ALIGNMENT);
         inner.add(info2);
@@ -233,5 +233,67 @@ public class SqlmapRunnerRootPanel extends JPanel {
         }
         processManager.stopServer();
         taskManager.shutdown();
+    }
+
+    public synchronized List<ScanRequestSession> getSessions() {
+        List<ScanRequestSession> sessions = new ArrayList<>();
+        for (RequestScanTabPanel tab : childTabs) {
+            sessions.add(tab.getSession());
+        }
+        return sessions;
+    }
+
+    public synchronized void clearAllTabs() {
+        for (RequestScanTabPanel tab : childTabs) {
+            tab.cleanup();
+        }
+        childTabs.clear();
+        requestTabbedPane.removeAll();
+        remove(requestTabbedPane);
+        add(emptyPlaceholderPanel, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+
+    public synchronized void restoreSessions(List<ScanRequestSession> restoredSessions) {
+        clearAllTabs();
+        if (restoredSessions == null || restoredSessions.isEmpty()) {
+            return;
+        }
+
+        remove(emptyPlaceholderPanel);
+        add(requestTabbedPane, BorderLayout.CENTER);
+
+        int maxId = 0;
+        for (ScanRequestSession session : restoredSessions) {
+            if (session.getSessionId() > maxId) {
+                maxId = session.getSessionId();
+            }
+
+            RequestScanTabPanel tab = new RequestScanTabPanel(api, session, taskManager);
+            childTabs.add(tab);
+
+            int tabIndex = requestTabbedPane.getTabCount();
+            requestTabbedPane.addTab(session.getTabTitle(), tab);
+
+            CloseableTabHeader_littlespidy header = new CloseableTabHeader_littlespidy(
+                    session.getTabTitle(),
+                    newTitle -> {
+                        session.setCustomTabTitle(newTitle);
+                        int idx = requestTabbedPane.indexOfComponent(tab);
+                        if (idx != -1) {
+                            requestTabbedPane.setTitleAt(idx, newTitle);
+                        }
+                    },
+                    h -> closeTab(tab));
+            requestTabbedPane.setTabComponentAt(tabIndex, header);
+        }
+
+        sessionCounter.set(maxId + 1);
+        if (requestTabbedPane.getTabCount() > 0) {
+            requestTabbedPane.setSelectedIndex(0);
+        }
+        revalidate();
+        repaint();
     }
 }

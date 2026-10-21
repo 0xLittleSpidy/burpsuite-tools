@@ -30,7 +30,7 @@ public class SQLMapAnalyzerExtension_littlespidy implements BurpExtension {
 
     @Override
     public void initialize(MontoyaApi api) {
-        api.extension().setName("SQLMap Output Analyzer and Scanner");
+        api.extension().setName("ng-sqlmap littlespidy");
 
         // 1. Data Stores and Managers
         SqlmapDataStore dataStore = new SqlmapDataStore();
@@ -49,9 +49,9 @@ public class SQLMapAnalyzerExtension_littlespidy implements BurpExtension {
         persistenceManager.bindContext(mainTab, dataStore);
 
         // 3. Register Top-Level SuiteTab
-        api.userInterface().registerSuiteTab("SQLMap Analyzer", mainTab);
+        api.userInterface().registerSuiteTab("ng-sqlmap littlespidy", mainTab);
 
-        // 4. Register Context Menu Provider: "Send to SQLMap Scanner"
+        // 4. Register Context Menu Provider: "Send to ng-sqlmap"
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
             @Override
             public List<Component> provideMenuItems(ContextMenuEvent event) {
@@ -66,7 +66,7 @@ public class SQLMapAnalyzerExtension_littlespidy implements BurpExtension {
 
                 if (targetRequest != null) {
                     final HttpRequest resolvedReq = targetRequest;
-                    JMenuItem sendItem = new JMenuItem("Send to SQLMap Scanner");
+                    JMenuItem sendItem = new JMenuItem("Send to ng-sqlmap");
                     sendItem.addActionListener(e -> {
                         runnerRootPanel.addOrFocusRequest(resolvedReq);
                         mainTab.switchToSqlmapTab();

@@ -1,0 +1,4 @@
+log_id,timestamp,actor,action,ip_address,affected_resource
+9001,2026-10-20 08:30:11,admin@target.local,USER_LOGIN,192.168.1.105,/login
+9002,2026-10-20 09:12:44,admin@target.local,ROLE_PRIVILEGE_ELEVATION,192.168.1.105,/admin/roles
+9003,2026-10-20 11:45:02,finance@target.local,EXPORT_FINANCIAL_REPORTS,192.168.1.120,/finance/export

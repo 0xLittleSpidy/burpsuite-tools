@@ -1,0 +1,5 @@
+emp_id,full_name,corporate_email,ssn,department,salary,manager_id
+E001,Michael Scott,m.scott@corp.local,123-45-6789,Executive,145000,E000
+E002,Dwight Schrute,d.schrute@corp.local,987-65-4321,Sales,98000,E001
+E003,Pam Beesly,p.beesly@corp.local,456-78-1234,Administration,62000,E001
+E004,Jim Halpert,j.halpert@corp.local,321-65-9874,Sales,95000,E001

@@ -71,4 +71,65 @@ public class ScanExecutionLifecycleTest {
         session.setCustomTabTitle("");
         assertEquals("#4 POST /login", session.getTabTitle());
     }
+
+    @Test
+    public void testSqlmapCommandAlwaysPresentInLogs() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("http://target.local/vuln?id=1");
+        options.setDb("auth_db");
+        options.setTbl("users");
+
+        ScanExecutionRecord record = new ScanExecutionRecord(1, options);
+        var logs = record.getLogs();
+        assertFalse(logs.isEmpty());
+        assertTrue(logs.get(0).getMessage().startsWith("SQLMAP Command: sqlmap -u \"http://target.local/vuln?id=1\""));
+        assertTrue(logs.get(0).getMessage().contains("-D \"auth_db\""));
+        assertTrue(logs.get(0).getMessage().contains("-T \"users\""));
+
+        // Simulate incoming API logs from sqlmapapi
+        record.setLogs(java.util.List.of(
+                new com.littlespidy.sqlmapanalyzer.api.model.SqlmapLogEntry("INFO", "10:00:01", "Testing connection to target"),
+                new com.littlespidy.sqlmapanalyzer.api.model.SqlmapLogEntry("INFO", "10:00:02", "Heuristic test shows injectable")
+        ));
+
+        // Command line must remain index 0!
+        var updatedLogs = record.getLogs();
+        assertEquals(3, updatedLogs.size());
+        assertTrue(updatedLogs.get(0).getMessage().startsWith("SQLMAP Command:"));
+        assertEquals("Testing connection to target", updatedLogs.get(1).getMessage());
+        assertEquals("Heuristic test shows injectable", updatedLogs.get(2).getMessage());
+    }
+
+    @Test
+    public void testScanRequestSessionDtoRoundtrip() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("https://api.target.local/v1/user?id=100");
+        options.setDbms("PostgreSQL");
+
+        ScanRequestSession session = new ScanRequestSession(7, "GET", "https://api.target.local/v1/user?id=100", "GET /v1/user HTTP/1.1\r\n\r\n".getBytes(), options);
+        session.setCustomTabTitle("User Profile Query");
+
+        ScanExecutionRecord run = session.getActiveExecution();
+        run.setStatus("VULNERABLE");
+        run.setVulnerable(true);
+        run.addFinding(new com.littlespidy.sqlmapanalyzer.api.model.SqlmapFinding(1, "id", "PostgreSQL", "Boolean-based blind", "AND 1=1", "Parameter 'id' is vulnerable"));
+
+        // Convert to DTO and reconstruct
+        com.littlespidy.sqlmapanalyzer.persistence.ScanRequestSessionDto_littlespidy dto =
+                com.littlespidy.sqlmapanalyzer.persistence.ScanRequestSessionDto_littlespidy.fromSession(session);
+        assertNotNull(dto);
+        assertEquals(7, dto.getSessionId());
+        assertEquals("User Profile Query", dto.getCustomTabTitle());
+        assertEquals(1, dto.getExecutions().size());
+
+        ScanRequestSession restored = dto.toSession();
+        assertEquals(7, restored.getSessionId());
+        assertEquals("User Profile Query", restored.getTabTitle());
+        assertEquals("GET", restored.getMethod());
+        assertEquals("https://api.target.local/v1/user?id=100", restored.getUrl());
+        assertEquals(1, restored.getExecutions().size());
+        assertEquals("VULNERABLE", restored.getActiveExecution().getStatus());
+        assertTrue(restored.getActiveExecution().isVulnerable());
+        assertEquals(1, restored.getActiveExecution().getFindings().size());
+    }
 }

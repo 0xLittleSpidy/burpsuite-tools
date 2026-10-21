@@ -1,0 +1,4 @@
+id,service_name,api_key,api_secret,permissions,created_at,expires_at
+1,PaymentGateway,pk_live_83920194827103948271,sk_live_94820193847201948271,payment:charge,payment:refund,2026-01-01,2027-01-01
+2,SmsNotifier,pk_live_19283746501928374650,sk_live_01928374650192837465,sms:send,2026-02-15,2027-02-15
+3,CloudStorage,pk_live_55667788990011223344,sk_live_44332211009988776655,s3:read,s3:write,2026-03-20,2027-03-20

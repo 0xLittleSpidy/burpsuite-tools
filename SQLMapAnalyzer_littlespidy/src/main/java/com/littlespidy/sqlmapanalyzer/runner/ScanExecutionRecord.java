@@ -94,7 +94,19 @@ public class ScanExecutionRecord implements Serializable {
     }
 
     public synchronized List<SqlmapLogEntry> getLogs() {
-        return new ArrayList<>(logs);
+        List<SqlmapLogEntry> result = new ArrayList<>();
+        String cmd = (options != null) ? options.buildCommandLine() : "";
+        if (!cmd.isBlank()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            String timeStr = sdf.format(new Date(timestamp));
+            result.add(new SqlmapLogEntry("INFO", timeStr, "SQLMAP Command: " + cmd));
+        }
+        for (SqlmapLogEntry l : logs) {
+            if (l != null && !l.getMessage().startsWith("SQLMAP Command:")) {
+                result.add(l);
+            }
+        }
+        return result;
     }
 
     public synchronized void addLog(SqlmapLogEntry entry) {
@@ -103,7 +115,13 @@ public class ScanExecutionRecord implements Serializable {
 
     public synchronized void setLogs(List<SqlmapLogEntry> newLogs) {
         logs.clear();
-        if (newLogs != null) logs.addAll(newLogs);
+        if (newLogs != null) {
+            for (SqlmapLogEntry l : newLogs) {
+                if (l != null && !l.getMessage().startsWith("SQLMAP Command:")) {
+                    logs.add(l);
+                }
+            }
+        }
     }
 
     public synchronized List<SqlmapFinding> getFindings() {

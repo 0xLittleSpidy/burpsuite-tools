@@ -189,6 +189,7 @@ public class RequestScanTabPanel extends JPanel {
         active.setOptions(configPanel.applyUiToOptions());
         configPanel.setScanningState(true);
         logConsolePanel.setStatusBadge("RUNNING", false);
+        logConsolePanel.updateFromRecord(active);
 
         taskManager.startScan(active, new ScanTaskManager.ScanUpdateListener() {
             @Override

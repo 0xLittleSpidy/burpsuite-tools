@@ -1,0 +1,6 @@
+id,username,password_hash,email,role,phone_number,is_active
+1,admin,$2y$12$e8O6kZp2c0wKzQx5A5j9Eeq1O8m7H7C4N1G8a3b5c6d7e8f9g0h1i,admin@target.local,SUPERADMIN,+1-555-0100,true
+2,editor,$2y$12$f9P7lAq3d1xLzRy6B6k0Ffr2P9n8I8D5O2H9b4c6d7e8f9g0h1i2j,editor@target.local,CONTENT_EDITOR,+1-555-0101,true
+3,finance_user,$2y$12$g0Q8mBr4e2yMzSz7C7l1Ggs3Q0o9J9E6P3I0c5d7e8f9g0h1i2j3k,finance@target.local,FINANCE,+1-555-0102,true
+4,johndoe,$2y$12$h1R9nCs5f3zNzT08D8m2Hht4R1p0K0F7Q4J1d6e8f9g0h1i2j3k4l,john.doe@target.local,CUSTOMER,+1-555-0103,true
+5,janesmith,$2y$12$i2S0oDt6g4aOzU19E9n3Iiu5S2q1L1G8R5K2e7f9g0h1i2j3k4l5m,jane.smith@target.local,CUSTOMER,+1-555-0104,true

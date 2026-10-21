@@ -1,0 +1,4 @@
+session_id,user_id,session_token,user_agent,ip,expires_at
+S101,1,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIn0.c2lnbl9leGFtcGxl,Mozilla/5.0 (Windows NT 10.0; Win64; x64),192.168.1.105,2026-10-25 23:59:59
+S102,2,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6ImVkaXRvciJ9.c2lnbl9leGFtcGxl,Mozilla/5.0 (X11; Linux x86_64),192.168.1.110,2026-10-24 12:00:00
+S103,4,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwibmFtZSI6ImpvaG5kb2UifQ.c2lnbl9leGFtcGxl,Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X),10.0.0.45,2026-10-22 18:30:00

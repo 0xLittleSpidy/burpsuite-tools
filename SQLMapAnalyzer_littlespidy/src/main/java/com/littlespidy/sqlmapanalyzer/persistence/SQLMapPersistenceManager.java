@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -122,6 +123,13 @@ public class SQLMapPersistenceManager {
             if (mainTab != null) {
                 sessionData.setSelectedDatabase(mainTab.getSelectedDatabaseName());
                 sessionData.setSelectedTable(mainTab.getSelectedTableName());
+                if (mainTab.getRunnerRootPanel() != null) {
+                    List<ScanRequestSessionDto_littlespidy> dtoList = new ArrayList<>();
+                    for (var s : mainTab.getRunnerRootPanel().getSessions()) {
+                        dtoList.add(ScanRequestSessionDto_littlespidy.fromSession(s));
+                    }
+                    sessionData.setScanSessions(dtoList);
+                }
             }
 
             File parentDir = destination.getParentFile();
@@ -175,6 +183,14 @@ public class SQLMapPersistenceManager {
 
             this.activeSessionFile = file;
             dirty.set(false);
+
+            if (data.getScanSessions() != null && mainTab != null && mainTab.getRunnerRootPanel() != null) {
+                List<com.littlespidy.sqlmapanalyzer.runner.ScanRequestSession> restoredSessions = new ArrayList<>();
+                for (ScanRequestSessionDto_littlespidy dto : data.getScanSessions()) {
+                    restoredSessions.add(dto.toSession());
+                }
+                SwingUtils.runOnEdt(() -> mainTab.getRunnerRootPanel().restoreSessions(restoredSessions));
+            }
 
             SwingUtils.runOnEdt(() -> {
                 updateStatusLabel();

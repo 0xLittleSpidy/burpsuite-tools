@@ -1,0 +1,4 @@
+account_id,username,password_hash,salt,mfa_secret,reset_token
+A01,root,$6$rounds=5000$saltstring$9x8y7z6w5v4u3t2s1r0q,salt_abc123,JBSWY3DPEHPK3PXP,tok_rst_8839201948201948
+A02,api_master,$6$rounds=5000$saltstring$1a2b3c4d5e6f7g8h9i0j,salt_def456,HXDMVJECJJWSRB3H,tok_rst_1192837465019283
+A03,backup_admin,$6$rounds=5000$saltstring$9k8j7h6g5f4d3s2a1q,salt_ghi789,MFRGGZDFMY2TQNBX,tok_rst_4455667788990011

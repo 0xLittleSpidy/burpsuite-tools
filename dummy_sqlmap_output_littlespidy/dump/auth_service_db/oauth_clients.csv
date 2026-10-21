@@ -1,0 +1,4 @@
+client_id,client_secret,redirect_uri,scope,grant_types
+client_mobile_app,sec_live_99482019482710492817,https://app.target.local/oauth/callback,read write openid,authorization_code refresh_token
+client_partner_portal,sec_live_55667788112233445566,https://portal.partner.com/auth/redirect,read:billing,client_credentials
+client_dev_testing,sec_test_00112233445566778899,http://localhost:3000/callback,all,authorization_code

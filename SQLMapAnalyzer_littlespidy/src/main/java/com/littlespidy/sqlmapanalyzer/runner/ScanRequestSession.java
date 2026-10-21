@@ -74,6 +74,18 @@ public class ScanRequestSession implements Serializable {
         return currentExecutionIndex;
     }
 
+    public synchronized void restoreExecutions(List<ScanExecutionRecord> restoredList, int activeIdx) {
+        if (restoredList != null && !restoredList.isEmpty()) {
+            this.executions.clear();
+            this.executions.addAll(restoredList);
+            if (activeIdx >= 0 && activeIdx < this.executions.size()) {
+                this.currentExecutionIndex = activeIdx;
+            } else {
+                this.currentExecutionIndex = this.executions.size() - 1;
+            }
+        }
+    }
+
     public synchronized ScanExecutionRecord createNewExecution() {
         int nextNum = executions.size() + 1;
         SqlmapTaskOptions prevOptions = getActiveExecution() != null

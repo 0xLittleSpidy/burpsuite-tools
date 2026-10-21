@@ -1,10 +1,10 @@
-# SQLMap Output Analyzer and Scanner Burp Suite Extension (_littlespidy)
+# ng-sqlmap littlespidy - SQLMap Scanner & Output Analyzer
 
 // Created with the help of an AI Agent and littlespidy.
 
 ## Overview
 
-The **SQLMap Output Analyzer and Scanner** is a complete, modern Burp Suite extension built with the Montoya API (`net.portswigger.burp.extensions:montoya-api:2026.4`). It converts and integrates the functionality of **SQLiPy** into a clean, multi-threaded Java architecture, while providing offline database browsing, structural analysis, and persistent session management.
+The **ng-sqlmap littlespidy** extension is a complete, modern Burp Suite extension built with the Montoya API (`net.portswigger.burp.extensions:montoya-api:2026.4`). It converts and integrates the functionality of **SQLiPy** into a clean, multi-threaded Java architecture, while providing offline database browsing, structural analysis, and persistent session management.
 
 Penetration testers can launch, configure, monitor in real time, and cancel SQLMap scans directly from Burp Suite requests, and then browse and analyze the extracted database tables and sensitive columns without manual CSV inspection.
 
@@ -125,15 +125,15 @@ cd SQLMapAnalyzer_littlespidy
 ```
 
 The compiled release fat-JAR will be created at:
-`SQLMapAnalyzer_littlespidy/build/libs/sqlmap-analyzer-littlespidy-1.0.0.jar`
+`SQLMapAnalyzer_littlespidy/build/libs/ng-sqlmap-littlespidy-1.0.0.jar`
 
 ### Loading into Burp Suite
 1. Open Burp Suite.
 2. Navigate to **Extensions** -> **Installed**.
 3. Click **Add**.
 4. Set **Extension type** to **Java**.
-5. Click **Select file...** and choose `SQLMapAnalyzer_littlespidy/build/libs/sqlmap-analyzer-littlespidy-1.0.0.jar`.
-6. Click **Next**. The extension will load, display the session startup dialog, and add the **SQLMap Analyzer** top-level tab.
+5. Click **Select file...** and choose `SQLMapAnalyzer_littlespidy/build/libs/ng-sqlmap-littlespidy-1.0.0.jar`.
+6. Click **Next**. The extension will load, display the session startup dialog, and add the **ng-sqlmap littlespidy** top-level tab.
 
 ---
 

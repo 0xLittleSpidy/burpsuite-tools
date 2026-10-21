@@ -57,7 +57,10 @@ public class ScanTaskManager {
 
         Future<?> future = scanExecutor.submit(() -> {
             try {
-                if (listener != null) listener.onStatusChanged(record, "INITIALIZING");
+                if (listener != null) {
+                    listener.onStatusChanged(record, "INITIALIZING");
+                    listener.onLogsUpdated(record, record.getLogs());
+                }
 
                 // 1. Create new task
                 String taskId = apiClient.createNewTask();
@@ -130,7 +133,7 @@ public class ScanTaskManager {
                         record.setLogs(logs);
                         lastLogCount = logs.size();
                         if (listener != null) {
-                            listener.onLogsUpdated(record, logs);
+                            listener.onLogsUpdated(record, record.getLogs());
                         }
                     }
 

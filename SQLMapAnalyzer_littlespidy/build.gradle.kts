@@ -28,7 +28,7 @@ tasks.named<Test>("test") {
 }
 
 tasks.named<Jar>("jar") {
-    archiveBaseName.set("sqlmap-analyzer-littlespidy")
+    archiveBaseName.set("ng-sqlmap-littlespidy")
     archiveClassifier.set("")
     archiveVersion.set("1.0.0")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

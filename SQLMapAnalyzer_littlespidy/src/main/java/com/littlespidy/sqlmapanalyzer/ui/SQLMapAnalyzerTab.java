@@ -160,5 +160,8 @@ public class SQLMapAnalyzerTab extends JPanel {
         viewerPanel.clearTableView();
         analysisPanel.refreshAll();
         topControlPanel.resetStatus();
+        if (runnerRootPanel != null) {
+            runnerRootPanel.clearAllTabs();
+        }
     }
 }

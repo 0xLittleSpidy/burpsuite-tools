@@ -20,6 +20,7 @@ public class SQLMapSessionData implements Serializable {
     private Map<String, String> notes = new HashMap<>();
     private String selectedDatabase = "";
     private String selectedTable = "";
+    private List<ScanRequestSessionDto_littlespidy> scanSessions = new ArrayList<>();
 
     public SQLMapSessionData() {}
 
@@ -77,5 +78,13 @@ public class SQLMapSessionData implements Serializable {
 
     public void setSelectedTable(String selectedTable) {
         this.selectedTable = selectedTable;
+    }
+
+    public List<ScanRequestSessionDto_littlespidy> getScanSessions() {
+        return scanSessions;
+    }
+
+    public void setScanSessions(List<ScanRequestSessionDto_littlespidy> scanSessions) {
+        this.scanSessions = scanSessions != null ? scanSessions : new ArrayList<>();
     }
 }

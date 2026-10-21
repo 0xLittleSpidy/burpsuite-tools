@@ -28,7 +28,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **SSO Inspector** | `sso-inspector-littlespidy-1.0.0.jar` (build locally) | Single Sign-On and OAuth 2.0 / OpenID Connect auditor with interactive OAuth workbench, parameter decoding, flow classifier, and ported oauth-scan checks |
 | **API Inspector** | `api-inspector-littlespidy-1.0.0.jar` (build locally) | REST API version discovery and representation prober with ResAPI Version Finder tab, per-request sub-tabs, and multi-strategy mutation engine |
 | **ng-auth-analyzer_littlespidy** | `ng-auth-analyzer_littlespidy-1.1.14.jar` (build locally) | Automated authorization testing with Configuration, History, and Import tabs, synchronized multi-user request/response toggle, and persistent session management |
-| **SQLMap Output Analyzer and Scanner** | `sqlmap-analyzer-littlespidy-1.0.0.jar` (build locally) | Integrated SQLMap suite converting SQLiPy to Java with request sub-tabs, real-time log streaming, execution history, scan cancellation, and offline database structure analysis |
+| **ng-sqlmap littlespidy** | `ng-sqlmap-littlespidy-1.0.0.jar` (build locally) | Integrated SQLMap suite converting SQLiPy to Java with request sub-tabs, real-time log streaming with SQLMAP command, execution history, scan cancellation, persistent session management, and offline database structure analysis |
 
 ---
 
@@ -191,7 +191,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Interactive Workspace & Inspection**: Typed sortable results table (`TableRowSorter`), embedded native Montoya request and response editors, diff breakdown panel, Repeater/Intruder dispatch, and CSV export.
 - **Persistent Session Storage & State Recovery**: Prompts user for storage directory on load, remembers preferences, supports dynamic folder switching via top toolbar, and automatically restores all sub-tabs, configurations, results, and Intruder strategy tracking data across Burp restarts with debounced atomic JSON writes and clean shutdown hooks.
 
-### 17. [SQLMap Output Analyzer and Scanner](file:///home/littlespidy/myextra/burpsuite-extensions/SQLMapAnalyzer_littlespidy)
+### 17. [ng-sqlmap littlespidy](file:///home/littlespidy/myextra/burpsuite-extensions/SQLMapAnalyzer_littlespidy)
 - **Java Conversion of SQLiPy**: Pure Java implementation replacing legacy Python/Jython with native Montoya API integration and direct `sqlmapapi.py` REST communication.
 - **Compact Space-Optimized Navigation Strip**: Single-row horizontal strip directly below session controls with navigation tabs on the far-left and SQLMap output directory controls on the far-right, maximizing vertical workspace.
 - **Request-Based Sub-Tab Management & Double-Click In-Place Renaming**: Right-click context menu (`Send to SQLMap Scanner`) dispatches requests into dedicated, closeable child tabs (`#<ID> <METHOD> <path>`). Double-clicking the tab name allows in-place inline renaming with zero modal popups (`Enter` to commit, `Escape` to cancel).
