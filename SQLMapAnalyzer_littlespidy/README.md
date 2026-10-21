@@ -1,60 +1,75 @@
-# SQLMap Output Analyzer Burp Suite Extension (_littlespidy)
+# SQLMap Output Analyzer and Scanner Burp Suite Extension (_littlespidy)
 
 // Created with the help of an AI Agent and littlespidy.
 
 ## Overview
 
-The **SQLMap Output Analyzer** is a modern Burp Suite extension built with the Montoya API (`net.portswigger.burp.extensions:montoya-api:2026.4`). It allows penetration testers and security auditors to import, browse, search, and analyze SQLMap extraction outputs directly inside Burp Suite without leaving their workflow or manually opening individual CSV files.
+The **SQLMap Output Analyzer and Scanner** is a complete, modern Burp Suite extension built with the Montoya API (`net.portswigger.burp.extensions:montoya-api:2026.4`). It converts and integrates the functionality of **SQLiPy** into a clean, multi-threaded Java architecture, while providing offline database browsing, structural analysis, and persistent session management.
+
+Penetration testers can launch, configure, monitor in real time, and cancel SQLMap scans directly from Burp Suite requests, and then browse and analyze the extracted database tables and sensitive columns without manual CSV inspection.
 
 ---
 
 ## Features
 
-### 1. Smart Directory Scanning
-- Automatically detects and populates standard SQLMap output directories:
-  - **Linux:** `~/.local/share/sqlmap/output/`
-  - **Windows:** `%USERPROFILE%\AppData\Local\sqlmap\output\` or `%LOCALAPPDATA%\sqlmap\output\`
-  - **macOS:** `~/.local/share/sqlmap/output/` or `~/Library/Application Support/sqlmap/output/`
-- Supports flexible directory layouts:
-  - Direct database structure: `<root>/<database>/<table>.csv`
-  - Target host dump structure: `<root>/<target_host>/dump/<database>/<table>.csv`
-- Non-blocking background scanning with real-time status and progress indicator.
+### 1. Tab 1: SQLMap Scanner (Java Conversion of SQLiPy)
+- **Montoya Context Menu Integration**:
+  - Right-click any HTTP request in **Proxy History**, **Repeater**, **Logger**, or **Target SiteMap** and select **"Send to SQLMap Scanner"**.
+  - Automatically parses target URL, HTTP method, headers, cookies, POST body, and injection parameters.
+- **Request-Based Child Sub-Tabs**:
+  - Spawns an isolated, closeable child tab for each request (`#1 POST /api/login [x]`).
+  - No single-window overwrites; manage multiple target requests concurrently.
+- **Dual-Pane Interface**:
+  - **Left Pane (Configuration)**:
+    - Quick presets: `Fast Detection`, `Standard Audit`, `Thorough`, and `WAF Bypass`.
+    - Injection parameter selection (`-p`), Level (1-5), Risk (1-3), Techniques (`BEUSTQ`), DBMS, Tamper scripts.
+    - Timing & Network: Threads (1-10), Delay, Timeout, Retries, Tor Socks5, HPP.
+    - Enumeration: Banner (`-b`), Current DB, Current User, Is DBA, Hostname, Users, Passwords, Tables, Columns, Dump.
+    - Action controls: `[Start Scan]`, `[Stop / Cancel Scan]`, and `[Copy CLI Command]`.
+  - **Right Pane (Native Request View)**:
+    - Embedded native Montoya `HttpRequestEditor` with syntax highlighting and raw/headers/params views.
+- **Real-Time Streaming Log Console**:
+  - Positioned at the bottom with automatic background log polling every 1000ms.
+  - Live status badge: `IDLE`, `RUNNING`, `VULNERABLE`, `COMPLETED`, `CANCELLED`, `ERROR`.
+  - Log level filtering (`ALL`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`), auto-scroll toggle, clear logs, and copy to clipboard.
+  - **Vulnerability Findings Tab**: Structured table showing confirmed vulnerable parameters, detected DBMS, injection types, and proof-of-concept payloads.
+- **Repeated Request Management (Execution Runs)**:
+  - If the same endpoint is submitted multiple times, the existing tab is focused and a new execution run (`Run #2`) is created.
+  - Execution history dropdown allows instant switching between past runs to compare configurations, logs, and findings without cluttering duplicate tabs.
+- **Immediate Scan Cancellation**:
+  - `[Stop / Cancel Scan]` calls `/scan/<taskid>/kill` on the SQLMap REST API, halts background polling, updates the status to `CANCELLED`, and logs the termination notice safely.
+- **API Server Control Bar**:
+  - Configure Host and Port (default: `127.0.0.1:8775`).
+  - `[Test Connection]` checks server reachability.
+  - `[Start Local API]` and `[Stop Local API]` can spawn and manage a local `sqlmapapi.py` subprocess directly.
 
-### 2. Tab 1: Database and Table Viewer
-- **Dynamic Selectors**:
-  - Database dropdown populated with all discovered databases (with target host tags when applicable).
-  - Table dropdown dynamically updating whenever the database selection changes.
-- **Breadcrumb Summary**: Displays active database, table, total rows, and visible/total column counts.
+### 2. Tab 2: Database and Table Viewer
+- **Smart Directory Scanning**:
+  - Auto-detects OS default SQLMap output directories (`~/.local/share/sqlmap/output/` on Linux/macOS and `%LOCALAPPDATA%\sqlmap\output\` on Windows).
+  - Handles direct `<db>/<table>.csv` or target dump structures (`<target>/dump/<db>/<table>.csv`).
+- **Dynamic Dropdowns**: Populated with discovered databases and dynamically updating table lists.
+- **Breadcrumb Statistics**: Displays active database, table, total rows, and visible/total column counts.
 - **Column Visibility Manager**: Dedicated modal dialog allowing users to toggle visible columns on or off with Select All and Deselect All controls.
 - **Real-Time Data Filtering**: High-speed row search supporting case-insensitive matching across table contents.
 - **Data Viewer**: Multi-column scrollable table with horizontal and vertical scrollbars, handling empty cells, special characters, and multiline text.
 - **CSV Export**: Export filtered or full table views to disk.
 
-### 3. Tab 2: Analysis
+### 3. Tab 3: Analysis
 - **Table Gathering**:
-  - Global catalog of all discovered tables across all databases.
-  - Displays database name, table name, column count, row count, file size, and target host.
+  - Global catalog of all discovered tables across all databases with column count, row count, file size, and target host.
   - Search filter for rapid table discovery.
-  - **Double-click navigation**: Double-clicking any table row immediately switches to Tab 1 with that database and table loaded.
+  - Double-click navigation: Double-clicking any table row immediately switches to Tab 2 with that database and table loaded.
 - **Column Gathering**:
   - Aggregates unique column names across all databases.
   - Grouped master-detail split layout:
     - Master list on the left displays unique column names and occurrence counts (e.g. `username (5 occurrences)`).
     - Detail table on the right displays every occurrence (database, table name, total rows, target host).
-  - **Double-click navigation**: Double-clicking an occurrence immediately opens that table in Tab 1.
+  - Double-click navigation: Double-clicking an occurrence immediately opens that table in Tab 2.
 - **Column Keyword Search**:
   - Case-insensitive partial matching and regex support.
-  - One-click quick presets for security auditing:
-    - `pass` (passwords, hashes, credentials)
-    - `user` (usernames, user IDs, accounts)
-    - `email` (email addresses)
-    - `token` (tokens, API keys, session secrets)
-    - `secret` (secrets, private keys)
-    - `number` (account numbers, cards, SSNs, phone numbers)
-    - `admin` (administrative roles, flags)
-    - `hash` (cryptographic hashes)
+  - Quick audit presets: `pass`, `user`, `email`, `token`, `secret`, `number`, `admin`, `hash`.
   - Results table displaying column name, database, table, rows, and host.
-  - **Double-click navigation**: Double-clicking any search result immediately opens that table in Tab 1.
+  - Double-click navigation: Double-clicking any search result immediately opens that table in Tab 2.
 
 ### 4. Persistent Session Storage & State Recovery
 - **No Auto-Load By Default**: Prompts the user on startup with three explicit choices:
@@ -78,7 +93,6 @@ The repository includes a ready-to-test SQLMap output directory under `SQLMapAna
   - `auth_db/`: `users.csv`, `password_resets.csv`, `api_tokens.csv`
   - `billing_db/`: `customers.csv`, `payment_cards.csv`, `invoices.csv`
   - `admin_db/`: `administrators.csv`, `system_config.csv`, `audit_logs.csv`
-- Demonstrates cross-database column gathering (`username`, `email`), sensitive keyword matching (`password_hash`, `api_token`, `card_number`, `is_admin`, `secret_key`), and RFC-4180 CSV parsing (quoted addresses, multiline notes, nulls).
 
 ---
 
@@ -87,6 +101,7 @@ The repository includes a ready-to-test SQLMap output directory under `SQLMapAna
 ### Prerequisites
 - Java Development Kit (JDK) 17 or higher
 - Burp Suite Professional or Community Edition (supporting Montoya API 2026.4 or later)
+- SQLMap with `sqlmapapi.py` (either running as REST server or installed on PATH)
 
 ### Build Instructions
 Run the Gradle build command from within the project directory:

@@ -5,6 +5,7 @@ import burp.api.montoya.MontoyaApi;
 import com.littlespidy.sqlmapanalyzer.model.SqlmapDataStore;
 import com.littlespidy.sqlmapanalyzer.persistence.SQLMapPersistenceManager;
 import com.littlespidy.sqlmapanalyzer.ui.analysis.AnalysisPanel;
+import com.littlespidy.sqlmapanalyzer.ui.runner.SqlmapRunnerRootPanel;
 import com.littlespidy.sqlmapanalyzer.ui.viewer.TableViewerPanel;
 
 import javax.swing.*;
@@ -12,6 +13,7 @@ import java.awt.*;
 
 /**
  * Main Suite Tab component for SQLMap Analyzer in Burp Suite.
+ * Houses Tab 1: SQLMap (Scanner), Tab 2: Database and Table Viewer, Tab 3: Analysis.
  * Plain ASCII text only.
  */
 public class SQLMapAnalyzerTab extends JPanel {
@@ -23,13 +25,16 @@ public class SQLMapAnalyzerTab extends JPanel {
     private final SessionControlPanel sessionControlPanel;
     private final TopControlPanel topControlPanel;
     private final JTabbedPane mainTabbedPane;
+
+    private final SqlmapRunnerRootPanel runnerRootPanel;
     private final TableViewerPanel viewerPanel;
     private final AnalysisPanel analysisPanel;
 
-    public SQLMapAnalyzerTab(MontoyaApi api, SqlmapDataStore dataStore, SQLMapPersistenceManager persistenceManager) {
+    public SQLMapAnalyzerTab(MontoyaApi api, SqlmapDataStore dataStore, SQLMapPersistenceManager persistenceManager, SqlmapRunnerRootPanel runnerRootPanel) {
         this.api = api;
         this.dataStore = dataStore;
         this.persistenceManager = persistenceManager;
+        this.runnerRootPanel = runnerRootPanel;
 
         setLayout(new BorderLayout());
 
@@ -44,16 +49,27 @@ public class SQLMapAnalyzerTab extends JPanel {
         headerPanel.add(topControlPanel);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Main Tabbed Pane: Tab 1 (Viewer) + Tab 2 (Analysis)
+        // Main Tabbed Pane: Tab 1 (SQLMap) + Tab 2 (Viewer) + Tab 3 (Analysis)
         mainTabbedPane = new JTabbedPane();
 
         viewerPanel = new TableViewerPanel(dataStore);
         analysisPanel = new AnalysisPanel(dataStore, this);
 
+        if (runnerRootPanel != null) {
+            mainTabbedPane.addTab("SQLMap", runnerRootPanel);
+        }
         mainTabbedPane.addTab("Database and Table Viewer", viewerPanel);
         mainTabbedPane.addTab("Analysis", analysisPanel);
 
         add(mainTabbedPane, BorderLayout.CENTER);
+    }
+
+    public SqlmapRunnerRootPanel getRunnerRootPanel() {
+        return runnerRootPanel;
+    }
+
+    public void switchToSqlmapTab() {
+        mainTabbedPane.setSelectedIndex(0);
     }
 
     public void refreshFromDataStore() {
@@ -63,7 +79,10 @@ public class SQLMapAnalyzerTab extends JPanel {
     }
 
     public void navigateToViewer(String dbName, String tableName) {
-        mainTabbedPane.setSelectedIndex(0);
+        int viewerIdx = mainTabbedPane.indexOfComponent(viewerPanel);
+        if (viewerIdx != -1) {
+            mainTabbedPane.setSelectedIndex(viewerIdx);
+        }
         viewerPanel.selectDatabaseAndTable(dbName, tableName);
     }
 

@@ -28,7 +28,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **SSO Inspector** | `sso-inspector-littlespidy-1.0.0.jar` (build locally) | Single Sign-On and OAuth 2.0 / OpenID Connect auditor with interactive OAuth workbench, parameter decoding, flow classifier, and ported oauth-scan checks |
 | **API Inspector** | `api-inspector-littlespidy-1.0.0.jar` (build locally) | REST API version discovery and representation prober with ResAPI Version Finder tab, per-request sub-tabs, and multi-strategy mutation engine |
 | **ng-auth-analyzer_littlespidy** | `ng-auth-analyzer_littlespidy-1.1.14.jar` (build locally) | Automated authorization testing with Configuration, History, and Import tabs, synchronized multi-user request/response toggle, and persistent session management |
-| **SQLMap Output Analyzer** | `sqlmap-analyzer-littlespidy-1.0.0.jar` (build locally) | Offline SQLMap output browser and structural analyzer with Database and Table Viewer, Table Gathering, Grouped Column Gathering, Keyword Search presets, and persistent session storage |
+| **SQLMap Output Analyzer and Scanner** | `sqlmap-analyzer-littlespidy-1.0.0.jar` (build locally) | Integrated SQLMap suite converting SQLiPy to Java with request sub-tabs, real-time log streaming, execution history, scan cancellation, and offline database structure analysis |
 
 ---
 
@@ -191,14 +191,17 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 - **Interactive Workspace & Inspection**: Typed sortable results table (`TableRowSorter`), embedded native Montoya request and response editors, diff breakdown panel, Repeater/Intruder dispatch, and CSV export.
 - **Persistent Session Storage & State Recovery**: Prompts user for storage directory on load, remembers preferences, supports dynamic folder switching via top toolbar, and automatically restores all sub-tabs, configurations, results, and Intruder strategy tracking data across Burp restarts with debounced atomic JSON writes and clean shutdown hooks.
 
-### 17. [SQLMap Output Analyzer](file:///home/littlespidy/myextra/burpsuite-extensions/SQLMapAnalyzer_littlespidy)
-- **Automatic Output Directory Discovery**: Intelligently scans OS default SQLMap directories (`~/.local/share/sqlmap/output/` on Linux/macOS and `%USERPROFILE%\AppData\Local\sqlmap\output\` on Windows) and custom target folders.
-- **Database & Table Viewer**: Dynamic database and table dropdowns, breadcrumb statistics, column visibility manager with toggleable checkboxes, instant text search, scrollable table view, and CSV export.
-- **Analysis Suite**:
-  - **Table Gathering**: Global catalog of all discovered tables with database name, table name, column count, row count, file size, target host, and double-click navigation.
-  - **Column Gathering**: Master-detail view of unique column names grouped across all databases and tables with occurrence counts and double-click navigation.
-  - **Column Keyword Search**: Rapid searching for sensitive column names with case-insensitive partial/regex matching, quick audit presets (`pass`, `user`, `email`, `token`, `secret`, `number`, `admin`, `hash`), and double-click navigation.
-- **Persistent Session Management**: Standardized startup dialog (Open Existing, Create New, Temporary), persistent top toolbar controls, session offboarding, debounced atomic auto-save, and clean extension shutdown hooks.
+### 17. [SQLMap Output Analyzer and Scanner](file:///home/littlespidy/myextra/burpsuite-extensions/SQLMapAnalyzer_littlespidy)
+- **Java Conversion of SQLiPy**: Pure Java implementation replacing legacy Python/Jython with native Montoya API integration and direct `sqlmapapi.py` REST communication.
+- **Request-Based Sub-Tab Management**: Right-click context menu (`Send to SQLMap Scanner`) dispatches requests into dedicated, closeable child tabs (`#<ID> <METHOD> <path>`).
+- **Dual-Pane Interface**: Configuration controls on the left (Level, Risk, Techniques, Tamper, Network, Enumeration flags, presets) and native Montoya `HttpRequestEditor` on the right.
+- **Real-Time Streaming Logs & Findings**: Real-time log console at the bottom with live polling, status badges, log level filtering, auto-scroll, and structured SQL injection findings table.
+- **Repeated Request Execution History**: Automatically groups repeated submissions into an Execution Run dropdown (`Run #1`, `Run #2`) within the existing tab to track multiple test runs without tab clutter.
+- **Scan Cancellation & Process Control**: Immediate scan termination via `/scan/<taskid>/kill` and one-click local `sqlmapapi.py` subprocess management.
+- **Offline Output Analyzer**:
+  - **Database & Table Viewer**: Dynamic database/table dropdowns, breadcrumbs, column visibility controls, table text search, and CSV export.
+  - **Analysis Suite**: Table Gathering cross-database catalog, Column Gathering grouped unique columns with occurrence counts, and Column Keyword Search with quick presets (`pass`, `user`, `email`, `token`, `secret`, `number`, `admin`, `hash`).
+- **Persistent Session Storage**: Interactive startup dialog, toolbar controls, debounced atomic auto-saves, and safe extension shutdown hooks.
 
 ---
 
