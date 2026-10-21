@@ -158,7 +158,7 @@ dramatically better workflow. They can run tests on one endpoint while sweeping 
 
 ### Tab Naming Convention & Double-Click In-Place Header Renaming (No Popups)
 
-Burp extensions supporting dynamic multi-session testing (e.g. sending requests from Proxy History, Repeater, Logger, or Scanner into dedicated testing/fuzzing/auditing tabs) must provide a predictable default naming convention and seamless in-place tab renaming.
+Burp extensions supporting dynamic multi-session testing (e.g. sending requests from Proxy History, Repeater, Logger, or Scanner into dedicated testing/fuzzing/auditing tabs) must provide a predictable default naming convention and seamless in-place tab renaming. Whenever a request is sent from other tools to the extension, the user must be able to rename the tab at any time by simply double-clicking its header.
 
 #### 1. Default Tab Naming Convention When Sending to Extension
 

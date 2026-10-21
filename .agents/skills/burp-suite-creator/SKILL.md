@@ -178,7 +178,8 @@ public Class<?> getColumnClass(int columnIndex) {
 
 ### 9. Dynamic Tab Naming Convention & Double-Click Inline Renaming (Zero Popups)
 
-Whenever an extension spawns dynamic session tabs (e.g., when a user sends an HTTP request from context menus, Proxy history, Repeater, or scanner):
+Whenever an extension spawns dynamic session tabs (e.g., when a user sends an HTTP request from context menus, Proxy history, Repeater, Logger, or scanner):
+- Whenever a request is sent from other tools to the extension, a dedicated request tab is spawned. The user can rename this tab at any time simply by double-clicking the tab name in the tab header to activate inline editing.
 
 1. **Default Naming Convention**:
    - Always assign a structured, predictable default tab title: `"#<ID> <METHOD> <truncated_path>"` (e.g., `"#1 GET /api/v1/users"`, `"#2 POST /login"`).

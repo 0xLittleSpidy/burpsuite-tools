@@ -173,6 +173,19 @@ public class RequestScanTabPanel extends JPanel {
         ScanExecutionRecord active = session.getActiveExecution();
         if (active == null) return;
 
+        String currentStatus = active.getStatus();
+        if ("COMPLETED".equalsIgnoreCase(currentStatus) || "VULNERABLE".equalsIgnoreCase(currentStatus) || "ERROR".equalsIgnoreCase(currentStatus)) {
+            active = session.createNewExecution();
+            refreshExecutionDropdown();
+            loadCurrentExecution();
+        } else if ("CANCELLED".equalsIgnoreCase(currentStatus) || active.isCancelled()) {
+            active.setCancelled(false);
+            active.setStatus("READY");
+            active.addLog(new SqlmapLogEntry("INFO", "", "Restarting cancelled scan execution run..."));
+            logConsolePanel.updateFromRecord(active);
+            refreshExecutionDropdown();
+        }
+
         active.setOptions(configPanel.applyUiToOptions());
         configPanel.setScanningState(true);
         logConsolePanel.setStatusBadge("RUNNING", false);
@@ -212,6 +225,7 @@ public class RequestScanTabPanel extends JPanel {
                 SwingUtils.runOnEdt(() -> {
                     if (record == session.getActiveExecution()) {
                         configPanel.setScanningState(false);
+                        logConsolePanel.setStatusBadge(record.getStatus(), record.isVulnerable());
                     }
                     refreshExecutionDropdown();
                 });
@@ -222,6 +236,7 @@ public class RequestScanTabPanel extends JPanel {
                 SwingUtils.runOnEdt(() -> {
                     if (record == session.getActiveExecution()) {
                         configPanel.setScanningState(false);
+                        logConsolePanel.setStatusBadge(record.getStatus(), record.isVulnerable());
                         JOptionPane.showMessageDialog(RequestScanTabPanel.this, errorMessage, "Scan Error", JOptionPane.ERROR_MESSAGE);
                     }
                     refreshExecutionDropdown();
@@ -237,6 +252,7 @@ public class RequestScanTabPanel extends JPanel {
         taskManager.cancelScan(active);
         configPanel.setScanningState(false);
         logConsolePanel.setStatusBadge("CANCELLED", false);
+        logConsolePanel.updateFromRecord(active);
         refreshExecutionDropdown();
     }
 

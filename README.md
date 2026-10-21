@@ -193,11 +193,15 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 
 ### 17. [SQLMap Output Analyzer and Scanner](file:///home/littlespidy/myextra/burpsuite-extensions/SQLMapAnalyzer_littlespidy)
 - **Java Conversion of SQLiPy**: Pure Java implementation replacing legacy Python/Jython with native Montoya API integration and direct `sqlmapapi.py` REST communication.
-- **Request-Based Sub-Tab Management**: Right-click context menu (`Send to SQLMap Scanner`) dispatches requests into dedicated, closeable child tabs (`#<ID> <METHOD> <path>`).
-- **Dual-Pane Interface**: Configuration controls on the left (Level, Risk, Techniques, Tamper, Network, Enumeration flags, presets) and native Montoya `HttpRequestEditor` on the right.
+- **Compact Space-Optimized Navigation Strip**: Single-row horizontal strip directly below session controls with navigation tabs on the far-left and SQLMap output directory controls on the far-right, maximizing vertical workspace.
+- **Request-Based Sub-Tab Management & Double-Click In-Place Renaming**: Right-click context menu (`Send to SQLMap Scanner`) dispatches requests into dedicated, closeable child tabs (`#<ID> <METHOD> <path>`). Double-clicking the tab name allows in-place inline renaming with zero modal popups (`Enter` to commit, `Escape` to cancel).
+- **Dual-Pane Interface**:
+  - Configuration controls on the left with presets (`Fast Detection`, `Standard Audit`, `Thorough`, `WAF Bypass`), multi-select tamper script dropdown with live search, and target specific resource fields for Database (`-D`), Table (`-T`), and Column (`-C`).
+  - Native Montoya `HttpRequestEditor` on the right with syntax highlighting and raw/headers/params views.
+  - Compact code-formatted Copy CLI dialog with standard close (X) button, ESC shortcut, and copy action.
 - **Real-Time Streaming Logs & Findings**: Real-time log console at the bottom with live polling, status badges, log level filtering, auto-scroll, and structured SQL injection findings table.
-- **Repeated Request Execution History**: Automatically groups repeated submissions into an Execution Run dropdown (`Run #1`, `Run #2`) within the existing tab to track multiple test runs without tab clutter.
-- **Scan Cancellation & Process Control**: Immediate scan termination via `/scan/<taskid>/kill` and one-click local `sqlmapapi.py` subprocess management.
+- **Repeated Request Execution History & Automated Lifecycle**: Automatically creates a new execution run (`Run #2`, `Run #3`) when starting a scan after completion, and reuses the existing run when restarting a cancelled scan.
+- **Scan Cancellation & Reliable Status**: Immediate scan termination via `/scan/<taskid>/kill`, cancellation state tracking ensuring cancelled status is preserved throughout the application, and one-click local `sqlmapapi.py` subprocess management.
 - **Offline Output Analyzer**:
   - **Database & Table Viewer**: Dynamic database/table dropdowns, breadcrumbs, column visibility controls, table text search, and CSV export.
   - **Analysis Suite**: Table Gathering cross-database catalog, Column Gathering grouped unique columns with occurrence counts, and Column Keyword Search with quick presets (`pass`, `user`, `email`, `token`, `secret`, `number`, `admin`, `hash`).

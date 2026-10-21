@@ -23,7 +23,11 @@ public class RequestConfigPanel extends JPanel {
     private final JTextField txtTechnique;
     private final JComboBox<String> comboDbms;
     private final JTextField txtOs;
-    private final JTextField txtTamper;
+    private final MultiSelectTamperDropdown_littlespidy tamperDropdown;
+
+    private final JTextField txtDb;
+    private final JTextField txtTbl;
+    private final JTextField txtCol;
 
     private final JComboBox<Integer> comboThreads;
     private final JTextField txtDelay;
@@ -132,10 +136,31 @@ public class RequestConfigPanel extends JPanel {
         detectPanel.add(comboDbms);
 
         detectPanel.add(new JLabel("Tamper Scripts:"));
-        txtTamper = new JTextField();
-        detectPanel.add(txtTamper);
+        tamperDropdown = new MultiSelectTamperDropdown_littlespidy();
+        detectPanel.add(tamperDropdown);
 
         content.add(detectPanel);
+
+        // 3. Target Specific Resources (Optional -D, -T, -C)
+        JPanel targetPanel = new JPanel(new GridLayout(3, 2, 4, 4));
+        targetPanel.setBorder(new CompoundBorder(new TitledBorder("Target Specific Resources (Optional)"), new EmptyBorder(4, 6, 4, 6)));
+
+        targetPanel.add(new JLabel("Database (-D):"));
+        txtDb = new JTextField();
+        txtDb.setToolTipText("Target specific database name");
+        targetPanel.add(txtDb);
+
+        targetPanel.add(new JLabel("Table (-T):"));
+        txtTbl = new JTextField();
+        txtTbl.setToolTipText("Target specific table name");
+        targetPanel.add(txtTbl);
+
+        targetPanel.add(new JLabel("Column (-C):"));
+        txtCol = new JTextField();
+        txtCol.setToolTipText("Target specific column(s) (comma-separated)");
+        targetPanel.add(txtCol);
+
+        content.add(targetPanel);
 
         // 3. Timing & Network Panel
         JPanel netPanel = new JPanel(new GridLayout(4, 2, 4, 4));
@@ -212,7 +237,10 @@ public class RequestConfigPanel extends JPanel {
         txtTechnique.setText(options.getTechnique());
         comboDbms.setSelectedItem(options.getDbms());
         txtOs.setText(options.getOs());
-        txtTamper.setText(options.getTamper());
+        tamperDropdown.setText(options.getTamper());
+        txtDb.setText(options.getDb());
+        txtTbl.setText(options.getTbl());
+        txtCol.setText(options.getCol());
 
         comboThreads.setSelectedItem(options.getThreads());
         txtDelay.setText(String.valueOf(options.getDelay()));
@@ -247,7 +275,10 @@ public class RequestConfigPanel extends JPanel {
         currentOptions.setTechnique(txtTechnique.getText().trim());
         currentOptions.setDbms((String) comboDbms.getSelectedItem());
         currentOptions.setOs(txtOs.getText().trim());
-        currentOptions.setTamper(txtTamper.getText().trim());
+        currentOptions.setTamper(tamperDropdown.getText());
+        currentOptions.setDb(txtDb.getText().trim());
+        currentOptions.setTbl(txtTbl.getText().trim());
+        currentOptions.setCol(txtCol.getText().trim());
 
         currentOptions.setThreads((Integer) comboThreads.getSelectedItem());
         try { currentOptions.setDelay(Integer.parseInt(txtDelay.getText().trim())); } catch (Exception ignored) {}
@@ -282,7 +313,7 @@ public class RequestConfigPanel extends JPanel {
         comboLevel.setSelectedItem(1);
         comboRisk.setSelectedItem(1);
         txtTechnique.setText("BEUSTQ");
-        txtTamper.setText("");
+        tamperDropdown.setText("");
         comboThreads.setSelectedItem(1);
     }
 
@@ -306,7 +337,7 @@ public class RequestConfigPanel extends JPanel {
     private void applyPresetWaf() {
         comboLevel.setSelectedItem(3);
         comboRisk.setSelectedItem(2);
-        txtTamper.setText("space2comment,between,randomcase");
+        tamperDropdown.setText("space2comment,between,randomcase");
         chkHpp.setSelected(true);
     }
 
@@ -314,7 +345,6 @@ public class RequestConfigPanel extends JPanel {
         applyUiToOptions();
         String cmd = currentOptions.buildCommandLine();
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(cmd), null);
-        JOptionPane.showMessageDialog(this, "SQLMap command copied to clipboard:\n\n" + cmd,
-                "Command Copied", JOptionPane.INFORMATION_MESSAGE);
+        CliCommandDialog_littlespidy.showCli(this, cmd);
     }
 }

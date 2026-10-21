@@ -17,6 +17,7 @@ public class ScanRequestSession implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int sessionId;
+    private String customTabTitle = null;
     private String method = "GET";
     private String url = "";
     private byte[] rawRequest = new byte[0];
@@ -98,7 +99,18 @@ public class ScanRequestSession implements Serializable {
         return false;
     }
 
-    public String getTabTitle() {
+    public synchronized void setCustomTabTitle(String customTabTitle) {
+        this.customTabTitle = customTabTitle;
+    }
+
+    public synchronized String getCustomTabTitle() {
+        return customTabTitle;
+    }
+
+    public synchronized String getTabTitle() {
+        if (customTabTitle != null && !customTabTitle.isBlank()) {
+            return customTabTitle;
+        }
         String path = url;
         try {
             URI u = URI.create(url);

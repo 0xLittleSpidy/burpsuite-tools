@@ -128,7 +128,16 @@ public class SqlmapRunnerRootPanel extends JPanel {
         int tabIndex = requestTabbedPane.getTabCount();
         requestTabbedPane.addTab(session.getTabTitle(), tab);
 
-        CloseableTabHeader_littlespidy header = new CloseableTabHeader_littlespidy(session.getTabTitle(), h -> closeTab(tab));
+        CloseableTabHeader_littlespidy header = new CloseableTabHeader_littlespidy(
+                session.getTabTitle(),
+                newTitle -> {
+                    session.setCustomTabTitle(newTitle);
+                    int idx = requestTabbedPane.indexOfComponent(tab);
+                    if (idx != -1) {
+                        requestTabbedPane.setTitleAt(idx, newTitle);
+                    }
+                },
+                h -> closeTab(tab));
         requestTabbedPane.setTabComponentAt(tabIndex, header);
         requestTabbedPane.setSelectedIndex(tabIndex);
     }
@@ -170,7 +179,16 @@ public class SqlmapRunnerRootPanel extends JPanel {
 
             int tabIndex = requestTabbedPane.getTabCount();
             requestTabbedPane.addTab(session.getTabTitle(), tab);
-            CloseableTabHeader_littlespidy header = new CloseableTabHeader_littlespidy(session.getTabTitle(), h -> closeTab(tab));
+            CloseableTabHeader_littlespidy header = new CloseableTabHeader_littlespidy(
+                    session.getTabTitle(),
+                    newTitle -> {
+                        session.setCustomTabTitle(newTitle);
+                        int idx = requestTabbedPane.indexOfComponent(tab);
+                        if (idx != -1) {
+                            requestTabbedPane.setTitleAt(idx, newTitle);
+                        }
+                    },
+                    h -> closeTab(tab));
             requestTabbedPane.setTabComponentAt(tabIndex, header);
             requestTabbedPane.setSelectedIndex(tabIndex);
         }

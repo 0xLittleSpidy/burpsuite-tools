@@ -13,7 +13,8 @@ import java.awt.*;
 import java.io.File;
 
 /**
- * Control bar for selecting SQLMap output directory and triggering scans.
+ * Compact control bar for selecting SQLMap output directory and triggering scans.
+ * Designed to fit cleanly on the far-right side of the navigation bar.
  * Plain ASCII text only.
  */
 public class TopControlPanel extends JPanel {
@@ -33,47 +34,40 @@ public class TopControlPanel extends JPanel {
         this.dataStore = dataStore;
         this.persistenceManager = persistenceManager;
 
-        setLayout(new BorderLayout(10, 5));
-        setBorder(new EmptyBorder(8, 10, 8, 10));
+        setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 2));
+        setBorder(new EmptyBorder(2, 4, 2, 4));
 
-        // Top row: Directory path input and buttons
-        JPanel inputPanel = new JPanel(new BorderLayout(8, 0));
-
-        JLabel dirLabel = SwingUtils.createBoldLabel("SQLMap Output Directory:");
-        inputPanel.add(dirLabel, BorderLayout.WEST);
+        JLabel dirLabel = SwingUtils.createBoldLabel("Output Dir:");
+        add(dirLabel);
 
         dirPathField = new JTextField();
         File defaultDir = OSUtils.getDefaultSqlmapOutputDir();
         dirPathField.setText(defaultDir.getAbsolutePath());
-        inputPanel.add(dirPathField, BorderLayout.CENTER);
+        dirPathField.setPreferredSize(new Dimension(210, 24));
+        dirPathField.setToolTipText("SQLMap dump output directory");
+        add(dirPathField);
 
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         btnBrowse = SwingUtils.createStyledButton("Browse...");
+        btnBrowse.setMargin(new Insets(2, 6, 2, 6));
         btnBrowse.addActionListener(e -> onBrowse());
+        add(btnBrowse);
 
         btnScan = SwingUtils.createStyledButton("Scan / Import");
         btnScan.setFont(btnScan.getFont().deriveFont(Font.BOLD));
+        btnScan.setMargin(new Insets(2, 6, 2, 6));
         btnScan.addActionListener(e -> startScan(new File(dirPathField.getText().trim())));
-
-        btnPanel.add(btnBrowse);
-        btnPanel.add(btnScan);
-        inputPanel.add(btnPanel, BorderLayout.EAST);
-
-        add(inputPanel, BorderLayout.NORTH);
-
-        // Bottom row: Status and progress bar
-        JPanel statusPanel = new JPanel(new BorderLayout(10, 0));
-        statusLabel = new JLabel("Status: Ready. Please select a SQLMap output directory.");
-        statusLabel.setFont(statusLabel.getFont().deriveFont(Font.PLAIN, 12));
+        add(btnScan);
 
         progressBar = new JProgressBar();
         progressBar.setVisible(false);
-        progressBar.setPreferredSize(new Dimension(150, 16));
+        progressBar.setPreferredSize(new Dimension(60, 16));
+        add(progressBar);
 
-        statusPanel.add(statusLabel, BorderLayout.CENTER);
-        statusPanel.add(progressBar, BorderLayout.EAST);
-
-        add(statusPanel, BorderLayout.SOUTH);
+        statusLabel = new JLabel("Ready");
+        statusLabel.setFont(statusLabel.getFont().deriveFont(Font.PLAIN, 11));
+        statusLabel.setForeground(Color.DARK_GRAY);
+        statusLabel.setToolTipText("Status: Ready. Please select a SQLMap output directory.");
+        add(statusLabel);
     }
 
     private void onBrowse() {
@@ -104,7 +98,8 @@ public class TopControlPanel extends JPanel {
         btnBrowse.setEnabled(false);
         progressBar.setIndeterminate(true);
         progressBar.setVisible(true);
-        statusLabel.setText("Status: Scanning directory " + rootDir.getName() + "...");
+        statusLabel.setText("Scanning...");
+        statusLabel.setToolTipText("Scanning directory " + rootDir.getName() + "...");
 
         SwingWorker<Void, String> worker = new SwingWorker<>() {
             private int foundDbs = 0;
@@ -117,7 +112,10 @@ public class TopControlPanel extends JPanel {
                 scanner.scanDirectory(rootDir, dataStore, new DirectoryScanner.ScanProgressListener() {
                     @Override
                     public void onProgress(String currentItem, int tableCount) {
-                        SwingUtils.runOnEdt(() -> statusLabel.setText("Scanning: " + currentItem + " (" + tableCount + " tables found)"));
+                        SwingUtils.runOnEdt(() -> {
+                            statusLabel.setText("Scanning (" + tableCount + ")");
+                            statusLabel.setToolTipText("Scanning: " + currentItem + " (" + tableCount + " tables found)");
+                        });
                     }
 
                     @Override
@@ -141,10 +139,12 @@ public class TopControlPanel extends JPanel {
                 progressBar.setVisible(false);
 
                 if (errorMessage != null) {
-                    statusLabel.setText("Status: " + errorMessage);
+                    statusLabel.setText("Error");
+                    statusLabel.setToolTipText(errorMessage);
                     JOptionPane.showMessageDialog(TopControlPanel.this, errorMessage, "Scan Warning", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    statusLabel.setText("Status: Scan complete. Found " + foundDbs + " databases and " + foundTables + " tables.");
+                    statusLabel.setText(foundDbs + " DBs, " + foundTables + " Tables");
+                    statusLabel.setToolTipText("Scan complete. Found " + foundDbs + " databases and " + foundTables + " tables.");
                     mainTab.refreshFromDataStore();
                     persistenceManager.triggerAutoSave();
                 }
@@ -159,7 +159,8 @@ public class TopControlPanel extends JPanel {
     }
 
     public void resetStatus() {
-        statusLabel.setText("Status: Ready. Please select a SQLMap output directory.");
+        statusLabel.setText("Ready");
+        statusLabel.setToolTipText("Status: Ready. Please select a SQLMap output directory.");
         progressBar.setVisible(false);
     }
 }

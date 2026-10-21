@@ -26,6 +26,9 @@ public class SqlmapTaskOptions implements Serializable {
     private String dbms = "";
     private String os = "";
     private String tamper = "";
+    private String db = "";
+    private String tbl = "";
+    private String col = "";
     private int threads = 1;
     private int delay = 0;
     private int timeout = 30;
@@ -78,6 +81,9 @@ public class SqlmapTaskOptions implements Serializable {
             this.dbms = other.dbms;
             this.os = other.os;
             this.tamper = other.tamper;
+            this.db = other.db;
+            this.tbl = other.tbl;
+            this.col = other.col;
             this.threads = other.threads;
             this.delay = other.delay;
             this.timeout = other.timeout;
@@ -127,6 +133,9 @@ public class SqlmapTaskOptions implements Serializable {
         if (dbms != null && !dbms.isBlank()) map.put("dbms", dbms);
         if (os != null && !os.isBlank()) map.put("os", os);
         if (tamper != null && !tamper.isBlank()) map.put("tamper", tamper);
+        if (db != null && !db.isBlank()) map.put("db", db);
+        if (tbl != null && !tbl.isBlank()) map.put("tbl", tbl);
+        if (col != null && !col.isBlank()) map.put("col", col);
 
         map.put("threads", threads);
         map.put("delay", delay);
@@ -190,6 +199,9 @@ public class SqlmapTaskOptions implements Serializable {
         if (dbms != null && !dbms.isBlank()) sb.append(" --dbms=\"").append(dbms).append("\"");
         if (os != null && !os.isBlank()) sb.append(" --os=\"").append(os).append("\"");
         if (tamper != null && !tamper.isBlank()) sb.append(" --tamper=\"").append(tamper).append("\"");
+        if (db != null && !db.isBlank()) sb.append(" -D \"").append(db).append("\"");
+        if (tbl != null && !tbl.isBlank()) sb.append(" -T \"").append(tbl).append("\"");
+        if (col != null && !col.isBlank()) sb.append(" -C \"").append(col).append("\"");
         if (threads > 1) sb.append(" --threads=").append(threads);
         if (delay > 0) sb.append(" --delay=").append(delay);
         if (batch) sb.append(" --batch");
@@ -236,6 +248,12 @@ public class SqlmapTaskOptions implements Serializable {
     public void setOs(String os) { this.os = os; }
     public String getTamper() { return tamper; }
     public void setTamper(String tamper) { this.tamper = tamper; }
+    public String getDb() { return db; }
+    public void setDb(String db) { this.db = db; }
+    public String getTbl() { return tbl; }
+    public void setTbl(String tbl) { this.tbl = tbl; }
+    public String getCol() { return col; }
+    public void setCol(String col) { this.col = col; }
     public int getThreads() { return threads; }
     public void setThreads(int threads) { this.threads = threads; }
     public int getDelay() { return delay; }

@@ -18,11 +18,13 @@ import java.util.List;
 public class ScanExecutionRecord implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private final String recordId = java.util.UUID.randomUUID().toString();
     private int executionNumber;
     private long timestamp;
     private String taskId = "";
     private SqlmapTaskOptions options;
     private String status = "READY";
+    private volatile boolean cancelled = false;
     private boolean vulnerable = false;
     private final List<SqlmapLogEntry> logs = new ArrayList<>();
     private final List<SqlmapFinding> findings = new ArrayList<>();
@@ -57,12 +59,30 @@ public class ScanExecutionRecord implements Serializable {
         this.options = options != null ? options : new SqlmapTaskOptions();
     }
 
+    public String getRecordId() {
+        return recordId;
+    }
+
+    public boolean isCancelled() {
+        return cancelled || "CANCELLED".equalsIgnoreCase(status);
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+        if (cancelled) {
+            this.status = "CANCELLED";
+        }
+    }
+
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status != null ? status : "READY";
+        if ("READY".equalsIgnoreCase(status) || "RUNNING".equalsIgnoreCase(status)) {
+            this.cancelled = false;
+        }
     }
 
     public boolean isVulnerable() {

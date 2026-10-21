@@ -16,16 +16,21 @@ Penetration testers can launch, configure, monitor in real time, and cancel SQLM
 - **Montoya Context Menu Integration**:
   - Right-click any HTTP request in **Proxy History**, **Repeater**, **Logger**, or **Target SiteMap** and select **"Send to SQLMap Scanner"**.
   - Automatically parses target URL, HTTP method, headers, cookies, POST body, and injection parameters.
-- **Request-Based Child Sub-Tabs**:
+- **Request-Based Child Sub-Tabs & Double-Click In-Place Renaming**:
   - Spawns an isolated, closeable child tab for each request (`#1 POST /api/login [x]`).
+  - **Double-Click In-Place Renaming**: Double-clicking any request tab name swaps the label into an inline text field directly in the tab header to rename the tab with zero modal popups (`Enter` to commit, `Escape` to cancel).
+  - Custom tab names are persisted across session saves and state restoration.
   - No single-window overwrites; manage multiple target requests concurrently.
 - **Dual-Pane Interface**:
   - **Left Pane (Configuration)**:
     - Quick presets: `Fast Detection`, `Standard Audit`, `Thorough`, and `WAF Bypass`.
-    - Injection parameter selection (`-p`), Level (1-5), Risk (1-3), Techniques (`BEUSTQ`), DBMS, Tamper scripts.
+    - Injection parameter selection (`-p`), Level (1-5), Risk (1-3), Techniques (`BEUSTQ`), DBMS.
+    - **Multi-Select Tamper Script Dropdown**: Live search filter, scrollable checklist of popular tamper scripts (`between`, `randomcase`, `space2comment`, etc.), "Select All" and "Clear" shortcuts, and manual text editing.
+    - **Target Specific Resources (Optional)**: Specific target inputs for Database (`-D`), Table (`-T`), and Column (`-C`).
     - Timing & Network: Threads (1-10), Delay, Timeout, Retries, Tor Socks5, HPP.
     - Enumeration: Banner (`-b`), Current DB, Current User, Is DBA, Hostname, Users, Passwords, Tables, Columns, Dump.
     - Action controls: `[Start Scan]`, `[Stop / Cancel Scan]`, and `[Copy CLI Command]`.
+    - **Compact Copy CLI Dialog**: Displays the generated command in a compact, code-formatted window with monospace syntax view, standard close (X) button, ESC shortcut, and "Copy Again" action.
   - **Right Pane (Native Request View)**:
     - Embedded native Montoya `HttpRequestEditor` with syntax highlighting and raw/headers/params views.
 - **Real-Time Streaming Log Console**:
@@ -33,11 +38,12 @@ Penetration testers can launch, configure, monitor in real time, and cancel SQLM
   - Live status badge: `IDLE`, `RUNNING`, `VULNERABLE`, `COMPLETED`, `CANCELLED`, `ERROR`.
   - Log level filtering (`ALL`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`), auto-scroll toggle, clear logs, and copy to clipboard.
   - **Vulnerability Findings Tab**: Structured table showing confirmed vulnerable parameters, detected DBMS, injection types, and proof-of-concept payloads.
-- **Repeated Request Management (Execution Runs)**:
-  - If the same endpoint is submitted multiple times, the existing tab is focused and a new execution run (`Run #2`) is created.
-  - Execution history dropdown allows instant switching between past runs to compare configurations, logs, and findings without cluttering duplicate tabs.
-- **Immediate Scan Cancellation**:
-  - `[Stop / Cancel Scan]` calls `/scan/<taskid>/kill` on the SQLMap REST API, halts background polling, updates the status to `CANCELLED`, and logs the termination notice safely.
+- **Repeated Request Management & Automated Execution Runs**:
+  - When a completed scan (`COMPLETED`, `VULNERABLE`, `ERROR`) has **Start Scan** clicked again, the extension automatically spawns the next execution run (`Run #2`, `Run #3`, etc.).
+  - When restarting a `CANCELLED` scan, the existing execution run is safely reused and restarted without creating unnecessary duplicate entries.
+  - Execution history dropdown allows instant switching between past runs to compare configurations, logs, and findings.
+- **Immediate Scan Cancellation & Accurate Status**:
+  - `[Stop / Cancel Scan]` terminates the scan immediately on the SQLMap API, cancels background polling, sets the status permanently to `CANCELLED`, and prevents subsequent polling cycles from erroneously overwriting the status with `COMPLETED`.
 - **API Server Control Bar**:
   - Configure Host and Port (default: `127.0.0.1:8775`).
   - `[Test Connection]` checks server reachability.
@@ -86,7 +92,14 @@ Penetration testers can launch, configure, monitor in real time, and cancel SQLM
 - **Debounced Atomic Auto-Save Engine**: Background daemon executor writes to `.tmp` followed by atomic replacement to prevent file corruption.
 - **Clean Shutdown Hook**: Registers an unloading handler via Montoya API to ensure safe state preservation on Burp exit or extension reload.
 
-### 5. Sample SQLMap Output for Personal Analysis
+### 5. Compact Space-Optimized Navigation Layout
+- **Single-Row Navigation Strip**:
+  - Located directly below the session control toolbar.
+  - **Far-Left Side**: Navigation toggle buttons (`[ SQLMap ]`, `[ Database and Table Viewer ]`, `[ Analysis ]`) switching active views smoothly via `CardLayout`.
+  - **Far-Right Side**: SQLMap output directory controls (`Output Dir: [path] [Browse...] [Scan / Import] [Status]`).
+  - Eliminates vertical screen space waste, maximizing visibility for scan options, request inspection, and data tables.
+
+### 6. Sample SQLMap Output for Personal Analysis
 The repository includes a ready-to-test SQLMap output directory under `SQLMapAnalyzer_littlespidy/sample_output/`:
 - **Target Host**: `app.target.local`
 - **Databases & Tables**:
