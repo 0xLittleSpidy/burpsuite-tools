@@ -66,23 +66,37 @@ Modern web applications and APIs frequently maintain legacy, unreleased, depreca
   - Postman Collections (v2.0 and v2.1 JSON).
 - File import with multi-file batch selection and format validation.
 - URL import with multi-URL ingestion, HTTP fetching via Montoya/Burp network settings, and error reporting.
-- Collections management table displaying collection name, format, source path/URL, target base URL override, discovered endpoint count, status, and assigned authentication profile.
-- Endpoint inspection sub-table with search filtering and detailed parameter/body viewer.
+- Collections management table displaying collection name, format, source path/URL, target base URL override, discovered endpoint count, and import status.
+- Discovered Endpoints pane for selected collection:
+  - Multi-select dropdown filters for HTTP method and authentication requirement.
+  - Live summary statistics displaying endpoint counts per HTTP method and endpoints requiring authentication vs no authentication.
+  - Combinable filtering narrowing down endpoints by method, authentication requirement, and search query.
 - Full session persistence for imported collections and discovered endpoints.
 
-### Feature 8: Authentication Testing Tab
-- Dedicated workspace to configure authentication profiles and execute automated test suites against imported collections.
-- Modular authentication mechanisms supported:
-  - Bearer Token authentication (`Authorization: Bearer <token>`).
-  - API Key authentication (Header or Query Parameter).
-  - HTTP Basic authentication (`Authorization: Basic <base64>`).
-  - Cookie authentication (`Cookie: <name>=<value>`).
-  - Custom Authentication Headers (`<Header-Name>: <value>`).
-- Masked secret credentials in UI with Show/Hide toggle.
-- Comparative unauthenticated testing: automatically sends unauthenticated request pairs to detect endpoints accessible without required authentication (`UNAUTHENTICATED_ACCESSIBLE`).
-- Non-blocking multi-threaded test execution engine with configurable thread concurrency (1-20), delay intervals, and cancellation controls.
-- Comprehensive results table with outcome categorization (`AUTHENTICATED_ONLY`, `UNAUTHENTICATED_ACCESSIBLE`, `AUTH_REJECTED`, `SUCCESS`, `CLIENT_ERROR`, `SERVER_ERROR`, `NETWORK_ERROR`).
-- Embedded Montoya HTTP message viewers for inspecting authenticated and unauthenticated request/response pairs.
+### Feature 8: Parameter Collector Tab
+- Dedicated workspace collecting query parameters and path parameters discovered across API endpoints.
+- Displays all query parameters, with each parameter listed on a separate line.
+- Displays all path parameters, with each parameter listed on a separate line.
+- One-click copy options to copy individual parameters or the complete list (one per line).
+- Supports filtering by collection and searching across parameter names.
+
+### Feature 9: Request and Response Viewer Tab
+- Dedicated request and response viewer tab replacing endpoint inspection modal dialogs.
+- Multi-select dropdown filter allowing users to filter requests across collections.
+- Multi-select method filter and search query filtering.
+- Displays all requests in the top pane.
+- Displays the selected request and corresponding response in the bottom pane arranged horizontally side-by-side.
+- Send Request action to execute requests and inspect live responses on the fly.
+
+### Feature 10: Authentication Testing Tab & Multi-Column Inspector
+- Dedicated workspace to create and manage multiple authentication profiles.
+- Profiles table with selective test toggles for including/excluding specific profiles.
+- Unauthenticated comparison testing controlled exclusively by the option "Run Unauthenticated Comparison Test for Each Endpoint" positioned directly above the results table.
+- Multi-profile comparison: runs tests across each selected profile and (when enabled) an unauthenticated request for each endpoint, presenting all test configurations side-by-side in the results table.
+- HTTP Message Inspector following the architecture and design patterns of ng-auth-analyzer_littlespidy:
+  - Top View mode toggle ("Request" and "Response").
+  - Side-by-side profile columns in a scrollable horizontal container.
+  - Each column displays the profile/test configuration header, status/outcome metadata badge, and CardLayout toggling between request and response editors across all columns simultaneously.
 - Export results to CSV and JSON.
 
 ---
