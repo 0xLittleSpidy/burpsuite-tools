@@ -1,0 +1,7 @@
+id,username,password_hash,email,phone_number,status,created_at
+1,admin,$2a$12$e80yq9O8rZ7q4kS1L3PXe.y49pDq8Jm5x/G7uUeL1wRzQ.AdminHash,admin@target.local,+1-555-0100,ACTIVE,2026-01-10 09:12:00
+2,jsmith,$2a$12$K1j0aF9q8z.w7xY3uE5mLe.z82mNq9Op5rS4tUvW2xYzQ.SmithHash,jsmith@target.local,+1-555-0145,ACTIVE,2026-01-12 14:32:10
+3,bwayne,$2a$12$L9p1bC8r7y.v6wX2tD4kKe.y71lMp8No4qR3sTuV1wXyP.WayneHash,bwayne@wayneenterprises.local,+1-555-0199,ACTIVE,2026-01-15 18:05:45
+4,dprince,$2a$12$M8o2cD7s6x.u5vW1sC3jJd.x60kLo7Mn3pQ2rStU0vWxO.PrinceHash,diana@themyscira.local,+1-555-0122,ACTIVE,2026-02-01 11:20:15
+5,ckent,$2a$12$N7n3dE6t5w.t4uV0rB2iIc.w59jKn6Lm2oP1qRsT9uVwN.KentHash,ckent@dailyplanet.local,,LOCKED,2026-02-14 08:45:00
+6,guest,$2a$12$O6m4eF5u4v.s3tU9qA1hHb.v48iJm5Kl1nO0pQrS8tUvM.GuestHash,guest@target.local,,INACTIVE,2026-03-01 10:00:00

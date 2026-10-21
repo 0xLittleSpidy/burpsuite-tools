@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,5 +81,31 @@ public class DirectoryScannerTest {
         assertNotNull(db.getTable("accounts"));
         assertEquals(2, db.getTable("accounts").getRowCount());
         assertEquals(3, db.getTable("accounts").getColumnCount());
+    }
+
+    @Test
+    public void testScanSampleOutputFolder() {
+        File sampleDir = new File("sample_output");
+        if (!sampleDir.exists()) {
+            sampleDir = new File("SQLMapAnalyzer_littlespidy/sample_output");
+        }
+        if (!sampleDir.exists()) return;
+
+        SqlmapDataStore store = new SqlmapDataStore();
+        scanner.scanDirectory(sampleDir, store, null);
+
+        assertEquals(3, store.getAllDatabases().size());
+        assertEquals(9, store.getAllTables().size());
+
+        // Check cross-database column gathering
+        List<com.littlespidy.sqlmapanalyzer.model.ColumnOccurrence> userOccs = store.getColumnOccurrences("username");
+        assertEquals(5, userOccs.size());
+
+        List<com.littlespidy.sqlmapanalyzer.model.ColumnOccurrence> emailOccs = store.getColumnOccurrences("email");
+        assertEquals(4, emailOccs.size());
+
+        // Check sensitive keyword search
+        List<com.littlespidy.sqlmapanalyzer.model.ColumnOccurrence> passMatches = store.searchColumns("pass", false);
+        assertEquals(2, passMatches.size()); // password_hash in users and administrators
     }
 }

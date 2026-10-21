@@ -234,7 +234,19 @@ public class SQLMapPersistenceManager {
         }
     }
 
+    public void saveSession(Component parent) {
+        if (activeSessionFile != null) {
+            if (performSave(activeSessionFile)) {
+                showSafeMessageDialog(parent, "Session saved successfully to:\n" + activeSessionFile.getAbsolutePath(),
+                        "Session Saved", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            saveSessionAs(parent);
+        }
+    }
+
     public void saveSessionAs(Component parent) {
+        if (GraphicsEnvironment.isHeadless() || Boolean.getBoolean("java.awt.headless")) return;
         JFileChooser chooser = new JFileChooser(getStartingDirectory());
         chooser.setDialogTitle("Save Session As");
         chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
@@ -248,9 +260,15 @@ public class SQLMapPersistenceManager {
             if (performSave(sel)) {
                 this.activeSessionFile = sel;
                 updateStatusLabel();
-                JOptionPane.showMessageDialog(parent, "Session saved successfully to:\n" + sel.getAbsolutePath(),
+                showSafeMessageDialog(parent, "Session saved successfully to:\n" + sel.getAbsolutePath(),
                         "Session Saved", JOptionPane.INFORMATION_MESSAGE);
             }
+        }
+    }
+
+    private void showSafeMessageDialog(Component parent, String message, String title, int messageType) {
+        if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+            JOptionPane.showMessageDialog(parent, message, title, messageType);
         }
     }
 

@@ -212,9 +212,11 @@ All extensions must implement persistent session storage so testers can resume a
    - For new session files, the user must explicitly mention/select the directory. Never write to arbitrary or hidden locations without user consent.
 
 3. **Persistent Toolbar Session Controls & Offboarding**:
-   - Expose session management directly on the top toolbar:
-     - Live indicator: `Session: <filename> (<folder>)` or `Session: [Temporary / In-Memory]`.
-     - Action buttons: `[New Session]`, `[Open Session]`, `[Offboard Session]`, `[Save As...]`.
+   - Expose session management directly on the top toolbar using a standardized Left-to-Right layout:
+     - **Left Side (Action Buttons)**: All session action buttons must be grouped on the left side of the toolbar: `[New Session]`, `[Open Session]`, `[Save]`, `[Save As...]`, and `[Offboard Session]`.
+       - An explicit `[Save]` button must always be present to allow testers to manually trigger an immediate synchronous save to disk at any moment.
+     - **Right Side (Session Status Indicator)**: The live session status indicator must be aligned on the right side: `Session: <filename> (<folder>)` or `Session: [Temporary / In-Memory]`.
+   - **Automatic Session Synchronization**: When a session file is bound, all state updates, discoveries, and user changes must automatically sync in the background via the debounced auto-save engine.
    - **Session Offboarding**: Once a user has onboarded a session JSON file, provide an **Offboard Session** action to unbind the active file (prompting to save any unsaved changes first) and clear all in-memory findings and tables, restoring the extension to a clean, fresh state without restarting Burp.
 
 4. **Debounced Atomic Auto-Save Engine**:

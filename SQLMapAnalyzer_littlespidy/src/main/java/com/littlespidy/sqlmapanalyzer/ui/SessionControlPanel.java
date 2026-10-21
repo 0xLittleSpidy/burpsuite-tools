@@ -10,6 +10,7 @@ import java.awt.*;
 
 /**
  * Top-level toolbar for persistent session management actions.
+ * Buttons are on the left side, session status is on the right side.
  * Plain ASCII text only.
  */
 public class SessionControlPanel extends JPanel {
@@ -24,13 +25,8 @@ public class SessionControlPanel extends JPanel {
                 new EmptyBorder(6, 10, 6, 10)
         ));
 
-        // Left side: Session status indicator
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        leftPanel.add(persistenceManager.getSessionStatusLabel());
-        add(leftPanel, BorderLayout.WEST);
-
-        // Right side: Session action buttons
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        // Left side: Session action buttons
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
 
         JButton btnNew = SwingUtils.createStyledButton("New Session");
         btnNew.setToolTipText("Create a new session bound to a directory on disk");
@@ -40,6 +36,10 @@ public class SessionControlPanel extends JPanel {
         btnOpen.setToolTipText("Open an existing session JSON file");
         btnOpen.addActionListener(e -> persistenceManager.openSession(this));
 
+        JButton btnSave = SwingUtils.createStyledButton("Save");
+        btnSave.setToolTipText("Immediately save session state to disk");
+        btnSave.addActionListener(e -> persistenceManager.saveSession(this));
+
         JButton btnSaveAs = SwingUtils.createStyledButton("Save As...");
         btnSaveAs.setToolTipText("Save current state to a new session JSON file");
         btnSaveAs.addActionListener(e -> persistenceManager.saveSessionAs(this));
@@ -48,11 +48,17 @@ public class SessionControlPanel extends JPanel {
         btnOffboard.setToolTipText("Unbind active session and clear workspace to fresh state");
         btnOffboard.addActionListener(e -> persistenceManager.offboardSession(this));
 
-        rightPanel.add(btnNew);
-        rightPanel.add(btnOpen);
-        rightPanel.add(btnSaveAs);
-        rightPanel.add(btnOffboard);
+        leftPanel.add(btnNew);
+        leftPanel.add(btnOpen);
+        leftPanel.add(btnSave);
+        leftPanel.add(btnSaveAs);
+        leftPanel.add(btnOffboard);
 
+        add(leftPanel, BorderLayout.WEST);
+
+        // Right side: Session status indicator
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        rightPanel.add(persistenceManager.getSessionStatusLabel());
         add(rightPanel, BorderLayout.EAST);
     }
 }

@@ -375,14 +375,18 @@ Every Burp Suite extension must provide robust session storage capabilities so t
    - The extension must never write session files into arbitrary, hidden, or unexpected system folders.
    - Previously selected directories may be remembered in Montoya preferences (`api.persistence().preferences().setString(...)`) strictly as the default starting directory in the file chooser dialog, but never used to silently auto-load data.
 
-4. **Toolbar Session Management Controls**:
-   - The top toolbar of the extension must display persistent session controls:
-     - **Active Session Indicator**: Displays the current session file path or `[Temporary / In-Memory]`.
-     - **[New Session]**: Allows creating a new session file (prompting for save confirmation if dirty, then prompting for directory and filename).
-     - **[Open Session]**: Opens an existing session file via `JFileChooser`.
-     - **[Offboard Session]**: Unbinds the active session file, prompts to save changes, and resets the extension to a clean, fresh state without restarting Burp.
-     - **[Save As...]**: Exports or binds the current session to a new file location.
-     - **[Save Now]**: Immediately flushes in-memory data to the bound session file synchronously.
+4. **Toolbar Session Management Controls & Layout**:
+   - The top toolbar of the extension must display persistent session controls arranged in a standardized Left-to-Right layout:
+     - **Left Side (Action Buttons)**: All session action buttons must be grouped on the left side of the panel:
+       - **[New Session]**: Allows creating a new session file (prompting for save confirmation if dirty, then prompting for directory and filename).
+       - **[Open Session]**: Opens an existing session file via `JFileChooser`.
+       - **[Save]**: Immediately flushes in-memory data to the bound session file synchronously (or prompts `Save As...` if unbound). An explicit Save button must always be present.
+       - **[Save As...]**: Exports or binds the current session to a new file location.
+       - **[Offboard Session]**: Unbinds the active session file, prompts to save changes, and resets the extension to a clean, fresh state without restarting Burp.
+     - **Right Side (Session Status Indicator)**:
+       - Displays the current session file path or `[Temporary / In-Memory]` on the right side of the toolbar.
+   - **Automatic Session Synchronization**:
+     - In addition to the manual `[Save]` button, session state must automatically sync in the background whenever changes occur via the debounced auto-save engine.
 
 5. **Session Offboarding & Fresh Extension Reset**:
    - Once a user has onboarded a session JSON file, they must have the ability to **offboard** it at any time.

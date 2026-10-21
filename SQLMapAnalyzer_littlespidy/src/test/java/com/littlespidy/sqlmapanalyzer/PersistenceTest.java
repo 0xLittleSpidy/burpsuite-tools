@@ -82,5 +82,9 @@ public class PersistenceTest {
         assertEquals(1, reloadedStore.getAllTables().size());
         assertTrue(reloadedStore.isBookmarked("crm_db.customers"));
         assertEquals("Contains customer auth tokens", reloadedStore.getNote("crm_db.customers"));
+
+        // Verify saveSession directly updates active bound session
+        reloadManager.saveSession(null);
+        assertTrue(sessionFile.exists());
     }
 }

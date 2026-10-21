@@ -62,11 +62,23 @@ The **SQLMap Output Analyzer** is a modern Burp Suite extension built with the M
   - **Create New Session**: Select a directory and specify a session filename to bind and auto-save state as testing progresses.
   - **Temporary / In-Memory Session**: Run in-memory without saving to disk (can be saved at any time).
 - **Persistent Toolbar Controls**:
-  - Status indicator: `Session: <filename> (<folder>)` or `Session: [Temporary / In-Memory]`.
-  - Action buttons: `[New Session]`, `[Open Session]`, `[Offboard Session]`, `[Save As...]`.
+  - Arranged in standard Left-to-Right layout:
+    - **Left Side (Action Buttons)**: `[New Session]`, `[Open Session]`, `[Save]`, `[Save As...]`, `[Offboard Session]`.
+    - **Right Side (Session Status)**: `Session: <filename> (<folder>)` or `Session: [Temporary / In-Memory]`.
+  - **Explicit Save Button**: The `[Save]` button allows testers to immediately flush active session data to disk synchronously.
+- **Automated Session Synchronization**: Background daemon executor automatically syncs state changes to disk debounced by 1500ms whenever an active session file is bound.
 - **Session Offboarding**: Clear active tables, databases, and metadata, unbind the session file, and restore a fresh workspace without restarting Burp.
-- **Debounced Atomic Auto-Save Engine**: Background daemon executor with 1500ms debounce writing to `.tmp` followed by atomic replacement to prevent file corruption.
+- **Debounced Atomic Auto-Save Engine**: Background daemon executor writes to `.tmp` followed by atomic replacement to prevent file corruption.
 - **Clean Shutdown Hook**: Registers an unloading handler via Montoya API to ensure safe state preservation on Burp exit or extension reload.
+
+### 5. Sample SQLMap Output for Personal Analysis
+The repository includes a ready-to-test SQLMap output directory under `SQLMapAnalyzer_littlespidy/sample_output/`:
+- **Target Host**: `app.target.local`
+- **Databases & Tables**:
+  - `auth_db/`: `users.csv`, `password_resets.csv`, `api_tokens.csv`
+  - `billing_db/`: `customers.csv`, `payment_cards.csv`, `invoices.csv`
+  - `admin_db/`: `administrators.csv`, `system_config.csv`, `audit_logs.csv`
+- Demonstrates cross-database column gathering (`username`, `email`), sensitive keyword matching (`password_hash`, `api_token`, `card_number`, `is_admin`, `secret_key`), and RFC-4180 CSV parsing (quoted addresses, multiline notes, nulls).
 
 ---
 
