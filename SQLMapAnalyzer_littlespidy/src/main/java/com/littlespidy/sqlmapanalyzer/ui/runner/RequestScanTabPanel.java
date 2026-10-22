@@ -108,8 +108,42 @@ public class RequestScanTabPanel extends JPanel {
 
         add(mainSplit, BorderLayout.CENTER);
 
+        syncHeadersToConfig();
         refreshExecutionDropdown();
         loadCurrentExecution();
+    }
+
+    private void syncHeadersToConfig() {
+        java.util.Map<String, String> headers = null;
+        if (requestEditor != null) {
+            try {
+                HttpRequest req = requestEditor.getRequest();
+                if (req != null && req.headers() != null && !req.headers().isEmpty()) {
+                    headers = new java.util.LinkedHashMap<>();
+                    for (var h : req.headers()) {
+                        String name = h.name();
+                        String val = h.value();
+                        if (headers.containsKey(name)) {
+                            if ("cookie".equalsIgnoreCase(name)) {
+                                headers.put(name, headers.get(name) + "; " + val);
+                            } else {
+                                headers.put(name, headers.get(name) + ", " + val);
+                            }
+                        } else {
+                            headers.put(name, val);
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        if (headers == null || headers.isEmpty()) {
+            headers = com.littlespidy.sqlmapanalyzer.util.OSUtils.parseHeadersFromRawRequest(session.getRawRequest());
+        }
+
+        if (headers != null && !headers.isEmpty()) {
+            configPanel.setRequestHeaders(headers);
+        }
     }
 
     public ScanRequestSession getSession() {
@@ -186,6 +220,7 @@ public class RequestScanTabPanel extends JPanel {
             refreshExecutionDropdown();
         }
 
+        syncHeadersToConfig();
         active.setOptions(configPanel.applyUiToOptions());
         configPanel.setScanningState(true);
         logConsolePanel.setStatusBadge("RUNNING", false);

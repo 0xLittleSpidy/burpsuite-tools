@@ -183,10 +183,18 @@ public class SqlmapTaskOptions implements Serializable {
             sb.append(" --data=\"").append(data).append("\"");
         }
         if (cookie != null && !cookie.isBlank()) {
-            sb.append(" --cookie=\"").append(cookie).append("\"");
+            String escapedCookie = cookie.replace("\"", "\\\"");
+            sb.append(" --cookie=\"").append(escapedCookie).append("\"");
         }
         if (agent != null && !agent.isBlank()) {
             sb.append(" --user-agent=\"").append(agent).append("\"");
+        }
+        if (referer != null && !referer.isBlank()) {
+            sb.append(" --referer=\"").append(referer).append("\"");
+        }
+        if (headers != null && !headers.isBlank()) {
+            String escapedHeaders = headers.replace("\r\n", "\\n").replace("\n", "\\n").replace("\"", "\\\"");
+            sb.append(" --headers=\"").append(escapedHeaders).append("\"");
         }
         if (testParameter != null && !testParameter.isBlank()) {
             sb.append(" -p \"").append(testParameter).append("\"");

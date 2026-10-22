@@ -25,6 +25,9 @@ public class RequestConfigPanel extends JPanel {
     private final JTextField txtOs;
     private final MultiSelectTamperDropdown_littlespidy tamperDropdown;
 
+    private final MultiSelectHeaderDropdown_littlespidy headerDropdown;
+    private final JLabel lblHeaderSummary;
+
     private final JTextField txtDb;
     private final JTextField txtTbl;
     private final JTextField txtCol;
@@ -141,7 +144,25 @@ public class RequestConfigPanel extends JPanel {
 
         content.add(detectPanel);
 
-        // 3. Target Specific Resources (Optional -D, -T, -C)
+        // 3. HTTP Headers & Authentication Panel
+        JPanel headerPanel = new JPanel(new BorderLayout(4, 4));
+        headerPanel.setBorder(new CompoundBorder(new TitledBorder("HTTP Headers & Authentication"), new EmptyBorder(4, 6, 6, 6)));
+
+        JPanel topHeaderRow = new JPanel(new BorderLayout(6, 0));
+        topHeaderRow.add(new JLabel("Include Request Headers:"), BorderLayout.WEST);
+        headerDropdown = new MultiSelectHeaderDropdown_littlespidy();
+        headerDropdown.setOnSelectionChanged(this::updateHeaderSummary);
+        topHeaderRow.add(headerDropdown, BorderLayout.CENTER);
+        headerPanel.add(topHeaderRow, BorderLayout.NORTH);
+
+        lblHeaderSummary = new JLabel("Selected Headers: None");
+        lblHeaderSummary.setFont(lblHeaderSummary.getFont().deriveFont(Font.PLAIN, 11));
+        lblHeaderSummary.setForeground(new Color(0, 100, 0));
+        headerPanel.add(lblHeaderSummary, BorderLayout.SOUTH);
+
+        content.add(headerPanel);
+
+        // 4. Target Specific Resources (Optional -D, -T, -C)
         JPanel targetPanel = new JPanel(new GridLayout(3, 2, 4, 4));
         targetPanel.setBorder(new CompoundBorder(new TitledBorder("Target Specific Resources (Optional)"), new EmptyBorder(4, 6, 4, 6)));
 
@@ -262,12 +283,59 @@ public class RequestConfigPanel extends JPanel {
         chkTables.setSelected(options.isGetTables());
         chkColumns.setSelected(options.isGetColumns());
         chkDump.setSelected(options.isDumpTable());
+
+        // Synchronize selected headers in headerDropdown
+        java.util.Set<String> activeHeaders = new java.util.LinkedHashSet<>();
+        if (options.getCookie() != null && !options.getCookie().isBlank()) {
+            activeHeaders.add("Cookie");
+        }
+        if (options.getAgent() != null && !options.getAgent().isBlank()) {
+            activeHeaders.add("User-Agent");
+        }
+        if (options.getReferer() != null && !options.getReferer().isBlank()) {
+            activeHeaders.add("Referer");
+        }
+        if (options.getHeaders() != null && !options.getHeaders().isBlank()) {
+            String[] lines = options.getHeaders().split("\r?\n");
+            for (String line : lines) {
+                int c = line.indexOf(':');
+                if (c > 0) {
+                    activeHeaders.add(line.substring(0, c).trim());
+                }
+            }
+        }
+        if (!activeHeaders.isEmpty()) {
+            headerDropdown.setSelectedHeaders(activeHeaders);
+        }
+        updateHeaderSummary();
+    }
+
+    public void setRequestHeaders(java.util.Map<String, String> headers) {
+        headerDropdown.setRequestHeaders(headers);
+        updateHeaderSummary();
+    }
+
+    private void updateHeaderSummary() {
+        java.util.Set<String> selected = headerDropdown.getSelectedHeaderNames();
+        if (selected.isEmpty()) {
+            lblHeaderSummary.setText("No headers selected (requests will be sent without extra headers).");
+            lblHeaderSummary.setForeground(Color.GRAY);
+        } else {
+            lblHeaderSummary.setText("Active (" + selected.size() + "): " + String.join(", ", selected));
+            lblHeaderSummary.setForeground(new Color(0, 110, 0));
+        }
     }
 
     public SqlmapTaskOptions applyUiToOptions() {
         if (currentOptions == null) {
             currentOptions = new SqlmapTaskOptions();
         }
+
+        // Request Headers & Authentication from multi-select dropdown
+        currentOptions.setCookie(headerDropdown.getSelectedCookie());
+        currentOptions.setAgent(headerDropdown.getSelectedAgent());
+        currentOptions.setReferer(headerDropdown.getSelectedReferer());
+        currentOptions.setHeaders(headerDropdown.getSelectedHeadersString());
 
         currentOptions.setTestParameter(txtParam.getText().trim());
         currentOptions.setLevel((Integer) comboLevel.getSelectedItem());

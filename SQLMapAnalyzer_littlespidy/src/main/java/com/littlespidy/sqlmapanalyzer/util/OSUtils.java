@@ -40,6 +40,33 @@ public final class OSUtils {
         return "python3";
     }
 
+    public static java.util.Map<String, String> parseHeadersFromRawRequest(byte[] rawRequest) {
+        java.util.Map<String, String> map = new java.util.LinkedHashMap<>();
+        if (rawRequest == null || rawRequest.length == 0) return map;
+
+        String raw = new String(rawRequest, java.nio.charset.StandardCharsets.UTF_8);
+        String[] lines = raw.split("\r?\n");
+        for (int i = 1; i < lines.length; i++) {
+            String line = lines[i];
+            if (line.isBlank()) break; // End of HTTP headers
+            int colonIdx = line.indexOf(':');
+            if (colonIdx > 0) {
+                String name = line.substring(0, colonIdx).trim();
+                String value = line.substring(colonIdx + 1).trim();
+                if (map.containsKey(name)) {
+                    if ("cookie".equalsIgnoreCase(name)) {
+                        map.put(name, map.get(name) + "; " + value);
+                    } else {
+                        map.put(name, map.get(name) + ", " + value);
+                    }
+                } else {
+                    map.put(name, value);
+                }
+            }
+        }
+        return map;
+    }
+
     public static File getDefaultSqlmapOutputDir() {
         String userHome = System.getProperty("user.home", ".");
 
