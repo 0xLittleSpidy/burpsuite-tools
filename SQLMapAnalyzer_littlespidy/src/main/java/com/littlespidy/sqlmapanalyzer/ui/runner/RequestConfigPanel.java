@@ -38,6 +38,9 @@ public class RequestConfigPanel extends JPanel {
     private final JTextField txtTimeout;
     private final JTextField txtRetries;
     private final JTextField txtTimeSec;
+    private final JCheckBox chkTimeless;
+    private final JCheckBox chkNoCast;
+    private final JCheckBox chkHex;
     private final JCheckBox chkForceSsl;
     private final JCheckBox chkTor;
     private final JCheckBox chkHpp;
@@ -130,7 +133,7 @@ public class RequestConfigPanel extends JPanel {
         content.add(presetsPanel);
 
         // 2. Detection & Techniques Panel
-        JPanel detectPanel = new JPanel(new GridLayout(7, 2, 4, 4));
+        JPanel detectPanel = new JPanel(new GridLayout(8, 2, 4, 4));
         detectPanel.setBorder(new CompoundBorder(new TitledBorder("Detection & Techniques"), new EmptyBorder(4, 6, 4, 6)));
 
         detectPanel.add(new JLabel("Test Parameter (-p):"));
@@ -153,6 +156,11 @@ public class RequestConfigPanel extends JPanel {
         txtTimeSec = new JTextField("5");
         txtTimeSec.setToolTipText("Seconds to delay the DBMS response for time-based blind attacks (--time-sec, default 5)");
         detectPanel.add(txtTimeSec);
+
+        detectPanel.add(new JLabel("Timeless Blind:"));
+        chkTimeless = new JCheckBox("Enable (--timeless)");
+        chkTimeless.setToolTipText("Do not use time offsets in time-based blind attacks (--timeless)");
+        detectPanel.add(chkTimeless);
 
         detectPanel.add(new JLabel("Back-end DBMS:"));
         comboDbms = new JComboBox<>(new String[]{"", "MySQL", "PostgreSQL", "Oracle", "Microsoft SQL Server", "SQLite", "MariaDB"});
@@ -205,7 +213,7 @@ public class RequestConfigPanel extends JPanel {
         content.add(targetPanel);
 
         // 5. Timing & Network Panel
-        JPanel netPanel = new JPanel(new GridLayout(6, 2, 4, 4));
+        JPanel netPanel = new JPanel(new GridLayout(7, 2, 4, 4));
         netPanel.setBorder(new CompoundBorder(new TitledBorder("Timing & Network"), new EmptyBorder(4, 6, 4, 6)));
 
         netPanel.add(new JLabel("Proxy (--proxy):"));
@@ -228,16 +236,25 @@ public class RequestConfigPanel extends JPanel {
         txtRetries = new JTextField("3");
         txtOs = new JTextField();
 
-        chkForceSsl = new JCheckBox("Use HTTPS (--force-ssl)");
+        chkForceSsl = new JCheckBox("Use HTTPS (--force-ssl)", currentOptions.isForceSsl());
         chkForceSsl.setToolTipText("Force usage of SSL/HTTPS protocol for target requests");
         chkForceSsl.addActionListener(e -> onForceSslToggled());
 
         chkTor = new JCheckBox("Use Tor Socks5");
         chkHpp = new JCheckBox("HTTP Parameter Pollution (HPP)");
+
+        chkNoCast = new JCheckBox("No Cast (--no-cast)");
+        chkNoCast.setToolTipText("Turn off payload casting mechanism (--no-cast)");
+
+        chkHex = new JCheckBox("Hex Conversion (--hex)");
+        chkHex.setToolTipText("Use DBMS hex function(s) for data retrieval (--hex)");
+
         netPanel.add(chkForceSsl);
         netPanel.add(chkTor);
         netPanel.add(chkHpp);
         netPanel.add(new JLabel());
+        netPanel.add(chkNoCast);
+        netPanel.add(chkHex);
 
         content.add(netPanel);
 
@@ -304,6 +321,9 @@ public class RequestConfigPanel extends JPanel {
         txtRetries.setText(String.valueOf(options.getRetries()));
         chkTor.setSelected(options.isTor());
         chkHpp.setSelected(options.isHpp());
+        chkTimeless.setSelected(options.isTimeless());
+        chkNoCast.setSelected(options.isNoCast());
+        chkHex.setSelected(options.isHexConvert());
         boolean isHttps = options.isForceSsl() || (options.getUrl() != null && options.getUrl().toLowerCase().startsWith("https://"));
         chkForceSsl.setSelected(isHttps);
 
@@ -400,6 +420,9 @@ public class RequestConfigPanel extends JPanel {
         try { currentOptions.setRetries(Integer.parseInt(txtRetries.getText().trim())); } catch (Exception ignored) {}
         currentOptions.setTor(chkTor.isSelected());
         currentOptions.setHpp(chkHpp.isSelected());
+        currentOptions.setTimeless(chkTimeless.isSelected());
+        currentOptions.setNoCast(chkNoCast.isSelected());
+        currentOptions.setHexConvert(chkHex.isSelected());
 
         boolean forceSsl = chkForceSsl.isSelected();
         currentOptions.setForceSsl(forceSsl);
@@ -476,6 +499,18 @@ public class RequestConfigPanel extends JPanel {
 
     public JTextField getTxtTimeSecForTest() {
         return txtTimeSec;
+    }
+
+    public JCheckBox getChkTimelessForTest() {
+        return chkTimeless;
+    }
+
+    public JCheckBox getChkNoCastForTest() {
+        return chkNoCast;
+    }
+
+    public JCheckBox getChkHexForTest() {
+        return chkHex;
     }
 
     public JCheckBox getChkForceSslForTest() {

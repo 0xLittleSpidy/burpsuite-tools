@@ -163,7 +163,11 @@ public class SqlmapRunnerRootPanel extends JPanel {
         String url = JOptionPane.showInputDialog(this, "Enter target URL to scan:", "http://example.com/item.php?id=1");
         if (url != null && !url.isBlank()) {
             SqlmapTaskOptions options = new SqlmapTaskOptions();
-            options.setUrl(url.trim());
+            String finalUrl = url.trim();
+            if (options.isForceSsl() && finalUrl.startsWith("http://")) {
+                finalUrl = "https://" + finalUrl.substring(7);
+            }
+            options.setUrl(finalUrl);
             options.setMethod("GET");
 
             int sessionId = sessionCounter.getAndIncrement();
@@ -198,12 +202,12 @@ public class SqlmapRunnerRootPanel extends JPanel {
     private SqlmapTaskOptions extractOptionsFromRequest(HttpRequest request, String resolvedUrl) {
         SqlmapTaskOptions opt = new SqlmapTaskOptions();
         String finalUrl = resolvedUrl != null && !resolvedUrl.isBlank() ? resolvedUrl : OSUtils.resolveFullUrl(request, null);
+        opt.setForceSsl(true);
+        if (finalUrl != null && finalUrl.startsWith("http://")) {
+            finalUrl = "https://" + finalUrl.substring(7);
+        }
         opt.setUrl(finalUrl);
         opt.setMethod(request.method());
-
-        boolean isHttps = (finalUrl != null && finalUrl.toLowerCase().startsWith("https://")) ||
-                (request.httpService() != null && request.httpService().secure());
-        opt.setForceSsl(isHttps);
 
         // Extract body data if present
         if (request.body() != null && request.body().length() > 0) {

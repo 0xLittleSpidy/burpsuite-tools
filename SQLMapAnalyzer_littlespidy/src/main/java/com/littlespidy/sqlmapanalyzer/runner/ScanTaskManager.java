@@ -149,11 +149,15 @@ public class ScanTaskManager {
                             break;
                         }
 
-                        // Gather findings
-                        List<SqlmapFinding> findings = apiClient.getScanData(taskId);
-                        record.setFindings(findings);
-                        if (listener != null) {
-                            listener.onFindingsUpdated(record, findings);
+                        // Gather findings safely
+                        try {
+                            List<SqlmapFinding> findings = apiClient.getScanData(taskId);
+                            record.setFindings(findings);
+                            if (listener != null) {
+                                listener.onFindingsUpdated(record, findings);
+                            }
+                        } catch (Exception e) {
+                            record.addLog(new SqlmapLogEntry("WARNING", "", "Unable to parse some scan data: " + e.getMessage()));
                         }
 
                         if (record.isVulnerable()) {

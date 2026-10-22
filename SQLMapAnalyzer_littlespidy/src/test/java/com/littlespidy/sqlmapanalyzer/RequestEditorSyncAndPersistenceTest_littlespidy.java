@@ -94,7 +94,8 @@ public class RequestEditorSyncAndPersistenceTest_littlespidy {
         SqlmapTaskOptions activeOpts = session.getActiveExecution().getOptions();
         String cliCommand = activeOpts.buildCommandLine();
 
-        assertTrue(cliCommand.contains("-u \"http://target.local/api/orders\""));
+        assertTrue(cliCommand.contains("-u \"https://target.local/api/orders\""));
+        assertTrue(cliCommand.contains("--force-ssl"));
         assertTrue(cliCommand.contains("--method=POST"));
         assertTrue(cliCommand.contains("--data=\"{\"orderId\":999}\""));
     }

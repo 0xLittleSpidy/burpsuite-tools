@@ -59,6 +59,46 @@ public class SqlmapApiClient {
         return builder;
     }
 
+    private String getAsStringSafe(JsonObject obj, String memberName) {
+        if (obj == null || !obj.has(memberName)) return "";
+        JsonElement el = obj.get(memberName);
+        if (el == null || el.isJsonNull()) return "";
+        try {
+            return el.getAsString();
+        } catch (Exception e) {
+            return el.toString();
+        }
+    }
+
+    private String getAsStringSafe(JsonElement el) {
+        if (el == null || el.isJsonNull()) return "";
+        try {
+            return el.getAsString();
+        } catch (Exception e) {
+            return el.toString();
+        }
+    }
+
+    private boolean getAsBooleanSafe(JsonElement el) {
+        if (el == null || el.isJsonNull()) return false;
+        try {
+            return el.getAsBoolean();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private int getAsIntSafe(JsonObject obj, String memberName, int defaultVal) {
+        if (obj == null || !obj.has(memberName)) return defaultVal;
+        JsonElement el = obj.get(memberName);
+        if (el == null || el.isJsonNull()) return defaultVal;
+        try {
+            return el.getAsInt();
+        } catch (Exception e) {
+            return defaultVal;
+        }
+    }
+
     /**
      * Checks if the SQLMap API server is running and responsive.
      */
@@ -79,9 +119,12 @@ public class SqlmapApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-                if (json != null && json.has("success") && json.get("success").getAsBoolean() && json.has("taskid")) {
-                    deleteTask(json.get("taskid").getAsString());
-                    return "OK";
+                if (json != null && json.has("success") && getAsBooleanSafe(json.get("success")) && json.has("taskid")) {
+                    String taskId = getAsStringSafe(json, "taskid");
+                    if (!taskId.isBlank()) {
+                        deleteTask(taskId);
+                        return "OK";
+                    }
                 }
                 return "Unexpected server response (HTTP 200, missing task ID)";
             } else if (response.statusCode() == 401) {
@@ -106,8 +149,8 @@ public class SqlmapApiClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-            if (json != null && json.has("success") && json.get("success").getAsBoolean() && json.has("taskid")) {
-                return json.get("taskid").getAsString();
+            if (json != null && json.has("success") && getAsBooleanSafe(json.get("success")) && json.has("taskid")) {
+                return getAsStringSafe(json, "taskid");
             }
         }
         return null;
@@ -146,7 +189,7 @@ public class SqlmapApiClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-            return json != null && json.has("success") && json.get("success").getAsBoolean();
+            return json != null && json.has("success") && getAsBooleanSafe(json.get("success"));
         }
         return false;
     }
@@ -169,7 +212,7 @@ public class SqlmapApiClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-            return json != null && json.has("success") && json.get("success").getAsBoolean();
+            return json != null && json.has("success") && getAsBooleanSafe(json.get("success"));
         }
         return false;
     }
@@ -188,10 +231,9 @@ public class SqlmapApiClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-            if (json != null && json.has("status")) {
-                String status = json.get("status").getAsString();
-                int returncode = json.has("returncode") && !json.get("returncode").isJsonNull()
-                        ? json.get("returncode").getAsInt() : -1;
+            if (json != null && json.has("status") && !json.get("status").isJsonNull()) {
+                String status = getAsStringSafe(json, "status");
+                int returncode = getAsIntSafe(json, "returncode", -1);
                 return new SqlmapScanStatus(true, status, returncode);
             }
         }
@@ -212,15 +254,16 @@ public class SqlmapApiClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-            if (json != null && json.has("success") && json.get("success").getAsBoolean() && json.has("log")) {
+            if (json != null && json.has("success") && getAsBooleanSafe(json.get("success")) && json.has("log") && !json.get("log").isJsonNull() && json.get("log").isJsonArray()) {
                 JsonArray arr = json.getAsJsonArray("log");
                 List<SqlmapLogEntry> list = new ArrayList<>(arr.size());
                 for (JsonElement el : arr) {
-                    if (el.isJsonObject()) {
+                    if (el != null && el.isJsonObject()) {
                         JsonObject obj = el.getAsJsonObject();
-                        String level = obj.has("level") ? obj.get("level").getAsString() : "INFO";
-                        String time = obj.has("time") ? obj.get("time").getAsString() : "";
-                        String message = obj.has("message") ? obj.get("message").getAsString() : "";
+                        String level = getAsStringSafe(obj, "level");
+                        if (level.isBlank()) level = "INFO";
+                        String time = getAsStringSafe(obj, "time");
+                        String message = getAsStringSafe(obj, "message");
                         list.add(new SqlmapLogEntry(level, time, message));
                     }
                 }
@@ -244,57 +287,68 @@ public class SqlmapApiClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-            if (json != null && json.has("success") && json.get("success").getAsBoolean() && json.has("data")) {
+            if (json != null && json.has("success") && getAsBooleanSafe(json.get("success")) && json.has("data") && !json.get("data").isJsonNull() && json.get("data").isJsonArray()) {
                 JsonArray arr = json.getAsJsonArray("data");
                 List<SqlmapFinding> findings = new ArrayList<>();
 
                 for (JsonElement item : arr) {
-                    if (!item.isJsonObject()) continue;
-                    JsonObject obj = item.getAsJsonObject();
-                    int type = obj.has("type") ? obj.get("type").getAsInt() : -1;
-                    JsonElement val = obj.get("value");
+                    if (item == null || !item.isJsonObject()) continue;
+                    try {
+                        JsonObject obj = item.getAsJsonObject();
+                        int type = getAsIntSafe(obj, "type", -1);
+                        JsonElement val = obj.get("value");
 
-                    if (type == 0 && val != null && val.isJsonObject()) {
-                        // URL & Query parameter
-                        JsonObject vObj = val.getAsJsonObject();
-                        String url = vObj.has("url") ? vObj.get("url").getAsString() : "";
-                        String query = vObj.has("query") ? vObj.get("query").getAsString() : "";
-                        findings.add(new SqlmapFinding(type, query, "", "", "", "Target: " + url));
-                    } else if (type == 1 && val != null && val.isJsonArray()) {
-                        // DBMS & Injection details
-                        JsonArray itemsArr = val.getAsJsonArray();
-                        for (JsonElement el : itemsArr) {
-                            if (el.isJsonObject()) {
-                                JsonObject findingObj = el.getAsJsonObject();
-                                String dbms = findingObj.has("dbms") ? findingObj.get("dbms").getAsString() : "";
-                                String param = findingObj.has("parameter") ? findingObj.get("parameter").getAsString() : "";
-                                String place = findingObj.has("place") ? findingObj.get("place").getAsString() : "";
+                        if (val == null || val.isJsonNull()) {
+                            continue;
+                        }
 
-                                if (findingObj.has("data") && findingObj.get("data").isJsonObject()) {
-                                    JsonObject dataMap = findingObj.getAsJsonObject("data");
-                                    for (String k : dataMap.keySet()) {
-                                        JsonObject techObj = dataMap.getAsJsonObject(k);
-                                        String title = techObj.has("title") ? techObj.get("title").getAsString() : "";
-                                        String payload = techObj.has("payload") ? techObj.get("payload").getAsString() : "";
-                                        findings.add(new SqlmapFinding(type, param + " (" + place + ")", dbms, title, payload, "Confirmed SQL Injection"));
+                        if (type == 0 && val.isJsonObject()) {
+                            // URL & Query parameter
+                            JsonObject vObj = val.getAsJsonObject();
+                            String url = getAsStringSafe(vObj, "url");
+                            String query = getAsStringSafe(vObj, "query");
+                            findings.add(new SqlmapFinding(type, query, "", "", "", "Target: " + url));
+                        } else if (type == 1 && val.isJsonArray()) {
+                            // DBMS & Injection details
+                            JsonArray itemsArr = val.getAsJsonArray();
+                            for (JsonElement el : itemsArr) {
+                                if (el != null && el.isJsonObject()) {
+                                    JsonObject findingObj = el.getAsJsonObject();
+                                    String dbms = getAsStringSafe(findingObj, "dbms");
+                                    String param = getAsStringSafe(findingObj, "parameter");
+                                    String place = getAsStringSafe(findingObj, "place");
+
+                                    if (findingObj.has("data") && !findingObj.get("data").isJsonNull() && findingObj.get("data").isJsonObject()) {
+                                        JsonObject dataMap = findingObj.getAsJsonObject("data");
+                                        for (String k : dataMap.keySet()) {
+                                            JsonElement techEl = dataMap.get(k);
+                                            if (techEl != null && techEl.isJsonObject()) {
+                                                JsonObject techObj = techEl.getAsJsonObject();
+                                                String title = getAsStringSafe(techObj, "title");
+                                                String payload = getAsStringSafe(techObj, "payload");
+                                                findings.add(new SqlmapFinding(type, param + " (" + place + ")", dbms, title, payload, "Confirmed SQL Injection"));
+                                            }
+                                        }
+                                    } else {
+                                        findings.add(new SqlmapFinding(type, param, dbms, "", "", "Confirmed Vulnerable Parameter"));
                                     }
-                                } else {
-                                    findings.add(new SqlmapFinding(type, param, dbms, "", "", "Confirmed Vulnerable Parameter"));
                                 }
                             }
+                        } else if (type == 3) {
+                            findings.add(new SqlmapFinding(type, "", "", "Banner", "", getAsStringSafe(val)));
+                        } else if (type == 4) {
+                            findings.add(new SqlmapFinding(type, "", "", "Current User", "", getAsStringSafe(val)));
+                        } else if (type == 5) {
+                            findings.add(new SqlmapFinding(type, "", "", "Current Database", "", getAsStringSafe(val)));
+                        } else if (type == 6) {
+                            findings.add(new SqlmapFinding(type, "", "", "Hostname", "", getAsStringSafe(val)));
+                        } else if (type == 7) {
+                            findings.add(new SqlmapFinding(type, "", "", "Is DBA", "", getAsBooleanSafe(val) ? "Yes" : "No"));
+                        } else {
+                            findings.add(new SqlmapFinding(type, "", "", "Enumerated Item (Type " + type + ")", "", getAsStringSafe(val)));
                         }
-                    } else if (type == 3 && val != null) {
-                        findings.add(new SqlmapFinding(type, "", "", "Banner", "", val.getAsString()));
-                    } else if (type == 4 && val != null) {
-                        findings.add(new SqlmapFinding(type, "", "", "Current User", "", val.getAsString()));
-                    } else if (type == 5 && val != null) {
-                        findings.add(new SqlmapFinding(type, "", "", "Current Database", "", val.getAsString()));
-                    } else if (type == 6 && val != null) {
-                        findings.add(new SqlmapFinding(type, "", "", "Hostname", "", val.getAsString()));
-                    } else if (type == 7 && val != null) {
-                        findings.add(new SqlmapFinding(type, "", "", "Is DBA", "", val.getAsBoolean() ? "Yes" : "No"));
-                    } else if (val != null) {
-                        findings.add(new SqlmapFinding(type, "", "", "Enumerated Item (Type " + type + ")", "", val.toString()));
+                    } catch (Exception ignored) {
+                        // Protect individual finding parsing against malformed items
                     }
                 }
                 return findings;
@@ -316,7 +370,7 @@ public class SqlmapApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-                return json != null && json.has("success") && json.get("success").getAsBoolean();
+                return json != null && json.has("success") && getAsBooleanSafe(json.get("success"));
             }
         } catch (Exception ignored) {}
         return false;

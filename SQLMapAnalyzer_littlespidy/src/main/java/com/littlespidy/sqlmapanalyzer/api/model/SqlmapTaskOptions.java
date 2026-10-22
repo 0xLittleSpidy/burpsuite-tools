@@ -34,6 +34,9 @@ public class SqlmapTaskOptions implements Serializable {
     private int timeout = 30;
     private int retries = 3;
     private int timeSec = 5;
+    private boolean timeless = false;
+    private boolean noCast = false;
+    private boolean hexConvert = false;
 
     // Enumeration flags
     private boolean getBanner = true;
@@ -56,7 +59,7 @@ public class SqlmapTaskOptions implements Serializable {
     private String answers = "crack=N,dict=N,continue=Y,quit=N";
     private String ignoreCode = "";
     private String proxy = "http://127.0.0.1:8080";
-    private boolean forceSsl = false;
+    private boolean forceSsl = true;
     private boolean tor = false;
     private String torPort = "9050";
     private String torType = "SOCKS5";
@@ -109,6 +112,9 @@ public class SqlmapTaskOptions implements Serializable {
             this.ignoreCode = other.ignoreCode;
             this.proxy = other.proxy;
             this.forceSsl = other.forceSsl;
+            this.timeless = other.timeless;
+            this.noCast = other.noCast;
+            this.hexConvert = other.hexConvert;
             this.tor = other.tor;
             this.torPort = other.torPort;
             this.torType = other.torType;
@@ -144,6 +150,18 @@ public class SqlmapTaskOptions implements Serializable {
         map.put("timeout", timeout);
         map.put("retries", retries);
         map.put("timeSec", timeSec);
+        if (timeless) {
+            map.put("timeLess", "true");
+            map.put("timeless", "true");
+        }
+        if (noCast) {
+            map.put("noCast", "true");
+            map.put("no-cast", "true");
+        }
+        if (hexConvert) {
+            map.put("hexConvert", "true");
+            map.put("hex", "true");
+        }
 
         if (getBanner) map.put("getBanner", "true");
         if (getCurrentUser) map.put("getCurrentUser", "true");
@@ -226,6 +244,9 @@ public class SqlmapTaskOptions implements Serializable {
         if (threads > 1) sb.append(" --threads=").append(threads);
         if (delay > 0) sb.append(" --delay=").append(delay);
         if (timeSec > 0) sb.append(" --time-sec=").append(timeSec);
+        if (timeless) sb.append(" --timeless");
+        if (noCast) sb.append(" --no-cast");
+        if (hexConvert) sb.append(" --hex");
         if (batch) sb.append(" --batch");
         if (getBanner) sb.append(" -b");
         if (getCurrentUser) sb.append(" --current-user");
@@ -324,6 +345,12 @@ public class SqlmapTaskOptions implements Serializable {
     public void setProxy(String proxy) { this.proxy = proxy; }
     public boolean isForceSsl() { return forceSsl; }
     public void setForceSsl(boolean forceSsl) { this.forceSsl = forceSsl; }
+    public boolean isTimeless() { return timeless; }
+    public void setTimeless(boolean timeless) { this.timeless = timeless; }
+    public boolean isNoCast() { return noCast; }
+    public void setNoCast(boolean noCast) { this.noCast = noCast; }
+    public boolean isHexConvert() { return hexConvert; }
+    public void setHexConvert(boolean hexConvert) { this.hexConvert = hexConvert; }
     public boolean isTor() { return tor; }
     public void setTor(boolean tor) { this.tor = tor; }
     public String getTorPort() { return torPort; }

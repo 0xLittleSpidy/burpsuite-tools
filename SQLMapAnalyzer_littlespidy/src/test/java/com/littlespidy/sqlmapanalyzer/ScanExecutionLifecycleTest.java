@@ -82,7 +82,8 @@ public class ScanExecutionLifecycleTest {
         ScanExecutionRecord record = new ScanExecutionRecord(1, options);
         var logs = record.getLogs();
         assertFalse(logs.isEmpty());
-        assertTrue(logs.get(0).getMessage().startsWith("SQLMAP Command: sqlmap -u \"http://target.local/vuln?id=1\""));
+        assertTrue(logs.get(0).getMessage().startsWith("SQLMAP Command: sqlmap -u \"https://target.local/vuln?id=1\""));
+        assertTrue(logs.get(0).getMessage().contains("--force-ssl"));
         assertTrue(logs.get(0).getMessage().contains("-D \"auth_db\""));
         assertTrue(logs.get(0).getMessage().contains("-T \"users\""));
 

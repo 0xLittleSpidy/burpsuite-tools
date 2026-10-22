@@ -3,11 +3,17 @@ package com.littlespidy.sqlmapanalyzer;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.littlespidy.sqlmapanalyzer.api.SqlmapApiClient;
+import com.littlespidy.sqlmapanalyzer.api.SqlmapApiConfig;
+import com.littlespidy.sqlmapanalyzer.api.model.SqlmapFinding;
 import com.littlespidy.sqlmapanalyzer.api.model.SqlmapLogEntry;
 import com.littlespidy.sqlmapanalyzer.api.model.SqlmapScanStatus;
 import com.littlespidy.sqlmapanalyzer.api.model.SqlmapTaskOptions;
 import org.junit.jupiter.api.Test;
 
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +51,8 @@ public class SqlmapApiClientTest {
         assertEquals("true", map.get("dumpTable"));
 
         String cli = options.buildCommandLine();
-        assertTrue(cli.contains("-u \"http://target.local/vuln.php?id=1\""));
+        assertTrue(cli.contains("-u \"https://target.local/vuln.php?id=1\""));
+        assertTrue(cli.contains("--force-ssl"));
         assertTrue(cli.contains("-p \"id\""));
         assertTrue(cli.contains("--level=3"));
         assertTrue(cli.contains("--risk=2"));
@@ -79,5 +86,40 @@ public class SqlmapApiClientTest {
         assertTrue(terminated.isSuccess());
         assertFalse(terminated.isRunning());
         assertTrue(terminated.isTerminated());
+    }
+
+    @Test
+    public void testGetScanDataWithJsonNullDoesNotThrow() throws Exception {
+        com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/scan/test-task/data", exchange -> {
+            String jsonResponse = "{\"success\": true, \"data\": [" +
+                    "{\"type\": 3, \"value\": null}," +
+                    "{\"type\": 4, \"value\": null}," +
+                    "{\"type\": 7, \"value\": null}," +
+                    "{\"type\": 1, \"value\": [{\"dbms\": null, \"parameter\": \"id\", \"place\": null, \"data\": {\"1\": {\"title\": null, \"payload\": null}}}]}" +
+                    "]}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            byte[] bytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            SqlmapApiConfig config = new SqlmapApiConfig();
+            config.setHost("127.0.0.1");
+            config.setPort(server.getAddress().getPort());
+            config.setUsername("");
+            config.setPassword("");
+
+            SqlmapApiClient client = new SqlmapApiClient(config);
+            List<SqlmapFinding> findings = client.getScanData("test-task");
+            assertNotNull(findings);
+            // Verify findings parsed without throwing JsonNull UnsupportedOperationException
+            assertFalse(findings.isEmpty());
+        } finally {
+            server.stop(0);
+        }
     }
 }

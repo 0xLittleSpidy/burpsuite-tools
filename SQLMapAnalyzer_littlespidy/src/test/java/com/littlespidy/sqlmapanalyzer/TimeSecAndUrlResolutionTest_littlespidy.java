@@ -144,10 +144,7 @@ public class TimeSecAndUrlResolutionTest_littlespidy {
     public void testForceSslOptionAndCliCommand() {
         SqlmapTaskOptions options = new SqlmapTaskOptions();
         options.setUrl("http://target.local/vuln.php?id=1");
-        assertFalse(options.isForceSsl());
-
-        // Enable forceSsl
-        options.setForceSsl(true);
+        // forceSsl is true by default
         assertTrue(options.isForceSsl());
 
         String cli = options.buildCommandLine();
@@ -156,6 +153,80 @@ public class TimeSecAndUrlResolutionTest_littlespidy {
 
         Map<String, Object> map = options.toOptionMap();
         assertEquals("true", map.get("forceSSL"));
+
+        // Disable forceSsl
+        options.setForceSsl(false);
+        assertFalse(options.isForceSsl());
+        String cliDisabled = options.buildCommandLine();
+        assertTrue(cliDisabled.contains("-u \"http://target.local/vuln.php?id=1\""));
+        assertFalse(cliDisabled.contains("--force-ssl"));
+    }
+
+    @Test
+    public void testTimelessNoCastHexOptions() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("https://target.local/vuln.php?id=1");
+
+        // Defaults are false
+        assertFalse(options.isTimeless());
+        assertFalse(options.isNoCast());
+        assertFalse(options.isHexConvert());
+
+        options.setTimeless(true);
+        options.setNoCast(true);
+        options.setHexConvert(true);
+
+        assertTrue(options.isTimeless());
+        assertTrue(options.isNoCast());
+        assertTrue(options.isHexConvert());
+
+        String cli = options.buildCommandLine();
+        assertTrue(cli.contains("--timeless"));
+        assertTrue(cli.contains("--no-cast"));
+        assertTrue(cli.contains("--hex"));
+
+        Map<String, Object> map = options.toOptionMap();
+        assertEquals("true", map.get("timeLess"));
+        assertEquals("true", map.get("noCast"));
+        assertEquals("true", map.get("hexConvert"));
+    }
+
+    @Test
+    public void testTimelessNoCastHexUIConfigPanel() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("https://target.local/test");
+        options.setTimeless(false);
+        options.setNoCast(false);
+        options.setHexConvert(false);
+
+        byte[] raw = "GET /test HTTP/1.1\r\nHost: target.local\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        ScanRequestSession session = new ScanRequestSession(4, "GET", "https://target.local/test", raw, options);
+
+        RequestScanTabPanel tabPanel = new RequestScanTabPanel(null, session, null);
+        RequestConfigPanel configPanel = tabPanel.getConfigPanelForTest();
+        assertNotNull(configPanel);
+        assertNotNull(configPanel.getChkTimelessForTest());
+        assertNotNull(configPanel.getChkNoCastForTest());
+        assertNotNull(configPanel.getChkHexForTest());
+
+        assertFalse(configPanel.getChkTimelessForTest().isSelected());
+        assertFalse(configPanel.getChkNoCastForTest().isSelected());
+        assertFalse(configPanel.getChkHexForTest().isSelected());
+
+        // Check options in UI
+        configPanel.getChkTimelessForTest().setSelected(true);
+        configPanel.getChkNoCastForTest().setSelected(true);
+        configPanel.getChkHexForTest().setSelected(true);
+
+        SqlmapTaskOptions updatedOpts = configPanel.applyUiToOptions();
+        assertTrue(updatedOpts.isTimeless());
+        assertTrue(updatedOpts.isNoCast());
+        assertTrue(updatedOpts.isHexConvert());
+
+        String cli = updatedOpts.buildCommandLine();
+        assertTrue(cli.contains("--timeless"));
+        assertTrue(cli.contains("--no-cast"));
+        assertTrue(cli.contains("--hex"));
     }
 
     @Test
