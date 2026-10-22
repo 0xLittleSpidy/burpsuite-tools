@@ -208,10 +208,10 @@ public class HeaderDocPanel extends JPanel {
                     JPanel specRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
                     specRow.setOpaque(false);
 
-                    JLabel titleLbl = new JLabel("• " + spec.title());
+                    JLabel titleLbl = new JLabel("- " + spec.title());
                     titleLbl.setFont(titleLbl.getFont().deriveFont(Font.PLAIN, 12f));
 
-                    JButton linkBtn = new JButton("Open Spec ↗");
+                    JButton linkBtn = new JButton("Open Spec");
                     linkBtn.setFont(linkBtn.getFont().deriveFont(10f));
                     linkBtn.setMargin(new Insets(1, 4, 1, 4));
                     linkBtn.addActionListener(e -> {
@@ -259,7 +259,7 @@ public class HeaderDocPanel extends JPanel {
             JPanel searchRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
             searchRow.setOpaque(false);
 
-            JButton searchBtn = new JButton("Search http.dev for '" + currentHeaderName + "' ↗");
+            JButton searchBtn = new JButton("Search http.dev for '" + currentHeaderName + "'");
             searchBtn.addActionListener(e -> {
                 String searchUrl = "https://http.dev/headers#" + currentHeaderName.toLowerCase();
                 try {
@@ -275,6 +275,8 @@ public class HeaderDocPanel extends JPanel {
             specsContainer.setVisible(true);
         }
 
+        summaryCard.revalidate();
+        summaryCard.repaint();
         revalidate();
         repaint();
     }
@@ -291,6 +293,8 @@ public class HeaderDocPanel extends JPanel {
         directivesContainer.removeAll();
         specsTitle.setVisible(false);
         specsContainer.removeAll();
+        summaryCard.revalidate();
+        summaryCard.repaint();
         revalidate();
         repaint();
     }

@@ -92,7 +92,8 @@ public class HSTSInspectorTab extends JPanel {
     private final javax.swing.Timer refreshTimer;
     private volatile boolean needsRefresh = false;
 
-    private String selectedSummaryValue = null;
+    private HSTSSummaryTableModel.SummaryRow selectedSummaryRow = null;
+    private List<HSTSEntry> currentFilteredEntries = Collections.emptyList();
 
     public HSTSInspectorTab(MontoyaApi api, HSTSDataStore dataStore) {
         this.api            = api;
@@ -143,9 +144,11 @@ public class HSTSInspectorTab extends JPanel {
                 int row = summaryTable.getSelectedRow();
                 if (row >= 0) {
                     int mr = summaryTable.convertRowIndexToModel(row);
-                    selectedSummaryValue = summaryTableModel.getSummaryValueAt(mr);
-                    updateEntryTable();
+                    selectedSummaryRow = summaryTableModel.getRowAt(mr);
+                } else {
+                    selectedSummaryRow = null;
                 }
+                updateEntryTable();
             }
         });
         setupTableKeyboardCopy(summaryTable);
@@ -175,8 +178,8 @@ public class HSTSInspectorTab extends JPanel {
         setupTableKeyboardCopy(entryTable);
 
         JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("📤 Request",  requestEditor.uiComponent());
-        editorTabs.addTab("📥 Response", responseEditor.uiComponent());
+        editorTabs.addTab("Request",  requestEditor.uiComponent());
+        editorTabs.addTab("Response", responseEditor.uiComponent());
 
         JSplitPane masterDetail = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
             new JScrollPane(entryTable), editorTabs);
@@ -202,7 +205,7 @@ public class HSTSInspectorTab extends JPanel {
 
         JLabel modeLbl = new JLabel("Inspect Mode:");
         modeLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        inspectModeComboBox.addActionListener(e -> { selectedSummaryValue = null; refreshView(); });
+        inspectModeComboBox.addActionListener(e -> { selectedSummaryRow = null; refreshView(); });
 
         JLabel filterLbl = new JLabel("Filter:");
         valueFilterField.setToolTipText("Filter by pattern value, assessment, or keyword");
@@ -217,7 +220,7 @@ public class HSTSInspectorTab extends JPanel {
             methodFilterBtn.clearSelection();
             statusFilterBtn.clearSelection();
             contentTypeFilterBtn.clearSelection();
-            selectedSummaryValue = null;
+            selectedSummaryRow = null;
             refreshView();
         });
 
@@ -233,7 +236,7 @@ public class HSTSInspectorTab extends JPanel {
                 "Clear all captured HSTS entries?", "Clear Data", JOptionPane.YES_NO_OPTION);
             if (ok == JOptionPane.YES_OPTION) {
                 dataStore.clear();
-                selectedSummaryValue = null;
+                selectedSummaryRow = null;
                 refreshView();
             }
         });
@@ -272,7 +275,13 @@ public class HSTSInspectorTab extends JPanel {
     }
 
     private void setupSummaryTableRendering() {
-        summaryTable.getColumnModel().getColumn(2).setMaxWidth(70);
+        if (summaryTable.getColumnModel().getColumnCount() >= 4) {
+            summaryTable.getColumnModel().getColumn(0).setPreferredWidth(180);
+            summaryTable.getColumnModel().getColumn(1).setPreferredWidth(340);
+            summaryTable.getColumnModel().getColumn(2).setPreferredWidth(80);
+            summaryTable.getColumnModel().getColumn(2).setMaxWidth(100);
+            summaryTable.getColumnModel().getColumn(3).setPreferredWidth(320);
+        }
         summaryTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(
@@ -401,70 +410,38 @@ public class HSTSInspectorTab extends JPanel {
 
             String statusStr = statusSel.isEmpty() ? "" : String.join(" / ", statusSel);
 
-            Map<String, List<HSTSEntry>> grouped = groupWithMultiSelectCT(
-                mode, kw, statusStr, ctSel, methodSel, scopePred);
+            List<HSTSEntry> entries;
+            if (ctSel.size() <= 1) {
+                String ctStr = ctSel.isEmpty() ? "" : ctSel.iterator().next();
+                entries = dataStore.getFilteredEntries(mode, null, kw,
+                    statusStr, ctStr, methodSel, scopePred);
+            } else {
+                Map<Integer, HSTSEntry> merged = new LinkedHashMap<>();
+                for (String ct : ctSel) {
+                    dataStore.getFilteredEntries(mode, null, kw,
+                        statusStr, ct, methodSel, scopePred).forEach(e -> merged.putIfAbsent(e.id(), e));
+                }
+                entries = new ArrayList<>(merged.values());
+            }
 
-            summaryTableModel.updateData(grouped);
+            this.currentFilteredEntries = entries;
+            summaryTableModel.updateData(entries, mode);
             updateEntryTable();
 
             statsLabel.setText(
                 "Total Unique URLs: " + dataStore.size()
-                + " | Patterns: " + summaryTableModel.getRowCount()
+                + " | Domain/Value Pairs: " + summaryTableModel.getRowCount()
                 + " | Displayed: " + entryTableModel.getRowCount()
             );
         });
     }
 
     private void updateEntryTable() {
-        String mode    = selectedMode();
-        String kw      = valueFilterField.getText().trim();
-        Set<String> ms = methodFilterBtn.getSelected();
-        Set<String> ss = statusFilterBtn.getSelected();
-        Set<String> cs = contentTypeFilterBtn.getSelected();
-        boolean inScope = inScopeOnlyCheckBox.isSelected();
-
-        java.util.function.Predicate<String> scopePred = inScope
-            ? url -> api.scope().isInScope(url) : null;
-
-        String statusStr = ss.isEmpty() ? "" : String.join(" / ", ss);
-
-        List<HSTSEntry> entries;
-        if (cs.size() <= 1) {
-            String ctStr = cs.isEmpty() ? "" : cs.iterator().next();
-            entries = dataStore.getFilteredEntries(mode, selectedSummaryValue, kw,
-                statusStr, ctStr, ms, scopePred);
+        if (selectedSummaryRow != null) {
+            entryTableModel.updateData(selectedSummaryRow.getEntries());
         } else {
-            Map<Integer, HSTSEntry> merged = new LinkedHashMap<>();
-            for (String ct : cs) {
-                dataStore.getFilteredEntries(mode, selectedSummaryValue, kw,
-                    statusStr, ct, ms, scopePred).forEach(e -> merged.putIfAbsent(e.id(), e));
-            }
-            entries = new ArrayList<>(merged.values());
+            entryTableModel.updateData(currentFilteredEntries != null ? currentFilteredEntries : Collections.emptyList());
         }
-        entryTableModel.updateData(entries);
-    }
-
-    private Map<String, List<HSTSEntry>> groupWithMultiSelectCT(
-            String mode, String kw,
-            String statusStr, Set<String> ctSel,
-            Set<String> methodSel,
-            java.util.function.Predicate<String> scopePred) {
-
-        if (ctSel.size() <= 1) {
-            String ct = ctSel.isEmpty() ? "" : ctSel.iterator().next();
-            return dataStore.groupByMode(mode, kw, statusStr, ct, methodSel, scopePred);
-        }
-        Map<String, List<HSTSEntry>> merged = new LinkedHashMap<>();
-        for (String ct : ctSel) {
-            dataStore.groupByMode(mode, kw, statusStr, ct, methodSel, scopePred)
-                .forEach((key, list) -> {
-                    merged.computeIfAbsent(key, k -> new ArrayList<>());
-                    Set<Integer> seen = new HashSet<>();
-                    merged.get(key).forEach(e -> seen.add(e.id()));
-                    list.stream().filter(e -> seen.add(e.id())).forEach(merged.get(key)::add);
-                });
-        }
-        return merged;
     }
 
     private String selectedMode() {

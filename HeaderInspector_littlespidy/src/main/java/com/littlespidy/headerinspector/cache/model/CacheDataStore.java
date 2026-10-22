@@ -137,7 +137,8 @@ public class CacheDataStore {
                 if (val.equals(exactDirectiveValue)) filtered.add(entry);
             } else {
                 if (valueFilter == null || valueFilter.isBlank()
-                        || val.toLowerCase().contains(valueFilter.trim().toLowerCase())) {
+                        || val.toLowerCase().contains(valueFilter.trim().toLowerCase())
+                        || (entry.host() != null && entry.host().toLowerCase().contains(valueFilter.trim().toLowerCase()))) {
                     filtered.add(entry);
                 }
             }

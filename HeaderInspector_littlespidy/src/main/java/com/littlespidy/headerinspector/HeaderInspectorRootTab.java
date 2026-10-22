@@ -23,13 +23,13 @@ import java.awt.*;
  * Created with the help of an AI Agent and littlespidy.
  *
  * Root suite tab for Header Inspector containing:
- * 0. 📖 Welcome & Guide (Single unified onboarding dashboard and module guide)
- * 1. 📋 Header Collector (Request & Response headers grouped by name, unique values, associated domains)
- * 2. ⚡ Method Collector (HTTP methods aggregated by verb, safe/idempotent/cacheable semantics from http.dev)
- * 3. 🔢 Status Collector (HTTP status codes grouped by class & code, client actions, SEO impact from http.dev)
- * 4. 🗄️ Cache Inspector (Caching directives, CDN headers, master-detail editors)
- * 5. 🛡️ CSP Inspector (Content Security Policy auditing with Inbuilt Google CSP Evaluator)
- * 6. 🔒 HSTS Inspector (Strict-Transport-Security auditing, max-age, preload readiness)
+ * 0. Welcome & Guide (Single unified onboarding dashboard and module guide)
+ * 1. Header Collector (Request & Response headers grouped by name, unique values, associated domains)
+ * 2. Method Collector (HTTP methods aggregated by verb, safe/idempotent/cacheable semantics from http.dev)
+ * 3. Status Collector (HTTP status codes grouped by class & code, client actions, SEO impact from http.dev)
+ * 4. Cache Inspector (Caching directives, CDN headers, master-detail editors)
+ * 5. CSP Inspector (Content Security Policy auditing with Inbuilt Google CSP Evaluator)
+ * 6. HSTS Inspector (Strict-Transport-Security auditing, max-age, preload readiness)
  *
  * Coordinates unified Proxy history ingestion so loading in one tab synchronizes across all tabs.
  *
@@ -165,7 +165,7 @@ public class HeaderInspectorRootTab extends JPanel {
         ));
         calloutPanel.setBackground(new Color(235, 245, 255));
 
-        JLabel calloutTitle = new JLabel("⚡ One-Click Synchronized Ingestion (Zero Passive CPU Overhead)");
+        JLabel calloutTitle = new JLabel("One-Click Synchronized Ingestion (Zero Passive CPU Overhead)");
         calloutTitle.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
         calloutTitle.setForeground(new Color(13, 71, 161));
 
@@ -190,7 +190,7 @@ public class HeaderInspectorRootTab extends JPanel {
         cardsGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         cardsGrid.add(createModuleCard(
-            "📋 Header Collector",
+            "Header Collector",
             "Harvests every HTTP Request and Response header across proxy history. Groups multiple distinct values under "
             + "their respective header names, attributes unique name-value pairs to target domains, offers 4-pillar deep linking "
             + "with search marking, and one-click TSV export.",
@@ -199,7 +199,7 @@ public class HeaderInspectorRootTab extends JPanel {
         ));
 
         cardsGrid.add(createModuleCard(
-            "⚡ Method Collector (NEW)",
+            "Method Collector",
             "Aggregates all HTTP request methods (GET, POST, PUT, DELETE, PATCH, etc.) across traffic. Classifies RFC 9110 safety, "
             + "idempotency, and cacheability properties, correlates endpoints and target domains, and embeds offline documentation from http.dev.",
             "Switch to Methods",
@@ -207,7 +207,7 @@ public class HeaderInspectorRootTab extends JPanel {
         ));
 
         cardsGrid.add(createModuleCard(
-            "🔢 Status Collector (NEW)",
+            "Status Collector",
             "Aggregates all HTTP response status codes (standard 1xx-5xx plus Cloudflare, Nginx, Akamai, and Edgio vendor codes). "
             + "Correlates status classes, meanings, recommended client actions, SEO impact, and embeds offline reference documentation from http.dev.",
             "Switch to Statuses",
@@ -215,7 +215,7 @@ public class HeaderInspectorRootTab extends JPanel {
         ));
 
         cardsGrid.add(createModuleCard(
-            "🗄️ Cache Inspector",
+            "Cache Inspector",
             "Audits 12 key caching directives and CDN headers (Cache-Control, Pragma, Expires, Age, ETag, Vary, CF-Cache-Status, etc.). "
             + "Quickly identifies unkeyed input poisoning risks, web cache deception vectors, and private response leakage. "
             + "Multi-select filtering by method, status code, and content type.",
@@ -224,18 +224,18 @@ public class HeaderInspectorRootTab extends JPanel {
         ));
 
         cardsGrid.add(createModuleCard(
-            "🛡️ CSP Inspector (Inbuilt Google CSP Evaluator)",
+            "CSP Inspector (Inbuilt Google CSP Evaluator)",
             "Audits Content Security Policies using Google's official CSP Evaluator engine (v1.1.8) running 100% offline. "
             + "Detects 'unsafe-inline', 'unsafe-eval', missing object-src/base-uri, and identifies known JSONP/Angular allowlist "
             + "bypasses (e.g. cdnjs.cloudflare.com). Includes an interactive Google CSP Scratchpad.",
             "Switch to CSP Inspector",
             () -> mainTabbedPane.setSelectedIndex(5),
-            "🌐 Check Google Updates",
+            "Check Google Updates",
             () -> com.littlespidy.headerinspector.csp.evaluator.GoogleCspUpdateChecker.checkForUpdatesAsync(this)
         ));
 
         cardsGrid.add(createModuleCard(
-            "🔒 HSTS Inspector",
+            "HSTS Inspector",
             "Evaluates Strict-Transport-Security configurations against RFC 6797 and browser preload criteria. "
             + "Flags missing HSTS, short max-age (< 1 year / < 30 days), max-age=0 opt-outs, and missing includeSubDomains. "
             + "Severity-coded triage table with instant TSV export.",
@@ -250,7 +250,7 @@ public class HeaderInspectorRootTab extends JPanel {
         JPanel workflowPanel = new JPanel(new BorderLayout(6, 6));
         workflowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         workflowPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "🚀 Quick Start Workflow",
+            BorderFactory.createEtchedBorder(), "Quick Start Workflow",
             javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.TOP,
             new Font(Font.SANS_SERIF, Font.BOLD, 13)
         ));

@@ -59,7 +59,6 @@ public class MethodCollectorTab extends JPanel {
     // Quick-Info Banner above endpoint table
     private final JPanel quickInfoPanel = new JPanel(new BorderLayout(6, 2));
     private final JLabel quickInfoLabel = new JLabel("Select an HTTP method to view explanation from http.dev");
-    private final JButton quickInfoDocsBtn = new JButton("View Full Explanation ↗");
 
     // Toolbar Controls
     private final JButton loadHistoryBtn = new JButton("Load Proxy History");
@@ -143,13 +142,34 @@ public class MethodCollectorTab extends JPanel {
         groupTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         groupTable.setRowSorter(new TableRowSorter<>(groupTableModel));
 
+        // Column widths for Group Table
+        groupTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // Method
+        groupTable.getColumnModel().getColumn(1).setPreferredWidth(60);  // Safe
+        groupTable.getColumnModel().getColumn(2).setPreferredWidth(85);  // Idempotent
+        groupTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // Cacheable
+        groupTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Total Requests
+        groupTable.getColumnModel().getColumn(5).setPreferredWidth(70);  // Domains
+        groupTable.getColumnModel().getColumn(6).setPreferredWidth(115); // Unique Endpoints
+
         endpointTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         endpointTable.setRowSorter(new TableRowSorter<>(endpointTableModel));
+
+        // Column widths for Endpoint Table
+        endpointTable.getColumnModel().getColumn(0).setPreferredWidth(50);  // #
+        endpointTable.getColumnModel().getColumn(0).setMaxWidth(60);
+        endpointTable.getColumnModel().getColumn(1).setPreferredWidth(60);  // Status
+        endpointTable.getColumnModel().getColumn(1).setMaxWidth(75);
+        endpointTable.getColumnModel().getColumn(2).setPreferredWidth(65);  // Method
+        endpointTable.getColumnModel().getColumn(2).setMaxWidth(80);
+        endpointTable.getColumnModel().getColumn(3).setPreferredWidth(160); // Host
+        endpointTable.getColumnModel().getColumn(4).setPreferredWidth(320); // URL
+        endpointTable.getColumnModel().getColumn(5).setPreferredWidth(120); // Time
 
         JScrollPane groupScroll = new JScrollPane(groupTable);
         groupScroll.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "HTTP Methods (Grouped)", TitledBorder.LEFT, TitledBorder.TOP
         ));
+        groupScroll.setMinimumSize(new Dimension(380, 160));
 
         JScrollPane endpointScroll = new JScrollPane(endpointTable);
         endpointScroll.setBorder(BorderFactory.createTitledBorder(
@@ -161,31 +181,30 @@ public class MethodCollectorTab extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(210, 215, 220)),
                 BorderFactory.createEmptyBorder(4, 6, 4, 6)
         ));
-        quickInfoDocsBtn.setFont(quickInfoDocsBtn.getFont().deriveFont(11f));
-        quickInfoDocsBtn.setMargin(new Insets(2, 6, 2, 6));
-        quickInfoDocsBtn.setEnabled(false);
-        quickInfoDocsBtn.addActionListener(e -> {
-            editorTabs.setSelectedComponent(methodDocPanel);
-        });
         quickInfoPanel.add(quickInfoLabel, BorderLayout.CENTER);
-        quickInfoPanel.add(quickInfoDocsBtn, BorderLayout.EAST);
 
         JPanel endpointContainer = new JPanel(new BorderLayout(0, 2));
+        endpointContainer.setMinimumSize(new Dimension(380, 160));
         endpointContainer.add(quickInfoPanel, BorderLayout.NORTH);
         endpointContainer.add(endpointScroll, BorderLayout.CENTER);
 
         // Horizontal Split: Methods on Left, Endpoints on Right
         JSplitPane tablesSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, groupScroll, endpointContainer);
-        tablesSplit.setResizeWeight(0.40);
+        tablesSplit.setOneTouchExpandable(true);
+        tablesSplit.setContinuousLayout(true);
+        tablesSplit.setResizeWeight(0.42);
+        tablesSplit.setDividerLocation(470);
 
         // Editors Tabbed Pane
-        editorTabs.addTab("📤 Request", requestEditor.uiComponent());
-        editorTabs.addTab("📥 Response", responseEditor.uiComponent());
-        editorTabs.addTab("📖 Method Explained (http.dev)", methodDocPanel);
+        editorTabs.addTab("Request", requestEditor.uiComponent());
+        editorTabs.addTab("Response", responseEditor.uiComponent());
+        editorTabs.addTab("Method Explained (http.dev)", methodDocPanel);
 
         // Vertical Split: Tables on Top, Request/Response Editors on Bottom
         JSplitPane rootSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tablesSplit, editorTabs);
-        rootSplit.setResizeWeight(0.55);
+        rootSplit.setOneTouchExpandable(true);
+        rootSplit.setContinuousLayout(true);
+        rootSplit.setResizeWeight(0.52);
 
         add(rootSplit, BorderLayout.CENTER);
 
@@ -231,7 +250,8 @@ public class MethodCollectorTab extends JPanel {
                 refreshView();
                 methodDocPanel.resetView();
                 quickInfoLabel.setText("Select an HTTP method to view explanation from http.dev");
-                quickInfoDocsBtn.setEnabled(false);
+                quickInfoPanel.revalidate();
+                quickInfoPanel.repaint();
                 requestEditor.setRequest(null);
                 responseEditor.setResponse(null);
             }
@@ -251,7 +271,8 @@ public class MethodCollectorTab extends JPanel {
                     selectedGroup = null;
                     endpointTableModel.setRecords(null);
                     quickInfoLabel.setText("Select an HTTP method to view explanation from http.dev");
-                    quickInfoDocsBtn.setEnabled(false);
+                    quickInfoPanel.revalidate();
+                    quickInfoPanel.repaint();
                     methodDocPanel.resetView();
                 }
             }
@@ -276,7 +297,8 @@ public class MethodCollectorTab extends JPanel {
         if (group == null) {
             endpointTableModel.setRecords(null);
             quickInfoLabel.setText("Select an HTTP method to view explanation from http.dev");
-            quickInfoDocsBtn.setEnabled(false);
+            quickInfoPanel.revalidate();
+            quickInfoPanel.repaint();
             methodDocPanel.resetView();
             return;
         }
@@ -289,12 +311,12 @@ public class MethodCollectorTab extends JPanel {
             quickInfoLabel.setText("<html><b>" + group.method() + "</b>: Safe=" + (doc.safe() ? "Yes" : "No")
                     + " | Idempotent=" + (doc.idempotent() ? "Yes" : "No")
                     + " | Cacheable=" + doc.cacheable()
-                    + " &mdash; <i>" + escapeHtml(doc.summary()) + "</i></html>");
-            quickInfoDocsBtn.setEnabled(true);
+                    + " - <i>" + escapeHtml(doc.summary()) + "</i></html>");
         } else {
-            quickInfoLabel.setText("<html><b>" + group.method() + "</b>: Custom or extension method &mdash; no standard http.dev entry</html>");
-            quickInfoDocsBtn.setEnabled(false);
+            quickInfoLabel.setText("<html><b>" + group.method() + "</b>: Custom or extension method - no standard http.dev entry</html>");
         }
+        quickInfoPanel.revalidate();
+        quickInfoPanel.repaint();
 
         // Auto-select first endpoint if available
         if (endpointTable.getRowCount() > 0) {

@@ -58,14 +58,14 @@ public record HSTSEntry(
     }
 
     public String assessment() {
-        if (isMissingHsts())    return "CRITICAL – Missing HSTS header";
-        if (isOptOut())         return "CRITICAL – max-age=0 (HSTS disabled)";
-        if (isShortMaxAge())    return "HIGH – max-age < 30 days (" + maxAgeSummary() + ")";
+        if (isMissingHsts())    return "CRITICAL - Missing HSTS header";
+        if (isOptOut())         return "CRITICAL - max-age=0 (HSTS disabled)";
+        if (isShortMaxAge())    return "HIGH - max-age < 30 days (" + maxAgeSummary() + ")";
         if (maxAge < 31_536_000L) {
-            return "MEDIUM – max-age < 1 year (" + maxAgeSummary() + ")";
+            return "MEDIUM - max-age < 1 year (" + maxAgeSummary() + ")";
         }
-        if (!includeSubDomains) return "MEDIUM – Missing includeSubDomains";
-        if (!preload)           return "GOOD – HSTS set, consider adding preload";
-        return "GOOD – Best practice (max-age + includeSubDomains + preload)";
+        if (!includeSubDomains) return "MEDIUM - Missing includeSubDomains";
+        if (!preload)           return "GOOD - HSTS set, consider adding preload";
+        return "GOOD - Best practice (max-age + includeSubDomains + preload)";
     }
 }

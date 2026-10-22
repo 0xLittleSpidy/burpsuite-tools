@@ -11,83 +11,110 @@ import java.util.*;
 /**
  * Created with the help of an AI Agent and littlespidy.
  *
- * Summary table model showing unique CSP values, associated domains, counts, and security assessments.
+ * Summary table model showing unique CSP values per domain, occurrence counts, and security assessments.
+ * Every value has its own row, URL count, and assessment.
  *
  * @author littlespidy
  */
 public class CSPSummaryTableModel extends AbstractTableModel {
 
     private static final String[] COLUMN_NAMES = {
+        "Domain Name",
         "Value",
-        "Domains",
-        "Count",
+        "URL Count",
         "Assessment"
     };
 
     public static class CSPSummaryRow {
+        private final String domain;
         private final String value;
-        private final String domains;
         private final int count;
         private final String assessment;
-        private final String groupKey;
         private final List<CSPEntry> entries;
 
-        public CSPSummaryRow(String value, String domains, int count, String assessment, String groupKey, List<CSPEntry> entries) {
+        public CSPSummaryRow(String domain, String value, int count, String assessment, List<CSPEntry> entries) {
+            this.domain = domain;
             this.value = value;
-            this.domains = domains;
             this.count = count;
             this.assessment = assessment;
-            this.groupKey = groupKey;
             this.entries = entries;
         }
 
+        public String getDomain() { return domain; }
         public String getValue() { return value; }
-        public String getDomains() { return domains; }
         public int getCount() { return count; }
         public String getAssessment() { return assessment; }
-        public String getGroupKey() { return groupKey; }
         public List<CSPEntry> getEntries() { return entries; }
     }
 
     private final List<CSPSummaryRow> rows = new ArrayList<>();
 
-    public synchronized void updateData(Map<String, List<CSPEntry>> groupedData) {
+    public synchronized void updateData(List<CSPEntry> entries, String mode) {
         rows.clear();
-        if (groupedData != null) {
-            List<Map.Entry<String, List<CSPEntry>>> sorted = new ArrayList<>(groupedData.entrySet());
-            sorted.sort((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()));
+        if (entries == null || entries.isEmpty()) {
+            fireTableDataChanged();
+            return;
+        }
 
-            for (Map.Entry<String, List<CSPEntry>> e : sorted) {
-                String groupKey = e.getKey();
-                List<CSPEntry> list = e.getValue();
-                int count = list.size();
+        String normalizedMode = mode != null ? mode.trim() : "Full Policy";
+        Map<String, List<CSPEntry>> map = new LinkedHashMap<>();
 
-                Set<String> domainSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-                for (CSPEntry entry : list) {
-                    if (entry.host() != null && !entry.host().isBlank()) {
-                        domainSet.add(entry.host());
+        for (CSPEntry entry : entries) {
+            String domain = (entry.host() != null && !entry.host().isBlank()) ? entry.host().trim() : "(unknown)";
+            if (normalizedMode.equalsIgnoreCase("All Sources (Directives)")) {
+                if (entry.isMissingCsp()) {
+                    String key = domain.toLowerCase() + "\t(missing CSP)";
+                    map.computeIfAbsent(key, k -> new ArrayList<>()).add(entry);
+                } else {
+                    Set<String> seenTokens = new HashSet<>();
+                    for (Map.Entry<String, List<String>> dir : entry.parsedDirectives().entrySet()) {
+                        String directiveName = dir.getKey();
+                        for (String token : dir.getValue()) {
+                            String itemKey = directiveName + " " + token;
+                            if (seenTokens.add(itemKey)) {
+                                String key = domain.toLowerCase() + "\t" + itemKey;
+                                map.computeIfAbsent(key, k -> new ArrayList<>()).add(entry);
+                            }
+                        }
                     }
                 }
-                String domains = String.join(", ", domainSet);
-
-                String rawVal;
-                if (list.isEmpty()) {
-                    rawVal = groupKey;
-                } else {
-                    CSPEntry first = list.get(0);
-                    rawVal = first.isMissingCsp() ? "(missing CSP)" : first.getPrimaryCsp();
-                }
-
-                String assessment = evaluateSecurityAssessment(rawVal, list);
-                rows.add(new CSPSummaryRow(rawVal, domains, count, assessment, groupKey, list));
+            } else {
+                String val = deriveValue(entry, normalizedMode);
+                String key = domain.toLowerCase() + "\t" + val;
+                map.computeIfAbsent(key, k -> new ArrayList<>()).add(entry);
             }
         }
+
+        for (Map.Entry<String, List<CSPEntry>> e : map.entrySet()) {
+            List<CSPEntry> list = e.getValue();
+            CSPEntry first = list.get(0);
+            String domain = (first.host() != null && !first.host().isBlank()) ? first.host().trim() : "(unknown)";
+            String val = e.getKey().substring(e.getKey().indexOf('\t') + 1);
+            int count = list.size();
+            String assessment = evaluateSecurityAssessment(val, list);
+            rows.add(new CSPSummaryRow(domain, val, count, assessment, list));
+        }
+
+        rows.sort(Comparator.comparing((CSPSummaryRow r) -> r.getDomain().toLowerCase())
+                .thenComparing(CSPSummaryRow::getValue));
         fireTableDataChanged();
     }
 
-    public synchronized String getSummaryValueAt(int rowIndex) {
+    private static String deriveValue(CSPEntry entry, String mode) {
+        if (mode.equalsIgnoreCase("Full Policy")) {
+            return entry.isMissingCsp() ? "(missing CSP)" : entry.getPrimaryCsp();
+        } else if (mode.equalsIgnoreCase("CSP-Report-Only")) {
+            return (entry.cspReportOnlyHeader() != null && !entry.cspReportOnlyHeader().trim().isEmpty())
+                    ? entry.cspReportOnlyHeader().trim()
+                    : "(not set)";
+        } else {
+            return entry.getDirectiveString(mode);
+        }
+    }
+
+    public synchronized CSPSummaryRow getRowAt(int rowIndex) {
         if (rowIndex >= 0 && rowIndex < rows.size()) {
-            return rows.get(rowIndex).getGroupKey();
+            return rows.get(rowIndex);
         }
         return null;
     }
@@ -133,8 +160,8 @@ public class CSPSummaryTableModel extends AbstractTableModel {
 
         CSPSummaryRow row = rows.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> row.getValue();
-            case 1 -> row.getDomains();
+            case 0 -> row.getDomain();
+            case 1 -> row.getValue();
             case 2 -> row.getCount();
             case 3 -> row.getAssessment();
             default -> null;

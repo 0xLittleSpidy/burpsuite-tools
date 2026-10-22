@@ -24,7 +24,7 @@ public class MultiSelectFilterButton extends JButton {
     private final Consumer<Set<String>> onChange;
 
     public MultiSelectFilterButton(String label, List<String> options, Consumer<Set<String>> onChange) {
-        super(label + " \u25be");
+        super(label + " [v]");
         this.label = label;
         this.options = new ArrayList<>(options);
         this.onChange = onChange;
@@ -129,11 +129,11 @@ public class MultiSelectFilterButton extends JButton {
     private void updateButtonText() {
         Set<String> sel = getSelected();
         if (sel.isEmpty()) {
-            setText(label + " \u25be");
+            setText(label + " [v]");
         } else if (sel.size() == 1) {
-            setText(label + ": " + sel.iterator().next() + " \u25be");
+            setText(label + ": " + sel.iterator().next() + " [v]");
         } else {
-            setText(label + ": " + sel.size() + " selected \u25be");
+            setText(label + ": " + sel.size() + " selected [v]");
         }
     }
 

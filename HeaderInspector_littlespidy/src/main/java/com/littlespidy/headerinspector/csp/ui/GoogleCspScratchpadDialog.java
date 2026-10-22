@@ -38,7 +38,7 @@ public class GoogleCspScratchpadDialog extends JDialog {
     };
 
     public GoogleCspScratchpadDialog(Window parent, String initialPolicy) {
-        super(parent, "🧪 Google CSP Evaluator Scratchpad", ModalityType.MODELESS);
+        super(parent, "Google CSP Evaluator Scratchpad", ModalityType.MODELESS);
         setLayout(new BorderLayout(8, 8));
         setSize(920, 680);
         setLocationRelativeTo(parent);
@@ -93,7 +93,7 @@ public class GoogleCspScratchpadDialog extends JDialog {
             evaluatorPanel.setPolicy("");
         });
 
-        JButton checkUpdatesBtn = new JButton("🌐 Check Google Updates");
+        JButton checkUpdatesBtn = new JButton("Check Google Updates");
         checkUpdatesBtn.setToolTipText("Check for new releases from https://github.com/google/csp-evaluator");
         checkUpdatesBtn.addActionListener(e -> com.littlespidy.headerinspector.csp.evaluator.GoogleCspUpdateChecker.checkForUpdatesAsync(this));
 

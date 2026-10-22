@@ -140,11 +140,14 @@ public class HSTSDataStore {
             if (!matchesMethod(entry.method(), methodFilter))             continue;
 
             String key = deriveGroupKey(m, entry);
+            if (MODE_MISSING.equals(m) && key == null) continue;
 
             if (selectedSummaryValue != null) {
                 if (selectedSummaryValue.equals(key)) list.add(entry);
             } else {
-                if (matchesText(key, valueFilter)) list.add(entry);
+                if (matchesText(key, valueFilter) || matchesText(entry.host(), valueFilter) || matchesText(entry.assessment(), valueFilter)) {
+                    list.add(entry);
+                }
             }
         }
         return list;

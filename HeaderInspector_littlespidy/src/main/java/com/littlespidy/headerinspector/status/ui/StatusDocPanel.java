@@ -177,10 +177,10 @@ public class StatusDocPanel extends JPanel {
                     JPanel specItem = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
                     specItem.setOpaque(false);
 
-                    JLabel specLabel = new JLabel("• " + spec.title());
+                    JLabel specLabel = new JLabel("- " + spec.title());
                     specLabel.setFont(specLabel.getFont().deriveFont(Font.PLAIN, 12f));
 
-                    JButton openSpecBtn = new JButton("View RFC ↗");
+                    JButton openSpecBtn = new JButton("View RFC");
                     openSpecBtn.setFont(openSpecBtn.getFont().deriveFont(10f));
                     openSpecBtn.setMargin(new Insets(1, 4, 1, 4));
                     openSpecBtn.addActionListener(e -> {
@@ -218,6 +218,8 @@ public class StatusDocPanel extends JPanel {
             specsTitle.setVisible(false);
         }
 
+        summaryCard.revalidate();
+        summaryCard.repaint();
         revalidate();
         repaint();
     }
@@ -234,6 +236,8 @@ public class StatusDocPanel extends JPanel {
         explanationArea.setText("");
         specsContainer.removeAll();
         specsTitle.setVisible(false);
+        summaryCard.revalidate();
+        summaryCard.repaint();
         revalidate();
         repaint();
     }

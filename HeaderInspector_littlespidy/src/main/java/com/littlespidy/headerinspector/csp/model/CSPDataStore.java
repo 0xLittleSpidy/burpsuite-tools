@@ -206,7 +206,10 @@ public class CSPDataStore {
                     }
                 }
             } else {
-                if (normalizedMode.equalsIgnoreCase("Full Policy")) {
+                boolean hostMatches = matchesText(entry.host(), valueFilter);
+                if (hostMatches) {
+                    list.add(entry);
+                } else if (normalizedMode.equalsIgnoreCase("Full Policy")) {
                     if (matchesText(entry.getPrimaryCsp(), valueFilter)) list.add(entry);
                 } else if (normalizedMode.equalsIgnoreCase("CSP-Report-Only")) {
                     String ro = (entry.cspReportOnlyHeader() != null) ? entry.cspReportOnlyHeader() : "(not set)";

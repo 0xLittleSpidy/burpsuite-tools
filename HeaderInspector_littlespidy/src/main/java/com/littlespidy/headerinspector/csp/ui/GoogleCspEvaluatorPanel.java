@@ -29,7 +29,7 @@ public class GoogleCspEvaluatorPanel extends JPanel {
     private final JTextField policyField = new JTextField();
     private final JButton copyPolicyBtn = new JButton("Copy CSP");
     private final JButton openScratchpadBtn = new JButton("Open in Scratchpad");
-    private final JButton checkUpdatesBtn = new JButton("🌐 Check Engine Updates");
+    private final JButton checkUpdatesBtn = new JButton("Check Engine Updates");
 
     private final FindingsTableModel tableModel = new FindingsTableModel();
     private final JTable findingsTable = new JTable(tableModel);
@@ -57,7 +57,7 @@ public class GoogleCspEvaluatorPanel extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout(6, 6));
 
         JPanel badgeRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        JLabel titleLabel = new JLabel("🔍 Google CSP Evaluator");
+        JLabel titleLabel = new JLabel("Google CSP Evaluator");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
 
         statusBadge.setOpaque(true);
@@ -157,7 +157,7 @@ public class GoogleCspEvaluatorPanel extends JPanel {
         policyField.setText(currentPolicy.isEmpty() ? "(No CSP header)" : currentPolicy);
 
         if (currentPolicy.isEmpty() || currentPolicy.equalsIgnoreCase("(missing CSP)")) {
-            statusBadge.setText("🔴 MISSING CSP");
+            statusBadge.setText("MISSING CSP");
             statusBadge.setBackground(CspSeverity.HIGH.getColor());
             tableModel.setFindings(List.of(new CspFinding(
                 com.littlespidy.headerinspector.csp.evaluator.CspFindingType.MISSING_DIRECTIVES,
@@ -177,7 +177,7 @@ public class GoogleCspEvaluatorPanel extends JPanel {
 
         CspSeverity highest = CspSeverity.getHighest(findings);
         if (highest == CspSeverity.NONE || findings.isEmpty()) {
-            statusBadge.setText("🟢 STRONG / PASS");
+            statusBadge.setText("STRONG / PASS");
             statusBadge.setBackground(CspSeverity.NONE.getColor());
         } else {
             statusBadge.setText(highest.getLabel() + " (" + findings.size() + " findings)");

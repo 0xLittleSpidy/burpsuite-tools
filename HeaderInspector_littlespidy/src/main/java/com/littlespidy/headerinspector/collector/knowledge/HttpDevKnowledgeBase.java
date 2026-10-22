@@ -104,6 +104,16 @@ public class HttpDevKnowledgeBase {
     }
 
     /**
+     * Returns an unmodifiable list of all categories including 'Custom / Vendor'.
+     */
+    public static List<String> getAllCategories() {
+        ensureLoaded();
+        List<String> list = new ArrayList<>(ALL_CATEGORIES);
+        list.add("Custom / Vendor");
+        return Collections.unmodifiableList(list);
+    }
+
+    /**
      * Returns an unmodifiable list of all headers in the knowledge base.
      */
     public static List<HttpDevHeaderDoc> getAll() {

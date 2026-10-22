@@ -108,7 +108,8 @@ public class CSPInspectorTab extends JPanel {
     private final javax.swing.Timer refreshTimer;
     private volatile boolean needsRefresh = false;
 
-    private String selectedSummaryValue = null;
+    private CSPSummaryTableModel.CSPSummaryRow selectedSummaryRow = null;
+    private List<CSPEntry> currentFilteredEntries = Collections.emptyList();
 
     public CSPInspectorTab(MontoyaApi api, CSPDataStore dataStore) {
         this.api = api;
@@ -166,13 +167,14 @@ public class CSPInspectorTab extends JPanel {
                 int row = summaryTable.getSelectedRow();
                 if (row >= 0) {
                     int mr = summaryTable.convertRowIndexToModel(row);
-                    selectedSummaryValue = summaryTableModel.getSummaryValueAt(mr);
-                    List<CSPEntry> entries = summaryTableModel.getEntriesAt(mr);
-                    if (!entries.isEmpty()) {
-                        googleEvaluatorPanel.setPolicy(entries.get(0).getPrimaryCsp());
+                    selectedSummaryRow = summaryTableModel.getRowAt(mr);
+                    if (selectedSummaryRow != null && !selectedSummaryRow.getEntries().isEmpty()) {
+                        googleEvaluatorPanel.setPolicy(selectedSummaryRow.getEntries().get(0).getPrimaryCsp());
                     }
-                    updateEntryTableForSelection();
+                } else {
+                    selectedSummaryRow = null;
                 }
+                updateEntryTableForSelection();
             }
         });
         setupTableKeyboardCopy(summaryTable);
@@ -205,9 +207,9 @@ public class CSPInspectorTab extends JPanel {
         setupTableKeyboardCopy(entryTable);
 
         JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("📤 Request", requestEditor.uiComponent());
-        editorTabs.addTab("📥 Response", responseEditor.uiComponent());
-        editorTabs.addTab("🔍 Google CSP Evaluator", googleEvaluatorPanel);
+        editorTabs.addTab("Request", requestEditor.uiComponent());
+        editorTabs.addTab("Response", responseEditor.uiComponent());
+        editorTabs.addTab("Google CSP Evaluator", googleEvaluatorPanel);
 
         JSplitPane masterDetailSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
             new JScrollPane(entryTable), editorTabs);
@@ -234,7 +236,7 @@ public class CSPInspectorTab extends JPanel {
         JLabel modeLbl = new JLabel("Mode:");
         modeLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         inspectModeComboBox.addActionListener(e -> {
-            selectedSummaryValue = null;
+            selectedSummaryRow = null;
             refreshView();
         });
 
@@ -251,17 +253,17 @@ public class CSPInspectorTab extends JPanel {
             statusFilterBtn.clearSelection();
             contentTypeFilterBtn.clearSelection();
             methodFilterBtn.clearSelection();
-            selectedSummaryValue = null;
+            selectedSummaryRow = null;
             refreshView();
         });
 
         inScopeOnlyCheckBox.addActionListener(e -> refreshView());
 
-        JButton scratchpadBtn = new JButton("🧪 Google CSP Scratchpad");
+        JButton scratchpadBtn = new JButton("Google CSP Scratchpad");
         scratchpadBtn.setToolTipText("Open interactive Google CSP Evaluator Scratchpad to test any policy");
         scratchpadBtn.addActionListener(e -> openScratchpad());
 
-        JButton checkUpdatesBtn = new JButton("🌐 Check Engine Updates");
+        JButton checkUpdatesBtn = new JButton("Check Engine Updates");
         checkUpdatesBtn.setToolTipText("Check for new releases from https://github.com/google/csp-evaluator");
         checkUpdatesBtn.addActionListener(e -> com.littlespidy.headerinspector.csp.evaluator.GoogleCspUpdateChecker.checkForUpdatesAsync(this));
 
@@ -276,7 +278,7 @@ public class CSPInspectorTab extends JPanel {
                 "Clear Data", JOptionPane.YES_NO_OPTION);
             if (ok == JOptionPane.YES_OPTION) {
                 dataStore.clear();
-                selectedSummaryValue = null;
+                selectedSummaryRow = null;
                 refreshView();
             }
         });
@@ -325,7 +327,13 @@ public class CSPInspectorTab extends JPanel {
     }
 
     private void setupSummaryTableRendering() {
-        summaryTable.getColumnModel().getColumn(2).setMaxWidth(70); // Count
+        if (summaryTable.getColumnModel().getColumnCount() >= 4) {
+            summaryTable.getColumnModel().getColumn(0).setPreferredWidth(180);
+            summaryTable.getColumnModel().getColumn(1).setPreferredWidth(340);
+            summaryTable.getColumnModel().getColumn(2).setPreferredWidth(80);
+            summaryTable.getColumnModel().getColumn(2).setMaxWidth(100);
+            summaryTable.getColumnModel().getColumn(3).setPreferredWidth(320);
+        }
         summaryTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(
@@ -455,12 +463,29 @@ public class CSPInspectorTab extends JPanel {
 
             final Set<String> selectedStatuses = statusFilterBtn.getSelected();
             final Set<String> selectedContentTypes = contentTypeFilterBtn.getSelected();
+            String statusStr = selectedStatuses.isEmpty() ? "" : String.join(" / ", selectedStatuses);
 
-            Map<String, List<CSPEntry>> grouped = groupByModeWithMultiSelect(
-                selectedMode, filterText, selectedStatuses, selectedContentTypes, methodFilter, inScopePredicate
-            );
+            List<CSPEntry> entriesToShow;
+            if (selectedContentTypes.size() <= 1) {
+                String ctStr = selectedContentTypes.isEmpty() ? "" : selectedContentTypes.iterator().next();
+                entriesToShow = dataStore.getFilteredEntries(
+                    selectedMode, null, filterText,
+                    statusStr, ctStr, methodFilter, inScopePredicate
+                );
+            } else {
+                Map<Integer, CSPEntry> merged = new LinkedHashMap<>();
+                for (String ct : selectedContentTypes) {
+                    List<CSPEntry> partial = dataStore.getFilteredEntries(
+                        selectedMode, null, filterText,
+                        statusStr, ct, methodFilter, inScopePredicate
+                    );
+                    for (CSPEntry e : partial) merged.putIfAbsent(e.id(), e);
+                }
+                entriesToShow = new ArrayList<>(merged.values());
+            }
 
-            summaryTableModel.updateData(grouped);
+            this.currentFilteredEntries = entriesToShow;
+            summaryTableModel.updateData(entriesToShow, selectedMode);
             updateEntryTableForSelection();
 
             int totalUnique = dataStore.size();
@@ -468,82 +493,17 @@ public class CSPInspectorTab extends JPanel {
             int displayedUrls = entryTableModel.getRowCount();
             statsLabel.setText(
                 "Total Unique URLs: " + totalUnique +
-                " | Patterns: " + uniquePatterns +
+                " | Domain/Value Pairs: " + uniquePatterns +
                 " | Displayed URLs: " + displayedUrls
             );
         });
     }
 
-    private Map<String, List<CSPEntry>> groupByModeWithMultiSelect(
-            String mode,
-            String valueFilter,
-            Set<String> selectedStatuses,
-            Set<String> selectedContentTypes,
-            Set<String> methodFilter,
-            java.util.function.Predicate<String> inScopePredicate) {
-
-        String statusStr = selectedStatuses.isEmpty() ? "" : String.join(" / ", selectedStatuses);
-        String ctStr = selectedContentTypes.isEmpty() ? "" : selectedContentTypes.iterator().next();
-
-        if (selectedContentTypes.size() <= 1) {
-            return dataStore.groupByMode(mode, valueFilter, statusStr, ctStr, methodFilter, inScopePredicate);
-        }
-
-        Map<String, List<CSPEntry>> merged = new LinkedHashMap<>();
-        for (String ct : selectedContentTypes) {
-            Map<String, List<CSPEntry>> partial = dataStore.groupByMode(
-                mode, valueFilter, statusStr, ct, methodFilter, inScopePredicate);
-            for (Map.Entry<String, List<CSPEntry>> e : partial.entrySet()) {
-                merged.computeIfAbsent(e.getKey(), k -> new ArrayList<>());
-                Set<Integer> existingIds = new HashSet<>();
-                for (CSPEntry existing : merged.get(e.getKey())) existingIds.add(existing.id());
-                for (CSPEntry candidate : e.getValue()) {
-                    if (existingIds.add(candidate.id())) {
-                        merged.get(e.getKey()).add(candidate);
-                    }
-                }
-            }
-        }
-        return merged;
-    }
-
     private void updateEntryTableForSelection() {
-        String selectedMode = (String) inspectModeComboBox.getSelectedItem();
-        if (selectedMode == null) selectedMode = "Full Policy";
-
-        String filterText = valueFilterField.getText().trim();
-        boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
-
-        Set<String> methodFilter = methodFilterBtn.getSelected();
-        Set<String> selectedStatuses = statusFilterBtn.getSelected();
-        Set<String> selectedContentTypes = contentTypeFilterBtn.getSelected();
-
-        java.util.function.Predicate<String> inScopePredicate = inScopeOnly
-            ? url -> api.scope().isInScope(url)
-            : null;
-
-        String statusStr = selectedStatuses.isEmpty() ? "" : String.join(" / ", selectedStatuses);
-
-        List<CSPEntry> entriesToShow;
-
-        if (selectedContentTypes.size() <= 1) {
-            String ctStr = selectedContentTypes.isEmpty() ? "" : selectedContentTypes.iterator().next();
-            entriesToShow = dataStore.getFilteredEntries(
-                selectedMode, selectedSummaryValue, filterText,
-                statusStr, ctStr, methodFilter, inScopePredicate
-            );
+        if (selectedSummaryRow != null) {
+            entryTableModel.updateData(selectedSummaryRow.getEntries());
         } else {
-            Map<Integer, CSPEntry> merged = new LinkedHashMap<>();
-            for (String ct : selectedContentTypes) {
-                List<CSPEntry> partial = dataStore.getFilteredEntries(
-                    selectedMode, selectedSummaryValue, filterText,
-                    statusStr, ct, methodFilter, inScopePredicate
-                );
-                for (CSPEntry e : partial) merged.putIfAbsent(e.id(), e);
-            }
-            entriesToShow = new ArrayList<>(merged.values());
+            entryTableModel.updateData(currentFilteredEntries != null ? currentFilteredEntries : Collections.emptyList());
         }
-
-        entryTableModel.updateData(entriesToShow);
     }
 }

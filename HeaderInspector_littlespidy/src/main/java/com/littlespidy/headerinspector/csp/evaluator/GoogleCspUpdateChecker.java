@@ -126,13 +126,13 @@ public class GoogleCspUpdateChecker {
         }
 
         if (result.updateAvailable()) {
-            String msg = "<html><font size='+1' color='#D32F2F'><b>🚀 New Google CSP Evaluator Release Available!</b></font><br/><br/>"
+            String msg = "<html><font size='+1' color='#D32F2F'><b>New Google CSP Evaluator Release Available!</b></font><br/><br/>"
                     + "A new version of Google CSP Evaluator has been published on GitHub:<br/>"
                     + "<b>Latest Google Release:</b> <font color='#D32F2F'><b>" + result.latestVersion() + "</b></font><br/>"
                     + "<b>Embedded Engine Version:</b> " + result.embeddedVersion() + "<br/>"
                     + (result.publishedAt().isEmpty() ? "" : "<b>Published Date:</b> " + result.publishedAt() + "<br/>")
                     + "<b>Release URL:</b> " + result.releaseUrl() + "<br/><br/>"
-                    + "<i>💡 Please notify the extension developer (littlespidy) to update the inbuilt rules and allowlist bypass datasets!</i></html>";
+                    + "<i>Please notify the extension developer (littlespidy) to update the inbuilt rules and allowlist bypass datasets!</i></html>";
 
             JPanel panel = new JPanel(new BorderLayout(8, 8));
             panel.add(new JLabel(msg), BorderLayout.CENTER);
@@ -150,7 +150,7 @@ public class GoogleCspUpdateChecker {
                 JOptionPane.showMessageDialog(parent, "Notification copied to clipboard! You can share this with the developer.", "Copied", JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
-            String msg = "<html><font size='+1' color='#2E7D32'><b>✅ Google CSP Evaluator is Up-to-Date!</b></font><br/><br/>"
+            String msg = "<html><font size='+1' color='#2E7D32'><b>Google CSP Evaluator is Up-to-Date!</b></font><br/><br/>"
                     + "The embedded engine matches the latest official release from Google:<br/>"
                     + "<b>Embedded Engine Version:</b> " + result.embeddedVersion() + "<br/>"
                     + "<b>Latest GitHub Release:</b> " + result.latestVersion() + "<br/>"

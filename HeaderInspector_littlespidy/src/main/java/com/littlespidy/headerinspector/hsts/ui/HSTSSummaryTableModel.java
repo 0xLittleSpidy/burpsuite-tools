@@ -1,6 +1,7 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.headerinspector.hsts.ui;
 
+import com.littlespidy.headerinspector.hsts.model.HSTSDataStore;
 import com.littlespidy.headerinspector.hsts.model.HSTSEntry;
 
 import javax.swing.table.AbstractTableModel;
@@ -10,71 +11,83 @@ import java.util.*;
  * Created with the help of an AI Agent and littlespidy.
  *
  * Table model for the top "HSTS Value Overview & Assessment" summary table.
- * Each row represents a unique header pattern/value, associated domains, and occurrence count.
+ * Displays all domain names and their associated values, where every value has
+ * its own separate row, URL count, and assessment.
  *
  * @author littlespidy
  */
 public class HSTSSummaryTableModel extends AbstractTableModel {
 
-    private static final String[] COLUMNS = { "Value", "Domains", "Count", "Assessment" };
+    private static final String[] COLUMNS = { "Domain Name", "Value", "URL Count", "Assessment" };
 
     public static class SummaryRow {
+        private final String domain;
         private final String value;
-        private final String domains;
-        private final int count;
+        private final int urlCount;
         private final String assessment;
-        private final String groupKey;
+        private final List<HSTSEntry> entries;
 
-        public SummaryRow(String value, String domains, int count, String assessment, String groupKey) {
+        public SummaryRow(String domain, String value, int urlCount, String assessment, List<HSTSEntry> entries) {
+            this.domain = domain;
             this.value = value;
-            this.domains = domains;
-            this.count = count;
+            this.urlCount = urlCount;
             this.assessment = assessment;
-            this.groupKey = groupKey;
+            this.entries = entries;
         }
 
+        public String getDomain() { return domain; }
         public String getValue() { return value; }
-        public String getDomains() { return domains; }
-        public int getCount() { return count; }
+        public int getUrlCount() { return urlCount; }
         public String getAssessment() { return assessment; }
-        public String getGroupKey() { return groupKey; }
+        public List<HSTSEntry> getEntries() { return entries; }
     }
 
     private final List<SummaryRow> rows = new ArrayList<>();
 
-    public synchronized void updateData(Map<String, List<HSTSEntry>> grouped) {
+    public synchronized void updateData(List<HSTSEntry> entries, String mode) {
         rows.clear();
-        for (Map.Entry<String, List<HSTSEntry>> e : grouped.entrySet()) {
-            String groupKey   = e.getKey();
-            List<HSTSEntry> entries = e.getValue();
-            int count         = entries.size();
-
-            Set<String> domainSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            for (HSTSEntry entry : entries) {
-                if (entry.host() != null && !entry.host().isBlank()) {
-                    domainSet.add(entry.host());
-                }
-            }
-            String domains = String.join(", ", domainSet);
-
-            String rawValue;
-            if (entries.isEmpty()) {
-                rawValue = groupKey;
-            } else {
-                HSTSEntry first = entries.get(0);
-                rawValue = first.isMissingHsts() ? "(missing HSTS)" : first.hstsHeader().trim();
-            }
-
-            String assessment = entries.isEmpty() ? "" : entries.get(0).assessment();
-            rows.add(new SummaryRow(rawValue, domains, count, assessment, groupKey));
+        if (entries == null || entries.isEmpty()) {
+            fireTableDataChanged();
+            return;
         }
-        rows.sort(Comparator.comparingInt(r -> severityOrder(r.getAssessment())));
+
+        Map<String, List<HSTSEntry>> map = new LinkedHashMap<>();
+        for (HSTSEntry entry : entries) {
+            String domain = (entry.host() != null && !entry.host().isBlank()) ? entry.host().trim() : "(unknown)";
+            String val = deriveValue(entry, mode);
+            String groupKey = domain.toLowerCase() + "\t" + val;
+            map.computeIfAbsent(groupKey, k -> new ArrayList<>()).add(entry);
+        }
+
+        for (List<HSTSEntry> groupList : map.values()) {
+            HSTSEntry first = groupList.get(0);
+            String domain = (first.host() != null && !first.host().isBlank()) ? first.host().trim() : "(unknown)";
+            String val = deriveValue(first, mode);
+            int count = groupList.size();
+            String assessment = first.assessment();
+            rows.add(new SummaryRow(domain, val, count, assessment, groupList));
+        }
+
+        rows.sort(Comparator.comparing((SummaryRow r) -> r.getDomain().toLowerCase())
+                .thenComparing(SummaryRow::getValue));
         fireTableDataChanged();
     }
 
-    public synchronized String getSummaryValueAt(int modelRow) {
+    private static String deriveValue(HSTSEntry e, String mode) {
+        if (e.isMissingHsts()) return "(missing HSTS)";
+        if (mode == null) return e.hstsHeader().trim();
+        return switch (mode) {
+            case HSTSDataStore.MODE_MAX_AGE -> e.maxAge() < 0 ? "(not set)" : "max-age=" + e.maxAge() + " (" + e.maxAgeSummary() + ")";
+            case HSTSDataStore.MODE_SUBDOMAINS -> e.includeSubDomains() ? "includeSubDomains: present" : "includeSubDomains: absent";
+            case HSTSDataStore.MODE_PRELOAD -> e.preload() ? "preload: present" : "preload: absent";
+            case HSTSDataStore.MODE_MISSING -> "(missing HSTS)";
+            default -> e.hstsHeader().trim();
+        };
+    }
+
+    public synchronized SummaryRow getRowAt(int modelRow) {
         if (modelRow < 0 || modelRow >= rows.size()) return null;
-        return rows.get(modelRow).getGroupKey();
+        return rows.get(modelRow);
     }
 
     @Override public synchronized int getRowCount()  { return rows.size(); }
@@ -91,21 +104,11 @@ public class HSTSSummaryTableModel extends AbstractTableModel {
         if (row < 0 || row >= rows.size()) return null;
         SummaryRow r = rows.get(row);
         return switch (col) {
-            case 0 -> r.getValue();
-            case 1 -> r.getDomains();
-            case 2 -> r.getCount();
+            case 0 -> r.getDomain();
+            case 1 -> r.getValue();
+            case 2 -> r.getUrlCount();
             case 3 -> r.getAssessment();
             default -> null;
         };
-    }
-
-    private static int severityOrder(String assessment) {
-        if (assessment == null) return 99;
-        String a = assessment.toUpperCase();
-        if (a.startsWith("CRITICAL")) return 0;
-        if (a.startsWith("HIGH"))     return 1;
-        if (a.startsWith("MEDIUM"))   return 2;
-        if (a.startsWith("GOOD"))     return 3;
-        return 4;
     }
 }

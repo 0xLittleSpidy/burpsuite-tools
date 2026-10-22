@@ -100,8 +100,9 @@ public class CacheInspectorTab extends JPanel {
     private final javax.swing.Timer refreshTimer;
     private volatile boolean needsRefresh = false;
 
-    // Currently selected directive filter from the summary table
-    private String selectedDirectiveValue = null;
+    // Currently selected row filter from the summary table
+    private CacheSummaryTableModel.CacheSummaryRow selectedSummaryRow = null;
+    private List<CacheEntry> currentFilteredEntries = Collections.emptyList();
 
     public CacheInspectorTab(MontoyaApi api, CacheDataStore dataStore) {
         this.api       = api;
@@ -149,14 +150,17 @@ public class CacheInspectorTab extends JPanel {
         ));
         summaryTable.setRowSorter(new TableRowSorter<>(summaryTableModel));
         summaryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setupSummaryTableRendering();
         summaryTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = summaryTable.getSelectedRow();
                 if (row >= 0) {
                     int mr = summaryTable.convertRowIndexToModel(row);
-                    selectedDirectiveValue = summaryTableModel.getDirectiveValueAt(mr);
-                    updateEntryTableForSelection();
+                    selectedSummaryRow = summaryTableModel.getRowAt(mr);
+                } else {
+                    selectedSummaryRow = null;
                 }
+                updateEntryTableForSelection();
             }
         });
         setupTableKeyboardCopy(summaryTable);
@@ -187,8 +191,8 @@ public class CacheInspectorTab extends JPanel {
         setupTableKeyboardCopy(entryTable);
 
         JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("📤 Request",  requestEditor.uiComponent());
-        editorTabs.addTab("📥 Response", responseEditor.uiComponent());
+        editorTabs.addTab("Request",  requestEditor.uiComponent());
+        editorTabs.addTab("Response", responseEditor.uiComponent());
 
         JSplitPane masterDetailSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
             new JScrollPane(entryTable), editorTabs);
@@ -216,7 +220,7 @@ public class CacheInspectorTab extends JPanel {
 
         JLabel headerLbl = new JLabel("Inspect Header:");
         headerLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        headerComboBox.addActionListener(e -> { selectedDirectiveValue = null; refreshView(); });
+        headerComboBox.addActionListener(e -> { selectedSummaryRow = null; refreshView(); });
 
         JLabel filterLbl = new JLabel("Directive:");
         valueFilterField.setToolTipText("Filter directive values (e.g. no-store, max-age, public, private)");
@@ -236,7 +240,7 @@ public class CacheInspectorTab extends JPanel {
             statusFilterBtn.clearSelection();
             contentTypeFilterBtn.clearSelection();
             methodFilterBtn.clearSelection();
-            selectedDirectiveValue = null;
+            selectedSummaryRow = null;
             refreshView();
         });
 
@@ -253,7 +257,7 @@ public class CacheInspectorTab extends JPanel {
                 "Clear Data", JOptionPane.YES_NO_OPTION);
             if (ok == JOptionPane.YES_OPTION) {
                 dataStore.clear();
-                selectedDirectiveValue = null;
+                selectedSummaryRow = null;
                 refreshView();
             }
         });
@@ -292,6 +296,44 @@ public class CacheInspectorTab extends JPanel {
     }
 
     // ── Table rendering ───────────────────────────────────────────────────────
+
+    private void setupSummaryTableRendering() {
+        if (summaryTable.getColumnModel().getColumnCount() >= 4) {
+            summaryTable.getColumnModel().getColumn(0).setPreferredWidth(180);
+            summaryTable.getColumnModel().getColumn(1).setPreferredWidth(340);
+            summaryTable.getColumnModel().getColumn(2).setPreferredWidth(80);
+            summaryTable.getColumnModel().getColumn(2).setMaxWidth(100);
+            summaryTable.getColumnModel().getColumn(3).setPreferredWidth(320);
+        }
+        summaryTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(
+                    JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                if (!isSelected && col == 3) {
+                    String str = (value != null) ? value.toString() : "";
+                    if (str.startsWith("CRITICAL")) {
+                        c.setForeground(new Color(180, 0, 0));
+                        c.setFont(c.getFont().deriveFont(Font.BOLD));
+                    } else if (str.startsWith("HIGH")) {
+                        c.setForeground(new Color(200, 70, 0));
+                        c.setFont(c.getFont().deriveFont(Font.BOLD));
+                    } else if (str.startsWith("MEDIUM")) {
+                        c.setForeground(new Color(170, 110, 0));
+                    } else if (str.startsWith("GOOD")) {
+                        c.setForeground(new Color(0, 120, 0));
+                    } else if (str.startsWith("LOW")) {
+                        c.setForeground(new Color(180, 140, 0));
+                    } else {
+                        c.setForeground(table.getForeground());
+                    }
+                } else if (!isSelected) {
+                    c.setForeground(table.getForeground());
+                }
+                return c;
+            }
+        });
+    }
 
     private void setupEntryTableRendering() {
         entryTable.getColumnModel().getColumn(0).setMaxWidth(50); // #
@@ -462,72 +504,38 @@ public class CacheInspectorTab extends JPanel {
 
             String statusStr = statusSel.isEmpty() ? "" : String.join(" / ", statusSel);
 
-            Map<String, List<CacheEntry>> grouped =
-                groupWithMultiSelectCT(selectedHeader, filterText, statusStr, ctSel, methodSel, scopePred);
+            List<CacheEntry> entries;
+            if (ctSel.size() <= 1) {
+                String ct = ctSel.isEmpty() ? "" : ctSel.iterator().next();
+                entries = dataStore.getFilteredEntries(selectedHeader, null,
+                    filterText, statusStr, ct, methodSel, scopePred);
+            } else {
+                Map<Integer, CacheEntry> merged = new LinkedHashMap<>();
+                for (String ct : ctSel) {
+                    dataStore.getFilteredEntries(selectedHeader, null,
+                        filterText, statusStr, ct, methodSel, scopePred)
+                        .forEach(e -> merged.putIfAbsent(e.id(), e));
+                }
+                entries = new ArrayList<>(merged.values());
+            }
 
-            summaryTableModel.updateData(grouped);
+            this.currentFilteredEntries = entries;
+            summaryTableModel.updateData(selectedHeader, entries);
             updateEntryTableForSelection();
 
             statsLabel.setText(
                 "Total Unique URLs: " + dataStore.size()
-                + " | Unique Directives: " + summaryTableModel.getRowCount()
+                + " | Domain/Value Pairs: " + summaryTableModel.getRowCount()
                 + " | Displayed URLs: " + entryTableModel.getRowCount()
             );
         });
     }
 
     private void updateEntryTableForSelection() {
-        String selectedHeader = (String) headerComboBox.getSelectedItem();
-        if (selectedHeader == null) selectedHeader = "Cache-Control";
-
-        String filterText  = valueFilterField.getText().trim();
-        boolean inScope    = inScopeOnlyCheckBox.isSelected();
-
-        Set<String> methodSel = methodFilterBtn.getSelected();
-        Set<String> statusSel = statusFilterBtn.getSelected();
-        Set<String> ctSel     = contentTypeFilterBtn.getSelected();
-
-        java.util.function.Predicate<String> scopePred = inScope
-            ? url -> api.scope().isInScope(url) : null;
-
-        String statusStr = statusSel.isEmpty() ? "" : String.join(" / ", statusSel);
-
-        List<CacheEntry> entries;
-        if (ctSel.size() <= 1) {
-            String ct = ctSel.isEmpty() ? "" : ctSel.iterator().next();
-            entries = dataStore.getFilteredEntries(selectedHeader, selectedDirectiveValue,
-                filterText, statusStr, ct, methodSel, scopePred);
+        if (selectedSummaryRow != null) {
+            entryTableModel.updateData(selectedSummaryRow.getEntries());
         } else {
-            Map<Integer, CacheEntry> merged = new LinkedHashMap<>();
-            for (String ct : ctSel) {
-                dataStore.getFilteredEntries(selectedHeader, selectedDirectiveValue,
-                    filterText, statusStr, ct, methodSel, scopePred)
-                    .forEach(e -> merged.putIfAbsent(e.id(), e));
-            }
-            entries = new ArrayList<>(merged.values());
+            entryTableModel.updateData(currentFilteredEntries != null ? currentFilteredEntries : Collections.emptyList());
         }
-        entryTableModel.updateData(entries);
-    }
-
-    private Map<String, List<CacheEntry>> groupWithMultiSelectCT(
-            String header, String kw, String statusStr,
-            Set<String> ctSel, Set<String> methodSel,
-            java.util.function.Predicate<String> scopePred) {
-
-        if (ctSel.size() <= 1) {
-            String ct = ctSel.isEmpty() ? "" : ctSel.iterator().next();
-            return dataStore.groupByDirectiveFiltered(header, kw, statusStr, ct, methodSel, scopePred);
-        }
-        Map<String, List<CacheEntry>> merged = new LinkedHashMap<>();
-        for (String ct : ctSel) {
-            dataStore.groupByDirectiveFiltered(header, kw, statusStr, ct, methodSel, scopePred)
-                .forEach((key, list) -> {
-                    merged.computeIfAbsent(key, k -> new ArrayList<>());
-                    Set<Integer> seen = new HashSet<>();
-                    merged.get(key).forEach(e -> seen.add(e.id()));
-                    list.stream().filter(e -> seen.add(e.id())).forEach(merged.get(key)::add);
-                });
-        }
-        return merged;
     }
 }

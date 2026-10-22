@@ -16,6 +16,7 @@ import com.littlespidy.headerinspector.collector.model.HeaderCollectorDataStore;
 import com.littlespidy.headerinspector.collector.model.HeaderNameGroup;
 import com.littlespidy.headerinspector.collector.model.HeaderType;
 import com.littlespidy.headerinspector.collector.model.HeaderValueRecord;
+import com.littlespidy.headerinspector.ui.common.MultiSelectFilterButton;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -26,7 +27,9 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with the help of an AI Agent and littlespidy.
@@ -60,12 +63,16 @@ public class HeaderCollectorTab extends JPanel {
     // Quick-Info Banner above value table
     private final JPanel quickInfoPanel = new JPanel(new BorderLayout(6, 2));
     private final JLabel quickInfoLabel = new JLabel("Select a header to view explanation from http.dev");
-    private final JButton quickInfoDocsBtn = new JButton("View Full Explanation ↗");
 
     // Toolbar Controls
     private final JButton loadHistoryBtn = new JButton("Load Proxy History");
     private final JCheckBox inScopeOnlyCheck = new JCheckBox("In-Scope Only", true);
     private final JComboBox<String> typeFilterCombo = new JComboBox<>(new String[]{"All Headers", "Request Headers", "Response Headers"});
+    private final MultiSelectFilterButton categoryFilterBtn = new MultiSelectFilterButton(
+            "Category",
+            buildCategoryOptions(),
+            sel -> refreshView()
+    );
     private final JTextField domainFilterField = new JTextField(14);
     private final JTextField searchFilterField = new JTextField(14);
     private final JButton resetFiltersBtn = new JButton("Reset Filters");
@@ -119,6 +126,7 @@ public class HeaderCollectorTab extends JPanel {
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(new JLabel("Type:"));
         toolbar.add(typeFilterCombo);
+        toolbar.add(categoryFilterBtn);
         toolbar.add(new JLabel("Domain:"));
         toolbar.add(domainFilterField);
         toolbar.add(new JLabel("Search:"));
@@ -162,14 +170,7 @@ public class HeaderCollectorTab extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(210, 215, 220)),
                 BorderFactory.createEmptyBorder(4, 6, 4, 6)
         ));
-        quickInfoDocsBtn.setFont(quickInfoDocsBtn.getFont().deriveFont(11f));
-        quickInfoDocsBtn.setMargin(new Insets(2, 6, 2, 6));
-        quickInfoDocsBtn.setEnabled(false);
-        quickInfoDocsBtn.addActionListener(e -> {
-            editorTabs.setSelectedComponent(headerDocPanel);
-        });
         quickInfoPanel.add(quickInfoLabel, BorderLayout.CENTER);
-        quickInfoPanel.add(quickInfoDocsBtn, BorderLayout.EAST);
 
         JPanel valueContainer = new JPanel(new BorderLayout(0, 2));
         valueContainer.add(quickInfoPanel, BorderLayout.NORTH);
@@ -180,9 +181,9 @@ public class HeaderCollectorTab extends JPanel {
         tablesSplit.setResizeWeight(0.40);
 
         // Editors Tabbed Pane
-        editorTabs.addTab("📤 Request", requestEditor.uiComponent());
-        editorTabs.addTab("📥 Response", responseEditor.uiComponent());
-        editorTabs.addTab("📖 Header Explained (http.dev)", headerDocPanel);
+        editorTabs.addTab("Request", requestEditor.uiComponent());
+        editorTabs.addTab("Response", responseEditor.uiComponent());
+        editorTabs.addTab("Header Explained (http.dev)", headerDocPanel);
 
         // Vertical Split: Tables on Top, Request/Response Editors on Bottom
         JSplitPane rootSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tablesSplit, editorTabs);
@@ -206,6 +207,7 @@ public class HeaderCollectorTab extends JPanel {
 
         resetFiltersBtn.addActionListener(e -> {
             typeFilterCombo.setSelectedIndex(0);
+            categoryFilterBtn.clearSelection();
             domainFilterField.setText("");
             searchFilterField.setText("");
             refreshView();
@@ -366,12 +368,12 @@ public class HeaderCollectorTab extends JPanel {
         // Group Table Context Menu
         JPopupMenu groupPopup = new JPopupMenu();
 
-        JMenuItem viewDocsItem = new JMenuItem("📖 View http.dev Explanation");
+        JMenuItem viewDocsItem = new JMenuItem("View http.dev Explanation");
         viewDocsItem.addActionListener(e -> {
             editorTabs.setSelectedComponent(headerDocPanel);
         });
 
-        JMenuItem copyLinkItem = new JMenuItem("🔗 Copy http.dev Reference Link");
+        JMenuItem copyLinkItem = new JMenuItem("Copy http.dev Reference Link");
         copyLinkItem.addActionListener(e -> {
             if (selectedGroup != null) {
                 HttpDevHeaderDoc doc = HttpDevKnowledgeBase.get(selectedGroup.headerName());
@@ -381,7 +383,7 @@ public class HeaderCollectorTab extends JPanel {
             }
         });
 
-        JMenuItem openBrowserItem = new JMenuItem("🌐 Open in Browser (http.dev)");
+        JMenuItem openBrowserItem = new JMenuItem("Open in Browser (http.dev)");
         openBrowserItem.addActionListener(e -> {
             if (selectedGroup != null) {
                 HttpDevHeaderDoc doc = HttpDevKnowledgeBase.get(selectedGroup.headerName());
@@ -413,6 +415,12 @@ public class HeaderCollectorTab extends JPanel {
         String searchFilter = searchFilterField.getText();
 
         List<HeaderNameGroup> filtered = dataStore.getFilteredGroups(typeFilter, domainFilter, searchFilter);
+        if (!categoryFilterBtn.isAllSelected()) {
+            Set<String> selectedCategories = categoryFilterBtn.getSelected();
+            filtered = filtered.stream()
+                    .filter(g -> selectedCategories.contains(HttpDevKnowledgeBase.getCategory(g.headerName())))
+                    .toList();
+        }
         groupTableModel.setGroups(filtered);
 
         if (selectedGroup != null && filtered.contains(selectedGroup)) {
@@ -565,7 +573,8 @@ public class HeaderCollectorTab extends JPanel {
     private void updateQuickInfo(HeaderNameGroup group) {
         if (group == null) {
             quickInfoLabel.setText("Select a header to view explanation from http.dev");
-            quickInfoDocsBtn.setEnabled(false);
+            quickInfoPanel.revalidate();
+            quickInfoPanel.repaint();
             return;
         }
 
@@ -579,7 +588,15 @@ public class HeaderCollectorTab extends JPanel {
             quickInfoLabel.setText(String.format("<html><b>[Custom / Vendor] %s:</b> Unrecognized or proprietary header (not in http.dev standard catalog).</html>",
                     escapeHtml(group.displayName())));
         }
-        quickInfoDocsBtn.setEnabled(true);
+        quickInfoPanel.revalidate();
+        quickInfoPanel.repaint();
+    }
+
+    private static List<String> buildCategoryOptions() {
+        List<String> options = new ArrayList<>();
+        options.add("All Categories");
+        options.addAll(HttpDevKnowledgeBase.getAllCategories());
+        return options;
     }
 
     private static String escapeHtml(String text) {
