@@ -1,9 +1,13 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.sqlmapanalyzer.api;
 
+import com.littlespidy.sqlmapanalyzer.util.OSUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -21,24 +25,55 @@ public class SqlmapProcessManager {
             return true;
         }
 
-        String python = config.getPythonPath();
-        String script = config.getApiScriptPath();
+        String rawScript = config.getApiScriptPath();
+        String cleanedScript = OSUtils.cleanPath(rawScript);
 
-        if (script == null || script.isBlank() || !new File(script).exists()) {
+        if (cleanedScript.isBlank() || !new File(cleanedScript).exists()) {
             if (logConsumer != null) {
-                logConsumer.accept("Error: sqlmapapi.py script not found at '" + script + "'. Please specify a valid path.");
+                logConsumer.accept("Error: sqlmapapi.py script not found at '" + rawScript + "'. Please specify a valid path in API Settings.");
             }
             return false;
         }
 
+        String pythonBin = config.getPythonPath();
+        if (pythonBin == null || pythonBin.isBlank()) {
+            pythonBin = OSUtils.getDefaultPythonBinary();
+        } else {
+            pythonBin = OSUtils.cleanPath(pythonBin);
+        }
+
+        String username = config.getUsername();
+        if (username == null || username.isBlank()) {
+            username = "admin";
+            config.setUsername(username);
+        }
+
+        String password = config.getPassword();
+        if (password == null || password.isBlank()) {
+            password = "sqlmapapi_pass";
+            config.setPassword(password);
+        }
+
+        List<String> cmd = new ArrayList<>();
+        cmd.add(pythonBin);
+        cmd.add(cleanedScript);
+        cmd.add("-s");
+        cmd.add("-H");
+        cmd.add(config.getHost());
+        cmd.add("-p");
+        cmd.add(String.valueOf(config.getPort()));
+        cmd.add("--username");
+        cmd.add(username);
+        cmd.add("--password");
+        cmd.add(password);
+
         try {
-            ProcessBuilder pb = new ProcessBuilder(
-                    python,
-                    script,
-                    "-s",
-                    "-H", config.getHost(),
-                    "-p", String.valueOf(config.getPort())
-            );
+            if (logConsumer != null) {
+                logConsumer.accept("[API SERVER] Launching: " + pythonBin + " " + cleanedScript + " -s -H "
+                        + config.getHost() + " -p " + config.getPort() + " --username " + username + " --password ********");
+            }
+
+            ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
 
             process = pb.start();

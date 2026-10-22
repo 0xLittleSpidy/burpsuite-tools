@@ -15,8 +15,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,26 +45,60 @@ public class SqlmapApiClient {
         return config;
     }
 
+    private HttpRequest.Builder newRequestBuilder(String path) {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(config.getBaseUrl() + path));
+
+        String user = config.getUsername();
+        String pass = config.getPassword();
+        if (user != null && !user.isBlank() && pass != null && !pass.isBlank()) {
+            String credentials = user + ":" + pass;
+            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+            builder.header("Authorization", "Basic " + encoded);
+        }
+        return builder;
+    }
+
     /**
      * Checks if the SQLMap API server is running and responsive.
      */
     public boolean testConnection() {
+        return "OK".equals(testConnectionDetails());
+    }
+
+    /**
+     * Checks connectivity and returns detailed status information.
+     */
+    public String testConnectionDetails() {
         try {
-            String testTaskId = createNewTask();
-            if (testTaskId != null && !testTaskId.isBlank()) {
-                deleteTask(testTaskId);
-                return true;
+            HttpRequest request = newRequestBuilder("/task/new")
+                    .timeout(Duration.ofSeconds(6))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                JsonObject json = gson.fromJson(response.body(), JsonObject.class);
+                if (json != null && json.has("success") && json.get("success").getAsBoolean() && json.has("taskid")) {
+                    deleteTask(json.get("taskid").getAsString());
+                    return "OK";
+                }
+                return "Unexpected server response (HTTP 200, missing task ID)";
+            } else if (response.statusCode() == 401) {
+                return "401 Unauthorized (Invalid username/password in API Settings)";
+            } else {
+                return "HTTP Error " + response.statusCode();
             }
-        } catch (Exception ignored) {}
-        return false;
+        } catch (Exception e) {
+            return "Connection failed: " + (e.getMessage() != null ? e.getMessage() : e.toString());
+        }
     }
 
     /**
      * Allocates a new scan task ID from /task/new.
      */
     public String createNewTask() throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.getBaseUrl() + "/task/new"))
+        HttpRequest request = newRequestBuilder("/task/new")
                 .timeout(Duration.ofSeconds(10))
                 .GET()
                 .build();
@@ -83,8 +119,7 @@ public class SqlmapApiClient {
     public boolean deleteTask(String taskId) {
         if (taskId == null || taskId.isBlank()) return false;
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(config.getBaseUrl() + "/task/" + taskId + "/delete"))
+            HttpRequest request = newRequestBuilder("/task/" + taskId + "/delete")
                     .timeout(Duration.ofSeconds(5))
                     .GET()
                     .build();
@@ -102,8 +137,7 @@ public class SqlmapApiClient {
         if (taskId == null || options == null) return false;
 
         String jsonPayload = gson.toJson(options.toOptionMap());
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.getBaseUrl() + "/option/" + taskId + "/set"))
+        HttpRequest request = newRequestBuilder("/option/" + taskId + "/set")
                 .timeout(Duration.ofSeconds(10))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
@@ -126,8 +160,7 @@ public class SqlmapApiClient {
         JsonObject payload = new JsonObject();
         payload.addProperty("url", targetUrl != null ? targetUrl : "");
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.getBaseUrl() + "/scan/" + taskId + "/start"))
+        HttpRequest request = newRequestBuilder("/scan/" + taskId + "/start")
                 .timeout(Duration.ofSeconds(10))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
@@ -147,8 +180,7 @@ public class SqlmapApiClient {
     public SqlmapScanStatus getScanStatus(String taskId) throws IOException, InterruptedException {
         if (taskId == null) return new SqlmapScanStatus(false, "invalid task", -1);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.getBaseUrl() + "/scan/" + taskId + "/status"))
+        HttpRequest request = newRequestBuilder("/scan/" + taskId + "/status")
                 .timeout(Duration.ofSeconds(10))
                 .GET()
                 .build();
@@ -172,8 +204,7 @@ public class SqlmapApiClient {
     public List<SqlmapLogEntry> getScanLogs(String taskId) throws IOException, InterruptedException {
         if (taskId == null) return Collections.emptyList();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.getBaseUrl() + "/scan/" + taskId + "/log"))
+        HttpRequest request = newRequestBuilder("/scan/" + taskId + "/log")
                 .timeout(Duration.ofSeconds(10))
                 .GET()
                 .build();
@@ -205,8 +236,7 @@ public class SqlmapApiClient {
     public List<SqlmapFinding> getScanData(String taskId) throws IOException, InterruptedException {
         if (taskId == null) return Collections.emptyList();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.getBaseUrl() + "/scan/" + taskId + "/data"))
+        HttpRequest request = newRequestBuilder("/scan/" + taskId + "/data")
                 .timeout(Duration.ofSeconds(10))
                 .GET()
                 .build();
@@ -279,8 +309,7 @@ public class SqlmapApiClient {
     public boolean stopScan(String taskId) {
         if (taskId == null) return false;
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(config.getBaseUrl() + "/scan/" + taskId + "/kill"))
+            HttpRequest request = newRequestBuilder("/scan/" + taskId + "/kill")
                     .timeout(Duration.ofSeconds(10))
                     .GET()
                     .build();
