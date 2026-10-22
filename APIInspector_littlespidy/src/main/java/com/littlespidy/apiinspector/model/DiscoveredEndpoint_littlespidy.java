@@ -17,6 +17,9 @@ public class DiscoveredEndpoint_littlespidy {
     private Map<String, String> queryParams;
     private Map<String, String> pathParams;
     private Map<String, String> bodyParams;
+    private Map<String, String> queryParamTypes;
+    private Map<String, String> pathParamTypes;
+    private Map<String, String> bodyParamTypes;
     private String requestBodySample;
     private String contentType;
     private boolean requiresAuth;
@@ -32,6 +35,9 @@ public class DiscoveredEndpoint_littlespidy {
         this.queryParams = new LinkedHashMap<>();
         this.pathParams = new LinkedHashMap<>();
         this.bodyParams = new LinkedHashMap<>();
+        this.queryParamTypes = new LinkedHashMap<>();
+        this.pathParamTypes = new LinkedHashMap<>();
+        this.bodyParamTypes = new LinkedHashMap<>();
         this.requestBodySample = "";
         this.contentType = "application/json";
         this.requiresAuth = false;
@@ -119,6 +125,33 @@ public class DiscoveredEndpoint_littlespidy {
 
     public void setBodyParams(Map<String, String> bodyParams) {
         this.bodyParams = bodyParams != null ? bodyParams : new LinkedHashMap<>();
+    }
+
+    public Map<String, String> getQueryParamTypes() {
+        if (queryParamTypes == null) queryParamTypes = new LinkedHashMap<>();
+        return queryParamTypes;
+    }
+
+    public void setQueryParamTypes(Map<String, String> queryParamTypes) {
+        this.queryParamTypes = queryParamTypes != null ? queryParamTypes : new LinkedHashMap<>();
+    }
+
+    public Map<String, String> getPathParamTypes() {
+        if (pathParamTypes == null) pathParamTypes = new LinkedHashMap<>();
+        return pathParamTypes;
+    }
+
+    public void setPathParamTypes(Map<String, String> pathParamTypes) {
+        this.pathParamTypes = pathParamTypes != null ? pathParamTypes : new LinkedHashMap<>();
+    }
+
+    public Map<String, String> getBodyParamTypes() {
+        if (bodyParamTypes == null) bodyParamTypes = new LinkedHashMap<>();
+        return bodyParamTypes;
+    }
+
+    public void setBodyParamTypes(Map<String, String> bodyParamTypes) {
+        this.bodyParamTypes = bodyParamTypes != null ? bodyParamTypes : new LinkedHashMap<>();
     }
 
     public String getRequestBodySample() {

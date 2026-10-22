@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 
 /**
  * Tab dedicated to parameter collection and extraction across API endpoints.
- * Displays all query parameters and path parameters with one-click copy options
- * for individual parameters or complete lists.
+ * Displays all query, path, and body parameters in structured tables with parameter data types
+ * and one-click copy icons for copying parameter values.
  */
 public class ParameterCollectorTab_littlespidy extends JPanel {
 
@@ -39,19 +39,16 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
     private JTable queryTable;
     private TableRowSorter<ParameterTableModel> querySorter;
     private JTextField querySearchField;
-    private JTextArea queryListTextArea;
 
     private ParameterTableModel pathTableModel;
     private JTable pathTable;
     private TableRowSorter<ParameterTableModel> pathSorter;
     private JTextField pathSearchField;
-    private JTextArea pathListTextArea;
 
     private ParameterTableModel bodyTableModel;
     private JTable bodyTable;
     private TableRowSorter<ParameterTableModel> bodySorter;
     private JTextField bodySearchField;
-    private JTextArea bodyListTextArea;
 
     private static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{([a-zA-Z0-9_\\-]+)\\}|:([a-zA-Z0-9_\\-]+)");
 
@@ -62,7 +59,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
     }
 
     private void initComponents() {
-        // --- Top Bar: Collection Selector, Global Copy Buttons, Summary ---
+        // --- Top Bar: Collection Selector, Global Copy All Combined, Summary ---
         JPanel topContainer = new JPanel();
         topContainer.setLayout(new BoxLayout(topContainer, BoxLayout.Y_AXIS));
 
@@ -78,21 +75,6 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         JButton refreshBtn = new JButton("Refresh");
         refreshBtn.addActionListener(e -> rebuildParameterLists());
         leftActions.add(refreshBtn);
-
-        JButton copyAllQueryBtn = new JButton("Copy All Query Params");
-        copyAllQueryBtn.setToolTipText("Copy full list of query parameters (one per line) to clipboard");
-        copyAllQueryBtn.addActionListener(e -> copyFullList(queryParamsList, "Query Parameters"));
-        leftActions.add(copyAllQueryBtn);
-
-        JButton copyAllPathBtn = new JButton("Copy All Path Params");
-        copyAllPathBtn.setToolTipText("Copy full list of path parameters (one per line) to clipboard");
-        copyAllPathBtn.addActionListener(e -> copyFullList(pathParamsList, "Path Parameters"));
-        leftActions.add(copyAllPathBtn);
-
-        JButton copyAllBodyBtn = new JButton("Copy All Body Params");
-        copyAllBodyBtn.setToolTipText("Copy full list of body parameters (one per line) to clipboard");
-        copyAllBodyBtn.addActionListener(e -> copyFullList(bodyParamsList, "Body Parameters"));
-        leftActions.add(copyAllBodyBtn);
 
         JButton copyAllCombinedBtn = new JButton("Copy All (Query + Path + Body)");
         copyAllCombinedBtn.setFont(copyAllCombinedBtn.getFont().deriveFont(Font.BOLD));
@@ -155,10 +137,6 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         clearBtn.addActionListener(e -> querySearchField.setText(""));
         searchBox.add(clearBtn);
         headerBar.add(searchBox, BorderLayout.WEST);
-
-        JButton copyListBtn = new JButton("Copy Query List");
-        copyListBtn.addActionListener(e -> copyFullList(queryParamsList, "Query Parameters"));
-        headerBar.add(copyListBtn, BorderLayout.EAST);
         panel.add(headerBar, BorderLayout.NORTH);
 
         // Query Parameters Table
@@ -167,38 +145,9 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         querySorter = new TableRowSorter<>(queryTableModel);
         queryTable.setRowSorter(querySorter);
         queryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        queryTable.getColumnModel().getColumn(3).setMaxWidth(70);
+        setupTableRenderersAndListeners(queryTable, queryTableModel);
 
-        // Click on row to copy individual parameter
-        queryTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int row = queryTable.getSelectedRow();
-                if (row >= 0) {
-                    int modelRow = queryTable.convertRowIndexToModel(row);
-                    ParameterEntry entry = queryTableModel.getEntry(modelRow);
-                    if (entry != null) {
-                        copySingleParameter(entry.name);
-                    }
-                }
-            }
-        });
-
-        // Tabbed view: Table view vs Plain list view
-        JTabbedPane queryTabs = new JTabbedPane();
-        queryTabs.addTab("Parameter Table (Click to Copy)", new JScrollPane(queryTable));
-
-        queryListTextArea = new JTextArea();
-        queryListTextArea.setEditable(false);
-        queryListTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        JPanel plainListPanel = new JPanel(new BorderLayout(4, 4));
-        plainListPanel.add(new JScrollPane(queryListTextArea), BorderLayout.CENTER);
-        JButton copyPlainBtn = new JButton("Copy All Lines to Clipboard");
-        copyPlainBtn.addActionListener(e -> copyFullList(queryParamsList, "Query Parameters"));
-        plainListPanel.add(copyPlainBtn, BorderLayout.SOUTH);
-        queryTabs.addTab("Plain List (One Per Line)", plainListPanel);
-
-        panel.add(queryTabs, BorderLayout.CENTER);
+        panel.add(new JScrollPane(queryTable), BorderLayout.CENTER);
         return panel;
     }
 
@@ -221,10 +170,6 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         clearBtn.addActionListener(e -> pathSearchField.setText(""));
         searchBox.add(clearBtn);
         headerBar.add(searchBox, BorderLayout.WEST);
-
-        JButton copyListBtn = new JButton("Copy Path List");
-        copyListBtn.addActionListener(e -> copyFullList(pathParamsList, "Path Parameters"));
-        headerBar.add(copyListBtn, BorderLayout.EAST);
         panel.add(headerBar, BorderLayout.NORTH);
 
         // Path Parameters Table
@@ -233,38 +178,9 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         pathSorter = new TableRowSorter<>(pathTableModel);
         pathTable.setRowSorter(pathSorter);
         pathTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        pathTable.getColumnModel().getColumn(3).setMaxWidth(70);
+        setupTableRenderersAndListeners(pathTable, pathTableModel);
 
-        // Click on row to copy individual parameter
-        pathTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int row = pathTable.getSelectedRow();
-                if (row >= 0) {
-                    int modelRow = pathTable.convertRowIndexToModel(row);
-                    ParameterEntry entry = pathTableModel.getEntry(modelRow);
-                    if (entry != null) {
-                        copySingleParameter(entry.name);
-                    }
-                }
-            }
-        });
-
-        // Tabbed view: Table view vs Plain list view
-        JTabbedPane pathTabs = new JTabbedPane();
-        pathTabs.addTab("Parameter Table (Click to Copy)", new JScrollPane(pathTable));
-
-        pathListTextArea = new JTextArea();
-        pathListTextArea.setEditable(false);
-        pathListTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        JPanel plainListPanel = new JPanel(new BorderLayout(4, 4));
-        plainListPanel.add(new JScrollPane(pathListTextArea), BorderLayout.CENTER);
-        JButton copyPlainBtn = new JButton("Copy All Lines to Clipboard");
-        copyPlainBtn.addActionListener(e -> copyFullList(pathParamsList, "Path Parameters"));
-        plainListPanel.add(copyPlainBtn, BorderLayout.SOUTH);
-        pathTabs.addTab("Plain List (One Per Line)", plainListPanel);
-
-        panel.add(pathTabs, BorderLayout.CENTER);
+        panel.add(new JScrollPane(pathTable), BorderLayout.CENTER);
         return panel;
     }
 
@@ -287,10 +203,6 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         clearBtn.addActionListener(e -> bodySearchField.setText(""));
         searchBox.add(clearBtn);
         headerBar.add(searchBox, BorderLayout.WEST);
-
-        JButton copyListBtn = new JButton("Copy Body List");
-        copyListBtn.addActionListener(e -> copyFullList(bodyParamsList, "Body Parameters"));
-        headerBar.add(copyListBtn, BorderLayout.EAST);
         panel.add(headerBar, BorderLayout.NORTH);
 
         // Body Parameters Table
@@ -299,39 +211,42 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         bodySorter = new TableRowSorter<>(bodyTableModel);
         bodyTable.setRowSorter(bodySorter);
         bodyTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        bodyTable.getColumnModel().getColumn(3).setMaxWidth(70);
+        setupTableRenderersAndListeners(bodyTable, bodyTableModel);
 
-        // Click on row to copy individual parameter
-        bodyTable.addMouseListener(new MouseAdapter() {
+        panel.add(new JScrollPane(bodyTable), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private void setupTableRenderersAndListeners(JTable table, ParameterTableModel model) {
+        // Setup copy icon renderer for Column 0 (Parameter Name)
+        table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+            private final CopyIcon_littlespidy copyIcon = new CopyIcon_littlespidy();
+
+            @Override
+            public Component getTableCellRendererComponent(JTable t, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(t, value, isSelected, hasFocus, row, column);
+                setIcon(copyIcon);
+                setIconTextGap(6);
+                setToolTipText("Click icon to copy parameter value to clipboard");
+                return this;
+            }
+        });
+
+        // Click handler: clicking on copy icon or cell copies parameter value to clipboard
+        table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int row = bodyTable.getSelectedRow();
-                if (row >= 0) {
-                    int modelRow = bodyTable.convertRowIndexToModel(row);
-                    ParameterEntry entry = bodyTableModel.getEntry(modelRow);
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+                if (row >= 0 && col == 0) {
+                    int modelRow = table.convertRowIndexToModel(row);
+                    ParameterEntry entry = model.getEntry(modelRow);
                     if (entry != null) {
-                        copySingleParameter(entry.name);
+                        copyParameterValue(entry);
                     }
                 }
             }
         });
-
-        // Tabbed view: Table view vs Plain list view
-        JTabbedPane bodyTabs = new JTabbedPane();
-        bodyTabs.addTab("Parameter Table (Click to Copy)", new JScrollPane(bodyTable));
-
-        bodyListTextArea = new JTextArea();
-        bodyListTextArea.setEditable(false);
-        bodyListTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        JPanel plainListPanel = new JPanel(new BorderLayout(4, 4));
-        plainListPanel.add(new JScrollPane(bodyListTextArea), BorderLayout.CENTER);
-        JButton copyPlainBtn = new JButton("Copy All Lines to Clipboard");
-        copyPlainBtn.addActionListener(e -> copyFullList(bodyParamsList, "Body Parameters"));
-        plainListPanel.add(copyPlainBtn, BorderLayout.SOUTH);
-        bodyTabs.addTab("Plain List (One Per Line)", plainListPanel);
-
-        panel.add(bodyTabs, BorderLayout.CENTER);
-        return panel;
     }
 
     public synchronized void updateCollections(List<ImportedCollection_littlespidy> cols) {
@@ -394,6 +309,12 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
                         }
+                        String dt = ep.getQueryParamTypes().get(name);
+                        if (dt != null && !dt.isBlank()) {
+                            p.dataType = dt;
+                        } else if (p.dataType == null || "string".equals(p.dataType)) {
+                            p.dataType = inferDataType(val);
+                        }
                     }
                 }
 
@@ -411,6 +332,9 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                                 p.addEndpoint(epDesc);
                                 if (p.sampleValue.isEmpty() && !qVal.isEmpty()) {
                                     p.sampleValue = qVal;
+                                }
+                                if (p.dataType == null || "string".equals(p.dataType)) {
+                                    p.dataType = inferDataType(qVal);
                                 }
                             }
                         }
@@ -430,6 +354,12 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
                         }
+                        String dt = ep.getPathParamTypes().get(name);
+                        if (dt != null && !dt.isBlank()) {
+                            p.dataType = dt;
+                        } else if (p.dataType == null || "string".equals(p.dataType)) {
+                            p.dataType = inferDataType(val);
+                        }
                     }
                 }
 
@@ -443,6 +373,9 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                             name = name.trim();
                             ParameterEntry p = pathMap.computeIfAbsent(name, ParameterEntry::new);
                             p.addEndpoint(epDesc);
+                            if (p.dataType == null) {
+                                p.dataType = "string";
+                            }
                         }
                     }
                 }
@@ -460,6 +393,12 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
                         }
+                        String dt = ep.getBodyParamTypes().get(name);
+                        if (dt != null && !dt.isBlank()) {
+                            p.dataType = dt;
+                        } else if (p.dataType == null || "string".equals(p.dataType)) {
+                            p.dataType = inferDataType(val);
+                        }
                     }
                 }
             }
@@ -473,29 +412,30 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         pathTableModel.fireTableDataChanged();
         bodyTableModel.fireTableDataChanged();
 
-        // Update plain text areas (each parameter on a separate line)
-        StringBuilder querySb = new StringBuilder();
-        for (ParameterEntry p : queryParamsList) {
-            querySb.append(p.name).append("\n");
-        }
-        queryListTextArea.setText(querySb.toString());
-        queryListTextArea.setCaretPosition(0);
-
-        StringBuilder pathSb = new StringBuilder();
-        for (ParameterEntry p : pathParamsList) {
-            pathSb.append(p.name).append("\n");
-        }
-        pathListTextArea.setText(pathSb.toString());
-        pathListTextArea.setCaretPosition(0);
-
-        StringBuilder bodySb = new StringBuilder();
-        for (ParameterEntry p : bodyParamsList) {
-            bodySb.append(p.name).append("\n");
-        }
-        bodyListTextArea.setText(bodySb.toString());
-        bodyListTextArea.setCaretPosition(0);
-
         summaryLabel.setText("Query Params: " + queryParamsList.size() + " | Path Params: " + pathParamsList.size() + " | Body Params: " + bodyParamsList.size());
+    }
+
+    public static String inferDataType(String val) {
+        if (val == null || val.isBlank()) {
+            return "string";
+        }
+        String v = val.trim();
+        if ("true".equalsIgnoreCase(v) || "false".equalsIgnoreCase(v)) {
+            return "boolean";
+        }
+        if (v.matches("^-?\\d+$")) {
+            return "integer";
+        }
+        if (v.matches("^-?\\d+\\.\\d+$")) {
+            return "number";
+        }
+        if (v.startsWith("[") && v.endsWith("]")) {
+            return "array";
+        }
+        if (v.startsWith("{") && v.endsWith("}")) {
+            return "object";
+        }
+        return "string";
     }
 
     private void filterQueryTable() {
@@ -525,23 +465,15 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         }
     }
 
-    private void copySingleParameter(String name) {
-        if (name == null || name.isBlank()) return;
-        copyToClipboard(name);
-        showFeedback("Copied parameter '" + name + "' to clipboard.");
-    }
-
-    private void copyFullList(List<ParameterEntry> list, String label) {
-        if (list == null || list.isEmpty()) {
-            showFeedback("No " + label + " to copy.");
-            return;
+    private void copyParameterValue(ParameterEntry entry) {
+        if (entry == null) return;
+        String val = (entry.sampleValue != null && !entry.sampleValue.isBlank()) ? entry.sampleValue : "";
+        copyToClipboard(val);
+        if (!val.isEmpty()) {
+            showFeedback("Copied value '" + val + "' for parameter '" + entry.name + "' to clipboard.");
+        } else {
+            showFeedback("Copied empty value for parameter '" + entry.name + "' to clipboard.");
         }
-        StringBuilder sb = new StringBuilder();
-        for (ParameterEntry p : list) {
-            sb.append(p.name).append("\n");
-        }
-        copyToClipboard(sb.toString().trim());
-        showFeedback("Copied " + list.size() + " " + label + " (one per line) to clipboard.");
     }
 
     private void copyCombinedList() {
@@ -584,11 +516,79 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         timer.start();
     }
 
+    public List<ParameterEntry> getQueryParamsList() {
+        return queryParamsList;
+    }
+
+    public List<ParameterEntry> getPathParamsList() {
+        return pathParamsList;
+    }
+
+    public List<ParameterEntry> getBodyParamsList() {
+        return bodyParamsList;
+    }
+
+    public JTable getQueryTable() {
+        return queryTable;
+    }
+
+    public JTable getPathTable() {
+        return pathTable;
+    }
+
+    public JTable getBodyTable() {
+        return bodyTable;
+    }
+
+    // --- Vector Copy Icon (Strictly ASCII / Java2D Vector - Zero Emojis) ---
+    public static class CopyIcon_littlespidy implements Icon {
+        private final int width;
+        private final int height;
+
+        public CopyIcon_littlespidy() {
+            this(14, 14);
+        }
+
+        public CopyIcon_littlespidy(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Back document outline
+            g2.setColor(Color.GRAY);
+            g2.drawRect(x + 3, y, width - 5, height - 5);
+
+            // Front document body & outline
+            g2.setColor(c != null ? c.getBackground() : Color.WHITE);
+            g2.fillRect(x, y + 3, width - 5, height - 5);
+            g2.setColor(Color.DARK_GRAY);
+            g2.drawRect(x, y + 3, width - 5, height - 5);
+
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() {
+            return width;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return height;
+        }
+    }
+
     // --- Data structures & Table model ---
 
     public static class ParameterEntry {
         public final String name;
         public String sampleValue = "";
+        public String dataType = "string";
         public final Set<String> endpoints = new LinkedHashSet<>();
 
         public ParameterEntry(String name) {
@@ -600,8 +600,8 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         }
     }
 
-    private static class ParameterTableModel extends AbstractTableModel {
-        private final String[] columns = {"Parameter Name", "Sample Value", "Endpoints Used", "Action"};
+    public static class ParameterTableModel extends AbstractTableModel {
+        private final String[] columns = {"Parameter Name", "Sample Value", "Endpoints Used", "Data Type"};
         private final List<ParameterEntry> entries;
 
         public ParameterTableModel(List<ParameterEntry> entries) {
@@ -621,12 +621,13 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
 
         @Override
         public Object getValueAt(int row, int col) {
+            if (row < 0 || row >= entries.size()) return "";
             ParameterEntry p = entries.get(row);
             switch (col) {
                 case 0: return p.name;
                 case 1: return p.sampleValue.isEmpty() ? "-" : p.sampleValue;
                 case 2: return p.endpoints.size() + " endpoint(s)";
-                case 3: return "Copy";
+                case 3: return (p.dataType != null && !p.dataType.isBlank()) ? p.dataType : "string";
                 default: return "";
             }
         }

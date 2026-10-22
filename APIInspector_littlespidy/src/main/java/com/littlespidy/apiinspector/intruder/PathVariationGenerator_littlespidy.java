@@ -51,9 +51,9 @@ public class PathVariationGenerator_littlespidy {
     }
 
     /**
-     * Generates path variations for API Endpoint Discovery by progressively removing
-     * both prefix segments and trailing segments to discover unmapped or alternative endpoints.
-     * Example: /api/v1/admin -> ["/v1/admin", "/admin", "/api/v1/", "/api/", "/"]
+     * Generates parent endpoint path variations for API Endpoint Discovery by progressively
+     * removing path segments from right to left.
+     * Example: /api/admin/health -> ["/api/admin", "/api", "/"]
      */
     public static List<String> generateEndpointDiscoveryPaths(String originalFullPath) {
         List<String> results = new ArrayList<>();
@@ -67,24 +67,7 @@ public class PathVariationGenerator_littlespidy {
             return List.of("/" + query);
         }
 
-        seen.add(originalFullPath);
-
-        // 1. Progressive prefix removal (left-to-right)
-        for (int start = 1; start < segments.size(); start++) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = start; i < segments.size(); i++) {
-                sb.append("/").append(segments.get(i));
-            }
-            if (pathOnly.endsWith("/") && !sb.toString().endsWith("/")) {
-                sb.append("/");
-            }
-            String candidate = sb.toString() + query;
-            if (seen.add(candidate)) {
-                results.add(candidate);
-            }
-        }
-
-        // 2. Progressive suffix removal (right-to-left)
+        // Generate parent endpoint paths from right to left
         for (int count = segments.size() - 1; count >= 0; count--) {
             StringBuilder sb = new StringBuilder();
             if (count == 0) {
@@ -93,10 +76,10 @@ public class PathVariationGenerator_littlespidy {
                 for (int i = 0; i < count; i++) {
                     sb.append("/").append(segments.get(i));
                 }
-                sb.append("/");
             }
+
             String candidate = sb.toString() + query;
-            if (seen.add(candidate)) {
+            if (!candidate.equals(originalFullPath) && seen.add(candidate)) {
                 results.add(candidate);
             }
         }

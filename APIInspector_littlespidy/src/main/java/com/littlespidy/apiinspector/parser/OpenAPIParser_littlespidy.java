@@ -79,8 +79,10 @@ public class OpenAPIParser_littlespidy implements APIParser_littlespidy {
                     Map<String, String> commonPathParams = new LinkedHashMap<>();
                     Map<String, String> commonQueryParams = new LinkedHashMap<>();
                     Map<String, String> commonHeaders = new LinkedHashMap<>();
+                    Map<String, String> commonPathTypes = new LinkedHashMap<>();
+                    Map<String, String> commonQueryTypes = new LinkedHashMap<>();
                     if (pathItem.has("parameters") && pathItem.get("parameters").isJsonArray()) {
-                        extractParameters(pathItem.getAsJsonArray("parameters"), commonPathParams, commonQueryParams, commonHeaders);
+                        extractParameters(pathItem.getAsJsonArray("parameters"), commonPathParams, commonQueryParams, commonHeaders, commonPathTypes, commonQueryTypes);
                     }
 
                     for (String method : new String[]{"get", "post", "put", "delete", "patch", "options", "head"}) {
@@ -103,13 +105,17 @@ public class OpenAPIParser_littlespidy implements APIParser_littlespidy {
                             Map<String, String> pathParams = new LinkedHashMap<>(commonPathParams);
                             Map<String, String> queryParams = new LinkedHashMap<>(commonQueryParams);
                             Map<String, String> headers = new LinkedHashMap<>(commonHeaders);
+                            Map<String, String> pathTypes = new LinkedHashMap<>(commonPathTypes);
+                            Map<String, String> queryTypes = new LinkedHashMap<>(commonQueryTypes);
 
                             if (op.has("parameters") && op.get("parameters").isJsonArray()) {
-                                extractParameters(op.getAsJsonArray("parameters"), pathParams, queryParams, headers);
+                                extractParameters(op.getAsJsonArray("parameters"), pathParams, queryParams, headers, pathTypes, queryTypes);
                             }
                             ep.setPathParams(pathParams);
                             ep.setQueryParams(queryParams);
                             ep.setHeaders(headers);
+                            ep.setPathParamTypes(pathTypes);
+                            ep.setQueryParamTypes(queryTypes);
 
                             // Request body
                             if (op.has("requestBody") && op.get("requestBody").isJsonObject()) {
@@ -150,26 +156,44 @@ public class OpenAPIParser_littlespidy implements APIParser_littlespidy {
         }
     }
 
-    private void extractParameters(JsonArray paramArray, Map<String, String> pathParams, Map<String, String> queryParams, Map<String, String> headers) {
+    private void extractParameters(
+            JsonArray paramArray,
+            Map<String, String> pathParams,
+            Map<String, String> queryParams,
+            Map<String, String> headers,
+            Map<String, String> pathTypes,
+            Map<String, String> queryTypes) {
+
         for (JsonElement p : paramArray) {
             if (!p.isJsonObject()) continue;
             JsonObject pObj = p.getAsJsonObject();
             String name = pObj.has("name") ? pObj.get("name").getAsString() : "";
             String in = pObj.has("in") ? pObj.get("in").getAsString().toLowerCase(Locale.ROOT) : "";
             String example = "1";
-            if (pObj.has("example")) {
-                example = pObj.get("example").getAsString();
-            } else if (pObj.has("schema") && pObj.get("schema").isJsonObject()) {
+            String type = "string";
+
+            if (pObj.has("schema") && pObj.get("schema").isJsonObject()) {
                 JsonObject s = pObj.getAsJsonObject("schema");
+                if (s.has("type") && s.get("type").isJsonPrimitive()) {
+                    type = s.get("type").getAsString().toLowerCase(Locale.ROOT);
+                }
                 if (s.has("example")) example = s.get("example").getAsString();
                 else if (s.has("default")) example = s.get("default").getAsString();
-                else if (s.has("type") && "string".equalsIgnoreCase(s.get("type").getAsString())) example = "sample";
+                else if ("string".equalsIgnoreCase(type)) example = "sample";
+            } else if (pObj.has("type") && pObj.get("type").isJsonPrimitive()) {
+                type = pObj.get("type").getAsString().toLowerCase(Locale.ROOT);
+            }
+
+            if (pObj.has("example")) {
+                example = pObj.get("example").getAsString();
             }
 
             if ("path".equals(in)) {
                 pathParams.put(name, example);
+                pathTypes.put(name, type);
             } else if ("query".equals(in)) {
                 queryParams.put(name, example);
+                queryTypes.put(name, type);
             } else if ("header".equals(in)) {
                 headers.put(name, example);
             }

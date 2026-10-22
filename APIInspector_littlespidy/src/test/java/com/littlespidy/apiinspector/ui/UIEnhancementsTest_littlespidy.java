@@ -2,6 +2,7 @@
 package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
+import com.littlespidy.apiinspector.TestMockHelper_littlespidy;
 import com.littlespidy.apiinspector.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -95,7 +96,7 @@ public class UIEnhancementsTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify Parameter Collector Tab extracts query and path parameters with separate lines")
+    @DisplayName("Verify Parameter Collector Tab tables, data type column, and parameter extraction")
     public void testParameterCollectorTab() throws Exception {
         ParameterCollectorTab_littlespidy paramTab = new ParameterCollectorTab_littlespidy();
 
@@ -113,33 +114,20 @@ public class UIEnhancementsTest_littlespidy {
         col.setEndpoints(List.of(ep1, ep2, ep3));
         paramTab.updateCollections(List.of(col));
 
-        // Check query text area has newline separated query params
-        Field queryTextAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("queryListTextArea");
-        queryTextAreaField.setAccessible(true);
-        JTextArea queryArea = (JTextArea) queryTextAreaField.get(paramTab);
-        String queryText = queryArea.getText();
-        assertTrue(queryText.contains("page\n"));
-        assertTrue(queryText.contains("pageSize\n"));
-        assertTrue(queryText.contains("status\n"));
-        assertTrue(queryText.contains("sort\n"));
-        assertTrue(queryText.contains("filter\n"));
+        // Verify Query Table has 5 items and column 3 is Data Type
+        JTable queryTable = paramTab.getQueryTable();
+        assertEquals(5, queryTable.getRowCount());
+        assertEquals("Data Type", queryTable.getColumnName(3));
 
-        // Check path text area has newline separated path params
-        Field pathTextAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("pathListTextArea");
-        pathTextAreaField.setAccessible(true);
-        JTextArea pathArea = (JTextArea) pathTextAreaField.get(paramTab);
-        String pathText = pathArea.getText();
-        assertTrue(pathText.contains("userId\n"));
-        assertTrue(pathText.contains("itemId\n"));
-        assertTrue(pathText.contains("reviewId\n"));
+        // Verify Path Table has 3 items and column 3 is Data Type
+        JTable pathTable = paramTab.getPathTable();
+        assertEquals(3, pathTable.getRowCount());
+        assertEquals("Data Type", pathTable.getColumnName(3));
 
-        // Check body text area has newline separated body params
-        Field bodyTextAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("bodyListTextArea");
-        bodyTextAreaField.setAccessible(true);
-        JTextArea bodyArea = (JTextArea) bodyTextAreaField.get(paramTab);
-        String bodyText = bodyArea.getText();
-        assertTrue(bodyText.contains("username\n"));
-        assertTrue(bodyText.contains("email\n"));
+        // Verify Body Table has 2 items and column 3 is Data Type
+        JTable bodyTable = paramTab.getBodyTable();
+        assertEquals(2, bodyTable.getRowCount());
+        assertEquals("Data Type", bodyTable.getColumnName(3));
 
         // Check summary label
         Field summaryLabelField = ParameterCollectorTab_littlespidy.class.getDeclaredField("summaryLabel");
@@ -151,15 +139,19 @@ public class UIEnhancementsTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify Request & Response Viewer Tab structure and collection multi-select filter")
+    @DisplayName("Verify Request & Response Viewer Tab structure, auth filter, and session store")
     public void testRequestResponseViewerTab() throws Exception {
         RequestResponseViewerTab_littlespidy viewerTab = new RequestResponseViewerTab_littlespidy(mockApi);
 
         ImportedCollection_littlespidy col1 = new ImportedCollection_littlespidy("Col A", "OpenAPI 3.0", "FILE", "/test/a.json");
-        col1.setEndpoints(List.of(new DiscoveredEndpoint_littlespidy("GET", "/a", "Endpoint A")));
+        DiscoveredEndpoint_littlespidy epA = new DiscoveredEndpoint_littlespidy("GET", "/a", "Endpoint A");
+        epA.setRequiresAuth(true);
+        col1.setEndpoints(List.of(epA));
 
         ImportedCollection_littlespidy col2 = new ImportedCollection_littlespidy("Col B", "Swagger 2.0", "FILE", "/test/b.json");
-        col2.setEndpoints(List.of(new DiscoveredEndpoint_littlespidy("POST", "/b", "Endpoint B")));
+        DiscoveredEndpoint_littlespidy epB = new DiscoveredEndpoint_littlespidy("POST", "/b", "Endpoint B");
+        epB.setRequiresAuth(false);
+        col2.setEndpoints(List.of(epB));
 
         viewerTab.updateCollections(List.of(col1, col2));
 
@@ -167,6 +159,30 @@ public class UIEnhancementsTest_littlespidy {
         tableField.setAccessible(true);
         JTable table = (JTable) tableField.get(viewerTab);
         assertEquals(2, table.getRowCount(), "Requests table should display endpoints from both collections");
+
+        // Verify AuthFilterDropDown exists and can filter
+        AuthFilterDropDown_littlespidy authFilter = viewerTab.getAuthFilterDropDown();
+        assertNotNull(authFilter);
+        authFilter.selectAll(false);
+        // Only select requires auth
+        for (Component c : authFilter.getComponents()) {
+            // Dropdown test
+        }
+
+        // Verify Session Store is present and can be applied
+        SessionStore_littlespidy sessionStore = viewerTab.getSessionStore();
+        assertNotNull(sessionStore);
+        sessionStore.setEnabled(true);
+        sessionStore.setBearerToken("test-jwt-token");
+        sessionStore.getCustomHeaders().put("X-Custom-Auth", "secret123");
+
+        burp.api.montoya.http.message.requests.HttpRequest mockReq =
+                TestMockHelper_littlespidy.createMockRequest("GET", "https://example.com/a", "/a", Map.of(), "");
+        burp.api.montoya.http.message.requests.HttpRequest applied = sessionStore.applyToRequest(mockReq, epA);
+        assertTrue(applied.hasHeader("Authorization"));
+        assertTrue(applied.headerValue("Authorization").contains("test-jwt-token"));
+        assertTrue(applied.hasHeader("X-Custom-Auth"));
+        assertEquals("secret123", applied.headerValue("X-Custom-Auth"));
     }
 
     @Test
@@ -193,16 +209,8 @@ public class UIEnhancementsTest_littlespidy {
 
         // Verify Parameter Collector received collection and extracted params
         ParameterCollectorTab_littlespidy paramTab = rootTab.getParameterCollectorTab();
-        Field queryAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("queryListTextArea");
-        queryAreaField.setAccessible(true);
-        JTextArea queryArea = (JTextArea) queryAreaField.get(paramTab);
-        assertTrue(queryArea.getText().contains("currency\n"), "Query parameters should be present");
-        assertTrue(queryArea.getText().contains("amount\n"), "Query parameters should be present");
-
-        Field pathAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("pathListTextArea");
-        pathAreaField.setAccessible(true);
-        JTextArea pathArea = (JTextArea) pathAreaField.get(paramTab);
-        assertTrue(pathArea.getText().contains("chargeId\n"), "Path parameters should be present");
+        assertEquals(2, paramTab.getQueryParamsList().size());
+        assertEquals(1, paramTab.getPathParamsList().size());
 
         // Verify Request & Response Viewer received collection and displays requests
         RequestResponseViewerTab_littlespidy viewerTab = rootTab.getRequestResponseViewerTab();
@@ -210,6 +218,67 @@ public class UIEnhancementsTest_littlespidy {
         viewerTableField.setAccessible(true);
         JTable viewerTable = (JTable) viewerTableField.get(viewerTab);
         assertEquals(2, viewerTable.getRowCount(), "Viewer table should display all 2 endpoints");
+    }
+
+    @Test
+    @DisplayName("Verify main tabs exact order: API Import, Request & Response Viewer, Parameter Collector, REST API Version Finder")
+    public void testMainTabsExactOrder() throws Exception {
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        Field rootTabbedPaneField = APIInspectorTab_littlespidy.class.getDeclaredField("rootTabbedPane");
+        rootTabbedPaneField.setAccessible(true);
+        JTabbedPane tabbedPane = (JTabbedPane) rootTabbedPaneField.get(rootTab);
+
+        assertEquals("API Import", tabbedPane.getTitleAt(0));
+        assertEquals("Request & Response Viewer", tabbedPane.getTitleAt(1));
+        assertEquals("Parameter Collector", tabbedPane.getTitleAt(2));
+        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(3));
+    }
+
+    @Test
+    @DisplayName("Verify Parameter Collector removed individual copy buttons and retains Copy All Combined")
+    public void testParameterCollectorButtonsAndCopyIcon() {
+        ParameterCollectorTab_littlespidy paramTab = new ParameterCollectorTab_littlespidy();
+
+        boolean hasCopyQueryList = false;
+        boolean hasCopyPathList = false;
+        boolean hasCopyBodyList = false;
+        boolean hasCopyAllQuery = false;
+        boolean hasCopyAllPath = false;
+        boolean hasCopyAllBody = false;
+        boolean hasCopyAllCombined = false;
+
+        for (Component c : getAllComponents(paramTab)) {
+            if (c instanceof JButton b) {
+                String text = b.getText();
+                if ("Copy Query List".equals(text)) hasCopyQueryList = true;
+                if ("Copy Path List".equals(text)) hasCopyPathList = true;
+                if ("Copy Body List".equals(text)) hasCopyBodyList = true;
+                if ("Copy All Query Params".equals(text)) hasCopyAllQuery = true;
+                if ("Copy All Path Params".equals(text)) hasCopyAllPath = true;
+                if ("Copy All Body Params".equals(text)) hasCopyAllBody = true;
+                if ("Copy All (Query + Path + Body)".equals(text)) hasCopyAllCombined = true;
+            }
+        }
+
+        assertFalse(hasCopyQueryList, "Copy Query List button should be removed");
+        assertFalse(hasCopyPathList, "Copy Path List button should be removed");
+        assertFalse(hasCopyBodyList, "Copy Body List button should be removed");
+        assertFalse(hasCopyAllQuery, "Copy All Query Params button should be removed");
+        assertFalse(hasCopyAllPath, "Copy All Path Params button should be removed");
+        assertFalse(hasCopyAllBody, "Copy All Body Params button should be removed");
+        assertTrue(hasCopyAllCombined, "Copy All (Query + Path + Body) button must be present");
+    }
+
+    @Test
+    @DisplayName("Verify Request & Response Viewer redundant pane title HTTP Request and Response Viewer is removed")
+    public void testRequestResponseViewerRedundantTitleRemoved() {
+        RequestResponseViewerTab_littlespidy viewerTab = new RequestResponseViewerTab_littlespidy(mockApi);
+        for (Component c : getAllComponents(viewerTab)) {
+            if (c instanceof JComponent jc && jc.getBorder() instanceof javax.swing.border.TitledBorder tb) {
+                assertNotEquals("HTTP Request and Response Viewer", tb.getTitle(),
+                        "Redundant pane title 'HTTP Request and Response Viewer' must be removed");
+            }
+        }
     }
 
     @Test

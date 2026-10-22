@@ -84,8 +84,11 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
                     Map<String, String> commonQueryParams = new LinkedHashMap<>();
                     Map<String, String> commonHeaders = new LinkedHashMap<>();
                     Map<String, String> commonBodyParams = new LinkedHashMap<>();
+                    Map<String, String> commonPathTypes = new LinkedHashMap<>();
+                    Map<String, String> commonQueryTypes = new LinkedHashMap<>();
+                    Map<String, String> commonBodyTypes = new LinkedHashMap<>();
                     if (pathItem.has("parameters") && pathItem.get("parameters").isJsonArray()) {
-                        extractSwaggerParameters(root, pathItem.getAsJsonArray("parameters"), commonPathParams, commonQueryParams, commonHeaders, commonBodyParams, null);
+                        extractSwaggerParameters(root, pathItem.getAsJsonArray("parameters"), commonPathParams, commonQueryParams, commonHeaders, commonBodyParams, commonPathTypes, commonQueryTypes, commonBodyTypes, null);
                     }
 
                     for (String method : new String[]{"get", "post", "put", "delete", "patch", "options", "head"}) {
@@ -109,15 +112,21 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
                             Map<String, String> queryParams = new LinkedHashMap<>(commonQueryParams);
                             Map<String, String> headers = new LinkedHashMap<>(commonHeaders);
                             Map<String, String> bodyParams = new LinkedHashMap<>(commonBodyParams);
+                            Map<String, String> pathTypes = new LinkedHashMap<>(commonPathTypes);
+                            Map<String, String> queryTypes = new LinkedHashMap<>(commonQueryTypes);
+                            Map<String, String> bodyTypes = new LinkedHashMap<>(commonBodyTypes);
                             String[] bodySampleHolder = new String[1];
 
                             if (op.has("parameters") && op.get("parameters").isJsonArray()) {
-                                extractSwaggerParameters(root, op.getAsJsonArray("parameters"), pathParams, queryParams, headers, bodyParams, bodySampleHolder);
+                                extractSwaggerParameters(root, op.getAsJsonArray("parameters"), pathParams, queryParams, headers, bodyParams, pathTypes, queryTypes, bodyTypes, bodySampleHolder);
                             }
                             ep.setPathParams(pathParams);
                             ep.setQueryParams(queryParams);
                             ep.setHeaders(headers);
                             ep.setBodyParams(bodyParams);
+                            ep.setPathParamTypes(pathTypes);
+                            ep.setQueryParamTypes(queryTypes);
+                            ep.setBodyParamTypes(bodyTypes);
                             if (bodySampleHolder[0] != null && !bodySampleHolder[0].isBlank()) {
                                 ep.setRequestBodySample(bodySampleHolder[0]);
                             } else if (!bodyParams.isEmpty() && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method))) {
@@ -183,6 +192,9 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
             Map<String, String> queryParams,
             Map<String, String> headers,
             Map<String, String> bodyParams,
+            Map<String, String> pathTypes,
+            Map<String, String> queryTypes,
+            Map<String, String> bodyTypes,
             String[] bodySampleHolder) {
 
         for (JsonElement p : paramArray) {
@@ -191,16 +203,29 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
             String name = pObj.has("name") ? pObj.get("name").getAsString() : "";
             String in = pObj.has("in") ? pObj.get("in").getAsString().toLowerCase(Locale.ROOT) : "";
             String example = "1";
+            String type = "string";
+
+            if (pObj.has("type") && pObj.get("type").isJsonPrimitive()) {
+                type = pObj.get("type").getAsString().toLowerCase(Locale.ROOT);
+            } else if (pObj.has("schema") && pObj.get("schema").isJsonObject()) {
+                JsonObject s = pObj.getAsJsonObject("schema");
+                if (s.has("type") && s.get("type").isJsonPrimitive()) {
+                    type = s.get("type").getAsString().toLowerCase(Locale.ROOT);
+                }
+            }
+
             if (pObj.has("default")) {
                 example = pObj.get("default").getAsString();
-            } else if (pObj.has("type") && "string".equalsIgnoreCase(pObj.get("type").getAsString())) {
+            } else if ("string".equalsIgnoreCase(type)) {
                 example = "sample";
             }
 
             if ("path".equals(in)) {
                 pathParams.put(name, example);
+                pathTypes.put(name, type);
             } else if ("query".equals(in)) {
                 queryParams.put(name, example);
+                queryTypes.put(name, type);
             } else if ("header".equals(in)) {
                 headers.put(name, example);
             } else if ("body".equals(in)) {
@@ -214,6 +239,7 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
             } else if ("formdata".equalsIgnoreCase(in)) {
                 if (bodyParams != null && !name.isBlank()) {
                     bodyParams.put(name, example);
+                    bodyTypes.put(name, type);
                 }
             }
         }

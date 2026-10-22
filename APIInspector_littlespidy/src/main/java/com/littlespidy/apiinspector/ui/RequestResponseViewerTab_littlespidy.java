@@ -12,6 +12,7 @@ import burp.api.montoya.ui.editor.HttpResponseEditor;
 import com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
 import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
+import com.littlespidy.apiinspector.model.SessionStore_littlespidy;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -38,9 +39,13 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
     private CollectionFilterDropDown_littlespidy collectionFilterDropDown;
     private MethodFilterDropDown_littlespidy methodFilterDropDown;
+    private AuthFilterDropDown_littlespidy authFilterDropDown;
     private JTextField searchField;
     private JLabel requestCountLabel;
     private JButton sendRequestBtn;
+    private JButton sessionStoreBtn;
+    private JLabel sessionStoreStatusLabel;
+    private SessionStore_littlespidy sessionStore = new SessionStore_littlespidy();
 
     private RequestTableModel tableModel;
     private JTable requestsTable;
@@ -76,6 +81,10 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         methodFilterDropDown.addFilterChangeListener(this::applyFilters);
         leftFilters.add(methodFilterDropDown);
 
+        authFilterDropDown = new AuthFilterDropDown_littlespidy();
+        authFilterDropDown.addFilterChangeListener(this::applyFilters);
+        leftFilters.add(authFilterDropDown);
+
         leftFilters.add(new JLabel("Search:"));
         searchField = new JTextField(18);
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -89,6 +98,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         clearFilterBtn.addActionListener(e -> {
             collectionFilterDropDown.selectAll(true);
             methodFilterDropDown.selectAll(true);
+            authFilterDropDown.selectAll(true);
             searchField.setText("");
             applyFilters();
         });
@@ -97,6 +107,26 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         topContainer.add(leftFilters, BorderLayout.WEST);
 
         JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        sessionStoreStatusLabel = new JLabel(sessionStore.getStatusSummary());
+        sessionStoreStatusLabel.setFont(sessionStoreStatusLabel.getFont().deriveFont(Font.ITALIC, 11f));
+        sessionStoreStatusLabel.setForeground(new Color(0, 100, 30));
+        rightActions.add(sessionStoreStatusLabel);
+
+        sessionStoreBtn = new JButton("Session Store");
+        sessionStoreBtn.setToolTipText("Configure session authentication credentials, tokens, and custom headers");
+        sessionStoreBtn.addActionListener(e -> {
+            SessionStoreDialog_littlespidy dialog = new SessionStoreDialog_littlespidy(
+                    SwingUtilities.getWindowAncestor(this),
+                    sessionStore,
+                    () -> {
+                        sessionStoreStatusLabel.setText(sessionStore.getStatusSummary());
+                        onEndpointRowSelected();
+                    }
+            );
+            dialog.setVisible(true);
+        });
+        rightActions.add(sessionStoreBtn);
+
         sendRequestBtn = new JButton("Send Request");
         sendRequestBtn.setToolTipText("Send the currently selected request to receive a live HTTP response");
         sendRequestBtn.addActionListener(e -> onSendRequest());
@@ -131,9 +161,9 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         topTablePanel.add(new JScrollPane(requestsTable), BorderLayout.CENTER);
         mainSplit.setTopComponent(topTablePanel);
 
-        // Bottom Pane: Request & Response Arranged Horizontally
+        // Bottom Pane: Request & Response Arranged Horizontally (redundant title removed)
         JPanel bottomViewerPanel = new JPanel(new BorderLayout(4, 4));
-        bottomViewerPanel.setBorder(new TitledBorder("HTTP Request and Response Viewer"));
+        bottomViewerPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
         JSplitPane horizontalMessageSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         horizontalMessageSplit.setResizeWeight(0.50);
@@ -211,6 +241,11 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
                     return false;
                 }
 
+                // Authentication requirement filter
+                if (authFilterDropDown != null && !authFilterDropDown.isAuthOptionSelected(item.endpoint.isRequiresAuth())) {
+                    return false;
+                }
+
                 // Search query
                 String query = searchField.getText().trim();
                 if (!query.isEmpty()) {
@@ -256,6 +291,9 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
         try {
             HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, item.endpoint, null, false);
+            if (sessionStore != null && sessionStore.appliesTo(item.endpoint)) {
+                req = sessionStore.applyToRequest(req, item.endpoint);
+            }
             if (requestEditor != null) {
                 requestEditor.setRequest(req);
             }
@@ -301,6 +339,9 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         Thread t = new Thread(() -> {
             try {
                 HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, item.endpoint, null, false);
+                if (sessionStore != null && sessionStore.appliesTo(item.endpoint)) {
+                    req = sessionStore.applyToRequest(req, item.endpoint);
+                }
                 if (api != null && api.http() != null) {
                     HttpRequestResponse resp = api.http().sendRequest(req);
                     if (resp != null && resp.hasResponse()) {
@@ -338,6 +379,22 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         if (requestEditor != null) requestEditor.setRequest(null);
         if (responseEditor != null) responseEditor.setResponse(null);
         responseInfoLabel.setText("Status: - | Length: 0 B");
+    }
+
+    public SessionStore_littlespidy getSessionStore() {
+        return sessionStore;
+    }
+
+    public void setSessionStore(SessionStore_littlespidy store) {
+        this.sessionStore = store != null ? store : new SessionStore_littlespidy();
+        if (sessionStoreStatusLabel != null) {
+            sessionStoreStatusLabel.setText(this.sessionStore.getStatusSummary());
+        }
+        onEndpointRowSelected();
+    }
+
+    public AuthFilterDropDown_littlespidy getAuthFilterDropDown() {
+        return authFilterDropDown;
     }
 
     public static class EndpointItem {

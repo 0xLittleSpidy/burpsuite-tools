@@ -317,6 +317,10 @@ public class APIInspectorPersistenceManager_littlespidy {
                     }
                 }
 
+                if (rootTab.getRequestResponseViewerTab() != null && rootTab.getRequestResponseViewerTab().getSessionStore() != null) {
+                    root.sessionStore = serializeSessionStore(rootTab.getRequestResponseViewerTab().getSessionStore());
+                }
+
                 String json = gson.toJson(root);
                 File tmpFile = new File(parentDir, SESSION_FILENAME + ".tmp");
                 Files.writeString(tmpFile.toPath(), json, StandardCharsets.UTF_8);
@@ -656,6 +660,11 @@ public class APIInspectorPersistenceManager_littlespidy {
                         rootTab.getAuthTestingTab().setResults(resList);
                     }
 
+                    // 7. Restore Session Store
+                    if (root.sessionStore != null && rootTab.getRequestResponseViewerTab() != null) {
+                        rootTab.getRequestResponseViewerTab().setSessionStore(deserializeSessionStore(root.sessionStore));
+                    }
+
                     // Resync profile selections across tabs
                     rootTab.getImportTab().updateAvailableProfiles(rootTab.getAuthTestingTab().getAllProfiles());
                     rootTab.getAuthTestingTab().refreshCollectionsCombo();
@@ -858,6 +867,9 @@ public class APIInspectorPersistenceManager_littlespidy {
                 epDto.queryParams = ep.getQueryParams();
                 epDto.pathParams = ep.getPathParams();
                 epDto.bodyParams = ep.getBodyParams();
+                epDto.queryParamTypes = ep.getQueryParamTypes();
+                epDto.pathParamTypes = ep.getPathParamTypes();
+                epDto.bodyParamTypes = ep.getBodyParamTypes();
                 epDto.requestBodySample = ep.getRequestBodySample();
                 epDto.contentType = ep.getContentType();
                 epDto.requiresAuth = ep.isRequiresAuth();
@@ -893,6 +905,9 @@ public class APIInspectorPersistenceManager_littlespidy {
                 ep.setQueryParams(epDto.queryParams);
                 ep.setPathParams(epDto.pathParams);
                 if (epDto.bodyParams != null) ep.setBodyParams(epDto.bodyParams);
+                if (epDto.queryParamTypes != null) ep.setQueryParamTypes(epDto.queryParamTypes);
+                if (epDto.pathParamTypes != null) ep.setPathParamTypes(epDto.pathParamTypes);
+                if (epDto.bodyParamTypes != null) ep.setBodyParamTypes(epDto.bodyParamTypes);
                 ep.setRequestBodySample(epDto.requestBodySample);
                 ep.setContentType(epDto.contentType);
                 ep.setRequiresAuth(epDto.requiresAuth);
@@ -1019,6 +1034,32 @@ public class APIInspectorPersistenceManager_littlespidy {
             r.setUnauthResponseBytes(Base64.getDecoder().decode(dto.unauthResponseBase64));
         }
         return r;
+    }
+
+    public static SessionStoreDTO serializeSessionStore(SessionStore_littlespidy s) {
+        if (s == null) return null;
+        SessionStoreDTO dto = new SessionStoreDTO();
+        dto.enabled = s.isEnabled();
+        dto.applyMode = s.getApplyMode();
+        dto.bearerToken = s.getBearerToken();
+        dto.customHeaders = new java.util.LinkedHashMap<>(s.getCustomHeaders());
+        dto.cookieName = s.getCookieName();
+        dto.cookieValue = s.getCookieValue();
+        return dto;
+    }
+
+    public static SessionStore_littlespidy deserializeSessionStore(SessionStoreDTO dto) {
+        if (dto == null) return new SessionStore_littlespidy();
+        SessionStore_littlespidy s = new SessionStore_littlespidy();
+        s.setEnabled(dto.enabled);
+        s.setApplyMode(dto.applyMode);
+        s.setBearerToken(dto.bearerToken);
+        if (dto.customHeaders != null) {
+            s.setCustomHeaders(dto.customHeaders);
+        }
+        s.setCookieName(dto.cookieName);
+        s.setCookieValue(dto.cookieValue);
+        return s;
     }
 
     private File detectBurpProjectDirectory() {

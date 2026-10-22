@@ -62,20 +62,47 @@ public class IntruderStrategiesTest_littlespidy {
 
     @Test
     public void testEndpointDiscoveryPathGeneration() {
-        String endpoint = "/api/v1/admin";
+        String endpoint = "/api/admin/health";
         List<String> paths = PathVariationGenerator_littlespidy.generateEndpointDiscoveryPaths(endpoint);
 
         assertNotNull(paths);
-        assertFalse(paths.isEmpty());
+        assertEquals(3, paths.size(), "Expected exactly 3 parent-path candidates");
 
-        // Must include prefix stripped paths
-        assertTrue(paths.contains("/v1/admin"), "Expected prefix stripped /v1/admin");
-        assertTrue(paths.contains("/admin"), "Expected prefix stripped /admin");
+        // Verify parent endpoint paths generated from right to left
+        assertEquals("/api/admin", paths.get(0));
+        assertEquals("/api", paths.get(1));
+        assertEquals("/", paths.get(2));
 
-        // Must include progressive right-to-left trimmed paths
-        assertTrue(paths.contains("/api/v1/"), "Expected progressive trimmed /api/v1/");
-        assertTrue(paths.contains("/api/"), "Expected progressive trimmed /api/");
-        assertTrue(paths.contains("/"), "Expected progressive trimmed /");
+        // Verify total requests when authenticated and unauthenticated are enabled (3 * 2 = 6 requests)
+        int totalRequests = paths.size() * 2;
+        assertEquals(6, totalRequests, "Expected exactly 6 total requests for 3 parent candidates");
+    }
+
+    @Test
+    public void testEndpointDiscoveryEdgeCases() {
+        // Single segment
+        List<String> singleSeg = PathVariationGenerator_littlespidy.generateEndpointDiscoveryPaths("/users");
+        assertEquals(1, singleSeg.size());
+        assertEquals("/", singleSeg.get(0));
+
+        // Root only
+        List<String> rootOnly = PathVariationGenerator_littlespidy.generateEndpointDiscoveryPaths("/");
+        assertEquals(1, rootOnly.size());
+        assertEquals("/", rootOnly.get(0));
+
+        // Trailing slash
+        List<String> trailingSlash = PathVariationGenerator_littlespidy.generateEndpointDiscoveryPaths("/api/admin/health/");
+        assertEquals(3, trailingSlash.size());
+        assertEquals("/api/admin", trailingSlash.get(0));
+        assertEquals("/api", trailingSlash.get(1));
+        assertEquals("/", trailingSlash.get(2));
+
+        // Query parameters preserved
+        List<String> withQuery = PathVariationGenerator_littlespidy.generateEndpointDiscoveryPaths("/api/v1/data?page=1");
+        assertEquals(3, withQuery.size());
+        assertEquals("/api/v1?page=1", withQuery.get(0));
+        assertEquals("/api?page=1", withQuery.get(1));
+        assertEquals("/?page=1", withQuery.get(2));
     }
 
     @Test

@@ -18,6 +18,7 @@ public class SessionStateDTO_littlespidy {
         public List<ImportedCollectionDTO> importedCollections = new ArrayList<>();
         public List<AuthProfileDTO> authProfiles = new ArrayList<>();
         public List<AuthTestResultDTO> authTestResults = new ArrayList<>();
+        public SessionStoreDTO sessionStore;
     }
 
     public static class SessionTabDTO {
@@ -107,6 +108,9 @@ public class SessionStateDTO_littlespidy {
         public java.util.Map<String, String> queryParams;
         public java.util.Map<String, String> pathParams;
         public java.util.Map<String, String> bodyParams;
+        public java.util.Map<String, String> queryParamTypes;
+        public java.util.Map<String, String> pathParamTypes;
+        public java.util.Map<String, String> bodyParamTypes;
         public String requestBodySample;
         public String contentType;
         public boolean requiresAuth;
@@ -152,5 +156,14 @@ public class SessionStateDTO_littlespidy {
         public String authResponseBase64;
         public String unauthRequestBase64;
         public String unauthResponseBase64;
+    }
+
+    public static class SessionStoreDTO {
+        public boolean enabled;
+        public String applyMode;
+        public String bearerToken;
+        public java.util.Map<String, String> customHeaders;
+        public String cookieName;
+        public String cookieValue;
     }
 }
