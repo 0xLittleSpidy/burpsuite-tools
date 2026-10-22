@@ -38,6 +38,7 @@ public class RequestConfigPanel extends JPanel {
     private final JTextField txtTimeout;
     private final JTextField txtRetries;
     private final JTextField txtTimeSec;
+    private final JCheckBox chkForceSsl;
     private final JCheckBox chkTor;
     private final JCheckBox chkHpp;
 
@@ -60,14 +61,20 @@ public class RequestConfigPanel extends JPanel {
     private final JButton btnCopyCli;
 
     private final Runnable onPreSync;
+    private final java.util.function.Consumer<Boolean> onSslToggled;
     private SqlmapTaskOptions currentOptions;
 
     public RequestConfigPanel(Runnable onStartScan, Runnable onStopScan) {
-        this(onStartScan, onStopScan, null);
+        this(onStartScan, onStopScan, null, null);
     }
 
     public RequestConfigPanel(Runnable onStartScan, Runnable onStopScan, Runnable onPreSync) {
+        this(onStartScan, onStopScan, onPreSync, null);
+    }
+
+    public RequestConfigPanel(Runnable onStartScan, Runnable onStopScan, Runnable onPreSync, java.util.function.Consumer<Boolean> onSslToggled) {
         this.onPreSync = onPreSync;
+        this.onSslToggled = onSslToggled;
         setLayout(new BorderLayout(0, 5));
         setBorder(new EmptyBorder(6, 6, 6, 6));
 
@@ -198,7 +205,7 @@ public class RequestConfigPanel extends JPanel {
         content.add(targetPanel);
 
         // 5. Timing & Network Panel
-        JPanel netPanel = new JPanel(new GridLayout(5, 2, 4, 4));
+        JPanel netPanel = new JPanel(new GridLayout(6, 2, 4, 4));
         netPanel.setBorder(new CompoundBorder(new TitledBorder("Timing & Network"), new EmptyBorder(4, 6, 4, 6)));
 
         netPanel.add(new JLabel("Proxy (--proxy):"));
@@ -221,10 +228,16 @@ public class RequestConfigPanel extends JPanel {
         txtRetries = new JTextField("3");
         txtOs = new JTextField();
 
+        chkForceSsl = new JCheckBox("Use HTTPS (--force-ssl)");
+        chkForceSsl.setToolTipText("Force usage of SSL/HTTPS protocol for target requests");
+        chkForceSsl.addActionListener(e -> onForceSslToggled());
+
         chkTor = new JCheckBox("Use Tor Socks5");
         chkHpp = new JCheckBox("HTTP Parameter Pollution (HPP)");
+        netPanel.add(chkForceSsl);
         netPanel.add(chkTor);
         netPanel.add(chkHpp);
+        netPanel.add(new JLabel());
 
         content.add(netPanel);
 
@@ -291,6 +304,8 @@ public class RequestConfigPanel extends JPanel {
         txtRetries.setText(String.valueOf(options.getRetries()));
         chkTor.setSelected(options.isTor());
         chkHpp.setSelected(options.isHpp());
+        boolean isHttps = options.isForceSsl() || (options.getUrl() != null && options.getUrl().toLowerCase().startsWith("https://"));
+        chkForceSsl.setSelected(isHttps);
 
         chkBanner.setSelected(options.isGetBanner());
         chkCurrentDb.setSelected(options.isGetCurrentDb());
@@ -386,6 +401,17 @@ public class RequestConfigPanel extends JPanel {
         currentOptions.setTor(chkTor.isSelected());
         currentOptions.setHpp(chkHpp.isSelected());
 
+        boolean forceSsl = chkForceSsl.isSelected();
+        currentOptions.setForceSsl(forceSsl);
+        String currentUrl = currentOptions.getUrl();
+        if (currentUrl != null && !currentUrl.isBlank()) {
+            if (forceSsl && currentUrl.startsWith("http://")) {
+                currentOptions.setUrl("https://" + currentUrl.substring(7));
+            } else if (!forceSsl && currentUrl.startsWith("https://")) {
+                currentOptions.setUrl("http://" + currentUrl.substring(8));
+            }
+        }
+
         currentOptions.setGetBanner(chkBanner.isSelected());
         currentOptions.setGetCurrentDb(chkCurrentDb.isSelected());
         currentOptions.setGetCurrentUser(chkCurrentUser.isSelected());
@@ -450,5 +476,26 @@ public class RequestConfigPanel extends JPanel {
 
     public JTextField getTxtTimeSecForTest() {
         return txtTimeSec;
+    }
+
+    public JCheckBox getChkForceSslForTest() {
+        return chkForceSsl;
+    }
+
+    private void onForceSslToggled() {
+        if (currentOptions == null) return;
+        boolean forceSsl = chkForceSsl.isSelected();
+        currentOptions.setForceSsl(forceSsl);
+        String currentUrl = currentOptions.getUrl();
+        if (currentUrl != null && !currentUrl.isBlank()) {
+            if (forceSsl && currentUrl.startsWith("http://")) {
+                currentOptions.setUrl("https://" + currentUrl.substring(7));
+            } else if (!forceSsl && currentUrl.startsWith("https://")) {
+                currentOptions.setUrl("http://" + currentUrl.substring(8));
+            }
+        }
+        if (onSslToggled != null) {
+            onSslToggled.accept(forceSsl);
+        }
     }
 }

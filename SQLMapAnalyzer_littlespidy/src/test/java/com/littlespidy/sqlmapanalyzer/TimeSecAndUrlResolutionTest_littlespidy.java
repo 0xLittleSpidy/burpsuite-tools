@@ -139,4 +139,70 @@ public class TimeSecAndUrlResolutionTest_littlespidy {
         assertTrue(updatedOpts.buildCommandLine().contains("--time-sec=12"));
         assertEquals(12, updatedOpts.toOptionMap().get("timeSec"));
     }
+
+    @Test
+    public void testForceSslOptionAndCliCommand() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("http://target.local/vuln.php?id=1");
+        assertFalse(options.isForceSsl());
+
+        // Enable forceSsl
+        options.setForceSsl(true);
+        assertTrue(options.isForceSsl());
+
+        String cli = options.buildCommandLine();
+        assertTrue(cli.contains("-u \"https://target.local/vuln.php?id=1\""));
+        assertTrue(cli.contains("--force-ssl"));
+
+        Map<String, Object> map = options.toOptionMap();
+        assertEquals("true", map.get("forceSSL"));
+    }
+
+    @Test
+    public void testForceSslUIConfigPanelToggle() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("http://target.local/api/search");
+        options.setForceSsl(false);
+
+        byte[] raw = "GET /api/search HTTP/1.1\r\nHost: target.local\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        ScanRequestSession session = new ScanRequestSession(2, "GET", "http://target.local/api/search", raw, options);
+
+        RequestScanTabPanel tabPanel = new RequestScanTabPanel(null, session, null);
+        RequestConfigPanel configPanel = tabPanel.getConfigPanelForTest();
+        assertNotNull(configPanel);
+        assertNotNull(configPanel.getChkForceSslForTest());
+
+        // Checkbox starts unchecked for http://
+        assertFalse(configPanel.getChkForceSslForTest().isSelected());
+
+        // User checks the HTTPS checkbox
+        configPanel.getChkForceSslForTest().setSelected(true);
+        for (var al : configPanel.getChkForceSslForTest().getActionListeners()) {
+            al.actionPerformed(new java.awt.event.ActionEvent(configPanel.getChkForceSslForTest(), 0, ""));
+        }
+
+        // Verify URL updated to https:// in session and options
+        assertEquals("https://target.local/api/search", session.getUrl());
+        SqlmapTaskOptions activeOpts = session.getActiveExecution().getOptions();
+        assertTrue(activeOpts.isForceSsl());
+        assertEquals("https://target.local/api/search", activeOpts.getUrl());
+        assertTrue(activeOpts.buildCommandLine().contains("--force-ssl"));
+        assertTrue(activeOpts.buildCommandLine().contains("-u \"https://target.local/api/search\""));
+    }
+
+    @Test
+    public void testForceSslPreCheckedForHttpsUrl() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("https://secure.target.local/admin");
+
+        byte[] raw = "GET /admin HTTP/1.1\r\nHost: secure.target.local\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        ScanRequestSession session = new ScanRequestSession(3, "GET", "https://secure.target.local/admin", raw, options);
+
+        RequestScanTabPanel tabPanel = new RequestScanTabPanel(null, session, null);
+        RequestConfigPanel configPanel = tabPanel.getConfigPanelForTest();
+        assertNotNull(configPanel);
+
+        // Pre-checked because URL starts with https://
+        assertTrue(configPanel.getChkForceSslForTest().isSelected());
+    }
 }

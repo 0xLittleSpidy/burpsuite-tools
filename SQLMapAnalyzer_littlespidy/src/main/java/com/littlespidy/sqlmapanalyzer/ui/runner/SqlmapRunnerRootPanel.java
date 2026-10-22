@@ -197,8 +197,13 @@ public class SqlmapRunnerRootPanel extends JPanel {
 
     private SqlmapTaskOptions extractOptionsFromRequest(HttpRequest request, String resolvedUrl) {
         SqlmapTaskOptions opt = new SqlmapTaskOptions();
-        opt.setUrl(resolvedUrl != null && !resolvedUrl.isBlank() ? resolvedUrl : OSUtils.resolveFullUrl(request, null));
+        String finalUrl = resolvedUrl != null && !resolvedUrl.isBlank() ? resolvedUrl : OSUtils.resolveFullUrl(request, null);
+        opt.setUrl(finalUrl);
         opt.setMethod(request.method());
+
+        boolean isHttps = (finalUrl != null && finalUrl.toLowerCase().startsWith("https://")) ||
+                (request.httpService() != null && request.httpService().secure());
+        opt.setForceSsl(isHttps);
 
         // Extract body data if present
         if (request.body() != null && request.body().length() > 0) {

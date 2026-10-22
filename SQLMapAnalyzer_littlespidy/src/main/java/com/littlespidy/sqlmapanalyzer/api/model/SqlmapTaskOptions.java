@@ -56,6 +56,7 @@ public class SqlmapTaskOptions implements Serializable {
     private String answers = "crack=N,dict=N,continue=Y,quit=N";
     private String ignoreCode = "";
     private String proxy = "http://127.0.0.1:8080";
+    private boolean forceSsl = false;
     private boolean tor = false;
     private String torPort = "9050";
     private String torType = "SOCKS5";
@@ -107,6 +108,7 @@ public class SqlmapTaskOptions implements Serializable {
             this.answers = other.answers;
             this.ignoreCode = other.ignoreCode;
             this.proxy = other.proxy;
+            this.forceSsl = other.forceSsl;
             this.tor = other.tor;
             this.torPort = other.torPort;
             this.torType = other.torType;
@@ -162,6 +164,7 @@ public class SqlmapTaskOptions implements Serializable {
         if (answers != null && !answers.isBlank()) map.put("answers", answers);
         if (ignoreCode != null && !ignoreCode.isBlank()) map.put("ignoreCode", ignoreCode);
         if (proxy != null && !proxy.isBlank()) map.put("proxy", proxy);
+        if (forceSsl) map.put("forceSSL", "true");
         if (tor) {
             map.put("tor", "true");
             map.put("torPort", torPort);
@@ -175,7 +178,11 @@ public class SqlmapTaskOptions implements Serializable {
     }
 
     public String buildCommandLine() {
-        StringBuilder sb = new StringBuilder("sqlmap -u \"").append(url).append("\"");
+        String targetUrl = url;
+        if (forceSsl && targetUrl != null && targetUrl.startsWith("http://")) {
+            targetUrl = "https://" + targetUrl.substring(7);
+        }
+        StringBuilder sb = new StringBuilder("sqlmap -u \"").append(targetUrl).append("\"");
         if (method != null && !method.equalsIgnoreCase("GET")) {
             sb.append(" --method=").append(method);
         }
@@ -194,6 +201,9 @@ public class SqlmapTaskOptions implements Serializable {
         }
         if (proxy != null && !proxy.isBlank()) {
             sb.append(" --proxy=\"").append(proxy.replace("\"", "\\\"")).append("\"");
+        }
+        if (forceSsl) {
+            sb.append(" --force-ssl");
         }
         if (headers != null && !headers.isBlank()) {
             String escapedHeaders = headers.replace("\r\n", "\\n").replace("\n", "\\n").replace("\"", "\\\"");
@@ -312,6 +322,8 @@ public class SqlmapTaskOptions implements Serializable {
     public void setIgnoreCode(String ignoreCode) { this.ignoreCode = ignoreCode; }
     public String getProxy() { return proxy; }
     public void setProxy(String proxy) { this.proxy = proxy; }
+    public boolean isForceSsl() { return forceSsl; }
+    public void setForceSsl(boolean forceSsl) { this.forceSsl = forceSsl; }
     public boolean isTor() { return tor; }
     public void setTor(boolean tor) { this.tor = tor; }
     public String getTorPort() { return torPort; }

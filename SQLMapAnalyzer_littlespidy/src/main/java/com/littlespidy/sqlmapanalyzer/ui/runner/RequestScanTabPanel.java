@@ -80,7 +80,7 @@ public class RequestScanTabPanel extends JPanel {
         JSplitPane centerSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         centerSplit.setResizeWeight(0.48);
 
-        configPanel = new RequestConfigPanel(this::startScan, this::stopScan, this::syncRequestEditorToSession);
+        configPanel = new RequestConfigPanel(this::startScan, this::stopScan, this::syncRequestEditorToSession, this::onSslToggled);
         centerSplit.setLeftComponent(configPanel);
 
         // Right component: Native Montoya Request Editor
@@ -242,6 +242,29 @@ public class RequestScanTabPanel extends JPanel {
 
     public RequestConfigPanel getConfigPanelForTest() {
         return configPanel;
+    }
+
+    private void onSslToggled(boolean forceSsl) {
+        String sessionUrl = session.getUrl();
+        if (sessionUrl != null && !sessionUrl.isBlank()) {
+            if (forceSsl && sessionUrl.startsWith("http://")) {
+                session.setUrl("https://" + sessionUrl.substring(7));
+            } else if (!forceSsl && sessionUrl.startsWith("https://")) {
+                session.setUrl("http://" + sessionUrl.substring(8));
+            }
+        }
+        ScanExecutionRecord active = session.getActiveExecution();
+        if (active != null && active.getOptions() != null) {
+            active.getOptions().setForceSsl(forceSsl);
+            String optUrl = active.getOptions().getUrl();
+            if (optUrl != null && !optUrl.isBlank()) {
+                if (forceSsl && optUrl.startsWith("http://")) {
+                    active.getOptions().setUrl("https://" + optUrl.substring(7));
+                } else if (!forceSsl && optUrl.startsWith("https://")) {
+                    active.getOptions().setUrl("http://" + optUrl.substring(8));
+                }
+            }
+        }
     }
 
     private void refreshExecutionDropdown() {
