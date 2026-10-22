@@ -52,6 +52,30 @@ public class ScanRequestSession implements Serializable {
         return rawRequest;
     }
 
+    public synchronized void setMethod(String method) {
+        this.method = method != null ? method.toUpperCase() : "GET";
+    }
+
+    public synchronized void setUrl(String url) {
+        this.url = url != null ? url : "";
+    }
+
+    public synchronized void setRawRequest(byte[] rawRequest) {
+        this.rawRequest = rawRequest != null ? rawRequest : new byte[0];
+    }
+
+    public synchronized void updateRequest(String method, String url, byte[] rawRequest) {
+        if (method != null && !method.isBlank()) {
+            this.method = method.toUpperCase();
+        }
+        if (url != null && !url.isBlank()) {
+            this.url = url;
+        }
+        if (rawRequest != null) {
+            this.rawRequest = rawRequest;
+        }
+    }
+
     public synchronized List<ScanExecutionRecord> getExecutions() {
         return Collections.unmodifiableList(executions);
     }

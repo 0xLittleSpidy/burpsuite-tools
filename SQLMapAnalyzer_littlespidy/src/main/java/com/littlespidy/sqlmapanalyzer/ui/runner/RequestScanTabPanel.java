@@ -7,6 +7,7 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.ui.editor.HttpRequestEditor;
 import com.littlespidy.sqlmapanalyzer.api.model.SqlmapFinding;
 import com.littlespidy.sqlmapanalyzer.api.model.SqlmapLogEntry;
+import com.littlespidy.sqlmapanalyzer.api.model.SqlmapTaskOptions;
 import com.littlespidy.sqlmapanalyzer.runner.ScanExecutionRecord;
 import com.littlespidy.sqlmapanalyzer.runner.ScanRequestSession;
 import com.littlespidy.sqlmapanalyzer.runner.ScanTaskManager;
@@ -34,6 +35,7 @@ public class RequestScanTabPanel extends JPanel {
 
     private final RequestConfigPanel configPanel;
     private final HttpRequestEditor requestEditor;
+    private final JTextArea rawArea;
     private final LogConsolePanel logConsolePanel;
 
     private boolean updatingCombo = false;
@@ -78,7 +80,7 @@ public class RequestScanTabPanel extends JPanel {
         JSplitPane centerSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         centerSplit.setResizeWeight(0.48);
 
-        configPanel = new RequestConfigPanel(this::startScan, this::stopScan);
+        configPanel = new RequestConfigPanel(this::startScan, this::stopScan, this::syncRequestEditorToSession);
         centerSplit.setLeftComponent(configPanel);
 
         // Right component: Native Montoya Request Editor
@@ -89,11 +91,12 @@ public class RequestScanTabPanel extends JPanel {
                     requestEditor.setRequest(HttpRequest.httpRequest(ByteArray.byteArray(session.getRawRequest())));
                 } catch (Exception ignored) {}
             }
+            rawArea = null;
             centerSplit.setRightComponent(requestEditor.uiComponent());
         } else {
             requestEditor = null;
-            JTextArea rawArea = new JTextArea(new String(session.getRawRequest()));
-            rawArea.setEditable(false);
+            rawArea = new JTextArea(new String(session.getRawRequest(), java.nio.charset.StandardCharsets.UTF_8));
+            rawArea.setEditable(true);
             centerSplit.setRightComponent(new JScrollPane(rawArea));
         }
 
@@ -147,7 +150,126 @@ public class RequestScanTabPanel extends JPanel {
     }
 
     public ScanRequestSession getSession() {
+        syncRequestEditorToSession();
         return session;
+    }
+
+    public synchronized void syncRequestEditorToSession() {
+        byte[] raw = null;
+        String method = null;
+        String url = null;
+        String body = null;
+
+        if (requestEditor != null) {
+            try {
+                HttpRequest req = requestEditor.getRequest();
+                if (req != null) {
+                    if (req.toByteArray() != null) {
+                        raw = req.toByteArray().getBytes();
+                    }
+                    method = req.method();
+                    url = req.url();
+                    body = req.bodyToString();
+
+                    if (url == null || (!url.startsWith("http://") && !url.startsWith("https://"))) {
+                        String hostHeader = req.headerValue("Host");
+                        if (hostHeader != null && !hostHeader.trim().isEmpty()) {
+                            String scheme = "http://";
+                            if (session.getUrl() != null && session.getUrl().toLowerCase().startsWith("https://")) {
+                                scheme = "https://";
+                            }
+                            String path = (req.path() != null && !req.path().isEmpty()) ? req.path() : "/";
+                            if (!path.startsWith("/")) {
+                                path = "/" + path;
+                            }
+                            url = scheme + hostHeader.trim() + path;
+                        } else if (session.getUrl() != null) {
+                            url = session.getUrl();
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        } else if (rawArea != null) {
+            String text = rawArea.getText();
+            if (text != null && !text.isEmpty()) {
+                raw = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                String[] lines = text.split("\r?\n");
+                String path = "/";
+                String host = "";
+                if (lines.length > 0 && !lines[0].trim().isEmpty()) {
+                    String[] parts = lines[0].trim().split("\\s+");
+                    if (parts.length > 0) method = parts[0].toUpperCase();
+                    if (parts.length > 1) path = parts[1];
+                }
+                for (String line : lines) {
+                    if (line.toLowerCase().startsWith("host:")) {
+                        host = line.substring(5).trim();
+                        break;
+                    }
+                }
+                int headerEnd = text.indexOf("\r\n\r\n");
+                if (headerEnd != -1) {
+                    body = text.substring(headerEnd + 4);
+                } else {
+                    headerEnd = text.indexOf("\n\n");
+                    if (headerEnd != -1) {
+                        body = text.substring(headerEnd + 2);
+                    }
+                }
+                String scheme = "http://";
+                if (session.getUrl() != null && session.getUrl().toLowerCase().startsWith("https://")) {
+                    scheme = "https://";
+                }
+                if (!host.isEmpty()) {
+                    if (!path.startsWith("/")) {
+                        path = "/" + path;
+                    }
+                    url = scheme + host + path;
+                } else {
+                    url = session.getUrl();
+                }
+            }
+        }
+
+        if (raw != null && raw.length > 0) {
+            session.updateRequest(method, url, raw);
+            ScanExecutionRecord active = session.getActiveExecution();
+            if (active != null && active.getOptions() != null) {
+                SqlmapTaskOptions opts = active.getOptions();
+                if (url != null && !url.isEmpty()) {
+                    opts.setUrl(url);
+                }
+                if (method != null && !method.isEmpty()) {
+                    opts.setMethod(method);
+                }
+                if (body != null) {
+                    opts.setData(body.isEmpty() ? null : body);
+                }
+            }
+            syncHeadersToConfig();
+
+            // Update parent tab title if not custom-renamed
+            SwingUtilities.invokeLater(() -> {
+                JTabbedPane parentPane = (JTabbedPane) SwingUtilities.getAncestorOfClass(JTabbedPane.class, this);
+                if (parentPane != null) {
+                    int idx = parentPane.indexOfComponent(this);
+                    if (idx != -1) {
+                        Component headerComp = parentPane.getTabComponentAt(idx);
+                        if (headerComp instanceof CloseableTabHeader_littlespidy) {
+                            CloseableTabHeader_littlespidy header = (CloseableTabHeader_littlespidy) headerComp;
+                            if (session.getCustomTabTitle() == null || session.getCustomTabTitle().isEmpty()) {
+                                header.setTitle(session.getTabTitle());
+                                parentPane.setTitleAt(idx, session.getTabTitle());
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    public JTextArea getRawAreaForTest() {
+        return rawArea;
     }
 
     private void refreshExecutionDropdown() {
@@ -181,11 +303,12 @@ public class RequestScanTabPanel extends JPanel {
         configPanel.loadOptions(active.getOptions());
         logConsolePanel.updateFromRecord(active);
 
-        boolean isRunning = taskManager.isScanning(active);
+        boolean isRunning = taskManager != null && taskManager.isScanning(active);
         configPanel.setScanningState(isRunning);
     }
 
     private void onNewExecution() {
+        syncRequestEditorToSession();
         ScanExecutionRecord newRun = session.createNewExecution();
         refreshExecutionDropdown();
         loadCurrentExecution();
@@ -204,6 +327,7 @@ public class RequestScanTabPanel extends JPanel {
     }
 
     private void startScan() {
+        syncRequestEditorToSession();
         ScanExecutionRecord active = session.getActiveExecution();
         if (active == null) return;
 
@@ -226,66 +350,70 @@ public class RequestScanTabPanel extends JPanel {
         logConsolePanel.setStatusBadge("RUNNING", false);
         logConsolePanel.updateFromRecord(active);
 
-        taskManager.startScan(active, new ScanTaskManager.ScanUpdateListener() {
-            @Override
-            public void onLogsUpdated(ScanExecutionRecord record, List<SqlmapLogEntry> newLogs) {
-                SwingUtils.runOnEdt(() -> {
-                    if (record == session.getActiveExecution()) {
-                        logConsolePanel.appendLogs(newLogs);
-                    }
-                });
-            }
+        if (taskManager != null) {
+            taskManager.startScan(active, new ScanTaskManager.ScanUpdateListener() {
+                @Override
+                public void onLogsUpdated(ScanExecutionRecord record, List<SqlmapLogEntry> newLogs) {
+                    SwingUtils.runOnEdt(() -> {
+                        if (record == session.getActiveExecution()) {
+                            logConsolePanel.appendLogs(newLogs);
+                        }
+                    });
+                }
 
-            @Override
-            public void onStatusChanged(ScanExecutionRecord record, String status) {
-                SwingUtils.runOnEdt(() -> {
-                    if (record == session.getActiveExecution()) {
-                        logConsolePanel.setStatusBadge(status, record.isVulnerable());
-                    }
-                    refreshExecutionDropdown();
-                });
-            }
+                @Override
+                public void onStatusChanged(ScanExecutionRecord record, String status) {
+                    SwingUtils.runOnEdt(() -> {
+                        if (record == session.getActiveExecution()) {
+                            logConsolePanel.setStatusBadge(status, record.isVulnerable());
+                        }
+                        refreshExecutionDropdown();
+                    });
+                }
 
-            @Override
-            public void onFindingsUpdated(ScanExecutionRecord record, List<SqlmapFinding> findings) {
-                SwingUtils.runOnEdt(() -> {
-                    if (record == session.getActiveExecution()) {
-                        logConsolePanel.updateFindings(findings);
-                    }
-                    refreshExecutionDropdown();
-                });
-            }
+                @Override
+                public void onFindingsUpdated(ScanExecutionRecord record, List<SqlmapFinding> findings) {
+                    SwingUtils.runOnEdt(() -> {
+                        if (record == session.getActiveExecution()) {
+                            logConsolePanel.updateFindings(findings);
+                        }
+                        refreshExecutionDropdown();
+                    });
+                }
 
-            @Override
-            public void onScanComplete(ScanExecutionRecord record) {
-                SwingUtils.runOnEdt(() -> {
-                    if (record == session.getActiveExecution()) {
-                        configPanel.setScanningState(false);
-                        logConsolePanel.setStatusBadge(record.getStatus(), record.isVulnerable());
-                    }
-                    refreshExecutionDropdown();
-                });
-            }
+                @Override
+                public void onScanComplete(ScanExecutionRecord record) {
+                    SwingUtils.runOnEdt(() -> {
+                        if (record == session.getActiveExecution()) {
+                            configPanel.setScanningState(false);
+                            logConsolePanel.setStatusBadge(record.getStatus(), record.isVulnerable());
+                        }
+                        refreshExecutionDropdown();
+                    });
+                }
 
-            @Override
-            public void onScanError(ScanExecutionRecord record, String errorMessage) {
-                SwingUtils.runOnEdt(() -> {
-                    if (record == session.getActiveExecution()) {
-                        configPanel.setScanningState(false);
-                        logConsolePanel.setStatusBadge(record.getStatus(), record.isVulnerable());
-                        JOptionPane.showMessageDialog(RequestScanTabPanel.this, errorMessage, "Scan Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                    refreshExecutionDropdown();
-                });
-            }
-        });
+                @Override
+                public void onScanError(ScanExecutionRecord record, String errorMessage) {
+                    SwingUtils.runOnEdt(() -> {
+                        if (record == session.getActiveExecution()) {
+                            configPanel.setScanningState(false);
+                            logConsolePanel.setStatusBadge(record.getStatus(), record.isVulnerable());
+                            JOptionPane.showMessageDialog(RequestScanTabPanel.this, errorMessage, "Scan Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        refreshExecutionDropdown();
+                    });
+                }
+            });
+        }
     }
 
     private void stopScan() {
         ScanExecutionRecord active = session.getActiveExecution();
         if (active == null) return;
 
-        taskManager.cancelScan(active);
+        if (taskManager != null) {
+            taskManager.cancelScan(active);
+        }
         configPanel.setScanningState(false);
         logConsolePanel.setStatusBadge("CANCELLED", false);
         logConsolePanel.updateFromRecord(active);
@@ -294,7 +422,7 @@ public class RequestScanTabPanel extends JPanel {
 
     public void cleanup() {
         ScanExecutionRecord active = session.getActiveExecution();
-        if (active != null && taskManager.isScanning(active)) {
+        if (active != null && taskManager != null && taskManager.isScanning(active)) {
             taskManager.cancelScan(active);
         }
     }

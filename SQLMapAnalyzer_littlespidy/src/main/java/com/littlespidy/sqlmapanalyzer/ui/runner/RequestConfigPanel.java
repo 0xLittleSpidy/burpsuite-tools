@@ -58,9 +58,15 @@ public class RequestConfigPanel extends JPanel {
     private final JButton btnStopScan;
     private final JButton btnCopyCli;
 
+    private final Runnable onPreSync;
     private SqlmapTaskOptions currentOptions;
 
     public RequestConfigPanel(Runnable onStartScan, Runnable onStopScan) {
+        this(onStartScan, onStopScan, null);
+    }
+
+    public RequestConfigPanel(Runnable onStartScan, Runnable onStopScan, Runnable onPreSync) {
+        this.onPreSync = onPreSync;
         setLayout(new BorderLayout(0, 5));
         setBorder(new EmptyBorder(6, 6, 6, 6));
 
@@ -73,6 +79,7 @@ public class RequestConfigPanel extends JPanel {
         btnStartScan.setFont(btnStartScan.getFont().deriveFont(Font.BOLD, 12));
         btnStartScan.setBackground(new Color(220, 245, 220));
         btnStartScan.addActionListener(e -> {
+            if (onPreSync != null) onPreSync.run();
             applyUiToOptions();
             if (onStartScan != null) onStartScan.run();
         });
@@ -422,6 +429,7 @@ public class RequestConfigPanel extends JPanel {
     }
 
     private void copyCliCommand() {
+        if (onPreSync != null) onPreSync.run();
         applyUiToOptions();
         String cmd = currentOptions.buildCommandLine();
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(cmd), null);
