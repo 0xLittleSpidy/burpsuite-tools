@@ -37,6 +37,7 @@ public class RequestConfigPanel extends JPanel {
     private final JTextField txtDelay;
     private final JTextField txtTimeout;
     private final JTextField txtRetries;
+    private final JTextField txtTimeSec;
     private final JCheckBox chkTor;
     private final JCheckBox chkHpp;
 
@@ -122,7 +123,7 @@ public class RequestConfigPanel extends JPanel {
         content.add(presetsPanel);
 
         // 2. Detection & Techniques Panel
-        JPanel detectPanel = new JPanel(new GridLayout(6, 2, 4, 4));
+        JPanel detectPanel = new JPanel(new GridLayout(7, 2, 4, 4));
         detectPanel.setBorder(new CompoundBorder(new TitledBorder("Detection & Techniques"), new EmptyBorder(4, 6, 4, 6)));
 
         detectPanel.add(new JLabel("Test Parameter (-p):"));
@@ -140,6 +141,11 @@ public class RequestConfigPanel extends JPanel {
         detectPanel.add(new JLabel("Techniques (BEUSTQ):"));
         txtTechnique = new JTextField("BEUSTQ");
         detectPanel.add(txtTechnique);
+
+        detectPanel.add(new JLabel("Time-Sec (--time-sec):"));
+        txtTimeSec = new JTextField("5");
+        txtTimeSec.setToolTipText("Seconds to delay the DBMS response for time-based blind attacks (--time-sec, default 5)");
+        detectPanel.add(txtTimeSec);
 
         detectPanel.add(new JLabel("Back-end DBMS:"));
         comboDbms = new JComboBox<>(new String[]{"", "MySQL", "PostgreSQL", "Oracle", "Microsoft SQL Server", "SQLite", "MariaDB"});
@@ -269,6 +275,7 @@ public class RequestConfigPanel extends JPanel {
         comboLevel.setSelectedItem(options.getLevel());
         comboRisk.setSelectedItem(options.getRisk());
         txtTechnique.setText(options.getTechnique());
+        txtTimeSec.setText(String.valueOf(options.getTimeSec() > 0 ? options.getTimeSec() : 5));
         comboDbms.setSelectedItem(options.getDbms());
         txtOs.setText(options.getOs());
         tamperDropdown.setText(options.getTamper());
@@ -360,6 +367,11 @@ public class RequestConfigPanel extends JPanel {
         currentOptions.setLevel((Integer) comboLevel.getSelectedItem());
         currentOptions.setRisk((Integer) comboRisk.getSelectedItem());
         currentOptions.setTechnique(txtTechnique.getText().trim());
+        try {
+            currentOptions.setTimeSec(Integer.parseInt(txtTimeSec.getText().trim()));
+        } catch (Exception ignored) {
+            currentOptions.setTimeSec(5);
+        }
         currentOptions.setDbms((String) comboDbms.getSelectedItem());
         currentOptions.setOs(txtOs.getText().trim());
         currentOptions.setTamper(tamperDropdown.getText());
@@ -434,5 +446,9 @@ public class RequestConfigPanel extends JPanel {
         String cmd = currentOptions.buildCommandLine();
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(cmd), null);
         CliCommandDialog_littlespidy.showCli(this, cmd);
+    }
+
+    public JTextField getTxtTimeSecForTest() {
+        return txtTimeSec;
     }
 }

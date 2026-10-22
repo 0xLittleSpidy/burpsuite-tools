@@ -9,6 +9,7 @@ import com.littlespidy.sqlmapanalyzer.api.SqlmapProcessManager;
 import com.littlespidy.sqlmapanalyzer.api.model.SqlmapTaskOptions;
 import com.littlespidy.sqlmapanalyzer.runner.ScanRequestSession;
 import com.littlespidy.sqlmapanalyzer.runner.ScanTaskManager;
+import com.littlespidy.sqlmapanalyzer.util.OSUtils;
 import com.littlespidy.sqlmapanalyzer.util.SwingUtils;
 
 import javax.swing.*;
@@ -94,10 +95,10 @@ public class SqlmapRunnerRootPanel extends JPanel {
         if (request == null) return;
 
         String method = request.method();
-        String url = request.url();
+        String url = OSUtils.resolveFullUrl(request, null);
         byte[] rawBytes = request.toByteArray().getBytes();
 
-        SqlmapTaskOptions options = extractOptionsFromRequest(request);
+        SqlmapTaskOptions options = extractOptionsFromRequest(request, url);
 
         // Check if an existing tab matches this method & URL
         for (int i = 0; i < childTabs.size(); i++) {
@@ -194,9 +195,9 @@ public class SqlmapRunnerRootPanel extends JPanel {
         }
     }
 
-    private SqlmapTaskOptions extractOptionsFromRequest(HttpRequest request) {
+    private SqlmapTaskOptions extractOptionsFromRequest(HttpRequest request, String resolvedUrl) {
         SqlmapTaskOptions opt = new SqlmapTaskOptions();
-        opt.setUrl(request.url());
+        opt.setUrl(resolvedUrl != null && !resolvedUrl.isBlank() ? resolvedUrl : OSUtils.resolveFullUrl(request, null));
         opt.setMethod(request.method());
 
         // Extract body data if present

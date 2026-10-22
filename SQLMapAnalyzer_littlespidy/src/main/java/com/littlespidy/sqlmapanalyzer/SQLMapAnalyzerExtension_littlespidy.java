@@ -59,9 +59,17 @@ public class SQLMapAnalyzerExtension_littlespidy implements BurpExtension {
                 if (event.messageEditorRequestResponse().isPresent() &&
                         event.messageEditorRequestResponse().get().requestResponse() != null &&
                         event.messageEditorRequestResponse().get().requestResponse().request() != null) {
-                    targetRequest = event.messageEditorRequestResponse().get().requestResponse().request();
+                    var reqResp = event.messageEditorRequestResponse().get().requestResponse();
+                    targetRequest = reqResp.request();
+                    if (reqResp.httpService() != null) {
+                        targetRequest = targetRequest.withService(reqResp.httpService());
+                    }
                 } else if (event.selectedRequestResponses() != null && !event.selectedRequestResponses().isEmpty()) {
-                    targetRequest = event.selectedRequestResponses().get(0).request();
+                    var reqResp = event.selectedRequestResponses().get(0);
+                    targetRequest = reqResp.request();
+                    if (reqResp.httpService() != null) {
+                        targetRequest = targetRequest.withService(reqResp.httpService());
+                    }
                 }
 
                 if (targetRequest != null) {

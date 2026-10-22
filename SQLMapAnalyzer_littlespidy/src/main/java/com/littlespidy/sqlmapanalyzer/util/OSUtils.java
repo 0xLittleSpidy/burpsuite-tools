@@ -1,7 +1,12 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.sqlmapanalyzer.util;
 
+import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.http.HttpService;
+import burp.api.montoya.http.message.requests.HttpRequest;
+
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +70,139 @@ public final class OSUtils {
             }
         }
         return map;
+    }
+
+    public static HttpService createHttpServiceFromUrl(MontoyaApi api, String url) {
+        if (url == null || url.isBlank()) return null;
+        try {
+            return HttpService.httpService(url);
+        } catch (Exception ignored) {
+            try {
+                URI uri = URI.create(url);
+                String host = uri.getHost();
+                if (host != null && !host.isBlank()) {
+                    boolean secure = "https".equalsIgnoreCase(uri.getScheme());
+                    int port = uri.getPort();
+                    if (port <= 0) {
+                        port = secure ? 443 : 80;
+                    }
+                    return HttpService.httpService(host, port, secure);
+                }
+            } catch (Exception ignored2) {}
+        }
+        return null;
+    }
+
+    public static String resolveFullUrlFromRaw(byte[] rawRequest, String fallbackUrl) {
+        if (rawRequest == null || rawRequest.length == 0) {
+            return fallbackUrl != null ? fallbackUrl : "";
+        }
+        String text = new String(rawRequest, java.nio.charset.StandardCharsets.UTF_8);
+        String[] lines = text.split("\r?\n");
+        String path = "/";
+        String host = "";
+
+        if (lines.length > 0 && !lines[0].trim().isEmpty()) {
+            String[] parts = lines[0].trim().split("\\s+");
+            if (parts.length > 1) {
+                path = parts[1];
+            }
+        }
+
+        for (String line : lines) {
+            if (line.toLowerCase().startsWith("host:")) {
+                host = line.substring(5).trim();
+                break;
+            }
+        }
+
+        if (host.isEmpty()) {
+            return fallbackUrl != null ? fallbackUrl : (path.startsWith("http") ? path : "");
+        }
+
+        String scheme = "http://";
+        if (fallbackUrl != null && fallbackUrl.toLowerCase().startsWith("https://")) {
+            scheme = "https://";
+        } else if (host.contains(":443")) {
+            scheme = "https://";
+        }
+
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+
+        return scheme + host + path;
+    }
+
+    public static String resolveFullUrl(HttpRequest request, String fallbackUrl) {
+        if (request == null) {
+            return fallbackUrl != null ? fallbackUrl : "";
+        }
+
+        // 1. Try attached HttpService if present
+        try {
+            HttpService service = request.httpService();
+            if (service != null && service.host() != null && !service.host().isBlank()) {
+                String host = service.host().trim();
+                boolean secure = service.secure();
+                int port = service.port();
+                String scheme = secure ? "https://" : "http://";
+                String portPart = "";
+                if (secure && port > 0 && port != 443) {
+                    portPart = ":" + port;
+                } else if (!secure && port > 0 && port != 80) {
+                    portPart = ":" + port;
+                }
+                String path = request.path();
+                if (path == null || path.isBlank()) {
+                    path = "/";
+                }
+                if (!path.startsWith("/")) {
+                    path = "/" + path;
+                }
+                return scheme + host + portPart + path;
+            }
+        } catch (Exception ignored) {}
+
+        // 2. Check if request.url() already contains a full URL
+        try {
+            String rawUrl = request.url();
+            if (rawUrl != null && (rawUrl.startsWith("http://") || rawUrl.startsWith("https://"))) {
+                return rawUrl;
+            }
+        } catch (Exception ignored) {}
+
+        // 3. Fallback to raw bytes
+        try {
+            if (request.toByteArray() != null) {
+                byte[] raw = request.toByteArray().getBytes();
+                if (raw != null && raw.length > 0) {
+                    return resolveFullUrlFromRaw(raw, fallbackUrl);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 4. Fallback to Host header
+        try {
+            String hostHeader = request.headerValue("Host");
+            if (hostHeader != null && !hostHeader.isBlank()) {
+                hostHeader = hostHeader.trim();
+                String scheme = (fallbackUrl != null && fallbackUrl.toLowerCase().startsWith("https://")) || hostHeader.contains(":443") ? "https://" : "http://";
+                String path = request.path();
+                if (path == null || path.isBlank()) {
+                    path = request.url();
+                }
+                if (path == null || path.isBlank()) {
+                    path = "/";
+                }
+                if (!path.startsWith("/")) {
+                    path = "/" + path;
+                }
+                return scheme + hostHeader + path;
+            }
+        } catch (Exception ignored) {}
+
+        return fallbackUrl != null ? fallbackUrl : "";
     }
 
     public static File getDefaultSqlmapOutputDir() {

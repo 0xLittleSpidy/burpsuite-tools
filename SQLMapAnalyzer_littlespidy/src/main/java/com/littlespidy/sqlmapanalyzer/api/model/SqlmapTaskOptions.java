@@ -215,6 +215,7 @@ public class SqlmapTaskOptions implements Serializable {
         if (col != null && !col.isBlank()) sb.append(" -C \"").append(col).append("\"");
         if (threads > 1) sb.append(" --threads=").append(threads);
         if (delay > 0) sb.append(" --delay=").append(delay);
+        if (timeSec > 0) sb.append(" --time-sec=").append(timeSec);
         if (batch) sb.append(" --batch");
         if (getBanner) sb.append(" -b");
         if (getCurrentUser) sb.append(" --current-user");

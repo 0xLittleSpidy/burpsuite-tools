@@ -88,7 +88,12 @@ public class RequestScanTabPanel extends JPanel {
             requestEditor = api.userInterface().createHttpRequestEditor();
             if (session.getRawRequest() != null && session.getRawRequest().length > 0) {
                 try {
-                    requestEditor.setRequest(HttpRequest.httpRequest(ByteArray.byteArray(session.getRawRequest())));
+                    HttpRequest req = HttpRequest.httpRequest(ByteArray.byteArray(session.getRawRequest()));
+                    burp.api.montoya.http.HttpService service = com.littlespidy.sqlmapanalyzer.util.OSUtils.createHttpServiceFromUrl(api, session.getUrl());
+                    if (service != null) {
+                        req = req.withService(service);
+                    }
+                    requestEditor.setRequest(req);
                 } catch (Exception ignored) {}
             }
             rawArea = null;
@@ -168,25 +173,8 @@ public class RequestScanTabPanel extends JPanel {
                         raw = req.toByteArray().getBytes();
                     }
                     method = req.method();
-                    url = req.url();
+                    url = com.littlespidy.sqlmapanalyzer.util.OSUtils.resolveFullUrl(req, session.getUrl());
                     body = req.bodyToString();
-
-                    if (url == null || (!url.startsWith("http://") && !url.startsWith("https://"))) {
-                        String hostHeader = req.headerValue("Host");
-                        if (hostHeader != null && !hostHeader.trim().isEmpty()) {
-                            String scheme = "http://";
-                            if (session.getUrl() != null && session.getUrl().toLowerCase().startsWith("https://")) {
-                                scheme = "https://";
-                            }
-                            String path = (req.path() != null && !req.path().isEmpty()) ? req.path() : "/";
-                            if (!path.startsWith("/")) {
-                                path = "/" + path;
-                            }
-                            url = scheme + hostHeader.trim() + path;
-                        } else if (session.getUrl() != null) {
-                            url = session.getUrl();
-                        }
-                    }
                 }
             } catch (Exception ignored) {}
         } else if (rawArea != null) {
@@ -194,18 +182,9 @@ public class RequestScanTabPanel extends JPanel {
             if (text != null && !text.isEmpty()) {
                 raw = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                 String[] lines = text.split("\r?\n");
-                String path = "/";
-                String host = "";
                 if (lines.length > 0 && !lines[0].trim().isEmpty()) {
                     String[] parts = lines[0].trim().split("\\s+");
                     if (parts.length > 0) method = parts[0].toUpperCase();
-                    if (parts.length > 1) path = parts[1];
-                }
-                for (String line : lines) {
-                    if (line.toLowerCase().startsWith("host:")) {
-                        host = line.substring(5).trim();
-                        break;
-                    }
                 }
                 int headerEnd = text.indexOf("\r\n\r\n");
                 if (headerEnd != -1) {
@@ -216,18 +195,7 @@ public class RequestScanTabPanel extends JPanel {
                         body = text.substring(headerEnd + 2);
                     }
                 }
-                String scheme = "http://";
-                if (session.getUrl() != null && session.getUrl().toLowerCase().startsWith("https://")) {
-                    scheme = "https://";
-                }
-                if (!host.isEmpty()) {
-                    if (!path.startsWith("/")) {
-                        path = "/" + path;
-                    }
-                    url = scheme + host + path;
-                } else {
-                    url = session.getUrl();
-                }
+                url = com.littlespidy.sqlmapanalyzer.util.OSUtils.resolveFullUrlFromRaw(raw, session.getUrl());
             }
         }
 
@@ -270,6 +238,10 @@ public class RequestScanTabPanel extends JPanel {
 
     public JTextArea getRawAreaForTest() {
         return rawArea;
+    }
+
+    public RequestConfigPanel getConfigPanelForTest() {
+        return configPanel;
     }
 
     private void refreshExecutionDropdown() {
