@@ -4,6 +4,7 @@ package com.littlespidy.headerinspector.cache.ui;
 import com.littlespidy.headerinspector.ProxyHistoryCoordinator;
 import com.littlespidy.headerinspector.cache.model.CacheDataStore;
 import com.littlespidy.headerinspector.cache.model.CacheEntry;
+import com.littlespidy.headerinspector.ui.common.DomainColorManager_littlespidy;
 import com.littlespidy.headerinspector.ui.common.MultiSelectFilterButton;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.proxy.ProxyHttpRequestResponse;
@@ -310,8 +311,12 @@ public class CacheInspectorTab extends JPanel {
             public Component getTableCellRendererComponent(
                     JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-                if (!isSelected && col == 3) {
+                if (!isSelected && col == 0) {
+                    String domain = (value != null) ? value.toString() : "";
+                    DomainColorManager_littlespidy.applyDomainStyle(c, table, domain, false);
+                } else if (!isSelected && col == 3) {
                     String str = (value != null) ? value.toString() : "";
+                    c.setBackground(table.getBackground());
                     if (str.startsWith("CRITICAL")) {
                         c.setForeground(new Color(180, 0, 0));
                         c.setFont(c.getFont().deriveFont(Font.BOLD));
@@ -328,6 +333,7 @@ public class CacheInspectorTab extends JPanel {
                         c.setForeground(table.getForeground());
                     }
                 } else if (!isSelected) {
+                    c.setBackground(table.getBackground());
                     c.setForeground(table.getForeground());
                 }
                 return c;
@@ -345,9 +351,13 @@ public class CacheInspectorTab extends JPanel {
             public Component getTableCellRendererComponent(
                     JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-                if (!isSelected) {
+                if (!isSelected && col == 4) {
+                    String domain = (value != null) ? value.toString() : "";
+                    DomainColorManager_littlespidy.applyDomainStyle(c, table, domain, false);
+                } else if (!isSelected) {
                     int mr = table.convertRowIndexToModel(row);
                     CacheEntry entry = entryTableModel.getEntryAt(mr);
+                    c.setForeground(table.getForeground());
                     if (entry != null) {
                         int status = entry.statusCode();
                         if      (status >= 200 && status < 300) c.setBackground(new Color(240, 255, 240));
@@ -355,6 +365,8 @@ public class CacheInspectorTab extends JPanel {
                         else if (status >= 400 && status < 500) c.setBackground(new Color(255, 248, 235));
                         else if (status >= 500)                 c.setBackground(new Color(255, 235, 235));
                         else                                    c.setBackground(table.getBackground());
+                    } else {
+                        c.setBackground(table.getBackground());
                     }
                 }
                 return c;
