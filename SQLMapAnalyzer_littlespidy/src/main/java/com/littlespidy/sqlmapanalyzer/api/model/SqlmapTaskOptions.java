@@ -55,7 +55,7 @@ public class SqlmapTaskOptions implements Serializable {
     private boolean batch = true;
     private String answers = "crack=N,dict=N,continue=Y,quit=N";
     private String ignoreCode = "";
-    private String proxy = "";
+    private String proxy = "http://127.0.0.1:8080";
     private boolean tor = false;
     private String torPort = "9050";
     private String torType = "SOCKS5";
@@ -191,6 +191,9 @@ public class SqlmapTaskOptions implements Serializable {
         }
         if (referer != null && !referer.isBlank()) {
             sb.append(" --referer=\"").append(referer).append("\"");
+        }
+        if (proxy != null && !proxy.isBlank()) {
+            sb.append(" --proxy=\"").append(proxy.replace("\"", "\\\"")).append("\"");
         }
         if (headers != null && !headers.isBlank()) {
             String escapedHeaders = headers.replace("\r\n", "\\n").replace("\n", "\\n").replace("\"", "\\\"");

@@ -32,6 +32,7 @@ public class SqlmapTaskOptionsTest {
         assertTrue(cli.contains("-T \"users\""), "CLI should contain -T users");
         assertTrue(cli.contains("-C \"username,password_hash\""), "CLI should contain -C column");
         assertTrue(cli.contains("--tamper=\"space2comment,between\""), "CLI should contain tamper scripts");
+        assertTrue(cli.contains("--proxy=\"http://127.0.0.1:8080\""), "CLI should contain default Burp proxy");
     }
 
     @Test

@@ -51,17 +51,25 @@ public class HeaderSelectionAndOptionsTest_littlespidy {
 
         dropdown.setRequestHeaders(map);
 
+        // Verification: Headers must be empty by default until selected by user
         Set<String> selected = dropdown.getSelectedHeaderNames();
-        assertTrue(selected.contains("Cookie"), "Cookie should be auto-selected by default");
-        assertTrue(selected.contains("Authorization"), "Authorization should be auto-selected by default");
-        assertTrue(selected.contains("X-API-Key"), "API key headers should be auto-selected by default");
+        assertTrue(selected.isEmpty(), "Headers must be empty by default until selected");
+        assertEquals("", dropdown.getText(), "Dropdown text field should be blank by default");
+        assertEquals("", dropdown.getSelectedCookie());
+        assertEquals("", dropdown.getSelectedHeadersString());
+
+        // When user selects headers, they are activated
+        dropdown.setSelectedHeaders(Set.of("Cookie", "Authorization", "X-API-Key"));
+        Set<String> active = dropdown.getSelectedHeaderNames();
+        assertTrue(active.contains("Cookie"));
+        assertTrue(active.contains("Authorization"));
+        assertTrue(active.contains("X-API-Key"));
 
         assertEquals("PHPSESSID=session_secret_999", dropdown.getSelectedCookie());
-
         String headersStr = dropdown.getSelectedHeadersString();
         assertTrue(headersStr.contains("Authorization: Bearer token_xyz"));
         assertTrue(headersStr.contains("X-API-Key: api-key-value-123"));
-        assertFalse(headersStr.contains("Cookie:"), "Cookie should be handled via getSelectedCookie(), not extra headers");
+        assertFalse(headersStr.contains("Cookie:"));
     }
 
     @Test
@@ -73,8 +81,11 @@ public class HeaderSelectionAndOptionsTest_littlespidy {
         options.setReferer("http://target.local/portal");
         options.setHeaders("Authorization: Bearer token_secret_jwt\nX-CSRF-Token: csrf_abc");
 
+        assertEquals("http://127.0.0.1:8080", options.getProxy(), "Proxy must default to Burp Proxy");
+
         String cli = options.buildCommandLine();
         assertNotNull(cli);
+        assertTrue(cli.contains("--proxy=\"http://127.0.0.1:8080\""), "CLI must contain default --proxy flag");
         assertTrue(cli.contains("--cookie=\"PHPSESSID=abc123; role=tester\""), "CLI must contain --cookie flag");
         assertTrue(cli.contains("--user-agent=\"Custom-Scanner/1.0\""), "CLI must contain --user-agent flag");
         assertTrue(cli.contains("--referer=\"http://target.local/portal\""), "CLI must contain --referer flag");
@@ -83,6 +94,7 @@ public class HeaderSelectionAndOptionsTest_littlespidy {
 
         // Verify toOptionMap() for REST API
         Map<String, Object> optMap = options.toOptionMap();
+        assertEquals("http://127.0.0.1:8080", optMap.get("proxy"));
         assertEquals("PHPSESSID=abc123; role=tester", optMap.get("cookie"));
         assertEquals("Custom-Scanner/1.0", optMap.get("agent"));
         assertEquals("http://target.local/portal", optMap.get("referer"));

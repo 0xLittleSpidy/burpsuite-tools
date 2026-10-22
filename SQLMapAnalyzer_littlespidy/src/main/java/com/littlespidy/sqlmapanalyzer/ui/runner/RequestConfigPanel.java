@@ -32,6 +32,7 @@ public class RequestConfigPanel extends JPanel {
     private final JTextField txtTbl;
     private final JTextField txtCol;
 
+    private final JTextField txtProxy;
     private final JComboBox<Integer> comboThreads;
     private final JTextField txtDelay;
     private final JTextField txtTimeout;
@@ -144,20 +145,20 @@ public class RequestConfigPanel extends JPanel {
 
         content.add(detectPanel);
 
-        // 3. HTTP Headers & Authentication Panel
+        // 3. Headers Panel
         JPanel headerPanel = new JPanel(new BorderLayout(4, 4));
-        headerPanel.setBorder(new CompoundBorder(new TitledBorder("HTTP Headers & Authentication"), new EmptyBorder(4, 6, 6, 6)));
+        headerPanel.setBorder(new CompoundBorder(new TitledBorder("Headers"), new EmptyBorder(4, 6, 6, 6)));
 
         JPanel topHeaderRow = new JPanel(new BorderLayout(6, 0));
-        topHeaderRow.add(new JLabel("Include Request Headers:"), BorderLayout.WEST);
+        topHeaderRow.add(new JLabel("Headers:"), BorderLayout.WEST);
         headerDropdown = new MultiSelectHeaderDropdown_littlespidy();
         headerDropdown.setOnSelectionChanged(this::updateHeaderSummary);
         topHeaderRow.add(headerDropdown, BorderLayout.CENTER);
         headerPanel.add(topHeaderRow, BorderLayout.NORTH);
 
-        lblHeaderSummary = new JLabel("Selected Headers: None");
+        lblHeaderSummary = new JLabel("Selected: None");
         lblHeaderSummary.setFont(lblHeaderSummary.getFont().deriveFont(Font.PLAIN, 11));
-        lblHeaderSummary.setForeground(new Color(0, 100, 0));
+        lblHeaderSummary.setForeground(Color.GRAY);
         headerPanel.add(lblHeaderSummary, BorderLayout.SOUTH);
 
         content.add(headerPanel);
@@ -183,9 +184,14 @@ public class RequestConfigPanel extends JPanel {
 
         content.add(targetPanel);
 
-        // 3. Timing & Network Panel
-        JPanel netPanel = new JPanel(new GridLayout(4, 2, 4, 4));
+        // 5. Timing & Network Panel
+        JPanel netPanel = new JPanel(new GridLayout(5, 2, 4, 4));
         netPanel.setBorder(new CompoundBorder(new TitledBorder("Timing & Network"), new EmptyBorder(4, 6, 4, 6)));
+
+        netPanel.add(new JLabel("Proxy (--proxy):"));
+        txtProxy = new JTextField(currentOptions.getProxy());
+        txtProxy.setToolTipText("HTTP proxy URL (e.g. http://127.0.0.1:8080). Leave blank to disable.");
+        netPanel.add(txtProxy);
 
         netPanel.add(new JLabel("Concurrent Threads:"));
         comboThreads = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5, 8, 10});
@@ -263,6 +269,8 @@ public class RequestConfigPanel extends JPanel {
         txtTbl.setText(options.getTbl());
         txtCol.setText(options.getCol());
 
+        txtProxy.setText(options.getProxy() != null ? options.getProxy() : "http://127.0.0.1:8080");
+
         comboThreads.setSelectedItem(options.getThreads());
         txtDelay.setText(String.valueOf(options.getDelay()));
         txtTimeout.setText(String.valueOf(options.getTimeout()));
@@ -318,10 +326,12 @@ public class RequestConfigPanel extends JPanel {
     private void updateHeaderSummary() {
         java.util.Set<String> selected = headerDropdown.getSelectedHeaderNames();
         if (selected.isEmpty()) {
-            lblHeaderSummary.setText("No headers selected (requests will be sent without extra headers).");
+            lblHeaderSummary.setText("Selected: None");
+            lblHeaderSummary.setToolTipText("No headers selected (requests will be sent without extra headers).");
             lblHeaderSummary.setForeground(Color.GRAY);
         } else {
-            lblHeaderSummary.setText("Active (" + selected.size() + "): " + String.join(", ", selected));
+            lblHeaderSummary.setText("Selected (" + selected.size() + ")");
+            lblHeaderSummary.setToolTipText("Active headers: " + String.join(", ", selected));
             lblHeaderSummary.setForeground(new Color(0, 110, 0));
         }
     }
@@ -336,6 +346,8 @@ public class RequestConfigPanel extends JPanel {
         currentOptions.setAgent(headerDropdown.getSelectedAgent());
         currentOptions.setReferer(headerDropdown.getSelectedReferer());
         currentOptions.setHeaders(headerDropdown.getSelectedHeadersString());
+
+        currentOptions.setProxy(txtProxy.getText().trim());
 
         currentOptions.setTestParameter(txtParam.getText().trim());
         currentOptions.setLevel((Integer) comboLevel.getSelectedItem());

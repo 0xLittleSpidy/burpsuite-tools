@@ -59,18 +59,7 @@ public class MultiSelectHeaderDropdown_littlespidy extends JPanel {
         if (headers != null) {
             this.requestHeaders.putAll(headers);
         }
-
-        // If no selection made yet, auto-select Cookie, Authorization, and token-related headers
-        if (selectedHeaders.isEmpty() && !requestHeaders.isEmpty()) {
-            for (String key : requestHeaders.keySet()) {
-                String lower = key.toLowerCase();
-                if (lower.equals("cookie") || lower.equals("authorization")
-                        || lower.contains("auth") || lower.contains("token") || lower.contains("api-key")) {
-                    selectedHeaders.add(key);
-                }
-            }
-            updateTextFieldFromSelection();
-        }
+        updateTextFieldFromSelection();
     }
 
     public Map<String, String> getRequestHeaders() {

@@ -204,26 +204,7 @@ public class SqlmapRunnerRootPanel extends JPanel {
             opt.setData(request.body().toString());
         }
 
-        // Extract headers & cookies
-        StringBuilder customHeaders = new StringBuilder();
-        for (var h : request.headers()) {
-            String name = h.name();
-            String val = h.value();
-            if ("cookie".equalsIgnoreCase(name)) {
-                opt.setCookie(val);
-            } else if ("user-agent".equalsIgnoreCase(name)) {
-                opt.setAgent(val);
-            } else if ("referer".equalsIgnoreCase(name)) {
-                opt.setReferer(val);
-            } else if (!"content-length".equalsIgnoreCase(name) && !"host".equalsIgnoreCase(name)) {
-                customHeaders.append(name).append(": ").append(val).append("\n");
-            }
-        }
-
-        if (customHeaders.length() > 0) {
-            opt.setHeaders(customHeaders.toString().trim());
-        }
-
+        // By default, headers and cookies remain unselected until user chooses them via dropdown
         return opt;
     }
 
