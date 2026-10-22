@@ -186,9 +186,12 @@ public class TimeSecAndUrlResolutionTest_littlespidy {
         assertTrue(cli.contains("--hex"));
 
         Map<String, Object> map = options.toOptionMap();
-        assertEquals("true", map.get("timeLess"));
+        assertEquals("true", map.get("timeless"));
         assertEquals("true", map.get("noCast"));
         assertEquals("true", map.get("hexConvert"));
+        assertNull(map.get("timeLess"), "Invalid camelCase timeLess key must not be present");
+        assertNull(map.get("no-cast"), "Invalid kebab-case no-cast key must not be present");
+        assertNull(map.get("hex"), "Invalid short hex key must not be present");
     }
 
     @Test

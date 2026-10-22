@@ -97,7 +97,7 @@ public class RequestEditorSyncAndPersistenceTest_littlespidy {
         assertTrue(cliCommand.contains("-u \"https://target.local/api/orders\""));
         assertTrue(cliCommand.contains("--force-ssl"));
         assertTrue(cliCommand.contains("--method=POST"));
-        assertTrue(cliCommand.contains("--data=\"{\"orderId\":999}\""));
+        assertTrue(cliCommand.contains("--data=\"{\\\"orderId\\\":999}\""));
     }
 
     @Test

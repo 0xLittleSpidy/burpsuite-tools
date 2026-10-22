@@ -122,4 +122,59 @@ public class SqlmapApiClientTest {
             server.stop(0);
         }
     }
+
+    @Test
+    public void testSetOptionsFiltersUnsupportedOptions() throws Exception {
+        com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        java.util.concurrent.atomic.AtomicReference<String> receivedPayload = new java.util.concurrent.atomic.AtomicReference<>();
+
+        // /option/test-task/list returns supported options that do NOT include 'timeless'
+        server.createContext("/option/test-task/list", exchange -> {
+            String json = "{\"success\": true, \"options\": {\"url\": null, \"batch\": true, \"noCast\": false, \"hexConvert\": false}}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
+
+        // /option/test-task/set receives the filtered options
+        server.createContext("/option/test-task/set", exchange -> {
+            byte[] body = exchange.getRequestBody().readAllBytes();
+            receivedPayload.set(new String(body, StandardCharsets.UTF_8));
+            String resp = "{\"success\": true}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            byte[] bytes = resp.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            SqlmapApiConfig config = new SqlmapApiConfig();
+            config.setHost("127.0.0.1");
+            config.setPort(server.getAddress().getPort());
+            config.setUsername("");
+            config.setPassword("");
+
+            SqlmapApiClient client = new SqlmapApiClient(config);
+            SqlmapTaskOptions options = new SqlmapTaskOptions();
+            options.setUrl("http://target.local");
+            options.setTimeless(true);
+            options.setNoCast(true);
+            options.setHexConvert(true);
+
+            boolean success = client.setOptions("test-task", options);
+            assertTrue(success);
+
+            String payload = receivedPayload.get();
+            assertNotNull(payload);
+            assertTrue(payload.contains("\"noCast\":"), "noCast should be included because it is supported");
+            assertTrue(payload.contains("\"hexConvert\":"), "hexConvert should be included because it is supported");
+            assertFalse(payload.contains("\"timeless\":"), "timeless should be filtered out because it is not in options list");
+        } finally {
+            server.stop(0);
+        }
+    }
 }

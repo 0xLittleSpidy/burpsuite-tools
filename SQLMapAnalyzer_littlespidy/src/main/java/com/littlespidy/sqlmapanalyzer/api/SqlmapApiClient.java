@@ -174,12 +174,42 @@ public class SqlmapApiClient {
     }
 
     /**
+     * Retrieves the set of supported option names from /option/<taskId>/list.
+     */
+    public java.util.Set<String> getSupportedOptions(String taskId) {
+        if (taskId == null || taskId.isBlank()) return Collections.emptySet();
+        try {
+            HttpRequest request = newRequestBuilder("/option/" + taskId + "/list")
+                    .timeout(Duration.ofSeconds(6))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                JsonObject json = gson.fromJson(response.body(), JsonObject.class);
+                if (json != null && json.has("success") && getAsBooleanSafe(json.get("success")) && json.has("options")) {
+                    JsonObject optsObj = json.getAsJsonObject("options");
+                    if (optsObj != null) {
+                        return optsObj.keySet();
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return Collections.emptySet();
+    }
+
+    /**
      * Sets configuration options on /option/<taskId>/set.
      */
     public boolean setOptions(String taskId, SqlmapTaskOptions options) throws IOException, InterruptedException {
         if (taskId == null || options == null) return false;
 
-        String jsonPayload = gson.toJson(options.toOptionMap());
+        java.util.Map<String, Object> optionMap = new java.util.LinkedHashMap<>(options.toOptionMap());
+        java.util.Set<String> supported = getSupportedOptions(taskId);
+        if (supported != null && !supported.isEmpty()) {
+            optionMap.keySet().removeIf(k -> !supported.contains(k));
+        }
+
+        String jsonPayload = gson.toJson(optionMap);
         HttpRequest request = newRequestBuilder("/option/" + taskId + "/set")
                 .timeout(Duration.ofSeconds(10))
                 .header("Content-Type", "application/json")

@@ -49,4 +49,22 @@ public class SqlmapTaskOptionsTest {
         assertEquals("test_col", copy.getCol());
         assertEquals("randomcase", copy.getTamper());
     }
+
+    @Test
+    public void testDataEscapingInCliCommand() {
+        SqlmapTaskOptions options = new SqlmapTaskOptions();
+        options.setUrl("https://target.local/api/login");
+        options.setMethod("POST");
+
+        // Test single line JSON
+        options.setData("{\"username\":\"admin\",\"password\":\"secret\"}");
+        String cli = options.buildCommandLine();
+        assertTrue(cli.contains("--data=\"{\\\"username\\\":\\\"admin\\\",\\\"password\\\":\\\"secret\\\"}\""));
+
+        // Test multiline JSON with newlines
+        options.setData("{\n  \"id\": 123,\n  \"query\": \"test\"\n}");
+        String multilineCli = options.buildCommandLine();
+        assertTrue(multilineCli.contains("--data=\"{   \\\"id\\\": 123,   \\\"query\\\": \\\"test\\\" }\""));
+        assertFalse(multilineCli.contains("\n"), "CLI command should not contain literal unescaped newlines");
+    }
 }

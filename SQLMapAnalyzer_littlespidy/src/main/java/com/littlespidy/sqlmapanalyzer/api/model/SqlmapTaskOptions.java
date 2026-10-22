@@ -151,16 +151,13 @@ public class SqlmapTaskOptions implements Serializable {
         map.put("retries", retries);
         map.put("timeSec", timeSec);
         if (timeless) {
-            map.put("timeLess", "true");
             map.put("timeless", "true");
         }
         if (noCast) {
             map.put("noCast", "true");
-            map.put("no-cast", "true");
         }
         if (hexConvert) {
             map.put("hexConvert", "true");
-            map.put("hex", "true");
         }
 
         if (getBanner) map.put("getBanner", "true");
@@ -205,7 +202,9 @@ public class SqlmapTaskOptions implements Serializable {
             sb.append(" --method=").append(method);
         }
         if (data != null && !data.isBlank()) {
-            sb.append(" --data=\"").append(data).append("\"");
+            String sanitizedData = data.replace("\r\n", " ").replace("\n", " ");
+            String escapedData = sanitizedData.replace("\\", "\\\\").replace("\"", "\\\"");
+            sb.append(" --data=\"").append(escapedData).append("\"");
         }
         if (cookie != null && !cookie.isBlank()) {
             String escapedCookie = cookie.replace("\"", "\\\"");
