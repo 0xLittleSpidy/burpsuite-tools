@@ -153,16 +153,13 @@ public class StatusCollectorTab extends JPanel {
         endpointTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         endpointTable.setRowSorter(new TableRowSorter<>(endpointTableModel));
 
-        // Column widths for Endpoint Table
-        endpointTable.getColumnModel().getColumn(0).setPreferredWidth(50);  // #
-        endpointTable.getColumnModel().getColumn(0).setMaxWidth(60);
-        endpointTable.getColumnModel().getColumn(1).setPreferredWidth(60);  // Status
-        endpointTable.getColumnModel().getColumn(1).setMaxWidth(75);
-        endpointTable.getColumnModel().getColumn(2).setPreferredWidth(65);  // Method
-        endpointTable.getColumnModel().getColumn(2).setMaxWidth(80);
-        endpointTable.getColumnModel().getColumn(3).setPreferredWidth(160); // Host
-        endpointTable.getColumnModel().getColumn(4).setPreferredWidth(320); // URL
-        endpointTable.getColumnModel().getColumn(5).setPreferredWidth(120); // Time
+        // Column widths for Endpoint Table (4 columns: Method, URL / Endpoint, Domain, Responses)
+        endpointTable.getColumnModel().getColumn(0).setPreferredWidth(70);  // Method
+        endpointTable.getColumnModel().getColumn(0).setMaxWidth(90);
+        endpointTable.getColumnModel().getColumn(1).setPreferredWidth(340); // URL / Endpoint
+        endpointTable.getColumnModel().getColumn(2).setPreferredWidth(160); // Domain
+        endpointTable.getColumnModel().getColumn(3).setPreferredWidth(80);  // Responses
+        endpointTable.getColumnModel().getColumn(3).setMaxWidth(100);
 
         JScrollPane groupScroll = new JScrollPane(groupTable);
         groupScroll.setBorder(BorderFactory.createTitledBorder(
