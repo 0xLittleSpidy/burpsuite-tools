@@ -29,6 +29,7 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
 | **API Inspector** | `api-inspector-littlespidy-1.0.0.jar` (build locally) | REST API version discovery and representation prober with ResAPI Version Finder tab, per-request sub-tabs, and multi-strategy mutation engine |
 | **ng-auth-analyzer_littlespidy** | `ng-auth-analyzer_littlespidy-1.1.14.jar` (build locally) | Automated authorization testing with Configuration, History, and Import tabs, synchronized multi-user request/response toggle, and persistent session management |
 | **ng-sqlmap littlespidy** | `ng-sqlmap-littlespidy-1.0.0.jar` (build locally) | Integrated SQLMap suite converting SQLiPy to Java with request sub-tabs, real-time log streaming with SQLMAP command, execution history, scan cancellation, persistent session management, and offline database structure analysis |
+| **Quick Helper** | `quick-helper-littlespidy-1.0.0.jar` (build locally) | Quick helper menu actions for Burp Suite: copy unique domain names and domain names with HTTP schema directly from the Target Site Map |
 
 ---
 
@@ -206,6 +207,13 @@ Pre-compiled extension JARs are available for download from the [Latest Release 
   - **Database & Table Viewer**: Dynamic database/table dropdowns, breadcrumbs, column visibility controls, table text search, and CSV export.
   - **Analysis Suite**: Table Gathering cross-database catalog, Column Gathering grouped unique columns with occurrence counts, and Column Keyword Search with quick presets (`pass`, `user`, `email`, `token`, `secret`, `number`, `admin`, `hash`).
 - **Persistent Session Storage**: Interactive startup dialog, toolbar controls, debounced atomic auto-saves, and safe extension shutdown hooks.
+
+### 18. [Quick Helper](file:///home/littlespidy/myextra/burpsuite/QuickHelper_littlespidy)
+- **Top Menu Bar and Context Menu Integration**: Provides direct actions in Burp Suite's top Menu Bar and right-click Context Menus.
+- **Copy All Domain Names**: Rapidly extracts unique domain names from the Target Site Map and copies them to the system clipboard sorted alphabetically.
+- **Copy All Domain Names with HTTP Schema**: Extracts unique domain names with protocol schemes (`https://` or `http://`), omitting standard ports and preserving custom ports.
+- **In-Scope Filters**: Filter options for extracting only in-scope domain names and domain names with schema.
+- **Asynchronous Execution**: Performs sitemap extraction on a background worker thread to prevent any Swing EDT freeze on large targets.
 
 ---
 
