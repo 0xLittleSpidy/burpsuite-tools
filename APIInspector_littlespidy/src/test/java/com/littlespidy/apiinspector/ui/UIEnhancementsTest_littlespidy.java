@@ -107,7 +107,10 @@ public class UIEnhancementsTest_littlespidy {
         DiscoveredEndpoint_littlespidy ep2 = new DiscoveredEndpoint_littlespidy("GET", "/items/{itemId}/reviews/{reviewId}", "Reviews");
         ep2.setQueryParams(Map.of("sort", "desc", "filter", "verified"));
 
-        col.setEndpoints(List.of(ep1, ep2));
+        DiscoveredEndpoint_littlespidy ep3 = new DiscoveredEndpoint_littlespidy("POST", "/users", "Create User");
+        ep3.setBodyParams(Map.of("username", "testuser", "email", "test@example.com"));
+
+        col.setEndpoints(List.of(ep1, ep2, ep3));
         paramTab.updateCollections(List.of(col));
 
         // Check query text area has newline separated query params
@@ -130,12 +133,21 @@ public class UIEnhancementsTest_littlespidy {
         assertTrue(pathText.contains("itemId\n"));
         assertTrue(pathText.contains("reviewId\n"));
 
+        // Check body text area has newline separated body params
+        Field bodyTextAreaField = ParameterCollectorTab_littlespidy.class.getDeclaredField("bodyListTextArea");
+        bodyTextAreaField.setAccessible(true);
+        JTextArea bodyArea = (JTextArea) bodyTextAreaField.get(paramTab);
+        String bodyText = bodyArea.getText();
+        assertTrue(bodyText.contains("username\n"));
+        assertTrue(bodyText.contains("email\n"));
+
         // Check summary label
         Field summaryLabelField = ParameterCollectorTab_littlespidy.class.getDeclaredField("summaryLabel");
         summaryLabelField.setAccessible(true);
         JLabel summaryLabel = (JLabel) summaryLabelField.get(paramTab);
         assertTrue(summaryLabel.getText().contains("Query Params: 5"));
         assertTrue(summaryLabel.getText().contains("Path Params: 3"));
+        assertTrue(summaryLabel.getText().contains("Body Params: 2"));
     }
 
     @Test

@@ -106,6 +106,7 @@ public class SessionStateDTO_littlespidy {
         public java.util.Map<String, String> headers;
         public java.util.Map<String, String> queryParams;
         public java.util.Map<String, String> pathParams;
+        public java.util.Map<String, String> bodyParams;
         public String requestBodySample;
         public String contentType;
         public boolean requiresAuth;

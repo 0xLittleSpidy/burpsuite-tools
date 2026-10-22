@@ -116,6 +116,7 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
         Map<String, String> queryParams = new LinkedHashMap<>();
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> pathParams = new LinkedHashMap<>();
+        Map<String, String> bodyParams = new LinkedHashMap<>();
         String bodySample = "";
         String contentType = "application/json";
 
@@ -189,6 +190,49 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
             String mode = body.has("mode") ? body.get("mode").getAsString() : "raw";
             if ("raw".equalsIgnoreCase(mode) && body.has("raw")) {
                 bodySample = body.get("raw").getAsString();
+                if (bodySample != null && !bodySample.isBlank()) {
+                    try {
+                        JsonElement parsed = JsonParser.parseString(bodySample.trim());
+                        JsonSchemaResolver_littlespidy.extractParamsFromJsonElement(parsed, "", bodyParams);
+                    } catch (Exception ignored) {
+                    }
+                }
+            } else if ("urlencoded".equalsIgnoreCase(mode) && body.has("urlencoded") && body.get("urlencoded").isJsonArray()) {
+                StringBuilder formBody = new StringBuilder();
+                for (JsonElement el : body.getAsJsonArray("urlencoded")) {
+                    if (el.isJsonObject()) {
+                        JsonObject obj = el.getAsJsonObject();
+                        String k = obj.has("key") ? obj.get("key").getAsString() : "";
+                        String v = obj.has("value") && !obj.get("value").isJsonNull() ? obj.get("value").getAsString() : "sample";
+                        if (!k.isBlank()) {
+                            bodyParams.put(k, v);
+                            if (formBody.length() > 0) formBody.append("&");
+                            formBody.append(k).append("=").append(v);
+                        }
+                    }
+                }
+                bodySample = formBody.toString();
+                if ("application/json".equals(contentType)) {
+                    contentType = "application/x-www-form-urlencoded";
+                }
+            } else if ("formdata".equalsIgnoreCase(mode) && body.has("formdata") && body.get("formdata").isJsonArray()) {
+                StringBuilder formBody = new StringBuilder();
+                for (JsonElement el : body.getAsJsonArray("formdata")) {
+                    if (el.isJsonObject()) {
+                        JsonObject obj = el.getAsJsonObject();
+                        String k = obj.has("key") ? obj.get("key").getAsString() : "";
+                        String v = obj.has("value") && !obj.get("value").isJsonNull() ? obj.get("value").getAsString() : "sample";
+                        if (!k.isBlank()) {
+                            bodyParams.put(k, v);
+                            if (formBody.length() > 0) formBody.append("&");
+                            formBody.append(k).append("=").append(v);
+                        }
+                    }
+                }
+                bodySample = formBody.toString();
+                if ("application/json".equals(contentType)) {
+                    contentType = "multipart/form-data";
+                }
             }
         }
 
@@ -199,6 +243,7 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
         ep.setQueryParams(queryParams);
         ep.setHeaders(headers);
         ep.setPathParams(pathParams);
+        ep.setBodyParams(bodyParams);
         ep.setRequestBodySample(bodySample);
         ep.setContentType(contentType);
         ep.setRequiresAuth(hasAuth);

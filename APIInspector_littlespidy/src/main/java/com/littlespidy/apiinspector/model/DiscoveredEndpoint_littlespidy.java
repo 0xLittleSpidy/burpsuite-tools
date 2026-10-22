@@ -16,6 +16,7 @@ public class DiscoveredEndpoint_littlespidy {
     private Map<String, String> headers;
     private Map<String, String> queryParams;
     private Map<String, String> pathParams;
+    private Map<String, String> bodyParams;
     private String requestBodySample;
     private String contentType;
     private boolean requiresAuth;
@@ -30,6 +31,7 @@ public class DiscoveredEndpoint_littlespidy {
         this.headers = new LinkedHashMap<>();
         this.queryParams = new LinkedHashMap<>();
         this.pathParams = new LinkedHashMap<>();
+        this.bodyParams = new LinkedHashMap<>();
         this.requestBodySample = "";
         this.contentType = "application/json";
         this.requiresAuth = false;
@@ -110,6 +112,15 @@ public class DiscoveredEndpoint_littlespidy {
         this.pathParams = pathParams != null ? pathParams : new LinkedHashMap<>();
     }
 
+    public Map<String, String> getBodyParams() {
+        if (bodyParams == null) bodyParams = new LinkedHashMap<>();
+        return bodyParams;
+    }
+
+    public void setBodyParams(Map<String, String> bodyParams) {
+        this.bodyParams = bodyParams != null ? bodyParams : new LinkedHashMap<>();
+    }
+
     public String getRequestBodySample() {
         return requestBodySample;
     }
@@ -150,6 +161,9 @@ public class DiscoveredEndpoint_littlespidy {
         }
         if (queryParams != null && !queryParams.isEmpty()) {
             parts.add("Query: " + queryParams.keySet());
+        }
+        if (bodyParams != null && !bodyParams.isEmpty()) {
+            parts.add("Body: " + bodyParams.keySet());
         }
         if (headers != null && !headers.isEmpty()) {
             parts.add("Headers: " + headers.keySet());

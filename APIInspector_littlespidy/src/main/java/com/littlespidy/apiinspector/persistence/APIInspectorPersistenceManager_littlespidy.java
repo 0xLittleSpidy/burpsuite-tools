@@ -857,6 +857,7 @@ public class APIInspectorPersistenceManager_littlespidy {
                 epDto.headers = ep.getHeaders();
                 epDto.queryParams = ep.getQueryParams();
                 epDto.pathParams = ep.getPathParams();
+                epDto.bodyParams = ep.getBodyParams();
                 epDto.requestBodySample = ep.getRequestBodySample();
                 epDto.contentType = ep.getContentType();
                 epDto.requiresAuth = ep.isRequiresAuth();
@@ -891,6 +892,7 @@ public class APIInspectorPersistenceManager_littlespidy {
                 ep.setHeaders(epDto.headers);
                 ep.setQueryParams(epDto.queryParams);
                 ep.setPathParams(epDto.pathParams);
+                if (epDto.bodyParams != null) ep.setBodyParams(epDto.bodyParams);
                 ep.setRequestBodySample(epDto.requestBodySample);
                 ep.setContentType(epDto.contentType);
                 ep.setRequiresAuth(epDto.requiresAuth);

@@ -248,6 +248,180 @@ public class APIParserTest_littlespidy {
     }
 
     @Test
+    @DisplayName("Parse OpenAPI 3.0 specification with $ref schema and requestBody resolution")
+    public void testOpenApiWithRefBodyParsing() {
+        String json = """
+        {
+          "openapi": "3.0.0",
+          "info": { "title": "Petstore API", "version": "1.0.0" },
+          "paths": {
+            "/pets": {
+              "post": {
+                "summary": "Create Pet",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/NewPet"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "components": {
+            "schemas": {
+              "NewPet": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Fluffy" },
+                  "tag": { "type": "string" },
+                  "age": { "type": "integer", "example": 3 }
+                }
+              }
+            }
+          }
+        }
+        """;
+
+        ParseResult_littlespidy result = APIParserFactory_littlespidy.parse(json, "petstore.json", "FILE");
+        assertTrue(result.isSuccess());
+        ImportedCollection_littlespidy col = result.getCollection();
+        assertNotNull(col);
+        assertEquals(1, col.getEndpointCount());
+
+        DiscoveredEndpoint_littlespidy petEp = col.getEndpoints().get(0);
+        assertEquals("POST", petEp.getMethod());
+        assertEquals("/pets", petEp.getPath());
+
+        // Ensure body is not empty JSON "{}"
+        assertNotNull(petEp.getRequestBodySample());
+        assertFalse("{}".equals(petEp.getRequestBodySample().trim()), "Body sample must not be empty JSON");
+        assertTrue(petEp.getRequestBodySample().contains("Fluffy"));
+        assertTrue(petEp.getRequestBodySample().contains("age"));
+
+        // Ensure body parameters are extracted
+        assertNotNull(petEp.getBodyParams());
+        assertFalse(petEp.getBodyParams().isEmpty(), "Body parameters must be extracted");
+        assertTrue(petEp.getBodyParams().containsKey("name"));
+        assertTrue(petEp.getBodyParams().containsKey("tag"));
+        assertTrue(petEp.getBodyParams().containsKey("age"));
+        assertEquals("Fluffy", petEp.getBodyParams().get("name"));
+        assertTrue(petEp.getParametersSummary().contains("Body: ["));
+    }
+
+    @Test
+    @DisplayName("Parse Swagger 2.0 with $ref body and formData parameters")
+    public void testSwaggerWithRefAndFormDataParsing() {
+        String json = """
+        {
+          "swagger": "2.0",
+          "info": { "title": "Store Swagger API", "version": "1.0.0" },
+          "paths": {
+            "/orders": {
+              "post": {
+                "summary": "Create Order",
+                "parameters": [
+                  {
+                    "name": "body",
+                    "in": "body",
+                    "schema": {
+                      "$ref": "#/definitions/Order"
+                    }
+                  }
+                ]
+              }
+            },
+            "/upload": {
+              "post": {
+                "summary": "Upload File",
+                "consumes": ["application/x-www-form-urlencoded"],
+                "parameters": [
+                  { "name": "fileDescription", "in": "formData", "type": "string" },
+                  { "name": "category", "in": "formData", "type": "string", "default": "documents" }
+                ]
+              }
+            }
+          },
+          "definitions": {
+            "Order": {
+              "type": "object",
+              "properties": {
+                "orderId": { "type": "integer", "example": 999 },
+                "itemSku": { "type": "string", "example": "SKU-100" }
+              }
+            }
+          }
+        }
+        """;
+
+        ParseResult_littlespidy result = APIParserFactory_littlespidy.parse(json, "swagger_store.json", "FILE");
+        assertTrue(result.isSuccess());
+        ImportedCollection_littlespidy col = result.getCollection();
+        assertNotNull(col);
+        assertEquals(2, col.getEndpointCount());
+
+        DiscoveredEndpoint_littlespidy orderEp = col.getEndpoints().stream()
+                .filter(e -> "/orders".equals(e.getPath()))
+                .findFirst().orElse(null);
+        assertNotNull(orderEp);
+        assertFalse("{}".equals(orderEp.getRequestBodySample().trim()));
+        assertTrue(orderEp.getRequestBodySample().contains("999"));
+        assertTrue(orderEp.getBodyParams().containsKey("orderId"));
+        assertTrue(orderEp.getBodyParams().containsKey("itemSku"));
+
+        DiscoveredEndpoint_littlespidy uploadEp = col.getEndpoints().stream()
+                .filter(e -> "/upload".equals(e.getPath()))
+                .findFirst().orElse(null);
+        assertNotNull(uploadEp);
+        assertTrue(uploadEp.getBodyParams().containsKey("fileDescription"));
+        assertTrue(uploadEp.getBodyParams().containsKey("category"));
+        assertTrue(uploadEp.getRequestBodySample().contains("fileDescription="));
+        assertTrue(uploadEp.getRequestBodySample().contains("category=documents"));
+    }
+
+    @Test
+    @DisplayName("Parse Postman collection with urlencoded body")
+    public void testPostmanUrlEncodedBodyParsing() {
+        String json = """
+        {
+          "info": {
+            "name": "Form Postman Collection",
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+          },
+          "item": [
+            {
+              "name": "Token Request",
+              "request": {
+                "method": "POST",
+                "url": { "raw": "https://auth.example.com/oauth/token" },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "grant_type", "value": "password" },
+                    { "key": "client_id", "value": "app123" }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+        """;
+
+        ParseResult_littlespidy result = APIParserFactory_littlespidy.parse(json, "postman_form.json", "FILE");
+        assertTrue(result.isSuccess());
+        ImportedCollection_littlespidy col = result.getCollection();
+        DiscoveredEndpoint_littlespidy ep = col.getEndpoints().get(0);
+
+        assertTrue(ep.getBodyParams().containsKey("grant_type"));
+        assertTrue(ep.getBodyParams().containsKey("client_id"));
+        assertTrue(ep.getRequestBodySample().contains("grant_type=password"));
+        assertTrue(ep.getRequestBodySample().contains("client_id=app123"));
+    }
+
+    @Test
     @DisplayName("Fail gracefully on invalid or unsupported format")
     public void testInvalidFormatHandling() {
         String randomText = "This is just a plain text file with no API schema.";

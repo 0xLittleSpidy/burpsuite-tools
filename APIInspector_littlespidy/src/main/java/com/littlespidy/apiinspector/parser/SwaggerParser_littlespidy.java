@@ -83,8 +83,9 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
                     Map<String, String> commonPathParams = new LinkedHashMap<>();
                     Map<String, String> commonQueryParams = new LinkedHashMap<>();
                     Map<String, String> commonHeaders = new LinkedHashMap<>();
+                    Map<String, String> commonBodyParams = new LinkedHashMap<>();
                     if (pathItem.has("parameters") && pathItem.get("parameters").isJsonArray()) {
-                        extractSwaggerParameters(pathItem.getAsJsonArray("parameters"), commonPathParams, commonQueryParams, commonHeaders, null);
+                        extractSwaggerParameters(root, pathItem.getAsJsonArray("parameters"), commonPathParams, commonQueryParams, commonHeaders, commonBodyParams, null);
                     }
 
                     for (String method : new String[]{"get", "post", "put", "delete", "patch", "options", "head"}) {
@@ -107,16 +108,25 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
                             Map<String, String> pathParams = new LinkedHashMap<>(commonPathParams);
                             Map<String, String> queryParams = new LinkedHashMap<>(commonQueryParams);
                             Map<String, String> headers = new LinkedHashMap<>(commonHeaders);
+                            Map<String, String> bodyParams = new LinkedHashMap<>(commonBodyParams);
                             String[] bodySampleHolder = new String[1];
 
                             if (op.has("parameters") && op.get("parameters").isJsonArray()) {
-                                extractSwaggerParameters(op.getAsJsonArray("parameters"), pathParams, queryParams, headers, bodySampleHolder);
+                                extractSwaggerParameters(root, op.getAsJsonArray("parameters"), pathParams, queryParams, headers, bodyParams, bodySampleHolder);
                             }
                             ep.setPathParams(pathParams);
                             ep.setQueryParams(queryParams);
                             ep.setHeaders(headers);
-                            if (bodySampleHolder[0] != null) {
+                            ep.setBodyParams(bodyParams);
+                            if (bodySampleHolder[0] != null && !bodySampleHolder[0].isBlank()) {
                                 ep.setRequestBodySample(bodySampleHolder[0]);
+                            } else if (!bodyParams.isEmpty() && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method))) {
+                                StringBuilder formBody = new StringBuilder();
+                                for (Map.Entry<String, String> bEntry : bodyParams.entrySet()) {
+                                    if (formBody.length() > 0) formBody.append("&");
+                                    formBody.append(bEntry.getKey()).append("=").append(bEntry.getValue());
+                                }
+                                ep.setRequestBodySample(formBody.toString());
                             }
 
                             // Consumes / Content-Type
@@ -167,10 +177,12 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
     }
 
     private void extractSwaggerParameters(
+            JsonObject root,
             JsonArray paramArray,
             Map<String, String> pathParams,
             Map<String, String> queryParams,
             Map<String, String> headers,
+            Map<String, String> bodyParams,
             String[] bodySampleHolder) {
 
         for (JsonElement p : paramArray) {
@@ -191,9 +203,17 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
                 queryParams.put(name, example);
             } else if ("header".equals(in)) {
                 headers.put(name, example);
-            } else if ("body".equals(in) && bodySampleHolder != null) {
+            } else if ("body".equals(in)) {
                 if (pObj.has("schema") && pObj.get("schema").isJsonObject()) {
-                    bodySampleHolder[0] = generateSampleFromSwaggerSchema(pObj.getAsJsonObject("schema"));
+                    JsonObject schema = pObj.getAsJsonObject("schema");
+                    JsonElement sample = JsonSchemaResolver_littlespidy.generateSample(root, schema, bodyParams, new HashSet<>(), 0);
+                    if (bodySampleHolder != null) {
+                        bodySampleHolder[0] = gson.toJson(sample);
+                    }
+                }
+            } else if ("formdata".equalsIgnoreCase(in)) {
+                if (bodyParams != null && !name.isBlank()) {
+                    bodyParams.put(name, example);
                 }
             }
         }
@@ -201,27 +221,8 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
 
     private String generateSampleFromSwaggerSchema(JsonObject schema) {
         if (schema == null) return "{}";
-        if (schema.has("properties") && schema.get("properties").isJsonObject()) {
-            JsonObject sample = new JsonObject();
-            JsonObject props = schema.getAsJsonObject("properties");
-            for (Map.Entry<String, JsonElement> prop : props.entrySet()) {
-                if (prop.getValue().isJsonObject()) {
-                    JsonObject pObj = prop.getValue().getAsJsonObject();
-                    String type = pObj.has("type") ? pObj.get("type").getAsString() : "string";
-                    if ("integer".equalsIgnoreCase(type) || "number".equalsIgnoreCase(type)) {
-                        sample.addProperty(prop.getKey(), 1);
-                    } else if ("boolean".equalsIgnoreCase(type)) {
-                        sample.addProperty(prop.getKey(), true);
-                    } else {
-                        sample.addProperty(prop.getKey(), "sample");
-                    }
-                } else {
-                    sample.addProperty(prop.getKey(), "sample");
-                }
-            }
-            return gson.toJson(sample);
-        }
-        return "{}";
+        JsonElement el = JsonSchemaResolver_littlespidy.generateSample(null, schema, null, new HashSet<>(), 0);
+        return gson.toJson(el);
     }
 
     private JsonObject parseRootObject(String content) {

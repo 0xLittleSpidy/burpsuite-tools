@@ -113,22 +113,7 @@ public class OpenAPIParser_littlespidy implements APIParser_littlespidy {
 
                             // Request body
                             if (op.has("requestBody") && op.get("requestBody").isJsonObject()) {
-                                JsonObject reqBody = op.getAsJsonObject("requestBody");
-                                if (reqBody.has("content") && reqBody.get("content").isJsonObject()) {
-                                    JsonObject contentObj = reqBody.getAsJsonObject("content");
-                                    for (Map.Entry<String, JsonElement> mediaTypeEntry : contentObj.entrySet()) {
-                                        ep.setContentType(mediaTypeEntry.getKey());
-                                        if (mediaTypeEntry.getValue().isJsonObject()) {
-                                            JsonObject mediaVal = mediaTypeEntry.getValue().getAsJsonObject();
-                                            if (mediaVal.has("example")) {
-                                                ep.setRequestBodySample(gson.toJson(mediaVal.get("example")));
-                                            } else if (mediaVal.has("schema")) {
-                                                ep.setRequestBodySample(generateSampleFromSchema(mediaVal.getAsJsonObject("schema")));
-                                            }
-                                        }
-                                        break;
-                                    }
-                                }
+                                JsonSchemaResolver_littlespidy.extractOpenAPIRequestBody(root, op.getAsJsonObject("requestBody"), ep, gson);
                             }
 
                             // Security / Auth
@@ -193,27 +178,8 @@ public class OpenAPIParser_littlespidy implements APIParser_littlespidy {
 
     private String generateSampleFromSchema(JsonObject schema) {
         if (schema == null) return "{}";
-        if (schema.has("properties") && schema.get("properties").isJsonObject()) {
-            JsonObject sample = new JsonObject();
-            JsonObject props = schema.getAsJsonObject("properties");
-            for (Map.Entry<String, JsonElement> prop : props.entrySet()) {
-                if (prop.getValue().isJsonObject()) {
-                    JsonObject pObj = prop.getValue().getAsJsonObject();
-                    String type = pObj.has("type") ? pObj.get("type").getAsString() : "string";
-                    if ("integer".equalsIgnoreCase(type) || "number".equalsIgnoreCase(type)) {
-                        sample.addProperty(prop.getKey(), 1);
-                    } else if ("boolean".equalsIgnoreCase(type)) {
-                        sample.addProperty(prop.getKey(), true);
-                    } else {
-                        sample.addProperty(prop.getKey(), "sample");
-                    }
-                } else {
-                    sample.addProperty(prop.getKey(), "sample");
-                }
-            }
-            return gson.toJson(sample);
-        }
-        return "{}";
+        JsonElement el = JsonSchemaResolver_littlespidy.generateSample(null, schema, null, new HashSet<>(), 0);
+        return gson.toJson(el);
     }
 
     private JsonObject parseRootObject(String content) {

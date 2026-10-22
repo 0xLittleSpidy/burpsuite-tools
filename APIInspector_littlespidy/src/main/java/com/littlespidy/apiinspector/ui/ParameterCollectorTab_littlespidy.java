@@ -29,6 +29,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
     private final List<ImportedCollection_littlespidy> collections = new ArrayList<>();
     private final List<ParameterEntry> queryParamsList = new ArrayList<>();
     private final List<ParameterEntry> pathParamsList = new ArrayList<>();
+    private final List<ParameterEntry> bodyParamsList = new ArrayList<>();
 
     private JComboBox<CollectionComboItem> collectionSelector;
     private JLabel summaryLabel;
@@ -45,6 +46,12 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
     private TableRowSorter<ParameterTableModel> pathSorter;
     private JTextField pathSearchField;
     private JTextArea pathListTextArea;
+
+    private ParameterTableModel bodyTableModel;
+    private JTable bodyTable;
+    private TableRowSorter<ParameterTableModel> bodySorter;
+    private JTextField bodySearchField;
+    private JTextArea bodyListTextArea;
 
     private static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{([a-zA-Z0-9_\\-]+)\\}|:([a-zA-Z0-9_\\-]+)");
 
@@ -82,16 +89,21 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         copyAllPathBtn.addActionListener(e -> copyFullList(pathParamsList, "Path Parameters"));
         leftActions.add(copyAllPathBtn);
 
-        JButton copyAllCombinedBtn = new JButton("Copy All (Query + Path)");
+        JButton copyAllBodyBtn = new JButton("Copy All Body Params");
+        copyAllBodyBtn.setToolTipText("Copy full list of body parameters (one per line) to clipboard");
+        copyAllBodyBtn.addActionListener(e -> copyFullList(bodyParamsList, "Body Parameters"));
+        leftActions.add(copyAllBodyBtn);
+
+        JButton copyAllCombinedBtn = new JButton("Copy All (Query + Path + Body)");
         copyAllCombinedBtn.setFont(copyAllCombinedBtn.getFont().deriveFont(Font.BOLD));
-        copyAllCombinedBtn.setToolTipText("Copy combined unique list of all parameters (one per line) to clipboard");
+        copyAllCombinedBtn.setToolTipText("Copy combined unique list of all parameters (Query, Path, Body) (one per line) to clipboard");
         copyAllCombinedBtn.addActionListener(e -> copyCombinedList());
         leftActions.add(copyAllCombinedBtn);
 
         topBar.add(leftActions, BorderLayout.WEST);
 
         JPanel rightStats = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 2));
-        summaryLabel = new JLabel("Query Params: 0 | Path Params: 0");
+        summaryLabel = new JLabel("Query Params: 0 | Path Params: 0 | Body Params: 0");
         summaryLabel.setFont(summaryLabel.getFont().deriveFont(Font.PLAIN, 12f));
         rightStats.add(summaryLabel);
         topBar.add(rightStats, BorderLayout.EAST);
@@ -108,20 +120,20 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
 
         add(topContainer, BorderLayout.NORTH);
 
-        // --- Center: Split Pane for Query Parameters and Path Parameters ---
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setResizeWeight(0.5);
-        splitPane.setContinuousLayout(true);
-
-        // Left: Query Parameters Section
+        // --- Center: 3-way Split Pane for Query, Path, and Body Parameters ---
         JPanel querySection = createQuerySection();
-        splitPane.setLeftComponent(querySection);
-
-        // Right: Path Parameters Section
         JPanel pathSection = createPathSection();
-        splitPane.setRightComponent(pathSection);
+        JPanel bodySection = createBodySection();
 
-        add(splitPane, BorderLayout.CENTER);
+        JSplitPane innerSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pathSection, bodySection);
+        innerSplit.setResizeWeight(0.5);
+        innerSplit.setContinuousLayout(true);
+
+        JSplitPane outerSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, querySection, innerSplit);
+        outerSplit.setResizeWeight(0.33);
+        outerSplit.setContinuousLayout(true);
+
+        add(outerSplit, BorderLayout.CENTER);
     }
 
     private JPanel createQuerySection() {
@@ -256,6 +268,72 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         return panel;
     }
 
+    private JPanel createBodySection() {
+        JPanel panel = new JPanel(new BorderLayout(4, 4));
+        panel.setBorder(new TitledBorder("Body Parameters"));
+
+        JPanel headerBar = new JPanel(new BorderLayout(6, 2));
+        JPanel searchBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        searchBox.add(new JLabel("Filter:"));
+        bodySearchField = new JTextField(14);
+        bodySearchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { filterBodyTable(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { filterBodyTable(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { filterBodyTable(); }
+        });
+        searchBox.add(bodySearchField);
+
+        JButton clearBtn = new JButton("Clear");
+        clearBtn.addActionListener(e -> bodySearchField.setText(""));
+        searchBox.add(clearBtn);
+        headerBar.add(searchBox, BorderLayout.WEST);
+
+        JButton copyListBtn = new JButton("Copy Body List");
+        copyListBtn.addActionListener(e -> copyFullList(bodyParamsList, "Body Parameters"));
+        headerBar.add(copyListBtn, BorderLayout.EAST);
+        panel.add(headerBar, BorderLayout.NORTH);
+
+        // Body Parameters Table
+        bodyTableModel = new ParameterTableModel(bodyParamsList);
+        bodyTable = new JTable(bodyTableModel);
+        bodySorter = new TableRowSorter<>(bodyTableModel);
+        bodyTable.setRowSorter(bodySorter);
+        bodyTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        bodyTable.getColumnModel().getColumn(3).setMaxWidth(70);
+
+        // Click on row to copy individual parameter
+        bodyTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = bodyTable.getSelectedRow();
+                if (row >= 0) {
+                    int modelRow = bodyTable.convertRowIndexToModel(row);
+                    ParameterEntry entry = bodyTableModel.getEntry(modelRow);
+                    if (entry != null) {
+                        copySingleParameter(entry.name);
+                    }
+                }
+            }
+        });
+
+        // Tabbed view: Table view vs Plain list view
+        JTabbedPane bodyTabs = new JTabbedPane();
+        bodyTabs.addTab("Parameter Table (Click to Copy)", new JScrollPane(bodyTable));
+
+        bodyListTextArea = new JTextArea();
+        bodyListTextArea.setEditable(false);
+        bodyListTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        JPanel plainListPanel = new JPanel(new BorderLayout(4, 4));
+        plainListPanel.add(new JScrollPane(bodyListTextArea), BorderLayout.CENTER);
+        JButton copyPlainBtn = new JButton("Copy All Lines to Clipboard");
+        copyPlainBtn.addActionListener(e -> copyFullList(bodyParamsList, "Body Parameters"));
+        plainListPanel.add(copyPlainBtn, BorderLayout.SOUTH);
+        bodyTabs.addTab("Plain List (One Per Line)", plainListPanel);
+
+        panel.add(bodyTabs, BorderLayout.CENTER);
+        return panel;
+    }
+
     public synchronized void updateCollections(List<ImportedCollection_littlespidy> cols) {
         collections.clear();
         if (cols != null) {
@@ -285,6 +363,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
     public synchronized void rebuildParameterLists() {
         queryParamsList.clear();
         pathParamsList.clear();
+        bodyParamsList.clear();
 
         CollectionComboItem sel = (CollectionComboItem) collectionSelector.getSelectedItem();
         List<ImportedCollection_littlespidy> targetCols = new ArrayList<>();
@@ -296,6 +375,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
 
         Map<String, ParameterEntry> queryMap = new LinkedHashMap<>();
         Map<String, ParameterEntry> pathMap = new LinkedHashMap<>();
+        Map<String, ParameterEntry> bodyMap = new LinkedHashMap<>();
 
         for (ImportedCollection_littlespidy col : targetCols) {
             for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
@@ -366,14 +446,32 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         }
                     }
                 }
+
+                // 5. Body parameters from explicit map
+                if (ep.getBodyParams() != null) {
+                    for (Map.Entry<String, String> bEntry : ep.getBodyParams().entrySet()) {
+                        String name = bEntry.getKey();
+                        if (name == null || name.isBlank()) continue;
+                        name = name.trim();
+                        String val = bEntry.getValue() != null ? bEntry.getValue() : "";
+
+                        ParameterEntry p = bodyMap.computeIfAbsent(name, ParameterEntry::new);
+                        p.addEndpoint(epDesc);
+                        if (p.sampleValue.isEmpty() && !val.isEmpty()) {
+                            p.sampleValue = val;
+                        }
+                    }
+                }
             }
         }
 
         queryParamsList.addAll(queryMap.values());
         pathParamsList.addAll(pathMap.values());
+        bodyParamsList.addAll(bodyMap.values());
 
         queryTableModel.fireTableDataChanged();
         pathTableModel.fireTableDataChanged();
+        bodyTableModel.fireTableDataChanged();
 
         // Update plain text areas (each parameter on a separate line)
         StringBuilder querySb = new StringBuilder();
@@ -390,7 +488,14 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         pathListTextArea.setText(pathSb.toString());
         pathListTextArea.setCaretPosition(0);
 
-        summaryLabel.setText("Query Params: " + queryParamsList.size() + " | Path Params: " + pathParamsList.size());
+        StringBuilder bodySb = new StringBuilder();
+        for (ParameterEntry p : bodyParamsList) {
+            bodySb.append(p.name).append("\n");
+        }
+        bodyListTextArea.setText(bodySb.toString());
+        bodyListTextArea.setCaretPosition(0);
+
+        summaryLabel.setText("Query Params: " + queryParamsList.size() + " | Path Params: " + pathParamsList.size() + " | Body Params: " + bodyParamsList.size());
     }
 
     private void filterQueryTable() {
@@ -408,6 +513,15 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
             pathSorter.setRowFilter(null);
         } else {
             pathSorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(q)));
+        }
+    }
+
+    private void filterBodyTable() {
+        String q = bodySearchField.getText().trim();
+        if (q.isEmpty()) {
+            bodySorter.setRowFilter(null);
+        } else {
+            bodySorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(q)));
         }
     }
 
@@ -436,6 +550,9 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
             unique.add(p.name);
         }
         for (ParameterEntry p : pathParamsList) {
+            unique.add(p.name);
+        }
+        for (ParameterEntry p : bodyParamsList) {
             unique.add(p.name);
         }
 
