@@ -133,10 +133,22 @@ public class JSSourceMapExplorerTab extends JPanel {
                 refreshView();
             }
         });
+        this.reconMiningPanel.setOnReconFinished(() -> {
+            refreshView();
+            if (storageManager != null) {
+                storageManager.scheduleAutoSave();
+            }
+        });
 
         this.graphQLInspectorPanel = new GraphQLInspectorPanel_littlespidy(api, dataStore);
         this.graphQLInspectorPanel.setHistoryLoader(this::loadProxyHistory);
         this.graphQLInspectorPanel.setInScopeOnly(inScopeOnlyCheckBox.isSelected());
+        this.graphQLInspectorPanel.setOnGraphQLFinished(() -> {
+            refreshView();
+            if (storageManager != null) {
+                storageManager.scheduleAutoSave();
+            }
+        });
 
         this.aiSecurityPanel = new AiSecurityAnalystPanel(api);
 
@@ -149,6 +161,11 @@ public class JSSourceMapExplorerTab extends JPanel {
         this.reconMiningPanel.setAiAnalysisOpener((name, content) -> openAiAnalysisForFile(name, content));
 
         setLayout(new BorderLayout());
+
+        // Display Session panel globally across all tabs
+        if (storageManager != null) {
+            add(storageManager.createSessionToolbarComponent(this, this::refreshAllTabs), BorderLayout.NORTH);
+        }
 
         // Setup debounced UI refresh timer (400ms)
         this.refreshTimer = new javax.swing.Timer(400, e -> {
@@ -164,14 +181,14 @@ public class JSSourceMapExplorerTab extends JPanel {
             needsRefresh = true;
         });
 
-        // Tab 1: JS and SourceMap Workspace
-        rootTabbedPane.addTab("JS and SourceMap Workspace", createWorkspacePanel());
+        // Tab 1: JS and Source Map
+        rootTabbedPane.addTab("JS and Source Map", createWorkspacePanel());
 
         // Tab 2: Dedicated Recon and Secret Mining Tab
         rootTabbedPane.addTab("Recon and Secret Mining", reconMiningPanel);
 
-        // Tab 3: Dedicated GraphQL Inspector Tab
-        rootTabbedPane.addTab("GraphQL Inspector", graphQLInspectorPanel);
+        // Tab 3: Dedicated GraphQL Tab
+        rootTabbedPane.addTab("GraphQL", graphQLInspectorPanel);
 
         // Tab 4: AI Security Analyst (Local LLM / Antigravity CLI)
         rootTabbedPane.addTab("AI Security Analyst", aiSecurityPanel);
@@ -219,17 +236,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         String bodyStr = resp.bodyToString();
         entry.setFramework(JsFrameworkDetector.detectFramework(url, bodyStr));
 
-        // Run Secret, Path, Cloud URLs, Dependency, Comment & Security Bypass discovery on raw JS file
-        var jsMining = SecretAndEndpointMiner.mine(url, "JS File", bodyStr);
-        entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies(), jsMining.comments(), jsMining.securityBypasses());
-
-        var gqlOps = DualEngineGraphQLCoordinator_littlespidy.extractOperations(url, "JS File", bodyStr);
-        entry.setJsGraphQLOperations(gqlOps);
-
         dataStore.addEntry(entry);
-        if (graphQLInspectorPanel != null) {
-            graphQLInspectorPanel.refreshFromDataStore();
-        }
         if (storageManager != null) {
             storageManager.scheduleAutoSave();
         }
@@ -242,14 +249,7 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         // ── Top Toolbar ──
         JPanel topContainer = new JPanel(new BorderLayout(4, 4));
-        if (storageManager != null) {
-            JPanel headerStack = new JPanel(new BorderLayout());
-            headerStack.add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
-            headerStack.add(createMainToolbar(), BorderLayout.SOUTH);
-            topContainer.add(headerStack, BorderLayout.NORTH);
-        } else {
-            topContainer.add(createMainToolbar(), BorderLayout.NORTH);
-        }
+        topContainer.add(createMainToolbar(), BorderLayout.NORTH);
         topContainer.add(createFilterToolbar(), BorderLayout.CENTER);
 
         // ── Status Strip ──
@@ -357,6 +357,10 @@ public class JSSourceMapExplorerTab extends JPanel {
         JButton deselectAllBtn = new JButton("Deselect All");
         deselectAllBtn.addActionListener(e -> jsTable.clearSelection());
 
+        JButton copyJsUrlsBtn = new JButton("Copy JS URLs");
+        copyJsUrlsBtn.setToolTipText("Copy all JavaScript file URLs to clipboard, one per line");
+        copyJsUrlsBtn.addActionListener(e -> copyAllJsUrls());
+
         JButton probeSelectedBtn = new JButton("Probe Selected .map");
         probeSelectedBtn.setToolTipText("Actively probe selected rows for exposed .js.map files");
         probeSelectedBtn.addActionListener(e -> probeSelectedScripts());
@@ -407,6 +411,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(selectAllBtn);
         toolbar.add(deselectAllBtn);
+        toolbar.add(copyJsUrlsBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(probeSelectedBtn);
         toolbar.add(probeAllBtn);
@@ -843,12 +848,37 @@ public class JSSourceMapExplorerTab extends JPanel {
         openAiAnalysisForFile(entry.getUrl(), entry.getResponse().bodyToString());
     }
 
+    private void copyAllJsUrls() {
+        List<JsFileEntry> entries = jsTableModel.getAllEntries();
+        if (entries.isEmpty()) {
+            entries = dataStore.getEntries();
+        }
+        if (entries.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No JavaScript file URLs available.", "", JOptionPane.PLAIN_MESSAGE);
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (JsFileEntry entry : entries) {
+            if (entry.getUrl() != null && !entry.getUrl().isBlank()) {
+                if (sb.length() > 0) sb.append("\n");
+                sb.append(entry.getUrl().trim());
+            }
+        }
+
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
+            new StringSelection(sb.toString()), null
+        );
+
+        JOptionPane.showMessageDialog(this, "Copied to clipboard.", "", JOptionPane.PLAIN_MESSAGE);
+    }
+
     private void loadProxyHistory() {
         if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(false);
         if (reconMiningPanel != null) reconMiningPanel.setHistoryLoading(true);
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);
-        liveStatusLabel.setText("Stage 1: Scanning Proxy history for JavaScript assets...");
+        liveStatusLabel.setText("Scanning Proxy history for JavaScript assets...");
 
         SwingWorker<List<JsFileEntry>, String> worker = new SwingWorker<>() {
             @Override
@@ -857,7 +887,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                 List<JsFileEntry> stage1Entries = new ArrayList<>();
                 boolean inScopeOnly = inScopeOnlyCheckBox.isSelected();
 
-                // Stage 1: Fast Scrape & Deduplication + Framework Detection
+                // Fast Scrape & Deduplication + Framework Detection
                 for (ProxyHttpRequestResponse item : history) {
                     if (isCancelled()) break;
                     if (!item.hasResponse()) continue;
@@ -930,86 +960,23 @@ public class JSSourceMapExplorerTab extends JPanel {
                     return stage1Entries;
                 }
 
-                // Immediately register Stage 1 entries into dataStore so UI displays them
                 dataStore.addEntries(stage1Entries);
-                SwingUtilities.invokeLater(() -> {
-                    refreshView();
-                    reconMiningPanel.refreshFromDataStore();
-                });
-
-                // Stage 2: Background Bounded Executor Pool for Deep Recon Mining
-                int totalToMine = stage1Entries.size();
-                publish("Stage 2: Mining secrets & endpoints across " + totalToMine + " scripts...");
-
-                int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
-                ExecutorService miningPool = Executors.newFixedThreadPool(numThreads);
-                AtomicInteger processed = new AtomicInteger(0);
-
-                try {
-                    List<java.util.concurrent.Future<?>> futures = new ArrayList<>(totalToMine);
-                    for (JsFileEntry entry : stage1Entries) {
-                        if (isCancelled()) break;
-                        futures.add(miningPool.submit(() -> {
-                            if (isCancelled()) return;
-                            try {
-                                if (entry.getResponse() != null) {
-                                    String code = entry.getResponse().bodyToString();
-                                    var jsMining = SecretAndEndpointMiner.mine(entry.getUrl(), "JS File", code);
-                                    entry.setJsReconFindings(jsMining.secrets(), jsMining.endpoints(), jsMining.cloudUrls(), jsMining.dependencies(), jsMining.comments(), jsMining.securityBypasses());
-
-                                    var gqlOps = DualEngineGraphQLCoordinator_littlespidy.extractOperations(entry.getUrl(), "JS File", code);
-                                    entry.setJsGraphQLOperations(gqlOps);
-                                }
-                            } catch (Exception ignored) {}
-
-                            int cur = processed.incrementAndGet();
-                            if (cur % 5 == 0 || cur == totalToMine) {
-                                SwingUtilities.invokeLater(() -> {
-                                    progressBar.setIndeterminate(false);
-                                    progressBar.setMaximum(totalToMine);
-                                    progressBar.setValue(cur);
-                                    liveStatusLabel.setText(String.format("Stage 2: Mining secrets, endpoints & GraphQL (%d / %d)...", cur, totalToMine));
-                                    jsTableModel.fireTableDataChanged();
-                                });
-                            }
-                        }));
-                    }
-
-                    for (var f : futures) {
-                        if (isCancelled()) break;
-                        try {
-                            f.get();
-                        } catch (Exception ignored) {}
-                    }
-                } finally {
-                    miningPool.shutdownNow();
-                }
-
                 return stage1Entries;
-            }
-
-            @Override
-            protected void process(List<String> chunks) {
-                if (!chunks.isEmpty()) {
-                    liveStatusLabel.setText(chunks.get(chunks.size() - 1));
-                }
             }
 
             @Override
             protected void done() {
                 try {
                     List<JsFileEntry> result = get();
-                    refreshView();
-                    reconMiningPanel.refreshFromDataStore();
-                    graphQLInspectorPanel.refreshFromDataStore();
+                    refreshAllTabs();
                     if (storageManager != null) {
                         storageManager.scheduleAutoSave();
                     }
-                    liveStatusLabel.setText(String.format("Loaded & mined %d new JS assets from Proxy history.", result.size()));
+                    liveStatusLabel.setText(String.format("Loaded %d new JS assets from Proxy history. Click 'Run' on Recon or GraphQL tab to analyze.", result.size()));
                     JOptionPane.showMessageDialog(
                         JSSourceMapExplorerTab.this,
-                        "Proxy history ingestion complete!\nImported and analyzed " + result.size() + " new JavaScript assets.",
-                        "History Loaded & Mined",
+                        "Proxy history ingestion complete!\nImported " + result.size() + " new JavaScript assets.",
+                        "History Loaded",
                         JOptionPane.INFORMATION_MESSAGE
                     );
                 } catch (Exception ex) {
@@ -1024,6 +991,12 @@ public class JSSourceMapExplorerTab extends JPanel {
         };
 
         worker.execute();
+    }
+
+    public synchronized void refreshAllTabs() {
+        refreshView();
+        if (reconMiningPanel != null) reconMiningPanel.refreshFromDataStore();
+        if (graphQLInspectorPanel != null) graphQLInspectorPanel.refreshFromDataStore();
     }
 
     public synchronized void refreshView() {

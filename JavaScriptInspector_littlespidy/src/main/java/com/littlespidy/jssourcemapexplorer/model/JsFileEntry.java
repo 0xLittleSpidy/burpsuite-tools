@@ -152,7 +152,18 @@ public class JsFileEntry {
         List<DiscoveredComment> comments,
         List<DiscoveredSecurityBypass> securityBypasses
     ) {
-        setJsReconFindings(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, Collections.emptyList());
+        jsSecrets.clear();
+        if (secrets != null) jsSecrets.addAll(secrets);
+        jsEndpoints.clear();
+        if (endpoints != null) jsEndpoints.addAll(endpoints);
+        jsCloudUrls.clear();
+        if (cloudUrls != null) jsCloudUrls.addAll(cloudUrls);
+        jsDependencies.clear();
+        if (dependencies != null) jsDependencies.addAll(dependencies);
+        jsComments.clear();
+        if (comments != null) jsComments.addAll(comments);
+        jsSecurityBypasses.clear();
+        if (securityBypasses != null) jsSecurityBypasses.addAll(securityBypasses);
     }
 
     public synchronized void setJsReconFindings(

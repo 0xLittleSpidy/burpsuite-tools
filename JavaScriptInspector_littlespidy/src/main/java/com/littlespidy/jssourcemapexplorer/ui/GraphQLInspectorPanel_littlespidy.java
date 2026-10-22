@@ -2,6 +2,7 @@
 package com.littlespidy.jssourcemapexplorer.ui;
 
 import burp.api.montoya.MontoyaApi;
+import com.littlespidy.jssourcemapexplorer.engine.DualEngineGraphQLCoordinator_littlespidy;
 import com.littlespidy.jssourcemapexplorer.engine.GraphQLRepeaterService_littlespidy;
 import com.littlespidy.jssourcemapexplorer.model.DiscoveredGraphQLOperation;
 import com.littlespidy.jssourcemapexplorer.model.JsDataStore;
@@ -21,6 +22,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Dedicated top-level Suite tab for GraphQL discovery and security testing.
@@ -50,6 +56,9 @@ public class GraphQLInspectorPanel_littlespidy extends JPanel {
 
     // Filter Controls
     private final JButton loadHistoryBtn = new JButton("Load Proxy History");
+    private final JButton runGraphQLBtn = new JButton("Run");
+    private final AtomicBoolean isDiscovering = new AtomicBoolean(false);
+    private Runnable onGraphQLFinished;
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", true);
     private final MultiSelectFilterButton domainFilterBtn;
     private final Set<String> knownDomains = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -97,6 +106,10 @@ public class GraphQLInspectorPanel_littlespidy extends JPanel {
 
     public void setHistoryLoader(Runnable loader) {
         this.historyLoader = loader;
+    }
+
+    public void setOnGraphQLFinished(Runnable callback) {
+        this.onGraphQLFinished = callback;
     }
 
     public void setHistoryLoading(boolean loading) {
@@ -158,6 +171,11 @@ public class GraphQLInspectorPanel_littlespidy extends JPanel {
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
         statsLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         rightPanel.add(statsLabel);
+        rightPanel.add(new JSeparator(SwingConstants.VERTICAL));
+
+        runGraphQLBtn.setToolTipText("Run GraphQL operation discovery on discovered JavaScript assets");
+        runGraphQLBtn.addActionListener(e -> runGraphQLDiscovery());
+        rightPanel.add(runGraphQLBtn);
 
         panel.add(leftPanel, BorderLayout.WEST);
         panel.add(rightPanel, BorderLayout.EAST);
@@ -350,6 +368,78 @@ public class GraphQLInspectorPanel_littlespidy extends JPanel {
         menu.add(copyCurl);
 
         menu.show(opsTable, e.getX(), e.getY());
+    }
+
+    // ── On-Demand GraphQL Discovery Execution ─────────────────────────────────
+    public void runGraphQLDiscovery() {
+        if (isDiscovering.get()) {
+            JOptionPane.showMessageDialog(this, "GraphQL discovery is already in progress.", "Discovery In Progress", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<JsFileEntry> entries = dataStore != null ? dataStore.getEntries() : Collections.emptyList();
+        if (entries.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No JavaScript files available for GraphQL discovery. Please load Proxy history or send requests first.", "GraphQL Discovery", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        isDiscovering.set(true);
+        runGraphQLBtn.setEnabled(false);
+        runGraphQLBtn.setText("Running...");
+
+        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() {
+                int total = entries.size();
+                int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
+                ExecutorService pool = Executors.newFixedThreadPool(numThreads);
+                AtomicInteger processed = new AtomicInteger(0);
+
+                try {
+                    List<Future<?>> futures = new ArrayList<>(total);
+                    for (JsFileEntry entry : entries) {
+                        futures.add(pool.submit(() -> {
+                            try {
+                                if (entry.getResponse() != null) {
+                                    String code = entry.getResponse().bodyToString();
+                                    var gqlOps = DualEngineGraphQLCoordinator_littlespidy.extractOperations(entry.getUrl(), "JS File", code);
+                                    entry.setJsGraphQLOperations(gqlOps);
+                                }
+                            } catch (Exception ignored) {}
+                            int count = processed.incrementAndGet();
+                            publish(count);
+                        }));
+                    }
+                    for (var f : futures) {
+                        try { f.get(); } catch (Exception ignored) {}
+                    }
+                } finally {
+                    pool.shutdownNow();
+                }
+                return null;
+            }
+
+            @Override
+            protected void process(List<Integer> chunks) {
+                if (!chunks.isEmpty()) {
+                    int done = chunks.get(chunks.size() - 1);
+                    statsLabel.setText(String.format("Discovering GraphQL operations (%d / %d)...", done, entries.size()));
+                }
+            }
+
+            @Override
+            protected void done() {
+                isDiscovering.set(false);
+                runGraphQLBtn.setEnabled(true);
+                runGraphQLBtn.setText("Run");
+                refreshFromDataStore();
+                if (onGraphQLFinished != null) {
+                    onGraphQLFinished.run();
+                }
+            }
+        };
+
+        worker.execute();
     }
 
     public synchronized void refreshFromDataStore() {

@@ -28,6 +28,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -82,6 +87,9 @@ public class ReconMiningPanel extends JPanel {
 
     // ── Top Toolbar Controls ──
     private final JButton loadHistoryBtn = new JButton("Load Proxy History");
+    private final JButton runReconBtn = new JButton("Run");
+    private final AtomicBoolean isMining = new AtomicBoolean(false);
+    private Runnable onReconFinished;
     private final JCheckBox inScopeOnlyCheckBox = new JCheckBox("In-Scope Only", true);
     private MultiSelectFilterButton methodFilterBtn;
     private MultiSelectFilterButton statusFilterBtn;
@@ -151,6 +159,10 @@ public class ReconMiningPanel extends JPanel {
         }
     }
 
+    public void setOnReconFinished(Runnable callback) {
+        this.onReconFinished = callback;
+    }
+
     public void setInScopeChangeListener(java.util.function.Consumer<Boolean> listener) {
         this.inScopeChangeListener = listener;
     }
@@ -213,7 +225,9 @@ public class ReconMiningPanel extends JPanel {
         });
 
         // ── Top Master Toolbar ──
-        JPanel topToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        JPanel topToolbar = new JPanel(new BorderLayout(6, 4));
+
+        JPanel leftToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
 
         loadHistoryBtn.setToolTipText("Scan Burp Proxy HTTP history to extract and analyze JavaScript requests");
         loadHistoryBtn.addActionListener(e -> {
@@ -221,7 +235,7 @@ public class ReconMiningPanel extends JPanel {
                 historyLoader.run();
             }
         });
-        topToolbar.add(loadHistoryBtn);
+        leftToolbar.add(loadHistoryBtn);
 
         inScopeOnlyCheckBox.setToolTipText("Show only requests targeting hosts in Burp target scope");
         inScopeOnlyCheckBox.addActionListener(e -> {
@@ -231,41 +245,41 @@ public class ReconMiningPanel extends JPanel {
             }
             applyRequestFilter();
         });
-        topToolbar.add(inScopeOnlyCheckBox);
+        leftToolbar.add(inScopeOnlyCheckBox);
 
         domainFilterBtn.setToolTipText("Filter requests by one or more target domains");
-        topToolbar.add(domainFilterBtn);
+        leftToolbar.add(domainFilterBtn);
 
-        topToolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        leftToolbar.add(new JSeparator(SwingConstants.VERTICAL));
 
         JLabel mthdLbl = new JLabel("Method:");
         mthdLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        topToolbar.add(mthdLbl);
-        topToolbar.add(methodFilterBtn);
+        leftToolbar.add(mthdLbl);
+        leftToolbar.add(methodFilterBtn);
 
         JLabel statusLbl = new JLabel("Status:");
         statusLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        topToolbar.add(statusLbl);
-        topToolbar.add(statusFilterBtn);
+        leftToolbar.add(statusLbl);
+        leftToolbar.add(statusFilterBtn);
 
         JLabel filterLbl = new JLabel("Source:");
         filterLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        topToolbar.add(filterLbl);
-        topToolbar.add(sourceTypeFilter);
+        leftToolbar.add(filterLbl);
+        leftToolbar.add(sourceTypeFilter);
         sourceTypeFilter.addActionListener(e -> applyRequestFilter());
 
-        topToolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        leftToolbar.add(new JSeparator(SwingConstants.VERTICAL));
 
         JLabel searchLbl = new JLabel("Search:");
         searchLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        topToolbar.add(searchLbl);
+        leftToolbar.add(searchLbl);
         searchField.setToolTipText("Search by URL, Host, or Path");
         searchField.addActionListener(e -> applyRequestFilter());
-        topToolbar.add(searchField);
+        leftToolbar.add(searchField);
 
         JButton filterBtn = new JButton("Filter");
         filterBtn.addActionListener(e -> applyRequestFilter());
-        topToolbar.add(filterBtn);
+        leftToolbar.add(filterBtn);
 
         JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> {
@@ -295,14 +309,22 @@ public class ReconMiningPanel extends JPanel {
             depSearchField.setText("");
             refreshFromDataStore();
         });
-        topToolbar.add(resetBtn);
+        leftToolbar.add(resetBtn);
 
         JButton refreshBtn = new JButton("Refresh Findings");
         refreshBtn.addActionListener(e -> refreshFromDataStore());
-        topToolbar.add(refreshBtn);
+        leftToolbar.add(refreshBtn);
 
-        topToolbar.add(new JSeparator(SwingConstants.VERTICAL));
-        topToolbar.add(statsLabel);
+        JPanel rightToolbar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
+        rightToolbar.add(statsLabel);
+        rightToolbar.add(new JSeparator(SwingConstants.VERTICAL));
+
+        runReconBtn.setToolTipText("Run Recon mining on discovered JavaScript assets");
+        runReconBtn.addActionListener(e -> runReconMining());
+        rightToolbar.add(runReconBtn);
+
+        topToolbar.add(leftToolbar, BorderLayout.WEST);
+        topToolbar.add(rightToolbar, BorderLayout.EAST);
 
         add(topToolbar, BorderLayout.NORTH);
 
@@ -969,6 +991,85 @@ public class ReconMiningPanel extends JPanel {
                 scrollTextComponent(child, position);
             }
         }
+    }
+
+    // ── On-Demand Recon Execution ─────────────────────────────────────────────
+    public void runReconMining() {
+        if (isMining.get()) {
+            JOptionPane.showMessageDialog(this, "Recon mining is already in progress.", "Mining In Progress", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<JsFileEntry> entries = dataStore != null ? dataStore.getEntries() : Collections.emptyList();
+        if (entries.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No JavaScript files available to mine. Please load Proxy history or send requests first.", "Recon Mining", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        isMining.set(true);
+        runReconBtn.setEnabled(false);
+        runReconBtn.setText("Running...");
+
+        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() {
+                int total = entries.size();
+                int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
+                ExecutorService pool = Executors.newFixedThreadPool(numThreads);
+                AtomicInteger processed = new AtomicInteger(0);
+
+                try {
+                    List<Future<?>> futures = new ArrayList<>(total);
+                    for (JsFileEntry entry : entries) {
+                        futures.add(pool.submit(() -> {
+                            try {
+                                if (entry.getResponse() != null) {
+                                    String code = entry.getResponse().bodyToString();
+                                    var jsMining = SecretAndEndpointMiner.mine(entry.getUrl(), "JS File", code);
+                                    entry.setJsReconFindings(
+                                        jsMining.secrets(),
+                                        jsMining.endpoints(),
+                                        jsMining.cloudUrls(),
+                                        jsMining.dependencies(),
+                                        jsMining.comments(),
+                                        jsMining.securityBypasses()
+                                    );
+                                }
+                            } catch (Exception ignored) {}
+                            int count = processed.incrementAndGet();
+                            publish(count);
+                        }));
+                    }
+                    for (var f : futures) {
+                        try { f.get(); } catch (Exception ignored) {}
+                    }
+                } finally {
+                    pool.shutdownNow();
+                }
+                return null;
+            }
+
+            @Override
+            protected void process(List<Integer> chunks) {
+                if (!chunks.isEmpty()) {
+                    int done = chunks.get(chunks.size() - 1);
+                    statsLabel.setText(String.format("Mining recon findings (%d / %d)...", done, entries.size()));
+                }
+            }
+
+            @Override
+            protected void done() {
+                isMining.set(false);
+                runReconBtn.setEnabled(true);
+                runReconBtn.setText("Run");
+                refreshFromDataStore();
+                if (onReconFinished != null) {
+                    onReconFinished.run();
+                }
+            }
+        };
+
+        worker.execute();
     }
 
     // ── Data Ingestion & Master Refresh ──────────────────────────────────────
