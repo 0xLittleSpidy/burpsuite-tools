@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript Inspector (littlespidy) - Retire.js Integration UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --badge-high: #f14c4c;
+      --badge-med: #cca700;
+      --badge-low: #388a34;
+      --badge-clean: #1f8a4c;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Burp Suite Top Banner */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+    .burp-title {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 13px;
+    }
+    .theme-toggle-btn {
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    /* Suite Tabs */
+    .suite-tabs {
+      background-color: var(--bg-darker);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding-left: 10px;
+    }
+    .suite-tab {
+      padding: 6px 14px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-right: 1px solid transparent;
+      border-left: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .suite-tab.active {
+      color: var(--accent);
+      border-top: 2px solid var(--accent);
+      background-color: var(--bg-dark);
+      border-right: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    /* Extension Root Tabs */
+    .ext-tabs {
+      display: flex;
+      background-color: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      padding: 4px 10px 0 10px;
+    }
+    .ext-tab {
+      padding: 6px 16px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      font-size: 12px;
+    }
+    .ext-tab.active {
+      background-color: var(--bg-card);
+      color: var(--text-bright);
+      border-color: var(--border);
+      font-weight: 600;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 8px;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    /* Toolbars */
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--bg-card);
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+    }
+    .btn {
+      background-color: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 9px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background-color: var(--btn-hover);
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: #d15d16;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+    .btn-highlight {
+      background-color: #7232a8;
+      color: #ffffff;
+      border-color: #8c42cc;
+      font-weight: 600;
+    }
+    .btn-highlight:hover {
+      background-color: #8c42cc;
+    }
+    .sep {
+      width: 1px;
+      height: 18px;
+      background-color: var(--border);
+      margin: 0 4px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      cursor: pointer;
+      color: var(--text-bright);
+    }
+    select, input[type="text"] {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 3px 6px;
+      font-size: 11px;
+      border-radius: 3px;
+      outline: none;
+    }
+    .stats-badge {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .stats-badge strong {
+      color: var(--text-bright);
+    }
+    .stats-badge .vuln-count {
+      color: var(--badge-high);
+      font-weight: bold;
+    }
+
+    /* Master-Detail Split Area */
+    .split-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 6px;
+      min-height: 0;
+    }
+
+    /* Top Section: Scripts Table */
+    .table-container {
+      flex: 0 0 38%;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background-color: var(--bg-card);
+      min-height: 150px;
+    }
+    .table-header-title {
+      padding: 4px 8px;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-bright);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .scroll-table {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    th {
+      background-color: var(--bg-darker);
+      position: sticky;
+      top: 0;
+      text-align: left;
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-bright);
+      font-weight: 600;
+      user-select: none;
+    }
+    td {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    tr:hover td {
+      background-color: var(--bg-hover);
+      cursor: pointer;
+    }
+    tr.selected td {
+      background-color: var(--bg-selected) !important;
+      color: #ffffff !important;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .badge-high {
+      background-color: rgba(241, 76, 76, 0.2);
+      color: #ff6b6b;
+      border: 1px solid #f14c4c;
+    }
+    .badge-med {
+      background-color: rgba(204, 167, 0, 0.2);
+      color: #ffd83d;
+      border: 1px solid #cca700;
+    }
+    .badge-clean {
+      background-color: rgba(31, 138, 76, 0.2);
+      color: #4cd984;
+      border: 1px solid #1f8a4c;
+    }
+    .badge-none {
+      color: var(--text-muted);
+    }
+    .badge-scope {
+      background-color: #1a442a;
+      color: #55db88;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-size: 9px;
+    }
+
+    /* Bottom Section: Inspection Tabs */
+    .bottom-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background-color: var(--bg-card);
+      min-height: 0;
+    }
+    .sub-tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+    }
+    .sub-tab {
+      padding: 6px 14px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .sub-tab.active {
+      background-color: var(--bg-card);
+      color: var(--text-bright);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+    }
+    .sub-tab .tab-badge {
+      background-color: var(--badge-high);
+      color: #ffffff;
+      padding: 0 5px;
+      border-radius: 8px;
+      font-size: 9px;
+      margin-left: 5px;
+      font-weight: bold;
+    }
+
+    /* Retire.js Sub-Tab Panel Layout */
+    .retire-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    /* Summary Header Card */
+    .retire-header-card {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--badge-high);
+      border-radius: 4px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .retire-header-card.clean-card {
+      border-left-color: var(--badge-clean);
+    }
+    .retire-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .retire-lib-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .retire-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+      font-size: 11px;
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .meta-label {
+      color: var(--text-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .meta-value {
+      color: var(--text-bright);
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    /* Vulnerabilities Split View: Left List, Right Detail */
+    .retire-detail-split {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      min-height: 0;
+    }
+
+    .vuln-list-pane {
+      flex: 0 0 55%;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background-color: var(--bg-darker);
+      min-height: 0;
+    }
+
+    .vuln-detail-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background-color: var(--bg-darker);
+      overflow-y: auto;
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .detail-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 3px;
+      margin-top: 4px;
+    }
+
+    .detail-text {
+      font-size: 11px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .code-box {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      color: #79c0ff;
+      border-radius: 3px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .link-item {
+      color: #58a6ff;
+      text-decoration: none;
+      word-break: break-all;
+      font-size: 11px;
+    }
+    .link-item:hover {
+      text-decoration: underline;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    /* Notice banner */
+    .info-banner {
+      background-color: rgba(229, 107, 31, 0.1);
+      border: 1px solid rgba(229, 107, 31, 0.4);
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: var(--text-bright);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Suite Header -->
+  <div class="burp-header">
+    <div class="title-area">
+      <span class="burp-logo-badge">BURP</span>
+      <span class="burp-title">Burp Suite Professional - JavaScript Inspector (littlespidy)</span>
+    </div>
+    <div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Dark / Light Theme</button>
+    </div>
+  </div>
+
+  <!-- Suite Tabs -->
+  <div class="suite-tabs">
+    <div class="suite-tab">Dashboard</div>
+    <div class="suite-tab">Target</div>
+    <div class="suite-tab">Proxy</div>
+    <div class="suite-tab">Intruder</div>
+    <div class="suite-tab">Repeater</div>
+    <div class="suite-tab active">JavaScript Inspector</div>
+  </div>
+
+  <!-- Extension Tabs -->
+  <div class="ext-tabs">
+    <div class="ext-tab active">JS and Source Map</div>
+    <div class="ext-tab">Recon and Secret Mining</div>
+    <div class="ext-tab">GraphQL</div>
+    <div class="ext-tab">AI Security Analyst</div>
+  </div>
+
+  <!-- Main Workspace -->
+  <div class="workspace">
+
+    <!-- Top Action Toolbar -->
+    <div class="toolbar-row">
+      <button class="btn btn-primary" onclick="alert('Simulated: Proxy history refreshed.')">Load Proxy History</button>
+      <label class="checkbox-label">
+        <input type="checkbox" checked> In-Scope Only
+      </label>
+      <select>
+        <option>All Domains (2)</option>
+        <option>app.example-portal.com</option>
+        <option>cdn.external-assets.com</option>
+      </select>
+      <div class="sep"></div>
+      <button class="btn">Select All</button>
+      <button class="btn">Deselect All</button>
+      <button class="btn">Copy JS URLs</button>
+      <div class="sep"></div>
+      <button class="btn">Probe Selected .map</button>
+      <button class="btn">Probe All Visible .map</button>
+      <button class="btn">Unpack Selected .map</button>
+      <button class="btn">Download JS File(s)...</button>
+      <div class="sep"></div>
+      <!-- Retire.js Actions -->
+      <button class="btn btn-highlight" onclick="scanSelectedRetireJs()">Scan Selected (Retire.js)</button>
+      <button class="btn btn-highlight" onclick="scanAllRetireJs()">Scan All Visible (Retire.js)</button>
+      <select title="Retire.js Vulnerability Database">
+        <option>Retire.js DB: v3.0.4 (Online / 3,420 signatures)</option>
+        <option>Update Retire.js DB Online...</option>
+        <option>Reload Bundled Offline DB</option>
+      </select>
+      <div class="sep"></div>
+      <button class="btn" style="color: #f14c4c;">Clear Data</button>
+    </div>
+
+    <!-- Filter Toolbar -->
+    <div class="toolbar-row">
+      <label class="checkbox-label">
+        <input type="checkbox"> Exposed .map Only
+      </label>
+      <div class="sep"></div>
+      <label class="checkbox-label" style="color: #ff8585; font-weight: 600;">
+        <input type="checkbox" id="vulnOnlyCheckbox" onchange="applyFilters()"> Vulnerable Only (Retire.js)
+      </label>
+      <div class="sep"></div>
+      <label style="font-weight: 600; font-size: 11px;">Severity Filter:</label>
+      <select id="severitySelect" onchange="applyFilters()">
+        <option value="ALL">All Severities</option>
+        <option value="HIGH">High Severity Only</option>
+        <option value="MEDIUM">Medium and Above</option>
+        <option value="CLEAN">Clean Only</option>
+      </select>
+      <div class="sep"></div>
+      <label style="font-weight: 600; font-size: 11px;">Status:</label>
+      <select>
+        <option>200 OK Only</option>
+        <option>All Status Codes</option>
+      </select>
+      <div class="sep"></div>
+      <label style="font-weight: 600; font-size: 11px;">Search:</label>
+      <input type="text" id="searchBox" placeholder="Filter URL or library..." oninput="applyFilters()" style="width: 170px;">
+
+      <div class="stats-badge">
+        Total: <strong>6</strong> | 1st Party: <strong>4</strong> | .map Exposed: <strong>2</strong> | <span class="vuln-count">Retire.js Vulnerable: 4</span>
+      </div>
+    </div>
+
+    <!-- Master-Detail Split Container -->
+    <div class="split-container">
+
+      <!-- Top Section: Discovered JavaScript Scripts Table -->
+      <div class="table-container">
+        <div class="table-header-title">
+          <span>Discovered JavaScript Scripts (Deduplicated)</span>
+          <span style="font-size: 10px; color: var(--text-muted); font-weight: normal;">Click a row to inspect Retire.js vulnerability report and source mappings below</span>
+        </div>
+        <div class="scroll-table">
+          <table id="scriptsTable">
+            <thead>
+              <tr>
+                <th style="width: 35px;">#</th>
+                <th style="width: 75px;">Framework</th>
+                <th style="width: 55px;">Status</th>
+                <th style="width: 170px;">Host</th>
+                <th>JS Path</th>
+                <th style="width: 220px; color: #ff9b50;">Retire.js Vulnerabilities</th>
+                <th style="width: 110px;">Passive .map</th>
+                <th style="width: 110px;">On-Demand Probe</th>
+                <th style="width: 120px;">Unpacked Files</th>
+                <th style="width: 70px;">Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1: Selected jQuery -->
+              <tr class="selected" onclick="selectScript(1, this)" data-vuln="HIGH" data-lib="jquery">
+                <td>1</td>
+                <td>jQuery</td>
+                <td>200</td>
+                <td>app.example-portal.com</td>
+                <td>/static/js/vendor.jquery-1.8.2.min.js</td>
+                <td><span class="badge badge-high">[HIGH] jQuery 1.8.2 (4 CVEs)</span></td>
+                <td>Detected in Header</td>
+                <td>Found (200 OK)</td>
+                <td>48 files</td>
+                <td>92.4 KB</td>
+              </tr>
+              <!-- Row 2: Lodash -->
+              <tr onclick="selectScript(2, this)" data-vuln="HIGH" data-lib="lodash">
+                <td>2</td>
+                <td>-</td>
+                <td>200</td>
+                <td>app.example-portal.com</td>
+                <td>/assets/libs/lodash.4.17.4.js</td>
+                <td><span class="badge badge-high">[HIGH] Lodash 4.17.4 (2 CVEs)</span></td>
+                <td>Not Found</td>
+                <td>Not Run</td>
+                <td>-</td>
+                <td>71.1 KB</td>
+              </tr>
+              <!-- Row 3: AngularJS -->
+              <tr onclick="selectScript(3, this)" data-vuln="MEDIUM" data-lib="angularjs">
+                <td>3</td>
+                <td>Angular</td>
+                <td>200</td>
+                <td>app.example-portal.com</td>
+                <td>/legacy/angular.1.5.8.min.js</td>
+                <td><span class="badge badge-med">[MED] AngularJS 1.5.8 (3 CVEs)</span></td>
+                <td>Detected in Header</td>
+                <td>Found (200 OK)</td>
+                <td>112 files</td>
+                <td>145.2 KB</td>
+              </tr>
+              <!-- Row 4: Bootstrap -->
+              <tr onclick="selectScript(4, this)" data-vuln="MEDIUM" data-lib="bootstrap">
+                <td>4</td>
+                <td>-</td>
+                <td>200</td>
+                <td>cdn.external-assets.com</td>
+                <td>/ui/bootstrap-3.3.7.min.js</td>
+                <td><span class="badge badge-med">[MED] Bootstrap 3.3.7 (2 CVEs)</span></td>
+                <td>Not Found</td>
+                <td>Not Run</td>
+                <td>-</td>
+                <td>37.0 KB</td>
+              </tr>
+              <!-- Row 5: Clean React -->
+              <tr onclick="selectScript(5, this)" data-vuln="CLEAN" data-lib="react">
+                <td>5</td>
+                <td>React</td>
+                <td>200</td>
+                <td>app.example-portal.com</td>
+                <td>/static/chunks/react-dom.18.2.0.min.js</td>
+                <td><span class="badge badge-clean">Clean (0 Known CVEs)</span></td>
+                <td>Detected in Body</td>
+                <td>Found (200 OK)</td>
+                <td>254 files</td>
+                <td>131.5 KB</td>
+              </tr>
+              <!-- Row 6: Clean Next.js Chunk -->
+              <tr onclick="selectScript(6, this)" data-vuln="CLEAN" data-lib="nextjs">
+                <td>6</td>
+                <td>Next.js</td>
+                <td>200</td>
+                <td>app.example-portal.com</td>
+                <td>/_next/static/chunks/main-app-9c48b2.js</td>
+                <td><span class="badge badge-clean">Clean (0 Known CVEs)</span></td>
+                <td>Detected in Body</td>
+                <td>Found (200 OK)</td>
+                <td>310 files</td>
+                <td>289.4 KB</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bottom Section: Inspection Tabs -->
+      <div class="bottom-container">
+        <div class="sub-tabs">
+          <div class="sub-tab" onclick="switchSubTab('tree', this)">Reconstructed Source Tree</div>
+          <div class="sub-tab" onclick="switchSubTab('js-http', this)">JS HTTP Message</div>
+          <div class="sub-tab" onclick="switchSubTab('map-http', this)">SourceMap (.map) HTTP Message</div>
+          <!-- Integrated Retire.js Tab -->
+          <div class="sub-tab active" onclick="switchSubTab('retire', this)">
+            Retire.js Vulnerabilities <span class="tab-badge" id="tabBadge">4</span>
+          </div>
+        </div>
+
+        <!-- Retire.js Tab Content -->
+        <div id="retirePanel" class="retire-panel">
+
+          <!-- Header Summary Card -->
+          <div id="summaryCard" class="retire-header-card">
+            <div class="retire-header-top">
+              <div class="retire-lib-title">
+                <span id="libTitleText">jQuery 1.8.2</span>
+                <span id="libBadge" class="badge badge-high">HIGH RISK VULNERABILITY</span>
+              </div>
+              <div class="action-row">
+                <button class="btn" onclick="alert('Rescanning script against Retire.js...')">Rescan Script</button>
+                <button class="btn" onclick="alert('Vulnerabilities exported to clipboard in TSV format.')">Export TSV</button>
+                <button class="btn" onclick="alert('Vulnerabilities exported to JSON.')">Export JSON</button>
+                <button class="btn btn-primary" onclick="alert('Montoya AuditIssue created under Burp Target / Dashboard!')">Report to Burp Scanner</button>
+              </div>
+            </div>
+
+            <div class="retire-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Detection Method</span>
+                <span class="meta-value" id="metaDetect">Content Pattern Match: /*! jQuery v1.8.2</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Target Asset</span>
+                <span class="meta-value" id="metaAsset">https://app.example-portal.com/static/js/vendor.jquery-1.8.2.min.js</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Vulnerability Breakdown</span>
+                <span class="meta-value" id="metaCounts" style="color: #ff7878;">4 Known CVEs (2 High, 2 Medium)</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Retire.js Engine</span>
+                <span class="meta-value">Retire.js v3.0.4 (com.h3xstream.retirejs)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split View: Vulnerabilities Table (Left) + Detailed Inspector (Right) -->
+          <div class="retire-detail-split">
+
+            <!-- Left: Vulnerabilities List Table -->
+            <div class="vuln-list-pane">
+              <div class="table-header-title">
+                <span>Vulnerabilities & Security Advisories</span>
+                <span style="font-size: 10px; color: var(--text-muted); font-weight: normal;">Select a CVE to inspect details</span>
+              </div>
+              <div class="scroll-table">
+                <table id="vulnTable">
+                  <thead>
+                    <tr>
+                      <th style="width: 30px;">#</th>
+                      <th style="width: 65px;">Severity</th>
+                      <th style="width: 120px;">Identifier / CVE</th>
+                      <th style="width: 100px;">Affected Versions</th>
+                      <th>Issue Summary</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vulnTableBody">
+                    <!-- Dynamic Rows populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right: Vulnerability Detail Card -->
+            <div id="detailPane" class="vuln-detail-pane">
+              <div>
+                <span id="detailSeverityBadge" class="badge badge-high" style="margin-bottom: 6px;">HIGH SEVERITY</span>
+                <h3 id="detailTitle" style="color: var(--text-bright); font-size: 13px; margin-top: 4px;">
+                  CVE-2015-9251: 3rd party CORS request execution
+                </h3>
+              </div>
+
+              <div class="detail-section-title">Description and Security Impact</div>
+              <p id="detailDesc" class="detail-text">
+                jQuery versions prior to 3.0.0 are vulnerable to Cross-Site Scripting (XSS). When using $.ajax() with dataType 'script' or when cross-domain requests without an explicit dataType are executed, responses from third-party or untrusted servers may execute arbitrary JavaScript in the context of the vulnerable application.
+              </p>
+
+              <div class="detail-section-title">Remediation Guidance</div>
+              <p id="detailRemediation" class="detail-text" style="color: #9cdcfe;">
+                Upgrade jQuery to version 3.5.0 or later. If upgrading is blocked by legacy plugins, configure $.ajaxSetup({ dataType: 'json' }) or enforce strict CORS policies to avoid auto-evaluating untrusted responses.
+              </p>
+
+              <div class="detail-section-title">Matched Evidence in JavaScript Asset</div>
+              <div id="detailEvidence" class="code-box">/*! jQuery v1.8.2 jquery.com | jquery.org/license */
+(function( window, undefined ) {
+  var rootjQuery,
+  core_strundefined = typeof undefined,
+  location = window.location,
+  document = window.document,</div>
+
+              <div class="detail-section-title">Advisory References</div>
+              <div id="detailLinks" class="links-list">
+                <a class="link-item" href="https://nvd.nist.gov/vuln/detail/CVE-2015-9251" target="_blank">[NIST NVD] CVE-2015-9251 Details</a>
+                <a class="link-item" href="https://github.com/jquery/jquery/issues/2432" target="_blank">[GitHub Issue] jquery/jquery #2432</a>
+                <a class="link-item" href="https://blog.jquery.com/2016/06/09/jquery-3-0-final-released/" target="_blank">[jQuery Official Advisory] jQuery 3.0 Release Notes</a>
+              </div>
+
+              <div class="action-row" style="margin-top: auto;">
+                <button class="btn" onclick="copyDetailText()">Copy Vulnerability Details</button>
+                <button class="btn" onclick="copyAdvisories()">Copy Reference URLs</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Created with the help of an AI Agent and littlespidy.
+
+    const mockDatasets = {
+      1: {
+        lib: "jQuery",
+        version: "1.8.2",
+        status: "HIGH",
+        statusBadge: "HIGH RISK VULNERABILITY",
+        badgeClass: "badge-high",
+        detect: "Content Pattern Match: /*! jQuery v1.8.2",
+        asset: "https://app.example-portal.com/static/js/vendor.jquery-1.8.2.min.js",
+        counts: "4 Known CVEs (2 High, 2 Medium)",
+        vulns: [
+          {
+            id: 1,
+            severity: "HIGH",
+            badgeClass: "badge-high",
+            cve: "CVE-2015-9251",
+            versions: "< 3.0.0",
+            summary: "3rd party CORS request execution leads to arbitrary code",
+            desc: "jQuery prior to 3.0.0 is vulnerable to Cross-Site Scripting (XSS). When $.ajax() performs cross-domain requests without explicit dataType, external or untrusted servers can execute arbitrary JavaScript in the application context.",
+            remediation: "Upgrade jQuery to version 3.5.0 or later. Avoid dataType: 'script' requests to third-party endpoints.",
+            evidence: "/*! jQuery v1.8.2 jquery.com | jquery.org/license */\n(function( window, undefined ) {\n  var rootjQuery,\n  core_strundefined = typeof undefined...",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2015-9251",
+              "https://github.com/jquery/jquery/issues/2432",
+              "https://blog.jquery.com/2016/06/09/jquery-3-0-final-released/"
+            ]
+          },
+          {
+            id: 2,
+            severity: "HIGH",
+            badgeClass: "badge-high",
+            cve: "CVE-2020-11022",
+            versions: ">= 1.2.0, < 3.5.0",
+            summary: "Cross-site scripting (XSS) in jQuery.htmlPrefilter regex",
+            desc: "In jQuery versions greater than or equal to 1.2.0 and before 3.5.0, passing HTML from untrusted sources to jQuery's DOM manipulation methods (such as .html(), .append(), etc.) may result in execution of untrusted code via regex regex self-closing tag flaws.",
+            remediation: "Upgrade jQuery to 3.5.0 or later, or deploy DOMPurify before passing markup to jQuery methods.",
+            evidence: "rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\\/\\>\\x20\\t\\r\\n\\f]*)[^>]*)\\/>/gi",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2020-11022",
+              "https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/"
+            ]
+          },
+          {
+            id: 3,
+            severity: "MEDIUM",
+            badgeClass: "badge-med",
+            cve: "CVE-2019-11358",
+            versions: "< 3.4.0",
+            summary: "Prototype pollution vulnerability via jQuery.extend",
+            desc: "jQuery before 3.4.0 mishandles jQuery.extend(true, {}, ...) deep object copying, leading to Object Prototype Pollution if untrusted object properties can be merged.",
+            remediation: "Upgrade jQuery to 3.4.0 or later.",
+            evidence: "jQuery.extend = jQuery.fn.extend = function() {\n  var options, name, src, copy, copyIsArray, clone...",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2019-11358",
+              "https://github.com/jquery/jquery/pull/4333"
+            ]
+          },
+          {
+            id: 4,
+            severity: "MEDIUM",
+            badgeClass: "badge-med",
+            cve: "CVE-2020-11023",
+            versions: ">= 1.0.3, < 3.5.0",
+            summary: "XSS in jQuery.htmlPrefilter with untrusted HTML",
+            desc: "Passing HTML containing <option> tags from untrusted sources to DOM manipulation methods can bypass sanity checks and execute malicious script.",
+            remediation: "Upgrade jQuery to version 3.5.0 or later.",
+            evidence: "jQuery.htmlPrefilter = function( html ) {\n  return html.replace( rxhtmlTag, '<$1></$2>' );\n};",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2020-11023"
+            ]
+          }
+        ]
+      },
+      2: {
+        lib: "Lodash",
+        version: "4.17.4",
+        status: "HIGH",
+        statusBadge: "HIGH RISK VULNERABILITY",
+        badgeClass: "badge-high",
+        detect: "Filename and URL Pattern: lodash.4.17.4.js",
+        asset: "https://app.example-portal.com/assets/libs/lodash.4.17.4.js",
+        counts: "2 Known CVEs (2 High)",
+        vulns: [
+          {
+            id: 1,
+            severity: "HIGH",
+            badgeClass: "badge-high",
+            cve: "CVE-2019-10744",
+            versions: "< 4.17.12",
+            summary: "Prototype pollution in defaultsDeep function",
+            desc: "The function defaultsDeep in lodash before 4.17.12 allows attackers to cause prototype pollution via deep merging.",
+            remediation: "Upgrade lodash to 4.17.12 or later.",
+            evidence: "/**\n * @license\n * Lodash <https://lodash.com/>\n * Copyright JS Foundation and other contributors\n * Version 4.17.4\n */",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2019-10744",
+              "https://snyk.io/vuln/SNYK-JS-LODASH-450202"
+            ]
+          },
+          {
+            id: 2,
+            severity: "HIGH",
+            badgeClass: "badge-high",
+            cve: "CVE-2020-8203",
+            versions: "< 4.17.19",
+            summary: "Prototype pollution in zipObjectDeep",
+            desc: "Prototype pollution in lodash before 4.17.19 via zipObjectDeep function allowing manipulation of Object.prototype.",
+            remediation: "Upgrade lodash to 4.17.19 or higher.",
+            evidence: "function zipObjectDeep(props, values) { return baseZipObject(props, values, baseSet); }",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2020-8203"
+            ]
+          }
+        ]
+      },
+      3: {
+        lib: "AngularJS",
+        version: "1.5.8",
+        status: "MEDIUM",
+        statusBadge: "MEDIUM RISK VULNERABILITY",
+        badgeClass: "badge-med",
+        detect: "Content Pattern Match: @license AngularJS v1.5.8",
+        asset: "https://app.example-portal.com/legacy/angular.1.5.8.min.js",
+        counts: "3 Known CVEs (3 Medium)",
+        vulns: [
+          {
+            id: 1,
+            severity: "MEDIUM",
+            badgeClass: "badge-med",
+            cve: "CVE-2019-10768",
+            versions: "< 1.8.0",
+            summary: "Prototype pollution in angular.merge",
+            desc: "angular.merge allows prototype pollution when recursively copying user-controlled objects.",
+            remediation: "Upgrade AngularJS to 1.8.0 or migrate to modern Angular.",
+            evidence: "/**\n * @license AngularJS v1.5.8\n * (c) 2010-2016 Google, Inc. http://angularjs.org\n * License: MIT\n */",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2019-10768"
+            ]
+          },
+          {
+            id: 2,
+            severity: "MEDIUM",
+            badgeClass: "badge-med",
+            cve: "CVE-2020-35769",
+            versions: "< 1.8.0",
+            summary: "Client-side template injection (CSTI)",
+            desc: "Expression sandbox bypass leading to remote script execution when user input is parsed by AngularJS expressions.",
+            remediation: "Do not evaluate server reflections in ng-app, or upgrade to 1.8.0.",
+            evidence: "function parse(expr, interceptor) { ... }",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2020-35769"
+            ]
+          },
+          {
+            id: 3,
+            severity: "MEDIUM",
+            badgeClass: "badge-med",
+            cve: "CVE-2022-25869",
+            versions: "< 1.8.3",
+            summary: "Regular expression denial of service (ReDoS)",
+            desc: "ReDoS vulnerability in angular.js expression parsing.",
+            remediation: "Upgrade AngularJS to 1.8.3.",
+            evidence: "var R_ISO8601_STR = /^(\\d{4})-?(\\d\\d)-?(\\d\\d)...",
+            links: [
+              "https://nvd.nist.gov/vuln/detail/CVE-2022-25869"
+            ]
+          }
+        ]
+      },
+      4: {
+        lib: "Bootstrap",
+        version: "3.3.7",
+        status: "MEDIUM",
+        statusBadge: "MEDIUM RISK VULNERABILITY",
+        badgeClass: "badge-med",
+        detect: "Content Pattern Match: Bootstrap v3.3.7",
+        asset: "https://cdn.external-assets.com/ui/bootstrap-3.3.7.min.js",
+        counts: "2 Known CVEs (2 Medium)",
+        vulns: [
+          {
+            id: 1,
+            severity: "MEDIUM",
+            badgeClass: "badge-med",
+            cve: "CVE-2018-14041",
+            versions: "< 4.0.0",
+            summary: "XSS in collapse data-parent attribute",
+            desc: "Cross-site scripting in collapse component data-parent attribute handling.",
+            remediation: "Upgrade Bootstrap to 4.1.2 or 5.x.",
+            evidence: "/*!\n * Bootstrap v3.3.7 (http://getbootstrap.com)\n * Copyright 2011-2016 Twitter, Inc.\n */",
+            links: ["https://nvd.nist.gov/vuln/detail/CVE-2018-14041"]
+          },
+          {
+            id: 2,
+            severity: "MEDIUM",
+            badgeClass: "badge-med",
+            cve: "CVE-2019-8331",
+            versions: "< 3.4.1",
+            summary: "XSS in tooltip and popover data-template",
+            desc: "XSS in tooltip or popover plugins if HTML templates contain untrusted attributes.",
+            remediation: "Upgrade Bootstrap to 3.4.1 or higher.",
+            evidence: "Tooltip.DEFAULTS = { animation: true, placement: 'top', template: '...' }",
+            links: ["https://nvd.nist.gov/vuln/detail/CVE-2019-8331"]
+          }
+        ]
+      },
+      5: {
+        lib: "React DOM",
+        version: "18.2.0",
+        status: "CLEAN",
+        statusBadge: "CLEAN - NO KNOWN VULNERABILITIES",
+        badgeClass: "badge-clean",
+        detect: "Content Pattern: react-dom.production.min.js",
+        asset: "https://app.example-portal.com/static/chunks/react-dom.18.2.0.min.js",
+        counts: "0 Known CVEs",
+        vulns: []
+      },
+      6: {
+        lib: "Next.js App Chunk",
+        version: "Custom App Code",
+        status: "CLEAN",
+        statusBadge: "CLEAN - NO KNOWN VULNERABILITIES",
+        badgeClass: "badge-clean",
+        detect: "Proprietary First-Party Application Bundle",
+        asset: "https://app.example-portal.com/_next/static/chunks/main-app-9c48b2.js",
+        counts: "0 Known CVEs",
+        vulns: []
+      }
+    };
+
+    let currentScriptId = 1;
+    let currentVulnIndex = 0;
+
+    function renderRetirePanel(scriptId) {
+      const data = mockDatasets[scriptId];
+      if (!data) return;
+
+      currentScriptId = scriptId;
+      currentVulnIndex = 0;
+
+      // Update Header Card
+      const summaryCard = document.getElementById("summaryCard");
+      const libTitleText = document.getElementById("libTitleText");
+      const libBadge = document.getElementById("libBadge");
+      const metaDetect = document.getElementById("metaDetect");
+      const metaAsset = document.getElementById("metaAsset");
+      const metaCounts = document.getElementById("metaCounts");
+      const tabBadge = document.getElementById("tabBadge");
+
+      libTitleText.textContent = data.lib + (data.version ? " " + data.version : "");
+      libBadge.textContent = data.statusBadge;
+      libBadge.className = "badge " + data.badgeClass;
+
+      if (data.status === "CLEAN") {
+        summaryCard.className = "retire-header-card clean-card";
+        metaCounts.style.color = "var(--badge-clean)";
+        tabBadge.textContent = "0";
+        tabBadge.style.backgroundColor = "var(--badge-clean)";
+      } else {
+        summaryCard.className = "retire-header-card";
+        metaCounts.style.color = (data.status === "HIGH") ? "var(--badge-high)" : "var(--badge-med)";
+        tabBadge.textContent = data.vulns.length;
+        tabBadge.style.backgroundColor = (data.status === "HIGH") ? "var(--badge-high)" : "var(--badge-med)";
+      }
+
+      metaDetect.textContent = data.detect;
+      metaAsset.textContent = data.asset;
+      metaCounts.textContent = data.counts;
+
+      // Update Vuln Table
+      const tbody = document.getElementById("vulnTableBody");
+      tbody.innerHTML = "";
+
+      if (data.vulns.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="5" style="text-align: center; padding: 24px; color: var(--badge-clean);">
+          <strong>No known vulnerable libraries or CVEs detected in this script.</strong><br>
+          <span style="font-size: 10px; color: var(--text-muted);">Verified against Retire.js repository signatures.</span>
+        </td>`;
+        tbody.appendChild(tr);
+
+        // Blank out detail pane
+        document.getElementById("detailPane").innerHTML = `
+          <div style="text-align: center; margin: auto; padding: 20px;">
+            <span class="badge badge-clean" style="font-size: 12px; padding: 4px 8px;">CLEAN COMPONENT</span>
+            <h4 style="margin-top: 10px; color: var(--text-bright);">No Security Advisories Reported</h4>
+            <p class="detail-text" style="margin-top: 6px; max-width: 320px;">
+              The Retire.js vulnerability engine checked this script's URL, content hash, and embedded declarations and detected no matching CVEs.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      data.vulns.forEach((v, idx) => {
+        const tr = document.createElement("tr");
+        if (idx === 0) tr.className = "selected";
+        tr.onclick = function() {
+          selectVuln(idx, this);
+        };
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td><span class="badge ${v.badgeClass}">${v.severity}</span></td>
+          <td><strong style="color: var(--text-bright);">${v.cve}</strong></td>
+          <td><code>${v.versions}</code></td>
+          <td>${v.summary}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderVulnDetail(data.vulns[0]);
+    }
+
+    function selectVuln(idx, trElement) {
+      const data = mockDatasets[currentScriptId];
+      if (!data || !data.vulns[idx]) return;
+
+      currentVulnIndex = idx;
+      const rows = document.querySelectorAll("#vulnTableBody tr");
+      rows.forEach(r => r.classList.remove("selected"));
+      if (trElement) trElement.classList.add("selected");
+
+      renderVulnDetail(data.vulns[idx]);
+    }
+
+    function renderVulnDetail(v) {
+      const detailPane = document.getElementById("detailPane");
+      let linksHtml = "";
+      v.links.forEach(url => {
+        linksHtml += `<a class="link-item" href="${url}" target="_blank">${url}</a>`;
+      });
+
+      detailPane.innerHTML = `
+        <div>
+          <span id="detailSeverityBadge" class="badge ${v.badgeClass}" style="margin-bottom: 6px;">${v.severity} SEVERITY</span>
+          <h3 id="detailTitle" style="color: var(--text-bright); font-size: 13px; margin-top: 4px;">
+            ${v.cve}: ${v.summary}
+          </h3>
+        </div>
+
+        <div class="detail-section-title">Description and Security Impact</div>
+        <p class="detail-text">${v.desc}</p>
+
+        <div class="detail-section-title">Remediation Guidance</div>
+        <p class="detail-text" style="color: #9cdcfe;">${v.remediation}</p>
+
+        <div class="detail-section-title">Matched Evidence in JavaScript Asset</div>
+        <div class="code-box">${escapeHtml(v.evidence)}</div>
+
+        <div class="detail-section-title">Advisory References</div>
+        <div class="links-list">${linksHtml}</div>
+
+        <div class="action-row" style="margin-top: auto;">
+          <button class="btn" onclick="copyDetailText()">Copy Vulnerability Details</button>
+          <button class="btn" onclick="copyAdvisories()">Copy Reference URLs</button>
+        </div>
+      `;
+    }
+
+    function selectScript(id, trElement) {
+      const rows = document.querySelectorAll("#scriptsTable tbody tr");
+      rows.forEach(r => r.classList.remove("selected"));
+      if (trElement) trElement.classList.add("selected");
+      renderRetirePanel(id);
+    }
+
+    function applyFilters() {
+      const vulnOnly = document.getElementById("vulnOnlyCheckbox").checked;
+      const sevFilter = document.getElementById("severitySelect").value;
+      const query = document.getElementById("searchBox").value.toLowerCase();
+
+      const rows = document.querySelectorAll("#scriptsTable tbody tr");
+      rows.forEach(row => {
+        const vuln = row.getAttribute("data-vuln");
+        const lib = row.getAttribute("data-lib");
+        const text = row.innerText.toLowerCase();
+
+        let visible = true;
+
+        if (vulnOnly && vuln === "CLEAN") {
+          visible = false;
+        }
+
+        if (sevFilter === "HIGH" && vuln !== "HIGH") visible = false;
+        if (sevFilter === "MEDIUM" && (vuln !== "HIGH" && vuln !== "MEDIUM")) visible = false;
+        if (sevFilter === "CLEAN" && vuln !== "CLEAN") visible = false;
+
+        if (query && !text.includes(query)) visible = false;
+
+        row.style.display = visible ? "" : "none";
+      });
+    }
+
+    function switchSubTab(tabName, tabElement) {
+      const tabs = document.querySelectorAll(".sub-tab");
+      tabs.forEach(t => t.classList.remove("active"));
+      tabElement.classList.add("active");
+
+      const retirePanel = document.getElementById("retirePanel");
+      if (tabName === "retire") {
+        retirePanel.style.display = "flex";
+      } else {
+        retirePanel.style.display = "none";
+        alert("Switched to sub-tab: " + tabName + ". (Click 'Retire.js Vulnerabilities' to return to the Retire.js interface).");
+      }
+    }
+
+    function scanSelectedRetireJs() {
+      alert("Scanning selected script against Retire.js engine and repository signatures...");
+    }
+
+    function scanAllRetireJs() {
+      alert("Batch scanning all 6 visible JavaScript scripts against Retire.js database...");
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light-theme");
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function copyDetailText() {
+      alert("Copied vulnerability summary and remediation text to clipboard.");
+    }
+
+    function copyAdvisories() {
+      alert("Copied advisory links to clipboard.");
+    }
+
+    // Initialize
+    window.addEventListener("DOMContentLoaded", () => {
+      renderRetirePanel(1);
+    });
+  </script>
+</body>
+</html>
