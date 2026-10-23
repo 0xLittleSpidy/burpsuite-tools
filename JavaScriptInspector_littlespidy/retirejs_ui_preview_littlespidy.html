@@ -581,14 +581,14 @@
       <button class="btn">Deselect All</button>
       <button class="btn">Copy JS URLs</button>
       <div class="sep"></div>
-      <button class="btn">Probe Selected .map</button>
-      <button class="btn">Probe All Visible .map</button>
-      <button class="btn">Unpack Selected .map</button>
       <button class="btn">Download JS File(s)...</button>
+      <button class="btn">Scan Selected (.map)</button>
+      <button class="btn">Scan All (.map)</button>
+      <button class="btn">Unpack Selected .map</button>
       <div class="sep"></div>
       <!-- Retire.js Actions -->
-      <button class="btn btn-highlight" onclick="scanSelectedRetireJs()">Scan Selected (Retire.js)</button>
-      <button class="btn btn-highlight" onclick="scanAllRetireJs()">Scan All Visible (Retire.js)</button>
+      <button class="btn btn-highlight" onclick="scanSelectedRetireJs()">Scan Selected (Retire JS)</button>
+      <button class="btn btn-highlight" onclick="scanAllRetireJs()">Scan All (Retire JS)</button>
       <select title="Retire.js Vulnerability Database">
         <option>Retire.js DB: v3.0.4 (Online / 3,420 signatures)</option>
         <option>Update Retire.js DB Online...</option>
@@ -742,9 +742,9 @@
       <!-- Bottom Section: Inspection Tabs -->
       <div class="bottom-container">
         <div class="sub-tabs">
+          <div class="sub-tab" onclick="switchSubTab('js-http', this)">Javascript</div>
+          <div class="sub-tab" onclick="switchSubTab('map-http', this)">Sourcemap</div>
           <div class="sub-tab" onclick="switchSubTab('tree', this)">Reconstructed Source Tree</div>
-          <div class="sub-tab" onclick="switchSubTab('js-http', this)">JS HTTP Message</div>
-          <div class="sub-tab" onclick="switchSubTab('map-http', this)">SourceMap (.map) HTTP Message</div>
           <!-- Integrated Retire.js Tab -->
           <div class="sub-tab active" onclick="switchSubTab('retire', this)">
             Retire.js Vulnerabilities <span class="tab-badge" id="tabBadge">4</span>
@@ -760,12 +760,6 @@
               <div class="retire-lib-title">
                 <span id="libTitleText">jQuery 1.8.2</span>
                 <span id="libBadge" class="badge badge-high">HIGH RISK VULNERABILITY</span>
-              </div>
-              <div class="action-row">
-                <button class="btn" onclick="alert('Rescanning script against Retire.js...')">Rescan Script</button>
-                <button class="btn" onclick="alert('Vulnerabilities exported to clipboard in TSV format.')">Export TSV</button>
-                <button class="btn" onclick="alert('Vulnerabilities exported to JSON.')">Export JSON</button>
-                <button class="btn btn-primary" onclick="alert('Montoya AuditIssue created under Burp Target / Dashboard!')">Report to Burp Scanner</button>
               </div>
             </div>
 

@@ -160,17 +160,18 @@ public class RetireJsSwingPreviewRunner_littlespidy {
         bar1.add(createDarkButton("Deselect All"));
         bar1.add(createDarkButton("Copy JS URLs"));
         bar1.add(new JSeparator(SwingConstants.VERTICAL));
-        bar1.add(createDarkButton("Probe Selected .map"));
-        bar1.add(createDarkButton("Probe All Visible .map"));
+        bar1.add(createDarkButton("Download JS File(s)..."));
+        bar1.add(createDarkButton("Scan Selected (.map)"));
+        bar1.add(createDarkButton("Scan All (.map)"));
         bar1.add(createDarkButton("Unpack Selected .map"));
         bar1.add(new JSeparator(SwingConstants.VERTICAL));
 
         // Retire.js buttons
-        JButton scanSelectedRetireBtn = createDarkButton("Scan Selected (Retire.js)");
+        JButton scanSelectedRetireBtn = createDarkButton("Scan Selected (Retire JS)");
         scanSelectedRetireBtn.setForeground(new Color(0x79, 0xc0, 0xff));
         bar1.add(scanSelectedRetireBtn);
 
-        JButton scanAllRetireBtn = createDarkButton("Scan All Visible (Retire.js)");
+        JButton scanAllRetireBtn = createDarkButton("Scan All (Retire JS)");
         scanAllRetireBtn.setForeground(new Color(0x79, 0xc0, 0xff));
         bar1.add(scanAllRetireBtn);
 
@@ -285,14 +286,14 @@ public class RetireJsSwingPreviewRunner_littlespidy {
         scriptsPanel.add(new JScrollPane(table), BorderLayout.CENTER);
         mainSplit.setTopComponent(scriptsPanel);
 
-        // Bottom Inspection Tabs
+        // Bottom Inspection Tabs: Javascript, Sourcemap, Reconstructed Source Tree, Retire.js
         JTabbedPane bottomTabs = new JTabbedPane();
         bottomTabs.setBackground(COLOR_DARK);
         bottomTabs.setForeground(COLOR_TEXT);
 
+        bottomTabs.addTab("Javascript", new JPanel());
+        bottomTabs.addTab("Sourcemap", new JPanel());
         bottomTabs.addTab("Reconstructed Source Tree", new JPanel());
-        bottomTabs.addTab("JS HTTP Message", new JPanel());
-        bottomTabs.addTab("SourceMap (.map) HTTP Message", new JPanel());
 
         // Sub-Tab 4: Retire.js Vulnerabilities Panel
         JPanel retirePanel = createRetireJsTabPanel();
@@ -343,18 +344,6 @@ public class RetireJsSwingPreviewRunner_littlespidy {
         metaGrid.add(createMetaLabel("VULNERABILITIES BREAKDOWN", "4 Known CVEs (2 High, 2 Medium)"));
 
         headerCard.add(metaGrid, BorderLayout.CENTER);
-
-        JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionRow.setBackground(COLOR_DARK);
-        actionRow.add(createDarkButton("Rescan Script"));
-        actionRow.add(createDarkButton("Export TSV"));
-        actionRow.add(createDarkButton("Export JSON"));
-        JButton burpReportBtn = new JButton("Report to Burp Scanner");
-        burpReportBtn.setBackground(COLOR_ACCENT);
-        burpReportBtn.setForeground(Color.WHITE);
-        actionRow.add(burpReportBtn);
-
-        headerCard.add(actionRow, BorderLayout.SOUTH);
         panel.add(headerCard, BorderLayout.NORTH);
 
         // -- Split View: Left CVE Table vs Right Detail Inspector --
