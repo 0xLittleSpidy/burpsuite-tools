@@ -33,3 +33,11 @@ tasks.named<Jar>("jar") {
     from(configurations.runtimeClasspath.get().filter { it.isDirectory })
     from(configurations.runtimeClasspath.get().filterNot { it.isDirectory }.map { zipTree(it) })
 }
+
+tasks.register<JavaExec>("previewRetireJsGui") {
+    group = "application"
+    description = "Displays the standalone Java Swing GUI preview of the Retire.js integration."
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("com.littlespidy.jssourcemapexplorer.ui.RetireJsSwingPreviewRunner_littlespidy")
+}
+
