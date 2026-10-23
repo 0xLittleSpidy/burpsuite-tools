@@ -61,7 +61,7 @@ public class ExecutionLogPanel extends JPanel {
 
         stageFilterBtn = new MultiSelectFilterButton(
                 "Stage",
-                List.of("All Stages", "Upload", "Probe", "Content-Type", "File-Size", "EXIF", "Preflight", "ReDownload", "Verification"),
+                List.of("All Stages", "Upload", "Probe", "Ext-Fuzz", "Content-Type", "File-Size", "EXIF", "Preflight", "ReDownload", "Verification"),
                 sel -> refreshFilter()
         );
 

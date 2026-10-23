@@ -13,6 +13,7 @@ public enum StageType {
     REDOWNLOAD("ReDownload"),
     VERIFICATION("Verification"),
     EXTENSION_PROBE("Probe"),
+    EXTENSION_FUZZ("Ext-Fuzz"),
     CONTENT_TYPE_PROBE("Content-Type"),
     FILE_SIZE_PROBE("File-Size"),
     EXIF_PROBE("EXIF");

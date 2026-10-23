@@ -111,6 +111,7 @@ public class UploadSessionPanel extends JPanel {
 
     private JSpinner throttleSpinner;
     private JButton testRedlBtn;
+    private JButton fuzzExtBtn;
     private JButton probeExtBtn;
     private JButton probeContentTypeBtn;
     private JButton testFileSizeBtn;
@@ -303,6 +304,12 @@ public class UploadSessionPanel extends JPanel {
         testRedlBtn.setToolTipText("Verify URL extraction and test downloading the file from the server");
         testRedlBtn.addActionListener(e -> testReDownloader());
 
+        fuzzExtBtn = new JButton("Fuzz Extension Only");
+        fuzzExtBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        fuzzExtBtn.setForeground(new Color(0, 130, 110));
+        fuzzExtBtn.setToolTipText("Fuzz only the file extension name (e.g. abcd.jpg, abcd.png) preserving request file body");
+        fuzzExtBtn.addActionListener(e -> fuzzExtensionOnly());
+
         probeExtBtn = new JButton("Probe Extensions");
         probeExtBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         probeExtBtn.setForeground(new Color(0, 100, 180));
@@ -344,6 +351,7 @@ public class UploadSessionPanel extends JPanel {
         previewResultLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
 
         actionsPanel.add(testRedlBtn);
+        actionsPanel.add(fuzzExtBtn);
         actionsPanel.add(probeExtBtn);
         actionsPanel.add(probeContentTypeBtn);
         actionsPanel.add(testFileSizeBtn);
@@ -697,12 +705,25 @@ public class UploadSessionPanel extends JPanel {
 
     private void setScanRunning(boolean isRunning) {
         startScanBtn.setEnabled(!isRunning);
+        fuzzExtBtn.setEnabled(!isRunning);
         probeExtBtn.setEnabled(!isRunning);
         probeContentTypeBtn.setEnabled(!isRunning);
         testFileSizeBtn.setEnabled(!isRunning);
         testExifBtn.setEnabled(!isRunning);
         testRedlBtn.setEnabled(!isRunning);
         stopScanBtn.setEnabled(isRunning);
+    }
+
+    private void fuzzExtensionOnly() {
+        syncConfigFromUI();
+        setScanRunning(true);
+        HttpRequest activeReq = (uploadReqEditor != null && uploadReqEditor.getRequest() != null)
+                ? uploadReqEditor.getRequest()
+                : baseRequest;
+
+        currentExecutor = createExecutor("Extension Fuzz");
+        statusLabel.setForeground(new Color(0, 130, 110));
+        currentExecutor.startExtensionFuzz(activeReq);
     }
 
     private void probeAllowedExtensions() {

@@ -70,6 +70,7 @@ public class UploadScanExecutor {
     public enum ScanMode {
         FULL_SCAN,
         ALLOWED_EXTENSIONS_PROBE,
+        EXTENSION_FUZZ_ONLY,
         CONTENT_TYPE_PROBE,
         FILE_SIZE_PROBE,
         EXIF_PROBE
@@ -81,6 +82,10 @@ public class UploadScanExecutor {
 
     public void startAllowedExtensionsProbe(HttpRequest baseRequest) {
         startInternal(baseRequest, ScanMode.ALLOWED_EXTENSIONS_PROBE);
+    }
+
+    public void startExtensionFuzz(HttpRequest baseRequest) {
+        startInternal(baseRequest, ScanMode.EXTENSION_FUZZ_ONLY);
     }
 
     public void startContentTypeProbe(HttpRequest baseRequest) {
@@ -106,6 +111,7 @@ public class UploadScanExecutor {
         String startMsg;
         switch (mode) {
             case ALLOWED_EXTENSIONS_PROBE: startMsg = "Starting allowed extensions probe..."; break;
+            case EXTENSION_FUZZ_ONLY:      startMsg = "Starting extension name fuzzing..."; break;
             case CONTENT_TYPE_PROBE:       startMsg = "Starting Content-Type probe..."; break;
             case FILE_SIZE_PROBE:          startMsg = "Starting file size limit tests..."; break;
             case EXIF_PROBE:               startMsg = "Starting EXIF metadata & leakage tests..."; break;
@@ -131,6 +137,7 @@ public class UploadScanExecutor {
                 String finishMsg;
                 switch (mode) {
                     case ALLOWED_EXTENSIONS_PROBE: finishMsg = "Allowed extensions probe finished."; break;
+                    case EXTENSION_FUZZ_ONLY:      finishMsg = "Extension name fuzzing finished."; break;
                     case CONTENT_TYPE_PROBE:       finishMsg = "Content-Type probe finished."; break;
                     case FILE_SIZE_PROBE:          finishMsg = "File size limit tests finished."; break;
                     case EXIF_PROBE:               finishMsg = "EXIF metadata & leakage tests finished."; break;
@@ -170,6 +177,9 @@ public class UploadScanExecutor {
         switch (mode) {
             case ALLOWED_EXTENSIONS_PROBE:
                 payloads = UploadPayloadGenerator.generateAllowedExtensionPayloadsOnly(config, originalFilename);
+                break;
+            case EXTENSION_FUZZ_ONLY:
+                payloads = UploadPayloadGenerator.generateExtensionFuzzPayloadsOnly(config, originalFilename);
                 break;
             case CONTENT_TYPE_PROBE:
                 payloads = UploadPayloadGenerator.generateContentTypePayloadsOnly(config, originalFilename);
@@ -258,7 +268,9 @@ public class UploadScanExecutor {
             int uploadId = sequenceCounter.getAndIncrement();
             StageType entryStage = StageType.UPLOAD;
             String cat = payload.getCategory();
-            if (mode == ScanMode.ALLOWED_EXTENSIONS_PROBE || "Allowed Extensions".equalsIgnoreCase(cat)) {
+            if (mode == ScanMode.EXTENSION_FUZZ_ONLY || "Extension Fuzz".equalsIgnoreCase(cat)) {
+                entryStage = StageType.EXTENSION_FUZZ;
+            } else if (mode == ScanMode.ALLOWED_EXTENSIONS_PROBE || "Allowed Extensions".equalsIgnoreCase(cat)) {
                 entryStage = StageType.EXTENSION_PROBE;
             } else if (mode == ScanMode.CONTENT_TYPE_PROBE || "Content-Type".equalsIgnoreCase(cat)) {
                 entryStage = StageType.CONTENT_TYPE_PROBE;
@@ -509,6 +521,10 @@ public class UploadScanExecutor {
                     newBody = body;
                 }
 
+                if (payload.isPreserveBody()) {
+                    return modifiedReq.withBody(newBody);
+                }
+
                 // Look for Content-Type within this multipart part
                 int ctIdx = newBody.indexOf("Content-Type: ", fnIdx);
                 if (ctIdx != -1 && ctIdx < fnIdx + 200) {
@@ -535,6 +551,10 @@ public class UploadScanExecutor {
 
         if (hasBodyMarkers) {
             return modifiedReq.withBody(body);
+        }
+
+        if (payload.isPreserveBody()) {
+            return modifiedReq;
         }
 
         // Fallback: replace body directly with binary payload

@@ -18,6 +18,14 @@ public class PayloadDefinition {
     private final String executionMarker;
     private final String collaboratorSubdomain;
     private final boolean isOob;
+    private final boolean preserveBody;
+
+    public PayloadDefinition(String name,
+                             String category,
+                             String filename,
+                             boolean preserveBody) {
+        this(name, category, filename, "", new byte[0], "", "", false, preserveBody);
+    }
 
     public PayloadDefinition(String name,
                              String category,
@@ -25,7 +33,7 @@ public class PayloadDefinition {
                              String contentType,
                              byte[] content,
                              String executionMarker) {
-        this(name, category, filename, contentType, content, executionMarker, "", false);
+        this(name, category, filename, contentType, content, executionMarker, "", false, false);
     }
 
     public PayloadDefinition(String name,
@@ -36,7 +44,7 @@ public class PayloadDefinition {
                              String executionMarker) {
         this(name, category, filename, contentType,
                 contentString != null ? contentString.getBytes(StandardCharsets.UTF_8) : new byte[0],
-                executionMarker, "", false);
+                executionMarker, "", false, false);
     }
 
     public PayloadDefinition(String name,
@@ -47,14 +55,27 @@ public class PayloadDefinition {
                              String executionMarker,
                              String collaboratorSubdomain,
                              boolean isOob) {
+        this(name, category, filename, contentType, content, executionMarker, collaboratorSubdomain, isOob, false);
+    }
+
+    public PayloadDefinition(String name,
+                             String category,
+                             String filename,
+                             String contentType,
+                             byte[] content,
+                             String executionMarker,
+                             String collaboratorSubdomain,
+                             boolean isOob,
+                             boolean preserveBody) {
         this.name = name;
         this.category = category;
         this.filename = filename;
-        this.contentType = contentType;
+        this.contentType = contentType != null ? contentType : "";
         this.content = content != null ? content : new byte[0];
         this.executionMarker = executionMarker != null ? executionMarker : "";
         this.collaboratorSubdomain = collaboratorSubdomain != null ? collaboratorSubdomain : "";
         this.isOob = isOob;
+        this.preserveBody = preserveBody;
     }
 
     public PayloadDefinition(String name,
@@ -67,7 +88,7 @@ public class PayloadDefinition {
                              boolean isOob) {
         this(name, category, filename, contentType,
                 contentString != null ? contentString.getBytes(StandardCharsets.UTF_8) : new byte[0],
-                executionMarker, collaboratorSubdomain, isOob);
+                executionMarker, collaboratorSubdomain, isOob, false);
     }
 
     public String getName() {
@@ -100,5 +121,9 @@ public class PayloadDefinition {
 
     public boolean isOob() {
         return isOob;
+    }
+
+    public boolean isPreserveBody() {
+        return preserveBody;
     }
 }

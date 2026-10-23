@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -811,6 +813,102 @@ public class UploadPayloadGenerator {
         }
         if (config.isTestExifLeakage() || config.isTestExifXss() || config.isTestExifInjections()) {
             payloads.addAll(generateExifPayloads(config, baseFilename, collab, token));
+        }
+
+        return payloads;
+    }
+
+    /**
+     * Collects all extension names to fuzz based on active configuration categories,
+     * custom extensions, and consolidated Wikipedia extensions.
+     */
+    public static List<String> getExtensionsToFuzz(UploadScannerConfig config) {
+        Set<String> exts = new LinkedHashSet<>();
+
+        // 1. Images
+        if (config == null || config.isTestExtImages()) {
+            exts.addAll(List.of("jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "ico", "tiff", "avif"));
+        }
+
+        // 2. Documents
+        if (config == null || config.isTestExtDocuments()) {
+            exts.addAll(List.of("txt", "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv", "rtf", "odt"));
+        }
+
+        // 3. Web & Data
+        if (config == null || config.isTestExtWebData()) {
+            exts.addAll(List.of("json", "xml", "html", "js", "css", "yaml"));
+        }
+
+        // 4. Archives
+        if (config == null || config.isTestExtArchives()) {
+            exts.addAll(List.of("zip", "tar", "gz", "7z", "rar"));
+        }
+
+        // 5. Media
+        if (config == null || config.isTestExtMedia()) {
+            exts.addAll(List.of("mp3", "wav", "mp4", "avi", "mov", "mkv", "ogg"));
+        }
+
+        // 6. Custom extensions
+        if (config != null && config.getCustomExtensions() != null && !config.getCustomExtensions().trim().isEmpty()) {
+            String[] custom = config.getCustomExtensions().split("[,;\\s]+");
+            for (String c : custom) {
+                String clean = c.trim().replaceAll("^\\.+", "").toLowerCase();
+                if (!clean.isEmpty()) {
+                    exts.add(clean);
+                }
+            }
+        }
+
+        // 7. Wikipedia consolidated extensions (912)
+        if (config == null || config.isTestExtWikipedia()) {
+            List<String> wikiList = loadWikipediaExtensions();
+            for (String w : wikiList) {
+                String clean = w.trim().replaceAll("^\\.+", "").toLowerCase();
+                if (!clean.isEmpty()) {
+                    exts.add(clean);
+                }
+            }
+        }
+
+        // Fallback: If nothing was selected, provide common extensions + Wikipedia
+        if (exts.isEmpty()) {
+            exts.addAll(List.of("jpg", "png", "gif", "pdf", "doc", "docx", "txt", "zip", "tar", "gz"));
+            for (String w : loadWikipediaExtensions()) {
+                String clean = w.trim().replaceAll("^\\.+", "").toLowerCase();
+                if (!clean.isEmpty()) {
+                    exts.add(clean);
+                }
+            }
+        }
+
+        return new ArrayList<>(exts);
+    }
+
+    /**
+     * Generates extension-only fuzzing payloads where the original base filename prefix (e.g. "abcd")
+     * is preserved and each known extension is appended (e.g. "abcd.jpg", "abcd.png"), while preserving
+     * the original request body content.
+     */
+    public static List<PayloadDefinition> generateExtensionFuzzPayloadsOnly(UploadScannerConfig config, String originalFilename) {
+        String baseStem = (originalFilename != null && !originalFilename.trim().isEmpty())
+                ? originalFilename.trim()
+                : "upload";
+
+        int lastDot = baseStem.lastIndexOf('.');
+        if (lastDot > 0) {
+            baseStem = baseStem.substring(0, lastDot);
+        }
+
+        List<String> extensions = getExtensionsToFuzz(config);
+        List<PayloadDefinition> payloads = new ArrayList<>(extensions.size());
+        String category = "Extension Fuzz";
+
+        for (String ext : extensions) {
+            String fuzzedFilename = baseStem + "." + ext;
+            String name = "Fuzz Extension: ." + ext;
+            payloads.add(new PayloadDefinition(name, category, fuzzedFilename, true));
         }
 
         return payloads;

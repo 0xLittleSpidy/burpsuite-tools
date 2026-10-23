@@ -1027,6 +1027,105 @@ class UploadScannerTest {
         assertEquals("Content-Type", StageType.CONTENT_TYPE_PROBE.getDisplayName());
         assertEquals("File-Size", StageType.FILE_SIZE_PROBE.getDisplayName());
         assertEquals("EXIF", StageType.EXIF_PROBE.getDisplayName());
+        assertEquals("Ext-Fuzz", StageType.EXTENSION_FUZZ.getDisplayName());
+    }
+
+    @Test
+    @DisplayName("UploadPayloadGenerator: getExtensionsToFuzz collects extension lists")
+    void testGetExtensionsToFuzz() {
+        UploadScannerConfig config = new UploadScannerConfig();
+        config.setCustomExtensions("bak, sql, conf");
+        List<String> exts = UploadPayloadGenerator.getExtensionsToFuzz(config);
+
+        assertNotNull(exts);
+        assertFalse(exts.isEmpty());
+        // Verify standard categories present
+        assertTrue(exts.contains("jpg"));
+        assertTrue(exts.contains("png"));
+        assertTrue(exts.contains("pdf"));
+        assertTrue(exts.contains("zip"));
+        assertTrue(exts.contains("mp4"));
+        // Verify custom extensions present
+        assertTrue(exts.contains("bak"));
+        assertTrue(exts.contains("sql"));
+        assertTrue(exts.contains("conf"));
+        // Verify Wikipedia extensions present
+        assertTrue(exts.contains("3ds"));
+    }
+
+    @Test
+    @DisplayName("UploadPayloadGenerator: generateExtensionFuzzPayloadsOnly generates abcd.<ext> and preserveBody=true")
+    void testGenerateExtensionFuzzPayloadsOnly() {
+        UploadScannerConfig config = new UploadScannerConfig();
+        List<PayloadDefinition> payloads = UploadPayloadGenerator.generateExtensionFuzzPayloadsOnly(config, "abcd.jpg");
+
+        assertNotNull(payloads);
+        assertFalse(payloads.isEmpty());
+
+        for (PayloadDefinition p : payloads) {
+            assertEquals("Extension Fuzz", p.getCategory());
+            assertTrue(p.isPreserveBody(), "preserveBody must be true for extension fuzzing");
+            assertTrue(p.getFilename().startsWith("abcd."), "Filename must start with 'abcd.': " + p.getFilename());
+        }
+
+        // Verify specific expected filenames
+        List<String> filenames = payloads.stream().map(PayloadDefinition::getFilename).toList();
+        assertTrue(filenames.contains("abcd.jpg"));
+        assertTrue(filenames.contains("abcd.png"));
+        assertTrue(filenames.contains("abcd.gif"));
+        assertTrue(filenames.contains("abcd.pdf"));
+    }
+
+    @Test
+    @DisplayName("UploadScanExecutor: injectPayload preserves file body when isPreserveBody is true")
+    void testInjectPayloadPreserveBody() {
+        String originalBody = "--boundary123\r\n" +
+                "Content-Disposition: form-data; name=\"file\"; filename=\"abcd.jpg\"\r\n" +
+                "Content-Type: image/jpeg\r\n\r\n" +
+                "ORIGINAL_USER_FILE_BYTES_LITTLESPIDY\r\n" +
+                "--boundary123--\r\n";
+
+        HttpRequest req = createMockRequest("/upload",
+                List.of(createHeader("Content-Type", "multipart/form-data; boundary=boundary123")),
+                originalBody);
+
+        PayloadDefinition payload = new PayloadDefinition("Fuzz Extension: .png", "Extension Fuzz", "abcd.png", true);
+        HttpRequest modified = UploadScanExecutor.injectPayload(req, payload);
+
+        assertNotNull(modified);
+        String modifiedBody = modified.bodyToString();
+
+        // Filename should be updated to abcd.png
+        assertTrue(modifiedBody.contains("filename=\"abcd.png\""), "Filename must be replaced with abcd.png");
+        assertFalse(modifiedBody.contains("filename=\"abcd.jpg\""), "Original filename should be gone");
+
+        // Content-Type and Body bytes must be preserved
+        assertTrue(modifiedBody.contains("Content-Type: image/jpeg"), "Content-Type must remain image/jpeg");
+        assertTrue(modifiedBody.contains("ORIGINAL_USER_FILE_BYTES_LITTLESPIDY"), "Body bytes must remain unchanged");
+    }
+
+    @Test
+    @DisplayName("UploadLogTableModel: Filter by Stage 'Ext-Fuzz'")
+    void testLogTableModelFilterByExtFuzz() {
+        UploadLogTableModel model = new UploadLogTableModel();
+
+        UploadEntry e1 = new UploadEntry(1, StageType.EXTENSION_FUZZ, "POST", (short) 200, "Fuzz Extension: .png (abcd.png)",
+                1024, "https://example.com/upload", null, "", null, null);
+        UploadEntry e2 = new UploadEntry(2, StageType.EXTENSION_PROBE, "POST", (short) 200, "Allowed Extension: JPEG (.jpg)",
+                256, "https://example.com/upload", null, "", null, null);
+        UploadEntry e3 = new UploadEntry(3, StageType.UPLOAD, "POST", (short) 200, "PHP Web Shell",
+                512, "https://example.com/upload", null, "", null, null);
+
+        model.addEntry(e1);
+        model.addEntry(e2);
+        model.addEntry(e3);
+
+        assertEquals(3, model.getRowCount());
+
+        // Filter for "Ext-Fuzz"
+        model.applyFilters(Set.of("Ext-Fuzz"), null, null, "");
+        assertEquals(1, model.getRowCount());
+        assertEquals("Fuzz Extension: .png (abcd.png)", model.getValueAt(0, 4));
     }
 
     // -- Helper methods for mocking Montoya HttpRequest & HttpHeader --
