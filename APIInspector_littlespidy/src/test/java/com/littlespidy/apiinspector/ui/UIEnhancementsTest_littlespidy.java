@@ -114,19 +114,22 @@ public class UIEnhancementsTest_littlespidy {
         col.setEndpoints(List.of(ep1, ep2, ep3));
         paramTab.updateCollections(List.of(col));
 
-        // Verify Query Table has 5 items and column 3 is Data Type
+        // Verify Query Table has 5 items and column 0 is Parameter, column 3 is Data Type
         JTable queryTable = paramTab.getQueryTable();
         assertEquals(5, queryTable.getRowCount());
+        assertEquals("Parameter", queryTable.getColumnName(0));
         assertEquals("Data Type", queryTable.getColumnName(3));
 
-        // Verify Path Table has 3 items and column 3 is Data Type
+        // Verify Path Table has 3 items and column 0 is Parameter, column 3 is Data Type
         JTable pathTable = paramTab.getPathTable();
         assertEquals(3, pathTable.getRowCount());
+        assertEquals("Parameter", pathTable.getColumnName(0));
         assertEquals("Data Type", pathTable.getColumnName(3));
 
-        // Verify Body Table has 2 items and column 3 is Data Type
+        // Verify Body Table has 2 items and column 0 is Parameter, column 3 is Data Type
         JTable bodyTable = paramTab.getBodyTable();
         assertEquals(2, bodyTable.getRowCount());
+        assertEquals("Parameter", bodyTable.getColumnName(0));
         assertEquals("Data Type", bodyTable.getColumnName(3));
 
         // Check summary label
@@ -221,7 +224,7 @@ public class UIEnhancementsTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify main tabs exact order: API Import, Request & Response Viewer, Parameter Collector, REST API Version Finder")
+    @DisplayName("Verify main tabs exact order: API Import, Request & Response Viewer, Parameter Collector, Authentication Testing, REST API Version Finder")
     public void testMainTabsExactOrder() throws Exception {
         APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
         Field rootTabbedPaneField = APIInspectorTab_littlespidy.class.getDeclaredField("rootTabbedPane");
@@ -231,7 +234,10 @@ public class UIEnhancementsTest_littlespidy {
         assertEquals("API Import", tabbedPane.getTitleAt(0));
         assertEquals("Request & Response Viewer", tabbedPane.getTitleAt(1));
         assertEquals("Parameter Collector", tabbedPane.getTitleAt(2));
-        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(3));
+        assertEquals("Authentication Testing", tabbedPane.getTitleAt(3));
+        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(4));
+        assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(5));
+        assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(6));
     }
 
     @Test
@@ -428,6 +434,122 @@ public class UIEnhancementsTest_littlespidy {
 
         authTab.setInspectorViewMode(0); // Request mode
         assertTrue(reqToggle.isSelected());
+    }
+
+    @Test
+    @DisplayName("Verify Parameter Collector Header Copy and Double-Click Navigation")
+    public void testParameterCollectorHeaderCopyAndDoubleClickNavigation() throws Exception {
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        ParameterCollectorTab_littlespidy paramTab = rootTab.getParameterCollectorTab();
+        RequestResponseViewerTab_littlespidy viewerTab = rootTab.getRequestResponseViewerTab();
+
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy("TestCol", "OpenAPI 3.0", "FILE", "/test.json");
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("GET", "/api/test", "Test Endpoint");
+        ep.setQueryParams(Map.of("apiKey", "xyz123"));
+        col.setEndpoints(List.of(ep));
+
+        rootTab.getImportTab().setCollections(List.of(col));
+
+        // 1. Verify column header renderer on Column 0 is ParameterHeaderRenderer
+        JTable queryTable = paramTab.getQueryTable();
+        javax.swing.table.TableCellRenderer hr = queryTable.getColumnModel().getColumn(0).getHeaderRenderer();
+        assertTrue(hr instanceof ParameterCollectorTab_littlespidy.ParameterHeaderRenderer,
+                "Column 0 header renderer must be ParameterHeaderRenderer");
+
+        // 2. Verify double-click listener navigation to RequestResponseViewerTab
+        assertEquals(1, paramTab.getQueryParamsList().size());
+        ParameterCollectorTab_littlespidy.ParameterEntry entry = paramTab.getQueryParamsList().get(0);
+        assertNotNull(entry.getFirstEndpoint());
+        assertEquals("/api/test", entry.getFirstEndpoint().getPath());
+
+        // Simulate selection and display in viewerTab
+        boolean selected = viewerTab.selectAndDisplayEndpoint(entry.getFirstEndpoint());
+        assertTrue(selected, "Endpoint should be successfully selected and displayed in viewer tab");
+
+        // Test root tab select
+        rootTab.selectTab(viewerTab);
+        Field rootTabbedPaneField = APIInspectorTab_littlespidy.class.getDeclaredField("rootTabbedPane");
+        rootTabbedPaneField.setAccessible(true);
+        JTabbedPane tabbedPane = (JTabbedPane) rootTabbedPaneField.get(rootTab);
+        assertEquals(viewerTab, tabbedPane.getSelectedComponent());
+    }
+
+    @Test
+    @DisplayName("Verify Export CSV button is removed from both Intruder Strategy tabs")
+    public void testIntruderStrategiesExportCsvRemoved() {
+        IntruderStrategyTrackingTab_littlespidy docTab = new IntruderStrategyTrackingTab_littlespidy(mockApi, "Doc Strategy");
+        IntruderStrategyTrackingTab_littlespidy epTab = new IntruderStrategyTrackingTab_littlespidy(mockApi, "Endpoint Discovery");
+
+        for (Component c : getAllComponents(docTab)) {
+            if (c instanceof JButton b) {
+                assertNotEquals("Export CSV", b.getText(), "Export CSV button must be removed from Doc Strategy tab");
+            }
+        }
+
+        for (Component c : getAllComponents(epTab)) {
+            if (c instanceof JButton b) {
+                assertNotEquals("Export CSV", b.getText(), "Export CSV button must be removed from Endpoint Discovery Strategy tab");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Verify REST API Version Finder normal user agent, session store button, and removed close all button")
+    public void testRestAPIVersionFinderButtonsAndUserAgent() throws Exception {
+        ResAPIVersionFinderTab_littlespidy vfTab = new ResAPIVersionFinderTab_littlespidy(mockApi);
+
+        boolean hasCloseAll = false;
+        boolean hasSessionStore = false;
+
+        for (Component c : getAllComponents(vfTab)) {
+            if (c instanceof JButton b) {
+                if ("Close All Tabs".equals(b.getText())) {
+                    hasCloseAll = true;
+                }
+                if ("Session Store".equals(b.getText())) {
+                    hasSessionStore = true;
+                }
+            }
+        }
+
+        assertFalse(hasCloseAll, "Close All Tabs button must be removed from REST API Version Finder");
+        assertTrue(hasSessionStore, "Session Store button must be present in REST API Version Finder");
+
+        // Verify Session Store model on vfTab
+        SessionStore_littlespidy store = vfTab.getSessionStore();
+        assertNotNull(store);
+        store.setEnabled(true);
+        store.setBearerToken("vf-token-123");
+
+        burp.api.montoya.http.message.requests.HttpRequest mockReq =
+                TestMockHelper_littlespidy.createMockRequest("GET", "https://example.com/api", "/api", Map.of(), "");
+        burp.api.montoya.http.message.requests.HttpRequest applied = store.applyToRequest(mockReq);
+        assertTrue(applied.hasHeader("Authorization"));
+        assertTrue(applied.headerValue("Authorization").contains("vf-token-123"));
+    }
+
+    @Test
+    @DisplayName("Verify API Import endpoint details dialog creation and display")
+    public void testAPIImportEndpointDetailsDialog() {
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("POST", "/api/v2/orders", "Create new order");
+        ep.setDescription("Detailed description of order creation flow with billing and items.");
+        ep.setRequiresAuth(true);
+        ep.setAuthSchemes(List.of("Bearer", "OAuth2"));
+        ep.setQueryParams(Map.of("dryRun", "true"));
+        ep.setBodyParams(Map.of("itemCount", "3"));
+
+        if (!GraphicsEnvironment.isHeadless()) {
+            EndpointDetailsDialog_littlespidy dialog = new EndpointDetailsDialog_littlespidy(null, ep, () -> {});
+            assertNotNull(dialog);
+            assertEquals("Endpoint Details: POST /api/v2/orders", dialog.getTitle());
+            dialog.dispose();
+        } else {
+            assertEquals("POST", ep.getMethod());
+            assertEquals("/api/v2/orders", ep.getPath());
+            assertEquals("Create new order", ep.getSummary());
+            assertEquals("Detailed description of order creation flow with billing and items.", ep.getDescription());
+            assertTrue(ep.isRequiresAuth());
+        }
     }
 
     private static List<Component> getAllComponents(Container c) {

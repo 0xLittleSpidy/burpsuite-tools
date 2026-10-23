@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
@@ -49,6 +50,25 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
     private JTable bodyTable;
     private TableRowSorter<ParameterTableModel> bodySorter;
     private JTextField bodySearchField;
+
+    public interface ParameterDoubleClickListener {
+        void onParameterDoubleClicked(DiscoveredEndpoint_littlespidy endpoint, ParameterEntry parameter);
+    }
+
+    public interface SendToVersionFinderListener {
+        void onSendToVersionFinder(DiscoveredEndpoint_littlespidy endpoint);
+    }
+
+    private ParameterDoubleClickListener onParameterDoubleClickListener;
+    private SendToVersionFinderListener onSendToVersionFinderListener;
+
+    public void setOnParameterDoubleClickListener(ParameterDoubleClickListener listener) {
+        this.onParameterDoubleClickListener = listener;
+    }
+
+    public void setOnSendToVersionFinderListener(SendToVersionFinderListener listener) {
+        this.onSendToVersionFinderListener = listener;
+    }
 
     private static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{([a-zA-Z0-9_\\-]+)\\}|:([a-zA-Z0-9_\\-]+)");
 
@@ -218,35 +238,161 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
     }
 
     private void setupTableRenderersAndListeners(JTable table, ParameterTableModel model) {
-        // Setup copy icon renderer for Column 0 (Parameter Name)
-        table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
-            private final CopyIcon_littlespidy copyIcon = new CopyIcon_littlespidy();
+        // Plain text renderer for Column 0 (Parameter Name) - per-parameter copy button removed
+        table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer());
 
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                super.getTableCellRendererComponent(t, value, isSelected, hasFocus, row, column);
-                setIcon(copyIcon);
-                setIconTextGap(6);
-                setToolTipText("Click icon to copy parameter value to clipboard");
-                return this;
-            }
-        });
+        // Install Column 0 Header Renderer with a dedicated "Copy" button on the column name "Parameter"
+        table.getColumnModel().getColumn(0).setHeaderRenderer(new ParameterHeaderRenderer());
 
-        // Click handler: clicking on copy icon or cell copies parameter value to clipboard
-        table.addMouseListener(new MouseAdapter() {
+        // Header click listener: Clicking on the Copy button on the "Parameter" column header copies all parameters from the table
+        table.getTableHeader().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
-                int col = table.columnAtPoint(e.getPoint());
-                if (row >= 0 && col == 0) {
-                    int modelRow = table.convertRowIndexToModel(row);
-                    ParameterEntry entry = model.getEntry(modelRow);
-                    if (entry != null) {
-                        copyParameterValue(entry);
+                int col = table.getTableHeader().columnAtPoint(e.getPoint());
+                if (col == 0) {
+                    Rectangle rect = table.getTableHeader().getHeaderRect(col);
+                    int xInCol = e.getX() - rect.x;
+                    // If clicked in the right 55 pixels of the header cell (the Copy button area)
+                    if (xInCol >= rect.width - 55) {
+                        copyAllParametersFromTable(table, model);
+                        e.consume();
                     }
                 }
             }
         });
+
+        // Table mouse listener: Double-click navigates to exact request in Request & Response Viewer tab
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    int row = table.rowAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        int modelRow = table.convertRowIndexToModel(row);
+                        ParameterEntry entry = model.getEntry(modelRow);
+                        if (entry != null && onParameterDoubleClickListener != null) {
+                            DiscoveredEndpoint_littlespidy ep = entry.getFirstEndpoint();
+                            onParameterDoubleClickListener.onParameterDoubleClicked(ep, entry);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            private void showContextMenu(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                if (row >= 0) {
+                    if (!table.isRowSelected(row)) {
+                        table.setRowSelectionInterval(row, row);
+                    }
+                    int modelRow = table.convertRowIndexToModel(row);
+                    ParameterEntry entry = model.getEntry(modelRow);
+                    if (entry != null) {
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem copyParamItem = new JMenuItem("Copy Parameter Name");
+                        copyParamItem.addActionListener(ev -> {
+                            copyToClipboard(entry.name);
+                            showFeedback("Copied parameter '" + entry.name + "' to clipboard.");
+                        });
+                        menu.add(copyParamItem);
+
+                        JMenuItem copyValItem = new JMenuItem("Copy Sample Value");
+                        copyValItem.addActionListener(ev -> copyParameterValue(entry));
+                        menu.add(copyValItem);
+
+                        menu.addSeparator();
+
+                        JMenuItem sendToVF = new JMenuItem("Send to ResAPI Version Finder");
+                        sendToVF.setEnabled(entry.getFirstEndpoint() != null);
+                        sendToVF.addActionListener(ev -> {
+                            if (entry.getFirstEndpoint() != null && onSendToVersionFinderListener != null) {
+                                onSendToVersionFinderListener.onSendToVersionFinder(entry.getFirstEndpoint());
+                            }
+                        });
+                        menu.add(sendToVF);
+
+                        menu.show(table, e.getX(), e.getY());
+                    }
+                }
+            }
+        });
+    }
+
+    private void copyAllParametersFromTable(JTable table, ParameterTableModel model) {
+        int rowCount = table.getRowCount();
+        if (rowCount == 0) {
+            showFeedback("No parameters available to copy in this table.");
+            return;
+        }
+
+        Set<String> names = new LinkedHashSet<>();
+        for (int i = 0; i < rowCount; i++) {
+            int modelRow = table.convertRowIndexToModel(i);
+            ParameterEntry entry = model.getEntry(modelRow);
+            if (entry != null && entry.name != null && !entry.name.isBlank()) {
+                names.add(entry.name);
+            }
+        }
+
+        if (names.isEmpty()) {
+            showFeedback("No parameters found.");
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String n : names) {
+            sb.append(n).append("\n");
+        }
+        copyToClipboard(sb.toString().trim());
+        showFeedback("Copied " + names.size() + " parameter(s) from " + table.getColumnName(0) + " column to clipboard.");
+    }
+
+    public static class ParameterHeaderRenderer extends JPanel implements TableCellRenderer {
+        private final JLabel label;
+        private final JButton copyButton;
+
+        public ParameterHeaderRenderer() {
+            super(new BorderLayout(4, 0));
+            setOpaque(true);
+
+            label = new JLabel("Parameter");
+            label.setFont(label.getFont().deriveFont(Font.BOLD));
+
+            copyButton = new JButton("Copy");
+            copyButton.setFocusable(false);
+            copyButton.setFont(copyButton.getFont().deriveFont(Font.PLAIN, 10f));
+            copyButton.setMargin(new Insets(1, 4, 1, 4));
+            copyButton.setToolTipText("Copy all parameters in this column to clipboard");
+
+            setBorder(BorderFactory.createCompoundBorder(
+                    UIManager.getBorder("TableHeader.cellBorder"),
+                    BorderFactory.createEmptyBorder(0, 4, 0, 4)
+            ));
+
+            add(label, BorderLayout.CENTER);
+            add(copyButton, BorderLayout.EAST);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value != null) {
+                label.setText(value.toString());
+            }
+            if (table != null && table.getTableHeader() != null) {
+                setBackground(table.getTableHeader().getBackground());
+                setForeground(table.getTableHeader().getForeground());
+            }
+            return this;
+        }
     }
 
     public synchronized void updateCollections(List<ImportedCollection_littlespidy> cols) {
@@ -305,7 +451,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         String val = qEntry.getValue() != null ? qEntry.getValue() : "";
 
                         ParameterEntry p = queryMap.computeIfAbsent(name, ParameterEntry::new);
-                        p.addEndpoint(epDesc);
+                        p.addEndpoint(epDesc, ep);
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
                         }
@@ -329,7 +475,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                             String qVal = eq > 0 && eq < pair.length() - 1 ? pair.substring(eq + 1).trim() : "";
                             if (!qName.isBlank()) {
                                 ParameterEntry p = queryMap.computeIfAbsent(qName, ParameterEntry::new);
-                                p.addEndpoint(epDesc);
+                                p.addEndpoint(epDesc, ep);
                                 if (p.sampleValue.isEmpty() && !qVal.isEmpty()) {
                                     p.sampleValue = qVal;
                                 }
@@ -350,7 +496,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         String val = pEntry.getValue() != null ? pEntry.getValue() : "";
 
                         ParameterEntry p = pathMap.computeIfAbsent(name, ParameterEntry::new);
-                        p.addEndpoint(epDesc);
+                        p.addEndpoint(epDesc, ep);
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
                         }
@@ -372,7 +518,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         if (name != null && !name.isBlank()) {
                             name = name.trim();
                             ParameterEntry p = pathMap.computeIfAbsent(name, ParameterEntry::new);
-                            p.addEndpoint(epDesc);
+                            p.addEndpoint(epDesc, ep);
                             if (p.dataType == null) {
                                 p.dataType = "string";
                             }
@@ -389,7 +535,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         String val = bEntry.getValue() != null ? bEntry.getValue() : "";
 
                         ParameterEntry p = bodyMap.computeIfAbsent(name, ParameterEntry::new);
-                        p.addEndpoint(epDesc);
+                        p.addEndpoint(epDesc, ep);
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
                         }
@@ -590,18 +736,30 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         public String sampleValue = "";
         public String dataType = "string";
         public final Set<String> endpoints = new LinkedHashSet<>();
+        public final List<DiscoveredEndpoint_littlespidy> endpointObjects = new ArrayList<>();
 
         public ParameterEntry(String name) {
             this.name = name;
         }
 
         public void addEndpoint(String ep) {
+            addEndpoint(ep, null);
+        }
+
+        public void addEndpoint(String ep, DiscoveredEndpoint_littlespidy endpointObj) {
             if (ep != null) endpoints.add(ep);
+            if (endpointObj != null && !endpointObjects.contains(endpointObj)) {
+                endpointObjects.add(endpointObj);
+            }
+        }
+
+        public DiscoveredEndpoint_littlespidy getFirstEndpoint() {
+            return endpointObjects.isEmpty() ? null : endpointObjects.get(0);
         }
     }
 
     public static class ParameterTableModel extends AbstractTableModel {
-        private final String[] columns = {"Parameter Name", "Sample Value", "Endpoints Used", "Data Type"};
+        private final String[] columns = {"Parameter", "Sample Value", "Endpoints Used", "Data Type"};
         private final List<ParameterEntry> entries;
 
         public ParameterTableModel(List<ParameterEntry> entries) {

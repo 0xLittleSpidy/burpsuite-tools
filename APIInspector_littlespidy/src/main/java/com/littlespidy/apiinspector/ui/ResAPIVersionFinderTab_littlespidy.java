@@ -6,6 +6,7 @@ import burp.api.montoya.http.HttpService;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import com.littlespidy.apiinspector.model.ProbeResult_littlespidy;
+import com.littlespidy.apiinspector.model.SessionStore_littlespidy;
 import com.littlespidy.apiinspector.persistence.APIInspectorPersistenceManager_littlespidy;
 import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy.ProbeResultDTO;
 import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy.SessionTabDTO;
@@ -35,6 +36,9 @@ public class ResAPIVersionFinderTab_littlespidy extends JPanel {
     private JTextField manualUrlField;
     private JComboBox<String> methodCombo;
     private JLabel storageLabel;
+    private SessionStore_littlespidy sessionStore = new SessionStore_littlespidy();
+    private JLabel sessionStoreStatusLabel;
+    private JButton sessionStoreBtn;
 
     public ResAPIVersionFinderTab_littlespidy(MontoyaApi api) {
         super(new BorderLayout());
@@ -64,10 +68,28 @@ public class ResAPIVersionFinderTab_littlespidy extends JPanel {
         createSessionBtn.addActionListener(e -> createSessionFromManualInput());
         launcherControls.add(createSessionBtn);
 
-        JButton closeAllBtn = new JButton("Close All Tabs");
-        closeAllBtn.setToolTipText("Close all active request sub-tabs");
-        closeAllBtn.addActionListener(e -> closeAllTabs());
-        launcherControls.add(closeAllBtn);
+        sessionStoreStatusLabel = new JLabel(sessionStore.getStatusSummary());
+        sessionStoreStatusLabel.setFont(sessionStoreStatusLabel.getFont().deriveFont(Font.ITALIC, 11f));
+        sessionStoreStatusLabel.setForeground(new Color(0, 100, 30));
+        launcherControls.add(sessionStoreStatusLabel);
+
+        sessionStoreBtn = new JButton("Session Store");
+        sessionStoreBtn.setToolTipText("Configure session authentication credentials, tokens, and custom headers");
+        sessionStoreBtn.addActionListener(e -> {
+            SessionStoreDialog_littlespidy dialog = new SessionStoreDialog_littlespidy(
+                    SwingUtilities.getWindowAncestor(this),
+                    sessionStore,
+                    () -> {
+                        sessionStoreStatusLabel.setText(sessionStore.getStatusSummary());
+                        for (RequestSessionPanel_littlespidy panel : getAllSessionPanels()) {
+                            panel.setSessionStore(sessionStore);
+                        }
+                        notifyStateChanged();
+                    }
+            );
+            dialog.setVisible(true);
+        });
+        launcherControls.add(sessionStoreBtn);
 
         topBar.add(launcherControls, BorderLayout.CENTER);
 
@@ -132,6 +154,7 @@ public class ResAPIVersionFinderTab_littlespidy extends JPanel {
         String defaultTitle = "#" + sessionId + " " + method + " " + truncatedPath;
 
         RequestSessionPanel_littlespidy sessionPanel = new RequestSessionPanel_littlespidy(api, request, response);
+        sessionPanel.setSessionStore(this.sessionStore);
         sessionTabbedPane.addTab(defaultTitle, sessionPanel);
 
         int tabIndex = sessionTabbedPane.indexOfComponent(sessionPanel);
@@ -159,6 +182,7 @@ public class ResAPIVersionFinderTab_littlespidy extends JPanel {
         HttpResponse baseResp = APIInspectorPersistenceManager_littlespidy.deserializeHttpResponse(dto.baselineResponse);
 
         RequestSessionPanel_littlespidy sessionPanel = new RequestSessionPanel_littlespidy(api, baseReq, baseResp);
+        sessionPanel.setSessionStore(this.sessionStore);
 
         if (dto.strategies != null) {
             sessionPanel.setUriPathSelected(dto.strategies.uriPath);
@@ -260,7 +284,7 @@ public class ResAPIVersionFinderTab_littlespidy extends JPanel {
             if (selectedMethod == null) selectedMethod = "GET";
 
             HttpService service = HttpService.httpService(host, port, isHttps);
-            HttpRequest request = HttpRequest.httpRequest(service, selectedMethod + " " + path + " HTTP/1.1\r\nHost: " + host + "\r\nUser-Agent: APIInspector/1.0\r\nAccept: */*\r\n\r\n");
+            HttpRequest request = HttpRequest.httpRequest(service, selectedMethod + " " + path + " HTTP/1.1\r\nHost: " + host + "\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36\r\nAccept: */*\r\n\r\n");
 
             addNewSession(request, null);
 
@@ -285,6 +309,20 @@ public class ResAPIVersionFinderTab_littlespidy extends JPanel {
         if (path == null) return "/";
         if (path.length() <= maxLen) return path;
         return path.substring(0, maxLen - 3) + "...";
+    }
+
+    public SessionStore_littlespidy getSessionStore() {
+        return sessionStore;
+    }
+
+    public void setSessionStore(SessionStore_littlespidy store) {
+        this.sessionStore = (store != null) ? store : new SessionStore_littlespidy();
+        if (sessionStoreStatusLabel != null) {
+            sessionStoreStatusLabel.setText(this.sessionStore.getStatusSummary());
+        }
+        for (RequestSessionPanel_littlespidy panel : getAllSessionPanels()) {
+            panel.setSessionStore(this.sessionStore);
+        }
     }
 
     public JTabbedPane getSessionTabbedPane() {

@@ -4,6 +4,7 @@ package com.littlespidy.apiinspector.ui;
 import com.littlespidy.apiinspector.engine.ProbeProgressListener_littlespidy;
 import com.littlespidy.apiinspector.engine.VersionProbeEngine_littlespidy;
 import com.littlespidy.apiinspector.model.ProbeResult_littlespidy;
+import com.littlespidy.apiinspector.model.SessionStore_littlespidy;
 import com.littlespidy.apiinspector.strategy.*;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.message.HttpRequestResponse;
@@ -40,6 +41,7 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
     private final VersionProbeEngine_littlespidy engine;
     private HttpRequest baselineRequest;
     private HttpResponse baselineResponse;
+    private SessionStore_littlespidy sessionStore;
 
     // UI Elements
     private JLabel targetLabel;
@@ -247,6 +249,14 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         add(splitPane, BorderLayout.CENTER);
     }
 
+    public void setSessionStore(SessionStore_littlespidy sessionStore) {
+        this.sessionStore = sessionStore;
+    }
+
+    public SessionStore_littlespidy getSessionStore() {
+        return sessionStore;
+    }
+
     private void updateBaselineDisplay() {
         if (baselineRequest == null) {
             targetLabel.setText("Target: No baseline request loaded");
@@ -273,7 +283,8 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         progressLabel.setText("Fetching baseline...");
         new Thread(() -> {
             try {
-                HttpRequestResponse resp = api.http().sendRequest(baselineRequest);
+                HttpRequest req = (sessionStore != null && sessionStore.isEnabled()) ? sessionStore.applyToRequest(baselineRequest) : baselineRequest;
+                HttpRequestResponse resp = api.http().sendRequest(req);
                 if (resp != null && resp.hasResponse()) {
                     baselineResponse = resp.response();
                     SwingUtilities.invokeLater(() -> {
@@ -333,7 +344,7 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         progressBar.setValue(0);
         progressBar.setVisible(true);
 
-        engine.startProbing(baselineRequest, baselineResponse, active, candidates, threads, delay, this);
+        engine.startProbing(baselineRequest, baselineResponse, active, candidates, threads, delay, sessionStore, this);
     }
 
     private void stopProbing() {

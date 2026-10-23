@@ -16,6 +16,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -50,6 +52,15 @@ public class APIImportTab_littlespidy extends JPanel {
     private JTextField baseUrlField;
 
     private final List<Runnable> stateChangedListeners = new ArrayList<>();
+
+    public interface SendToVersionFinderCallback {
+        void onSendToVersionFinder(ImportedCollection_littlespidy collection, DiscoveredEndpoint_littlespidy endpoint);
+    }
+    private SendToVersionFinderCallback onSendToVersionFinderListener;
+
+    public void setOnSendToVersionFinderListener(SendToVersionFinderCallback listener) {
+        this.onSendToVersionFinderListener = listener;
+    }
 
     public APIImportTab_littlespidy(MontoyaApi api) {
         super(new BorderLayout(8, 8));
@@ -222,11 +233,82 @@ public class APIImportTab_littlespidy extends JPanel {
         endpointTable.setRowSorter(endpointSorter);
         endpointTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+        // Double click opens endpoint details dialog, right click opens context menu
+        endpointTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    int row = endpointTable.rowAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        int modelRow = endpointTable.convertRowIndexToModel(row);
+                        DiscoveredEndpoint_littlespidy ep = endpointTableModel.getEndpointAt(modelRow);
+                        if (ep != null) {
+                            showEndpointDetailsDialog(ep);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            private void showContextMenu(MouseEvent e) {
+                int row = endpointTable.rowAtPoint(e.getPoint());
+                if (row >= 0) {
+                    if (!endpointTable.isRowSelected(row)) {
+                        endpointTable.setRowSelectionInterval(row, row);
+                    }
+                    int modelRow = endpointTable.convertRowIndexToModel(row);
+                    DiscoveredEndpoint_littlespidy ep = endpointTableModel.getEndpointAt(modelRow);
+                    if (ep != null) {
+                        JPopupMenu menu = new JPopupMenu();
+
+                        JMenuItem viewDetails = new JMenuItem("View Endpoint Details");
+                        viewDetails.addActionListener(ev -> showEndpointDetailsDialog(ep));
+                        menu.add(viewDetails);
+
+                        menu.addSeparator();
+
+                        JMenuItem sendToVF = new JMenuItem("Send to ResAPI Version Finder");
+                        sendToVF.addActionListener(ev -> {
+                            ImportedCollection_littlespidy col = getSelectedCollection();
+                            if (col != null && onSendToVersionFinderListener != null) {
+                                onSendToVersionFinderListener.onSendToVersionFinder(col, ep);
+                            }
+                        });
+                        menu.add(sendToVF);
+
+                        menu.show(endpointTable, e.getX(), e.getY());
+                    }
+                }
+            }
+        });
+
         JScrollPane epScroll = new JScrollPane(endpointTable);
         endpointsPanel.add(epScroll, BorderLayout.CENTER);
 
         splitPane.setBottomComponent(endpointsPanel);
         add(splitPane, BorderLayout.CENTER);
+    }
+
+    public void showEndpointDetailsDialog(DiscoveredEndpoint_littlespidy ep) {
+        if (ep == null) return;
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        Runnable sendToVFAction = () -> {
+            ImportedCollection_littlespidy col = getSelectedCollection();
+            if (col != null && onSendToVersionFinderListener != null) {
+                onSendToVersionFinderListener.onSendToVersionFinder(col, ep);
+            }
+        };
+        EndpointDetailsDialog_littlespidy dialog = new EndpointDetailsDialog_littlespidy(parent, ep, sendToVFAction);
+        dialog.setVisible(true);
     }
 
     private void onImportFiles() {

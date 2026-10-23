@@ -96,6 +96,13 @@ public class SessionStore_littlespidy {
         if (request == null || !appliesTo(endpoint)) {
             return request;
         }
+        return applyToRequest(request);
+    }
+
+    public HttpRequest applyToRequest(HttpRequest request) {
+        if (request == null || !enabled) {
+            return request;
+        }
 
         HttpRequest modified = request;
 

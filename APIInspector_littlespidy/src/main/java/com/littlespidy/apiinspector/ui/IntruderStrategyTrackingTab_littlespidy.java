@@ -94,11 +94,6 @@ public class IntruderStrategyTrackingTab_littlespidy extends JPanel {
         clearBtn.addActionListener(e -> clearHistory());
         rightControlsBox.add(clearBtn);
 
-        JButton exportBtn = new JButton("Export CSV");
-        exportBtn.setToolTipText("Export tracked requests and variations to CSV");
-        exportBtn.addActionListener(e -> exportCsv());
-        rightControlsBox.add(exportBtn);
-
         topBar.add(rightControlsBox, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 

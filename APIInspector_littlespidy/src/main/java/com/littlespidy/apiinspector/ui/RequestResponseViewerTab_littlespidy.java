@@ -20,6 +20,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +56,15 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
     private HttpRequestEditor requestEditor;
     private HttpResponseEditor responseEditor;
     private JLabel responseInfoLabel;
+
+    public interface SendToVersionFinderCallback {
+        void onSendToVersionFinder(ImportedCollection_littlespidy collection, DiscoveredEndpoint_littlespidy endpoint);
+    }
+    private SendToVersionFinderCallback onSendToVersionFinderListener;
+
+    public void setOnSendToVersionFinderListener(SendToVersionFinderCallback listener) {
+        this.onSendToVersionFinderListener = listener;
+    }
 
     public RequestResponseViewerTab_littlespidy(MontoyaApi api) {
         super(new BorderLayout(6, 6));
@@ -155,6 +166,58 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         requestsTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 onEndpointRowSelected();
+            }
+        });
+
+        requestsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            private void showContextMenu(MouseEvent e) {
+                int row = requestsTable.rowAtPoint(e.getPoint());
+                if (row >= 0) {
+                    if (!requestsTable.isRowSelected(row)) {
+                        requestsTable.setRowSelectionInterval(row, row);
+                    }
+                    int modelRow = requestsTable.convertRowIndexToModel(row);
+                    if (modelRow >= 0 && modelRow < endpointItems.size()) {
+                        EndpointItem item = endpointItems.get(modelRow);
+                        JPopupMenu menu = new JPopupMenu();
+
+                        JMenuItem sendToVF = new JMenuItem("Send to ResAPI Version Finder");
+                        sendToVF.addActionListener(ev -> {
+                            if (onSendToVersionFinderListener != null) {
+                                onSendToVersionFinderListener.onSendToVersionFinder(item.collection, item.endpoint);
+                            }
+                        });
+                        menu.add(sendToVF);
+
+                        JMenuItem sendToRepeater = new JMenuItem("Send to Repeater");
+                        sendToRepeater.addActionListener(ev -> {
+                            try {
+                                String targetBaseUrl = (item.collection.getTargetBaseUrl() != null && !item.collection.getTargetBaseUrl().isBlank())
+                                        ? item.collection.getTargetBaseUrl() : "https://localhost";
+                                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, item.endpoint, null, false);
+                                if (sessionStore != null && sessionStore.appliesTo(item.endpoint)) {
+                                    req = sessionStore.applyToRequest(req, item.endpoint);
+                                }
+                                if (api != null && api.repeater() != null) {
+                                    api.repeater().sendToRepeater(req, item.endpoint.getMethod() + " " + item.endpoint.getPath());
+                                }
+                            } catch (Exception ignored) {}
+                        });
+                        menu.add(sendToRepeater);
+
+                        menu.show(requestsTable, e.getX(), e.getY());
+                    }
+                }
             }
         });
 
@@ -391,6 +454,51 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
             sessionStoreStatusLabel.setText(this.sessionStore.getStatusSummary());
         }
         onEndpointRowSelected();
+    }
+
+    public boolean selectAndDisplayEndpoint(DiscoveredEndpoint_littlespidy targetEp) {
+        if (targetEp == null || endpointItems.isEmpty()) {
+            return false;
+        }
+
+        int targetModelIndex = -1;
+        for (int i = 0; i < endpointItems.size(); i++) {
+            EndpointItem item = endpointItems.get(i);
+            if (item.endpoint == targetEp ||
+                (targetEp.getId() != null && targetEp.getId().equals(item.endpoint.getId())) ||
+                (targetEp.getMethod() != null && targetEp.getMethod().equalsIgnoreCase(item.endpoint.getMethod()) &&
+                 targetEp.getPath() != null && targetEp.getPath().equals(item.endpoint.getPath()))) {
+                targetModelIndex = i;
+                break;
+            }
+        }
+
+        if (targetModelIndex == -1) {
+            return false;
+        }
+
+        // Check if currently visible under active filters
+        int viewRow = requestsTable.convertRowIndexToView(targetModelIndex);
+        if (viewRow == -1) {
+            collectionFilterDropDown.selectAll(true);
+            methodFilterDropDown.selectAll(true);
+            if (authFilterDropDown != null) {
+                authFilterDropDown.selectAll(true);
+            }
+            searchField.setText("");
+            applyFilters();
+            viewRow = requestsTable.convertRowIndexToView(targetModelIndex);
+        }
+
+        if (viewRow >= 0 && viewRow < requestsTable.getRowCount()) {
+            requestsTable.setRowSelectionInterval(viewRow, viewRow);
+            Rectangle rect = requestsTable.getCellRect(viewRow, 0, true);
+            requestsTable.scrollRectToVisible(rect);
+            onEndpointRowSelected();
+            return true;
+        }
+
+        return false;
     }
 
     public AuthFilterDropDown_littlespidy getAuthFilterDropDown() {

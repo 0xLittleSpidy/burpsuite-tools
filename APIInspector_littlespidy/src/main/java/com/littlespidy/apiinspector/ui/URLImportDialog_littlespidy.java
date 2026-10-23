@@ -185,7 +185,7 @@ public class URLImportDialog_littlespidy extends JDialog {
         conn.setRequestMethod("GET");
         conn.setConnectTimeout(15000);
         conn.setReadTimeout(15000);
-        conn.setRequestProperty("User-Agent", "APIInspector/1.0");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
         conn.setRequestProperty("Accept", "application/json, application/yaml, text/yaml, */*");
 
         int code = conn.getResponseCode();

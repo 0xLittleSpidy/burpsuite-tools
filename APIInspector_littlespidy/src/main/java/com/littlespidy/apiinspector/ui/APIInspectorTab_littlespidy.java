@@ -2,6 +2,10 @@
 package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.http.message.requests.HttpRequest;
+import com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy;
+import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
+import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,6 +42,31 @@ public class APIInspectorTab_littlespidy extends JPanel {
 
         this.authTestingTab.setImportTabRef(this.importTab);
 
+        // Parameter double click navigates directly to exact request in Request & Response Viewer tab
+        this.parameterCollectorTab.setOnParameterDoubleClickListener((ep, param) -> {
+            if (ep != null) {
+                rootTabbedPane.setSelectedComponent(requestResponseViewerTab);
+                requestResponseViewerTab.selectAndDisplayEndpoint(ep);
+            }
+        });
+
+        // Wire "Send to ResAPI Version Finder" from internal tabs
+        this.parameterCollectorTab.setOnSendToVersionFinderListener(ep -> {
+            sendEndpointToVersionFinder(ep, null);
+        });
+
+        this.importTab.setOnSendToVersionFinderListener((col, ep) -> {
+            String baseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
+                    ? col.getTargetBaseUrl() : "https://localhost";
+            sendEndpointToVersionFinder(ep, baseUrl);
+        });
+
+        this.requestResponseViewerTab.setOnSendToVersionFinderListener((col, ep) -> {
+            String baseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
+                    ? col.getTargetBaseUrl() : "https://localhost";
+            sendEndpointToVersionFinder(ep, baseUrl);
+        });
+
         // Sync tabs when API Import changes
         this.importTab.addStateChangedListener(() -> {
             parameterCollectorTab.updateCollections(importTab.getAllCollections());
@@ -60,8 +89,8 @@ public class APIInspectorTab_littlespidy extends JPanel {
         rootTabbedPane.addTab("API Import", importTab);
         rootTabbedPane.addTab("Request & Response Viewer", requestResponseViewerTab);
         rootTabbedPane.addTab("Parameter Collector", parameterCollectorTab);
-        rootTabbedPane.addTab("REST API Version Finder", versionFinderTab);
         rootTabbedPane.addTab("Authentication Testing", authTestingTab);
+        rootTabbedPane.addTab("REST API Version Finder", versionFinderTab);
         rootTabbedPane.addTab("API Documentation Strategy", docStrategyTab);
         rootTabbedPane.addTab("API Endpoint Discovery Strategy", endpointDiscoveryTab);
 
@@ -129,6 +158,17 @@ public class APIInspectorTab_littlespidy extends JPanel {
 
     public IntruderStrategyTrackingTab_littlespidy getEndpointDiscoveryTab() {
         return endpointDiscoveryTab;
+    }
+
+    public void sendEndpointToVersionFinder(DiscoveredEndpoint_littlespidy ep, String targetBaseUrl) {
+        if (ep == null) return;
+        try {
+            String base = (targetBaseUrl != null && !targetBaseUrl.isBlank()) ? targetBaseUrl : "https://localhost";
+            HttpRequest req = AuthTestEngine_littlespidy.buildRequest(base, ep, null, false);
+            versionFinderTab.addNewSession(req, null);
+            rootTabbedPane.setSelectedComponent(versionFinderTab);
+        } catch (Exception ignored) {
+        }
     }
 
     public void selectTab(Component tabComponent) {

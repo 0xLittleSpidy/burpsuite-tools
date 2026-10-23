@@ -3,6 +3,7 @@ package com.littlespidy.apiinspector.engine;
 
 import com.littlespidy.apiinspector.model.ProbeMutation_littlespidy;
 import com.littlespidy.apiinspector.model.ProbeResult_littlespidy;
+import com.littlespidy.apiinspector.model.SessionStore_littlespidy;
 import com.littlespidy.apiinspector.strategy.VersionStrategy_littlespidy;
 import burp.api.montoya.http.Http;
 import burp.api.montoya.http.message.HttpRequestResponse;
@@ -51,6 +52,18 @@ public class VersionProbeEngine_littlespidy {
             List<String> candidateVersions,
             int threadCount,
             int delayMs,
+            ProbeProgressListener_littlespidy listener) {
+        startProbing(baselineRequest, baselineResponse, activeStrategies, candidateVersions, threadCount, delayMs, null, listener);
+    }
+
+    public synchronized void startProbing(
+            HttpRequest baselineRequest,
+            HttpResponse baselineResponse,
+            List<VersionStrategy_littlespidy> activeStrategies,
+            List<String> candidateVersions,
+            int threadCount,
+            int delayMs,
+            SessionStore_littlespidy sessionStore,
             ProbeProgressListener_littlespidy listener) {
 
         if (running.get()) {
@@ -119,7 +132,11 @@ public class VersionProbeEngine_littlespidy {
 
                         try {
                             if (http != null) {
-                                HttpRequestResponse reqResp = http.sendRequest(mutation.getRequest());
+                                HttpRequest reqToSend = mutation.getRequest();
+                                if (sessionStore != null && sessionStore.isEnabled()) {
+                                    reqToSend = sessionStore.applyToRequest(reqToSend);
+                                }
+                                HttpRequestResponse reqResp = http.sendRequest(reqToSend);
                                 if (reqResp != null && reqResp.hasResponse()) {
                                     probeResponse = reqResp.response();
                                     status = probeResponse.statusCode();

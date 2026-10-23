@@ -55,6 +55,21 @@ public class APIInspectorContextMenu_littlespidy implements ContextMenuItemsProv
             return menuList;
         }
 
+        // Direct Top-Level Action: Send to ResAPI Version Finder
+        JMenuItem directVersionFinderItem = new JMenuItem("Send to ResAPI Version Finder");
+        directVersionFinderItem.addActionListener(e -> {
+            for (HttpRequestResponse target : targets) {
+                if (target.request() != null) {
+                    rootTab.getVersionFinderTab().addNewSession(
+                            target.request(),
+                            target.hasResponse() ? target.response() : null
+                    );
+                }
+            }
+            rootTab.selectTab(rootTab.getVersionFinderTab());
+        });
+        menuList.add(directVersionFinderItem);
+
         JMenu apiInspectorMenu = new JMenu("API Inspector (littlespidy)");
 
         // Action 1: Send to ResAPI Version Finder
