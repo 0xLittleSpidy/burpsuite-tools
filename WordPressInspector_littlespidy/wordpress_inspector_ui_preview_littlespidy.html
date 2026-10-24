@@ -185,6 +185,20 @@
       color: var(--accent);
     }
 
+    .parent-tab.plus-tab {
+      background-color: transparent;
+      border: 1px dashed var(--border);
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 13px;
+      padding: 5px 12px;
+    }
+
+    .parent-tab.plus-tab:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
     .close-tab-btn {
       display: inline-block;
       padding: 0 4px;
@@ -197,23 +211,6 @@
     .close-tab-btn:hover {
       background-color: var(--badge-vulnerable);
       color: #ffffff;
-    }
-
-    .add-tab-btn {
-      padding: 6px 10px;
-      background-color: transparent;
-      border: 1px dashed var(--border);
-      border-radius: 4px;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .add-tab-btn:hover {
-      background-color: var(--bg-hover);
-      color: var(--text-bright);
-      border-color: var(--accent);
     }
 
     /* Tab Content Areas */
@@ -317,16 +314,6 @@
       background-color: var(--accent-hover);
     }
 
-    .btn-danger {
-      background-color: var(--badge-vulnerable);
-      border-color: var(--badge-vulnerable);
-      color: #ffffff;
-    }
-
-    .btn-danger:hover {
-      opacity: 0.9;
-    }
-
     .quota-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -357,7 +344,7 @@
     .checkbox-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .checkbox-item {
@@ -618,18 +605,6 @@
       white-space: pre-wrap;
     }
 
-    .log-line-info {
-      color: #4ec9b0;
-    }
-
-    .log-line-warn {
-      color: #dcdcaa;
-    }
-
-    .log-line-err {
-      color: #f14c4c;
-    }
-
     /* Modal */
     .modal-overlay {
       position: fixed;
@@ -640,6 +615,7 @@
       background-color: rgba(0, 0, 0, 0.6);
       display: none;
       align-items: center;
+      justify-content: space-between;
       justify-content: center;
       z-index: 1000;
     }
@@ -725,7 +701,10 @@
         <span>shop.ecommerce-demo.org</span>
         <span class="close-tab-btn" onclick="closeDomainTab(event, 'domain-2-panel', this)">[X]</span>
       </div>
-      <button class="add-tab-btn" onclick="promptAddDomain()">+ Add Target Domain</button>
+      <!-- '+' button in parent domain tabs strip -->
+      <div class="parent-tab plus-tab" onclick="promptAddDomain()" title="Add Target Domain Tab">
+        <span>[+]</span>
+      </div>
     </div>
 
     <!-- TAB 1: CONFIGURATION -->
@@ -780,16 +759,12 @@
           </div>
         </div>
 
-        <!-- Scanner Settings Card -->
+        <!-- Scanner Optimization Options Card -->
         <div class="config-card">
           <div class="config-card-title">
-            <span>Inspection & Reconnaissance Options</span>
+            <span>Scanner Optimization Options</span>
           </div>
           <div class="checkbox-group">
-            <label class="checkbox-item">
-              <input type="checkbox" checked>
-              <span><strong>Passive Live Traffic Detection:</strong> Inspect passing Burp Proxy responses for WordPress signatures in real-time.</span>
-            </label>
             <label class="checkbox-item">
               <input type="checkbox" checked>
               <span><strong>24-Hour Cache for WPScan Results:</strong> Avoid duplicate API requests for the same plugin/theme within 24 hours.</span>
@@ -806,20 +781,6 @@
               <input type="checkbox" checked>
               <span><strong>Automatic Security Hardening Checks:</strong> Probe XML-RPC multicall/pingback methods, REST endpoints, and sensitive files.</span>
             </label>
-          </div>
-        </div>
-
-        <!-- HTTP History Scan Card -->
-        <div class="config-card">
-          <div class="config-card-title">
-            <span>Historical Traffic Analysis</span>
-          </div>
-          <p style="color: var(--text-muted); margin-bottom: 12px;">
-            Search your current Burp Suite Proxy HTTP history to passively detect WordPress installations and collect plugins and themes discovered in earlier traffic.
-          </p>
-          <div class="form-inline">
-            <button class="btn btn-primary" onclick="triggerHttpHistoryScan()">Scan HTTP Proxy History</button>
-            <span id="historyScanResult" style="color: var(--text-muted); font-size: 11px;">Proxy history scan idle.</span>
           </div>
         </div>
 
@@ -893,7 +854,6 @@
           </div>
         </div>
 
-        <!-- WordPress Core Vulnerabilities Table -->
         <div class="table-container">
           <div class="table-toolbar">
             <span style="font-weight: bold; color: var(--text-bright);">WordPress Core 6.2.2 Known Vulnerabilities (WPScan DB)</span>
@@ -1044,7 +1004,6 @@
             </table>
           </div>
 
-          <!-- Selected Plugin Vulnerability Drill-down -->
           <div class="detail-pane" style="flex: 1;">
             <div class="detail-header">
               <span id="pluginDetailHeader">Vulnerabilities for 'woocommerce' (Version 8.1.1)</span>
@@ -1075,20 +1034,6 @@
                     <td>8.1.2</td>
                     <td>CVE-2023-45678</td>
                     <td>https://wpscan.com/vulnerability/12346</td>
-                  </tr>
-                  <tr>
-                    <td style="font-weight: 600;">WooCommerce &lt;= 8.1.1 - Contributor Stored XSS in Product Review</td>
-                    <td><span class="status-badge badge-warn">Stored XSS</span></td>
-                    <td>8.1.2</td>
-                    <td>CVE-2023-45679</td>
-                    <td>https://wpscan.com/vulnerability/12347</td>
-                  </tr>
-                  <tr>
-                    <td style="font-weight: 600;">WooCommerce &lt;= 8.1.1 - Server-Side Request Forgery via Webhook</td>
-                    <td><span class="status-badge badge-vuln">SSRF</span></td>
-                    <td>8.2.1</td>
-                    <td>CVE-2023-49000</td>
-                    <td>https://wpscan.com/vulnerability/12348</td>
                   </tr>
                 </tbody>
               </table>
@@ -1126,13 +1071,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
-
-        <div class="config-card" style="margin-top: 10px;">
-          <div class="config-card-title">Theme Security Analysis</div>
-          <p style="color: var(--text);">
-            Theme <strong>twentytwentythree</strong> version 1.1 matches the official WordPress.org release. No published CVEs or advisories were found in the WPScan database for this slug and version.
-          </p>
         </div>
       </div>
 
@@ -1188,22 +1126,6 @@
                 <td>REST API (/wp-json/wp/v2/users)</td>
                 <td>https://blog.security-target.com/author/sarah-jenkins/</td>
               </tr>
-              <tr>
-                <td>3</td>
-                <td style="font-weight: bold;">mspencer</td>
-                <td>Mark Spencer</td>
-                <td>mspencer</td>
-                <td>Author Redirect (/?author=3)</td>
-                <td>https://blog.security-target.com/author/mspencer/</td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td style="font-weight: bold;">dev_contributor</td>
-                <td>Alex Rivera</td>
-                <td>alex-rivera</td>
-                <td>Author Redirect (/?author=4)</td>
-                <td>https://blog.security-target.com/author/alex-rivera/</td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -1218,40 +1140,25 @@
             <button class="btn" onclick="copyLogs()">Copy to Clipboard</button>
           </div>
         </div>
-        <div class="console-log" id="consoleLogArea">[2026-10-24 12:15:01] [*] Initializing WordPress Inspector for: https://blog.security-target.com/
-[2026-10-24 12:15:01] [*] Fetching target homepage...
-[2026-10-24 12:15:02] [+] Target homepage retrieved (HTTP 200, 48291 bytes)
-[2026-10-24 12:15:02] [*] Testing XML-RPC interface at /xmlrpc.php...
-[2026-10-24 12:15:02] [+] XML-RPC enabled!
-[2026-10-24 12:15:02] [!] Pingback method available (pingback.ping) - Potential DDoS amplification vector
-[2026-10-24 12:15:02] [!] Multicall method available (system.multicall) - Potential brute-force vector
-[2026-10-24 12:15:02] [*] Probing REST API endpoints at /wp-json/wp/v2/...
-[2026-10-24 12:15:03] [+] Accessible REST endpoint: API root (/wp-json/)
-[2026-10-24 12:15:03] [+] Accessible REST endpoint: Users (/wp-json/wp/v2/users) -> UNPROTECTED
-[2026-10-24 12:15:03] [+] Accessible REST endpoint: Posts (/wp-json/wp/v2/posts)
-[2026-10-24 12:15:03] [+] Accessible REST endpoint: Pages (/wp-json/wp/v2/pages)
-[2026-10-24 12:15:03] [*] Enumerating WordPress users via REST API...
-[2026-10-24 12:15:03] [+] Found user: admin (ID: 1)
-[2026-10-24 12:15:03] [+] Found user: Sarah Jenkins (ID: 2, slug: sarah-jenkins)
-[2026-10-24 12:15:04] [*] Checking author redirect method (?author=N)...
-[2026-10-24 12:15:04] [+] Found user via redirect: mspencer (ID: 3)
-[2026-10-24 12:15:04] [+] Found user via redirect: dev_contributor (ID: 4)
-[2026-10-24 12:15:04] [*] Detecting WordPress Core version...
-[2026-10-24 12:15:04] [+] Version 6.2.2 detected from generator meta tag
-[2026-10-24 12:15:04] [*] Extracting plugins and themes from homepage and Burp HTTP history...
-[2026-10-24 12:15:05] [+] Discovered 8 plugins, 1 theme across 34 proxy history records
-[2026-10-24 12:15:05] [*] Querying WPScan API for WordPress Core 6.2.2...
-[2026-10-24 12:15:06] [+] Core: 6 vulnerabilities found
-[2026-10-24 12:15:06] [*] Scanning high-risk plugins via WPScan API...
-[2026-10-24 12:15:07] [+] Plugin 'woocommerce' (8.1.1): 4 vulnerabilities found
-[2026-10-24 12:15:08] [+] Plugin 'contact-form-7' (5.7.2): 1 vulnerability found
-[2026-10-24 12:15:09] [+] Plugin 'elementor' (3.14.0): 3 vulnerabilities found
-[2026-10-24 12:15:10] [+] Plugin 'wordfence' (7.10.4): 0 vulnerabilities (Clean)
-[2026-10-24 12:15:11] [+] Theme 'twentytwentythree' (1.1): 0 vulnerabilities (Clean)
-[2026-10-24 12:15:11] ==================================================
-[2026-10-24 12:15:11] SCAN COMPLETE: 14 total vulnerabilities identified
-[2026-10-24 12:15:11] API Credits Used: 5 | Cached Hits: 3
-[2026-10-24 12:15:11] ==================================================</div>
+        <div class="console-log" id="consoleLogArea">[2026-10-24 14:15:01] [*] Initializing WordPress Inspector for: https://blog.security-target.com/
+[2026-10-24 14:15:01] [*] Fetching target homepage...
+[2026-10-24 14:15:02] [+] Target homepage retrieved (HTTP 200, 48291 bytes)
+[2026-10-24 14:15:02] [*] Testing XML-RPC interface at /xmlrpc.php...
+[2026-10-24 14:15:02] [+] XML-RPC enabled!
+[2026-10-24 14:15:02] [!] Pingback method available (pingback.ping) - Potential DDoS amplification vector
+[2026-10-24 14:15:02] [!] Multicall method available (system.multicall) - Potential brute-force vector
+[2026-10-24 14:15:03] [+] Accessible REST endpoint: API root (/wp-json/)
+[2026-10-24 14:15:03] [+] Accessible REST endpoint: Users (/wp-json/wp/v2/users) -> UNPROTECTED
+[2026-10-24 14:15:03] [*] Enumerating WordPress users via REST API...
+[2026-10-24 14:15:03] [+] Found user: admin (ID: 1)
+[2026-10-24 14:15:04] [+] Found user via redirect: mspencer (ID: 3)
+[2026-10-24 14:15:04] [*] Detecting WordPress Core version...
+[2026-10-24 14:15:04] [+] Version 6.2.2 detected from generator meta tag
+[2026-10-24 14:15:05] [*] Querying WPScan API for WordPress Core 6.2.2...
+[2026-10-24 14:15:06] [+] Core: 6 vulnerabilities found
+[2026-10-24 14:15:07] [+] Plugin 'woocommerce' (8.1.1): 4 vulnerabilities found
+[2026-10-24 14:15:08] [+] Plugin 'contact-form-7' (5.7.2): 1 vulnerability found
+[2026-10-24 14:15:11] SCAN COMPLETE: 14 total vulnerabilities identified</div>
       </div>
     </div>
 
@@ -1288,7 +1195,7 @@
         </div>
         <pre id="exportContentArea"># WordPress Security Assessment Report
 Target: https://blog.security-target.com/
-Scan Date: 2026-10-24 12:15:11 UTC
+Scan Date: 2026-10-24 14:15:11 UTC
 WordPress Version: 6.2.2 (Outdated)
 
 ## Executive Summary
@@ -1299,22 +1206,6 @@ WordPress Version: 6.2.2 (Outdated)
 - Users Enumerated: 4
 - XML-RPC: Enabled (Pingback & Multicall Active)
 - REST API: Exposed (/wp-json/wp/v2/users unauthenticated)
-
-## Core Vulnerabilities
-- CVE-2023-39999: WordPress &lt;= 6.2.2 - User Enumeration via oEmbed
-- CVE-2023-38000: WordPress &lt;= 6.2.2 - Directory Traversal in WP_Theme
-- CVE-2023-38001: WordPress &lt;= 6.2.2 - Cross-Site Scripting via Nav Menu
-
-## Plugin Findings
-### WooCommerce (Version 8.1.1)
-- CVE-2023-47777: Unauthenticated Arbitrary File Upload (Fixed in 8.2.0)
-- CVE-2023-45678: Sensitive Data Exposure via Order API (Fixed in 8.1.2)
-
-### Contact Form 7 (Version 5.7.2)
-- CVE-2023-34567: Reflected XSS in Form Submissions (Fixed in 5.8.0)
-
-### Elementor (Version 3.14.0)
-- CVE-2023-33445: Authenticated Contributor Arbitrary Code Execution (Fixed in 3.14.2)
 </pre>
       </div>
       <div class="modal-footer">
@@ -1372,7 +1263,6 @@ WordPress Version: 6.2.2 (Outdated)
       if (confirm('Close domain tab for ' + parentTab.querySelector('span').textContent + '?')) {
         parentTab.remove();
         if (panel) panel.remove();
-        // Activate configuration tab
         const configTab = document.querySelector('.parent-tab.config-tab');
         if (configTab) {
           switchParentTab('config-tab-panel', configTab);
@@ -1380,25 +1270,23 @@ WordPress Version: 6.2.2 (Outdated)
       }
     }
 
-    // Add Domain Tab
+    // '+' Button in Parent Domain Tab strip
     function promptAddDomain() {
       const domain = prompt('Enter target WordPress URL or Domain (e.g. https://target-site.com):', 'https://');
       if (domain && domain.trim() !== '' && domain !== 'https://') {
         const cleanDomain = domain.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
         const newTabId = 'domain-' + Date.now() + '-panel';
         
-        // Add tab header
         const tabsBar = document.getElementById('parentTabsBar');
-        const addBtn = tabsBar.querySelector('.add-tab-btn');
+        const plusTab = tabsBar.querySelector('.plus-tab');
         
         const newTab = document.createElement('div');
         newTab.className = 'parent-tab';
         newTab.innerHTML = `<span>${cleanDomain}</span> <span class="close-tab-btn" onclick="closeDomainTab(event, '${newTabId}', this)">[X]</span>`;
         newTab.onclick = function() { switchParentTab(newTabId, newTab); };
         
-        tabsBar.insertBefore(newTab, addBtn);
+        tabsBar.insertBefore(newTab, plusTab);
 
-        // Add panel
         const container = document.querySelector('.extension-container');
         const newPanel = document.createElement('div');
         newPanel.className = 'tab-content';
@@ -1458,26 +1346,13 @@ WordPress Version: 6.2.2 (Outdated)
       }
     }
 
-    function triggerHttpHistoryScan() {
-      const status = document.getElementById('historyScanResult');
-      status.textContent = '[*] Scanning Burp HTTP Proxy history...';
-      status.style.color = 'var(--accent)';
-      setTimeout(() => {
-        status.textContent = '[+] Scanned 142 items: Found 2 WordPress targets, 11 plugin references!';
-        status.style.color = 'var(--badge-clean)';
-      }, 1200);
-    }
-
-    // Plugin Selection
     function selectPluginRow(row, slug) {
       document.querySelectorAll('#pluginsTableBody tr').forEach(r => r.classList.remove('selected'));
       row.classList.add('selected');
-      
       const header = document.getElementById('pluginDetailHeader');
       header.textContent = `Vulnerabilities for '${slug}'`;
     }
 
-    // Scan Simulation
     function runDomainScan(domain) {
       const log = document.getElementById('consoleLogArea');
       log.textContent += `\n[${new Date().toISOString().replace('T', ' ').substring(0, 19)}] [*] Starting manual scan for ${domain}...`;
@@ -1491,7 +1366,6 @@ WordPress Version: 6.2.2 (Outdated)
       alert(`Initiated targeted scan for: ${type}`);
     }
 
-    // Export Modal
     function openExportModal(domain) {
       document.getElementById('exportModalTitle').textContent = `Export Practitioner Report for ${domain}`;
       document.getElementById('exportModal').style.display = 'flex';
@@ -1506,7 +1380,7 @@ WordPress Version: 6.2.2 (Outdated)
       if (fmt === 'json') {
         pre.textContent = JSON.stringify({
           "scan_metadata": {
-            "timestamp": "2026-10-24T12:15:11Z",
+            "timestamp": "2026-10-24T14:15:11Z",
             "target_url": "https://blog.security-target.com/",
             "scanner": "WPScan API v3",
             "burp_extension": "WordPress Inspector (littlespidy)"
@@ -1515,18 +1389,12 @@ WordPress Version: 6.2.2 (Outdated)
             "version": "6.2.2",
             "outdated": true,
             "core_vulnerabilities": 6
-          },
-          "security_probes": {
-            "xmlrpc": { "enabled": true, "pingback": true, "multicall": true },
-            "rest_api": { "users_exposed": true, "endpoints_count": 5 }
-          },
-          "plugins_summary": { "total": 8, "vulnerable": 3 },
-          "themes_summary": { "active": "twentytwentythree", "vulnerable": 0 }
+          }
         }, null, 2);
       } else {
         pre.textContent = `# WordPress Security Assessment Report
 Target: https://blog.security-target.com/
-Scan Date: 2026-10-24 12:15:11 UTC
+Scan Date: 2026-10-24 14:15:11 UTC
 WordPress Version: 6.2.2 (Outdated)
 
 ## Executive Summary

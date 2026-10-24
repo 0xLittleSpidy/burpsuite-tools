@@ -15,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created with the help of an AI Agent and littlespidy.
  *
  * Main Burp Suite extension Suite Tab for WordPress Inspector.
- * Holds the top-level JTabbedPane containing the Configuration tab and individual Domain parent tabs.
+ * Holds the top-level JTabbedPane containing the Configuration tab, individual Domain parent tabs,
+ * and a trailing [+] button to dynamically add new target domains.
  */
 public class WordPressInspectorSuiteTab_littlespidy extends JPanel implements WordPressDataStore_littlespidy.DataStoreListener {
 
@@ -25,6 +26,9 @@ public class WordPressInspectorSuiteTab_littlespidy extends JPanel implements Wo
 
     private final JTabbedPane topTabbedPane;
     private final ConfigurationTab_littlespidy configTab;
+    private final JPanel plusDummyTab;
+    private Component lastSelectedComponent;
+
     private final Map<String, DomainParentTab_littlespidy> domainTabs = new ConcurrentHashMap<>();
 
     public WordPressInspectorSuiteTab_littlespidy(
@@ -44,14 +48,60 @@ public class WordPressInspectorSuiteTab_littlespidy extends JPanel implements Wo
         // Tab 0: Permanent Configuration Tab
         configTab = new ConfigurationTab_littlespidy(api, dataStore, prefsManager, this);
         topTabbedPane.addTab("Configuration", configTab);
+        lastSelectedComponent = configTab;
+
+        // Permanent trailing [+] Tab to add new target domains
+        plusDummyTab = new JPanel();
+        topTabbedPane.addTab("[+]", plusDummyTab);
+        int plusIndex = topTabbedPane.indexOfComponent(plusDummyTab);
+
+        JLabel plusLabel = new JLabel(" [+] ");
+        plusLabel.setFont(plusLabel.getFont().deriveFont(Font.BOLD, 12f));
+        plusLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        plusLabel.setToolTipText("Add Target Domain Tab");
+        topTabbedPane.setTabComponentAt(plusIndex, plusLabel);
+
+        // Listen for clicks on [+] tab
+        topTabbedPane.addChangeListener(e -> {
+            if (topTabbedPane.getSelectedComponent() == plusDummyTab) {
+                SwingUtilities.invokeLater(this::promptAddNewTarget);
+            } else {
+                lastSelectedComponent = topTabbedPane.getSelectedComponent();
+            }
+        });
 
         add(topTabbedPane, BorderLayout.CENTER);
+    }
+
+    public synchronized void promptAddNewTarget() {
+        String input = (String) JOptionPane.showInputDialog(
+                this,
+                "Enter target WordPress URL or hostname (e.g. https://example.com):",
+                "Add Target Domain",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                null,
+                "https://"
+        );
+
+        if (input != null && !input.trim().isEmpty() && !input.trim().equalsIgnoreCase("https://") && !input.trim().equalsIgnoreCase("http://")) {
+            String cleanInput = input.trim();
+            WordPressTarget_littlespidy target = dataStore.getOrCreateTarget(cleanInput, cleanInput);
+            openDomainTab(target);
+        } else {
+            // Revert back to previously active component
+            if (lastSelectedComponent != null && lastSelectedComponent != plusDummyTab) {
+                topTabbedPane.setSelectedComponent(lastSelectedComponent);
+            } else {
+                topTabbedPane.setSelectedComponent(configTab);
+            }
+        }
     }
 
     public synchronized void openDomainTab(WordPressTarget_littlespidy target) {
         String key = target.getRootDomain();
         if (domainTabs.containsKey(key)) {
-            // Activate existing tab
+            // Activate existing domain tab
             DomainParentTab_littlespidy existing = domainTabs.get(key);
             topTabbedPane.setSelectedComponent(existing);
             return;
@@ -60,11 +110,17 @@ public class WordPressInspectorSuiteTab_littlespidy extends JPanel implements Wo
         DomainParentTab_littlespidy domainTab = new DomainParentTab_littlespidy(api, dataStore, target);
         domainTabs.put(key, domainTab);
 
-        topTabbedPane.addTab(key, domainTab);
-        int tabIndex = topTabbedPane.indexOfComponent(domainTab);
+        // Insert immediately before the trailing [+] tab
+        int plusIndex = topTabbedPane.indexOfComponent(plusDummyTab);
+        if (plusIndex >= 0) {
+            topTabbedPane.insertTab(key, null, domainTab, null, plusIndex);
+        } else {
+            topTabbedPane.addTab(key, domainTab);
+        }
 
+        int newIndex = topTabbedPane.indexOfComponent(domainTab);
         CloseableTabHeader_littlespidy header = new CloseableTabHeader_littlespidy(key, () -> closeDomainTab(key));
-        topTabbedPane.setTabComponentAt(tabIndex, header);
+        topTabbedPane.setTabComponentAt(newIndex, header);
 
         topTabbedPane.setSelectedComponent(domainTab);
     }
@@ -74,6 +130,9 @@ public class WordPressInspectorSuiteTab_littlespidy extends JPanel implements Wo
         if (tab != null) {
             topTabbedPane.remove(tab);
             dataStore.removeTarget(rootDomain);
+            if (topTabbedPane.getSelectedComponent() == plusDummyTab) {
+                topTabbedPane.setSelectedComponent(configTab);
+            }
         }
     }
 

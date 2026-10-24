@@ -12,13 +12,14 @@ Ported and enhanced from BurpWpsScan, WordPress Inspector introduces a clean mul
 - Secure WPScan API Token input stored directly in Burp preferences.
 - Real-time API connection testing and validation with wpscan.com.
 - Daily API usage tracker and counter reset tool.
-- Passive live traffic detection toggle.
 - 24-hour result caching to avoid redundant API credit consumption.
-- Burp Proxy HTTP history scanner to detect WordPress targets from previous browsing.
-- Quick-add domain utility to spin up new target tabs on demand.
+- Curated 80+ high-risk plugin vulnerability prioritization.
+- Free plugin update checks against WordPress.org API.
+- Deep security hardening probes (XML-RPC multicall/pingback, REST endpoint inspection).
 
 ### 2. Multi-Domain Parent Tab Workflow
 - Each target domain has its own dedicated parent tab with an editable target URL bar.
+- Interactive `[+]` button tab positioned directly in the parent tab strip to create new target tabs on demand.
 - Custom subpaths and protocols can be edited on the fly before scanning.
 - Closeable tab headers using clean ASCII controls `[X]`.
 
