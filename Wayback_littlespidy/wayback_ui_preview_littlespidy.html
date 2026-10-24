@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaybackLister (littlespidy) - Burp Suite Extension UI Preview</title>
+  <title>Wayback (littlespidy) - Burp Suite Extension UI Preview</title>
   <style>
     :root {
       --bg-dark: #1e1e1e;
@@ -232,7 +232,7 @@
       border-color: var(--accent);
     }
 
-    /* Child Sub-tabs Bar (inside active domain) */
+    /* Child Sub-tabs Bar (inside active domain): Path, Subdomain, Directory Listing */
     .child-tabs-bar {
       background-color: var(--bg-card);
       display: flex;
@@ -779,7 +779,7 @@
   <div class="burp-header">
     <div class="title-area">
       <span class="burp-logo-badge">BURP SUITE</span>
-      <span class="suite-title">WaybackLister (littlespidy) - Burp Suite Extension UI Preview</span>
+      <span class="suite-title">wayback (littlespidy) - Burp Suite Extension UI Preview</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
       <span style="font-size: 11px; color: var(--text-muted);">Montoya API Standard | Plain ASCII Mode</span>
@@ -795,7 +795,7 @@
     <div class="burp-tab">Intruder</div>
     <div class="burp-tab">Repeater</div>
     <div class="burp-tab">Extensions</div>
-    <div class="burp-tab active">WaybackLister</div>
+    <div class="burp-tab active">wayback</div>
   </div>
 
   <!-- Persistent Session Management Toolbar -->
@@ -840,7 +840,7 @@
       <div class="config-grid">
         <!-- Detection Signatures Card -->
         <div class="config-card">
-          <div class="config-card-title">Directory Listing Detection Signatures (Common to All Scans)</div>
+          <div class="config-card-title">Directory Listing Detection Signatures (Common)</div>
           <p style="font-size: 11px; color: var(--text-muted);">Responses containing any of these substrings when returning HTTP 200 will be flagged as open directory listings across all domains.</p>
           <div class="signature-list" id="signatureListContainer">
             <div class="signature-item"><span>Index of /</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
@@ -867,8 +867,9 @@
             <input type="text" class="text-input" style="width: 100%;" value="https://web.archive.org/cdx/search/cdx?url={DOMAIN}&amp;output=txt&amp;fl=original&amp;collapse=urlkey">
           </div>
           <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-            <span class="input-label">Custom User-Agent:</span>
-            <input type="text" class="text-input" style="width: 100%;" value="WaybackLister/2.0 (BurpSuite-Extension-littlespidy)">
+            <span class="input-label">Standard Browser User-Agent:</span>
+            <input type="text" class="text-input" style="width: 100%;" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36">
+            <span style="font-size: 10px; color: var(--text-muted);">Standard realistic browser User-Agent header (no custom tool signature).</span>
           </div>
           <div style="display: flex; gap: 10px;">
             <div class="input-group">
@@ -903,19 +904,22 @@
   <!-- DOMAIN PANEL 1: testphp.vulnweb.com (Active Parent Tab) -->
   <div class="parent-tab-content active" id="domain-panel-1">
     
-    <!-- Child Sub-tabs Bar inside testphp.vulnweb.com -->
+    <!-- Child Sub-tabs Bar inside testphp.vulnweb.com: 1. Path, 2. Subdomain, 3. Directory Listing -->
     <div class="child-tabs-bar">
-      <div class="child-tab active" onclick="switchChildTab('panel1-tab-findings', this, 'domain-panel-1')">
-        Directory Listings
-        <span class="badge-count found" id="panel1-findingsCount">4</span>
-      </div>
-      <div class="child-tab" onclick="switchChildTab('panel1-tab-paths', this, 'domain-panel-1')">
-        Discovered Paths
+      <!-- 1st Child Tab: Path -->
+      <div class="child-tab active" onclick="switchChildTab('panel1-tab-paths', this, 'domain-panel-1')">
+        Path
         <span class="badge-count">186</span>
       </div>
+      <!-- 2nd Child Tab: Subdomain -->
       <div class="child-tab" onclick="switchChildTab('panel1-tab-subdomains', this, 'domain-panel-1')">
-        Discovered Subdomains
+        Subdomain
         <span class="badge-count">7</span>
+      </div>
+      <!-- 3rd Child Tab: Directory Listing -->
+      <div class="child-tab" onclick="switchChildTab('panel1-tab-findings', this, 'domain-panel-1')">
+        Directory Listing
+        <span class="badge-count found" id="panel1-findingsCount">4</span>
       </div>
     </div>
 
@@ -1008,133 +1012,8 @@
         </div>
       </div>
 
-      <!-- CHILD TAB 1: Directory Listings (Findings) -->
-      <div id="panel1-tab-findings" class="child-tab-content active">
-        <div class="filter-bar">
-          <span class="input-label">Filter Findings:</span>
-          <input type="text" class="search-input" placeholder="Filter by host, path, signature..." onkeyup="filterTable(this, 'panel1-findingsTable')">
-          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click any row for context menu (Send to Repeater, Intruder, etc.)</span>
-        </div>
-
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
-          <!-- Table: NO Action Column! Right-click triggers context menu -->
-          <div class="table-container">
-            <table id="panel1-findingsTable">
-              <thead>
-                <tr>
-                  <th style="width: 40px;">#</th>
-                  <th style="width: 65px;">Protocol</th>
-                  <th style="width: 180px;">Host</th>
-                  <th>Exposed Directory Path</th>
-                  <th style="width: 75px;">Status</th>
-                  <th style="width: 170px;">Matched Signature</th>
-                  <th style="width: 90px;">Length</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="odd selected" onclick="selectFindingRow(this, 1)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/admin/')">
-                  <td>1</td>
-                  <td>HTTP</td>
-                  <td>testphp.vulnweb.com</td>
-                  <td>/admin/</td>
-                  <td><span class="status-tag status-200">200 OK</span></td>
-                  <td><span class="signature-badge">Index of /admin</span></td>
-                  <td>4,218 B</td>
-                </tr>
-                <tr class="even" onclick="selectFindingRow(this, 2)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/secured/')">
-                  <td>2</td>
-                  <td>HTTP</td>
-                  <td>testphp.vulnweb.com</td>
-                  <td>/secured/</td>
-                  <td><span class="status-tag status-200">200 OK</span></td>
-                  <td><span class="signature-badge">&lt;title&gt;Index of</span></td>
-                  <td>1,842 B</td>
-                </tr>
-                <tr class="odd" onclick="selectFindingRow(this, 3)" oncontextmenu="showFindingsContextMenu(event, 'https://testphp.vulnweb.com/images/')">
-                  <td>3</td>
-                  <td>HTTPS</td>
-                  <td>testphp.vulnweb.com</td>
-                  <td>/images/</td>
-                  <td><span class="status-tag status-200">200 OK</span></td>
-                  <td><span class="signature-badge">Parent Directory&lt;/a&gt;</span></td>
-                  <td>6,712 B</td>
-                </tr>
-                <tr class="even" onclick="selectFindingRow(this, 4)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/backup/')">
-                  <td>4</td>
-                  <td>HTTP</td>
-                  <td>testphp.vulnweb.com</td>
-                  <td>/backup/</td>
-                  <td><span class="status-tag status-200">200 OK</span></td>
-                  <td><span class="signature-badge">Last modified&lt;/a&gt;</span></td>
-                  <td>3,105 B</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- PARALLEL SIDE-BY-SIDE HTTP REQUEST & RESPONSE VIEWERS -->
-          <div class="parallel-inspector-pane">
-            <!-- Left: HTTP Request -->
-            <div class="parallel-viewer-box">
-              <div class="parallel-viewer-header">
-                <span>HTTP Request</span>
-                <div class="viewer-submodes">
-                  <button class="viewer-submode-btn active">Raw</button>
-                  <button class="viewer-submode-btn">Headers</button>
-                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Request to clipboard')">Copy</button>
-                </div>
-              </div>
-              <div class="parallel-viewer-body" id="reqViewerText">GET /admin/ HTTP/1.1
-Host: testphp.vulnweb.com
-User-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Connection: close</div>
-            </div>
-
-            <!-- Right: HTTP Response -->
-            <div class="parallel-viewer-box">
-              <div class="parallel-viewer-header">
-                <span>HTTP Response (Status: 200 OK)</span>
-                <div class="viewer-submodes">
-                  <button class="viewer-submode-btn active">Raw</button>
-                  <button class="viewer-submode-btn">Headers</button>
-                  <button class="viewer-submode-btn">Render</button>
-                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Response to clipboard')">Copy</button>
-                </div>
-              </div>
-              <div class="parallel-viewer-body" id="respViewerText">HTTP/1.1 200 OK
-Date: Sat, 24 Oct 2026 05:22:10 GMT
-Server: Apache/2.4.41 (Ubuntu)
-Content-Type: text/html;charset=UTF-8
-Content-Length: 4218
-Connection: close
-
-&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;
-&lt;html&gt;
- &lt;head&gt;
-  &lt;title&gt;Index of /admin&lt;/title&gt;
- &lt;/head&gt;
- &lt;body&gt;
-&lt;h1&gt;Index of /admin&lt;/h1&gt;
-  &lt;table&gt;
-   &lt;tr&gt;&lt;th&gt;&lt;a href="?C=N;O=D"&gt;Name&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=M;O=A"&gt;Last modified&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=S;O=A"&gt;Size&lt;/a&gt;&lt;/th&gt;&lt;/tr&gt;
-   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;&lt;a href="/"&gt;Parent Directory&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;td align="right"&gt;  - &lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;&lt;a href="config.php.bak"&gt;config.php.bak&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2024-03-12 11:42&lt;/td&gt;&lt;td align="right"&gt;2.4K&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;&lt;a href="db_dump.sql.gz"&gt;db_dump.sql.gz&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-01-08 09:15&lt;/td&gt;&lt;td align="right"&gt;1.8M&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;&lt;a href="secret_keys.txt"&gt;secret_keys.txt&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-06-19 14:02&lt;/td&gt;&lt;td align="right"&gt;512 &lt;/td&gt;&lt;/tr&gt;
-   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
-&lt;/table&gt;
-&lt;address&gt;Apache/2.4.41 (Ubuntu) Server at testphp.vulnweb.com Port 80&lt;/address&gt;
-&lt;/body&gt;&lt;/html&gt;</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CHILD TAB 2: Discovered Paths -->
-      <div id="panel1-tab-paths" class="child-tab-content">
+      <!-- CHILD TAB 1: Path (First Tab) -->
+      <div id="panel1-tab-paths" class="child-tab-content active">
         <div class="filter-bar">
           <span class="input-label">Filter Harvested Paths:</span>
           <input type="text" class="search-input" placeholder="Filter paths e.g. /api, .php, /admin..." onkeyup="filterTable(this, 'panel1-pathsTable')">
@@ -1209,7 +1088,7 @@ Connection: close
         </div>
       </div>
 
-      <!-- CHILD TAB 3: Discovered Subdomains -->
+      <!-- CHILD TAB 2: Subdomain (Second Tab) -->
       <div id="panel1-tab-subdomains" class="child-tab-content">
         <div class="filter-bar">
           <span class="input-label">Discovered Subdomains (Wayback CDX):</span>
@@ -1264,15 +1143,140 @@ Connection: close
         </div>
       </div>
 
+      <!-- CHILD TAB 3: Directory Listing (Third Tab) -->
+      <div id="panel1-tab-findings" class="child-tab-content">
+        <div class="filter-bar">
+          <span class="input-label">Filter Directory Listings:</span>
+          <input type="text" class="search-input" placeholder="Filter by host, path, signature..." onkeyup="filterTable(this, 'panel1-findingsTable')">
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click any row for context menu (Send to Repeater, Intruder, etc.)</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+          <!-- Table: NO Action Column! Right-click triggers context menu -->
+          <div class="table-container">
+            <table id="panel1-findingsTable">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th style="width: 65px;">Protocol</th>
+                  <th style="width: 180px;">Host</th>
+                  <th>Exposed Directory Path</th>
+                  <th style="width: 75px;">Status</th>
+                  <th style="width: 170px;">Matched Signature</th>
+                  <th style="width: 90px;">Length</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="odd selected" onclick="selectFindingRow(this, 1)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/admin/')">
+                  <td>1</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/admin/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Index of /admin</span></td>
+                  <td>4,218 B</td>
+                </tr>
+                <tr class="even" onclick="selectFindingRow(this, 2)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/secured/')">
+                  <td>2</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/secured/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">&lt;title&gt;Index of</span></td>
+                  <td>1,842 B</td>
+                </tr>
+                <tr class="odd" onclick="selectFindingRow(this, 3)" oncontextmenu="showFindingsContextMenu(event, 'https://testphp.vulnweb.com/images/')">
+                  <td>3</td>
+                  <td>HTTPS</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/images/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Parent Directory&lt;/a&gt;</span></td>
+                  <td>6,712 B</td>
+                </tr>
+                <tr class="even" onclick="selectFindingRow(this, 4)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/backup/')">
+                  <td>4</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/backup/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Last modified&lt;/a&gt;</span></td>
+                  <td>3,105 B</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PARALLEL SIDE-BY-SIDE HTTP REQUEST & RESPONSE VIEWERS -->
+          <div class="parallel-inspector-pane">
+            <!-- Left: HTTP Request -->
+            <div class="parallel-viewer-box">
+              <div class="parallel-viewer-header">
+                <span>HTTP Request</span>
+                <div class="viewer-submodes">
+                  <button class="viewer-submode-btn active">Raw</button>
+                  <button class="viewer-submode-btn">Headers</button>
+                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Request to clipboard')">Copy</button>
+                </div>
+              </div>
+              <div class="parallel-viewer-body" id="reqViewerText">GET /admin/ HTTP/1.1
+Host: testphp.vulnweb.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Connection: close</div>
+            </div>
+
+            <!-- Right: HTTP Response -->
+            <div class="parallel-viewer-box">
+              <div class="parallel-viewer-header">
+                <span>HTTP Response (Status: 200 OK)</span>
+                <div class="viewer-submodes">
+                  <button class="viewer-submode-btn active">Raw</button>
+                  <button class="viewer-submode-btn">Headers</button>
+                  <button class="viewer-submode-btn">Render</button>
+                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Response to clipboard')">Copy</button>
+                </div>
+              </div>
+              <div class="parallel-viewer-body" id="respViewerText">HTTP/1.1 200 OK
+Date: Sat, 24 Oct 2026 05:22:10 GMT
+Server: Apache/2.4.41 (Ubuntu)
+Content-Type: text/html;charset=UTF-8
+Content-Length: 4218
+Connection: close
+
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;
+&lt;html&gt;
+ &lt;head&gt;
+  &lt;title&gt;Index of /admin&lt;/title&gt;
+ &lt;/head&gt;
+ &lt;body&gt;
+&lt;h1&gt;Index of /admin&lt;/h1&gt;
+  &lt;table&gt;
+   &lt;tr&gt;&lt;th&gt;&lt;a href="?C=N;O=D"&gt;Name&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=M;O=A"&gt;Last modified&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=S;O=A"&gt;Size&lt;/a&gt;&lt;/th&gt;&lt;/tr&gt;
+   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="/"&gt;Parent Directory&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;td align="right"&gt;  - &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="config.php.bak"&gt;config.php.bak&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2024-03-12 11:42&lt;/td&gt;&lt;td align="right"&gt;2.4K&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="db_dump.sql.gz"&gt;db_dump.sql.gz&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-01-08 09:15&lt;/td&gt;&lt;td align="right"&gt;1.8M&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="secret_keys.txt"&gt;secret_keys.txt&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-06-19 14:02&lt;/td&gt;&lt;td align="right"&gt;512 &lt;/td&gt;&lt;/tr&gt;
+   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
+&lt;/table&gt;
+&lt;address&gt;Apache/2.4.41 (Ubuntu) Server at testphp.vulnweb.com Port 80&lt;/address&gt;
+&lt;/body&gt;&lt;/html&gt;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <!-- DOMAIN PANEL 2: api.vulnweb.com (Simulated Second Parent Tab) -->
   <div class="parent-tab-content" id="domain-panel-2">
     <div class="child-tabs-bar">
-      <div class="child-tab active">Directory Listings <span class="badge-count found">1</span></div>
-      <div class="child-tab">Discovered Paths <span class="badge-count">42</span></div>
-      <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
+      <div class="child-tab active">Path <span class="badge-count">42</span></div>
+      <div class="child-tab">Subdomain <span class="badge-count">0</span></div>
+      <div class="child-tab">Directory Listing <span class="badge-count found">1</span></div>
     </div>
     <div class="main-workspace">
       <div class="control-panel">
@@ -1341,7 +1345,7 @@ Connection: close
       <span>Active Session: session_vulnweb_recon.json | Active Tab: #1 testphp.vulnweb.com</span>
     </div>
     <div>
-      <span>WaybackLister v2.0 for Burp Suite (Montoya API) | Dedicated Domain Multi-Session Model | Plain ASCII</span>
+      <span>wayback v2.0 for Burp Suite (Montoya API) | Dedicated Domain Multi-Session Model | Plain ASCII</span>
     </div>
   </div>
 
@@ -1448,9 +1452,9 @@ Connection: close
       panelElem.id = panelId;
       panelElem.innerHTML = `
         <div class="child-tabs-bar">
-          <div class="child-tab active">Directory Listings <span class="badge-count found">0</span></div>
-          <div class="child-tab">Discovered Paths <span class="badge-count">0</span></div>
-          <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
+          <div class="child-tab active">Path <span class="badge-count">0</span></div>
+          <div class="child-tab">Subdomain <span class="badge-count">0</span></div>
+          <div class="child-tab">Directory Listing <span class="badge-count found">0</span></div>
         </div>
         <div class="main-workspace">
           <div class="control-panel">
@@ -1491,16 +1495,16 @@ Connection: close
       const respBox = document.getElementById('respViewerText');
 
       if (id === 1) {
-        reqBox.textContent = `GET /admin/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nConnection: close`;
+        reqBox.textContent = `GET /admin/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nConnection: close`;
         respBox.textContent = `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 05:22:10 GMT\nServer: Apache/2.4.41 (Ubuntu)\nContent-Type: text/html;charset=UTF-8\nContent-Length: 4218\nConnection: close\n\n<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<html>\n <head>\n  <title>Index of /admin</title>\n </head>\n <body>\n<h1>Index of /admin</h1>\n  <table>\n   <tr><th><a href="?C=N;O=D">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th></tr>\n   <tr><th colspan="5"><hr></th></tr>\n<tr><td><a href="/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td></tr>\n<tr><td><a href="config.php.bak">config.php.bak</a></td><td align="right">2024-03-12 11:42</td><td align="right">2.4K</td></tr>\n<tr><td><a href="db_dump.sql.gz">db_dump.sql.gz</a></td><td align="right">2025-01-08 09:15</td><td align="right">1.8M</td></tr>\n<tr><td><a href="secret_keys.txt">secret_keys.txt</a></td><td align="right">2025-06-19 14:02</td><td align="right">512 </td></tr>\n</table>\n</body></html>`;
       } else if (id === 2) {
-        reqBox.textContent = `GET /secured/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
+        reqBox.textContent = `GET /secured/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nConnection: close`;
         respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache/2.4.41\nContent-Length: 1842\n\n<html><head><title>Index of /secured</title></head><body><h1>Index of /secured</h1><p><a href="passwords.kdbx">passwords.kdbx</a></p></body></html>`;
       } else if (id === 3) {
-        reqBox.textContent = `GET /images/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
+        reqBox.textContent = `GET /images/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nConnection: close`;
         respBox.textContent = `HTTP/1.1 200 OK\nServer: nginx/1.18.0\nContent-Length: 6712\n\n<html><body><h1>Directory listing for /images/</h1><a href="../">Parent Directory</a><br><a href="logo.png">logo.png</a></body></html>`;
       } else if (id === 4) {
-        reqBox.textContent = `GET /backup/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
+        reqBox.textContent = `GET /backup/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nConnection: close`;
         respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache\nContent-Length: 3105\n\n<html><head><title>Index of /backup</title></head><body><a href="archive_2025.tar.gz">archive_2025.tar.gz</a> Last modified: 2025-08-10</body></html>`;
       }
     }
