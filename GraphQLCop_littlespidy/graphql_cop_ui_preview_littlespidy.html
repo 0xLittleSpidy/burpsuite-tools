@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GraphQL Cop (littlespidy) - Burp Suite Extension UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --border-focus: #007acc;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --accent-disabled: #8a481e;
+      --badge-high: #f14c4c;
+      --badge-medium: #cca700;
+      --badge-low: #3794ff;
+      --badge-info: #388a34;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --border-focus: #007acc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --badge-high: #d32f2f;
+      --badge-medium: #b78103;
+      --badge-low: #1976d2;
+      --badge-info: #2e7d32;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Burp Top Banner */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      letter-spacing: 0.5px;
+    }
+    .suite-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Burp Main Suite Tabs */
+    .suite-tabs {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 8px;
+      gap: 2px;
+      user-select: none;
+    }
+    .suite-tab {
+      padding: 6px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-size: 12px;
+    }
+    .suite-tab:hover {
+      color: var(--text-bright);
+      background-color: var(--bg-hover);
+    }
+    .suite-tab.active {
+      color: var(--text-bright);
+      border-bottom: 2px solid var(--accent);
+      background-color: var(--bg-dark);
+      font-weight: 600;
+    }
+
+    /* Persistent Session Toolbar */
+    .session-toolbar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .session-actions-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background-color: var(--btn-hover);
+      border-color: var(--text-muted);
+    }
+    .btn-accent {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .btn-accent:hover {
+      background-color: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+    .session-status-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+    .status-pill {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 3px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+    .status-pill.active-file {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Multi-Session Tabs */
+    .session-tabs-bar {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      gap: 2px;
+      overflow-x: auto;
+    }
+    .session-tab-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background-color: var(--bg-darker);
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 11px;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .session-tab-item:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-bright);
+    }
+    .session-tab-item.active {
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      border-top: 2px solid var(--accent);
+      font-weight: 600;
+    }
+    .tab-close-btn {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: bold;
+      padding: 0 3px;
+      border-radius: 2px;
+    }
+    .tab-close-btn:hover {
+      color: #ff5555;
+      background-color: rgba(255, 85, 85, 0.2);
+    }
+    .new-tab-btn {
+      padding: 4px 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: bold;
+    }
+    .new-tab-btn:hover {
+      color: var(--text-bright);
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Config and Trigger Panel */
+    .config-panel {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .config-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .input-label {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+    .text-input {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 2px;
+      outline: none;
+    }
+    .text-input:focus {
+      border-color: var(--border-focus);
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    /* Rapid-Triage Filter Bar */
+    .filter-bar {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-group-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-select {
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 3px 6px;
+      font-size: 11px;
+      border-radius: 2px;
+      outline: none;
+    }
+    .filter-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* Split Pane: Table on Top, Request/Response on Bottom */
+    .split-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      background-color: var(--bg-dark);
+      min-height: 180px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-darker);
+      color: var(--text-bright);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      font-weight: 600;
+      user-select: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    th:hover {
+      background-color: var(--bg-hover);
+    }
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    tr.even {
+      background-color: var(--row-even);
+    }
+    tr.odd {
+      background-color: var(--row-odd);
+    }
+    tr:hover {
+      background-color: var(--bg-hover) !important;
+      cursor: pointer;
+    }
+    tr.selected {
+      background-color: var(--bg-selected) !important;
+      color: var(--text-bright) !important;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 2px;
+      font-weight: bold;
+      font-size: 10px;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+    .badge-high {
+      background-color: var(--badge-high);
+      color: #ffffff;
+    }
+    .badge-medium {
+      background-color: var(--badge-medium);
+      color: #ffffff;
+    }
+    .badge-low {
+      background-color: var(--badge-low);
+      color: #ffffff;
+    }
+    .badge-info {
+      background-color: var(--badge-info);
+      color: #ffffff;
+    }
+
+    /* Split Divider */
+    .split-divider {
+      height: 4px;
+      background-color: var(--border);
+      cursor: row-resize;
+    }
+
+    /* Details Viewer Pane */
+    .details-pane {
+      height: 280px;
+      display: flex;
+      background-color: var(--bg-darker);
+      border-top: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .viewer-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .viewer-box:last-child {
+      border-right: none;
+    }
+    .viewer-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .viewer-title {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+    .sub-tabs {
+      display: flex;
+      gap: 2px;
+    }
+    .sub-tab {
+      padding: 2px 8px;
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .sub-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+    .viewer-content {
+      flex: 1;
+      background-color: var(--code-bg);
+      color: #d4d4d4;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11px;
+      padding: 8px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Footer Info Bar */
+    .footer-bar {
+      background-color: var(--bg-darker);
+      border-top: 1px solid var(--border);
+      padding: 4px 12px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+    .footer-left {
+      display: flex;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Burp Suite Suite Header -->
+  <div class="burp-header">
+    <div class="title-area">
+      <span class="burp-logo-badge">BURP</span>
+      <span class="suite-title">Burp Suite Professional - GraphQL Cop Extension Preview</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+      <button class="btn" onclick="showInfoDialog()">About Extension</button>
+    </div>
+  </div>
+
+  <!-- Burp Main Suite Tabs -->
+  <div class="suite-tabs">
+    <div class="suite-tab">Dashboard</div>
+    <div class="suite-tab">Target</div>
+    <div class="suite-tab">Proxy</div>
+    <div class="suite-tab">Intruder</div>
+    <div class="suite-tab">Repeater</div>
+    <div class="suite-tab">Collaborator</div>
+    <div class="suite-tab active">GraphQL Cop</div>
+  </div>
+
+  <!-- Persistent Session Toolbar -->
+  <div class="session-toolbar">
+    <div class="session-actions-left">
+      <button class="btn" onclick="handleNewSession()">[New Session]</button>
+      <button class="btn" onclick="handleOpenSession()">[Open Session]</button>
+      <button class="btn btn-accent" onclick="handleSaveSession()">[Save]</button>
+      <button class="btn" onclick="handleSaveAsSession()">[Save As...]</button>
+      <button class="btn" onclick="handleOffboardSession()">[Offboard Session]</button>
+    </div>
+    <div class="session-status-right">
+      <span>Active Storage:</span>
+      <span class="status-pill active-file" id="sessionPathDisplay">/home/littlespidy/graphql_cop_session.json</span>
+      <span class="status-pill" id="autoSaveIndicator">Synced</span>
+    </div>
+  </div>
+
+  <!-- Multi-Session Dynamic Tabs Bar -->
+  <div class="session-tabs-bar" id="sessionTabsBar">
+    <div class="session-tab-item active" onclick="switchSessionTab(0)">
+      <span>Quick Audit / Sweep</span>
+    </div>
+    <div class="session-tab-item" onclick="switchSessionTab(1)" title="Double click to rename tab">
+      <span class="tab-title-text" ondblclick="startInlineRename(this)">#1 POST /graphql</span>
+      <span class="tab-close-btn" onclick="closeSessionTab(event, 1)">x</span>
+    </div>
+    <div class="session-tab-item" onclick="switchSessionTab(2)" title="Double click to rename tab">
+      <span class="tab-title-text" ondblclick="startInlineRename(this)">#2 GET /api/v1/graphql</span>
+      <span class="tab-close-btn" onclick="closeSessionTab(event, 2)">x</span>
+    </div>
+    <div class="new-tab-btn" onclick="addNewSessionTab()" title="Open new testing tab">+</div>
+  </div>
+
+  <!-- Main Active Workspace -->
+  <div class="workspace">
+
+    <!-- Config & Trigger Panel -->
+    <div class="config-panel">
+      <div class="config-row">
+        <div class="input-group" style="flex: 2;">
+          <span class="input-label">Target URL:</span>
+          <input type="text" class="text-input" id="targetUrlInput" value="https://api.target-app.com/graphql" style="flex: 1;">
+        </div>
+        <div class="input-group" style="flex: 2;">
+          <span class="input-label">Custom Headers (JSON / KV):</span>
+          <input type="text" class="text-input" id="customHeadersInput" value='{"Authorization": "Bearer eyJhbGciOi..."}' style="flex: 1;">
+        </div>
+        <button class="btn btn-accent" id="runScanBtn" onclick="toggleScan()">Run Audit</button>
+        <button class="btn" onclick="clearResults()">Clear Results</button>
+      </div>
+
+      <div class="config-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkDiscovery" checked>
+          <span>Auto-discover endpoints (/, /graphql, /graphiql, /playground, /console)</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkDos" checked>
+          <span>Enable Denial-of-Service / Intrusive Checks (Batching, Aliases, Circular Introspection)</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkDebug" checked>
+          <span>Debug Mode (Send X-GraphQL-Cop-Test header)</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkInScope" checked>
+          <span>Enforce Burp Target Scope</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Rapid Triage Filters Bar -->
+    <div class="filter-bar">
+      <div class="filter-group-left">
+        <span class="input-label">Severity:</span>
+        <select class="filter-select" id="filterSeverity" onchange="applyFilters()">
+          <option value="ALL">All Severities</option>
+          <option value="HIGH">HIGH (4)</option>
+          <option value="MEDIUM">MEDIUM (2)</option>
+          <option value="LOW">LOW (2)</option>
+          <option value="INFO">INFO (2)</option>
+        </select>
+
+        <span class="input-label">Status Code:</span>
+        <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+          <option value="ALL">All Status Codes</option>
+          <option value="200">200 OK</option>
+          <option value="4xx">4xx Client Error</option>
+          <option value="5xx">5xx Server Error</option>
+        </select>
+
+        <span class="input-label">Search:</span>
+        <input type="text" class="text-input" id="filterSearch" placeholder="Filter title, description, path..." onkeyup="applyFilters()" style="width: 220px;">
+
+        <button class="btn" onclick="resetFilters()">Reset Filters</button>
+      </div>
+
+      <div>
+        <button class="btn" onclick="copyCurlPoc()">Copy cURL PoC</button>
+      </div>
+    </div>
+
+    <!-- Split Container -->
+    <div class="split-container">
+
+      <!-- Table View -->
+      <div class="table-container">
+        <table id="findingsTable">
+          <thead>
+            <tr>
+              <th style="width: 40px;" onclick="sortTable(0)">#</th>
+              <th style="width: 90px;" onclick="sortTable(1)">Severity</th>
+              <th style="width: 240px;" onclick="sortTable(2)">Finding Title</th>
+              <th style="width: 280px;" onclick="sortTable(3)">Description</th>
+              <th style="width: 200px;" onclick="sortTable(4)">Impact</th>
+              <th style="width: 180px;" onclick="sortTable(5)">Endpoint</th>
+              <th style="width: 70px;" onclick="sortTable(6)">Method</th>
+              <th style="width: 60px;" onclick="sortTable(7)">Status</th>
+              <th style="width: 80px;" onclick="sortTable(8)">Length</th>
+              <th style="width: 70px;" onclick="sortTable(9)">Time</th>
+            </tr>
+          </thead>
+          <tbody id="findingsBody">
+            <!-- Populated dynamically by script -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split-divider"></div>
+
+      <!-- Request and Response Editors -->
+      <div class="details-pane">
+        <!-- Request Viewer Box -->
+        <div class="viewer-box">
+          <div class="viewer-header">
+            <span class="viewer-title">Request Editor (Montoya HttpRequestEditor)</span>
+            <div class="sub-tabs">
+              <span class="sub-tab active">Raw</span>
+              <span class="sub-tab">Headers</span>
+              <span class="sub-tab">JSON</span>
+            </div>
+          </div>
+          <div class="viewer-content" id="requestViewerContent">POST /graphql HTTP/1.1
+Host: api.target-app.com
+User-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOi...
+X-GraphQL-Cop-Test: Introspection
+Content-Length: 68
+
+{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}</div>
+        </div>
+
+        <!-- Response Viewer Box -->
+        <div class="viewer-box">
+          <div class="viewer-header">
+            <span class="viewer-title">Response Editor (Montoya HttpResponseEditor)</span>
+            <div class="sub-tabs">
+              <span class="sub-tab active">Raw</span>
+              <span class="sub-tab">Headers</span>
+              <span class="sub-tab">JSON</span>
+              <span class="sub-tab">Hex</span>
+            </div>
+          </div>
+          <div class="viewer-content" id="responseViewerContent">HTTP/1.1 200 OK
+Date: Sat, 24 Oct 2026 12:00:00 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 4291
+Connection: keep-alive
+
+{
+  "data": {
+    "__schema": {
+      "types": [
+        {
+          "name": "Query",
+          "fields": [
+            { "name": "getUserProfile" },
+            { "name": "listTransactions" },
+            { "name": "adminGetSystemMetrics" }
+          ]
+        },
+        {
+          "name": "Mutation",
+          "fields": [
+            { "name": "updateUserPassword" },
+            { "name": "grantAdminRole" }
+          ]
+        }
+      ]
+    }
+  }
+}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Bar -->
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span id="findingsCountDisplay">Findings: 10 total (10 visible)</span>
+        <span id="scanStatusDisplay">Status: Idle</span>
+      </div>
+      <div>
+        <span>GraphQL Cop Port for Burp Suite (littlespidy) | Montoya API Standard</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* Created with the help of an AI Agent and littlespidy. */
+
+    const findingsData = [
+      {
+        id: 1,
+        severity: "HIGH",
+        title: "Introspection",
+        description: "Introspection Query Enabled",
+        impact: "Information Leakage - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 4291,
+        time: "142 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nUser-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)\nContent-Type: application/json\nAuthorization: Bearer eyJhbGciOi...\nX-GraphQL-Cop-Test: Introspection\nContent-Length: 68\n\n{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}`,
+        response: `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 12:00:00 GMT\nContent-Type: application/json; charset=utf-8\nContent-Length: 4291\n\n{\n  "data": {\n    "__schema": {\n      "types": [\n        {\n          "name": "Query",\n          "fields": [\n            { "name": "getUserProfile" },\n            { "name": "listTransactions" },\n            { "name": "adminGetSystemMetrics" }\n          ]\n        }\n      ]\n    }\n  }\n}`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOi...' -d '{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 2,
+        severity: "HIGH",
+        title: "Array-based Query Batching",
+        description: "Batch queries allowed with 10+ simultaneous queries",
+        impact: "Denial of Service - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 1250,
+        time: "320 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Array-based Query Batching\n\n[{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"}]`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n[{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}}]`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -d '[{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"}]' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 3,
+        severity: "HIGH",
+        title: "Alias Overloading",
+        description: "Alias Overloading with 100+ aliases is allowed",
+        impact: "Denial of Service - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 2840,
+        time: "480 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Alias Overloading\n\n{"query":"query cop { alias0:__typename alias1:__typename alias2:__typename ... alias100:__typename }"}`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"alias0":"Query","alias1":"Query",...,"alias100":"Query"}}`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { alias0:__typename alias1:__typename alias2:__typename ... alias100:__typename }"}' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 4,
+        severity: "HIGH",
+        title: "Directive Overloading",
+        description: "Multiple duplicated directives allowed in a query",
+        impact: "Denial of Service - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 980,
+        time: "210 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Directive Overloading\n\n{"query":"query cop { __typename @aa@aa@aa@aa@aa@aa@aa@aa@aa@aa }"}`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"errors":[{"message":"Unknown directive '@aa'"},...]}`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __typename @aa@aa@aa@aa@aa@aa@aa@aa@aa@aa }"}' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 5,
+        severity: "MEDIUM",
+        title: "GET Method Query Support",
+        description: "GraphQL queries allowed using the GET method",
+        impact: "Possible Cross Site Request Forgery (CSRF) - /graphql",
+        endpoint: "/graphql",
+        method: "GET",
+        status: 200,
+        length: 42,
+        time: "85 ms",
+        request: `GET /graphql?query=query+cop+{__typename} HTTP/1.1\nHost: api.target-app.com\nUser-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)\nX-GraphQL-Cop-Test: GET Method Query Support`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Query"}}`,
+        curl: `curl -X GET 'https://api.target-app.com/graphql?query=query+cop+{__typename}'`
+      },
+      {
+        id: 6,
+        severity: "MEDIUM",
+        title: "POST based url-encoded query",
+        description: "GraphQL accepts non-JSON queries over POST",
+        impact: "Possible Cross Site Request Forgery - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 42,
+        time: "92 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/x-www-form-urlencoded\nX-GraphQL-Cop-Test: POST based url-encoded query (possible CSRF)\n\nquery=query+cop+{+__typename+}`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Query"}}`,
+        curl: `curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d 'query=query+cop+{+__typename+}' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 7,
+        severity: "LOW",
+        title: "GraphQL IDE",
+        description: "GraphiQL Explorer/Playground Enabled",
+        impact: "Information Leakage - /graphiql",
+        endpoint: "/graphiql",
+        method: "GET",
+        status: 200,
+        length: 8312,
+        time: "115 ms",
+        request: `GET /graphiql HTTP/1.1\nHost: api.target-app.com\nAccept: text/html\nX-GraphQL-Cop-Test: GraphQL IDE`,
+        response: `HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\n\n<!DOCTYPE html><html><head><title>GraphiQL Explorer</title><link rel="stylesheet" href="/graphiql.min.css"/>...</head><body>...</body></html>`,
+        curl: `curl -X GET -H 'Accept: text/html' 'https://api.target-app.com/graphiql'`
+      },
+      {
+        id: 8,
+        severity: "LOW",
+        title: "Field Suggestions",
+        description: "Field Suggestions are Enabled",
+        impact: "Information Leakage - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 154,
+        time: "105 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Field Suggestions\n\n{"query":"query cop { __schema { directive } }"}`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"errors":[{"message":"Cannot query field 'directive' on type '__Schema'. Did you mean 'directives'?"}]}`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __schema { directive } }"}' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 9,
+        severity: "INFO",
+        title: "Trace Mode",
+        description: "Tracing is Enabled",
+        impact: "Information Leakage - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 712,
+        time: "130 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Trace Mode\n\n{"query":"query cop { __typename }"}`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Query"},"extensions":{"tracing":{"version":1,"startTime":"2026-10-24T12:00:00.000Z","endTime":"2026-10-24T12:00:00.130Z","duration":130000000}}}`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __typename }"}' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 10,
+        severity: "INFO",
+        title: "Unhandled Errors Detection",
+        description: "Exception errors are not handled",
+        impact: "Information Leakage - /graphql",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 512,
+        time: "98 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Unhandled Errors Detection\n\n{"query":"qwerty cop { abc }"}`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"errors":[{"message":"Syntax Error: Unexpected Name 'qwerty'","extensions":{"exception":{"stacktrace":["SyntaxError: Unexpected Name 'qwerty'","    at syntaxError (/app/node_modules/graphql/error/syntaxError.js:15:10)"]}}}]}`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"qwerty cop { abc }"}' 'https://api.target-app.com/graphql'`
+      }
+    ];
+
+    let currentSelectedFinding = findingsData[0];
+    let isScanning = false;
+
+    function renderTable(items) {
+      const tbody = document.getElementById("findingsBody");
+      tbody.innerHTML = "";
+
+      items.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.className = index % 2 === 0 ? "even" : "odd";
+        if (currentSelectedFinding && currentSelectedFinding.id === item.id) {
+          tr.classList.add("selected");
+        }
+
+        let badgeClass = "badge-info";
+        if (item.severity === "HIGH") badgeClass = "badge-high";
+        else if (item.severity === "MEDIUM") badgeClass = "badge-medium";
+        else if (item.severity === "LOW") badgeClass = "badge-low";
+
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td><span class="badge ${badgeClass}">${item.severity}</span></td>
+          <td style="font-weight: 600;">${item.title}</td>
+          <td>${item.description}</td>
+          <td>${item.impact}</td>
+          <td>${item.endpoint}</td>
+          <td>${item.method}</td>
+          <td>${item.status}</td>
+          <td>${item.length} B</td>
+          <td>${item.time}</td>
+        `;
+
+        tr.onclick = () => selectFinding(item, tr);
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("findingsCountDisplay").innerText = 
+        `Findings: ${findingsData.length} total (${items.length} visible)`;
+    }
+
+    function selectFinding(item, trElement) {
+      currentSelectedFinding = item;
+      document.querySelectorAll("#findingsBody tr").forEach(r => r.classList.remove("selected"));
+      if (trElement) trElement.classList.add("selected");
+
+      document.getElementById("requestViewerContent").innerText = item.request;
+      document.getElementById("responseViewerContent").innerText = item.response;
+    }
+
+    function applyFilters() {
+      const sev = document.getElementById("filterSeverity").value;
+      const status = document.getElementById("filterStatus").value;
+      const search = document.getElementById("filterSearch").value.toLowerCase().trim();
+
+      const filtered = findingsData.filter(item => {
+        if (sev !== "ALL" && item.severity !== sev) return false;
+        if (status !== "ALL") {
+          if (status === "200" && item.status !== 200) return false;
+          if (status === "4xx" && (item.status < 400 || item.status >= 500)) return false;
+          if (status === "5xx" && item.status < 500) return false;
+        }
+        if (search) {
+          const matchTitle = item.title.toLowerCase().includes(search);
+          const matchDesc = item.description.toLowerCase().includes(search);
+          const matchImpact = item.impact.toLowerCase().includes(search);
+          const matchEndpoint = item.endpoint.toLowerCase().includes(search);
+          if (!matchTitle && !matchDesc && !matchImpact && !matchEndpoint) return false;
+        }
+        return true;
+      });
+
+      renderTable(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById("filterSeverity").value = "ALL";
+      document.getElementById("filterStatus").value = "ALL";
+      document.getElementById("filterSearch").value = "";
+      renderTable(findingsData);
+    }
+
+    function copyCurlPoc() {
+      if (currentSelectedFinding && currentSelectedFinding.curl) {
+        navigator.clipboard.writeText(currentSelectedFinding.curl).then(() => {
+          alert("Copied cURL verification command to clipboard:\n\n" + currentSelectedFinding.curl);
+        }).catch(() => {
+          prompt("Copy cURL command:", currentSelectedFinding.curl);
+        });
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light-theme");
+      const btn = document.getElementById("themeToggleBtn");
+      if (document.body.classList.contains("light-theme")) {
+        btn.innerText = "Theme: Light";
+      } else {
+        btn.innerText = "Theme: Dark";
+      }
+    }
+
+    function toggleScan() {
+      const btn = document.getElementById("runScanBtn");
+      const status = document.getElementById("scanStatusDisplay");
+      if (!isScanning) {
+        isScanning = true;
+        btn.innerText = "Stop Audit";
+        btn.classList.remove("btn-accent");
+        status.innerText = "Status: Auditing GraphQL endpoints...";
+        setTimeout(() => {
+          if (isScanning) {
+            isScanning = false;
+            btn.innerText = "Run Audit";
+            btn.classList.add("btn-accent");
+            status.innerText = "Status: Scan completed. 10 findings discovered.";
+          }
+        }, 2000);
+      } else {
+        isScanning = false;
+        btn.innerText = "Run Audit";
+        btn.classList.add("btn-accent");
+        status.innerText = "Status: Audit cancelled by user.";
+      }
+    }
+
+    function clearResults() {
+      renderTable([]);
+      document.getElementById("requestViewerContent").innerText = "";
+      document.getElementById("responseViewerContent").innerText = "";
+    }
+
+    function handleNewSession() {
+      const name = prompt("Enter new session filename (e.g. audit_production.json):", "audit_production.json");
+      if (name) {
+        document.getElementById("sessionPathDisplay").innerText = "/home/littlespidy/" + name;
+        alert("Created and bound new session: /home/littlespidy/" + name);
+      }
+    }
+
+    function handleOpenSession() {
+      alert("Simulating JFileChooser: Selected /home/littlespidy/graphql_cop_session.json");
+      renderTable(findingsData);
+    }
+
+    function handleSaveSession() {
+      const ind = document.getElementById("autoSaveIndicator");
+      ind.innerText = "Saving...";
+      setTimeout(() => {
+        ind.innerText = "Saved";
+        setTimeout(() => { ind.innerText = "Synced"; }, 1500);
+      }, 500);
+    }
+
+    function handleSaveAsSession() {
+      const target = prompt("Save session copy as:", "/home/littlespidy/backup_session.json");
+      if (target) {
+        alert("Session exported to: " + target);
+      }
+    }
+
+    function handleOffboardSession() {
+      if (confirm("Save changes before offboarding session?")) {
+        handleSaveSession();
+      }
+      document.getElementById("sessionPathDisplay").innerText = "[Temporary / In-Memory]";
+      document.getElementById("sessionPathDisplay").classList.remove("active-file");
+      alert("Session offboarded. Extension reset to clean state.");
+    }
+
+    function startInlineRename(element) {
+      const currentText = element.innerText;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = currentText;
+      input.className = "text-input";
+      input.style.fontSize = "11px";
+      input.style.padding = "1px 4px";
+      input.style.width = "140px";
+
+      element.replaceWith(input);
+      input.focus();
+      input.select();
+
+      function commit() {
+        const val = input.value.trim() || currentText;
+        const newSpan = document.createElement("span");
+        newSpan.className = "tab-title-text";
+        newSpan.innerText = val;
+        newSpan.ondblclick = () => startInlineRename(newSpan);
+        input.replaceWith(newSpan);
+      }
+
+      input.onkeydown = (e) => {
+        if (e.key === "Enter") commit();
+        else if (e.key === "Escape") {
+          input.value = currentText;
+          commit();
+        }
+      };
+      input.onblur = commit;
+    }
+
+    function switchSessionTab(idx) {
+      document.querySelectorAll(".session-tab-item").forEach((tab, i) => {
+        if (i === idx) tab.classList.add("active");
+        else tab.classList.remove("active");
+      });
+    }
+
+    function closeSessionTab(e, idx) {
+      e.stopPropagation();
+      if (confirm("Close session tab #" + idx + "?")) {
+        const tab = e.target.closest(".session-tab-item");
+        if (tab) tab.remove();
+      }
+    }
+
+    function addNewSessionTab() {
+      const bar = document.getElementById("sessionTabsBar");
+      const addBtn = bar.querySelector(".new-tab-btn");
+      const count = bar.querySelectorAll(".session-tab-item").length;
+      const newTab = document.createElement("div");
+      newTab.className = "session-tab-item";
+      newTab.title = "Double click to rename tab";
+      newTab.innerHTML = `
+        <span class="tab-title-text" ondblclick="startInlineRename(this)">#${count} POST /graphql</span>
+        <span class="tab-close-btn" onclick="closeSessionTab(event, ${count})">x</span>
+      `;
+      newTab.onclick = () => {
+        document.querySelectorAll(".session-tab-item").forEach(t => t.classList.remove("active"));
+        newTab.classList.add("active");
+      };
+      bar.insertBefore(newTab, addBtn);
+      newTab.click();
+    }
+
+    function showInfoDialog() {
+      alert("GraphQL Cop Burp Extension (littlespidy)\n\nMontoya API Standard Extension\nConverted from CLI graphql-cop\nFeatures: 13 Tests, Multi-session tabs, In-place renaming, Rapid triage filters, Session persistence.");
+    }
+
+    // Initial render
+    window.onload = () => {
+      renderTable(findingsData);
+      selectFinding(findingsData[0]);
+    };
+  </script>
+</body>
+</html>
