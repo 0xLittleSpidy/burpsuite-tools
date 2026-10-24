@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Inspector - Hidden API Storage &amp; Extended Version Finder Preview (littlespidy)</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Suite Orange */
+      --accent-hover: #ff7f32;
+      --badge-green: #2e7d32;
+      --badge-orange: #b78103;
+      --badge-blue: #1565c0;
+      --badge-purple: #6a1b9a;
+      --badge-red: #c62828;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --input-bg: #2d2d2d;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --badge-green: #388e3c;
+      --badge-orange: #f57c00;
+      --badge-blue: #1976d2;
+      --badge-purple: #7b1fa2;
+      --badge-red: #d32f2f;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --input-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-darker);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.4;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Burp Window Title Bar */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .burp-title-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .burp-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-bright);
+    }
+
+    .burp-version {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .theme-toggle-btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .theme-toggle-btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    /* Primary Suite Tabs */
+    .suite-tabs {
+      background-color: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 8px;
+      gap: 2px;
+      overflow-x: auto;
+    }
+
+    .suite-tab {
+      padding: 8px 14px;
+      color: var(--text);
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .suite-tab:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-bright);
+    }
+
+    .suite-tab.active {
+      background-color: var(--bg-card);
+      color: var(--accent);
+      border-color: var(--border);
+      font-weight: 600;
+    }
+
+    .new-tag {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+
+    /* Tab Content Container */
+    .tab-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-color: var(--bg-card);
+    }
+
+    .tab-panel {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* Controls Bar & Filters */
+    .toolbar-container {
+      background-color: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toolbar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .input-box {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 5px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .input-box:focus {
+      border-color: var(--accent);
+    }
+
+    select.input-box {
+      cursor: pointer;
+    }
+
+    .btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-danger {
+      background-color: #8b1e1e;
+      border-color: #8b1e1e;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background-color: #a82020;
+    }
+
+    /* Summary Metrics Bar */
+    .metrics-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 14px;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+    }
+
+    .metric-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-discovery {
+      background-color: rgba(21, 101, 192, 0.2);
+      color: #42a5f5;
+      border: 1px solid #1565c0;
+    }
+
+    .badge-js {
+      background-color: rgba(106, 27, 154, 0.2);
+      color: #ba68c8;
+      border: 1px solid #6a1b9a;
+    }
+
+    .badge-version {
+      background-color: rgba(46, 125, 50, 0.2);
+      color: #81c784;
+      border: 1px solid #2e7d32;
+    }
+
+    .badge-manual {
+      background-color: rgba(183, 129, 3, 0.2);
+      color: #ffb74d;
+      border: 1px solid #b78103;
+    }
+
+    .badge-all {
+      background-color: rgba(229, 107, 31, 0.2);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    /* Main Split View: Top Table, Bottom Inspector */
+    .main-split {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      border-bottom: 1px solid var(--border);
+      min-height: 220px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      padding: 7px 10px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    thead th:hover {
+      background-color: var(--bg-hover);
+    }
+
+    tbody tr {
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--row-even);
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: var(--row-odd);
+    }
+
+    tbody tr:hover {
+      background-color: var(--bg-hover);
+    }
+
+    tbody tr.selected {
+      background-color: var(--bg-selected) !important;
+      color: #ffffff;
+    }
+
+    td {
+      padding: 6px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 320px;
+    }
+
+    .method-tag {
+      font-weight: 700;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+
+    .method-get { background-color: #0d47a1; color: #bbdefb; }
+    .method-post { background-color: #1b5e20; color: #c8e6c9; }
+    .method-put { background-color: #e65100; color: #ffe0b2; }
+    .method-delete { background-color: #b71c1c; color: #ffcdd2; }
+    .method-patch { background-color: #4a148c; color: #e1bee7; }
+
+    .status-badge {
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+
+    .status-2xx { background-color: rgba(46, 125, 50, 0.25); color: #81c784; }
+    .status-3xx { background-color: rgba(2, 136, 209, 0.25); color: #4fc3f7; }
+    .status-4xx { background-color: rgba(239, 108, 0, 0.25); color: #ffb74d; }
+    .status-5xx { background-color: rgba(198, 40, 40, 0.25); color: #e57373; }
+    .status-none { color: var(--text-muted); }
+
+    /* Bottom Inspector Panel */
+    .bottom-inspector {
+      height: 250px;
+      background-color: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sub-tabs {
+      background-color: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 10px;
+      gap: 4px;
+    }
+
+    .sub-tab {
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      color: var(--text);
+      border-bottom: 2px solid transparent;
+    }
+
+    .sub-tab:hover {
+      color: var(--text-bright);
+    }
+
+    .sub-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .sub-panel {
+      display: none;
+      flex: 1;
+      padding: 10px;
+      overflow: auto;
+    }
+
+    .sub-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .editor-box {
+      font-family: "JetBrains Mono", "Courier New", Courier, monospace;
+      font-size: 11px;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px;
+      border-radius: 3px;
+      flex: 1;
+      white-space: pre;
+      overflow: auto;
+      line-height: 1.45;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      row-gap: 6px;
+      column-gap: 12px;
+      font-size: 12px;
+    }
+
+    .details-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Modal Backdrop and Box */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.65);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-window {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 720px;
+      max-width: 95%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background-color: var(--bg-dark);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-bright);
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-bright);
+    }
+
+    .modal-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      background-color: var(--bg-dark);
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Version Finder Preview Tab */
+    .vf-container {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .vf-card {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+    }
+
+    .vf-card-title {
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 10px;
+      color: var(--text-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vf-wordlist-box {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      max-height: 180px;
+      overflow-y: auto;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 3px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #81c784;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Header Bar -->
+  <header class="burp-header">
+    <div class="burp-title-box">
+      <span class="burp-logo-badge">BURP SUITE</span>
+      <span class="burp-title">API Inspector (littlespidy)</span>
+      <span class="burp-version">v2.1.0 - Montoya API Extension</span>
+    </div>
+    <div style="display:flex; align-items:center; gap: 10px;">
+      <span style="font-size: 11px; color: var(--text-muted);">Storage: /home/littlespidy/myextra/burpsuite-extensions/APIInspector_littlespidy</span>
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">Switch to Light Theme</button>
+    </div>
+  </header>
+
+  <!-- 2. Suite Tab Navigation -->
+  <nav class="suite-tabs">
+    <div class="suite-tab" onclick="switchSuiteTab('importTab', this)">API Import</div>
+    <div class="suite-tab" onclick="switchSuiteTab('viewerTab', this)">Request &amp; Response Viewer</div>
+    <div class="suite-tab" onclick="switchSuiteTab('paramTab', this)">Parameter Collector</div>
+    <div class="suite-tab" onclick="switchSuiteTab('authTab', this)">Authentication Testing</div>
+    <div class="suite-tab" onclick="switchSuiteTab('versionFinderTab', this)">REST API Version Finder</div>
+    <div class="suite-tab" onclick="switchSuiteTab('docStrategyTab', this)">API Documentation Strategy</div>
+    <div class="suite-tab" onclick="switchSuiteTab('endpointDiscoveryTab', this)">API Endpoint Discovery Strategy</div>
+    <div class="suite-tab active" onclick="switchSuiteTab('hiddenStorageTab', this)">
+      Hidden API Storage <span class="new-tag">NEW</span>
+    </div>
+  </nav>
+
+  <!-- 3. Main Workspace Container -->
+  <main class="tab-content">
+
+    <!-- TAB PANEL: HIDDEN API STORAGE -->
+    <section id="hiddenStorageTab" class="tab-panel active">
+
+      <!-- Action & Search Toolbar -->
+      <div class="toolbar-container">
+        <div class="toolbar-row">
+          <div class="filter-group">
+            <span style="font-weight: 600; color: var(--text-bright);">Filter:</span>
+            <input type="text" id="storageSearchInput" class="input-box" placeholder="Search URL, path, param, notes..." style="width: 260px;" oninput="applyFilters()">
+
+            <label style="color: var(--text-muted); font-size: 11px;">Source:</label>
+            <select id="sourceFilterSelect" class="input-box" onchange="applyFilters()">
+              <option value="ALL">All Sources</option>
+              <option value="JS Analysis">JS Analysis</option>
+              <option value="Endpoint Discovery">Endpoint Discovery</option>
+              <option value="Version Finder">REST API Version Finder</option>
+              <option value="Manual Entry">Manual Entry</option>
+            </select>
+
+            <label style="color: var(--text-muted); font-size: 11px;">Method:</label>
+            <select id="methodFilterSelect" class="input-box" onchange="applyFilters()">
+              <option value="ALL">All Methods</option>
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+              <option value="PATCH">PATCH</option>
+            </select>
+
+            <label style="color: var(--text-muted); font-size: 11px;">Status:</label>
+            <select id="statusFilterSelect" class="input-box" onchange="applyFilters()">
+              <option value="ALL">All Statuses</option>
+              <option value="2xx">2xx Success</option>
+              <option value="3xx">3xx Redirect</option>
+              <option value="4xx">4xx Client Error</option>
+              <option value="5xx">5xx Server Error</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <button class="btn btn-primary" onclick="openAddEndpointModal()">+ Add Endpoint</button>
+            <button class="btn btn-primary" onclick="openJsAnalysisModal()">JS Analysis Extractor</button>
+            <button class="btn" onclick="sendSelectedToVersionFinder()">Send to Version Finder</button>
+            <button class="btn" onclick="sendSelectedToRepeater()">Send to Repeater</button>
+            <button class="btn" onclick="exportEndpoints()">Export</button>
+            <button class="btn btn-danger" onclick="deleteSelectedEndpoint()">Delete</button>
+            <button class="btn btn-danger" onclick="clearAllEndpoints()">Clear All</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics and Count Bar -->
+      <div class="metrics-bar">
+        <span class="metric-badge badge-all" id="badgeAll">Total: 8 Endpoints</span>
+        <span class="metric-badge badge-js" id="badgeJs">JS Analysis: 4</span>
+        <span class="metric-badge badge-discovery" id="badgeDisc">Endpoint Discovery: 2</span>
+        <span class="metric-badge badge-version" id="badgeVf">Version Finder: 1</span>
+        <span class="metric-badge badge-manual" id="badgeMan">Manual: 1</span>
+        <span style="margin-left: auto; color: var(--text-muted);">Click any row to view Request/Response details and notes</span>
+      </div>
+
+      <!-- Split Container: Table on top, Request/Response & Details on bottom -->
+      <div class="main-split">
+        <div class="table-container">
+          <table id="hiddenEndpointsTable">
+            <thead>
+              <tr>
+                <th style="width: 45px;">#</th>
+                <th style="width: 140px;">Source</th>
+                <th style="width: 70px;">Method</th>
+                <th>Endpoint / URL</th>
+                <th style="width: 160px;">Parameters</th>
+                <th style="width: 75px;">Status</th>
+                <th style="width: 150px;">Discovered Date</th>
+                <th>Notes / Tags</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Dynamically rendered rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Detail Inspector at bottom -->
+        <div class="bottom-inspector">
+          <div class="sub-tabs">
+            <div class="sub-tab active" onclick="switchSubTab('detailsPanel', this)">Endpoint Details &amp; Notes</div>
+            <div class="sub-tab" onclick="switchSubTab('requestPanel', this)">Request Viewer (Montoya)</div>
+            <div class="sub-tab" onclick="switchSubTab('responsePanel', this)">Response Viewer (Montoya)</div>
+          </div>
+
+          <div id="detailsPanel" class="sub-panel active">
+            <div class="details-grid">
+              <div class="details-label">Target URL:</div>
+              <div id="detUrl" style="color: var(--text-bright); font-weight: 500;">https://api.target.com/api/v2/internal/admin/keys</div>
+
+              <div class="details-label">Discovery Source:</div>
+              <div id="detSource"><span class="metric-badge badge-js">JS Analysis</span></div>
+
+              <div class="details-label">HTTP Method:</div>
+              <div id="detMethod"><span class="method-tag method-get">GET</span></div>
+
+              <div class="details-label">Status Code:</div>
+              <div id="detStatus"><span class="status-badge status-2xx">200 OK</span></div>
+
+              <div class="details-label">Parameters:</div>
+              <div id="detParams" style="color: var(--text);">includeInactive=true, format=json</div>
+
+              <div class="details-label">Editable Notes:</div>
+              <div>
+                <textarea id="detNotes" class="input-box" style="width: 100%; height: 50px;" oninput="updateActiveNotes()">Discovered hidden internal key management endpoint in main.app.chunk.js bundle during reconnaissance.</textarea>
+              </div>
+            </div>
+          </div>
+
+          <div id="requestPanel" class="sub-panel">
+            <pre class="editor-box" id="reqViewerText">GET /api/v2/internal/admin/keys?includeInactive=true&amp;format=json HTTP/1.1
+Host: api.target.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+Accept: application/json
+Authorization: Bearer [REDACTED_INTERNAL_TOKEN]
+Connection: close</pre>
+          </div>
+
+          <div id="responsePanel" class="sub-panel">
+            <pre class="editor-box" id="respViewerText">HTTP/1.1 200 OK
+Date: Sat, 24 Oct 2026 08:00:00 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 182
+Connection: close
+
+{
+  "status": "success",
+  "keys": [
+    {"keyId": "k_admin_09", "scope": "system:readwrite", "active": true},
+    {"keyId": "k_debug_02", "scope": "debug:all", "active": false}
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB PANEL: REST API VERSION FINDER PREVIEW -->
+    <section id="versionFinderTab" class="tab-panel">
+      <div class="vf-container">
+        <div class="vf-card">
+          <div class="vf-card-title">REST API Version Finder - Extended Candidates Integration</div>
+          <p style="margin-bottom: 10px; color: var(--text);">
+            Full integration of <strong>1,091 version candidates</strong> (v0, v1, v1.01-v1.99, v1.1-v1.9, v2...v9.99, v10...v10.99) directly accessible via presets or custom wordlists.
+          </p>
+
+          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+            <label style="font-weight: 600; color: var(--text-bright);">Version Preset:</label>
+            <select id="vfPresetSelect" class="input-box" onchange="loadVersionPreset(this.value)">
+              <option value="extended" selected>All Extended Versions (1,091 versions: v0, v1 - v10.99)</option>
+              <option value="common">Common Standard (0, 1, 2, 3, 4, 5, 0.1, 1.0, 2.0, beta, latest...)</option>
+              <option value="major">Major Only (v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10)</option>
+            </select>
+            <span class="metric-badge badge-version" id="vfCandidateBadge">1,091 Candidates Loaded</span>
+            <button class="btn btn-primary" onclick="alert('Preset loaded successfully!')">Apply to Active Session</button>
+          </div>
+
+          <div style="margin-bottom: 6px; font-weight: 600; color: var(--text-bright);">Active Version Candidates Wordlist:</div>
+          <div class="vf-wordlist-box" id="vfWordlistBox">
+v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.10, v1.11, v1.12, v1.13, v1.14, v1.15, v1.16, v1.17, v1.18, v1.19, v1.2, v1.20, v1.21, v1.22, v1.23, v1.24, v1.25, v1.26, v1.27, v1.28, v1.29, v1.3, v1.30, v1.31, v1.32, v1.33, v1.34, v1.35, v1.36, v1.37, v1.38, v1.39, v1.4, v1.40, v1.41, v1.42, v1.43, v1.44, v1.45, v1.46, v1.47, v1.48, v1.49, v1.5, v1.50, v1.51, v1.52, v1.53, v1.54, v1.55, v1.56, v1.57, v1.58, v1.59, v1.6, v1.60, v1.61, v1.62, v1.63, v1.64, v1.65, v1.66, v1.67, v1.68, v1.69, v1.7, v1.70, v1.71, v1.72, v1.73, v1.74, v1.75, v1.76, v1.77, v1.78, v1.79, v1.8, v1.80, v1.81, v1.82, v1.83, v1.84, v1.85, v1.86, v1.87, v1.88, v1.89, v1.9, v1.90, v1.91, v1.92, v1.93, v1.94, v1.95, v1.96, v1.97, v1.98, v1.99, v10, v10.01, v10.02, ... [1,091 total versions through v9.99]
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OTHER SUITE TABS (Placeholders for full Burp aesthetic) -->
+    <section id="importTab" class="tab-panel"><div style="padding: 20px;">API Import Workspace</div></section>
+    <section id="viewerTab" class="tab-panel"><div style="padding: 20px;">Request &amp; Response Viewer Workspace</div></section>
+    <section id="paramTab" class="tab-panel"><div style="padding: 20px;">Parameter Collector Workspace</div></section>
+    <section id="authTab" class="tab-panel"><div style="padding: 20px;">Authentication Testing Workspace</div></section>
+    <section id="docStrategyTab" class="tab-panel"><div style="padding: 20px;">API Documentation Strategy Tracking</div></section>
+    <section id="endpointDiscoveryTab" class="tab-panel"><div style="padding: 20px;">API Endpoint Discovery Strategy Tracking</div></section>
+
+  </main>
+
+  <!-- 4. Modal: + Add Endpoint -->
+  <div class="modal-overlay" id="addEndpointModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span class="modal-title">Save Discovered Endpoint to Hidden API Storage</span>
+        <button class="modal-close-btn" onclick="closeModal('addEndpointModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label style="font-weight: 600;">Full Endpoint URL / Path:</label>
+        <input type="text" id="newEpUrl" class="input-box" placeholder="e.g. https://api.target.com/api/v2/internal/config">
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-weight: 600;">HTTP Method:</label>
+            <select id="newEpMethod" class="input-box" style="width: 100%;">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+              <option value="PATCH">PATCH</option>
+              <option value="OPTIONS">OPTIONS</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="font-weight: 600;">Source:</label>
+            <select id="newEpSource" class="input-box" style="width: 100%;">
+              <option value="JS Analysis">JS Analysis</option>
+              <option value="Endpoint Discovery">Endpoint Discovery</option>
+              <option value="Version Finder">REST API Version Finder</option>
+              <option value="Manual Entry">Manual Entry</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="font-weight: 600;">Status Code (optional):</label>
+            <input type="number" id="newEpStatus" class="input-box" placeholder="200" style="width: 100%;">
+          </div>
+        </div>
+
+        <label style="font-weight: 600;">Parameters (comma-separated or query string):</label>
+        <input type="text" id="newEpParams" class="input-box" placeholder="e.g. debug=true, tenantId=alpha">
+
+        <label style="font-weight: 600;">Notes / Tags:</label>
+        <textarea id="newEpNotes" class="input-box" style="height: 60px;" placeholder="Notes regarding discovery, authorization level, sensitive parameters..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('addEndpointModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveManualEndpoint()">Save Endpoint</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Modal: JS Analysis Endpoint Extractor -->
+  <div class="modal-overlay" id="jsAnalysisModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span class="modal-title">JS Analysis Endpoint Extractor</span>
+        <button class="modal-close-btn" onclick="closeModal('jsAnalysisModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text);">
+          Paste JavaScript bundle content, script responses, or raw text below. The extractor will automatically discover hidden API endpoints, versioned paths, and internal routes.
+        </p>
+
+        <label style="font-weight: 600;">JavaScript Content / Code Snippet:</label>
+        <textarea id="jsInputArea" class="input-box" style="height: 120px; font-family: monospace; font-size: 11px;" placeholder="Paste JavaScript source here... e.g. axios.get('/api/v2/internal/debug').then(...)"></textarea>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button class="btn btn-primary" onclick="runJsRegexExtraction()">Run Regex Extraction</button>
+          <span id="jsExtractStats" style="font-size: 11px; color: var(--accent); font-weight: 600;">0 endpoints discovered</span>
+        </div>
+
+        <label style="font-weight: 600;">Discovered Paths Preview:</label>
+        <div id="jsDiscoveredList" style="max-height: 120px; overflow-y: auto; background-color: var(--code-bg); border: 1px solid var(--border); border-radius: 3px; padding: 6px; font-family: monospace; font-size: 11px; color: #81c784;">
+          (Click 'Run Regex Extraction' to parse endpoints)
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('jsAnalysisModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveJsEndpointsBtn" onclick="saveExtractedJsEndpoints()" disabled>Save All to Hidden API Storage</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample Dataset for UI Demonstration
+    let endpoints = [
+      {
+        id: 1,
+        source: "JS Analysis",
+        method: "GET",
+        url: "https://api.target.com/api/v2/internal/admin/keys",
+        params: "includeInactive=true, format=json",
+        status: 200,
+        date: "2026-10-24 13:10:45",
+        notes: "Discovered hidden internal key management endpoint in main.app.chunk.js bundle.",
+        request: "GET /api/v2/internal/admin/keys?includeInactive=true&format=json HTTP/1.1\nHost: api.target.com\nUser-Agent: Mozilla/5.0\nAccept: application/json\nConnection: close",
+        response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 145\n\n{\"keys\": [\"k_admin_01\", \"k_root_debug\"]}"
+      },
+      {
+        id: 2,
+        source: "JS Analysis",
+        method: "POST",
+        url: "https://api.target.com/api/v1/auth/refresh-token-internal",
+        params: "body: refreshToken, deviceFingerprint",
+        status: 401,
+        date: "2026-10-24 13:12:02",
+        notes: "Hidden refresh token handler extracted from auth-client.bundle.js.",
+        request: "POST /api/v1/auth/refresh-token-internal HTTP/1.1\nHost: api.target.com\nContent-Type: application/json\n\n{\"refreshToken\": \"...\"}",
+        response: "HTTP/1.1 401 Unauthorized\nContent-Type: application/json\n\n{\"error\": \"Missing device fingerprint\"}"
+      },
+      {
+        id: 3,
+        source: "Endpoint Discovery",
+        method: "GET",
+        url: "https://api.target.com/api/v1/users/1042/permissions",
+        params: "detailed=true",
+        status: 200,
+        date: "2026-10-24 13:15:20",
+        notes: "Parent path variation revealed unlisted permissions endpoint.",
+        request: "GET /api/v1/users/1042/permissions?detailed=true HTTP/1.1\nHost: api.target.com\n\n",
+        response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"permissions\": [\"read:profile\", \"edit:billing\"]}"
+      },
+      {
+        id: 4,
+        source: "Endpoint Discovery",
+        method: "DELETE",
+        url: "https://api.target.com/api/v2/accounts/bulk-purge",
+        params: "dryRun=false, confirmToken",
+        status: 403,
+        date: "2026-10-24 13:18:11",
+        notes: "Discovered via endpoint path stripping. Requires admin privilege.",
+        request: "DELETE /api/v2/accounts/bulk-purge HTTP/1.1\nHost: api.target.com\n\n",
+        response: "HTTP/1.1 403 Forbidden\n\n{\"error\": \"Admin role required\"}"
+      },
+      {
+        id: 5,
+        source: "Version Finder",
+        method: "GET",
+        url: "https://api.target.com/api/v10.02/customers/export",
+        params: "type=all",
+        status: 200,
+        date: "2026-10-24 13:22:30",
+        notes: "Probed version variation v10.02 revealed unreleased API version with full customer export.",
+        request: "GET /api/v10.02/customers/export?type=all HTTP/1.1\nHost: api.target.com\n\n",
+        response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"customers\": [{\"id\": 1, \"email\": \"victim@test.local\"}]}"
+      },
+      {
+        id: 6,
+        source: "JS Analysis",
+        method: "GET",
+        url: "https://api.target.com/debug/v1/metrics/prometheus",
+        params: "none",
+        status: 200,
+        date: "2026-10-24 13:25:00",
+        notes: "Exposed Prometheus debug metrics route hardcoded in telemetry.js.",
+        request: "GET /debug/v1/metrics/prometheus HTTP/1.1\nHost: api.target.com\n\n",
+        response: "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n# HELP http_requests_total\nhttp_requests_total 42109"
+      },
+      {
+        id: 7,
+        source: "JS Analysis",
+        method: "PUT",
+        url: "https://api.target.com/api/v1/feature-flags/override",
+        params: "body: flagKey, enabled",
+        status: 400,
+        date: "2026-10-24 13:27:14",
+        notes: "Internal feature-flags client endpoint found in vendor bundle.",
+        request: "PUT /api/v1/feature-flags/override HTTP/1.1\nHost: api.target.com\n\n",
+        response: "HTTP/1.1 400 Bad Request\n\n{\"error\": \"flagKey is required\"}"
+      },
+      {
+        id: 8,
+        source: "Manual Entry",
+        method: "GET",
+        url: "https://api.target.com/internal/v3/healthz",
+        params: "extended=1",
+        status: 200,
+        date: "2026-10-24 13:29:40",
+        notes: "Manually logged from external documentation leak.",
+        request: "GET /internal/v3/healthz?extended=1 HTTP/1.1\nHost: api.target.com\n\n",
+        response: "HTTP/1.1 200 OK\n\n{\"status\": \"healthy\", \"database\": \"connected\"}"
+      }
+    ];
+
+    let selectedEndpointId = 1;
+    let extractedJsPaths = [];
+
+    function renderTable() {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      const query = document.getElementById("storageSearchInput").value.toLowerCase();
+      const sourceFilter = document.getElementById("sourceFilterSelect").value;
+      const methodFilter = document.getElementById("methodFilterSelect").value;
+      const statusFilter = document.getElementById("statusFilterSelect").value;
+
+      let filtered = endpoints.filter(ep => {
+        if (sourceFilter !== "ALL" && ep.source !== sourceFilter) return false;
+        if (methodFilter !== "ALL" && ep.method !== methodFilter) return false;
+        if (statusFilter !== "ALL") {
+          const s = ep.status;
+          if (statusFilter === "2xx" && (s < 200 || s > 299)) return false;
+          if (statusFilter === "3xx" && (s < 300 || s > 399)) return false;
+          if (statusFilter === "4xx" && (s < 400 || s > 499)) return false;
+          if (statusFilter === "5xx" && (s < 500 || s > 599)) return false;
+        }
+        if (query) {
+          const match = ep.url.toLowerCase().includes(query) ||
+                        ep.params.toLowerCase().includes(query) ||
+                        ep.notes.toLowerCase().includes(query) ||
+                        ep.source.toLowerCase().includes(query) ||
+                        ep.method.toLowerCase().includes(query);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      filtered.forEach(ep => {
+        const tr = document.createElement("tr");
+        if (ep.id === selectedEndpointId) {
+          tr.classList.add("selected");
+        }
+        tr.onclick = () => selectEndpoint(ep.id);
+
+        let badgeClass = "badge-js";
+        if (ep.source === "Endpoint Discovery") badgeClass = "badge-discovery";
+        else if (ep.source === "Version Finder") badgeClass = "badge-version";
+        else if (ep.source === "Manual Entry") badgeClass = "badge-manual";
+
+        let methodClass = "method-get";
+        if (ep.method === "POST") methodClass = "method-post";
+        else if (ep.method === "PUT") methodClass = "method-put";
+        else if (ep.method === "DELETE") methodClass = "method-delete";
+        else if (ep.method === "PATCH") methodClass = "method-patch";
+
+        let statusClass = "status-none";
+        if (ep.status >= 200 && ep.status < 300) statusClass = "status-2xx";
+        else if (ep.status >= 300 && ep.status < 400) statusClass = "status-3xx";
+        else if (ep.status >= 400 && ep.status < 500) statusClass = "status-4xx";
+        else if (ep.status >= 500) statusClass = "status-5xx";
+
+        tr.innerHTML = `
+          <td>${ep.id}</td>
+          <td><span class="metric-badge ${badgeClass}">${ep.source}</span></td>
+          <td><span class="method-tag ${methodClass}">${ep.method}</span></td>
+          <td style="font-weight: 500;">${ep.url}</td>
+          <td style="color: var(--text-muted);">${ep.params}</td>
+          <td><span class="status-badge ${statusClass}">${ep.status || "-"}</span></td>
+          <td style="font-size: 11px; color: var(--text-muted);">${ep.date}</td>
+          <td>${ep.notes}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateMetrics();
+    }
+
+    function selectEndpoint(id) {
+      selectedEndpointId = id;
+      const ep = endpoints.find(e => e.id === id);
+      if (!ep) return;
+
+      document.getElementById("detUrl").innerText = ep.url;
+      document.getElementById("detSource").innerHTML = `<span class="metric-badge ${getSourceBadgeClass(ep.source)}">${ep.source}</span>`;
+      document.getElementById("detMethod").innerHTML = `<span class="method-tag ${getMethodClass(ep.method)}">${ep.method}</span>`;
+      document.getElementById("detStatus").innerHTML = `<span class="status-badge ${getStatusBadgeClass(ep.status)}">${ep.status}</span>`;
+      document.getElementById("detParams").innerText = ep.params || "None";
+      document.getElementById("detNotes").value = ep.notes || "";
+
+      document.getElementById("reqViewerText").innerText = ep.request || `${ep.method} ${ep.url} HTTP/1.1\nHost: api.target.com\nUser-Agent: Mozilla/5.0\n\n`;
+      document.getElementById("respViewerText").innerText = ep.response || `HTTP/1.1 ${ep.status} OK\nContent-Type: application/json\n\n{"status": "captured"}`;
+
+      renderTable();
+    }
+
+    function updateActiveNotes() {
+      const ep = endpoints.find(e => e.id === selectedEndpointId);
+      if (ep) {
+        ep.notes = document.getElementById("detNotes").value;
+        const rows = document.querySelectorAll("#tableBody tr");
+        rows.forEach(r => {
+          if (r.children[0].innerText == ep.id) {
+            r.children[7].innerText = ep.notes;
+          }
+        });
+      }
+    }
+
+    function getSourceBadgeClass(src) {
+      if (src === "Endpoint Discovery") return "badge-discovery";
+      if (src === "Version Finder") return "badge-version";
+      if (src === "Manual Entry") return "badge-manual";
+      return "badge-js";
+    }
+
+    function getMethodClass(m) {
+      if (m === "POST") return "method-post";
+      if (m === "PUT") return "method-put";
+      if (m === "DELETE") return "method-delete";
+      if (m === "PATCH") return "method-patch";
+      return "method-get";
+    }
+
+    function getStatusBadgeClass(s) {
+      if (s >= 200 && s < 300) return "status-2xx";
+      if (s >= 300 && s < 400) return "status-3xx";
+      if (s >= 400 && s < 500) return "status-4xx";
+      if (s >= 500) return "status-5xx";
+      return "status-none";
+    }
+
+    function updateMetrics() {
+      document.getElementById("badgeAll").innerText = `Total: ${endpoints.length} Endpoints`;
+      document.getElementById("badgeJs").innerText = `JS Analysis: ${endpoints.filter(e => e.source === "JS Analysis").length}`;
+      document.getElementById("badgeDisc").innerText = `Endpoint Discovery: ${endpoints.filter(e => e.source === "Endpoint Discovery").length}`;
+      document.getElementById("badgeVf").innerText = `Version Finder: ${endpoints.filter(e => e.source === "Version Finder").length}`;
+      document.getElementById("badgeMan").innerText = `Manual: ${endpoints.filter(e => e.source === "Manual Entry").length}`;
+    }
+
+    function applyFilters() {
+      renderTable();
+    }
+
+    function switchSuiteTab(tabId, el) {
+      document.querySelectorAll(".suite-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add("active");
+    }
+
+    function switchSubTab(panelId, el) {
+      document.querySelectorAll(".sub-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".sub-panel").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      const target = document.getElementById(panelId);
+      if (target) target.classList.add("active");
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      document.getElementById("themeToggleBtn").innerText = isLight ? "Switch to Dark Theme" : "Switch to Light Theme";
+    }
+
+    // Modal controls
+    function openAddEndpointModal() {
+      document.getElementById("addEndpointModal").classList.add("active");
+    }
+
+    function openJsAnalysisModal() {
+      document.getElementById("jsAnalysisModal").classList.add("active");
+      if (!document.getElementById("jsInputArea").value) {
+        document.getElementById("jsInputArea").value = `// Sample client bundle snippet
+const AUTH_URL = "/api/v1/auth/exchange-token";
+const ADMIN_DASHBOARD = "/api/v2/internal/admin/stats";
+const DEBUG_ROUTE = "/debug/v3/dump-heap";
+function syncOrders() { return fetch("/api/v1.05/orders/export?format=csv"); }`;
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    function saveManualEndpoint() {
+      const url = document.getElementById("newEpUrl").value.trim();
+      if (!url) {
+        alert("Please enter a valid URL or path.");
+        return;
+      }
+      const method = document.getElementById("newEpMethod").value;
+      const source = document.getElementById("newEpSource").value;
+      const status = parseInt(document.getElementById("newEpStatus").value) || 200;
+      const params = document.getElementById("newEpParams").value.trim();
+      const notes = document.getElementById("newEpNotes").value.trim() || "Manual endpoint entry";
+
+      const newId = endpoints.length ? Math.max(...endpoints.map(e => e.id)) + 1 : 1;
+      endpoints.unshift({
+        id: newId,
+        source: source,
+        method: method,
+        url: url,
+        params: params || "None",
+        status: status,
+        date: "2026-10-24 13:31:00",
+        notes: notes,
+        request: `${method} ${url} HTTP/1.1\nHost: api.target.com\nUser-Agent: Mozilla/5.0\n\n`,
+        response: `HTTP/1.1 ${status} OK\n\n`
+      });
+
+      closeModal("addEndpointModal");
+      selectEndpoint(newId);
+    }
+
+    function runJsRegexExtraction() {
+      const code = document.getElementById("jsInputArea").value;
+      // Regex pattern to extract endpoints from JS text
+      const regex = /["'](\/(?:api|v\d+|internal|debug|v[\d\.]+)[a-zA-Z0-9_\-\.\/\?=&]*)["']/g;
+      let match;
+      extractedJsPaths = [];
+      while ((match = regex.exec(code)) !== null) {
+        if (!extractedJsPaths.includes(match[1])) {
+          extractedJsPaths.push(match[1]);
+        }
+      }
+
+      const listDiv = document.getElementById("jsDiscoveredList");
+      if (extractedJsPaths.length === 0) {
+        listDiv.innerText = "No matching API routes found in snippet.";
+        document.getElementById("saveJsEndpointsBtn").disabled = true;
+      } else {
+        listDiv.innerHTML = extractedJsPaths.map(p => `&bull; ${p}`).join("<br>");
+        document.getElementById("saveJsEndpointsBtn").disabled = false;
+      }
+
+      document.getElementById("jsExtractStats").innerText = `${extractedJsPaths.length} endpoints discovered`;
+    }
+
+    function saveExtractedJsEndpoints() {
+      if (extractedJsPaths.length === 0) return;
+      extractedJsPaths.forEach(path => {
+        const newId = endpoints.length ? Math.max(...endpoints.map(e => e.id)) + 1 : 1;
+        endpoints.unshift({
+          id: newId,
+          source: "JS Analysis",
+          method: "GET",
+          url: "https://api.target.com" + path,
+          params: "auto-extracted",
+          status: 200,
+          date: "2026-10-24 13:31:30",
+          notes: "Extracted via JS Analysis regex scanner",
+          request: `GET ${path} HTTP/1.1\nHost: api.target.com\n\n`,
+          response: "HTTP/1.1 200 OK\n\n"
+        });
+      });
+      closeModal("jsAnalysisModal");
+      selectEndpoint(endpoints[0].id);
+      alert(`Saved ${extractedJsPaths.length} discovered endpoints to Hidden API Storage.`);
+    }
+
+    function sendSelectedToVersionFinder() {
+      const ep = endpoints.find(e => e.id === selectedEndpointId);
+      if (ep) {
+        alert(`Sent ${ep.method} ${ep.url} to REST API Version Finder as a new session tab.`);
+        switchSuiteTab("versionFinderTab", document.querySelectorAll(".suite-tab")[4]);
+      }
+    }
+
+    function sendSelectedToRepeater() {
+      const ep = endpoints.find(e => e.id === selectedEndpointId);
+      if (ep) {
+        alert(`Dispatched ${ep.method} ${ep.url} to Burp Suite Repeater.`);
+      }
+    }
+
+    function exportEndpoints() {
+      alert(`Exporting ${endpoints.length} hidden endpoints as CSV / JSON.`);
+    }
+
+    function deleteSelectedEndpoint() {
+      if (!confirm("Delete selected endpoint from Hidden API Storage?")) return;
+      endpoints = endpoints.filter(e => e.id !== selectedEndpointId);
+      if (endpoints.length) selectedEndpointId = endpoints[0].id;
+      renderTable();
+      if (endpoints.length) selectEndpoint(selectedEndpointId);
+    }
+
+    function clearAllEndpoints() {
+      if (!confirm("Are you sure you want to clear all stored hidden endpoints?")) return;
+      endpoints = [];
+      renderTable();
+    }
+
+    function loadVersionPreset(val) {
+      const box = document.getElementById("vfWordlistBox");
+      const badge = document.getElementById("vfCandidateBadge");
+      if (val === "extended") {
+        badge.innerText = "1,091 Candidates Loaded";
+        box.innerText = "v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.10, ... v10.99 [1,091 total versions]";
+      } else if (val === "common") {
+        badge.innerText = "13 Candidates Loaded";
+        box.innerText = "0, 1, 2, 3, 4, 5, 0.1, 1.0, 2.0, beta, latest, legacy, deprecated";
+      } else {
+        badge.innerText = "11 Candidates Loaded";
+        box.innerText = "v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10";
+      }
+    }
+
+    // Initialize
+    renderTable();
+    selectEndpoint(1);
+  </script>
+</body>
+</html>
