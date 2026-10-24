@@ -194,10 +194,10 @@
     .toolbar-container {
       background-color: var(--bg-dark);
       border-bottom: 1px solid var(--border);
-      padding: 10px 14px;
+      padding: 8px 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .toolbar-row {
@@ -278,8 +278,8 @@
     .metrics-bar {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 6px 14px;
+      gap: 10px;
+      padding: 5px 14px;
       background-color: var(--bg-darker);
       border-bottom: 1px solid var(--border);
       font-size: 11px;
@@ -318,13 +318,19 @@
       border: 1px solid #b78103;
     }
 
+    .badge-proxy {
+      background-color: rgba(0, 150, 136, 0.2);
+      color: #4db6ac;
+      border: 1px solid #009688;
+    }
+
     .badge-all {
       background-color: rgba(229, 107, 31, 0.2);
       color: var(--accent);
       border: 1px solid var(--accent);
     }
 
-    /* Main Split View: Top Table, Bottom Inspector */
+    /* Main Split View: Top Table, Bottom Parallel Viewers */
     .main-split {
       flex: 1;
       display: flex;
@@ -336,7 +342,7 @@
       flex: 1;
       overflow: auto;
       border-bottom: 1px solid var(--border);
-      min-height: 220px;
+      min-height: 200px;
     }
 
     table {
@@ -393,6 +399,26 @@
       max-width: 320px;
     }
 
+    .source-cell {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .source-dropdown-inline {
+      position: absolute;
+      top: 2px;
+      left: 6px;
+      right: 6px;
+      z-index: 50;
+      background-color: var(--bg-card);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      color: var(--text-bright);
+      font-size: 11px;
+      padding: 2px 4px;
+      outline: none;
+    }
+
     .method-tag {
       font-weight: 700;
       font-size: 10px;
@@ -421,79 +447,63 @@
     .status-5xx { background-color: rgba(198, 40, 40, 0.25); color: #e57373; }
     .status-none { color: var(--text-muted); }
 
-    /* Bottom Inspector Panel */
-    .bottom-inspector {
-      height: 250px;
-      background-color: var(--bg-card);
+    /* Parallel Request & Response Viewer Panel */
+    .parallel-inspector {
+      height: 290px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      border-top: 1px solid var(--border);
+      background-color: var(--bg-darker);
       overflow: hidden;
     }
 
-    .sub-tabs {
-      background-color: var(--bg-dark);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      padding: 0 10px;
-      gap: 4px;
-    }
-
-    .sub-tab {
-      padding: 6px 12px;
-      font-size: 11px;
-      cursor: pointer;
-      color: var(--text);
-      border-bottom: 2px solid transparent;
-    }
-
-    .sub-tab:hover {
-      color: var(--text-bright);
-    }
-
-    .sub-tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-      font-weight: 600;
-    }
-
-    .sub-panel {
-      display: none;
+    .viewer-column {
       flex: 1;
-      padding: 10px;
-      overflow: auto;
-    }
-
-    .sub-panel.active {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+
+    .viewer-column:last-child {
+      border-right: none;
+    }
+
+    .viewer-header {
+      background-color: var(--bg-dark);
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .viewer-title {
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .viewer-meta {
+      color: var(--text-muted);
+      font-size: 11px;
     }
 
     .editor-box {
       font-family: "JetBrains Mono", "Courier New", Courier, monospace;
       font-size: 11px;
       background-color: var(--code-bg);
-      border: 1px solid var(--border);
       color: var(--text);
-      padding: 8px;
-      border-radius: 3px;
+      padding: 10px;
       flex: 1;
       white-space: pre;
       overflow: auto;
       line-height: 1.45;
-    }
-
-    .details-grid {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      row-gap: 6px;
-      column-gap: 12px;
-      font-size: 12px;
-    }
-
-    .details-label {
-      font-weight: 600;
-      color: var(--text-muted);
+      border: none;
     }
 
     /* Modal Backdrop and Box */
@@ -518,7 +528,7 @@
       background-color: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 6px;
-      width: 720px;
+      width: 640px;
       max-width: 95%;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       display: flex;
@@ -653,14 +663,17 @@
         <div class="toolbar-row">
           <div class="filter-group">
             <span style="font-weight: 600; color: var(--text-bright);">Filter:</span>
-            <input type="text" id="storageSearchInput" class="input-box" placeholder="Search URL, path, param, notes..." style="width: 260px;" oninput="applyFilters()">
+            <input type="text" id="storageSearchInput" class="input-box" placeholder="Search URL, path, param, notes, source..." style="width: 280px;" oninput="applyFilters()">
 
             <label style="color: var(--text-muted); font-size: 11px;">Source:</label>
             <select id="sourceFilterSelect" class="input-box" onchange="applyFilters()">
               <option value="ALL">All Sources</option>
-              <option value="JS Analysis">JS Analysis</option>
               <option value="Endpoint Discovery">Endpoint Discovery</option>
+              <option value="JS Analysis">JS Analysis</option>
               <option value="Version Finder">REST API Version Finder</option>
+              <option value="Proxy History">Proxy History</option>
+              <option value="Repeater">Repeater</option>
+              <option value="Target Site Map">Target Site Map</option>
               <option value="Manual Entry">Manual Entry</option>
             </select>
 
@@ -686,11 +699,8 @@
 
           <div class="filter-group">
             <button class="btn btn-primary" onclick="openAddEndpointModal()">+ Add Endpoint</button>
-            <button class="btn btn-primary" onclick="openJsAnalysisModal()">JS Analysis Extractor</button>
-            <button class="btn" onclick="sendSelectedToVersionFinder()">Send to Version Finder</button>
-            <button class="btn" onclick="sendSelectedToRepeater()">Send to Repeater</button>
-            <button class="btn" onclick="exportEndpoints()">Export</button>
-            <button class="btn btn-danger" onclick="deleteSelectedEndpoint()">Delete</button>
+            <button class="btn" onclick="exportEndpoints()">Export CSV</button>
+            <button class="btn btn-danger" onclick="deleteSelectedEndpoint()">Delete Selected</button>
             <button class="btn btn-danger" onclick="clearAllEndpoints()">Clear All</button>
           </div>
         </div>
@@ -698,25 +708,28 @@
 
       <!-- Metrics and Count Bar -->
       <div class="metrics-bar">
-        <span class="metric-badge badge-all" id="badgeAll">Total: 8 Endpoints</span>
-        <span class="metric-badge badge-js" id="badgeJs">JS Analysis: 4</span>
+        <span class="metric-badge badge-all" id="badgeAll">Total: 7 Endpoints</span>
         <span class="metric-badge badge-discovery" id="badgeDisc">Endpoint Discovery: 2</span>
+        <span class="metric-badge badge-js" id="badgeJs">JS Analysis: 2</span>
         <span class="metric-badge badge-version" id="badgeVf">Version Finder: 1</span>
+        <span class="metric-badge badge-proxy" id="badgeProxy">Proxy/Repeater: 1</span>
         <span class="metric-badge badge-manual" id="badgeMan">Manual: 1</span>
-        <span style="margin-left: auto; color: var(--text-muted);">Click any row to view Request/Response details and notes</span>
+        <span style="margin-left: auto; color: var(--accent); font-weight: 500;">
+          Hint: Double-click any Source cell to change its source category via dropdown. Send endpoints from other tools via Burp context menu.
+        </span>
       </div>
 
-      <!-- Split Container: Table on top, Request/Response & Details on bottom -->
+      <!-- Split Container: Table on top, Parallel Request/Response on bottom -->
       <div class="main-split">
         <div class="table-container">
           <table id="hiddenEndpointsTable">
             <thead>
               <tr>
                 <th style="width: 45px;">#</th>
-                <th style="width: 140px;">Source</th>
+                <th style="width: 170px;">Source (Double-Click)</th>
                 <th style="width: 70px;">Method</th>
                 <th>Endpoint / URL</th>
-                <th style="width: 160px;">Parameters</th>
+                <th style="width: 180px;">Parameters</th>
                 <th style="width: 75px;">Status</th>
                 <th style="width: 150px;">Discovered Date</th>
                 <th>Notes / Tags</th>
@@ -728,39 +741,14 @@
           </table>
         </div>
 
-        <!-- Detail Inspector at bottom -->
-        <div class="bottom-inspector">
-          <div class="sub-tabs">
-            <div class="sub-tab active" onclick="switchSubTab('detailsPanel', this)">Endpoint Details &amp; Notes</div>
-            <div class="sub-tab" onclick="switchSubTab('requestPanel', this)">Request Viewer (Montoya)</div>
-            <div class="sub-tab" onclick="switchSubTab('responsePanel', this)">Response Viewer (Montoya)</div>
-          </div>
-
-          <div id="detailsPanel" class="sub-panel active">
-            <div class="details-grid">
-              <div class="details-label">Target URL:</div>
-              <div id="detUrl" style="color: var(--text-bright); font-weight: 500;">https://api.target.com/api/v2/internal/admin/keys</div>
-
-              <div class="details-label">Discovery Source:</div>
-              <div id="detSource"><span class="metric-badge badge-js">JS Analysis</span></div>
-
-              <div class="details-label">HTTP Method:</div>
-              <div id="detMethod"><span class="method-tag method-get">GET</span></div>
-
-              <div class="details-label">Status Code:</div>
-              <div id="detStatus"><span class="status-badge status-2xx">200 OK</span></div>
-
-              <div class="details-label">Parameters:</div>
-              <div id="detParams" style="color: var(--text);">includeInactive=true, format=json</div>
-
-              <div class="details-label">Editable Notes:</div>
-              <div>
-                <textarea id="detNotes" class="input-box" style="width: 100%; height: 50px;" oninput="updateActiveNotes()">Discovered hidden internal key management endpoint in main.app.chunk.js bundle during reconnaissance.</textarea>
-              </div>
+        <!-- Parallel Side-by-Side Request & Response Viewers (50% / 50%) -->
+        <div class="parallel-inspector">
+          <!-- Left: HttpRequestViewer -->
+          <div class="viewer-column">
+            <div class="viewer-header">
+              <span class="viewer-title">Request Viewer (Montoya API)</span>
+              <span class="viewer-meta" id="reqMeta">GET https://api.target.com/api/v2/internal/admin/keys</span>
             </div>
-          </div>
-
-          <div id="requestPanel" class="sub-panel">
             <pre class="editor-box" id="reqViewerText">GET /api/v2/internal/admin/keys?includeInactive=true&amp;format=json HTTP/1.1
 Host: api.target.com
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
@@ -769,7 +757,12 @@ Authorization: Bearer [REDACTED_INTERNAL_TOKEN]
 Connection: close</pre>
           </div>
 
-          <div id="responsePanel" class="sub-panel">
+          <!-- Right: HttpResponseViewer -->
+          <div class="viewer-column">
+            <div class="viewer-header">
+              <span class="viewer-title">Response Viewer (Montoya API)</span>
+              <span class="viewer-meta" id="respMeta">HTTP/1.1 200 OK | 182 bytes | JSON</span>
+            </div>
             <pre class="editor-box" id="respViewerText">HTTP/1.1 200 OK
 Date: Sat, 24 Oct 2026 08:00:00 GMT
 Content-Type: application/json; charset=utf-8
@@ -830,7 +823,7 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
   <div class="modal-overlay" id="addEndpointModal">
     <div class="modal-window">
       <div class="modal-header">
-        <span class="modal-title">Save Discovered Endpoint to Hidden API Storage</span>
+        <span class="modal-title">Manually Add Endpoint to Hidden API Storage</span>
         <button class="modal-close-btn" onclick="closeModal('addEndpointModal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -852,10 +845,14 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
           <div style="flex: 1;">
             <label style="font-weight: 600;">Source:</label>
             <select id="newEpSource" class="input-box" style="width: 100%;">
+              <option value="Manual Entry">Manual Entry</option>
               <option value="JS Analysis">JS Analysis</option>
               <option value="Endpoint Discovery">Endpoint Discovery</option>
               <option value="Version Finder">REST API Version Finder</option>
-              <option value="Manual Entry">Manual Entry</option>
+              <option value="Proxy History">Proxy History</option>
+              <option value="Repeater">Repeater</option>
+              <option value="Target Site Map">Target Site Map</option>
+              <option value="Other Tool">Other Tool</option>
             </select>
           </div>
           <div style="flex: 1;">
@@ -877,39 +874,20 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
     </div>
   </div>
 
-  <!-- 5. Modal: JS Analysis Endpoint Extractor -->
-  <div class="modal-overlay" id="jsAnalysisModal">
-    <div class="modal-window">
-      <div class="modal-header">
-        <span class="modal-title">JS Analysis Endpoint Extractor</span>
-        <button class="modal-close-btn" onclick="closeModal('jsAnalysisModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 12px; color: var(--text);">
-          Paste JavaScript bundle content, script responses, or raw text below. The extractor will automatically discover hidden API endpoints, versioned paths, and internal routes.
-        </p>
-
-        <label style="font-weight: 600;">JavaScript Content / Code Snippet:</label>
-        <textarea id="jsInputArea" class="input-box" style="height: 120px; font-family: monospace; font-size: 11px;" placeholder="Paste JavaScript source here... e.g. axios.get('/api/v2/internal/debug').then(...)"></textarea>
-
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <button class="btn btn-primary" onclick="runJsRegexExtraction()">Run Regex Extraction</button>
-          <span id="jsExtractStats" style="font-size: 11px; color: var(--accent); font-weight: 600;">0 endpoints discovered</span>
-        </div>
-
-        <label style="font-weight: 600;">Discovered Paths Preview:</label>
-        <div id="jsDiscoveredList" style="max-height: 120px; overflow-y: auto; background-color: var(--code-bg); border: 1px solid var(--border); border-radius: 3px; padding: 6px; font-family: monospace; font-size: 11px; color: #81c784;">
-          (Click 'Run Regex Extraction' to parse endpoints)
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" onclick="closeModal('jsAnalysisModal')">Cancel</button>
-        <button class="btn btn-primary" id="saveJsEndpointsBtn" onclick="saveExtractedJsEndpoints()" disabled>Save All to Hidden API Storage</button>
-      </div>
-    </div>
-  </div>
-
   <script>
+    // Available source categories for double-click editor dropdown
+    const SOURCE_OPTIONS = [
+      "Endpoint Discovery",
+      "JS Analysis",
+      "Version Finder",
+      "Proxy History",
+      "Repeater",
+      "Target Site Map",
+      "Logger",
+      "Manual Entry",
+      "Other Tool"
+    ];
+
     // Sample Dataset for UI Demonstration
     let endpoints = [
       {
@@ -921,8 +899,8 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
         status: 200,
         date: "2026-10-24 13:10:45",
         notes: "Discovered hidden internal key management endpoint in main.app.chunk.js bundle.",
-        request: "GET /api/v2/internal/admin/keys?includeInactive=true&format=json HTTP/1.1\nHost: api.target.com\nUser-Agent: Mozilla/5.0\nAccept: application/json\nConnection: close",
-        response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 145\n\n{\"keys\": [\"k_admin_01\", \"k_root_debug\"]}"
+        request: "GET /api/v2/internal/admin/keys?includeInactive=true&format=json HTTP/1.1\nHost: api.target.com\nUser-Agent: Mozilla/5.0\nAccept: application/json\nAuthorization: Bearer [REDACTED_INTERNAL_TOKEN]\nConnection: close",
+        response: "HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 08:00:00 GMT\nContent-Type: application/json; charset=utf-8\nContent-Length: 182\nConnection: close\n\n{\n  \"status\": \"success\",\n  \"keys\": [\n    {\"keyId\": \"k_admin_09\", \"scope\": \"system:readwrite\", \"active\": true},\n    {\"keyId\": \"k_debug_02\", \"scope\": \"debug:all\", \"active\": false}\n  ]\n}"
       },
       {
         id: 2,
@@ -933,8 +911,8 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
         status: 401,
         date: "2026-10-24 13:12:02",
         notes: "Hidden refresh token handler extracted from auth-client.bundle.js.",
-        request: "POST /api/v1/auth/refresh-token-internal HTTP/1.1\nHost: api.target.com\nContent-Type: application/json\n\n{\"refreshToken\": \"...\"}",
-        response: "HTTP/1.1 401 Unauthorized\nContent-Type: application/json\n\n{\"error\": \"Missing device fingerprint\"}"
+        request: "POST /api/v1/auth/refresh-token-internal HTTP/1.1\nHost: api.target.com\nContent-Type: application/json\nContent-Length: 42\nConnection: close\n\n{\"refreshToken\": \"eyJhbGciOi...\"}",
+        response: "HTTP/1.1 401 Unauthorized\nContent-Type: application/json\nContent-Length: 46\nConnection: close\n\n{\"error\": \"Missing device fingerprint header\"}"
       },
       {
         id: 3,
@@ -945,8 +923,8 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
         status: 200,
         date: "2026-10-24 13:15:20",
         notes: "Parent path variation revealed unlisted permissions endpoint.",
-        request: "GET /api/v1/users/1042/permissions?detailed=true HTTP/1.1\nHost: api.target.com\n\n",
-        response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"permissions\": [\"read:profile\", \"edit:billing\"]}"
+        request: "GET /api/v1/users/1042/permissions?detailed=true HTTP/1.1\nHost: api.target.com\nAccept: application/json\nConnection: close",
+        response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 72\nConnection: close\n\n{\"permissions\": [\"read:profile\", \"edit:billing\", \"manage:teams\"]}"
       },
       {
         id: 4,
@@ -957,8 +935,8 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
         status: 403,
         date: "2026-10-24 13:18:11",
         notes: "Discovered via endpoint path stripping. Requires admin privilege.",
-        request: "DELETE /api/v2/accounts/bulk-purge HTTP/1.1\nHost: api.target.com\n\n",
-        response: "HTTP/1.1 403 Forbidden\n\n{\"error\": \"Admin role required\"}"
+        request: "DELETE /api/v2/accounts/bulk-purge HTTP/1.1\nHost: api.target.com\nContent-Type: application/json\nConnection: close\n\n{\"confirmToken\": \"xyz\"}",
+        response: "HTTP/1.1 403 Forbidden\nContent-Type: application/json\nContent-Length: 35\nConnection: close\n\n{\"error\": \"Admin role required\"}"
       },
       {
         id: 5,
@@ -969,49 +947,37 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
         status: 200,
         date: "2026-10-24 13:22:30",
         notes: "Probed version variation v10.02 revealed unreleased API version with full customer export.",
-        request: "GET /api/v10.02/customers/export?type=all HTTP/1.1\nHost: api.target.com\n\n",
-        response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"customers\": [{\"id\": 1, \"email\": \"victim@test.local\"}]}"
+        request: "GET /api/v10.02/customers/export?type=all HTTP/1.1\nHost: api.target.com\nAccept: application/json\nConnection: close",
+        response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 95\nConnection: close\n\n{\"customers\": [{\"id\": 1, \"name\": \"VIP Client\", \"email\": \"victim@test.local\"}]}"
       },
       {
         id: 6,
-        source: "JS Analysis",
+        source: "Proxy History",
         method: "GET",
         url: "https://api.target.com/debug/v1/metrics/prometheus",
         params: "none",
         status: 200,
         date: "2026-10-24 13:25:00",
-        notes: "Exposed Prometheus debug metrics route hardcoded in telemetry.js.",
-        request: "GET /debug/v1/metrics/prometheus HTTP/1.1\nHost: api.target.com\n\n",
-        response: "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n# HELP http_requests_total\nhttp_requests_total 42109"
+        notes: "Sent from Burp Proxy history context menu directly to Hidden API Storage.",
+        request: "GET /debug/v1/metrics/prometheus HTTP/1.1\nHost: api.target.com\nAccept: text/plain\nConnection: close",
+        response: "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 52\nConnection: close\n\n# HELP http_requests_total\nhttp_requests_total 42109"
       },
       {
         id: 7,
-        source: "JS Analysis",
-        method: "PUT",
-        url: "https://api.target.com/api/v1/feature-flags/override",
-        params: "body: flagKey, enabled",
-        status: 400,
-        date: "2026-10-24 13:27:14",
-        notes: "Internal feature-flags client endpoint found in vendor bundle.",
-        request: "PUT /api/v1/feature-flags/override HTTP/1.1\nHost: api.target.com\n\n",
-        response: "HTTP/1.1 400 Bad Request\n\n{\"error\": \"flagKey is required\"}"
-      },
-      {
-        id: 8,
         source: "Manual Entry",
         method: "GET",
         url: "https://api.target.com/internal/v3/healthz",
         params: "extended=1",
         status: 200,
         date: "2026-10-24 13:29:40",
-        notes: "Manually logged from external documentation leak.",
-        request: "GET /internal/v3/healthz?extended=1 HTTP/1.1\nHost: api.target.com\n\n",
-        response: "HTTP/1.1 200 OK\n\n{\"status\": \"healthy\", \"database\": \"connected\"}"
+        notes: "Manually entered from external documentation leak.",
+        request: "GET /internal/v3/healthz?extended=1 HTTP/1.1\nHost: api.target.com\nConnection: close",
+        response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 48\nConnection: close\n\n{\"status\": \"healthy\", \"database\": \"connected\"}"
       }
     ];
 
     let selectedEndpointId = 1;
-    let extractedJsPaths = [];
+    let editingSourceId = null;
 
     function renderTable() {
       const tbody = document.getElementById("tableBody");
@@ -1048,12 +1014,17 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
         if (ep.id === selectedEndpointId) {
           tr.classList.add("selected");
         }
-        tr.onclick = () => selectEndpoint(ep.id);
+        tr.onclick = (e) => {
+          if (e.target.tagName !== "SELECT") {
+            selectEndpoint(ep.id);
+          }
+        };
 
         let badgeClass = "badge-js";
         if (ep.source === "Endpoint Discovery") badgeClass = "badge-discovery";
         else if (ep.source === "Version Finder") badgeClass = "badge-version";
         else if (ep.source === "Manual Entry") badgeClass = "badge-manual";
+        else if (ep.source === "Proxy History" || ep.source === "Repeater") badgeClass = "badge-proxy";
 
         let methodClass = "method-get";
         if (ep.method === "POST") methodClass = "method-post";
@@ -1067,9 +1038,16 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
         else if (ep.status >= 400 && ep.status < 500) statusClass = "status-4xx";
         else if (ep.status >= 500) statusClass = "status-5xx";
 
+        // Source cell with double-click inline dropdown capability
+        const sourceCellHtml = (editingSourceId === ep.id)
+          ? `<select class="source-dropdown-inline" onchange="changeSource(${ep.id}, this.value)" onblur="cancelSourceEdit()">
+              ${SOURCE_OPTIONS.map(opt => `<option value="${opt}" ${opt === ep.source ? "selected" : ""}>${opt}</option>`).join("")}
+            </select>`
+          : `<span class="metric-badge ${badgeClass}">${ep.source}</span>`;
+
         tr.innerHTML = `
           <td>${ep.id}</td>
-          <td><span class="metric-badge ${badgeClass}">${ep.source}</span></td>
+          <td class="source-cell" ondblclick="startSourceEdit(${ep.id}, event)">${sourceCellHtml}</td>
           <td><span class="method-tag ${methodClass}">${ep.method}</span></td>
           <td style="font-weight: 500;">${ep.url}</td>
           <td style="color: var(--text-muted);">${ep.params}</td>
@@ -1088,60 +1066,46 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
       const ep = endpoints.find(e => e.id === id);
       if (!ep) return;
 
-      document.getElementById("detUrl").innerText = ep.url;
-      document.getElementById("detSource").innerHTML = `<span class="metric-badge ${getSourceBadgeClass(ep.source)}">${ep.source}</span>`;
-      document.getElementById("detMethod").innerHTML = `<span class="method-tag ${getMethodClass(ep.method)}">${ep.method}</span>`;
-      document.getElementById("detStatus").innerHTML = `<span class="status-badge ${getStatusBadgeClass(ep.status)}">${ep.status}</span>`;
-      document.getElementById("detParams").innerText = ep.params || "None";
-      document.getElementById("detNotes").value = ep.notes || "";
-
+      document.getElementById("reqMeta").innerText = `${ep.method} ${ep.url}`;
       document.getElementById("reqViewerText").innerText = ep.request || `${ep.method} ${ep.url} HTTP/1.1\nHost: api.target.com\nUser-Agent: Mozilla/5.0\n\n`;
+
+      const byteLength = ep.response ? ep.response.length : 0;
+      document.getElementById("respMeta").innerText = `HTTP/1.1 ${ep.status} OK | ${byteLength} bytes | JSON`;
       document.getElementById("respViewerText").innerText = ep.response || `HTTP/1.1 ${ep.status} OK\nContent-Type: application/json\n\n{"status": "captured"}`;
 
       renderTable();
     }
 
-    function updateActiveNotes() {
-      const ep = endpoints.find(e => e.id === selectedEndpointId);
-      if (ep) {
-        ep.notes = document.getElementById("detNotes").value;
-        const rows = document.querySelectorAll("#tableBody tr");
-        rows.forEach(r => {
-          if (r.children[0].innerText == ep.id) {
-            r.children[7].innerText = ep.notes;
-          }
-        });
+    function startSourceEdit(id, event) {
+      event.stopPropagation();
+      editingSourceId = id;
+      renderTable();
+      const select = document.querySelector(".source-dropdown-inline");
+      if (select) {
+        select.focus();
       }
     }
 
-    function getSourceBadgeClass(src) {
-      if (src === "Endpoint Discovery") return "badge-discovery";
-      if (src === "Version Finder") return "badge-version";
-      if (src === "Manual Entry") return "badge-manual";
-      return "badge-js";
+    function changeSource(id, newSource) {
+      const ep = endpoints.find(e => e.id === id);
+      if (ep) {
+        ep.source = newSource;
+      }
+      editingSourceId = null;
+      renderTable();
     }
 
-    function getMethodClass(m) {
-      if (m === "POST") return "method-post";
-      if (m === "PUT") return "method-put";
-      if (m === "DELETE") return "method-delete";
-      if (m === "PATCH") return "method-patch";
-      return "method-get";
-    }
-
-    function getStatusBadgeClass(s) {
-      if (s >= 200 && s < 300) return "status-2xx";
-      if (s >= 300 && s < 400) return "status-3xx";
-      if (s >= 400 && s < 500) return "status-4xx";
-      if (s >= 500) return "status-5xx";
-      return "status-none";
+    function cancelSourceEdit() {
+      editingSourceId = null;
+      renderTable();
     }
 
     function updateMetrics() {
       document.getElementById("badgeAll").innerText = `Total: ${endpoints.length} Endpoints`;
-      document.getElementById("badgeJs").innerText = `JS Analysis: ${endpoints.filter(e => e.source === "JS Analysis").length}`;
       document.getElementById("badgeDisc").innerText = `Endpoint Discovery: ${endpoints.filter(e => e.source === "Endpoint Discovery").length}`;
+      document.getElementById("badgeJs").innerText = `JS Analysis: ${endpoints.filter(e => e.source === "JS Analysis").length}`;
       document.getElementById("badgeVf").innerText = `Version Finder: ${endpoints.filter(e => e.source === "Version Finder").length}`;
+      document.getElementById("badgeProxy").innerText = `Proxy/Repeater: ${endpoints.filter(e => e.source === "Proxy History" || e.source === "Repeater").length}`;
       document.getElementById("badgeMan").innerText = `Manual: ${endpoints.filter(e => e.source === "Manual Entry").length}`;
     }
 
@@ -1157,14 +1121,6 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
       if (target) target.classList.add("active");
     }
 
-    function switchSubTab(panelId, el) {
-      document.querySelectorAll(".sub-tab").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll(".sub-panel").forEach(p => p.classList.remove("active"));
-      el.classList.add("active");
-      const target = document.getElementById(panelId);
-      if (target) target.classList.add("active");
-    }
-
     function toggleTheme() {
       const isLight = document.body.classList.toggle("light-theme");
       document.getElementById("themeToggleBtn").innerText = isLight ? "Switch to Dark Theme" : "Switch to Light Theme";
@@ -1173,17 +1129,6 @@ v0, v1, v1.01, v1.02, v1.03, v1.04, v1.05, v1.06, v1.07, v1.08, v1.09, v1.1, v1.
     // Modal controls
     function openAddEndpointModal() {
       document.getElementById("addEndpointModal").classList.add("active");
-    }
-
-    function openJsAnalysisModal() {
-      document.getElementById("jsAnalysisModal").classList.add("active");
-      if (!document.getElementById("jsInputArea").value) {
-        document.getElementById("jsInputArea").value = `// Sample client bundle snippet
-const AUTH_URL = "/api/v1/auth/exchange-token";
-const ADMIN_DASHBOARD = "/api/v2/internal/admin/stats";
-const DEBUG_ROUTE = "/debug/v3/dump-heap";
-function syncOrders() { return fetch("/api/v1.05/orders/export?format=csv"); }`;
-      }
     }
 
     function closeModal(id) {
@@ -1210,7 +1155,7 @@ function syncOrders() { return fetch("/api/v1.05/orders/export?format=csv"); }`;
         url: url,
         params: params || "None",
         status: status,
-        date: "2026-10-24 13:31:00",
+        date: "2026-10-24 14:20:00",
         notes: notes,
         request: `${method} ${url} HTTP/1.1\nHost: api.target.com\nUser-Agent: Mozilla/5.0\n\n`,
         response: `HTTP/1.1 ${status} OK\n\n`
@@ -1220,69 +1165,8 @@ function syncOrders() { return fetch("/api/v1.05/orders/export?format=csv"); }`;
       selectEndpoint(newId);
     }
 
-    function runJsRegexExtraction() {
-      const code = document.getElementById("jsInputArea").value;
-      // Regex pattern to extract endpoints from JS text
-      const regex = /["'](\/(?:api|v\d+|internal|debug|v[\d\.]+)[a-zA-Z0-9_\-\.\/\?=&]*)["']/g;
-      let match;
-      extractedJsPaths = [];
-      while ((match = regex.exec(code)) !== null) {
-        if (!extractedJsPaths.includes(match[1])) {
-          extractedJsPaths.push(match[1]);
-        }
-      }
-
-      const listDiv = document.getElementById("jsDiscoveredList");
-      if (extractedJsPaths.length === 0) {
-        listDiv.innerText = "No matching API routes found in snippet.";
-        document.getElementById("saveJsEndpointsBtn").disabled = true;
-      } else {
-        listDiv.innerHTML = extractedJsPaths.map(p => `&bull; ${p}`).join("<br>");
-        document.getElementById("saveJsEndpointsBtn").disabled = false;
-      }
-
-      document.getElementById("jsExtractStats").innerText = `${extractedJsPaths.length} endpoints discovered`;
-    }
-
-    function saveExtractedJsEndpoints() {
-      if (extractedJsPaths.length === 0) return;
-      extractedJsPaths.forEach(path => {
-        const newId = endpoints.length ? Math.max(...endpoints.map(e => e.id)) + 1 : 1;
-        endpoints.unshift({
-          id: newId,
-          source: "JS Analysis",
-          method: "GET",
-          url: "https://api.target.com" + path,
-          params: "auto-extracted",
-          status: 200,
-          date: "2026-10-24 13:31:30",
-          notes: "Extracted via JS Analysis regex scanner",
-          request: `GET ${path} HTTP/1.1\nHost: api.target.com\n\n`,
-          response: "HTTP/1.1 200 OK\n\n"
-        });
-      });
-      closeModal("jsAnalysisModal");
-      selectEndpoint(endpoints[0].id);
-      alert(`Saved ${extractedJsPaths.length} discovered endpoints to Hidden API Storage.`);
-    }
-
-    function sendSelectedToVersionFinder() {
-      const ep = endpoints.find(e => e.id === selectedEndpointId);
-      if (ep) {
-        alert(`Sent ${ep.method} ${ep.url} to REST API Version Finder as a new session tab.`);
-        switchSuiteTab("versionFinderTab", document.querySelectorAll(".suite-tab")[4]);
-      }
-    }
-
-    function sendSelectedToRepeater() {
-      const ep = endpoints.find(e => e.id === selectedEndpointId);
-      if (ep) {
-        alert(`Dispatched ${ep.method} ${ep.url} to Burp Suite Repeater.`);
-      }
-    }
-
     function exportEndpoints() {
-      alert(`Exporting ${endpoints.length} hidden endpoints as CSV / JSON.`);
+      alert(`Exporting ${endpoints.length} hidden endpoints as CSV.`);
     }
 
     function deleteSelectedEndpoint() {
