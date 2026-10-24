@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GraphQL Cop (littlespidy) - Burp Suite Extension UI Preview</title>
+  <title>GraphQL Cop & Clairvoyance (littlespidy) - Burp Suite Extension UI Preview</title>
   <style>
     :root {
       --bg-dark: #1e1e1e;
@@ -175,6 +175,39 @@
       background-color: var(--accent-hover);
       border-color: var(--accent-hover);
     }
+    .btn-attack {
+      background-color: #2b333a;
+      border: 1px solid #414d59;
+      color: #9cdcfe;
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .btn-attack:hover {
+      background-color: #384554;
+      border-color: #007acc;
+      color: #ffffff;
+    }
+    .btn-dos {
+      background-color: #3b2222;
+      border: 1px solid #633333;
+      color: #fca5a5;
+    }
+    .btn-dos:hover {
+      background-color: #522d2d;
+      border-color: #f14c4c;
+      color: #ffffff;
+    }
+    .btn-voyager {
+      background-color: #0b4f6c;
+      border: 1px solid #1f8cb8;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .btn-voyager:hover {
+      background-color: #126b91;
+    }
     .session-status-right {
       display: flex;
       align-items: center;
@@ -194,7 +227,7 @@
       border-color: var(--accent);
     }
 
-    /* Multi-Session Tabs */
+    /* Multi-Session Dynamic Tabs Bar */
     .session-tabs-bar {
       background-color: var(--bg-darker);
       border-bottom: 1px solid var(--border);
@@ -248,6 +281,33 @@
       color: var(--text-bright);
     }
 
+    /* Sub-Tabs: Attack, HTTP History, Query */
+    .sub-tabs-bar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 12px;
+      gap: 4px;
+      user-select: none;
+    }
+    .sub-tab-item {
+      padding: 7px 18px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-weight: 600;
+    }
+    .sub-tab-item:hover {
+      color: var(--text-bright);
+      background-color: var(--bg-hover);
+    }
+    .sub-tab-item.active {
+      color: var(--text-bright);
+      border-bottom: 2px solid var(--accent);
+      background-color: var(--bg-dark);
+    }
+
     /* Main Workspace Layout */
     .workspace {
       display: flex;
@@ -256,7 +316,7 @@
       overflow: hidden;
     }
 
-    /* Config and Trigger Panel */
+    /* Config Panel */
     .config-panel {
       background-color: var(--bg-card);
       border-bottom: 1px solid var(--border);
@@ -293,13 +353,29 @@
     .text-input:focus {
       border-color: var(--border-focus);
     }
-    .checkbox-label {
+
+    /* Attack Buttons Grid */
+    .attack-buttons-container {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .attack-group {
       display: flex;
       align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      font-size: 11px;
-      color: var(--text);
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .attack-group-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 700;
+      min-width: 140px;
     }
 
     /* Rapid-Triage Filter Bar */
@@ -332,19 +408,18 @@
       border-color: var(--border-focus);
     }
 
-    /* Split Pane: Table on Top, Request/Response on Bottom */
+    /* Split Pane */
     .split-container {
       display: flex;
       flex-direction: column;
       flex: 1;
       overflow: hidden;
     }
-
     .table-container {
       flex: 1;
       overflow: auto;
       background-color: var(--bg-dark);
-      min-height: 180px;
+      min-height: 160px;
     }
     table {
       width: 100%;
@@ -427,7 +502,7 @@
 
     /* Details Viewer Pane */
     .details-pane {
-      height: 280px;
+      height: 250px;
       display: flex;
       background-color: var(--bg-darker);
       border-top: 1px solid var(--border);
@@ -456,18 +531,18 @@
       color: var(--text-bright);
       font-size: 11px;
     }
-    .sub-tabs {
+    .sub-sub-tabs {
       display: flex;
       gap: 2px;
     }
-    .sub-tab {
+    .sub-sub-tab {
       padding: 2px 8px;
       font-size: 10px;
       color: var(--text-muted);
       cursor: pointer;
       border-radius: 2px;
     }
-    .sub-tab.active {
+    .sub-sub-tab.active {
       background-color: var(--bg-dark);
       color: var(--text-bright);
       font-weight: 600;
@@ -482,6 +557,89 @@
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-all;
+    }
+
+    /* Query Tab Layout */
+    .query-tab-view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .query-toolbar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .query-main-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .query-tree-panel {
+      width: 260px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .tree-header {
+      padding: 6px 10px;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-bright);
+    }
+    .tree-list {
+      flex: 1;
+      overflow: auto;
+      padding: 4px 0;
+    }
+    .tree-item {
+      padding: 4px 12px;
+      cursor: pointer;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+    }
+    .tree-item:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-bright);
+    }
+    .tree-item.active {
+      background-color: var(--bg-selected);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .tree-badge {
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      background-color: var(--btn-bg);
+      color: var(--text-muted);
+    }
+    .query-editor-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* HTTP History Tab Layout */
+    .history-tab-view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     /* Footer Info Bar */
@@ -503,11 +661,11 @@
 </head>
 <body>
 
-  <!-- Burp Suite Suite Header -->
+  <!-- Burp Suite Header -->
   <div class="burp-header">
     <div class="title-area">
       <span class="burp-logo-badge">BURP</span>
-      <span class="suite-title">Burp Suite Professional - GraphQL Cop Extension Preview</span>
+      <span class="suite-title">Burp Suite Professional - GraphQL Cop & Clairvoyance Extension Preview</span>
     </div>
     <div class="header-actions">
       <button class="btn" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
@@ -515,7 +673,7 @@
     </div>
   </div>
 
-  <!-- Burp Main Suite Tabs -->
+  <!-- Burp Suite Main Tabs -->
   <div class="suite-tabs">
     <div class="suite-tab">Dashboard</div>
     <div class="suite-tab">Target</div>
@@ -544,10 +702,10 @@
 
   <!-- Multi-Session Dynamic Tabs Bar -->
   <div class="session-tabs-bar" id="sessionTabsBar">
-    <div class="session-tab-item active" onclick="switchSessionTab(0)">
+    <div class="session-tab-item" onclick="switchSessionTab(0)">
       <span>Quick Audit / Sweep</span>
     </div>
-    <div class="session-tab-item" onclick="switchSessionTab(1)" title="Double click to rename tab">
+    <div class="session-tab-item active" onclick="switchSessionTab(1)" title="Double click to rename tab">
       <span class="tab-title-text" ondblclick="startInlineRename(this)">#1 POST /graphql</span>
       <span class="tab-close-btn" onclick="closeSessionTab(event, 1)">x</span>
     </div>
@@ -558,116 +716,138 @@
     <div class="new-tab-btn" onclick="addNewSessionTab()" title="Open new testing tab">+</div>
   </div>
 
+  <!-- Sub-Tabs Bar: Attack | HTTP History | Query -->
+  <div class="sub-tabs-bar">
+    <div class="sub-tab-item active" id="subTabAttack" onclick="switchSubTab('attack')">Attack</div>
+    <div class="sub-tab-item" id="subTabHistory" onclick="switchSubTab('history')">HTTP History</div>
+    <div class="sub-tab-item" id="subTabQuery" onclick="switchSubTab('query')">Query & Schema Voyager</div>
+  </div>
+
   <!-- Main Active Workspace -->
   <div class="workspace">
 
-    <!-- Config & Trigger Panel -->
-    <div class="config-panel">
-      <div class="config-row">
-        <div class="input-group" style="flex: 2;">
-          <span class="input-label">Target URL:</span>
-          <input type="text" class="text-input" id="targetUrlInput" value="https://api.target-app.com/graphql" style="flex: 1;">
-        </div>
-        <div class="input-group" style="flex: 2;">
-          <span class="input-label">Custom Headers (JSON / KV):</span>
-          <input type="text" class="text-input" id="customHeadersInput" value='{"Authorization": "Bearer eyJhbGciOi..."}' style="flex: 1;">
-        </div>
-        <button class="btn btn-accent" id="runScanBtn" onclick="toggleScan()">Run Audit</button>
-        <button class="btn" onclick="clearResults()">Clear Results</button>
-      </div>
-
-      <div class="config-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="chkDiscovery" checked>
-          <span>Auto-discover endpoints (/, /graphql, /graphiql, /playground, /console)</span>
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="chkDos" checked>
-          <span>Enable Denial-of-Service / Intrusive Checks (Batching, Aliases, Circular Introspection)</span>
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="chkDebug" checked>
-          <span>Debug Mode (Send X-GraphQL-Cop-Test header)</span>
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="chkInScope" checked>
-          <span>Enforce Burp Target Scope</span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Rapid Triage Filters Bar -->
-    <div class="filter-bar">
-      <div class="filter-group-left">
-        <span class="input-label">Severity:</span>
-        <select class="filter-select" id="filterSeverity" onchange="applyFilters()">
-          <option value="ALL">All Severities</option>
-          <option value="HIGH">HIGH (4)</option>
-          <option value="MEDIUM">MEDIUM (2)</option>
-          <option value="LOW">LOW (2)</option>
-          <option value="INFO">INFO (2)</option>
-        </select>
-
-        <span class="input-label">Status Code:</span>
-        <select class="filter-select" id="filterStatus" onchange="applyFilters()">
-          <option value="ALL">All Status Codes</option>
-          <option value="200">200 OK</option>
-          <option value="4xx">4xx Client Error</option>
-          <option value="5xx">5xx Server Error</option>
-        </select>
-
-        <span class="input-label">Search:</span>
-        <input type="text" class="text-input" id="filterSearch" placeholder="Filter title, description, path..." onkeyup="applyFilters()" style="width: 220px;">
-
-        <button class="btn" onclick="resetFilters()">Reset Filters</button>
-      </div>
-
-      <div>
-        <button class="btn" onclick="copyCurlPoc()">Copy cURL PoC</button>
-      </div>
-    </div>
-
-    <!-- Split Container -->
-    <div class="split-container">
-
-      <!-- Table View -->
-      <div class="table-container">
-        <table id="findingsTable">
-          <thead>
-            <tr>
-              <th style="width: 40px;" onclick="sortTable(0)">#</th>
-              <th style="width: 90px;" onclick="sortTable(1)">Severity</th>
-              <th style="width: 240px;" onclick="sortTable(2)">Finding Title</th>
-              <th style="width: 280px;" onclick="sortTable(3)">Description</th>
-              <th style="width: 200px;" onclick="sortTable(4)">Impact</th>
-              <th style="width: 180px;" onclick="sortTable(5)">Endpoint</th>
-              <th style="width: 70px;" onclick="sortTable(6)">Method</th>
-              <th style="width: 60px;" onclick="sortTable(7)">Status</th>
-              <th style="width: 80px;" onclick="sortTable(8)">Length</th>
-              <th style="width: 70px;" onclick="sortTable(9)">Time</th>
-            </tr>
-          </thead>
-          <tbody id="findingsBody">
-            <!-- Populated dynamically by script -->
-          </tbody>
-        </table>
-      </div>
-
-      <div class="split-divider"></div>
-
-      <!-- Request and Response Editors -->
-      <div class="details-pane">
-        <!-- Request Viewer Box -->
-        <div class="viewer-box">
-          <div class="viewer-header">
-            <span class="viewer-title">Request Editor (Montoya HttpRequestEditor)</span>
-            <div class="sub-tabs">
-              <span class="sub-tab active">Raw</span>
-              <span class="sub-tab">Headers</span>
-              <span class="sub-tab">JSON</span>
-            </div>
+    <!-- SUB-TAB 1: ATTACK VIEW -->
+    <div id="viewAttack" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+      
+      <!-- Target Configuration Bar -->
+      <div class="config-panel">
+        <div class="config-row">
+          <div class="input-group" style="flex: 2;">
+            <span class="input-label">Target URL:</span>
+            <input type="text" class="text-input" id="targetUrlInput" value="https://api.target-app.com/graphql" style="flex: 1;">
           </div>
-          <div class="viewer-content" id="requestViewerContent">POST /graphql HTTP/1.1
+          <div class="input-group" style="flex: 2;">
+            <span class="input-label">Custom Headers (JSON / KV):</span>
+            <input type="text" class="text-input" id="customHeadersInput" value='{"Authorization": "Bearer eyJhbGciOi..."}' style="flex: 1;">
+          </div>
+          <button class="btn btn-accent" onclick="runAttack('ALL')">Run All Attacks</button>
+          <button class="btn" onclick="clearResults()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Individual Attack Action Buttons -->
+      <div class="attack-buttons-container">
+        <!-- Discovery & Info Disclosure -->
+        <div class="attack-group">
+          <span class="attack-group-title">Information & Recon:</span>
+          <button class="btn-attack" onclick="runAttack('INTROSPECTION')">[Introspection Query]</button>
+          <button class="btn-attack" onclick="runAttack('GRAPHIQL')">[GraphiQL / IDE Interface]</button>
+          <button class="btn-attack" onclick="runAttack('FIELD_SUGGESTIONS')">[Field Suggestions]</button>
+          <button class="btn-attack" onclick="runAttack('CLAIRVOYANCE')" style="background-color: #244b36; border-color: #388a34; color: #a3e635;">[Clairvoyance Schema Reconstruction]</button>
+          <button class="btn-attack" onclick="runAttack('TRACE_MODE')">[Trace Mode]</button>
+          <button class="btn-attack" onclick="runAttack('UNHANDLED_ERROR')">[Unhandled Errors]</button>
+        </div>
+
+        <!-- CSRF & Method Handling -->
+        <div class="attack-group">
+          <span class="attack-group-title">CSRF & Methods:</span>
+          <button class="btn-attack" onclick="runAttack('GET_QUERY')">[GET Query Support]</button>
+          <button class="btn-attack" onclick="runAttack('GET_MUTATION')">[GET Mutation Support (CSRF)]</button>
+          <button class="btn-attack" onclick="runAttack('POST_URLENCODED')">[POST Url-Encoded (CSRF)]</button>
+        </div>
+
+        <!-- Denial of Service (Intrusive) -->
+        <div class="attack-group">
+          <span class="attack-group-title">Denial of Service:</span>
+          <button class="btn-attack btn-dos" onclick="runAttack('BATCH_QUERY')">[Array Batching (10+)]</button>
+          <button class="btn-attack btn-dos" onclick="runAttack('ALIAS_OVERLOAD')">[Alias Overloading (100+)]</button>
+          <button class="btn-attack btn-dos" onclick="runAttack('DIRECTIVE_OVERLOAD')">[Directive Overloading]</button>
+          <button class="btn-attack btn-dos" onclick="runAttack('CIRCULAR_QUERY')">[Circular Introspection]</button>
+          <button class="btn-attack btn-dos" onclick="runAttack('FIELD_DUPLICATION')">[Field Duplication (500x)]</button>
+        </div>
+      </div>
+
+      <!-- Rapid Triage Filters Bar -->
+      <div class="filter-bar">
+        <div class="filter-group-left">
+          <span class="input-label">Severity:</span>
+          <select class="filter-select" id="filterSeverity" onchange="applyFilters()">
+            <option value="ALL">All Severities</option>
+            <option value="HIGH">HIGH (5)</option>
+            <option value="MEDIUM">MEDIUM (3)</option>
+            <option value="LOW">LOW (2)</option>
+            <option value="INFO">INFO (2)</option>
+          </select>
+
+          <span class="input-label">Status Code:</span>
+          <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+            <option value="ALL">All Status Codes</option>
+            <option value="200">200 OK</option>
+            <option value="4xx">4xx Client Error</option>
+            <option value="5xx">5xx Server Error</option>
+          </select>
+
+          <span class="input-label">Search:</span>
+          <input type="text" class="text-input" id="filterSearch" placeholder="Filter title, description, path..." onkeyup="applyFilters()" style="width: 220px;">
+
+          <button class="btn" onclick="resetFilters()">Reset Filters</button>
+        </div>
+
+        <div>
+          <button class="btn" onclick="copyCurlPoc()">Copy cURL PoC</button>
+        </div>
+      </div>
+
+      <!-- Split Container: Findings Table + Request/Response Viewers -->
+      <div class="split-container">
+        <!-- Findings Table -->
+        <div class="table-container">
+          <table id="findingsTable">
+            <thead>
+              <tr>
+                <th style="width: 40px;" onclick="sortTable(0)">#</th>
+                <th style="width: 90px;" onclick="sortTable(1)">Severity</th>
+                <th style="width: 240px;" onclick="sortTable(2)">Finding Title</th>
+                <th style="width: 280px;" onclick="sortTable(3)">Description</th>
+                <th style="width: 200px;" onclick="sortTable(4)">Impact</th>
+                <th style="width: 180px;" onclick="sortTable(5)">Endpoint</th>
+                <th style="width: 70px;" onclick="sortTable(6)">Method</th>
+                <th style="width: 60px;" onclick="sortTable(7)">Status</th>
+                <th style="width: 80px;" onclick="sortTable(8)">Length</th>
+                <th style="width: 70px;" onclick="sortTable(9)">Time</th>
+              </tr>
+            </thead>
+            <tbody id="findingsBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="split-divider"></div>
+
+        <!-- Details Pane -->
+        <div class="details-pane">
+          <!-- Request Box -->
+          <div class="viewer-box">
+            <div class="viewer-header">
+              <span class="viewer-title">Request Editor (Montoya HttpRequestEditor)</span>
+              <div class="sub-sub-tabs">
+                <span class="sub-sub-tab active">Raw</span>
+                <span class="sub-sub-tab">Headers</span>
+                <span class="sub-sub-tab">JSON</span>
+              </div>
+            </div>
+            <div class="viewer-content" id="requestViewerContent">POST /graphql HTTP/1.1
 Host: api.target-app.com
 User-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)
 Content-Type: application/json
@@ -676,20 +856,20 @@ X-GraphQL-Cop-Test: Introspection
 Content-Length: 68
 
 {"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}</div>
-        </div>
-
-        <!-- Response Viewer Box -->
-        <div class="viewer-box">
-          <div class="viewer-header">
-            <span class="viewer-title">Response Editor (Montoya HttpResponseEditor)</span>
-            <div class="sub-tabs">
-              <span class="sub-tab active">Raw</span>
-              <span class="sub-tab">Headers</span>
-              <span class="sub-tab">JSON</span>
-              <span class="sub-tab">Hex</span>
-            </div>
           </div>
-          <div class="viewer-content" id="responseViewerContent">HTTP/1.1 200 OK
+
+          <!-- Response Box -->
+          <div class="viewer-box">
+            <div class="viewer-header">
+              <span class="viewer-title">Response Editor (Montoya HttpResponseEditor)</span>
+              <div class="sub-sub-tabs">
+                <span class="sub-sub-tab active">Raw</span>
+                <span class="sub-sub-tab">Headers</span>
+                <span class="sub-sub-tab">JSON</span>
+                <span class="sub-sub-tab">Hex</span>
+              </div>
+            </div>
+            <div class="viewer-content" id="responseViewerContent">HTTP/1.1 200 OK
 Date: Sat, 24 Oct 2026 12:00:00 GMT
 Content-Type: application/json; charset=utf-8
 Content-Length: 4291
@@ -718,7 +898,180 @@ Connection: keep-alive
     }
   }
 }</div>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- SUB-TAB 2: HTTP HISTORY VIEW -->
+    <div id="viewHistory" class="history-tab-view">
+      <div class="filter-bar">
+        <div class="filter-group-left">
+          <span class="input-label">Filter Probe History:</span>
+          <input type="text" class="text-input" placeholder="Filter by URL, attack probe, status..." onkeyup="filterHistory(this.value)" style="width: 250px;">
+          <button class="btn" onclick="clearHistory()">Clear History</button>
+        </div>
+        <div>
+          <span id="historyStatsDisplay">Probes Dispatched: 12</span>
+        </div>
+      </div>
+
+      <div class="split-container">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th style="width: 70px;">Method</th>
+                <th style="width: 260px;">URL</th>
+                <th style="width: 220px;">Attack Type / Probe Name</th>
+                <th style="width: 60px;">Status</th>
+                <th style="width: 80px;">Length</th>
+                <th style="width: 70px;">Response Time</th>
+                <th style="width: 140px;">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="split-divider"></div>
+
+        <div class="details-pane">
+          <div class="viewer-box">
+            <div class="viewer-header">
+              <span class="viewer-title">History Probe Request (Montoya HttpRequestEditor)</span>
+            </div>
+            <div class="viewer-content" id="histReqViewer">Select a row in HTTP History table above to view raw probe request.</div>
+          </div>
+          <div class="viewer-box">
+            <div class="viewer-header">
+              <span class="viewer-title">History Probe Response (Montoya HttpResponseEditor)</span>
+            </div>
+            <div class="viewer-content" id="histRespViewer">Select a row in HTTP History table above to view server response.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-TAB 3: QUERY & SCHEMA VOYAGER VIEW -->
+    <div id="viewQuery" class="query-tab-view">
+      
+      <!-- Query Toolbar -->
+      <div class="query-toolbar">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn btn-voyager" onclick="openVoyagerDiagram()">[Open GraphQL Voyager Diagram in Browser]</button>
+          <button class="btn" onclick="exportSchemaJson()">[Export Schema JSON]</button>
+          <button class="btn" onclick="exportSchemaSdl()">[Export Schema SDL (.graphql)]</button>
+          <button class="btn" onclick="sendSelectedToRepeater()">[Send to Repeater]</button>
+        </div>
+        <div style="font-size: 11px;">
+          <span>Schema Source: </span>
+          <span class="status-pill active-file" id="schemaSourcePill">Introspection Discovered (18 Types, 42 Fields)</span>
+        </div>
+      </div>
+
+      <!-- Main Query Layout -->
+      <div class="query-main-layout">
+        
+        <!-- Left: Operations Tree Explorer -->
+        <div class="query-tree-panel">
+          <div class="tree-header">Discovered Operations & Types</div>
+          <div class="tree-list">
+            <div class="tree-header" style="font-size: 10px; background-color: var(--bg-hover);">QUERIES (6)</div>
+            <div class="tree-item active" onclick="loadQueryTemplate('getUserProfile')">
+              <span class="tree-badge">QUERY</span>
+              <span>getUserProfile</span>
+            </div>
+            <div class="tree-item" onclick="loadQueryTemplate('listTransactions')">
+              <span class="tree-badge">QUERY</span>
+              <span>listTransactions</span>
+            </div>
+            <div class="tree-item" onclick="loadQueryTemplate('adminGetSystemMetrics')">
+              <span class="tree-badge">QUERY</span>
+              <span>adminGetSystemMetrics</span>
+            </div>
+            <div class="tree-item" onclick="loadQueryTemplate('searchUsers')">
+              <span class="tree-badge">QUERY</span>
+              <span>searchUsers</span>
+            </div>
+            <div class="tree-item" onclick="loadQueryTemplate('getAppSettings')">
+              <span class="tree-badge">QUERY</span>
+              <span>getAppSettings</span>
+            </div>
+
+            <div class="tree-header" style="font-size: 10px; background-color: var(--bg-hover); margin-top: 6px;">MUTATIONS (3)</div>
+            <div class="tree-item" onclick="loadQueryTemplate('updateUserPassword')">
+              <span class="tree-badge" style="color: #f14c4c;">MUT</span>
+              <span>updateUserPassword</span>
+            </div>
+            <div class="tree-item" onclick="loadQueryTemplate('grantAdminRole')">
+              <span class="tree-badge" style="color: #f14c4c;">MUT</span>
+              <span>grantAdminRole</span>
+            </div>
+            <div class="tree-item" onclick="loadQueryTemplate('transferFunds')">
+              <span class="tree-badge" style="color: #f14c4c;">MUT</span>
+              <span>transferFunds</span>
+            </div>
+
+            <div class="tree-header" style="font-size: 10px; background-color: var(--bg-hover); margin-top: 6px;">SUBSCRIPTIONS (2)</div>
+            <div class="tree-item" onclick="loadQueryTemplate('onUserActivity')">
+              <span class="tree-badge" style="color: #a3e635;">SUB</span>
+              <span>onUserActivity</span>
+            </div>
+            <div class="tree-item" onclick="loadQueryTemplate('onSecurityAlert')">
+              <span class="tree-badge" style="color: #a3e635;">SUB</span>
+              <span>onSecurityAlert</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Generated Query Editor & Runner -->
+        <div class="query-editor-panel">
+          <div class="viewer-header">
+            <span class="viewer-title" id="activeOperationTitle">Generated Query: getUserProfile</span>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-accent" onclick="runActiveQuery()">Execute Query</button>
+              <button class="btn" onclick="copyActiveQuery()">Copy Query</button>
+            </div>
+          </div>
+          <div class="split-container">
+            <div class="viewer-content" id="activeQueryEditor" contenteditable="true" style="outline: none;">query getUserProfile {
+  getUserProfile(userId: "1001") {
+    id
+    username
+    email
+    role
+    phoneNumber
+    twoFactorEnabled
+    createdAt
+  }
+}</div>
+            <div class="split-divider"></div>
+            <div class="viewer-box" style="height: 220px;">
+              <div class="viewer-header">
+                <span class="viewer-title">Query Execution Output</span>
+                <span class="status-pill">Status: 200 OK (84 ms)</span>
+              </div>
+              <div class="viewer-content" id="queryResponseViewer">{
+  "data": {
+    "getUserProfile": {
+      "id": "1001",
+      "username": "admin_master",
+      "email": "admin@target-app.com",
+      "role": "SUPER_ADMINISTRATOR",
+      "phoneNumber": "+1-555-0199",
+      "twoFactorEnabled": true,
+      "createdAt": "2026-01-15T08:30:00Z"
+    }
+  }
+}</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -726,11 +1079,11 @@ Connection: keep-alive
     <!-- Footer Bar -->
     <div class="footer-bar">
       <div class="footer-left">
-        <span id="findingsCountDisplay">Findings: 10 total (10 visible)</span>
+        <span id="findingsCountDisplay">Findings: 11 total (11 visible)</span>
         <span id="scanStatusDisplay">Status: Idle</span>
       </div>
       <div>
-        <span>GraphQL Cop Port for Burp Suite (littlespidy) | Montoya API Standard</span>
+        <span>GraphQL Cop & Clairvoyance Port for Burp Suite (littlespidy) | Montoya API Standard</span>
       </div>
     </div>
 
@@ -752,11 +1105,26 @@ Connection: keep-alive
         length: 4291,
         time: "142 ms",
         request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nUser-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)\nContent-Type: application/json\nAuthorization: Bearer eyJhbGciOi...\nX-GraphQL-Cop-Test: Introspection\nContent-Length: 68\n\n{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}`,
-        response: `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 12:00:00 GMT\nContent-Type: application/json; charset=utf-8\nContent-Length: 4291\n\n{\n  "data": {\n    "__schema": {\n      "types": [\n        {\n          "name": "Query",\n          "fields": [\n            { "name": "getUserProfile" },\n            { "name": "listTransactions" },\n            { "name": "adminGetSystemMetrics" }\n          ]\n        }\n      ]\n    }\n  }\n}`,
+        response: `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 12:00:00 GMT\nContent-Type: application/json; charset=utf-8\nContent-Length: 4291\n\n{\n  "data": {\n    "__schema": {\n      "types": [\n        {\n          "name": "Query",\n          "fields": [\n            { "name": "getUserProfile" },\n            { "name": "listTransactions" },\n            { "name": "adminGetSystemMetrics" }\n          ]\n        },\n        {\n          "name": "Mutation",\n          "fields": [\n            { "name": "updateUserPassword" },\n            { "name": "grantAdminRole" }\n          ]\n        }\n      ]\n    }\n  }\n}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOi...' -d '{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}' 'https://api.target-app.com/graphql'`
       },
       {
         id: 2,
+        severity: "HIGH",
+        title: "Clairvoyance Schema Reconstruction",
+        description: "GraphQL Schema Reconstructed via Field Suggestion Oracles",
+        impact: "Information Leakage - 18 types recovered despite Introspection Disabled",
+        endpoint: "/graphql",
+        method: "POST",
+        status: 200,
+        length: 8940,
+        time: "1280 ms",
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Clairvoyance Schema Reconstruction\n\n{"query":"query { __schema { types { name } } }"}`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  "data": {\n    "__schema": {\n      "types": [\n        {"name": "Query"},\n        {"name": "UserProfile"},\n        {"name": "Transaction"},\n        {"name": "SystemMetrics"}\n      ]\n    }\n  }\n}`,
+        curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query { getUserProfile { id username email role } }"}' 'https://api.target-app.com/graphql'`
+      },
+      {
+        id: 3,
         severity: "HIGH",
         title: "Array-based Query Batching",
         description: "Batch queries allowed with 10+ simultaneous queries",
@@ -771,7 +1139,7 @@ Connection: keep-alive
         curl: `curl -X POST -H 'Content-Type: application/json' -d '[{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"}]' 'https://api.target-app.com/graphql'`
       },
       {
-        id: 3,
+        id: 4,
         severity: "HIGH",
         title: "Alias Overloading",
         description: "Alias Overloading with 100+ aliases is allowed",
@@ -786,7 +1154,7 @@ Connection: keep-alive
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { alias0:__typename alias1:__typename alias2:__typename ... alias100:__typename }"}' 'https://api.target-app.com/graphql'`
       },
       {
-        id: 4,
+        id: 5,
         severity: "HIGH",
         title: "Directive Overloading",
         description: "Multiple duplicated directives allowed in a query",
@@ -801,7 +1169,7 @@ Connection: keep-alive
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __typename @aa@aa@aa@aa@aa@aa@aa@aa@aa@aa }"}' 'https://api.target-app.com/graphql'`
       },
       {
-        id: 5,
+        id: 6,
         severity: "MEDIUM",
         title: "GET Method Query Support",
         description: "GraphQL queries allowed using the GET method",
@@ -816,7 +1184,22 @@ Connection: keep-alive
         curl: `curl -X GET 'https://api.target-app.com/graphql?query=query+cop+{__typename}'`
       },
       {
-        id: 6,
+        id: 7,
+        severity: "MEDIUM",
+        title: "Mutation is allowed over GET",
+        description: "GraphQL mutations allowed using the GET method",
+        impact: "Possible Cross Site Request Forgery (CSRF) - /graphql",
+        endpoint: "/graphql",
+        method: "GET",
+        status: 200,
+        length: 42,
+        time: "88 ms",
+        request: `GET /graphql?query=mutation+cop+{__typename} HTTP/1.1\nHost: api.target-app.com\nX-GraphQL-Cop-Test: Mutation is allowed over GET`,
+        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Mutation"}}`,
+        curl: `curl -X GET 'https://api.target-app.com/graphql?query=mutation+cop+{__typename}'`
+      },
+      {
+        id: 8,
         severity: "MEDIUM",
         title: "POST based url-encoded query",
         description: "GraphQL accepts non-JSON queries over POST",
@@ -831,7 +1214,7 @@ Connection: keep-alive
         curl: `curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d 'query=query+cop+{+__typename+}' 'https://api.target-app.com/graphql'`
       },
       {
-        id: 7,
+        id: 9,
         severity: "LOW",
         title: "GraphQL IDE",
         description: "GraphiQL Explorer/Playground Enabled",
@@ -846,7 +1229,7 @@ Connection: keep-alive
         curl: `curl -X GET -H 'Accept: text/html' 'https://api.target-app.com/graphiql'`
       },
       {
-        id: 8,
+        id: 10,
         severity: "LOW",
         title: "Field Suggestions",
         description: "Field Suggestions are Enabled",
@@ -861,7 +1244,7 @@ Connection: keep-alive
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __schema { directive } }"}' 'https://api.target-app.com/graphql'`
       },
       {
-        id: 9,
+        id: 11,
         severity: "INFO",
         title: "Trace Mode",
         description: "Tracing is Enabled",
@@ -874,26 +1257,124 @@ Connection: keep-alive
         request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Trace Mode\n\n{"query":"query cop { __typename }"}`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Query"},"extensions":{"tracing":{"version":1,"startTime":"2026-10-24T12:00:00.000Z","endTime":"2026-10-24T12:00:00.130Z","duration":130000000}}}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __typename }"}' 'https://api.target-app.com/graphql'`
-      },
-      {
-        id: 10,
-        severity: "INFO",
-        title: "Unhandled Errors Detection",
-        description: "Exception errors are not handled",
-        impact: "Information Leakage - /graphql",
-        endpoint: "/graphql",
-        method: "POST",
-        status: 200,
-        length: 512,
-        time: "98 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Unhandled Errors Detection\n\n{"query":"qwerty cop { abc }"}`,
-        response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"errors":[{"message":"Syntax Error: Unexpected Name 'qwerty'","extensions":{"exception":{"stacktrace":["SyntaxError: Unexpected Name 'qwerty'","    at syntaxError (/app/node_modules/graphql/error/syntaxError.js:15:10)"]}}}]}`,
-        curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"qwerty cop { abc }"}' 'https://api.target-app.com/graphql'`
       }
     ];
 
+    const historyData = [
+      { id: 1, method: "POST", url: "https://api.target-app.com/graphql", probe: "Introspection Query", status: 200, length: 4291, time: "142 ms", ts: "12:00:01.120", req: findingsData[0].request, resp: findingsData[0].response },
+      { id: 2, method: "GET", url: "https://api.target-app.com/graphiql", probe: "GraphiQL IDE Interface", status: 200, length: 8312, time: "115 ms", ts: "12:00:01.280", req: findingsData[8].request, resp: findingsData[8].response },
+      { id: 3, method: "POST", url: "https://api.target-app.com/graphql", probe: "Field Suggestions", status: 200, length: 154, time: "105 ms", ts: "12:00:01.410", req: findingsData[9].request, resp: findingsData[9].response },
+      { id: 4, method: "POST", url: "https://api.target-app.com/graphql", probe: "Clairvoyance Type Oracle (user)", status: 200, length: 182, time: "110 ms", ts: "12:00:01.550", req: findingsData[1].request, resp: findingsData[1].response },
+      { id: 5, method: "GET", url: "https://api.target-app.com/graphql?query=...", probe: "GET Method Query Support", status: 200, length: 42, time: "85 ms", ts: "12:00:01.680", req: findingsData[5].request, resp: findingsData[5].response },
+      { id: 6, method: "GET", url: "https://api.target-app.com/graphql?query=mutation...", probe: "GET Mutation Support (CSRF)", status: 200, length: 42, time: "88 ms", ts: "12:00:01.780", req: findingsData[6].request, resp: findingsData[6].response },
+      { id: 7, method: "POST", url: "https://api.target-app.com/graphql", probe: "POST Url-Encoded Query (CSRF)", status: 200, length: 42, time: "92 ms", ts: "12:00:01.890", req: findingsData[7].request, resp: findingsData[7].response },
+      { id: 8, method: "POST", url: "https://api.target-app.com/graphql", probe: "Trace Mode Detection", status: 200, length: 712, time: "130 ms", ts: "12:00:02.010", req: findingsData[10].request, resp: findingsData[10].response },
+      { id: 9, method: "POST", url: "https://api.target-app.com/graphql", probe: "Array Batching (10+)", status: 200, length: 1250, time: "320 ms", ts: "12:00:02.340", req: findingsData[2].request, resp: findingsData[2].response },
+      { id: 10, method: "POST", url: "https://api.target-app.com/graphql", probe: "Alias Overloading (100+)", status: 200, length: 2840, time: "480 ms", ts: "12:00:02.840", req: findingsData[3].request, resp: findingsData[3].response },
+      { id: 11, method: "POST", url: "https://api.target-app.com/graphql", probe: "Directive Overloading", status: 200, length: 980, time: "210 ms", ts: "12:00:03.060", req: findingsData[4].request, resp: findingsData[4].response },
+      { id: 12, method: "POST", url: "https://api.target-app.com/graphql", probe: "Circular Query Introspection", status: 200, length: 4510, time: "310 ms", ts: "12:00:03.380", req: findingsData[0].request, resp: findingsData[0].response }
+    ];
+
+    const queryTemplates = {
+      getUserProfile: `query getUserProfile {
+  getUserProfile(userId: "1001") {
+    id
+    username
+    email
+    role
+    phoneNumber
+    twoFactorEnabled
+    createdAt
+  }
+}`,
+      listTransactions: `query listTransactions {
+  listTransactions(limit: 10, offset: 0) {
+    id
+    amount
+    currency
+    status
+    recipientId
+    createdAt
+  }
+}`,
+      adminGetSystemMetrics: `query adminGetSystemMetrics {
+  adminGetSystemMetrics {
+    activeConnections
+    cpuUtilization
+    memoryUsageBytes
+    databaseLatencyMs
+    secretsCount
+  }
+}`,
+      searchUsers: `query searchUsers {
+  searchUsers(keyword: "admin") {
+    id
+    username
+    role
+  }
+}`,
+      getAppSettings: `query getAppSettings {
+  getAppSettings {
+    siteName
+    allowRegistration
+    maintenanceMode
+  }
+}`,
+      updateUserPassword: `mutation updateUserPassword {
+  updateUserPassword(userId: "1001", newPassword: "Password123!") {
+    success
+    message
+  }
+}`,
+      grantAdminRole: `mutation grantAdminRole {
+  grantAdminRole(targetUserId: "1001") {
+    success
+    assignedRole
+  }
+}`,
+      transferFunds: `mutation transferFunds {
+  transferFunds(fromAccount: "ACC-01", toAccount: "ACC-99", amount: 5000) {
+    transactionId
+    status
+  }
+}`,
+      onUserActivity: `subscription onUserActivity {
+  onUserActivity(userId: "1001") {
+    event
+    ipAddress
+    timestamp
+  }
+}`,
+      onSecurityAlert: `subscription onSecurityAlert {
+  onSecurityAlert {
+    alertId
+    severity
+    description
+  }
+}`
+    };
+
     let currentSelectedFinding = findingsData[0];
-    let isScanning = false;
+    let currentActiveQuery = 'getUserProfile';
+
+    function switchSubTab(tabName) {
+      document.querySelectorAll(".sub-tab-item").forEach(t => t.classList.remove("active"));
+      document.getElementById("viewAttack").style.display = "none";
+      document.getElementById("viewHistory").style.display = "none";
+      document.getElementById("viewQuery").style.display = "none";
+
+      if (tabName === "attack") {
+        document.getElementById("subTabAttack").classList.add("active");
+        document.getElementById("viewAttack").style.display = "flex";
+      } else if (tabName === "history") {
+        document.getElementById("subTabHistory").classList.add("active");
+        document.getElementById("viewHistory").style.display = "flex";
+        renderHistoryTable(historyData);
+      } else if (tabName === "query") {
+        document.getElementById("subTabQuery").classList.add("active");
+        document.getElementById("viewQuery").style.display = "flex";
+      }
+    }
 
     function renderTable(items) {
       const tbody = document.getElementById("findingsBody");
@@ -939,6 +1420,102 @@ Connection: keep-alive
 
       document.getElementById("requestViewerContent").innerText = item.request;
       document.getElementById("responseViewerContent").innerText = item.response;
+    }
+
+    function renderHistoryTable(items) {
+      const tbody = document.getElementById("historyTableBody");
+      tbody.innerHTML = "";
+
+      items.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.className = index % 2 === 0 ? "even" : "odd";
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td style="font-weight: 600;">${item.method}</td>
+          <td>${item.url}</td>
+          <td>${item.probe}</td>
+          <td>${item.status}</td>
+          <td>${item.length} B</td>
+          <td>${item.time}</td>
+          <td>${item.ts}</td>
+        `;
+        tr.onclick = () => {
+          document.querySelectorAll("#historyTableBody tr").forEach(r => r.classList.remove("selected"));
+          tr.classList.add("selected");
+          document.getElementById("histReqViewer").innerText = item.req;
+          document.getElementById("histRespViewer").innerText = item.resp;
+        };
+        tbody.appendChild(tr);
+      });
+      document.getElementById("historyStatsDisplay").innerText = `Probes Dispatched: ${items.length}`;
+    }
+
+    function filterHistory(query) {
+      const q = query.toLowerCase().trim();
+      const filtered = historyData.filter(h => 
+        h.url.toLowerCase().includes(q) ||
+        h.probe.toLowerCase().includes(q) ||
+        String(h.status).includes(q)
+      );
+      renderHistoryTable(filtered);
+    }
+
+    function clearHistory() {
+      renderHistoryTable([]);
+      document.getElementById("histReqViewer").innerText = "";
+      document.getElementById("histRespViewer").innerText = "";
+    }
+
+    function runAttack(attackType) {
+      const status = document.getElementById("scanStatusDisplay");
+      status.innerText = `Status: Executing attack probe: [${attackType}]...`;
+      setTimeout(() => {
+        status.innerText = `Status: Attack probe [${attackType}] executed successfully. Findings refreshed.`;
+        alert(`Executed attack probe: ${attackType}\nTarget: https://api.target-app.com/graphql\nFindings and HTTP History updated.`);
+      }, 500);
+    }
+
+    function loadQueryTemplate(opName) {
+      currentActiveQuery = opName;
+      document.querySelectorAll(".tree-item").forEach(item => {
+        if (item.innerText.includes(opName)) item.classList.add("active");
+        else item.classList.remove("active");
+      });
+      document.getElementById("activeOperationTitle").innerText = "Generated Operation: " + opName;
+      document.getElementById("activeQueryEditor").innerText = queryTemplates[opName] || "";
+    }
+
+    function runActiveQuery() {
+      const resp = document.getElementById("queryResponseViewer");
+      resp.innerText = "Executing query against target...";
+      setTimeout(() => {
+        resp.innerText = `{\n  "data": {\n    "${currentActiveQuery}": {\n      "status": "success",\n      "executedAt": "${new Date().toISOString()}",\n      "result": "Query executed cleanly via Montoya HTTP client."\n    }\n  }\n}`;
+      }, 300);
+    }
+
+    function copyActiveQuery() {
+      const text = document.getElementById("activeQueryEditor").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Query copied to clipboard!");
+      });
+    }
+
+    function openVoyagerDiagram() {
+      const url = "https://apis.guru/graphql-voyager/";
+      alert("Triggering browser launch via xdg-open for GraphQL Voyager diagram.\n\nGenerating standalone schema visualizer HTML...");
+      window.open(url, "_blank");
+    }
+
+    function exportSchemaJson() {
+      alert("Exported full GraphQL introspection schema JSON to /home/littlespidy/schema.json");
+    }
+
+    function exportSchemaSdl() {
+      alert("Exported reconstructed GraphQL SDL schema to /home/littlespidy/schema.graphql");
+    }
+
+    function sendSelectedToRepeater() {
+      alert("Dispatched active GraphQL operation to Burp Suite Repeater tab!");
     }
 
     function applyFilters() {
@@ -990,30 +1567,6 @@ Connection: keep-alive
         btn.innerText = "Theme: Light";
       } else {
         btn.innerText = "Theme: Dark";
-      }
-    }
-
-    function toggleScan() {
-      const btn = document.getElementById("runScanBtn");
-      const status = document.getElementById("scanStatusDisplay");
-      if (!isScanning) {
-        isScanning = true;
-        btn.innerText = "Stop Audit";
-        btn.classList.remove("btn-accent");
-        status.innerText = "Status: Auditing GraphQL endpoints...";
-        setTimeout(() => {
-          if (isScanning) {
-            isScanning = false;
-            btn.innerText = "Run Audit";
-            btn.classList.add("btn-accent");
-            status.innerText = "Status: Scan completed. 10 findings discovered.";
-          }
-        }, 2000);
-      } else {
-        isScanning = false;
-        btn.innerText = "Run Audit";
-        btn.classList.add("btn-accent");
-        status.innerText = "Status: Audit cancelled by user.";
       }
     }
 
@@ -1129,13 +1682,13 @@ Connection: keep-alive
     }
 
     function showInfoDialog() {
-      alert("GraphQL Cop Burp Extension (littlespidy)\n\nMontoya API Standard Extension\nConverted from CLI graphql-cop\nFeatures: 13 Tests, Multi-session tabs, In-place renaming, Rapid triage filters, Session persistence.");
+      alert("GraphQL Cop & Clairvoyance Burp Extension (littlespidy)\n\nMontoya API Standard Extension\nIntegrates:\n- GraphQL Cop (13 Auditing Attacks)\n- Clairvoyance (Schema Reconstruction Oracle)\n- GraphQL Voyager Visualizer\n- Dynamic Multi-Session Tabs (Attack, HTTP History, Query)");
     }
 
-    // Initial render
     window.onload = () => {
       renderTable(findingsData);
       selectFinding(findingsData[0]);
+      renderHistoryTable(historyData);
     };
   </script>
 </body>
