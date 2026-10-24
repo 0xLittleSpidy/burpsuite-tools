@@ -165,8 +165,8 @@
       color: var(--text-bright);
     }
 
-    /* Domain Tabs (Parent Tabs) */
-    .domain-tabs-bar {
+    /* Parent Tabs Bar (Configuration + Dedicated Domain Tabs) */
+    .parent-tabs-bar {
       background-color: var(--bg-darker);
       display: flex;
       align-items: center;
@@ -175,7 +175,7 @@
       gap: 2px;
       overflow-x: auto;
     }
-    .domain-tab {
+    .parent-tab {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -190,10 +190,10 @@
       user-select: none;
       white-space: nowrap;
     }
-    .domain-tab:hover {
+    .parent-tab:hover {
       color: var(--text-bright);
     }
-    .domain-tab.active {
+    .parent-tab.active {
       background-color: var(--bg-dark);
       color: var(--text-bright);
       border-top: 2px solid var(--accent);
@@ -201,10 +201,10 @@
       margin-bottom: -1px;
       font-weight: 600;
     }
-    .domain-tab-title {
+    .parent-tab-title {
       cursor: pointer;
     }
-    .domain-tab-close {
+    .parent-tab-close {
       background: none;
       border: none;
       color: var(--text-muted);
@@ -214,7 +214,7 @@
       padding: 0 2px;
       line-height: 1;
     }
-    .domain-tab-close:hover {
+    .parent-tab-close:hover {
       color: var(--badge-error);
     }
     .btn-add-domain-tab {
@@ -272,14 +272,14 @@
       color: #ffffff;
     }
 
-    /* Main Domain Workspace */
-    .domain-content {
+    /* Parent Tab Content Panels */
+    .parent-tab-content {
       flex: 1;
       display: none;
       flex-direction: column;
       overflow: hidden;
     }
-    .domain-content.active {
+    .parent-tab-content.active {
       display: flex;
     }
 
@@ -292,7 +292,7 @@
       gap: 8px;
     }
 
-    /* Control Panel / Toolbar */
+    /* Control Panel */
     .control-panel {
       background-color: var(--bg-card);
       border: 1px solid var(--border);
@@ -563,7 +563,7 @@
       font-size: 10px;
     }
 
-    /* PARALLEL (SIDE-BY-SIDE) REQUEST & RESPONSE INSPECTOR */
+    /* PARALLEL SIDE-BY-SIDE REQUEST & RESPONSE INSPECTOR */
     .parallel-inspector-pane {
       height: 250px;
       display: flex;
@@ -639,38 +639,44 @@
       min-width: 180px;
     }
 
-    /* Settings Tab */
-    .settings-grid {
+    /* Configuration Parent Tab Styling */
+    .config-workspace {
+      flex: 1;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    .config-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      overflow-y: auto;
-      flex: 1;
+      gap: 12px;
     }
-    .settings-card {
+    .config-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 3px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
-    .settings-card-title {
+    .config-card-title {
       font-size: 12px;
       font-weight: 600;
       color: var(--text-bright);
       border-bottom: 1px solid var(--border);
-      padding-bottom: 4px;
+      padding-bottom: 5px;
     }
     .signature-list {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      max-height: 180px;
+      max-height: 220px;
       overflow-y: auto;
       border: 1px solid var(--border);
-      padding: 4px;
+      padding: 6px;
       border-radius: 2px;
       background-color: var(--input-bg);
     }
@@ -678,12 +684,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 3px 6px;
+      padding: 4px 8px;
       background-color: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 2px;
       font-family: monospace;
-      font-size: 10px;
+      font-size: 11px;
     }
     .btn-icon-del {
       background: none;
@@ -692,6 +698,38 @@
       cursor: pointer;
       font-size: 10px;
       font-weight: bold;
+    }
+
+    /* Custom Right-Click Context Menu Mockup */
+    .context-menu-popup {
+      position: absolute;
+      display: none;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      border-radius: 3px;
+      padding: 4px 0;
+      z-index: 2000;
+      min-width: 170px;
+    }
+    .context-menu-item {
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-bright);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .context-menu-item:hover {
+      background-color: var(--bg-selected);
+      color: #ffffff;
+    }
+    .context-menu-separator {
+      height: 1px;
+      background-color: var(--border);
+      margin: 3px 0;
     }
 
     /* Toast Notification */
@@ -707,7 +745,7 @@
       font-size: 11px;
       display: none;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      z-index: 1000;
+      z-index: 3000;
     }
 
     /* Footer Status Bar */
@@ -732,9 +770,6 @@
     .status-indicator.scanning {
       background-color: var(--accent);
       box-shadow: 0 0 5px var(--accent);
-    }
-    .status-indicator.stopped {
-      background-color: var(--badge-error);
     }
   </style>
 </head>
@@ -779,25 +814,94 @@
     </div>
   </div>
 
-  <!-- Dedicated Domain Tabs (Parent Tabs) -->
-  <div class="domain-tabs-bar" id="domainTabsContainer">
-    <div class="domain-tab active" id="tab-dom-1" onclick="switchDomainTab('domain-panel-1', this)">
-      <span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#1 testphp.vulnweb.com</span>
-      <button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('tab-dom-1', 'domain-panel-1')">x</button>
+  <!-- Parent Tabs Bar: Global Configuration + Dedicated Domain Tabs -->
+  <div class="parent-tabs-bar" id="parentTabsContainer">
+    <!-- Common Configuration Tab (Global, Persistent) -->
+    <div class="parent-tab" id="tab-config" onclick="switchParentTab('panel-config', this)">
+      <span class="parent-tab-title">Configuration</span>
     </div>
-    <div class="domain-tab" id="tab-dom-2" onclick="switchDomainTab('domain-panel-2', this)">
-      <span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#2 api.vulnweb.com</span>
-      <button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('tab-dom-2', 'domain-panel-2')">x</button>
+
+    <!-- Domain Scan Tabs -->
+    <div class="parent-tab active" id="tab-dom-1" onclick="switchParentTab('domain-panel-1', this)">
+      <span class="parent-tab-title" ondblclick="editParentTabTitle(this)">#1 testphp.vulnweb.com</span>
+      <button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('tab-dom-1', 'domain-panel-1')">x</button>
     </div>
-    <div class="domain-tab" id="tab-dom-3" onclick="switchDomainTab('domain-panel-3', this)">
-      <span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#3 admin.vulnweb.com</span>
-      <button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('tab-dom-3', 'domain-panel-3')">x</button>
+    <div class="parent-tab" id="tab-dom-2" onclick="switchParentTab('domain-panel-2', this)">
+      <span class="parent-tab-title" ondblclick="editParentTabTitle(this)">#2 api.vulnweb.com</span>
+      <button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('tab-dom-2', 'domain-panel-2')">x</button>
     </div>
+
     <button class="btn-add-domain-tab" onclick="addNewDomainPrompt()">+ New Domain Scan</button>
   </div>
 
-  <!-- DOMAIN PANEL 1: testphp.vulnweb.com (Active) -->
-  <div class="domain-content active" id="domain-panel-1">
+  <!-- GLOBAL CONFIGURATION PARENT TAB -->
+  <div class="parent-tab-content" id="panel-config">
+    <div class="config-workspace">
+      <div class="config-grid">
+        <!-- Detection Signatures Card -->
+        <div class="config-card">
+          <div class="config-card-title">Directory Listing Detection Signatures (Common to All Scans)</div>
+          <p style="font-size: 11px; color: var(--text-muted);">Responses containing any of these substrings when returning HTTP 200 will be flagged as open directory listings across all domains.</p>
+          <div class="signature-list" id="signatureListContainer">
+            <div class="signature-item"><span>Index of /</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Directory Listing for</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>&lt;title&gt;Index of</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Parent Directory&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Last modified&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Name&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Size&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Description&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="newSigInput" class="text-input" style="min-width: 140px; flex: 1;" placeholder="New signature substring">
+            <button class="btn btn-secondary" onclick="addSignature()">Add</button>
+            <button class="btn btn-secondary" onclick="resetSignatures()">Reset Defaults</button>
+          </div>
+        </div>
+
+        <!-- Global Engine & Network Settings Card -->
+        <div class="config-card">
+          <div class="config-card-title">Wayback CDX &amp; HTTP Settings (Common)</div>
+          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span class="input-label">Wayback Machine CDX API URL Template:</span>
+            <input type="text" class="text-input" style="width: 100%;" value="https://web.archive.org/cdx/search/cdx?url={DOMAIN}&amp;output=txt&amp;fl=original&amp;collapse=urlkey">
+          </div>
+          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span class="input-label">Custom User-Agent:</span>
+            <input type="text" class="text-input" style="width: 100%;" value="WaybackLister/2.0 (BurpSuite-Extension-littlespidy)">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <div class="input-group">
+              <span class="input-label">CDX Retries:</span>
+              <input type="number" class="number-input" value="3" min="1" max="10">
+            </div>
+            <div class="input-group">
+              <span class="input-label">Retry Backoff (s):</span>
+              <input type="number" class="number-input" value="5" min="1" max="30">
+            </div>
+          </div>
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Test both HTTP and HTTPS protocols for each path
+            </label>
+          </div>
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Honor Burp Suite upstream proxies and SOCKS settings
+            </label>
+          </div>
+          <div style="margin-top: auto;">
+            <button class="btn btn-primary" onclick="triggerToast('Configuration saved successfully')">Save Configuration</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOMAIN PANEL 1: testphp.vulnweb.com (Active Parent Tab) -->
+  <div class="parent-tab-content active" id="domain-panel-1">
     
     <!-- Child Sub-tabs Bar inside testphp.vulnweb.com -->
     <div class="child-tabs-bar">
@@ -812,9 +916,6 @@
       <div class="child-tab" onclick="switchChildTab('panel1-tab-subdomains', this, 'domain-panel-1')">
         Discovered Subdomains
         <span class="badge-count">7</span>
-      </div>
-      <div class="child-tab" onclick="switchChildTab('panel1-tab-settings', this, 'domain-panel-1')">
-        Settings &amp; Signatures
       </div>
     </div>
 
@@ -912,27 +1013,26 @@
         <div class="filter-bar">
           <span class="input-label">Filter Findings:</span>
           <input type="text" class="search-input" placeholder="Filter by host, path, signature..." onkeyup="filterTable(this, 'panel1-findingsTable')">
-          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Select any row to inspect parallel HTTP Request &amp; Response side-by-side</span>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click any row for context menu (Send to Repeater, Intruder, etc.)</span>
         </div>
 
         <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
-          <!-- Table -->
+          <!-- Table: NO Action Column! Right-click triggers context menu -->
           <div class="table-container">
             <table id="panel1-findingsTable">
               <thead>
                 <tr>
                   <th style="width: 40px;">#</th>
                   <th style="width: 65px;">Protocol</th>
-                  <th style="width: 170px;">Host</th>
+                  <th style="width: 180px;">Host</th>
                   <th>Exposed Directory Path</th>
-                  <th style="width: 70px;">Status</th>
-                  <th style="width: 160px;">Matched Signature</th>
-                  <th style="width: 80px;">Length</th>
-                  <th style="width: 140px;">Actions</th>
+                  <th style="width: 75px;">Status</th>
+                  <th style="width: 170px;">Matched Signature</th>
+                  <th style="width: 90px;">Length</th>
                 </tr>
               </thead>
               <tbody>
-                <tr class="odd selected" onclick="selectFindingRow(this, 1)">
+                <tr class="odd selected" onclick="selectFindingRow(this, 1)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/admin/')">
                   <td>1</td>
                   <td>HTTP</td>
                   <td>testphp.vulnweb.com</td>
@@ -940,12 +1040,8 @@
                   <td><span class="status-tag status-200">200 OK</span></td>
                   <td><span class="signature-badge">Index of /admin</span></td>
                   <td>4,218 B</td>
-                  <td>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /admin/ to Repeater')">Repeater</button>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /admin/ to Intruder')">Intruder</button>
-                  </td>
                 </tr>
-                <tr class="even" onclick="selectFindingRow(this, 2)">
+                <tr class="even" onclick="selectFindingRow(this, 2)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/secured/')">
                   <td>2</td>
                   <td>HTTP</td>
                   <td>testphp.vulnweb.com</td>
@@ -953,12 +1049,8 @@
                   <td><span class="status-tag status-200">200 OK</span></td>
                   <td><span class="signature-badge">&lt;title&gt;Index of</span></td>
                   <td>1,842 B</td>
-                  <td>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /secured/ to Repeater')">Repeater</button>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /secured/ to Intruder')">Intruder</button>
-                  </td>
                 </tr>
-                <tr class="odd" onclick="selectFindingRow(this, 3)">
+                <tr class="odd" onclick="selectFindingRow(this, 3)" oncontextmenu="showFindingsContextMenu(event, 'https://testphp.vulnweb.com/images/')">
                   <td>3</td>
                   <td>HTTPS</td>
                   <td>testphp.vulnweb.com</td>
@@ -966,12 +1058,8 @@
                   <td><span class="status-tag status-200">200 OK</span></td>
                   <td><span class="signature-badge">Parent Directory&lt;/a&gt;</span></td>
                   <td>6,712 B</td>
-                  <td>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /images/ to Repeater')">Repeater</button>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /images/ to Intruder')">Intruder</button>
-                  </td>
                 </tr>
-                <tr class="even" onclick="selectFindingRow(this, 4)">
+                <tr class="even" onclick="selectFindingRow(this, 4)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/backup/')">
                   <td>4</td>
                   <td>HTTP</td>
                   <td>testphp.vulnweb.com</td>
@@ -979,10 +1067,6 @@
                   <td><span class="status-tag status-200">200 OK</span></td>
                   <td><span class="signature-badge">Last modified&lt;/a&gt;</span></td>
                   <td>3,105 B</td>
-                  <td>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /backup/ to Repeater')">Repeater</button>
-                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /backup/ to Intruder')">Intruder</button>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1056,6 +1140,7 @@ Connection: close
           <input type="text" class="search-input" placeholder="Filter paths e.g. /api, .php, /admin..." onkeyup="filterTable(this, 'panel1-pathsTable')">
           <button class="btn btn-secondary" onclick="triggerToast('Exported paths for testphp.vulnweb.com')">Export Paths</button>
           <button class="btn btn-secondary" onclick="triggerToast('Submitted 186 paths to Burp Site Map')">Send All to Site Map</button>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click row to Re-test, Send to Repeater, or Add to Site Map</span>
         </div>
 
         <div class="table-container">
@@ -1065,67 +1150,59 @@ Connection: close
                 <th style="width: 50px;">#</th>
                 <th style="width: 220px;">Target Host</th>
                 <th>Archived Path Prefix</th>
-                <th style="width: 120px;">Probe Status</th>
-                <th style="width: 120px;">Directory Result</th>
-                <th style="width: 100px;">Actions</th>
+                <th style="width: 140px;">Probe Status</th>
+                <th style="width: 140px;">Directory Result</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="odd">
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/admin/')">
                 <td>1</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/admin/</td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-200">Open Listing</span></td>
-                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /admin/')">Re-test</button></td>
               </tr>
-              <tr class="even">
+              <tr class="even" oncontextmenu="showPathsContextMenu(event, '/secured/')">
                 <td>2</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/secured/</td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-200">Open Listing</span></td>
-                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /secured/')">Re-test</button></td>
               </tr>
-              <tr class="odd">
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/images/')">
                 <td>3</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/images/</td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-200">Open Listing</span></td>
-                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /images/')">Re-test</button></td>
               </tr>
-              <tr class="even">
+              <tr class="even" oncontextmenu="showPathsContextMenu(event, '/backup/')">
                 <td>4</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/backup/</td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-200">Open Listing</span></td>
-                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /backup/')">Re-test</button></td>
               </tr>
-              <tr class="odd">
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/cart/')">
                 <td>5</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/cart/</td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-403">Normal Page</span></td>
-                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /cart/')">Re-test</button></td>
               </tr>
-              <tr class="even">
+              <tr class="even" oncontextmenu="showPathsContextMenu(event, '/categories/')">
                 <td>6</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/categories/</td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-403">Normal Page</span></td>
-                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /categories/')">Re-test</button></td>
               </tr>
-              <tr class="odd">
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/login.php')">
                 <td>7</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/login.php</td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-403">Not Directory</span></td>
-                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /login.php')">Re-test</button></td>
               </tr>
             </tbody>
           </table>
@@ -1138,6 +1215,7 @@ Connection: close
           <span class="input-label">Discovered Subdomains (Wayback CDX):</span>
           <button class="btn btn-secondary" onclick="triggerToast('Added all subdomains to Burp Target Scope')">Add All to Burp Scope</button>
           <button class="btn btn-secondary" onclick="triggerToast('Exported subdomain list')">Export Subdomains</button>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click row to Scan in Dedicated Tab or Add to Scope</span>
         </div>
 
         <div class="table-container">
@@ -1146,128 +1224,55 @@ Connection: close
               <tr>
                 <th style="width: 45px;">#</th>
                 <th>Discovered Subdomain</th>
-                <th style="width: 140px;">Archived Paths Found</th>
-                <th style="width: 140px;">Scan Status</th>
-                <th style="width: 200px;">Actions</th>
+                <th style="width: 160px;">Archived Paths Found</th>
+                <th style="width: 160px;">Scan Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="odd">
+              <tr class="odd" oncontextmenu="showSubdomainsContextMenu(event, 'testphp.vulnweb.com')">
                 <td>1</td>
                 <td>testphp.vulnweb.com</td>
                 <td>186 paths</td>
                 <td><span class="status-tag status-301">Scanning (66%)</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Active tab')">Current Tab</button>
-                </td>
               </tr>
-              <tr class="even">
+              <tr class="even" oncontextmenu="showSubdomainsContextMenu(event, 'api.vulnweb.com')">
                 <td>2</td>
                 <td>api.vulnweb.com</td>
                 <td>42 paths</td>
                 <td><span class="status-tag status-200">Completed (1 Listing)</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="switchToDomain('tab-dom-2', 'domain-panel-2')">Switch to Tab #2</button>
-                </td>
               </tr>
-              <tr class="odd">
+              <tr class="odd" oncontextmenu="showSubdomainsContextMenu(event, 'admin.vulnweb.com')">
                 <td>3</td>
                 <td>admin.vulnweb.com</td>
                 <td>18 paths</td>
                 <td><span class="status-tag status-403">Queued</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="switchToDomain('tab-dom-3', 'domain-panel-3')">Switch to Tab #3</button>
-                </td>
               </tr>
-              <tr class="even">
+              <tr class="even" oncontextmenu="showSubdomainsContextMenu(event, 'dev.vulnweb.com')">
                 <td>4</td>
                 <td>dev.vulnweb.com</td>
                 <td>29 paths</td>
                 <td><span class="status-tag status-403">Queued</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="addSpecificDomainTab('dev.vulnweb.com')">Scan in Dedicated Tab</button>
-                </td>
               </tr>
-              <tr class="odd">
+              <tr class="odd" oncontextmenu="showSubdomainsContextMenu(event, 'staging.vulnweb.com')">
                 <td>5</td>
                 <td>staging.vulnweb.com</td>
                 <td>15 paths</td>
                 <td><span class="status-tag status-403">Queued</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="addSpecificDomainTab('staging.vulnweb.com')">Scan in Dedicated Tab</button>
-                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- CHILD TAB 4: Settings & Signatures -->
-      <div id="panel1-tab-settings" class="child-tab-content">
-        <div class="settings-grid">
-          <div class="settings-card">
-            <div class="settings-card-title">Directory Listing Detection Signatures</div>
-            <p style="font-size: 11px; color: var(--text-muted);">Responses containing any of these substrings when returning HTTP 200 will be flagged as open directory listings.</p>
-            <div class="signature-list" id="signatureListContainer">
-              <div class="signature-item"><span>Index of /</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-              <div class="signature-item"><span>Directory Listing for</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-              <div class="signature-item"><span>&lt;title&gt;Index of</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-              <div class="signature-item"><span>Parent Directory&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-              <div class="signature-item"><span>Last modified&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-              <div class="signature-item"><span>Name&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-              <div class="signature-item"><span>Size&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-              <div class="signature-item"><span>Description&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
-            </div>
-            <div style="display: flex; gap: 6px;">
-              <input type="text" id="newSigInput" class="text-input" style="min-width: 140px; flex: 1;" placeholder="New signature substring">
-              <button class="btn btn-secondary" onclick="addSignature()">Add</button>
-              <button class="btn btn-secondary" onclick="resetSignatures()">Reset</button>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <div class="settings-card-title">Wayback CDX &amp; HTTP Settings</div>
-            <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-              <span class="input-label">CDX API Template:</span>
-              <input type="text" class="text-input" style="width: 100%;" value="https://web.archive.org/cdx/search/cdx?url={DOMAIN}&amp;output=txt&amp;fl=original&amp;collapse=urlkey">
-            </div>
-            <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-              <span class="input-label">Custom User-Agent:</span>
-              <input type="text" class="text-input" style="width: 100%;" value="WaybackLister/2.0 (BurpSuite-Extension-littlespidy)">
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <div class="input-group">
-                <span class="input-label">CDX Retries:</span>
-                <input type="number" class="number-input" value="3" min="1" max="10">
-              </div>
-              <div class="input-group">
-                <span class="input-label">Retry Backoff (s):</span>
-                <input type="number" class="number-input" value="5" min="1" max="30">
-              </div>
-            </div>
-            <div class="input-group">
-              <label class="checkbox-label">
-                <input type="checkbox" checked>
-                Test both HTTP and HTTPS protocols for each path
-              </label>
-            </div>
-            <div style="margin-top: auto;">
-              <button class="btn btn-primary" onclick="triggerToast('Settings saved')">Save Settings</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
-  <!-- DOMAIN PANEL 2: api.vulnweb.com (Simulated Second Domain Tab) -->
-  <div class="domain-content" id="domain-panel-2">
+  <!-- DOMAIN PANEL 2: api.vulnweb.com (Simulated Second Parent Tab) -->
+  <div class="parent-tab-content" id="domain-panel-2">
     <div class="child-tabs-bar">
       <div class="child-tab active">Directory Listings <span class="badge-count found">1</span></div>
       <div class="child-tab">Discovered Paths <span class="badge-count">42</span></div>
       <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
-      <div class="child-tab">Settings &amp; Signatures</div>
     </div>
     <div class="main-workspace">
       <div class="control-panel">
@@ -1292,13 +1297,12 @@ Connection: close
       <div class="table-container">
         <table>
           <thead>
-            <tr><th>#</th><th>Protocol</th><th>Host</th><th>Exposed Directory Path</th><th>Status</th><th>Matched Signature</th><th>Length</th><th>Actions</th></tr>
+            <tr><th>#</th><th>Protocol</th><th>Host</th><th>Exposed Directory Path</th><th>Status</th><th>Matched Signature</th><th>Length</th></tr>
           </thead>
           <tbody>
-            <tr class="odd selected">
+            <tr class="odd selected" oncontextmenu="showFindingsContextMenu(event, 'https://api.vulnweb.com/v1/docs/')">
               <td>1</td><td>HTTPS</td><td>api.vulnweb.com</td><td>/v1/docs/</td><td><span class="status-tag status-200">200 OK</span></td>
               <td><span class="signature-badge">Index of /v1/docs</span></td><td>1,240 B</td>
-              <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Sent to Repeater')">Repeater</button></td>
             </tr>
           </tbody>
         </table>
@@ -1306,35 +1310,35 @@ Connection: close
     </div>
   </div>
 
-  <!-- DOMAIN PANEL 3: admin.vulnweb.com (Simulated Third Domain Tab) -->
-  <div class="domain-content" id="domain-panel-3">
-    <div class="child-tabs-bar">
-      <div class="child-tab active">Directory Listings <span class="badge-count">0</span></div>
-      <div class="child-tab">Discovered Paths <span class="badge-count">18</span></div>
-      <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
-      <div class="child-tab">Settings &amp; Signatures</div>
-    </div>
-    <div class="main-workspace">
-      <div class="control-panel">
-        <div class="panel-row">
-          <div class="input-group">
-            <span class="input-label">Target Domain:</span>
-            <input type="text" class="text-input" value="admin.vulnweb.com" readonly>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-primary" onclick="triggerToast('Starting scan on admin.vulnweb.com')">Start Scan</button>
-          </div>
-        </div>
-        <p style="font-size: 11px; color: var(--text-muted); padding: 8px 0;">Domain queued for scanning. Click Start Scan to begin harvesting and probing.</p>
-      </div>
-    </div>
+  <!-- RIGHT CLICK CONTEXT MENUS -->
+  <div class="context-menu-popup" id="findingsContextMenu">
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Repeater')">Send to Repeater</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Intruder')">Send to Intruder</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" onclick="triggerContextAction('Copy URL')">Copy URL</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Open in Browser')">Open in Browser</div>
+  </div>
+
+  <div class="context-menu-popup" id="pathsContextMenu">
+    <div class="context-menu-item" onclick="triggerContextAction('Re-test Path')">Re-test Path</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Repeater')">Send to Repeater</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Burp Site Map')">Add to Site Map</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Copy Path')">Copy Path</div>
+  </div>
+
+  <div class="context-menu-popup" id="subdomainsContextMenu">
+    <div class="context-menu-item" onclick="contextScanSubdomainInNewTab()">Scan in Dedicated Tab</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" onclick="triggerContextAction('Added to Burp Target Scope')">Add to Target Scope</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Copied Subdomain')">Copy Subdomain</div>
   </div>
 
   <!-- Footer Status Bar -->
   <div class="footer-bar">
     <div style="display: flex; align-items: center;">
       <span class="status-indicator scanning"></span>
-      <span>Active Session: session_vulnweb_recon.json | Scanning #1 testphp.vulnweb.com</span>
+      <span>Active Session: session_vulnweb_recon.json | Active Tab: #1 testphp.vulnweb.com</span>
     </div>
     <div>
       <span>WaybackLister v2.0 for Burp Suite (Montoya API) | Dedicated Domain Multi-Session Model | Plain ASCII</span>
@@ -1352,26 +1356,20 @@ Connection: close
       btn.textContent = isLight ? 'Theme: Light' : 'Theme: Dark';
     }
 
-    // Domain Parent Tabs Switching
-    function switchDomainTab(panelId, tabElem) {
-      document.querySelectorAll('.domain-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.domain-content').forEach(p => p.classList.remove('active'));
+    // Parent Tabs Switching (Configuration + Domain Tabs)
+    function switchParentTab(panelId, tabElem) {
+      document.querySelectorAll('.parent-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.parent-tab-content').forEach(p => p.classList.remove('active'));
       tabElem.classList.add('active');
       const targetPanel = document.getElementById(panelId);
       if (targetPanel) {
         targetPanel.classList.add('active');
       }
-    }
-
-    function switchToDomain(tabId, panelId) {
-      const tab = document.getElementById(tabId);
-      if (tab) {
-        switchDomainTab(panelId, tab);
-      }
+      hideContextMenus();
     }
 
     // Double-click inline in-place tab header renaming (Zero modal popups)
-    function editDomainTabTitle(titleSpan) {
+    function editParentTabTitle(titleSpan) {
       const currentTitle = titleSpan.textContent;
       const input = document.createElement('input');
       input.type = 'text';
@@ -1405,21 +1403,25 @@ Connection: close
       input.select();
     }
 
-    // Close domain tab
-    function closeDomainTab(tabId, panelId) {
+    // Close parent domain tab
+    function closeParentTab(tabId, panelId) {
       if (confirm('Close this domain tab and abort any active scan on this target?')) {
         const tab = document.getElementById(tabId);
         const panel = document.getElementById(panelId);
         if (tab) tab.remove();
         if (panel) panel.remove();
-        const firstTab = document.querySelector('.domain-tab');
-        if (firstTab) firstTab.click();
+        const firstDomainTab = document.querySelector('.parent-tab:not(#tab-config)');
+        if (firstDomainTab) {
+          firstDomainTab.click();
+        } else {
+          document.getElementById('tab-config').click();
+        }
         triggerToast('Domain tab closed');
       }
     }
 
-    // Add new domain prompt
-    let domainCounter = 4;
+    // Add new domain scan prompt
+    let domainCounter = 3;
     function addNewDomainPrompt() {
       const domain = prompt('Enter target domain for new scan tab:', 'newtarget.com');
       if (domain && domain.trim()) {
@@ -1433,23 +1435,22 @@ Connection: close
       const panelId = `domain-panel-${id}`;
 
       const tabElem = document.createElement('div');
-      tabElem.className = 'domain-tab';
+      tabElem.className = 'parent-tab';
       tabElem.id = tabId;
-      tabElem.innerHTML = `<span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#${id} ${domain}</span><button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('${tabId}', '${panelId}')">x</button>`;
-      tabElem.onclick = () => switchDomainTab(panelId, tabElem);
+      tabElem.innerHTML = `<span class="parent-tab-title" ondblclick="editParentTabTitle(this)">#${id} ${domain}</span><button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('${tabId}', '${panelId}')">x</button>`;
+      tabElem.onclick = () => switchParentTab(panelId, tabElem);
 
       const addBtn = document.querySelector('.btn-add-domain-tab');
-      document.getElementById('domainTabsContainer').insertBefore(tabElem, addBtn);
+      document.getElementById('parentTabsContainer').insertBefore(tabElem, addBtn);
 
       const panelElem = document.createElement('div');
-      panelElem.className = 'domain-content';
+      panelElem.className = 'parent-tab-content';
       panelElem.id = panelId;
       panelElem.innerHTML = `
         <div class="child-tabs-bar">
           <div class="child-tab active">Directory Listings <span class="badge-count found">0</span></div>
           <div class="child-tab">Discovered Paths <span class="badge-count">0</span></div>
           <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
-          <div class="child-tab">Settings &amp; Signatures</div>
         </div>
         <div class="main-workspace">
           <div class="control-panel">
@@ -1466,7 +1467,7 @@ Connection: close
       `;
       document.body.insertBefore(panelElem, document.querySelector('.footer-bar'));
 
-      switchDomainTab(panelId, tabElem);
+      switchParentTab(panelId, tabElem);
       triggerToast(`Created dedicated tab for ${domain}`);
     }
 
@@ -1478,6 +1479,7 @@ Connection: close
       tabElem.classList.add('active');
       const targetContent = document.getElementById(contentId);
       if (targetContent) targetContent.classList.add('active');
+      hideContextMenus();
     }
 
     // Select row in findings table to update parallel viewers
@@ -1544,6 +1546,57 @@ Connection: close
       }
     }
 
+    // Context Menu Handling
+    let activeContextTarget = '';
+
+    function showFindingsContextMenu(e, targetUrl) {
+      e.preventDefault();
+      activeContextTarget = targetUrl;
+      hideContextMenus();
+      const menu = document.getElementById('findingsContextMenu');
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.style.display = 'block';
+    }
+
+    function showPathsContextMenu(e, path) {
+      e.preventDefault();
+      activeContextTarget = path;
+      hideContextMenus();
+      const menu = document.getElementById('pathsContextMenu');
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.style.display = 'block';
+    }
+
+    function showSubdomainsContextMenu(e, sub) {
+      e.preventDefault();
+      activeContextTarget = sub;
+      hideContextMenus();
+      const menu = document.getElementById('subdomainsContextMenu');
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.style.display = 'block';
+    }
+
+    function hideContextMenus() {
+      document.querySelectorAll('.context-menu-popup').forEach(m => m.style.display = 'none');
+    }
+
+    document.addEventListener('click', hideContextMenus);
+
+    function triggerContextAction(actionName) {
+      hideContextMenus();
+      triggerToast(`${actionName}: ${activeContextTarget}`);
+    }
+
+    function contextScanSubdomainInNewTab() {
+      hideContextMenus();
+      if (activeContextTarget) {
+        addSpecificDomainTab(activeContextTarget);
+      }
+    }
+
     // Toast Notice
     function triggerToast(msg) {
       const toast = document.getElementById('toastNotice');
@@ -1554,7 +1607,7 @@ Connection: close
       }, 2500);
     }
 
-    // Signatures
+    // Signatures in Configuration Tab
     function addSignature() {
       const input = document.getElementById('newSigInput');
       const val = input.value.trim();
