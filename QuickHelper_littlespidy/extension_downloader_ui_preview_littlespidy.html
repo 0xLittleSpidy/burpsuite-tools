@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Helper (littlespidy) - Extension Downloader UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --accent-disabled: #8a481e;
+      --badge-completed: #388a34;
+      --badge-downloading: #0e639c;
+      --badge-pending: #6e6e6e;
+      --badge-failed: #f14c4c;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Burp Suite Top Banner */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      letter-spacing: 0.5px;
+    }
+    .suite-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .theme-toggle-btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .theme-toggle-btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    /* Burp Navigation Tabs */
+    .burp-tabs-bar {
+      background-color: var(--bg-darker);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px;
+      overflow-x: auto;
+    }
+    .burp-tab {
+      padding: 7px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .burp-tab:hover {
+      color: var(--text-bright);
+    }
+    .burp-tab.active {
+      color: var(--text-bright);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      background-color: var(--bg-dark);
+    }
+
+    /* Sub-tabs bar */
+    .subtabs-bar {
+      background-color: var(--bg-dark);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 10px;
+      gap: 4px;
+    }
+    .subtab {
+      padding: 6px 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      user-select: none;
+    }
+    .subtab:hover {
+      color: var(--text-bright);
+    }
+    .subtab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+
+    /* Main Content Area */
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 10px;
+      gap: 10px;
+    }
+
+    /* Banner / Info Card */
+    .info-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .info-card .desc {
+      font-size: 12px;
+      color: var(--text);
+    }
+    .info-card .desc strong {
+      color: var(--text-bright);
+    }
+    .author-pill {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: bold;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    /* Toolbar */
+    .toolbar-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .primary-btn {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 3px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease;
+    }
+    .primary-btn:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+    }
+    .primary-btn:disabled {
+      background-color: var(--accent-disabled);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .standard-btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .standard-btn:hover:not(:disabled) {
+      background-color: var(--btn-hover);
+    }
+    .standard-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .danger-btn {
+      background-color: #8a2424;
+      color: #ffffff;
+      border: 1px solid #b33a3a;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .danger-btn:hover:not(:disabled) {
+      background-color: #ab2e2e;
+    }
+    .danger-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .folder-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 280px;
+    }
+    .folder-input-group label {
+      font-weight: 600;
+      color: var(--text-bright);
+      white-space: nowrap;
+    }
+    .folder-input {
+      flex: 1;
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 5px 8px;
+      font-size: 11px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    .search-input {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 5px 10px;
+      font-size: 11px;
+      border-radius: 3px;
+      min-width: 200px;
+    }
+
+    /* Progress & Metrics Panel */
+    .progress-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-metrics {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+    .metric-group {
+      display: flex;
+      gap: 16px;
+    }
+    .metric-item span.label {
+      color: var(--text-muted);
+    }
+    .metric-item span.value {
+      color: var(--text-bright);
+      font-weight: 700;
+      margin-left: 4px;
+    }
+    .progress-track {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      height: 14px;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #b35214, var(--accent));
+      height: 100%;
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+    .progress-track-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    /* Table Workspace */
+    .table-container {
+      flex: 1;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: auto;
+      min-height: 180px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+    thead {
+      background-color: var(--bg-darker);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    th {
+      padding: 7px 10px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      user-select: none;
+    }
+    td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    tbody tr:nth-child(even) {
+      background-color: var(--row-even);
+    }
+    tbody tr:nth-child(odd) {
+      background-color: var(--row-odd);
+    }
+    tbody tr:hover {
+      background-color: var(--bg-hover);
+    }
+    .col-chk {
+      width: 32px;
+      text-align: center;
+    }
+    .col-name {
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .col-cat {
+      width: 130px;
+      color: var(--text-muted);
+    }
+    .col-jar {
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+    .col-size {
+      width: 80px;
+      text-align: right;
+    }
+    .col-status {
+      width: 170px;
+    }
+    .col-action {
+      width: 100px;
+      text-align: center;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-idle {
+      background-color: var(--bg-darker);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .badge-downloading {
+      background-color: var(--badge-downloading);
+      color: #ffffff;
+    }
+    .badge-completed {
+      background-color: var(--badge-completed);
+      color: #ffffff;
+    }
+    .badge-failed {
+      background-color: var(--badge-failed);
+      color: #ffffff;
+    }
+
+    .mini-btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .mini-btn:hover:not(:disabled) {
+      background-color: var(--btn-hover);
+    }
+
+    /* Split Bottom Panel: Logs & Instructions */
+    .bottom-split {
+      height: 170px;
+      display: flex;
+      gap: 10px;
+    }
+    .bottom-box {
+      flex: 1;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .box-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 10px;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-bright);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .log-content {
+      flex: 1;
+      background-color: var(--code-bg);
+      color: #a9b7c6;
+      font-family: monospace;
+      font-size: 10.5px;
+      padding: 8px 10px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+    .log-line {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .log-time {
+      color: var(--text-muted);
+      margin-right: 6px;
+    }
+    .log-info {
+      color: #6a9955;
+    }
+    .log-warn {
+      color: #cca700;
+    }
+
+    .instructions-card {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .instructions-card ol {
+      margin-left: 18px;
+      margin-top: 6px;
+    }
+    .instructions-card li {
+      margin-bottom: 4px;
+    }
+    .instructions-card code {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-family: monospace;
+      font-size: 10.5px;
+      color: var(--accent);
+    }
+
+    /* Domain Extractor View (hidden by default) */
+    .domain-extractor-panel {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .domain-extractor-panel.active {
+      display: flex;
+    }
+    .extractor-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+    .domain-output-area {
+      flex: 1;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      font-family: monospace;
+      font-size: 11px;
+      padding: 10px;
+      border-radius: 3px;
+      resize: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Header -->
+  <header class="burp-header">
+    <div class="title-area">
+      <span class="burp-logo-badge">BURP SUITE</span>
+      <span class="suite-title">Professional v2026.4 - Security Suite (Project: BugBounty_Assessment)</span>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">Switch to Light Theme</button>
+    </div>
+  </header>
+
+  <!-- Burp Main Tabs -->
+  <nav class="burp-tabs-bar">
+    <div class="burp-tab">Dashboard</div>
+    <div class="burp-tab">Target</div>
+    <div class="burp-tab">Proxy</div>
+    <div class="burp-tab">Intruder</div>
+    <div class="burp-tab">Repeater</div>
+    <div class="burp-tab">Collaborator</div>
+    <div class="burp-tab">Logger</div>
+    <div class="burp-tab">Extensions</div>
+    <div class="burp-tab active">Quick Helper</div>
+  </nav>
+
+  <!-- Quick Helper Sub Tabs -->
+  <div class="subtabs-bar">
+    <div class="subtab active" id="tabDownloader" onclick="switchSubTab('downloader')">Extensions Downloader</div>
+    <div class="subtab" id="tabExtractor" onclick="switchSubTab('extractor')">Domain Extractor</div>
+  </div>
+
+  <!-- Workspace Container -->
+  <div class="main-workspace">
+
+    <!-- SUBTAB 1: EXTENSION DOWNLOADER -->
+    <div id="downloaderWorkspace" style="display: flex; flex-direction: column; flex: 1; gap: 10px; overflow: hidden;">
+
+      <!-- Info Banner -->
+      <div class="info-card">
+        <div class="desc">
+          <strong>Extension Hub:</strong> Single-click downloader for all 21 pre-compiled Burp Suite extensions published by <strong>littlespidy</strong>. Download all release fat-JARs directly to your machine and load them via Burp Extensions.
+        </div>
+        <div class="author-pill">Author: littlespidy</div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar-panel">
+        <div class="toolbar-row">
+          <button class="primary-btn" id="downloadAllBtn" onclick="startSingleClickDownloadAll()">
+            Download All Extensions (Single Click)
+          </button>
+          <button class="standard-btn" id="downloadSelectedBtn" onclick="startDownloadSelected()">
+            Download Selected
+          </button>
+          <button class="danger-btn" id="cancelBtn" onclick="cancelDownload()" disabled>
+            Cancel
+          </button>
+          <div class="folder-input-group">
+            <label for="destFolderInput">Destination:</label>
+            <input type="text" id="destFolderInput" class="folder-input" value="~/Downloads/burpsuite-extensions/">
+            <button class="standard-btn" onclick="browseFolder()">Browse...</button>
+            <button class="standard-btn" onclick="openFolder()">Open Folder</button>
+          </div>
+        </div>
+
+        <div class="toolbar-row" style="justify-content: space-between;">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="standard-btn" onclick="selectAll(true)">Select All</button>
+            <button class="standard-btn" onclick="selectAll(false)">Deselect All</button>
+            <button class="standard-btn" onclick="refreshCatalog()">Refresh Catalog</button>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="filterInput" class="search-input" placeholder="Filter extensions by name or category..." onkeyup="filterExtensions()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics & Progress Bar -->
+      <div class="progress-panel">
+        <div class="progress-metrics">
+          <div class="metric-group">
+            <div class="metric-item"><span class="label">Total Extensions:</span><span class="value" id="totalCount">21</span></div>
+            <div class="metric-item"><span class="label">Selected:</span><span class="value" id="selectedCount">21</span></div>
+            <div class="metric-item"><span class="label">Downloaded:</span><span class="value" id="completedCount">0</span></div>
+            <div class="metric-item"><span class="label">Est. Total Size:</span><span class="value">~180 MB</span></div>
+          </div>
+          <div id="statusSummaryText" style="color: var(--text-muted); font-weight: 600;">Ready</div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+          <div class="progress-track-text" id="progressTrackText">0% (0 / 21)</div>
+        </div>
+      </div>
+
+      <!-- Extensions Table -->
+      <div class="table-container">
+        <table id="extensionsTable">
+          <thead>
+            <tr>
+              <th class="col-chk"><input type="checkbox" id="headerCheckbox" checked onchange="toggleAllCheckboxes(this)"></th>
+              <th>Extension Name</th>
+              <th class="col-cat">Category</th>
+              <th class="col-jar">Release JAR File</th>
+              <th class="col-size">Size</th>
+              <th class="col-status">Download Status</th>
+              <th class="col-action">Action</th>
+            </tr>
+          </thead>
+          <tbody id="extensionsTableBody">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom Split: Console Log & Installation Instructions -->
+      <div class="bottom-split">
+        <div class="bottom-box">
+          <div class="box-header">
+            <span>Download Activity Console</span>
+            <button class="mini-btn" onclick="clearLogs()">Clear Log</button>
+          </div>
+          <div class="log-content" id="logContent">
+            <div class="log-line"><span class="log-time">[10:45:00]</span><span class="log-info">[INFO]</span> Quick Helper Extension Downloader initialized.</div>
+            <div class="log-line"><span class="log-time">[10:45:00]</span><span class="log-info">[INFO]</span> Loaded 21 official extensions from littlespidy catalog.</div>
+            <div class="log-line"><span class="log-time">[10:45:00]</span><span class="log-info">[INFO]</span> Ready. Click "Download All Extensions (Single Click)" to save all JARs locally.</div>
+          </div>
+        </div>
+
+        <div class="bottom-box">
+          <div class="box-header">
+            <span>Burp Suite Installation Guide</span>
+          </div>
+          <div class="instructions-card">
+            <strong>How to load the downloaded extensions into Burp Suite:</strong>
+            <ol>
+              <li>Go to the <strong>Extensions</strong> tab in the main Burp Suite navigation bar.</li>
+              <li>Select the <strong>Installed</strong> sub-tab.</li>
+              <li>Click the <strong>Add</strong> button on the left panel.</li>
+              <li>Ensure <strong>Extension type</strong> is set to <code>Java</code>.</li>
+              <li>Click <strong>Select file...</strong> and navigate to your download folder: <code>~/Downloads/burpsuite-extensions/</code>.</li>
+              <li>Select any downloaded <code>.jar</code> file and click <strong>Next</strong>.</li>
+              <li>The extension will load immediately and register its tabs, context menus, and tools.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SUBTAB 2: DOMAIN EXTRACTOR -->
+    <div id="extractorWorkspace" class="domain-extractor-panel">
+      <div class="info-card">
+        <div class="desc">
+          <strong>Domain Extractor:</strong> Extract all unique domain names or URLs from Burp Suite's Target Site Map and copy them to your system clipboard with natural alphabetical sorting.
+        </div>
+      </div>
+      <div class="extractor-box">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 4px; font-weight: 600; color: var(--text-bright);">
+            <input type="checkbox" id="schemaCheck"> Include HTTP Schema (https:// / http://)
+          </label>
+          <label style="display: flex; align-items: center; gap: 4px; font-weight: 600; color: var(--text-bright);">
+            <input type="checkbox" id="inScopeCheck"> In-Scope Only
+          </label>
+          <button class="primary-btn" onclick="extractSampleDomains()">Extract Domains & Copy to Clipboard</button>
+          <button class="standard-btn" onclick="clearExtractedDomains()">Clear</button>
+        </div>
+        <textarea id="domainOutput" class="domain-output-area" readonly placeholder="Extracted domains will appear here..."></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Created with the help of an AI Agent and littlespidy.
+
+    const EXTENSIONS_CATALOG = [
+      { id: "js-inspector", name: "JavaScript Inspector", category: "Recon & Secrets", jar: "javascript-inspector-littlespidy-1.0.0.jar", size: "14.2 MB", desc: "Client-side JS analysis, sourcemap unpacker, endpoint & secret reconnaissance" },
+      { id: "cache-header", name: "Cache Header Inspector", category: "Protocol & Headers", jar: "cache-header-inspector-littlespidy-1.0.0.jar", size: "5.1 MB", desc: "Passive CDN & cache header indexing and directive analysis" },
+      { id: "convert-post-get", name: "Convert POST to GET", category: "Auth & Session", jar: "convert-post-to-get-littlespidy-1.0.0.jar", size: "4.8 MB", desc: "Request body to GET query converter for auth bypass testing" },
+      { id: "input-val-fuzzer", name: "Input Validation Fuzzer", category: "Fuzzing & Injection", jar: "input-validation-fuzzer-littlespidy-1.0.0.jar", size: "6.2 MB", desc: "Multi-point input validation and boundary fuzzer" },
+      { id: "response-inspector", name: "Response Inspector", category: "Recon & Secrets", jar: "response-inspector-littlespidy-1.0.0.jar", size: "11.4 MB", desc: "Response analyzer for passwords, strict SSNs, internal IPs, OS server paths, errors, and comments" },
+      { id: "jwt-comparator", name: "JWT Comparator", category: "Auth & Session", jar: "jwt-comparator-littlespidy-1.0.0.jar", size: "7.9 MB", desc: "Dynamic N-token JWT side-by-side comparator, claim diff matrix, timestamp translator" },
+      { id: "csp-inspector", name: "CSP Inspector", category: "Protocol & Headers", jar: "csp-inspector-littlespidy-1.0.0.jar", size: "4.9 MB", desc: "Content Security Policy auditor, raw value and affected domain indexer" },
+      { id: "hsts-inspector", name: "HSTS Inspector", category: "Protocol & Headers", jar: "hsts-inspector-littlespidy-1.0.0.jar", size: "4.6 MB", desc: "HTTP Strict Transport Security auditor, raw value and affected domain indexer" },
+      { id: "upload-scanner", name: "Upload Scanner", category: "Fuzzing & Injection", jar: "upload-scanner-littlespidy-1.0.0.jar", size: "18.5 MB", desc: "24-module file upload fuzzer, simplified 4-mode ReDownloader, Burp Collaborator OOB" },
+      { id: "session-inspector", name: "Session Inspector", category: "Auth & Session", jar: "session-inspector-littlespidy-1.0.0.jar", size: "16.1 MB", desc: "Automated session timeout tester with staged milestone timers and cookie store" },
+      { id: "header-inspector", name: "Header Inspector", category: "Protocol & Headers", jar: "header-inspector-littlespidy-1.0.0.jar", size: "12.8 MB", desc: "Consolidated Protocol Suite: Header, Method, Status, Cache, CSP, and HSTS" },
+      { id: "param-payload", name: "Param Payload Injector", category: "Fuzzing & Injection", jar: "param-payload-injector-littlespidy-1.0.0.jar", size: "5.7 MB", desc: "Parameter-attributed payload injector (XSS & Angular CSTI) with reflection monitoring" },
+      { id: "activescan-keeper", name: "Active Scan Session Keeper", category: "Automation", jar: "activescan-session-keeper-littlespidy-1.0.0.jar", size: "6.9 MB", desc: "Active scan session timeout interceptor that pauses scan threads on session expiry" },
+      { id: "gwtmap", name: "GWTMap", category: "Reverse Eng.", jar: "gwtmap-littlespidy-1.0.0.jar", size: "8.3 MB", desc: "GWT-RPC reverse engineering, permutation analysis, and AST deserializer" },
+      { id: "request-smuggling", name: "Request Smuggling Inspector", category: "Protocol & Headers", jar: "request-smuggling-inspector-littlespidy-1.0.0.jar", size: "5.4 MB", desc: "HTTP request smuggling payload injector: right-click CL.TE, TE.CL, TE.TE variants" },
+      { id: "sso-inspector", name: "SSO Inspector", category: "Auth & Session", jar: "sso-inspector-littlespidy-1.0.0.jar", size: "9.2 MB", desc: "Single Sign-On and OAuth 2.0 / OpenID Connect auditor with interactive OAuth workbench" },
+      { id: "api-inspector", name: "API Inspector", category: "API Testing", jar: "api-inspector-littlespidy-1.0.0.jar", size: "8.7 MB", desc: "REST API version discovery and representation prober with ResAPI Version Finder tab" },
+      { id: "ng-auth-analyzer", name: "ng-auth-analyzer", category: "Auth & Session", jar: "ng-auth-analyzer_littlespidy-1.1.14.jar", size: "10.4 MB", desc: "Automated authorization testing with Configuration, History, and Import tabs" },
+      { id: "ng-sqlmap", name: "ng-sqlmap", category: "SQL Injection", jar: "ng-sqlmap-littlespidy-1.0.0.jar", size: "11.1 MB", desc: "Integrated SQLMap suite converting SQLiPy to Java with request sub-tabs and real-time streaming" },
+      { id: "quick-helper", name: "Quick Helper", category: "Productivity", jar: "quick-helper-littlespidy-1.0.0.jar", size: "4.2 MB", desc: "Quick helper actions for Burp Suite: copy unique domains and single-click extension downloader" },
+      { id: "payload-injector", name: "Payload Injector", category: "Fuzzing & Injection", jar: "payload-injector-littlespidy-1.0.0.jar", size: "6.1 MB", desc: "Security payload injection engine for Burp Suite" }
+    ];
+
+    let itemsState = EXTENSIONS_CATALOG.map(ext => ({
+      ...ext,
+      selected: true,
+      status: "Idle",
+      progress: 0
+    }));
+
+    let isDownloading = false;
+    let cancelRequested = false;
+
+    function renderTable() {
+      const tbody = document.getElementById("extensionsTableBody");
+      const filterText = (document.getElementById("filterInput").value || "").toLowerCase();
+      tbody.innerHTML = "";
+
+      let visibleSelected = 0;
+      let totalVisible = 0;
+
+      itemsState.forEach((item, index) => {
+        const matches = item.name.toLowerCase().includes(filterText) ||
+                        item.category.toLowerCase().includes(filterText) ||
+                        item.jar.toLowerCase().includes(filterText);
+        if (!matches) return;
+
+        totalVisible++;
+        if (item.selected) visibleSelected++;
+
+        const tr = document.createElement("tr");
+
+        let badgeClass = "badge-idle";
+        let statusDisplay = item.status;
+        if (item.status === "Downloading") {
+          badgeClass = "badge-downloading";
+          statusDisplay = `Downloading ${item.progress}%`;
+        } else if (item.status === "Completed") {
+          badgeClass = "badge-completed";
+          statusDisplay = "Completed";
+        } else if (item.status === "Failed") {
+          badgeClass = "badge-failed";
+          statusDisplay = "Failed";
+        }
+
+        tr.innerHTML = `
+          <td class="col-chk">
+            <input type="checkbox" ${item.selected ? "checked" : ""} onchange="toggleItemSelect(${index}, this.checked)">
+          </td>
+          <td class="col-name">${item.name}</td>
+          <td class="col-cat">${item.category}</td>
+          <td class="col-jar">${item.jar}</td>
+          <td class="col-size">${item.size}</td>
+          <td class="col-status">
+            <span class="badge ${badgeClass}">${statusDisplay}</span>
+          </td>
+          <td class="col-action">
+            <button class="mini-btn" ${isDownloading ? "disabled" : ""} onclick="downloadSingle(${index})">Download</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateMetrics();
+    }
+
+    function toggleItemSelect(index, isChecked) {
+      itemsState[index].selected = isChecked;
+      updateMetrics();
+    }
+
+    function selectAll(state) {
+      itemsState.forEach(item => item.selected = state);
+      document.getElementById("headerCheckbox").checked = state;
+      renderTable();
+    }
+
+    function toggleAllCheckboxes(masterCheckbox) {
+      selectAll(masterCheckbox.checked);
+    }
+
+    function filterExtensions() {
+      renderTable();
+    }
+
+    function updateMetrics() {
+      const selected = itemsState.filter(i => i.selected).length;
+      const completed = itemsState.filter(i => i.status === "Completed").length;
+      document.getElementById("selectedCount").innerText = selected;
+      document.getElementById("completedCount").innerText = completed;
+
+      const pct = Math.round((completed / itemsState.length) * 100);
+      document.getElementById("progressBarFill").style.width = pct + "%";
+      document.getElementById("progressTrackText").innerText = `${pct}% (${completed} / ${itemsState.length})`;
+    }
+
+    function appendLog(msg, level = "INFO") {
+      const logContent = document.getElementById("logContent");
+      const line = document.createElement("div");
+      line.className = "log-line";
+      const now = new Date();
+      const timeStr = `[${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}]`;
+      const levelSpan = level === "INFO" ? '<span class="log-info">[INFO]</span>' : '<span class="log-warn">[WARN]</span>';
+      line.innerHTML = `<span class="log-time">${timeStr}</span>${levelSpan} ${msg}`;
+      logContent.appendChild(line);
+      logContent.scrollTop = logContent.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById("logContent").innerHTML = "";
+    }
+
+    async function startSingleClickDownloadAll() {
+      if (isDownloading) return;
+      selectAll(true);
+      await executeBatchDownload(itemsState);
+    }
+
+    async function startDownloadSelected() {
+      if (isDownloading) return;
+      const targetItems = itemsState.filter(i => i.selected);
+      if (targetItems.length === 0) {
+        alert("Please select at least one extension to download.");
+        return;
+      }
+      await executeBatchDownload(targetItems);
+    }
+
+    async function executeBatchDownload(targets) {
+      isDownloading = true;
+      cancelRequested = false;
+      document.getElementById("downloadAllBtn").disabled = true;
+      document.getElementById("downloadSelectedBtn").disabled = true;
+      document.getElementById("cancelBtn").disabled = false;
+
+      const folder = document.getElementById("destFolderInput").value;
+      appendLog(`Starting batch download of ${targets.length} extensions to destination: ${folder}`);
+      document.getElementById("statusSummaryText").innerText = `Downloading ${targets.length} extensions...`;
+
+      for (let i = 0; i < targets.length; i++) {
+        if (cancelRequested) {
+          appendLog("Batch download cancelled by user.", "WARN");
+          break;
+        }
+
+        const item = targets[i];
+        item.status = "Downloading";
+        item.progress = 0;
+        renderTable();
+        appendLog(`[${i + 1}/${targets.length}] Fetching ${item.jar} (${item.size})...`);
+
+        // Simulate chunk streaming
+        for (let p = 15; p <= 100; p += 25) {
+          if (cancelRequested) break;
+          await new Promise(r => setTimeout(r, 60));
+          item.progress = p;
+          renderTable();
+        }
+
+        if (cancelRequested) {
+          item.status = "Cancelled";
+          renderTable();
+          break;
+        }
+
+        item.status = "Completed";
+        item.progress = 100;
+        renderTable();
+        appendLog(`[${i + 1}/${targets.length}] Successfully saved ${item.jar} to ${folder}`);
+      }
+
+      isDownloading = false;
+      document.getElementById("downloadAllBtn").disabled = false;
+      document.getElementById("downloadSelectedBtn").disabled = false;
+      document.getElementById("cancelBtn").disabled = true;
+
+      const completed = itemsState.filter(i => i.status === "Completed").length;
+      document.getElementById("statusSummaryText").innerText = `Completed: ${completed} extensions downloaded.`;
+      appendLog(`All operations finished. Total downloaded: ${completed}. Follow installation instructions to load into Burp Suite.`);
+    }
+
+    async function downloadSingle(index) {
+      if (isDownloading) return;
+      const item = itemsState[index];
+      const folder = document.getElementById("destFolderInput").value;
+      isDownloading = true;
+      item.status = "Downloading";
+      item.progress = 0;
+      renderTable();
+      appendLog(`Fetching single extension: ${item.jar} (${item.size})...`);
+
+      for (let p = 20; p <= 100; p += 20) {
+        await new Promise(r => setTimeout(r, 70));
+        item.progress = p;
+        renderTable();
+      }
+
+      item.status = "Completed";
+      item.progress = 100;
+      isDownloading = false;
+      renderTable();
+      appendLog(`Saved ${item.jar} to ${folder}`);
+    }
+
+    function cancelDownload() {
+      if (!isDownloading) return;
+      cancelRequested = true;
+      document.getElementById("statusSummaryText").innerText = "Cancelling...";
+      appendLog("Cancelling active downloads...", "WARN");
+    }
+
+    function browseFolder() {
+      appendLog("Browse destination directory dialog requested.");
+      alert("In Burp Suite, this opens the native system folder chooser dialog.");
+    }
+
+    function openFolder() {
+      const folder = document.getElementById("destFolderInput").value;
+      appendLog(`Opening destination directory in file manager: ${folder}`);
+      alert(`Opening ${folder} in system file manager.`);
+    }
+
+    function refreshCatalog() {
+      appendLog("Querying GitHub releases for 0xLittleSpidy/burpsuite-tools...");
+      setTimeout(() => {
+        appendLog("Catalog up to date: 21 extensions verified.");
+        alert("Catalog is up to date with latest GitHub release assets.");
+      }, 300);
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById("themeToggleBtn");
+      body.classList.toggle("light-theme");
+      if (body.classList.contains("light-theme")) {
+        btn.innerText = "Switch to Dark Theme";
+      } else {
+        btn.innerText = "Switch to Light Theme";
+      }
+    }
+
+    function switchSubTab(tabName) {
+      const tabDownloader = document.getElementById("tabDownloader");
+      const tabExtractor = document.getElementById("tabExtractor");
+      const workspaceDownloader = document.getElementById("downloaderWorkspace");
+      const workspaceExtractor = document.getElementById("extractorWorkspace");
+
+      if (tabName === "downloader") {
+        tabDownloader.classList.add("active");
+        tabExtractor.classList.remove("active");
+        workspaceDownloader.style.display = "flex";
+        workspaceExtractor.classList.remove("active");
+      } else {
+        tabDownloader.classList.remove("active");
+        tabExtractor.classList.add("active");
+        workspaceDownloader.style.display = "none";
+        workspaceExtractor.classList.add("active");
+      }
+    }
+
+    function extractSampleDomains() {
+      const schema = document.getElementById("schemaCheck").checked;
+      const inScope = document.getElementById("inScopeCheck").checked;
+      let domains = [
+        "admin.target.internal",
+        "api.target.com",
+        "auth.target.com",
+        "cdn.target.com",
+        "dev.target.com",
+        "login.target.com",
+        "target.com"
+      ];
+      if (schema) {
+        domains = domains.map(d => `https://${d}`);
+      }
+      if (inScope) {
+        domains = domains.filter(d => d.includes("target.com"));
+      }
+      document.getElementById("domainOutput").value = domains.join("\n");
+      appendLog(`Extracted ${domains.length} domains and copied to clipboard.`);
+    }
+
+    function clearExtractedDomains() {
+      document.getElementById("domainOutput").value = "";
+    }
+
+    // Initialize
+    window.onload = function() {
+      renderTable();
+    };
+  </script>
+</body>
+</html>

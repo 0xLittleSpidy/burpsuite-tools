@@ -32,3 +32,12 @@ Preserve all existing comments, docstrings, and unrelated code functionality unl
   2. Verify that `.gitignore` does not ignore `build/libs/*.jar`.
   3. Always stage, commit, and push the newly compiled JAR file to the remote repository alongside source code changes.
   4. Never omit the compiled JAR file from commits.
+
+### 6. Mandatory HTML GUI Preview Before Building
+Every time a Burp Suite extension user interface, suite tab, sub-tab, dialog, toolbar, or interactive feature is created, redesigned, or modified:
+1. Always build a standalone, interactive HTML mockup preview file (`<feature>_ui_preview_littlespidy.html`) in the extension directory before building the Java extension artifact.
+2. The HTML mockup must mirror Burp Suite aesthetics (dark and light themes), display realistic sample data, and include interactive tab and table behaviors.
+3. Automatically launch the HTML preview in the user's default web browser using `xdg-open <feature>_ui_preview_littlespidy.html`.
+4. The HTML file must adhere to all project directives (ASCII text only, no emojis, author markers).
+5. Always stage, commit, and push the HTML preview file to the remote repository.
+

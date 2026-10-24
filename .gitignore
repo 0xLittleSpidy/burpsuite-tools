@@ -21,3 +21,5 @@ csp-evaluator/
 reshaper/
 additional-cors-checks/
 oauth-scan/
+wayBackLister/
+sqlipy/

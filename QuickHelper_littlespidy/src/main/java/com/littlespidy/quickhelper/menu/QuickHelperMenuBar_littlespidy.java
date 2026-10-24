@@ -3,6 +3,7 @@ package com.littlespidy.quickhelper.menu;
 
 import com.littlespidy.quickhelper.model.ExtractionOptions_littlespidy;
 import com.littlespidy.quickhelper.service.DomainExtractorService_littlespidy;
+import com.littlespidy.quickhelper.ui.QuickHelperRootTab_littlespidy;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -13,9 +14,16 @@ import javax.swing.JMenuItem;
 public class QuickHelperMenuBar_littlespidy {
 
     private final DomainExtractorService_littlespidy extractorService;
+    private final QuickHelperRootTab_littlespidy rootTab;
 
     public QuickHelperMenuBar_littlespidy(DomainExtractorService_littlespidy extractorService) {
+        this(extractorService, null);
+    }
+
+    public QuickHelperMenuBar_littlespidy(DomainExtractorService_littlespidy extractorService,
+                                         QuickHelperRootTab_littlespidy rootTab) {
         this.extractorService = extractorService;
+        this.rootTab = rootTab;
     }
 
     /**
@@ -25,6 +33,23 @@ public class QuickHelperMenuBar_littlespidy {
      */
     public JMenu createMenu() {
         JMenu menu = new JMenu("Quick Helper");
+
+        if (rootTab != null) {
+            JMenuItem downloadAllItem = new JMenuItem("Download All Extensions (Single Click)");
+            downloadAllItem.setToolTipText("Download all 21 official extensions by littlespidy with a single click");
+            downloadAllItem.addActionListener(e -> {
+                rootTab.selectDownloaderTab();
+                rootTab.getDownloaderTab().triggerDownloadAll();
+            });
+            menu.add(downloadAllItem);
+
+            JMenuItem openTabItem = new JMenuItem("Open Extension Downloader Tab");
+            openTabItem.setToolTipText("Open the Quick Helper Suite Tab");
+            openTabItem.addActionListener(e -> rootTab.selectDownloaderTab());
+            menu.add(openTabItem);
+
+            menu.addSeparator();
+        }
 
         JMenuItem copyAllDomainsItem = new JMenuItem("Copy All Domain Names");
         copyAllDomainsItem.setToolTipText("Copy all unique domain names from the site map to clipboard");

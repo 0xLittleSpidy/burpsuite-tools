@@ -1,0 +1,1437 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaybackLister (littlespidy) - Burp Suite Extension UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Suite Orange */
+      --accent-hover: #ff7f32;
+      --accent-disabled: #8a481e;
+      --badge-found: #e56b1f;
+      --badge-success: #388a34;
+      --badge-info: #0e639c;
+      --badge-warn: #c586c0;
+      --badge-error: #f14c4c;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --input-bg: #2d2d2d;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --input-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Burp Top Banner */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 2px;
+      letter-spacing: 0.5px;
+    }
+    .suite-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .theme-toggle-btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .theme-toggle-btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    /* Burp Navigation Tabs Bar */
+    .burp-tabs-bar {
+      background-color: var(--bg-darker);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px;
+      overflow-x: auto;
+    }
+    .burp-tab {
+      padding: 6px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-top: 2px solid transparent;
+      font-size: 12px;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .burp-tab:hover {
+      color: var(--text-bright);
+    }
+    .burp-tab.active {
+      color: var(--text-bright);
+      background-color: var(--bg-dark);
+      border-top: 2px solid var(--accent);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--bg-dark);
+      margin-bottom: -1px;
+      font-weight: 600;
+    }
+
+    /* Sub Tabs Bar */
+    .sub-tabs-bar {
+      background-color: var(--bg-card);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 10px;
+    }
+    .sub-tab {
+      padding: 7px 16px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-size: 12px;
+      font-weight: 500;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sub-tab:hover {
+      color: var(--text-bright);
+    }
+    .sub-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      font-weight: 600;
+    }
+    .badge-count {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .badge-count.found {
+      background-color: var(--badge-found);
+      color: #ffffff;
+    }
+
+    /* Main Container */
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 8px 12px;
+      gap: 8px;
+    }
+
+    /* Control Panel / Toolbar */
+    .control-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .panel-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .input-label {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .text-input {
+      background-color: var(--input-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 5px 9px;
+      border-radius: 3px;
+      font-size: 12px;
+      outline: none;
+      min-width: 260px;
+    }
+    .text-input:focus {
+      border-color: var(--accent);
+    }
+    .number-input {
+      background-color: var(--input-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 5px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      width: 65px;
+      outline: none;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-bright);
+      font-size: 12px;
+    }
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      user-select: none;
+      transition: background-color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+    .btn-secondary {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--btn-hover);
+    }
+    .btn-danger {
+      background-color: var(--badge-error);
+      color: #ffffff;
+    }
+    .btn-danger:hover {
+      background-color: #d13434;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Metric Summary Bar */
+    .metric-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    .metric-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .metric-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .metric-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--text-bright);
+    }
+    .metric-value.highlight {
+      color: var(--accent);
+    }
+    .metric-value.success {
+      color: #4ec9b0;
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      height: 16px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .progress-bar-fill {
+      background-color: var(--accent);
+      height: 100%;
+      width: 68%;
+      transition: width 0.3s ease;
+    }
+    .progress-bar-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+    }
+
+    /* Content Area & Split View */
+    .tab-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      gap: 8px;
+    }
+    .tab-content.active {
+      display: flex;
+    }
+
+    .split-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      gap: 8px;
+    }
+
+    .table-container {
+      flex: 1;
+      min-height: 160px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    th {
+      background-color: var(--bg-darker);
+      color: var(--text-bright);
+      text-align: left;
+      padding: 6px 10px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+    }
+    th:last-child {
+      border-right: none;
+    }
+    td {
+      padding: 5px 10px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td:last-child {
+      border-right: none;
+    }
+    tr.even {
+      background-color: var(--row-even);
+    }
+    tr.odd {
+      background-color: var(--row-odd);
+    }
+    tr:hover {
+      background-color: var(--bg-hover) !important;
+      cursor: pointer;
+    }
+    tr.selected {
+      background-color: var(--bg-selected) !important;
+      color: #ffffff;
+    }
+    tr.selected td {
+      color: #ffffff;
+    }
+
+    .status-tag {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      display: inline-block;
+    }
+    .status-200 {
+      background-color: rgba(56, 138, 52, 0.25);
+      color: #6ed36a;
+      border: 1px solid rgba(56, 138, 52, 0.5);
+    }
+    .status-403 {
+      background-color: rgba(241, 76, 76, 0.25);
+      color: #f14c4c;
+      border: 1px solid rgba(241, 76, 76, 0.5);
+    }
+    .status-301, .status-302 {
+      background-color: rgba(14, 99, 156, 0.25);
+      color: #4fc1ff;
+      border: 1px solid rgba(14, 99, 156, 0.5);
+    }
+
+    .signature-badge {
+      background-color: rgba(229, 107, 31, 0.2);
+      color: var(--accent);
+      border: 1px solid rgba(229, 107, 31, 0.4);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 10px;
+    }
+
+    /* Bottom Preview Pane (Burp HTTP Inspector style) */
+    .preview-pane {
+      height: 220px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .preview-tabs {
+      background-color: var(--bg-darker);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+    }
+    .preview-tab {
+      padding: 5px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+    }
+    .preview-tab:hover {
+      color: var(--text-bright);
+    }
+    .preview-tab.active {
+      color: var(--text-bright);
+      border-bottom: 2px solid var(--accent);
+      font-weight: 600;
+    }
+    .preview-body {
+      flex: 1;
+      padding: 8px 12px;
+      background-color: var(--code-bg);
+      color: #d4d4d4;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 12px;
+    }
+    .search-input {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      min-width: 200px;
+    }
+
+    /* Console / Log tab */
+    .console-view {
+      flex: 1;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      color: #d4d4d4;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .log-line {
+      line-height: 1.5;
+    }
+    .log-ts {
+      color: #6a9955;
+    }
+    .log-info {
+      color: #4fc1ff;
+    }
+    .log-found {
+      color: #e56b1f;
+      font-weight: bold;
+    }
+    .log-warn {
+      color: #cca700;
+    }
+    .log-error {
+      color: #f14c4c;
+    }
+
+    /* Settings Tab */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .settings-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .settings-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-bright);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+    .signature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      padding: 6px;
+      border-radius: 3px;
+      background-color: var(--input-bg);
+    }
+    .signature-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .btn-icon-del {
+      background: none;
+      border: none;
+      color: var(--badge-error);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    /* Context menu preview notification */
+    .toast-notice {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--bg-darker);
+      border: 1px solid var(--accent);
+      color: var(--text-bright);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 11px;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    /* Footer Status Bar */
+    .footer-bar {
+      background-color: var(--bg-darker);
+      border-top: 1px solid var(--border);
+      padding: 4px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--badge-success);
+      margin-right: 6px;
+    }
+    .status-indicator.scanning {
+      background-color: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+    .status-indicator.stopped {
+      background-color: var(--badge-error);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Suite Header Mockup -->
+  <div class="burp-header">
+    <div class="title-area">
+      <span class="burp-logo-badge">BURP SUITE</span>
+      <span class="suite-title">WaybackLister (littlespidy) - Burp Suite Extension UI Preview</span>
+    </div>
+    <div class="header-actions">
+      <span style="font-size: 11px; color: var(--text-muted);">Montoya API Standard | Plain ASCII Mode</span>
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+    </div>
+  </div>
+
+  <!-- Simulated Burp Suite Navigation Tabs -->
+  <div class="burp-tabs-bar">
+    <div class="burp-tab">Dashboard</div>
+    <div class="burp-tab">Target</div>
+    <div class="burp-tab">Proxy</div>
+    <div class="burp-tab">Intruder</div>
+    <div class="burp-tab">Repeater</div>
+    <div class="burp-tab">Sequencer</div>
+    <div class="burp-tab">Decoder</div>
+    <div class="burp-tab">Comparer</div>
+    <div class="burp-tab">Logger</div>
+    <div class="burp-tab">Extensions</div>
+    <div class="burp-tab active">WaybackLister</div>
+  </div>
+
+  <!-- Extension Sub-tabs Bar -->
+  <div class="sub-tabs-bar">
+    <div class="sub-tab active" onclick="switchTab('tab-findings', this)">
+      Directory Listings
+      <span class="badge-count found" id="findingsCountBadge">4</span>
+    </div>
+    <div class="sub-tab" onclick="switchTab('tab-paths', this)">
+      Discovered Paths
+      <span class="badge-count" id="pathsCountBadge">186</span>
+    </div>
+    <div class="sub-tab" onclick="switchTab('tab-subdomains', this)">
+      Discovered Subdomains
+      <span class="badge-count" id="subdomainsCountBadge">7</span>
+    </div>
+    <div class="sub-tab" onclick="switchTab('tab-console', this)">
+      Scanner Log &amp; Console
+    </div>
+    <div class="sub-tab" onclick="switchTab('tab-settings', this)">
+      Settings &amp; Signatures
+    </div>
+  </div>
+
+  <!-- Main Content Workspace -->
+  <div class="main-workspace">
+
+    <!-- Control Toolbar Panel -->
+    <div class="control-panel">
+      <div class="panel-row">
+        <div class="input-group">
+          <span class="input-label">Target Domain:</span>
+          <input type="text" id="targetDomainInput" class="text-input" value="testphp.vulnweb.com" placeholder="e.g. example.com or comma-separated domains">
+        </div>
+
+        <div class="input-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="autoSubdomainsChk" checked>
+            Auto-discover Subdomains (*.domain/*)
+          </label>
+        </div>
+
+        <div class="input-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="burpScopeOnlyChk">
+            In-Scope Only
+          </label>
+        </div>
+
+        <div class="input-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="addToSiteMapChk" checked>
+            Add to Burp Site Map
+          </label>
+        </div>
+
+        <div class="input-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="createAuditIssueChk" checked>
+            Create Audit Issue
+          </label>
+        </div>
+      </div>
+
+      <div class="panel-row">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="input-group">
+            <span class="input-label">Threads:</span>
+            <input type="number" id="threadsInput" class="number-input" value="10" min="1" max="50">
+          </div>
+          <div class="input-group">
+            <span class="input-label">Delay (ms):</span>
+            <input type="number" id="delayInput" class="number-input" value="50" min="0" max="5000">
+          </div>
+          <div class="input-group">
+            <span class="input-label">Timeout (s):</span>
+            <input type="number" id="timeoutInput" class="number-input" value="10" min="2" max="60">
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn btn-primary" id="startBtn" onclick="startScanSimulation()">Start Scan</button>
+          <button class="btn btn-secondary" id="pauseBtn" onclick="pauseScanSimulation()" disabled>Pause</button>
+          <button class="btn btn-danger" id="stopBtn" onclick="stopScanSimulation()" disabled>Stop</button>
+          <button class="btn btn-secondary" onclick="clearAllData()">Clear All</button>
+          <button class="btn btn-secondary" onclick="exportData('findings')">Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Live Metric Summary Cards -->
+      <div class="metric-cards">
+        <div class="metric-card">
+          <span class="metric-title">CDX URLs Harvested</span>
+          <span class="metric-value" id="kpiHarvested">1,428</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Unique Directory Paths</span>
+          <span class="metric-value" id="kpiUniquePaths">186</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Subdomains Found</span>
+          <span class="metric-value" id="kpiSubdomains">7</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Requests Sent</span>
+          <span class="metric-value" id="kpiRequests">124 / 186</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Open Listings Found</span>
+          <span class="metric-value highlight" id="kpiFindings">4</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Engine Status</span>
+          <span class="metric-value success" id="kpiStatus" style="font-size: 13px; margin-top: 4px;">Running (Scanning)</span>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBarFill" style="width: 66%;"></div>
+        <span class="progress-bar-text" id="progressBarText">Checking path 124 of 186 (66%) - Scanning http://testphp.vulnweb.com/pictures/</span>
+      </div>
+    </div>
+
+    <!-- TAB 1: Directory Listings (Findings) -->
+    <div id="tab-findings" class="tab-content active">
+      <div class="filter-bar">
+        <span class="input-label">Filter Findings:</span>
+        <input type="text" class="search-input" id="findingsSearchInput" placeholder="Filter by host, path, signature..." onkeyup="filterFindingsTable()">
+        <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Select any row to inspect Burp HTTP Request &amp; Response below</span>
+      </div>
+
+      <div class="split-container">
+        <!-- Table -->
+        <div class="table-container">
+          <table id="findingsTable">
+            <thead>
+              <tr>
+                <th style="width: 45px;">#</th>
+                <th style="width: 75px;">Protocol</th>
+                <th style="width: 180px;">Host</th>
+                <th>Exposed Directory Path</th>
+                <th style="width: 70px;">Status</th>
+                <th style="width: 170px;">Matched Signature</th>
+                <th style="width: 85px;">Length</th>
+                <th style="width: 110px;">Audit Issue</th>
+                <th style="width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd selected" onclick="selectFindingRow(this, 1)">
+                <td>1</td>
+                <td>HTTP</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/admin/</td>
+                <td><span class="status-tag status-200">200 OK</span></td>
+                <td><span class="signature-badge">Index of /admin</span></td>
+                <td>4,218 B</td>
+                <td><span class="status-tag status-200">Reported</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent http://testphp.vulnweb.com/admin/ to Repeater')">Repeater</button>
+                </td>
+              </tr>
+              <tr class="even" onclick="selectFindingRow(this, 2)">
+                <td>2</td>
+                <td>HTTP</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/secured/</td>
+                <td><span class="status-tag status-200">200 OK</span></td>
+                <td><span class="signature-badge">&lt;title&gt;Index of</span></td>
+                <td>1,842 B</td>
+                <td><span class="status-tag status-200">Reported</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent http://testphp.vulnweb.com/secured/ to Repeater')">Repeater</button>
+                </td>
+              </tr>
+              <tr class="odd" onclick="selectFindingRow(this, 3)">
+                <td>3</td>
+                <td>HTTPS</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/images/</td>
+                <td><span class="status-tag status-200">200 OK</span></td>
+                <td><span class="signature-badge">Parent Directory&lt;/a&gt;</span></td>
+                <td>6,712 B</td>
+                <td><span class="status-tag status-200">Reported</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent https://testphp.vulnweb.com/images/ to Repeater')">Repeater</button>
+                </td>
+              </tr>
+              <tr class="even" onclick="selectFindingRow(this, 4)">
+                <td>4</td>
+                <td>HTTP</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/backup/</td>
+                <td><span class="status-tag status-200">200 OK</span></td>
+                <td><span class="signature-badge">Last modified&lt;/a&gt;</span></td>
+                <td>3,105 B</td>
+                <td><span class="status-tag status-200">Reported</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent http://testphp.vulnweb.com/backup/ to Repeater')">Repeater</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Preview Pane -->
+        <div class="preview-pane">
+          <div class="preview-tabs">
+            <div class="preview-tab active" onclick="switchPreviewTab('preview-resp', this)">HTTP Response</div>
+            <div class="preview-tab" onclick="switchPreviewTab('preview-req', this)">HTTP Request</div>
+            <div class="preview-tab" onclick="switchPreviewTab('preview-issue', this)">Audit Issue Details</div>
+          </div>
+          <div class="preview-body" id="previewResponse">HTTP/1.1 200 OK
+Date: Sat, 24 Oct 2026 05:22:10 GMT
+Server: Apache/2.4.41 (Ubuntu)
+Content-Type: text/html;charset=UTF-8
+Content-Length: 4218
+Connection: close
+
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;
+&lt;html&gt;
+ &lt;head&gt;
+  &lt;title&gt;Index of /admin&lt;/title&gt;
+ &lt;/head&gt;
+ &lt;body&gt;
+&lt;h1&gt;Index of /admin&lt;/h1&gt;
+  &lt;table&gt;
+   &lt;tr&gt;&lt;th valign="top"&gt;&lt;img src="/icons/blank.gif" alt="[ICO]"&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=N;O=D"&gt;Name&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=M;O=A"&gt;Last modified&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=S;O=A"&gt;Size&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=D;O=A"&gt;Description&lt;/a&gt;&lt;/th&gt;&lt;/tr&gt;
+   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/back.gif" alt="[PARENTDIR]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="/"&gt;Parent Directory&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;td align="right"&gt;  - &lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/unknown.gif" alt="[   ]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="config.php.bak"&gt;config.php.bak&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2024-03-12 11:42  &lt;/td&gt;&lt;td align="right"&gt;2.4K&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/compressed.gif" alt="[   ]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="db_dump.sql.gz"&gt;db_dump.sql.gz&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-01-08 09:15  &lt;/td&gt;&lt;td align="right"&gt;1.8M&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/text.gif" alt="[TXT]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="secret_keys.txt"&gt;secret_keys.txt&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-06-19 14:02  &lt;/td&gt;&lt;td align="right"&gt;512 &lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
+   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
+&lt;/table&gt;
+&lt;address&gt;Apache/2.4.41 (Ubuntu) Server at testphp.vulnweb.com Port 80&lt;/address&gt;
+&lt;/body&gt;&lt;/html&gt;</div>
+          <div class="preview-body" id="previewRequest" style="display:none;">GET /admin/ HTTP/1.1
+Host: testphp.vulnweb.com
+User-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Connection: close</div>
+          <div class="preview-body" id="previewIssue" style="display:none;">Issue Name: Open Directory Listing Discovered (WaybackLister)
+Severity: Medium
+Confidence: Certain
+Host: http://testphp.vulnweb.com
+Path: /admin/
+Matched Signature: "Index of /admin"
+
+Remediation Background:
+Directory listing is enabled on the web server, allowing unauthorized users to browse and download files within the server directory hierarchy. This frequently leaks database backups, configuration files, source code archives, and sensitive administrative utilities.
+
+Remediation Recommendation:
+Disable directory indexing in web server configuration (e.g. 'Options -Indexes' in Apache httpd, or remove 'autoindex on;' in Nginx).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Discovered Paths -->
+    <div id="tab-paths" class="tab-content">
+      <div class="filter-bar">
+        <span class="input-label">Filter Harvested Paths:</span>
+        <input type="text" class="search-input" id="pathsSearchInput" placeholder="Filter paths e.g. /api, .php, /admin..." onkeyup="filterPathsTable()">
+        <button class="btn btn-secondary" onclick="exportData('paths')">Export Paths</button>
+        <button class="btn btn-secondary" onclick="triggerToast('All unique paths submitted to Burp Site Map')">Send All to Site Map</button>
+      </div>
+
+      <div class="table-container">
+        <table id="pathsTable">
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th style="width: 220px;">Target Host</th>
+              <th>Archived Path Prefix</th>
+              <th style="width: 120px;">Probe Status</th>
+              <th style="width: 100px;">Directory Result</th>
+              <th style="width: 100px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="odd">
+              <td>1</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/admin/</td>
+              <td><span class="status-tag status-200">Checked</span></td>
+              <td><span class="status-tag status-200">Open Listing</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /admin/')">Re-test</button></td>
+            </tr>
+            <tr class="even">
+              <td>2</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/secured/</td>
+              <td><span class="status-tag status-200">Checked</span></td>
+              <td><span class="status-tag status-200">Open Listing</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /secured/')">Re-test</button></td>
+            </tr>
+            <tr class="odd">
+              <td>3</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/images/</td>
+              <td><span class="status-tag status-200">Checked</span></td>
+              <td><span class="status-tag status-200">Open Listing</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /images/')">Re-test</button></td>
+            </tr>
+            <tr class="even">
+              <td>4</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/backup/</td>
+              <td><span class="status-tag status-200">Checked</span></td>
+              <td><span class="status-tag status-200">Open Listing</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /backup/')">Re-test</button></td>
+            </tr>
+            <tr class="odd">
+              <td>5</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/cart/</td>
+              <td><span class="status-tag status-200">Checked</span></td>
+              <td><span class="status-tag status-403">Normal Page</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /cart/')">Re-test</button></td>
+            </tr>
+            <tr class="even">
+              <td>6</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/categories/</td>
+              <td><span class="status-tag status-200">Checked</span></td>
+              <td><span class="status-tag status-403">Normal Page</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /categories/')">Re-test</button></td>
+            </tr>
+            <tr class="odd">
+              <td>7</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/login.php</td>
+              <td><span class="status-tag status-200">Checked</span></td>
+              <td><span class="status-tag status-403">Not Directory</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /login.php')">Re-test</button></td>
+            </tr>
+            <tr class="even">
+              <td>8</td>
+              <td>testphp.vulnweb.com</td>
+              <td>/pictures/</td>
+              <td><span class="status-tag status-301">Scanning...</span></td>
+              <td><span class="status-tag status-301">In Progress</span></td>
+              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" disabled>Re-test</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: Subdomains -->
+    <div id="tab-subdomains" class="tab-content">
+      <div class="filter-bar">
+        <span class="input-label">Discovered Subdomains (Wayback CDX):</span>
+        <button class="btn btn-secondary" onclick="triggerToast('All 7 subdomains added to Burp Target Scope')">Add All to Burp Scope</button>
+        <button class="btn btn-secondary" onclick="exportData('subdomains')">Export Subdomain List</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th>Discovered Subdomain Host</th>
+              <th style="width: 140px;">Archived Paths Found</th>
+              <th style="width: 140px;">Scan Status</th>
+              <th style="width: 180px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="odd">
+              <td>1</td>
+              <td>testphp.vulnweb.com</td>
+              <td>186 paths</td>
+              <td><span class="status-tag status-301">Scanning (66%)</span></td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added testphp.vulnweb.com to Scope')">Scope</button>
+              </td>
+            </tr>
+            <tr class="even">
+              <td>2</td>
+              <td>api.vulnweb.com</td>
+              <td>42 paths</td>
+              <td><span class="status-tag status-200">Completed (1 Listing)</span></td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added api.vulnweb.com to Scope')">Scope</button>
+              </td>
+            </tr>
+            <tr class="odd">
+              <td>3</td>
+              <td>admin.vulnweb.com</td>
+              <td>18 paths</td>
+              <td><span class="status-tag status-403">Queued</span></td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added admin.vulnweb.com to Scope')">Scope</button>
+              </td>
+            </tr>
+            <tr class="even">
+              <td>4</td>
+              <td>dev.vulnweb.com</td>
+              <td>29 paths</td>
+              <td><span class="status-tag status-403">Queued</span></td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added dev.vulnweb.com to Scope')">Scope</button>
+              </td>
+            </tr>
+            <tr class="odd">
+              <td>5</td>
+              <td>staging.vulnweb.com</td>
+              <td>15 paths</td>
+              <td><span class="status-tag status-403">Queued</span></td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added staging.vulnweb.com to Scope')">Scope</button>
+              </td>
+            </tr>
+            <tr class="even">
+              <td>6</td>
+              <td>static.vulnweb.com</td>
+              <td>84 paths</td>
+              <td><span class="status-tag status-403">Queued</span></td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added static.vulnweb.com to Scope')">Scope</button>
+              </td>
+            </tr>
+            <tr class="odd">
+              <td>7</td>
+              <td>portal.vulnweb.com</td>
+              <td>9 paths</td>
+              <td><span class="status-tag status-403">Queued</span></td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added portal.vulnweb.com to Scope')">Scope</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: Scanner Log & Console -->
+    <div id="tab-console" class="tab-content">
+      <div class="filter-bar">
+        <span class="input-label">Scanner Output:</span>
+        <button class="btn btn-secondary" onclick="clearConsoleLog()">Clear Log</button>
+        <button class="btn btn-secondary" onclick="triggerToast('Logs copied to clipboard')">Copy All</button>
+      </div>
+
+      <div class="console-view" id="consoleLogContainer">
+        <div class="log-line"><span class="log-ts">[10:48:02]</span> <span class="log-info">[INIT]</span> WaybackLister Burp Extension v2.0 initialized (by FR13ND0x7F &amp; littlespidy).</div>
+        <div class="log-line"><span class="log-ts">[10:48:05]</span> <span class="log-info">[INFO]</span> Target domain set to: testphp.vulnweb.com. Auto-subdomains: ENABLED.</div>
+        <div class="log-line"><span class="log-ts">[10:48:06]</span> <span class="log-info">[WAYBACK]</span> Querying Wayback CDX API: https://web.archive.org/cdx/search/cdx?url=*.testphp.vulnweb.com/*&amp;output=txt&amp;fl=original&amp;collapse=urlkey</div>
+        <div class="log-line"><span class="log-ts">[10:48:09]</span> <span class="log-info">[WAYBACK]</span> Received 1,428 archived URLs. Parsing paths and subdomains...</div>
+        <div class="log-line"><span class="log-ts">[10:48:10]</span> <span class="log-info">[INFO]</span> Discovered 7 unique subdomains and 186 unique paths for testphp.vulnweb.com.</div>
+        <div class="log-line"><span class="log-ts">[10:48:11]</span> <span class="log-info">[SCAN]</span> Starting multi-threaded probe pool (Threads: 10, Delay: 50ms, Timeout: 10s)...</div>
+        <div class="log-line"><span class="log-ts">[10:48:12]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: http://testphp.vulnweb.com/admin/ (Matched: "Index of /admin", Length: 4218 B)</div>
+        <div class="log-line"><span class="log-ts">[10:48:12]</span> <span class="log-info">[BURP]</span> Created Burp Suite Audit Issue: "Open Directory Listing - /admin/" (Severity: Medium)</div>
+        <div class="log-line"><span class="log-ts">[10:48:13]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: http://testphp.vulnweb.com/secured/ (Matched: "&lt;title&gt;Index of", Length: 1842 B)</div>
+        <div class="log-line"><span class="log-ts">[10:48:15]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: https://testphp.vulnweb.com/images/ (Matched: "Parent Directory&lt;/a&gt;", Length: 6712 B)</div>
+        <div class="log-line"><span class="log-ts">[10:48:18]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: http://testphp.vulnweb.com/backup/ (Matched: "Last modified&lt;/a&gt;", Length: 3105 B)</div>
+        <div class="log-line"><span class="log-ts">[10:48:21]</span> <span class="log-info">[SCAN]</span> Progress: 124 / 186 paths verified (4 open directories found so far)...</div>
+      </div>
+    </div>
+
+    <!-- TAB 5: Settings & Signatures -->
+    <div id="tab-settings" class="tab-content">
+      <div class="settings-grid">
+        <!-- Detection Signatures Card -->
+        <div class="settings-card">
+          <div class="settings-card-title">Directory Listing Detection Signatures</div>
+          <p style="font-size: 11px; color: var(--text-muted);">Responses containing any of these substrings when returning HTTP 200 will be flagged as open directory listings.</p>
+          <div class="signature-list" id="signatureListContainer">
+            <div class="signature-item"><span>Index of /</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+            <div class="signature-item"><span>Directory Listing for</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+            <div class="signature-item"><span>&lt;title&gt;Index of</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+            <div class="signature-item"><span>Parent Directory&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+            <div class="signature-item"><span>Last modified&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+            <div class="signature-item"><span>Name&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+            <div class="signature-item"><span>Size&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+            <div class="signature-item"><span>Description&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="newSignatureInput" class="text-input" style="min-width: 140px; flex: 1;" placeholder="New pattern (e.g. Volume Serial Number)">
+            <button class="btn btn-secondary" onclick="addSignature()">Add Pattern</button>
+            <button class="btn btn-secondary" onclick="resetSignatures()">Reset Defaults</button>
+          </div>
+        </div>
+
+        <!-- Engine & Network Settings Card -->
+        <div class="settings-card">
+          <div class="settings-card-title">Wayback CDX &amp; Engine Settings</div>
+          
+          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span class="input-label">Wayback Machine CDX API URL Template:</span>
+            <input type="text" class="text-input" style="width: 100%;" value="https://web.archive.org/cdx/search/cdx?url={DOMAIN}&amp;output=txt&amp;fl=original&amp;collapse=urlkey">
+          </div>
+
+          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span class="input-label">Custom User-Agent:</span>
+            <input type="text" class="text-input" style="width: 100%;" value="WaybackLister/2.0 (BurpSuite-Extension-littlespidy)">
+          </div>
+
+          <div style="display: flex; gap: 14px;">
+            <div class="input-group">
+              <span class="input-label">CDX Retries:</span>
+              <input type="number" class="number-input" value="3" min="1" max="10">
+            </div>
+            <div class="input-group">
+              <span class="input-label">Retry Backoff (s):</span>
+              <input type="number" class="number-input" value="5" min="1" max="30">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Test both HTTP and HTTPS protocols for each path
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Honor Burp Suite upstream proxies and SOCKS settings
+            </label>
+          </div>
+
+          <div style="margin-top: auto; display: flex; gap: 8px;">
+            <button class="btn btn-primary" onclick="triggerToast('Settings saved successfully')">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Status Bar -->
+  <div class="footer-bar">
+    <div style="display: flex; align-items: center;">
+      <span class="status-indicator scanning" id="statusIndicator"></span>
+      <span id="footerStatusText">Engine: Running | Scanning paths on testphp.vulnweb.com (124/186)</span>
+    </div>
+    <div>
+      <span>WaybackLister v2.0 for Burp Suite (Montoya API) | Author: FR13ND0x7F &amp; littlespidy</span>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-notice" id="toastNotice">Notification</div>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-theme');
+      const btn = document.getElementById('themeToggleBtn');
+      btn.textContent = isLight ? 'Theme: Light' : 'Theme: Dark';
+    }
+
+    // Switch main sub-tabs
+    function switchTab(tabId, tabElement) {
+      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tabElement.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Switch HTTP Inspector preview tabs
+    function switchPreviewTab(panelId, tabElement) {
+      document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.preview-body').forEach(b => b.style.display = 'none');
+      tabElement.classList.add('active');
+
+      if (panelId === 'preview-resp') {
+        document.getElementById('previewResponse').style.display = 'block';
+      } else if (panelId === 'preview-req') {
+        document.getElementById('previewRequest').style.display = 'block';
+      } else if (panelId === 'preview-issue') {
+        document.getElementById('previewIssue').style.display = 'block';
+      }
+    }
+
+    // Select row in findings table
+    function selectFindingRow(row, id) {
+      document.querySelectorAll('#findingsTable tbody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+
+      const reqBox = document.getElementById('previewRequest');
+      const respBox = document.getElementById('previewResponse');
+      const issueBox = document.getElementById('previewIssue');
+
+      if (id === 1) {
+        reqBox.textContent = `GET /admin/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nAccept: */*\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 05:22:10 GMT\nServer: Apache/2.4.41 (Ubuntu)\nContent-Type: text/html;charset=UTF-8\nContent-Length: 4218\nConnection: close\n\n<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<html>\n <head>\n  <title>Index of /admin</title>\n </head>\n <body>\n<h1>Index of /admin</h1>\n  <table>\n   <tr><th><a href="?C=N;O=D">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th></tr>\n   <tr><th colspan="5"><hr></th></tr>\n<tr><td><a href="/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td></tr>\n<tr><td><a href="config.php.bak">config.php.bak</a></td><td align="right">2024-03-12 11:42</td><td align="right">2.4K</td></tr>\n<tr><td><a href="db_dump.sql.gz">db_dump.sql.gz</a></td><td align="right">2025-01-08 09:15</td><td align="right">1.8M</td></tr>\n</table>\n</body></html>`;
+        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Medium\nConfidence: Certain\nHost: http://testphp.vulnweb.com\nPath: /admin/\nMatched Signature: "Index of /admin"\n\nRemediation Recommendation:\nDisable directory indexing in web server configuration ('Options -Indexes' in Apache).`;
+      } else if (id === 2) {
+        reqBox.textContent = `GET /secured/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache/2.4.41\nContent-Length: 1842\n\n<html><head><title>Index of /secured</title></head><body><h1>Index of /secured</h1><p><a href="passwords.kdbx">passwords.kdbx</a></p></body></html>`;
+        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Medium\nConfidence: Certain\nHost: http://testphp.vulnweb.com\nPath: /secured/\nMatched Signature: "<title>Index of"`;
+      } else if (id === 3) {
+        reqBox.textContent = `GET /images/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nServer: nginx/1.18.0\nContent-Length: 6712\n\n<html><body><h1>Directory listing for /images/</h1><a href="../">Parent Directory</a><br><a href="logo.png">logo.png</a></body></html>`;
+        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Low\nConfidence: Certain\nHost: https://testphp.vulnweb.com\nPath: /images/\nMatched Signature: "Parent Directory</a>"`;
+      } else if (id === 4) {
+        reqBox.textContent = `GET /backup/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache\nContent-Length: 3105\n\n<html><head><title>Index of /backup</title></head><body><a href="archive_2025.tar.gz">archive_2025.tar.gz</a> Last modified: 2025-08-10</body></html>`;
+        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Medium\nConfidence: Certain\nHost: http://testphp.vulnweb.com\nPath: /backup/\nMatched Signature: "Last modified</a>"`;
+      }
+    }
+
+    // Filter findings
+    function filterFindingsTable() {
+      const q = document.getElementById('findingsSearchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#findingsTable tbody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // Filter paths
+    function filterPathsTable() {
+      const q = document.getElementById('pathsSearchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#pathsTable tbody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // Toast notification
+    function triggerToast(msg) {
+      const toast = document.getElementById('toastNotice');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+
+    // Scan control simulation
+    let isScanning = true;
+    function startScanSimulation() {
+      isScanning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('pauseBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = false;
+      document.getElementById('kpiStatus').textContent = 'Running (Scanning)';
+      document.getElementById('kpiStatus').className = 'metric-value success';
+      document.getElementById('statusIndicator').className = 'status-indicator scanning';
+      document.getElementById('footerStatusText').textContent = 'Engine: Running | Scanning paths on testphp.vulnweb.com';
+      triggerToast('Scan started');
+    }
+
+    function pauseScanSimulation() {
+      isScanning = false;
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('pauseBtn').disabled = true;
+      document.getElementById('kpiStatus').textContent = 'Paused';
+      document.getElementById('kpiStatus').className = 'metric-value';
+      document.getElementById('statusIndicator').className = 'status-indicator stopped';
+      document.getElementById('footerStatusText').textContent = 'Engine: Paused';
+      triggerToast('Scan paused');
+    }
+
+    function stopScanSimulation() {
+      isScanning = false;
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('pauseBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = true;
+      document.getElementById('kpiStatus').textContent = 'Idle (Stopped)';
+      document.getElementById('kpiStatus').className = 'metric-value';
+      document.getElementById('statusIndicator').className = 'status-indicator stopped';
+      document.getElementById('footerStatusText').textContent = 'Engine: Idle';
+      triggerToast('Scan stopped');
+    }
+
+    function clearAllData() {
+      if (confirm('Clear all findings, harvested paths, and scanner logs?')) {
+        document.querySelector('#findingsTable tbody').innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 16px;">No open directory listings discovered yet.</td></tr>';
+        document.getElementById('findingsCountBadge').textContent = '0';
+        document.getElementById('kpiFindings').textContent = '0';
+        document.getElementById('kpiRequests').textContent = '0 / 0';
+        document.getElementById('kpiHarvested').textContent = '0';
+        document.getElementById('kpiUniquePaths').textContent = '0';
+        document.getElementById('kpiSubdomains').textContent = '0';
+        document.getElementById('progressBarFill').style.width = '0%';
+        document.getElementById('progressBarText').textContent = 'Idle';
+        clearConsoleLog();
+        triggerToast('All data cleared');
+      }
+    }
+
+    function clearConsoleLog() {
+      document.getElementById('consoleLogContainer').innerHTML = '<div class="log-line"><span class="log-ts">[LOG]</span> Console cleared.</div>';
+    }
+
+    function exportData(type) {
+      triggerToast(`Exported ${type} data successfully (CSV format simulated)`);
+    }
+
+    // Signature management
+    function addSignature() {
+      const input = document.getElementById('newSignatureInput');
+      const val = input.value.trim();
+      if (!val) return;
+      const list = document.getElementById('signatureListContainer');
+      const item = document.createElement('div');
+      item.className = 'signature-item';
+      item.innerHTML = `<span>${val.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button>`;
+      list.appendChild(item);
+      input.value = '';
+      triggerToast(`Added signature pattern: "${val}"`);
+    }
+
+    function deleteSignature(btn) {
+      btn.parentElement.remove();
+      triggerToast('Removed signature pattern');
+    }
+
+    function resetSignatures() {
+      const defaults = [
+        "Index of /", "Directory Listing for", "<title>Index of",
+        "Parent Directory</a>", "Last modified</a>", "Name</a>",
+        "Size</a>", "Description</a>"
+      ];
+      const list = document.getElementById('signatureListContainer');
+      list.innerHTML = '';
+      defaults.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'signature-item';
+        item.innerHTML = `<span>${d.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button>`;
+        list.appendChild(item);
+      });
+      triggerToast('Reset signatures to defaults');
+    }
+  </script>
+</body>
+</html>

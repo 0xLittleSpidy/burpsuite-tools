@@ -5,6 +5,7 @@ import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import com.littlespidy.quickhelper.model.ExtractionOptions_littlespidy;
 import com.littlespidy.quickhelper.service.DomainExtractorService_littlespidy;
+import com.littlespidy.quickhelper.ui.QuickHelperRootTab_littlespidy;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -18,14 +19,31 @@ import java.util.List;
 public class QuickHelperContextMenu_littlespidy implements ContextMenuItemsProvider {
 
     private final DomainExtractorService_littlespidy extractorService;
+    private final QuickHelperRootTab_littlespidy rootTab;
 
     public QuickHelperContextMenu_littlespidy(DomainExtractorService_littlespidy extractorService) {
+        this(extractorService, null);
+    }
+
+    public QuickHelperContextMenu_littlespidy(DomainExtractorService_littlespidy extractorService,
+                                             QuickHelperRootTab_littlespidy rootTab) {
         this.extractorService = extractorService;
+        this.rootTab = rootTab;
     }
 
     @Override
     public List<Component> provideMenuItems(ContextMenuEvent event) {
         JMenu menu = new JMenu("Quick Helper");
+
+        if (rootTab != null) {
+            JMenuItem downloadAllItem = new JMenuItem("Download All Extensions (Single Click)");
+            downloadAllItem.addActionListener(e -> {
+                rootTab.selectDownloaderTab();
+                rootTab.getDownloaderTab().triggerDownloadAll();
+            });
+            menu.add(downloadAllItem);
+            menu.addSeparator();
+        }
 
         JMenuItem copyAllDomainsItem = new JMenuItem("Copy All Domain Names");
         copyAllDomainsItem.addActionListener(e ->
