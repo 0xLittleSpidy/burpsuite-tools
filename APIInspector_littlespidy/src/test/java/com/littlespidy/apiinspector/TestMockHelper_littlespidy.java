@@ -155,4 +155,19 @@ public class TestMockHelper_littlespidy {
                 }
         );
     }
+
+    public static burp.api.montoya.http.message.HttpRequestResponse createMockHttpRequestResponse(HttpRequest request, HttpResponse response) {
+        return (burp.api.montoya.http.message.HttpRequestResponse) Proxy.newProxyInstance(
+                burp.api.montoya.http.message.HttpRequestResponse.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.http.message.HttpRequestResponse.class},
+                (proxy, method, args) -> {
+                    String name = method.getName();
+                    if ("request".equals(name)) return request;
+                    if ("response".equals(name)) return response;
+                    if ("hasResponse".equals(name)) return response != null;
+                    if ("httpService".equals(name)) return request != null ? request.httpService() : null;
+                    return null;
+                }
+        );
+    }
 }

@@ -55,7 +55,7 @@ public class APIInspectorContextMenu_littlespidy implements ContextMenuItemsProv
             return menuList;
         }
 
-        // Direct Top-Level Action: Send to ResAPI Version Finder
+        // Direct Top-Level Action 1: Send to ResAPI Version Finder
         JMenuItem directVersionFinderItem = new JMenuItem("Send to ResAPI Version Finder");
         directVersionFinderItem.addActionListener(e -> {
             for (HttpRequestResponse target : targets) {
@@ -69,6 +69,19 @@ public class APIInspectorContextMenu_littlespidy implements ContextMenuItemsProv
             rootTab.selectTab(rootTab.getVersionFinderTab());
         });
         menuList.add(directVersionFinderItem);
+
+        // Direct Top-Level Action 2: Send to Hidden API Storage
+        JMenuItem directHiddenStorageItem = new JMenuItem("Send to Hidden API Storage");
+        directHiddenStorageItem.addActionListener(e -> {
+            String toolSource = resolveSourceTool(event);
+            for (HttpRequestResponse target : targets) {
+                if (target.request() != null) {
+                    rootTab.getHiddenApiStorageTab().addEndpointFromBurpTool(target, toolSource);
+                }
+            }
+            rootTab.selectTab(rootTab.getHiddenApiStorageTab());
+        });
+        menuList.add(directHiddenStorageItem);
 
         JMenu apiInspectorMenu = new JMenu("API Inspector (littlespidy)");
 
@@ -86,6 +99,19 @@ public class APIInspectorContextMenu_littlespidy implements ContextMenuItemsProv
             rootTab.selectTab(rootTab.getVersionFinderTab());
         });
         apiInspectorMenu.add(versionFinderItem);
+
+        // Action 2: Send to Hidden API Storage
+        JMenuItem hiddenStorageItem = new JMenuItem("Send to Hidden API Storage");
+        hiddenStorageItem.addActionListener(e -> {
+            String toolSource = resolveSourceTool(event);
+            for (HttpRequestResponse target : targets) {
+                if (target.request() != null) {
+                    rootTab.getHiddenApiStorageTab().addEndpointFromBurpTool(target, toolSource);
+                }
+            }
+            rootTab.selectTab(rootTab.getHiddenApiStorageTab());
+        });
+        apiInspectorMenu.add(hiddenStorageItem);
 
         apiInspectorMenu.addSeparator();
 
@@ -187,5 +213,22 @@ public class APIInspectorContextMenu_littlespidy implements ContextMenuItemsProv
         } else {
             rootTab.getEndpointDiscoveryTab().addReferenceEntry(refEntry);
         }
+    }
+
+    private String resolveSourceTool(ContextMenuEvent event) {
+        if (event == null || event.invocationType() == null) {
+            return "Proxy History";
+        }
+        String typeStr = event.invocationType().toString().toLowerCase();
+        if (typeStr.contains("proxy")) {
+            return "Proxy History";
+        } else if (typeStr.contains("repeater") || typeStr.contains("message_editor")) {
+            return "Repeater";
+        } else if (typeStr.contains("target") || typeStr.contains("site_map")) {
+            return "Target Site Map";
+        } else if (typeStr.contains("logger")) {
+            return "Logger";
+        }
+        return "Proxy History";
     }
 }

@@ -245,7 +245,7 @@ public class APIInspectorPersistenceManager_littlespidy {
             return;
         }
         if (tab == null) return;
-        saveSyncInternal(tab, null, null, null, null, null);
+        saveSyncInternal(tab, null, null, null, null, null, null);
     }
 
     public void saveSync(APIInspectorTab_littlespidy rootTab) {
@@ -255,7 +255,8 @@ public class APIInspectorPersistenceManager_littlespidy {
                 rootTab.getEndpointDiscoveryTab() != null ? rootTab.getEndpointDiscoveryTab().getAllEntries() : null,
                 rootTab.getImportTab() != null ? rootTab.getImportTab().getAllCollections() : null,
                 rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getAllProfiles() : null,
-                rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getAllResults() : null);
+                rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getAllResults() : null,
+                rootTab.getHiddenApiStorageTab() != null ? rootTab.getHiddenApiStorageTab().getAllEndpoints() : null);
     }
 
     private void saveSyncInternal(
@@ -264,7 +265,8 @@ public class APIInspectorPersistenceManager_littlespidy {
             List<ReferenceRequestEntry> endpointEntries,
             List<ImportedCollection_littlespidy> collections,
             List<AuthProfile_littlespidy> profiles,
-            List<AuthTestResult_littlespidy> testResults) {
+            List<AuthTestResult_littlespidy> testResults,
+            List<HiddenEndpoint_littlespidy> hiddenEndpoints) {
 
         synchronized (saveLock) {
             try {
@@ -314,6 +316,12 @@ public class APIInspectorPersistenceManager_littlespidy {
                 if (testResults != null) {
                     for (AuthTestResult_littlespidy r : testResults) {
                         root.authTestResults.add(serializeAuthTestResult(r));
+                    }
+                }
+
+                if (hiddenEndpoints != null) {
+                    for (HiddenEndpoint_littlespidy h : hiddenEndpoints) {
+                        root.hiddenEndpoints.add(serializeHiddenEndpoint(h));
                     }
                 }
 
@@ -663,6 +671,16 @@ public class APIInspectorPersistenceManager_littlespidy {
                     // 7. Restore Session Store
                     if (root.sessionStore != null && rootTab.getRequestResponseViewerTab() != null) {
                         rootTab.getRequestResponseViewerTab().setSessionStore(deserializeSessionStore(root.sessionStore));
+                    }
+
+                    // 8. Restore Hidden API Storage Endpoints
+                    if (root.hiddenEndpoints != null && !root.hiddenEndpoints.isEmpty() && rootTab.getHiddenApiStorageTab() != null) {
+                        List<HiddenEndpoint_littlespidy> epList = new ArrayList<>();
+                        for (HiddenEndpointDTO hDto : root.hiddenEndpoints) {
+                            HiddenEndpoint_littlespidy ep = deserializeHiddenEndpoint(hDto);
+                            if (ep != null) epList.add(ep);
+                        }
+                        rootTab.getHiddenApiStorageTab().setEndpoints(epList);
                     }
 
                     // Resync profile selections across tabs
@@ -1060,6 +1078,48 @@ public class APIInspectorPersistenceManager_littlespidy {
         s.setCookieName(dto.cookieName);
         s.setCookieValue(dto.cookieValue);
         return s;
+    }
+
+    public static HiddenEndpointDTO serializeHiddenEndpoint(HiddenEndpoint_littlespidy ep) {
+        if (ep == null) return null;
+        HiddenEndpointDTO dto = new HiddenEndpointDTO();
+        dto.id = ep.getId();
+        dto.source = ep.getSource();
+        dto.method = ep.getMethod();
+        dto.url = ep.getUrl();
+        dto.path = ep.getPath();
+        dto.parametersSummary = ep.getParametersSummary();
+        dto.statusCode = ep.getStatusCode();
+        dto.notes = ep.getNotes();
+        dto.discoveredAt = ep.getDiscoveredAt();
+        if (ep.getRawRequest() != null) {
+            dto.request = serializeHttpRequest(ep.getRawRequest());
+        }
+        if (ep.getRawResponse() != null) {
+            dto.response = serializeHttpResponse(ep.getRawResponse(), ep.getRawRequest() != null ? ep.getRawRequest().httpService() : null);
+        }
+        return dto;
+    }
+
+    public static HiddenEndpoint_littlespidy deserializeHiddenEndpoint(HiddenEndpointDTO dto) {
+        if (dto == null) return null;
+        HiddenEndpoint_littlespidy ep = new HiddenEndpoint_littlespidy();
+        if (dto.id != null) ep.setId(dto.id);
+        if (dto.source != null) ep.setSource(dto.source);
+        if (dto.method != null) ep.setMethod(dto.method);
+        if (dto.url != null) ep.setUrl(dto.url);
+        if (dto.path != null) ep.setPath(dto.path);
+        if (dto.parametersSummary != null) ep.setParametersSummary(dto.parametersSummary);
+        ep.setStatusCode(dto.statusCode);
+        if (dto.notes != null) ep.setNotes(dto.notes);
+        if (dto.discoveredAt > 0) ep.setDiscoveredAt(dto.discoveredAt);
+        if (dto.request != null) {
+            ep.setRawRequest(deserializeHttpRequest(dto.request));
+        }
+        if (dto.response != null) {
+            ep.setRawResponse(deserializeHttpResponse(dto.response));
+        }
+        return ep;
     }
 
     private File detectBurpProjectDirectory() {

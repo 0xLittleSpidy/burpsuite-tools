@@ -3,6 +3,7 @@ package com.littlespidy.apiinspector.ui;
 
 import com.littlespidy.apiinspector.engine.ProbeProgressListener_littlespidy;
 import com.littlespidy.apiinspector.engine.VersionProbeEngine_littlespidy;
+import com.littlespidy.apiinspector.model.APIVersionPresets_littlespidy;
 import com.littlespidy.apiinspector.model.ProbeResult_littlespidy;
 import com.littlespidy.apiinspector.model.SessionStore_littlespidy;
 import com.littlespidy.apiinspector.strategy.*;
@@ -56,6 +57,8 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
     private JCheckBox subdomainCheck;
     private JCheckBox cookieCheck;
 
+    private JComboBox<String> presetCombo;
+    private JLabel candidateCountLabel;
     private JTextField candidateInput;
     private JSpinner threadSpinner;
     private JSpinner delaySpinner;
@@ -135,14 +138,47 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         strategiesPanel.add(subdomainCheck);
         strategiesPanel.add(cookieCheck);
 
-        // Candidate Versions Row
+        // Candidate Versions Row with Presets & Count
         JPanel candidatesPanel = new JPanel(new BorderLayout(6, 2));
         candidatesPanel.setBorder(new EmptyBorder(2, 6, 2, 6));
-        JLabel candLabel = new JLabel("Version Candidates (comma-separated):");
-        candidateInput = new JTextField("0, 1, 2, 3, 4, 5, 0.1, 1.0, 2.0, beta, latest, legacy, deprecated");
-        candidateInput.setToolTipText("Comma-separated list of candidate version values to test");
-        candidatesPanel.add(candLabel, BorderLayout.WEST);
+
+        JPanel candLeftBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        candLeftBox.add(new JLabel("Preset:"));
+        presetCombo = new JComboBox<>(new String[]{
+                "Extended (1,091 Versions: v0 to v10.99)",
+                "Common Standard (13 Versions)",
+                "Major Numeric (11 Versions: v0 to v10)",
+                "Custom"
+        });
+        candLeftBox.add(presetCombo);
+
+        candidateCountLabel = new JLabel("[1,091 Candidates]");
+        candidateCountLabel.setFont(candidateCountLabel.getFont().deriveFont(Font.BOLD, 11f));
+        candLeftBox.add(candidateCountLabel);
+        candLeftBox.add(new JLabel("Candidates:"));
+        candidatesPanel.add(candLeftBox, BorderLayout.WEST);
+
+        candidateInput = new JTextField(APIVersionPresets_littlespidy.getExtendedVersionsCommaSeparated());
+        candidateInput.setToolTipText("Comma, newline, or space-separated list of candidate version values to test");
         candidatesPanel.add(candidateInput, BorderLayout.CENTER);
+
+        presetCombo.addActionListener(e -> {
+            int idx = presetCombo.getSelectedIndex();
+            if (idx == 0) {
+                candidateInput.setText(APIVersionPresets_littlespidy.getExtendedVersionsCommaSeparated());
+            } else if (idx == 1) {
+                candidateInput.setText(APIVersionPresets_littlespidy.getCommonVersionsCommaSeparated());
+            } else if (idx == 2) {
+                candidateInput.setText(APIVersionPresets_littlespidy.getMajorVersionsCommaSeparated());
+            }
+            updateCandidateCountDisplay();
+        });
+
+        candidateInput.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { updateCandidateCountDisplay(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { updateCandidateCountDisplay(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { updateCandidateCountDisplay(); }
+        });
 
         // Action Toolbar: Concurrency, Delay, Start, Stop, Clear, Export
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
@@ -323,7 +359,7 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
         String rawCandidates = candidateInput.getText().trim();
         List<String> candidates = new ArrayList<>();
         if (!rawCandidates.isEmpty()) {
-            for (String c : rawCandidates.split(",")) {
+            for (String c : rawCandidates.split("[,\\r?\\n\\s]+")) {
                 String clean = c.trim();
                 if (!clean.isEmpty()) {
                     candidates.add(clean);
@@ -652,7 +688,25 @@ public class RequestSessionPanel_littlespidy extends JPanel implements ProbeProg
     public void setCandidatesText(String text) {
         if (candidateInput != null && text != null) {
             candidateInput.setText(text);
+            if (presetCombo != null) {
+                presetCombo.setSelectedItem("Custom");
+            }
+            updateCandidateCountDisplay();
         }
+    }
+
+    private void updateCandidateCountDisplay() {
+        if (candidateInput == null || candidateCountLabel == null) return;
+        String raw = candidateInput.getText().trim();
+        if (raw.isEmpty()) {
+            candidateCountLabel.setText("[0 Candidates]");
+            return;
+        }
+        int count = 0;
+        for (String c : raw.split("[,\\r?\\n\\s]+")) {
+            if (!c.trim().isEmpty()) count++;
+        }
+        candidateCountLabel.setText("[" + count + " Candidates]");
     }
 
     public int getThreadCount() {

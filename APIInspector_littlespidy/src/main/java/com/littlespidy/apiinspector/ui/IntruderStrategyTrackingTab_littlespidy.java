@@ -48,6 +48,7 @@ public class IntruderStrategyTrackingTab_littlespidy extends JPanel {
     private JLabel statsLabel;
 
     private Runnable onStateChangedCallback;
+    private java.util.function.Consumer<com.littlespidy.apiinspector.model.HiddenEndpoint_littlespidy> onSaveToHiddenStorageCallback;
 
     public IntruderStrategyTrackingTab_littlespidy(MontoyaApi api, String strategyTitle) {
         super(new BorderLayout(6, 6));
@@ -355,6 +356,33 @@ public class IntruderStrategyTrackingTab_littlespidy extends JPanel {
         });
         menu.add(repeater);
 
+        JMenuItem saveToStorage = new JMenuItem("Save to Hidden API Storage");
+        saveToStorage.addActionListener(e -> {
+            int viewRow = variationTable.getSelectedRow();
+            if (viewRow != -1 && onSaveToHiddenStorageCallback != null) {
+                int modelRow = variationTable.convertRowIndexToModel(viewRow);
+                GeneratedVariationItem item = variationTableModel.getItemAt(modelRow);
+                if (item != null && item.getGeneratedRequest() != null) {
+                    HttpRequest req = item.getGeneratedRequest();
+                    String method = req.method() != null ? req.method() : "GET";
+                    String url = item.getFullUrl() != null ? item.getFullUrl() : req.url();
+                    com.littlespidy.apiinspector.model.HiddenEndpoint_littlespidy ep =
+                            new com.littlespidy.apiinspector.model.HiddenEndpoint_littlespidy(
+                                    "Endpoint Discovery",
+                                    method,
+                                    url,
+                                    item.getPathVariation(),
+                                    0,
+                                    "Discovered variation #" + item.getVariationIndex() + " from " + strategyTitle,
+                                    req,
+                                    null
+                            );
+                    onSaveToHiddenStorageCallback.accept(ep);
+                }
+            }
+        });
+        menu.add(saveToStorage);
+
         menu.addSeparator();
 
         JMenuItem copyUrl = new JMenuItem("Copy URL");
@@ -399,6 +427,10 @@ public class IntruderStrategyTrackingTab_littlespidy extends JPanel {
                 }
             }
         });
+    }
+
+    public void setOnSaveToHiddenStorageCallback(java.util.function.Consumer<com.littlespidy.apiinspector.model.HiddenEndpoint_littlespidy> callback) {
+        this.onSaveToHiddenStorageCallback = callback;
     }
 
     // --- Table Models ---

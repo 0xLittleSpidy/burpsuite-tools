@@ -26,6 +26,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
     private final AuthTestingTab_littlespidy authTestingTab;
     private final IntruderStrategyTrackingTab_littlespidy docStrategyTab;
     private final IntruderStrategyTrackingTab_littlespidy endpointDiscoveryTab;
+    private final HiddenAPIStorageTab_littlespidy hiddenStorageTab;
     private final JPanel topContainer = new JPanel(new BorderLayout());
 
     public APIInspectorTab_littlespidy(MontoyaApi api) {
@@ -39,6 +40,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
         this.authTestingTab = new AuthTestingTab_littlespidy(api);
         this.docStrategyTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Documentation Intruder Strategy");
         this.endpointDiscoveryTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Endpoint Discovery Intruder Strategy");
+        this.hiddenStorageTab = new HiddenAPIStorageTab_littlespidy(api);
 
         this.authTestingTab.setImportTabRef(this.importTab);
 
@@ -67,6 +69,10 @@ public class APIInspectorTab_littlespidy extends JPanel {
             sendEndpointToVersionFinder(ep, baseUrl);
         });
 
+        // Wire "Save to Hidden API Storage" from strategy tabs
+        this.endpointDiscoveryTab.setOnSaveToHiddenStorageCallback(this.hiddenStorageTab::addEndpoint);
+        this.docStrategyTab.setOnSaveToHiddenStorageCallback(this.hiddenStorageTab::addEndpoint);
+
         // Sync tabs when API Import changes
         this.importTab.addStateChangedListener(() -> {
             parameterCollectorTab.updateCollections(importTab.getAllCollections());
@@ -93,6 +99,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
         rootTabbedPane.addTab("REST API Version Finder", versionFinderTab);
         rootTabbedPane.addTab("API Documentation Strategy", docStrategyTab);
         rootTabbedPane.addTab("API Endpoint Discovery Strategy", endpointDiscoveryTab);
+        rootTabbedPane.addTab("Hidden API Storage", hiddenStorageTab);
 
         add(topContainer, BorderLayout.NORTH);
         add(rootTabbedPane, BorderLayout.CENTER);
@@ -130,6 +137,9 @@ public class APIInspectorTab_littlespidy extends JPanel {
         if (endpointDiscoveryTab != null) {
             endpointDiscoveryTab.restoreEntries(java.util.Collections.emptyList());
         }
+        if (hiddenStorageTab != null) {
+            hiddenStorageTab.setEndpoints(java.util.Collections.emptyList());
+        }
     }
 
     public ResAPIVersionFinderTab_littlespidy getVersionFinderTab() {
@@ -158,6 +168,10 @@ public class APIInspectorTab_littlespidy extends JPanel {
 
     public IntruderStrategyTrackingTab_littlespidy getEndpointDiscoveryTab() {
         return endpointDiscoveryTab;
+    }
+
+    public HiddenAPIStorageTab_littlespidy getHiddenApiStorageTab() {
+        return hiddenStorageTab;
     }
 
     public void sendEndpointToVersionFinder(DiscoveredEndpoint_littlespidy ep, String targetBaseUrl) {

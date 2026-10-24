@@ -18,6 +18,7 @@ public class SessionStateDTO_littlespidy {
         public List<ImportedCollectionDTO> importedCollections = new ArrayList<>();
         public List<AuthProfileDTO> authProfiles = new ArrayList<>();
         public List<AuthTestResultDTO> authTestResults = new ArrayList<>();
+        public List<HiddenEndpointDTO> hiddenEndpoints = new ArrayList<>();
         public SessionStoreDTO sessionStore;
     }
 
@@ -165,5 +166,19 @@ public class SessionStateDTO_littlespidy {
         public java.util.Map<String, String> customHeaders;
         public String cookieName;
         public String cookieValue;
+    }
+
+    public static class HiddenEndpointDTO {
+        public String id;
+        public String source;
+        public String method;
+        public String url;
+        public String path;
+        public String parametersSummary;
+        public int statusCode;
+        public String notes;
+        public long discoveredAt;
+        public HttpMessageDTO request;
+        public HttpMessageDTO response;
     }
 }

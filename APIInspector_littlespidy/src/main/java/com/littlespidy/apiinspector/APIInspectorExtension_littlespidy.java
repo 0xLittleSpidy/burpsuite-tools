@@ -30,6 +30,7 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
         // Hook persistent auto-save callbacks for all workspace tabs
         rootTab.getDocStrategyTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
         rootTab.getEndpointDiscoveryTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
+        rootTab.getHiddenApiStorageTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
         rootTab.getImportTab().addStateChangedListener(() -> persistenceManager.saveAsync(rootTab));
         rootTab.getAuthTestingTab().addStateChangedListener(() -> persistenceManager.saveAsync(rootTab));
 
