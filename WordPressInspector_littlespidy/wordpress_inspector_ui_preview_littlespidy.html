@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WordPress Inspector (littlespidy) - Burp Suite Extension UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Suite Orange */
+      --accent-hover: #ff7f32;
+      --accent-disabled: #8a481e;
+      --badge-vulnerable: #a82020;
+      --badge-clean: #2e7d32;
+      --badge-warning: #b78103;
+      --badge-info: #1565c0;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --input-bg: #2d2d2d;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --badge-vulnerable: #d32f2f;
+      --badge-clean: #388e3c;
+      --badge-warning: #f57c00;
+      --badge-info: #1976d2;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --input-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Burp Suite Top Banner */
+    .burp-top-bar {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      height: 38px;
+      user-select: none;
+    }
+
+    .burp-suite-tabs {
+      display: flex;
+      height: 100%;
+    }
+
+    .burp-suite-tab {
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .burp-suite-tab:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-bright);
+    }
+
+    .burp-suite-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--accent);
+      font-weight: 600;
+      border-top: 2px solid var(--accent);
+    }
+
+    .theme-toggle-btn {
+      background-color: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .theme-toggle-btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    /* Main Container */
+    .extension-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Extension Top-Level Parent Tabs */
+    .parent-tabs-bar {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 4px 8px 0 8px;
+      gap: 4px;
+      overflow-x: auto;
+    }
+
+    .parent-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .parent-tab:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-bright);
+    }
+
+    .parent-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      font-weight: 600;
+      border-top: 2px solid var(--accent);
+    }
+
+    .parent-tab.config-tab {
+      background-color: var(--bg-hover);
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .parent-tab.config-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--accent);
+    }
+
+    .close-tab-btn {
+      display: inline-block;
+      padding: 0 4px;
+      color: var(--text-muted);
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .close-tab-btn:hover {
+      background-color: var(--badge-vulnerable);
+      color: #ffffff;
+    }
+
+    .add-tab-btn {
+      padding: 6px 10px;
+      background-color: transparent;
+      border: 1px dashed var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .add-tab-btn:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-bright);
+      border-color: var(--accent);
+    }
+
+    /* Tab Content Areas */
+    .tab-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* Configuration Panel Layout */
+    .config-scroll-pane {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .config-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+    }
+
+    .config-card-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-text {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 6px 10px;
+      border-radius: 3px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .input-text:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      background-color: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 6px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-danger {
+      background-color: var(--badge-vulnerable);
+      border-color: var(--badge-vulnerable);
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      opacity: 0.9;
+    }
+
+    .quota-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .quota-box {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .quota-val {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--accent);
+      margin: 4px 0;
+    }
+
+    .quota-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    /* Domain Parent Tab Layout */
+    .domain-toolbar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .domain-url-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .domain-url-input {
+      flex: 1;
+      min-width: 250px;
+      max-width: 480px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-vuln {
+      background-color: var(--badge-vulnerable);
+      color: #ffffff;
+    }
+
+    .badge-ok {
+      background-color: var(--badge-clean);
+      color: #ffffff;
+    }
+
+    .badge-warn {
+      background-color: var(--badge-warning);
+      color: #ffffff;
+    }
+
+    .badge-info {
+      background-color: var(--badge-info);
+      color: #ffffff;
+    }
+
+    /* Domain Sub-Tabs */
+    .sub-tabs-bar {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 12px;
+      gap: 2px;
+    }
+
+    .sub-tab {
+      padding: 7px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      user-select: none;
+    }
+
+    .sub-tab:hover {
+      color: var(--text-bright);
+      background-color: var(--bg-hover);
+    }
+
+    .sub-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background-color: var(--bg-dark);
+    }
+
+    .sub-tab-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 12px;
+      gap: 12px;
+    }
+
+    .sub-tab-content.active {
+      display: flex;
+    }
+
+    /* Tables & Data Viewers */
+    .table-container {
+      flex: 1;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-toolbar {
+      padding: 6px 10px;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--bg-darker);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-size: 11px;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--row-even);
+    }
+
+    tr:nth-child(odd) {
+      background-color: var(--row-odd);
+    }
+
+    tr:hover {
+      background-color: var(--bg-hover);
+      cursor: pointer;
+    }
+
+    tr.selected {
+      background-color: var(--bg-selected) !important;
+      color: #ffffff;
+    }
+
+    tr.selected td {
+      color: #ffffff;
+    }
+
+    /* Split Pane */
+    .split-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .detail-pane {
+      height: 200px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .detail-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--text-bright);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .detail-body {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px;
+    }
+
+    .stat-card-title {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .stat-card-value {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-card-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Console Logs */
+    .console-log {
+      flex: 1;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 10px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      color: #9cdcfe;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .log-line-info {
+      color: #4ec9b0;
+    }
+
+    .log-line-warn {
+      color: #dcdcaa;
+    }
+
+    .log-line-err {
+      color: #f14c4c;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: 650px;
+      max-width: 90vw;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+      padding: 10px 14px;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      color: var(--text-bright);
+    }
+
+    .modal-content {
+      padding: 14px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 10px 14px;
+      background-color: var(--bg-darker);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Suite Tab Bar Representation -->
+  <div class="burp-top-bar">
+    <div class="burp-suite-tabs">
+      <div class="burp-suite-tab">Dashboard</div>
+      <div class="burp-suite-tab">Target</div>
+      <div class="burp-suite-tab">Proxy</div>
+      <div class="burp-suite-tab">Intruder</div>
+      <div class="burp-suite-tab">Repeater</div>
+      <div class="burp-suite-tab active">WordPress Inspector</div>
+      <div class="burp-suite-tab">Extensions</div>
+    </div>
+    <div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">Switch to Light Theme</button>
+    </div>
+  </div>
+
+  <!-- Extension Parent Tabs Bar -->
+  <div class="extension-container">
+    <div class="parent-tabs-bar" id="parentTabsBar">
+      <div class="parent-tab config-tab" onclick="switchParentTab('config-tab-panel', this)">
+        <span>Configuration</span>
+      </div>
+      <div class="parent-tab active" onclick="switchParentTab('domain-1-panel', this)">
+        <span>blog.security-target.com</span>
+        <span class="close-tab-btn" onclick="closeDomainTab(event, 'domain-1-panel', this)">[X]</span>
+      </div>
+      <div class="parent-tab" onclick="switchParentTab('domain-2-panel', this)">
+        <span>shop.ecommerce-demo.org</span>
+        <span class="close-tab-btn" onclick="closeDomainTab(event, 'domain-2-panel', this)">[X]</span>
+      </div>
+      <button class="add-tab-btn" onclick="promptAddDomain()">+ Add Target Domain</button>
+    </div>
+
+    <!-- TAB 1: CONFIGURATION -->
+    <div class="tab-content" id="config-tab-panel">
+      <div class="config-scroll-pane">
+        
+        <!-- WPScan API Key Card -->
+        <div class="config-card">
+          <div class="config-card-title">
+            <span>WPScan API Credentials</span>
+            <span class="status-badge badge-ok" id="apiKeyStatusBadge">[+] Valid Key (Active)</span>
+          </div>
+          <div class="form-group">
+            <label for="apiKeyInput">WPScan API Token:</label>
+            <div class="form-inline">
+              <input type="password" id="apiKeyInput" class="input-text" style="flex: 1;" value="wpscan_live_token_7f9984bc12dfa88201" placeholder="Enter your WPScan API token (from wpscan.com/api)">
+              <button class="btn" onclick="toggleApiKeyVisibility()">Show</button>
+              <button class="btn btn-primary" onclick="saveApiKey()">Save API Key</button>
+              <button class="btn" onclick="testApiKey()">Test & Verify</button>
+            </div>
+            <span style="color: var(--text-muted); font-size: 11px;">The API key is securely saved in Burp preferences and used to query core, plugin, and theme vulnerabilities.</span>
+          </div>
+        </div>
+
+        <!-- Quotas & API Counter Card -->
+        <div class="config-card">
+          <div class="config-card-title">
+            <span>WPScan API Quotas & Usage Tracker</span>
+            <button class="btn" onclick="resetApiCounter()">Reset Daily Usage Counter</button>
+          </div>
+          <div class="quota-grid">
+            <div class="quota-box">
+              <div class="quota-label">Daily API Calls Used</div>
+              <div class="quota-val" id="apiCallsUsed">24</div>
+              <div class="quota-label">WPScan API requests today</div>
+            </div>
+            <div class="quota-box">
+              <div class="quota-label">Estimated Remaining Quota</div>
+              <div class="quota-val">26</div>
+              <div class="quota-label">Based on 50 free daily credits</div>
+            </div>
+            <div class="quota-box">
+              <div class="quota-label">Cached Queries Saved</div>
+              <div class="quota-val">68</div>
+              <div class="quota-label">24-hour cache hits</div>
+            </div>
+            <div class="quota-box">
+              <div class="quota-label">Counter Reset Time</div>
+              <div class="quota-val" style="font-size: 14px; margin-top: 8px;">00:00:00 UTC</div>
+              <div class="quota-label">Automatic daily reset</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scanner Settings Card -->
+        <div class="config-card">
+          <div class="config-card-title">
+            <span>Inspection & Reconnaissance Options</span>
+          </div>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" checked>
+              <span><strong>Passive Live Traffic Detection:</strong> Inspect passing Burp Proxy responses for WordPress signatures in real-time.</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked>
+              <span><strong>24-Hour Cache for WPScan Results:</strong> Avoid duplicate API requests for the same plugin/theme within 24 hours.</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked>
+              <span><strong>Smart Plugin Prioritization:</strong> Scan all 80+ high-risk plugins first, plus up to 3 standard plugins to save API credits.</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked>
+              <span><strong>WordPress.org Public Update Monitoring:</strong> Query WordPress.org API for latest plugin versions (free, uses 0 WPScan credits).</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked>
+              <span><strong>Automatic Security Hardening Checks:</strong> Probe XML-RPC multicall/pingback methods, REST endpoints, and sensitive files.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- HTTP History Scan Card -->
+        <div class="config-card">
+          <div class="config-card-title">
+            <span>Historical Traffic Analysis</span>
+          </div>
+          <p style="color: var(--text-muted); margin-bottom: 12px;">
+            Search your current Burp Suite Proxy HTTP history to passively detect WordPress installations and collect plugins and themes discovered in earlier traffic.
+          </p>
+          <div class="form-inline">
+            <button class="btn btn-primary" onclick="triggerHttpHistoryScan()">Scan HTTP Proxy History</button>
+            <span id="historyScanResult" style="color: var(--text-muted); font-size: 11px;">Proxy history scan idle.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: DOMAIN PARENT TAB (blog.security-target.com) -->
+    <div class="tab-content active" id="domain-1-panel">
+      
+      <!-- Top Control Bar with Domain URL Input -->
+      <div class="domain-toolbar">
+        <span class="domain-url-label">Target URL:</span>
+        <input type="text" class="input-text domain-url-input" id="targetUrlInput1" value="https://blog.security-target.com/">
+        
+        <button class="btn btn-primary" onclick="runDomainScan('blog.security-target.com')">Run Full Scan</button>
+        <button class="btn" onclick="runSubScan('Plugins')">Scan Plugins</button>
+        <button class="btn" onclick="runSubScan('Themes')">Scan Themes</button>
+        <button class="btn" onclick="runSubScan('Users')">Enumerate Users</button>
+        <button class="btn" onclick="openExportModal('blog.security-target.com')">Export Report</button>
+        
+        <div style="margin-left: auto; display: flex; gap: 6px; align-items: center;">
+          <span class="status-badge badge-vuln">[!] 14 Vulnerabilities</span>
+          <span class="status-badge badge-info">WP 6.2.2</span>
+          <span class="status-badge badge-warn">XML-RPC Active</span>
+        </div>
+      </div>
+
+      <!-- Domain Sub-Tabs Bar -->
+      <div class="sub-tabs-bar">
+        <div class="sub-tab active" onclick="switchSubTab(event, 'domain1-overview')">Overview & Core</div>
+        <div class="sub-tab" onclick="switchSubTab(event, 'domain1-plugins')">Plugins (8)</div>
+        <div class="sub-tab" onclick="switchSubTab(event, 'domain1-themes')">Theme Detection (1)</div>
+        <div class="sub-tab" onclick="switchSubTab(event, 'domain1-users')">Users & Recon (4)</div>
+        <div class="sub-tab" onclick="switchSubTab(event, 'domain1-logs')">Scan Logs</div>
+      </div>
+
+      <!-- SUB-TAB 1: OVERVIEW & CORE -->
+      <div class="sub-tab-content active" id="domain1-overview">
+        <div class="cards-grid">
+          <div class="stat-card">
+            <div class="stat-card-title">WordPress Core Version</div>
+            <div class="stat-card-value">
+              <span>6.2.2</span>
+              <span class="status-badge badge-vuln">Outdated</span>
+            </div>
+            <div class="stat-card-desc">Detected via meta generator & RSS2 feed. 6 Core CVEs identified.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">XML-RPC Interface</div>
+            <div class="stat-card-value">
+              <span>Enabled</span>
+              <span class="status-badge badge-warn">Multicall & Pingback</span>
+            </div>
+            <div class="stat-card-desc">Pingback enabled (DDoS vector). System.multicall active (brute-force).</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">REST API Exposure</div>
+            <div class="stat-card-value">
+              <span>5 Routes Open</span>
+              <span class="status-badge badge-vuln">Users Exposed</span>
+            </div>
+            <div class="stat-card-desc">Unauthenticated user enumeration accessible via /wp-json/wp/v2/users.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">Security Hardening</div>
+            <div class="stat-card-value">
+              <span>Partial (1/5)</span>
+              <span class="status-badge badge-warn">Wordfence Only</span>
+            </div>
+            <div class="stat-card-desc">readme.html is accessible; generator tag is present in HTML headers.</div>
+          </div>
+        </div>
+
+        <!-- WordPress Core Vulnerabilities Table -->
+        <div class="table-container">
+          <div class="table-toolbar">
+            <span style="font-weight: bold; color: var(--text-bright);">WordPress Core 6.2.2 Known Vulnerabilities (WPScan DB)</span>
+            <span style="color: var(--text-muted);">6 Advisories Found</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 250px;">Vulnerability Title</th>
+                <th style="width: 130px;">Type</th>
+                <th style="width: 90px;">Fixed In</th>
+                <th style="width: 140px;">CVE ID</th>
+                <th>References & Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600;">WordPress &lt;= 6.2.2 - User Enumeration via oEmbed</td>
+                <td><span class="status-badge badge-warn">Info Disclosure</span></td>
+                <td>6.2.3</td>
+                <td>CVE-2023-39999</td>
+                <td>Unauthenticated author discovery via oEmbed JSON endpoints</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">WordPress &lt;= 6.2.2 - Directory Traversal in WP_Theme</td>
+                <td><span class="status-badge badge-vuln">Path Traversal</span></td>
+                <td>6.3.0</td>
+                <td>CVE-2023-38000</td>
+                <td>Allows traversal in theme localization files</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">WordPress &lt;= 6.2.2 - Cross-Site Scripting via Nav Menu</td>
+                <td><span class="status-badge badge-warn">Stored XSS</span></td>
+                <td>6.2.3</td>
+                <td>CVE-2023-38001</td>
+                <td>Authenticated contributor level stored XSS in custom links</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">WordPress &lt;= 6.2.2 - Open Redirect via Canonical Redirect</td>
+                <td><span class="status-badge badge-info">Open Redirect</span></td>
+                <td>6.3.1</td>
+                <td>CVE-2023-39141</td>
+                <td>Improper URL validation leading to external redirection</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">WordPress &lt;= 6.2.2 - DOS via XML-RPC pingback.ping</td>
+                <td><span class="status-badge badge-warn">Denial of Service</span></td>
+                <td>Unfixed</td>
+                <td>N/A</td>
+                <td>Amplification reflection attack against third-party targets</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 2: PLUGINS -->
+      <div class="sub-tab-content" id="domain1-plugins">
+        <div class="split-pane">
+          <div class="table-container" style="flex: 1.2;">
+            <div class="table-toolbar">
+              <div class="form-inline">
+                <span style="font-weight: bold; color: var(--text-bright);">Detected Plugins (8)</span>
+                <input type="text" class="input-text" placeholder="Filter plugins..." style="width: 180px;">
+              </div>
+              <div class="form-inline">
+                <button class="btn" onclick="alert('Checking WP.org for updates...')">Check WP.org Updates</button>
+                <button class="btn btn-primary" onclick="alert('Querying WPScan API for selected plugin...')">Scan Selected Plugin</button>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Plugin Slug</th>
+                  <th>Detected Version</th>
+                  <th>Latest Version (WP.org)</th>
+                  <th>High-Risk Category</th>
+                  <th>WPScan Status</th>
+                  <th>Vulnerabilities</th>
+                </tr>
+              </thead>
+              <tbody id="pluginsTableBody">
+                <tr class="selected" onclick="selectPluginRow(this, 'woocommerce')">
+                  <td style="font-weight: bold;">woocommerce</td>
+                  <td>8.1.1</td>
+                  <td>8.5.2 (Update Available)</td>
+                  <td><span class="status-badge badge-warn">E-Commerce</span></td>
+                  <td><span class="status-badge badge-vuln">Vulnerable</span></td>
+                  <td style="font-weight: bold; color: var(--badge-vulnerable);">4</td>
+                </tr>
+                <tr onclick="selectPluginRow(this, 'contact-form-7')">
+                  <td style="font-weight: bold;">contact-form-7</td>
+                  <td>5.7.2</td>
+                  <td>5.8.5 (Update Available)</td>
+                  <td><span class="status-badge badge-warn">Forms</span></td>
+                  <td><span class="status-badge badge-vuln">Vulnerable</span></td>
+                  <td style="font-weight: bold; color: var(--badge-vulnerable);">1</td>
+                </tr>
+                <tr onclick="selectPluginRow(this, 'elementor')">
+                  <td style="font-weight: bold;">elementor</td>
+                  <td>3.14.0</td>
+                  <td>3.18.3 (Update Available)</td>
+                  <td><span class="status-badge badge-warn">Page Builder</span></td>
+                  <td><span class="status-badge badge-vuln">Vulnerable</span></td>
+                  <td style="font-weight: bold; color: var(--badge-vulnerable);">3</td>
+                </tr>
+                <tr onclick="selectPluginRow(this, 'wordfence')">
+                  <td style="font-weight: bold;">wordfence</td>
+                  <td>7.10.4</td>
+                  <td>7.11.1</td>
+                  <td><span class="status-badge badge-info">Security</span></td>
+                  <td><span class="status-badge badge-ok">Clean</span></td>
+                  <td>0</td>
+                </tr>
+                <tr onclick="selectPluginRow(this, 'updraftplus')">
+                  <td style="font-weight: bold;">updraftplus</td>
+                  <td>1.23.4</td>
+                  <td>1.23.10</td>
+                  <td><span class="status-badge badge-warn">Backup</span></td>
+                  <td><span class="status-badge badge-ok">Clean</span></td>
+                  <td>0</td>
+                </tr>
+                <tr onclick="selectPluginRow(this, 'yoast-seo')">
+                  <td style="font-weight: bold;">wordpress-seo</td>
+                  <td>20.1</td>
+                  <td>22.0</td>
+                  <td><span class="status-badge badge-info">SEO</span></td>
+                  <td><span class="status-badge badge-ok">Clean</span></td>
+                  <td>0</td>
+                </tr>
+                <tr onclick="selectPluginRow(this, 'akismet')">
+                  <td style="font-weight: bold;">akismet</td>
+                  <td>5.2</td>
+                  <td>5.3.1</td>
+                  <td><span class="status-badge badge-info">Utility</span></td>
+                  <td><span class="status-badge badge-ok">Clean</span></td>
+                  <td>0</td>
+                </tr>
+                <tr onclick="selectPluginRow(this, 'wp-mail-smtp')">
+                  <td style="font-weight: bold;">wp-mail-smtp</td>
+                  <td>3.8.0</td>
+                  <td>3.11.0</td>
+                  <td><span class="status-badge badge-info">Utility</span></td>
+                  <td><span class="status-badge badge-ok">Clean</span></td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Selected Plugin Vulnerability Drill-down -->
+          <div class="detail-pane" style="flex: 1;">
+            <div class="detail-header">
+              <span id="pluginDetailHeader">Vulnerabilities for 'woocommerce' (Version 8.1.1)</span>
+              <span style="color: var(--text-muted);">Source: WPScan API v3</span>
+            </div>
+            <div class="detail-body" id="pluginDetailBody">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Fixed In</th>
+                    <th>CVE ID</th>
+                    <th>References</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight: 600;">WooCommerce &lt;= 8.1.1 - Unauthenticated Arbitrary File Upload</td>
+                    <td><span class="status-badge badge-vuln">RCE / File Upload</span></td>
+                    <td>8.2.0</td>
+                    <td>CVE-2023-47777</td>
+                    <td>https://wpscan.com/vulnerability/12345</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">WooCommerce &lt;= 8.1.1 - Sensitive Data Exposure via Order API</td>
+                    <td><span class="status-badge badge-warn">Information Disclosure</span></td>
+                    <td>8.1.2</td>
+                    <td>CVE-2023-45678</td>
+                    <td>https://wpscan.com/vulnerability/12346</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">WooCommerce &lt;= 8.1.1 - Contributor Stored XSS in Product Review</td>
+                    <td><span class="status-badge badge-warn">Stored XSS</span></td>
+                    <td>8.1.2</td>
+                    <td>CVE-2023-45679</td>
+                    <td>https://wpscan.com/vulnerability/12347</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">WooCommerce &lt;= 8.1.1 - Server-Side Request Forgery via Webhook</td>
+                    <td><span class="status-badge badge-vuln">SSRF</span></td>
+                    <td>8.2.1</td>
+                    <td>CVE-2023-49000</td>
+                    <td>https://wpscan.com/vulnerability/12348</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 3: THEME DETECTION -->
+      <div class="sub-tab-content" id="domain1-themes">
+        <div class="table-container">
+          <div class="table-toolbar">
+            <span style="font-weight: bold; color: var(--text-bright);">Detected WordPress Themes (1 Active)</span>
+            <button class="btn btn-primary" onclick="alert('Scanning theme via WPScan API...')">Scan Active Theme</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Theme Slug</th>
+                <th>Detected Version</th>
+                <th>Theme Type</th>
+                <th>Scan Status</th>
+                <th>Vulnerabilities</th>
+                <th>Detection Path</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: bold;">twentytwentythree</td>
+                <td>1.1</td>
+                <td><span class="status-badge badge-ok">Active Theme</span></td>
+                <td><span class="status-badge badge-ok">Clean</span></td>
+                <td>0</td>
+                <td>/wp-content/themes/twentytwentythree/style.css</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="config-card" style="margin-top: 10px;">
+          <div class="config-card-title">Theme Security Analysis</div>
+          <p style="color: var(--text);">
+            Theme <strong>twentytwentythree</strong> version 1.1 matches the official WordPress.org release. No published CVEs or advisories were found in the WPScan database for this slug and version.
+          </p>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 4: USERS & RECON -->
+      <div class="sub-tab-content" id="domain1-users">
+        <div class="cards-grid" style="margin-bottom: 10px;">
+          <div class="stat-card">
+            <div class="stat-card-title">Enumerated Usernames</div>
+            <div class="stat-card-value">
+              <span>4 Accounts Found</span>
+            </div>
+            <div class="stat-card-desc">Extracted via REST API /wp-json/wp/v2/users and ?author=N redirects.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">Administrative Login Exposure</div>
+            <div class="stat-card-value">
+              <span class="status-badge badge-vuln">'admin' Present</span>
+            </div>
+            <div class="stat-card-desc">User ID 1 has administrator privileges and default username.</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-toolbar">
+            <span style="font-weight: bold; color: var(--text-bright);">WordPress Enumerated Accounts</span>
+            <button class="btn" onclick="alert('Sending usernames to Burp Intruder...')">Send Usernames to Intruder</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Display Name</th>
+                <th>User Slug</th>
+                <th>Detection Vector</th>
+                <th>Profile Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td style="font-weight: bold; color: var(--badge-vulnerable);">admin</td>
+                <td>Site Administrator</td>
+                <td>admin</td>
+                <td>REST API (/wp-json/wp/v2/users)</td>
+                <td>https://blog.security-target.com/author/admin/</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td style="font-weight: bold;">sjenkins</td>
+                <td>Sarah Jenkins</td>
+                <td>sarah-jenkins</td>
+                <td>REST API (/wp-json/wp/v2/users)</td>
+                <td>https://blog.security-target.com/author/sarah-jenkins/</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td style="font-weight: bold;">mspencer</td>
+                <td>Mark Spencer</td>
+                <td>mspencer</td>
+                <td>Author Redirect (/?author=3)</td>
+                <td>https://blog.security-target.com/author/mspencer/</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td style="font-weight: bold;">dev_contributor</td>
+                <td>Alex Rivera</td>
+                <td>alex-rivera</td>
+                <td>Author Redirect (/?author=4)</td>
+                <td>https://blog.security-target.com/author/alex-rivera/</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 5: SCAN LOGS -->
+      <div class="sub-tab-content" id="domain1-logs">
+        <div class="table-toolbar" style="margin-bottom: 6px;">
+          <span style="font-weight: bold; color: var(--text-bright);">Real-Time Monospaced Scan Log</span>
+          <div class="form-inline">
+            <button class="btn" onclick="clearLogs()">Clear Log</button>
+            <button class="btn" onclick="copyLogs()">Copy to Clipboard</button>
+          </div>
+        </div>
+        <div class="console-log" id="consoleLogArea">[2026-10-24 12:15:01] [*] Initializing WordPress Inspector for: https://blog.security-target.com/
+[2026-10-24 12:15:01] [*] Fetching target homepage...
+[2026-10-24 12:15:02] [+] Target homepage retrieved (HTTP 200, 48291 bytes)
+[2026-10-24 12:15:02] [*] Testing XML-RPC interface at /xmlrpc.php...
+[2026-10-24 12:15:02] [+] XML-RPC enabled!
+[2026-10-24 12:15:02] [!] Pingback method available (pingback.ping) - Potential DDoS amplification vector
+[2026-10-24 12:15:02] [!] Multicall method available (system.multicall) - Potential brute-force vector
+[2026-10-24 12:15:02] [*] Probing REST API endpoints at /wp-json/wp/v2/...
+[2026-10-24 12:15:03] [+] Accessible REST endpoint: API root (/wp-json/)
+[2026-10-24 12:15:03] [+] Accessible REST endpoint: Users (/wp-json/wp/v2/users) -> UNPROTECTED
+[2026-10-24 12:15:03] [+] Accessible REST endpoint: Posts (/wp-json/wp/v2/posts)
+[2026-10-24 12:15:03] [+] Accessible REST endpoint: Pages (/wp-json/wp/v2/pages)
+[2026-10-24 12:15:03] [*] Enumerating WordPress users via REST API...
+[2026-10-24 12:15:03] [+] Found user: admin (ID: 1)
+[2026-10-24 12:15:03] [+] Found user: Sarah Jenkins (ID: 2, slug: sarah-jenkins)
+[2026-10-24 12:15:04] [*] Checking author redirect method (?author=N)...
+[2026-10-24 12:15:04] [+] Found user via redirect: mspencer (ID: 3)
+[2026-10-24 12:15:04] [+] Found user via redirect: dev_contributor (ID: 4)
+[2026-10-24 12:15:04] [*] Detecting WordPress Core version...
+[2026-10-24 12:15:04] [+] Version 6.2.2 detected from generator meta tag
+[2026-10-24 12:15:04] [*] Extracting plugins and themes from homepage and Burp HTTP history...
+[2026-10-24 12:15:05] [+] Discovered 8 plugins, 1 theme across 34 proxy history records
+[2026-10-24 12:15:05] [*] Querying WPScan API for WordPress Core 6.2.2...
+[2026-10-24 12:15:06] [+] Core: 6 vulnerabilities found
+[2026-10-24 12:15:06] [*] Scanning high-risk plugins via WPScan API...
+[2026-10-24 12:15:07] [+] Plugin 'woocommerce' (8.1.1): 4 vulnerabilities found
+[2026-10-24 12:15:08] [+] Plugin 'contact-form-7' (5.7.2): 1 vulnerability found
+[2026-10-24 12:15:09] [+] Plugin 'elementor' (3.14.0): 3 vulnerabilities found
+[2026-10-24 12:15:10] [+] Plugin 'wordfence' (7.10.4): 0 vulnerabilities (Clean)
+[2026-10-24 12:15:11] [+] Theme 'twentytwentythree' (1.1): 0 vulnerabilities (Clean)
+[2026-10-24 12:15:11] ==================================================
+[2026-10-24 12:15:11] SCAN COMPLETE: 14 total vulnerabilities identified
+[2026-10-24 12:15:11] API Credits Used: 5 | Cached Hits: 3
+[2026-10-24 12:15:11] ==================================================</div>
+      </div>
+    </div>
+
+    <!-- TAB 3: DOMAIN PARENT TAB (shop.ecommerce-demo.org) -->
+    <div class="tab-content" id="domain-2-panel">
+      <div class="domain-toolbar">
+        <span class="domain-url-label">Target URL:</span>
+        <input type="text" class="input-text domain-url-input" id="targetUrlInput2" value="https://shop.ecommerce-demo.org/">
+        <button class="btn btn-primary" onclick="alert('Running scan for shop.ecommerce-demo.org...')">Run Full Scan</button>
+        <button class="btn" onclick="openExportModal('shop.ecommerce-demo.org')">Export Report</button>
+        <div style="margin-left: auto;">
+          <span class="status-badge badge-ok">[+] Scan Clean (WP 6.4.2)</span>
+        </div>
+      </div>
+      <div style="padding: 20px; color: var(--text-muted);">
+        Select sub-tabs to inspect shop.ecommerce-demo.org plugins, theme, and logs.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Export Report Modal -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="exportModalTitle">Export Practitioner Report</span>
+        <span style="cursor: pointer;" onclick="closeExportModal()">[X]</span>
+      </div>
+      <div class="modal-content">
+        <div class="form-inline" style="margin-bottom: 10px;">
+          <label style="font-weight: bold;">Format:</label>
+          <button class="btn btn-primary" onclick="switchExportFormat('markdown')">Markdown (.md)</button>
+          <button class="btn" onclick="switchExportFormat('json')">Structured JSON (.json)</button>
+        </div>
+        <pre id="exportContentArea"># WordPress Security Assessment Report
+Target: https://blog.security-target.com/
+Scan Date: 2026-10-24 12:15:11 UTC
+WordPress Version: 6.2.2 (Outdated)
+
+## Executive Summary
+- Total Vulnerabilities: 14
+- Core Vulnerabilities: 6
+- Vulnerable Plugins: 3 (woocommerce, contact-form-7, elementor)
+- Active Theme: twentytwentythree (Clean)
+- Users Enumerated: 4
+- XML-RPC: Enabled (Pingback & Multicall Active)
+- REST API: Exposed (/wp-json/wp/v2/users unauthenticated)
+
+## Core Vulnerabilities
+- CVE-2023-39999: WordPress &lt;= 6.2.2 - User Enumeration via oEmbed
+- CVE-2023-38000: WordPress &lt;= 6.2.2 - Directory Traversal in WP_Theme
+- CVE-2023-38001: WordPress &lt;= 6.2.2 - Cross-Site Scripting via Nav Menu
+
+## Plugin Findings
+### WooCommerce (Version 8.1.1)
+- CVE-2023-47777: Unauthenticated Arbitrary File Upload (Fixed in 8.2.0)
+- CVE-2023-45678: Sensitive Data Exposure via Order API (Fixed in 8.1.2)
+
+### Contact Form 7 (Version 5.7.2)
+- CVE-2023-34567: Reflected XSS in Form Submissions (Fixed in 5.8.0)
+
+### Elementor (Version 3.14.0)
+- CVE-2023-33445: Authenticated Contributor Arbitrary Code Execution (Fixed in 3.14.2)
+</pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="copyExportText()">Copy Report</button>
+        <button class="btn btn-primary" onclick="closeExportModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Switcher
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById('themeBtn');
+      if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        btn.textContent = 'Switch to Light Theme';
+      } else {
+        body.classList.add('light-theme');
+        btn.textContent = 'Switch to Dark Theme';
+      }
+    }
+
+    // Parent Tab Switcher
+    function switchParentTab(panelId, tabElem) {
+      document.querySelectorAll('.parent-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+      
+      tabElem.classList.add('active');
+      const targetPanel = document.getElementById(panelId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    }
+
+    // Sub-Tab Switcher
+    function switchSubTab(event, subPanelId) {
+      const container = event.target.closest('.tab-content');
+      container.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      container.querySelectorAll('.sub-tab-content').forEach(p => p.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      const targetSub = document.getElementById(subPanelId);
+      if (targetSub) {
+        targetSub.classList.add('active');
+      }
+    }
+
+    // Close Parent Domain Tab
+    function closeDomainTab(e, panelId, closeElem) {
+      e.stopPropagation();
+      const parentTab = closeElem.closest('.parent-tab');
+      const panel = document.getElementById(panelId);
+      
+      if (confirm('Close domain tab for ' + parentTab.querySelector('span').textContent + '?')) {
+        parentTab.remove();
+        if (panel) panel.remove();
+        // Activate configuration tab
+        const configTab = document.querySelector('.parent-tab.config-tab');
+        if (configTab) {
+          switchParentTab('config-tab-panel', configTab);
+        }
+      }
+    }
+
+    // Add Domain Tab
+    function promptAddDomain() {
+      const domain = prompt('Enter target WordPress URL or Domain (e.g. https://target-site.com):', 'https://');
+      if (domain && domain.trim() !== '' && domain !== 'https://') {
+        const cleanDomain = domain.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+        const newTabId = 'domain-' + Date.now() + '-panel';
+        
+        // Add tab header
+        const tabsBar = document.getElementById('parentTabsBar');
+        const addBtn = tabsBar.querySelector('.add-tab-btn');
+        
+        const newTab = document.createElement('div');
+        newTab.className = 'parent-tab';
+        newTab.innerHTML = `<span>${cleanDomain}</span> <span class="close-tab-btn" onclick="closeDomainTab(event, '${newTabId}', this)">[X]</span>`;
+        newTab.onclick = function() { switchParentTab(newTabId, newTab); };
+        
+        tabsBar.insertBefore(newTab, addBtn);
+
+        // Add panel
+        const container = document.querySelector('.extension-container');
+        const newPanel = document.createElement('div');
+        newPanel.className = 'tab-content';
+        newPanel.id = newTabId;
+        newPanel.innerHTML = `
+          <div class="domain-toolbar">
+            <span class="domain-url-label">Target URL:</span>
+            <input type="text" class="input-text domain-url-input" value="${domain}">
+            <button class="btn btn-primary" onclick="runDomainScan('${cleanDomain}')">Run Full Scan</button>
+            <button class="btn" onclick="openExportModal('${cleanDomain}')">Export Report</button>
+            <div style="margin-left: auto;">
+              <span class="status-badge badge-info">Target Added (Unscanned)</span>
+            </div>
+          </div>
+          <div style="padding: 20px; color: var(--text-muted);">
+            Domain tab ready. Provide custom subpaths if required, then click <strong>Run Full Scan</strong> to detect WordPress version, plugins, themes, and WPScan vulnerabilities.
+          </div>
+        `;
+        container.appendChild(newPanel);
+        
+        switchParentTab(newTabId, newTab);
+      }
+    }
+
+    // API Key Actions
+    function toggleApiKeyVisibility() {
+      const input = document.getElementById('apiKeyInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value;
+      if (!key) {
+        alert('Please enter a valid WPScan API key.');
+        return;
+      }
+      document.getElementById('apiKeyStatusBadge').className = 'status-badge badge-ok';
+      document.getElementById('apiKeyStatusBadge').textContent = '[+] Saved to Burp Preferences';
+      setTimeout(() => {
+        document.getElementById('apiKeyStatusBadge').textContent = '[+] Valid Key (Active)';
+      }, 2000);
+    }
+
+    function testApiKey() {
+      const badge = document.getElementById('apiKeyStatusBadge');
+      badge.className = 'status-badge badge-info';
+      badge.textContent = '[*] Verifying with wpscan.com...';
+      setTimeout(() => {
+        badge.className = 'status-badge badge-ok';
+        badge.textContent = '[+] Valid Key (Quota: 26 credits left)';
+      }, 1000);
+    }
+
+    function resetApiCounter() {
+      if (confirm('Reset the daily WPScan API calls counter to 0?')) {
+        document.getElementById('apiCallsUsed').textContent = '0';
+      }
+    }
+
+    function triggerHttpHistoryScan() {
+      const status = document.getElementById('historyScanResult');
+      status.textContent = '[*] Scanning Burp HTTP Proxy history...';
+      status.style.color = 'var(--accent)';
+      setTimeout(() => {
+        status.textContent = '[+] Scanned 142 items: Found 2 WordPress targets, 11 plugin references!';
+        status.style.color = 'var(--badge-clean)';
+      }, 1200);
+    }
+
+    // Plugin Selection
+    function selectPluginRow(row, slug) {
+      document.querySelectorAll('#pluginsTableBody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      
+      const header = document.getElementById('pluginDetailHeader');
+      header.textContent = `Vulnerabilities for '${slug}'`;
+    }
+
+    // Scan Simulation
+    function runDomainScan(domain) {
+      const log = document.getElementById('consoleLogArea');
+      log.textContent += `\n[${new Date().toISOString().replace('T', ' ').substring(0, 19)}] [*] Starting manual scan for ${domain}...`;
+      log.scrollTop = log.scrollHeight;
+      alert(`Scan started for ${domain}. Switching to Scan Logs sub-tab.`);
+      const logSubTab = document.querySelectorAll('.sub-tab')[4];
+      if (logSubTab) logSubTab.click();
+    }
+
+    function runSubScan(type) {
+      alert(`Initiated targeted scan for: ${type}`);
+    }
+
+    // Export Modal
+    function openExportModal(domain) {
+      document.getElementById('exportModalTitle').textContent = `Export Practitioner Report for ${domain}`;
+      document.getElementById('exportModal').style.display = 'flex';
+    }
+
+    function closeExportModal() {
+      document.getElementById('exportModal').style.display = 'none';
+    }
+
+    function switchExportFormat(fmt) {
+      const pre = document.getElementById('exportContentArea');
+      if (fmt === 'json') {
+        pre.textContent = JSON.stringify({
+          "scan_metadata": {
+            "timestamp": "2026-10-24T12:15:11Z",
+            "target_url": "https://blog.security-target.com/",
+            "scanner": "WPScan API v3",
+            "burp_extension": "WordPress Inspector (littlespidy)"
+          },
+          "wordpress_info": {
+            "version": "6.2.2",
+            "outdated": true,
+            "core_vulnerabilities": 6
+          },
+          "security_probes": {
+            "xmlrpc": { "enabled": true, "pingback": true, "multicall": true },
+            "rest_api": { "users_exposed": true, "endpoints_count": 5 }
+          },
+          "plugins_summary": { "total": 8, "vulnerable": 3 },
+          "themes_summary": { "active": "twentytwentythree", "vulnerable": 0 }
+        }, null, 2);
+      } else {
+        pre.textContent = `# WordPress Security Assessment Report
+Target: https://blog.security-target.com/
+Scan Date: 2026-10-24 12:15:11 UTC
+WordPress Version: 6.2.2 (Outdated)
+
+## Executive Summary
+- Total Vulnerabilities: 14
+- Core Vulnerabilities: 6
+- Vulnerable Plugins: 3 (woocommerce, contact-form-7, elementor)
+- Active Theme: twentytwentythree (Clean)
+- Users Enumerated: 4
+- XML-RPC: Enabled (Pingback & Multicall Active)
+- REST API: Exposed (/wp-json/wp/v2/users unauthenticated)`;
+      }
+    }
+
+    function copyExportText() {
+      const text = document.getElementById('exportContentArea').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Report copied to clipboard.');
+      });
+    }
+
+    function clearLogs() {
+      document.getElementById('consoleLogArea').textContent = '';
+    }
+
+    function copyLogs() {
+      const text = document.getElementById('consoleLogArea').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Log output copied to clipboard.');
+      });
+    }
+  </script>
+</body>
+</html>
