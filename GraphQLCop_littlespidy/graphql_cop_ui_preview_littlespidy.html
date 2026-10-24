@@ -281,7 +281,7 @@
       color: var(--text-bright);
     }
 
-    /* Sub-Tabs: Attack, HTTP History, Query */
+    /* Sub-Tabs: Attack, HTTP History, Query, and Request Editor Preview */
     .sub-tabs-bar {
       background-color: var(--bg-card);
       border-bottom: 1px solid var(--border);
@@ -406,6 +406,58 @@
     }
     .filter-select:focus {
       border-color: var(--border-focus);
+    }
+
+    /* Multi-Select Dropdown Container */
+    .multiselect-container {
+      position: relative;
+      display: inline-block;
+    }
+    .multiselect-btn {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .multiselect-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 100;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      min-width: 260px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+    .multiselect-item {
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .multiselect-item:hover {
+      background-color: var(--bg-hover);
+    }
+    .multiselect-actions {
+      border-top: 1px solid var(--border);
+      padding: 4px 10px;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
     }
 
     /* Split Pane */
@@ -642,6 +694,65 @@
       overflow: hidden;
     }
 
+    /* HTTP Request Editor Preview (Proxy / Repeater Tab) */
+    .req-editor-tab-view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      padding: 12px;
+    }
+    .burp-req-frame {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      background-color: var(--bg-card);
+    }
+    .burp-req-tabs-bar {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 8px;
+      gap: 4px;
+    }
+    .burp-req-tab {
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .burp-req-tab.active {
+      color: var(--text-bright);
+      border-bottom: 2px solid var(--accent);
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+    .graphql-editor-grid {
+      display: flex;
+      flex: 1;
+      gap: 12px;
+      padding: 10px;
+      overflow: hidden;
+    }
+    .gql-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .gql-label {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+    }
+
     /* Footer Info Bar */
     .footer-bar {
       background-color: var(--bg-darker);
@@ -716,11 +827,12 @@
     <div class="new-tab-btn" onclick="addNewSessionTab()" title="Open new testing tab">+</div>
   </div>
 
-  <!-- Sub-Tabs Bar: Attack | HTTP History | Query -->
+  <!-- Sub-Tabs Bar: Attack | HTTP History | Query | Burp Request Editor Tab Preview -->
   <div class="sub-tabs-bar">
     <div class="sub-tab-item active" id="subTabAttack" onclick="switchSubTab('attack')">Attack</div>
     <div class="sub-tab-item" id="subTabHistory" onclick="switchSubTab('history')">HTTP History</div>
     <div class="sub-tab-item" id="subTabQuery" onclick="switchSubTab('query')">Query & Schema Voyager</div>
+    <div class="sub-tab-item" id="subTabReqEditor" onclick="switchSubTab('reqEditor')">Burp Request Editor Tab Preview</div>
   </div>
 
   <!-- Main Active Workspace -->
@@ -903,16 +1015,86 @@ Connection: keep-alive
       </div>
     </div>
 
-    <!-- SUB-TAB 2: HTTP HISTORY VIEW -->
+    <!-- SUB-TAB 2: HTTP HISTORY VIEW (WITH MULTI-SELECT PROBE FILTER) -->
     <div id="viewHistory" class="history-tab-view">
       <div class="filter-bar">
         <div class="filter-group-left">
-          <span class="input-label">Filter Probe History:</span>
-          <input type="text" class="text-input" placeholder="Filter by URL, attack probe, status..." onkeyup="filterHistory(this.value)" style="width: 250px;">
+          
+          <!-- Multi-Select Probes Filter Dropdown -->
+          <span class="input-label">Filter Probes:</span>
+          <div class="multiselect-container">
+            <button class="multiselect-btn" id="probeMultiSelectBtn" onclick="toggleProbeDropdown()">
+              <span id="probeSelectedCountLabel">All Probes Selected (12/12)</span>
+              <span style="font-size: 9px;">[v]</span>
+            </button>
+            <div class="multiselect-dropdown" id="probeDropdownMenu">
+              <div class="multiselect-item" onclick="toggleProbeFilter('ALL')">
+                <input type="checkbox" id="chkProbeAll" checked onchange="handleSelectAllProbes(this.checked)">
+                <span style="font-weight: 600;">(Select All Probes)</span>
+              </div>
+              <div style="border-top: 1px solid var(--border); margin: 3px 0;"></div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Introspection Query" checked onchange="onProbeItemChanged()">
+                <span>Introspection Query</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="GraphiQL IDE Interface" checked onchange="onProbeItemChanged()">
+                <span>GraphiQL / IDE Interface</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Field Suggestions" checked onchange="onProbeItemChanged()">
+                <span>Field Suggestions</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Clairvoyance" checked onchange="onProbeItemChanged()">
+                <span>Clairvoyance Schema Oracle</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="GET Method Query Support" checked onchange="onProbeItemChanged()">
+                <span>GET Method Query Support</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="GET Mutation Support" checked onchange="onProbeItemChanged()">
+                <span>GET Mutation Support (CSRF)</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="POST Url-Encoded" checked onchange="onProbeItemChanged()">
+                <span>POST Url-Encoded (CSRF)</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Trace Mode" checked onchange="onProbeItemChanged()">
+                <span>Trace Mode Detection</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Array Batching" checked onchange="onProbeItemChanged()">
+                <span>Array Batching DoS</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Alias Overloading" checked onchange="onProbeItemChanged()">
+                <span>Alias Overloading DoS</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Directive Overloading" checked onchange="onProbeItemChanged()">
+                <span>Directive Overloading DoS</span>
+              </div>
+              <div class="multiselect-item">
+                <input type="checkbox" class="chk-probe-item" value="Circular Query" checked onchange="onProbeItemChanged()">
+                <span>Circular Introspection DoS</span>
+              </div>
+              <div class="multiselect-actions">
+                <button class="btn" style="font-size: 10px; padding: 2px 6px;" onclick="handleSelectAllProbes(true)">All</button>
+                <button class="btn" style="font-size: 10px; padding: 2px 6px;" onclick="handleSelectAllProbes(false)">None</button>
+                <button class="btn btn-accent" style="font-size: 10px; padding: 2px 6px;" onclick="toggleProbeDropdown()">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <span class="input-label" style="margin-left: 10px;">Search:</span>
+          <input type="text" class="text-input" placeholder="Search URL, status, probe text..." id="historySearchInput" onkeyup="applyHistoryFilter()" style="width: 220px;">
           <button class="btn" onclick="clearHistory()">Clear History</button>
         </div>
         <div>
-          <span id="historyStatsDisplay">Probes Dispatched: 12</span>
+          <span id="historyStatsDisplay">Probes Shown: 12 / 12</span>
         </div>
       </div>
 
@@ -956,16 +1138,16 @@ Connection: keep-alive
       </div>
     </div>
 
-    <!-- SUB-TAB 3: QUERY & SCHEMA VOYAGER VIEW -->
+    <!-- SUB-TAB 3: QUERY & SCHEMA VOYAGER VIEW (LOCAL HOSTING) -->
     <div id="viewQuery" class="query-tab-view">
       
       <!-- Query Toolbar -->
       <div class="query-toolbar">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button class="btn btn-voyager" onclick="openVoyagerDiagram()">[Open GraphQL Voyager Diagram in Browser]</button>
+          <!-- Local Voyager Launcher -->
+          <button class="btn btn-voyager" onclick="openVoyagerDiagram()">[Open GraphQL Voyager in Browser (http://127.0.0.1:8989)]</button>
           <button class="btn" onclick="exportSchemaJson()">[Export Schema JSON]</button>
           <button class="btn" onclick="exportSchemaSdl()">[Export Schema SDL (.graphql)]</button>
-          <button class="btn" onclick="sendSelectedToRepeater()">[Send to Repeater]</button>
         </div>
         <div style="font-size: 11px;">
           <span>Schema Source: </span>
@@ -1074,6 +1256,65 @@ Connection: keep-alive
 
       </div>
 
+    </div>
+
+    <!-- SUB-TAB 4: BURP REQUEST EDITOR TAB PREVIEW (Montoya HttpRequestEditorProvider) -->
+    <div id="viewReqEditor" class="req-editor-tab-view">
+      <div style="margin-bottom: 8px;">
+        <span style="font-weight: 600; color: var(--text-bright);">Montoya HttpRequestEditorProvider Preview:</span>
+        <span style="color: var(--text-muted); margin-left: 8px;">Whenever a GraphQL request is inspected in Burp Proxy, Repeater, or Logger, a dedicated "GraphQL" tab is displayed. Editing values directly modifies the actual request.</span>
+      </div>
+
+      <div class="burp-req-frame">
+        <!-- Native Burp Request Tabs with new "GraphQL" Tab -->
+        <div class="burp-req-tabs-bar">
+          <div class="burp-req-tab">Pretty</div>
+          <div class="burp-req-tab">Raw</div>
+          <div class="burp-req-tab">Hex</div>
+          <div class="burp-req-tab active">GraphQL</div>
+        </div>
+
+        <!-- Structured GraphQL Editor View -->
+        <div class="graphql-editor-grid">
+          <!-- Left: Query Structure Editor -->
+          <div class="gql-col" style="flex: 2;">
+            <div class="gql-label">
+              <span>GraphQL Query / Mutation (Directly Editable):</span>
+              <span style="font-size: 10px; color: var(--accent);">Edits immediately synchronize to HTTP request body</span>
+            </div>
+            <textarea class="viewer-content" id="nativeEditorQuery" style="resize: none; border: 1px solid var(--border);" onkeyup="syncLiveHttpBody()">query getUserProfile($id: ID!) {
+  getUserProfile(userId: $id) {
+    id
+    username
+    email
+    role
+    phoneNumber
+    twoFactorEnabled
+  }
+}</textarea>
+          </div>
+
+          <!-- Right: Variables and Operation Name -->
+          <div class="gql-col" style="flex: 1;">
+            <div class="gql-label">
+              <span>Operation Name:</span>
+            </div>
+            <input type="text" class="text-input" id="nativeEditorOpName" value="getUserProfile" onkeyup="syncLiveHttpBody()">
+
+            <div class="gql-label" style="margin-top: 8px;">
+              <span>Variables (JSON):</span>
+            </div>
+            <textarea class="viewer-content" id="nativeEditorVars" style="resize: none; border: 1px solid var(--border); height: 120px;" onkeyup="syncLiveHttpBody()">{
+  "id": "1001"
+}</textarea>
+
+            <div class="gql-label" style="margin-top: 8px;">
+              <span>Resulting Synchronized HTTP Request Body:</span>
+            </div>
+            <div class="viewer-content" id="nativeEditorResultBody" style="font-size: 10px; height: 110px;">{"query":"query getUserProfile($id: ID!) {\n  getUserProfile(userId: $id) {\n    id\n    username\n    email\n    role\n    phoneNumber\n    twoFactorEnabled\n  }\n}","variables":{"id":"1001"},"operationName":"getUserProfile"}</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Footer Bar -->
@@ -1264,15 +1505,15 @@ Connection: keep-alive
       { id: 1, method: "POST", url: "https://api.target-app.com/graphql", probe: "Introspection Query", status: 200, length: 4291, time: "142 ms", ts: "12:00:01.120", req: findingsData[0].request, resp: findingsData[0].response },
       { id: 2, method: "GET", url: "https://api.target-app.com/graphiql", probe: "GraphiQL IDE Interface", status: 200, length: 8312, time: "115 ms", ts: "12:00:01.280", req: findingsData[8].request, resp: findingsData[8].response },
       { id: 3, method: "POST", url: "https://api.target-app.com/graphql", probe: "Field Suggestions", status: 200, length: 154, time: "105 ms", ts: "12:00:01.410", req: findingsData[9].request, resp: findingsData[9].response },
-      { id: 4, method: "POST", url: "https://api.target-app.com/graphql", probe: "Clairvoyance Type Oracle (user)", status: 200, length: 182, time: "110 ms", ts: "12:00:01.550", req: findingsData[1].request, resp: findingsData[1].response },
+      { id: 4, method: "POST", url: "https://api.target-app.com/graphql", probe: "Clairvoyance", status: 200, length: 182, time: "110 ms", ts: "12:00:01.550", req: findingsData[1].request, resp: findingsData[1].response },
       { id: 5, method: "GET", url: "https://api.target-app.com/graphql?query=...", probe: "GET Method Query Support", status: 200, length: 42, time: "85 ms", ts: "12:00:01.680", req: findingsData[5].request, resp: findingsData[5].response },
       { id: 6, method: "GET", url: "https://api.target-app.com/graphql?query=mutation...", probe: "GET Mutation Support (CSRF)", status: 200, length: 42, time: "88 ms", ts: "12:00:01.780", req: findingsData[6].request, resp: findingsData[6].response },
-      { id: 7, method: "POST", url: "https://api.target-app.com/graphql", probe: "POST Url-Encoded Query (CSRF)", status: 200, length: 42, time: "92 ms", ts: "12:00:01.890", req: findingsData[7].request, resp: findingsData[7].response },
+      { id: 7, method: "POST", url: "https://api.target-app.com/graphql", probe: "POST Url-Encoded", status: 200, length: 42, time: "92 ms", ts: "12:00:01.890", req: findingsData[7].request, resp: findingsData[7].response },
       { id: 8, method: "POST", url: "https://api.target-app.com/graphql", probe: "Trace Mode Detection", status: 200, length: 712, time: "130 ms", ts: "12:00:02.010", req: findingsData[10].request, resp: findingsData[10].response },
-      { id: 9, method: "POST", url: "https://api.target-app.com/graphql", probe: "Array Batching (10+)", status: 200, length: 1250, time: "320 ms", ts: "12:00:02.340", req: findingsData[2].request, resp: findingsData[2].response },
-      { id: 10, method: "POST", url: "https://api.target-app.com/graphql", probe: "Alias Overloading (100+)", status: 200, length: 2840, time: "480 ms", ts: "12:00:02.840", req: findingsData[3].request, resp: findingsData[3].response },
+      { id: 9, method: "POST", url: "https://api.target-app.com/graphql", probe: "Array Batching", status: 200, length: 1250, time: "320 ms", ts: "12:00:02.340", req: findingsData[2].request, resp: findingsData[2].response },
+      { id: 10, method: "POST", url: "https://api.target-app.com/graphql", probe: "Alias Overloading", status: 200, length: 2840, time: "480 ms", ts: "12:00:02.840", req: findingsData[3].request, resp: findingsData[3].response },
       { id: 11, method: "POST", url: "https://api.target-app.com/graphql", probe: "Directive Overloading", status: 200, length: 980, time: "210 ms", ts: "12:00:03.060", req: findingsData[4].request, resp: findingsData[4].response },
-      { id: 12, method: "POST", url: "https://api.target-app.com/graphql", probe: "Circular Query Introspection", status: 200, length: 4510, time: "310 ms", ts: "12:00:03.380", req: findingsData[0].request, resp: findingsData[0].response }
+      { id: 12, method: "POST", url: "https://api.target-app.com/graphql", probe: "Circular Query", status: 200, length: 4510, time: "310 ms", ts: "12:00:03.380", req: findingsData[0].request, resp: findingsData[0].response }
     ];
 
     const queryTemplates = {
@@ -1362,6 +1603,7 @@ Connection: keep-alive
       document.getElementById("viewAttack").style.display = "none";
       document.getElementById("viewHistory").style.display = "none";
       document.getElementById("viewQuery").style.display = "none";
+      document.getElementById("viewReqEditor").style.display = "none";
 
       if (tabName === "attack") {
         document.getElementById("subTabAttack").classList.add("active");
@@ -1373,6 +1615,9 @@ Connection: keep-alive
       } else if (tabName === "query") {
         document.getElementById("subTabQuery").classList.add("active");
         document.getElementById("viewQuery").style.display = "flex";
+      } else if (tabName === "reqEditor") {
+        document.getElementById("subTabReqEditor").classList.add("active");
+        document.getElementById("viewReqEditor").style.display = "flex";
       }
     }
 
@@ -1447,16 +1692,56 @@ Connection: keep-alive
         };
         tbody.appendChild(tr);
       });
-      document.getElementById("historyStatsDisplay").innerText = `Probes Dispatched: ${items.length}`;
+      document.getElementById("historyStatsDisplay").innerText = `Probes Shown: ${items.length} / ${historyData.length}`;
     }
 
-    function filterHistory(query) {
-      const q = query.toLowerCase().trim();
-      const filtered = historyData.filter(h => 
-        h.url.toLowerCase().includes(q) ||
-        h.probe.toLowerCase().includes(q) ||
-        String(h.status).includes(q)
-      );
+    /* Multi-Select Probe Filter Logic */
+    function toggleProbeDropdown() {
+      const menu = document.getElementById("probeDropdownMenu");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    function handleSelectAllProbes(isChecked) {
+      document.getElementById("chkProbeAll").checked = isChecked;
+      document.querySelectorAll(".chk-probe-item").forEach(cb => {
+        cb.checked = isChecked;
+      });
+      onProbeItemChanged();
+    }
+
+    function onProbeItemChanged() {
+      const checkedBoxes = Array.from(document.querySelectorAll(".chk-probe-item:checked"));
+      const totalBoxes = document.querySelectorAll(".chk-probe-item").length;
+      const count = checkedBoxes.length;
+
+      document.getElementById("chkProbeAll").checked = (count === totalBoxes);
+      if (count === totalBoxes) {
+        document.getElementById("probeSelectedCountLabel").innerText = `All Probes Selected (${totalBoxes}/${totalBoxes})`;
+      } else if (count === 0) {
+        document.getElementById("probeSelectedCountLabel").innerText = `No Probes Selected (0/${totalBoxes})`;
+      } else {
+        document.getElementById("probeSelectedCountLabel").innerText = `Probes Selected: (${count}/${totalBoxes})`;
+      }
+      applyHistoryFilter();
+    }
+
+    function applyHistoryFilter() {
+      const selectedProbes = Array.from(document.querySelectorAll(".chk-probe-item:checked")).map(cb => cb.value);
+      const search = document.getElementById("historySearchInput").value.toLowerCase().trim();
+
+      const filtered = historyData.filter(h => {
+        const matchesProbe = selectedProbes.some(p => h.probe.toLowerCase().includes(p.toLowerCase()));
+        if (!matchesProbe) return false;
+
+        if (search) {
+          const matchUrl = h.url.toLowerCase().includes(search);
+          const matchProbe = h.probe.toLowerCase().includes(search);
+          const matchStatus = String(h.status).includes(search);
+          if (!matchUrl && !matchProbe && !matchStatus) return false;
+        }
+        return true;
+      });
+
       renderHistoryTable(filtered);
     }
 
@@ -1501,9 +1786,8 @@ Connection: keep-alive
     }
 
     function openVoyagerDiagram() {
-      const url = "https://apis.guru/graphql-voyager/";
-      alert("Triggering browser launch via xdg-open for GraphQL Voyager diagram.\n\nGenerating standalone schema visualizer HTML...");
-      window.open(url, "_blank");
+      const localUrl = "http://127.0.0.1:8989/voyager";
+      alert(`Local Embedded GraphQL Voyager Server:\nStarting server at ${localUrl}...\nHosting locally from bundled assets. Zero third-party web calls.\n\nExecuting xdg-open ${localUrl}`);
     }
 
     function exportSchemaJson() {
@@ -1514,8 +1798,22 @@ Connection: keep-alive
       alert("Exported reconstructed GraphQL SDL schema to /home/littlespidy/schema.graphql");
     }
 
-    function sendSelectedToRepeater() {
-      alert("Dispatched active GraphQL operation to Burp Suite Repeater tab!");
+    /* Live Sync for Burp Request Editor Tab Preview */
+    function syncLiveHttpBody() {
+      const query = document.getElementById("nativeEditorQuery").value;
+      const opName = document.getElementById("nativeEditorOpName").value.trim();
+      let vars = {};
+      try {
+        vars = JSON.parse(document.getElementById("nativeEditorVars").value);
+      } catch(e) {}
+
+      const payload = {
+        query: query,
+        variables: vars
+      };
+      if (opName) payload.operationName = opName;
+
+      document.getElementById("nativeEditorResultBody").innerText = JSON.stringify(payload);
     }
 
     function applyFilters() {
@@ -1682,13 +1980,14 @@ Connection: keep-alive
     }
 
     function showInfoDialog() {
-      alert("GraphQL Cop & Clairvoyance Burp Extension (littlespidy)\n\nMontoya API Standard Extension\nIntegrates:\n- GraphQL Cop (13 Auditing Attacks)\n- Clairvoyance (Schema Reconstruction Oracle)\n- GraphQL Voyager Visualizer\n- Dynamic Multi-Session Tabs (Attack, HTTP History, Query)");
+      alert("GraphQL Cop & Clairvoyance Burp Extension (littlespidy)\n\nMontoya API Standard Extension\nIntegrates:\n- GraphQL Cop (13 Auditing Attacks)\n- Clairvoyance (Schema Reconstruction Oracle)\n- GraphQL Voyager Localhost Server\n- Multi-Select Probes Filter in HTTP History\n- Native Burp HTTP Request Pane 'GraphQL' Tab Editor");
     }
 
     window.onload = () => {
       renderTable(findingsData);
       selectFinding(findingsData[0]);
       renderHistoryTable(historyData);
+      syncLiveHttpBody();
     };
   </script>
 </body>
