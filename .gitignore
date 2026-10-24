@@ -23,3 +23,9 @@ additional-cors-checks/
 oauth-scan/
 wayBackLister/
 sqlipy/
+/clairvoyance/
+/graphql-cop/
+/graphql-network-inspector/
+/graphql-voyager/
+/inql/
+/BurpWpsScan/
