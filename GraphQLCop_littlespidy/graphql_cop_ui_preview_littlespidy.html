@@ -179,7 +179,18 @@
       background-color: var(--accent-hover);
       border-color: var(--accent-hover);
     }
-    .btn-attack {
+    .btn-stop {
+      background-color: #5a1d1d;
+      border: 1px solid #842020;
+      color: #ffc9c9;
+      font-weight: 600;
+    }
+    .btn-stop:hover {
+      background-color: #792727;
+      border-color: #ff6b6b;
+      color: #ffffff;
+    }
+    .btn-probe {
       background-color: #2b333a;
       border: 1px solid #414d59;
       color: #9cdcfe;
@@ -188,17 +199,17 @@
       border-radius: 2px;
       cursor: pointer;
     }
-    .btn-attack:hover {
+    .btn-probe:hover {
       background-color: #384554;
       border-color: #007acc;
       color: #ffffff;
     }
-    .btn-dos {
+    .btn-heavy {
       background-color: #3b2222;
       border: 1px solid #633333;
       color: #fca5a5;
     }
-    .btn-dos:hover {
+    .btn-heavy:hover {
       background-color: #522d2d;
       border-color: #f14c4c;
       color: #ffffff;
@@ -285,7 +296,7 @@
       color: var(--text-bright);
     }
 
-    /* Sub-Tabs: Attack, HTTP History, Query, Schema Intelligence, Burp Request Editor */
+    /* Sub-Tabs: Auditing, HTTP History, Query, Schema Intelligence, Burp Request Editor */
     .sub-tabs-bar {
       background-color: var(--bg-card);
       border-bottom: 1px solid var(--border);
@@ -320,25 +331,22 @@
       overflow: hidden;
     }
 
-    /* Target & Authentication Session Box */
+    /* Target & Controls Bar */
     .config-panel {
       background-color: var(--bg-card);
       border-bottom: 1px solid var(--border);
       padding: 8px 12px;
       display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
     }
-    .config-left {
-      flex: 1;
+    .config-inputs-row {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .config-right-auth {
+      align-items: center;
+      gap: 8px;
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
     }
     .input-label {
       font-weight: 600;
@@ -357,23 +365,8 @@
     .text-input:focus {
       border-color: var(--border-focus);
     }
-    .auth-header-textarea {
-      background-color: var(--bg-dark);
-      border: 1px solid var(--border);
-      color: #9cdcfe;
-      font-family: Consolas, monospace;
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 2px;
-      resize: vertical;
-      height: 60px;
-      outline: none;
-    }
-    .auth-header-textarea:focus {
-      border-color: var(--border-focus);
-    }
 
-    /* Attack Buttons Grid */
+    /* Probes Buttons Grid */
     .attack-buttons-container {
       background-color: var(--bg-darker);
       border-bottom: 1px solid var(--border);
@@ -651,6 +644,55 @@
       font-weight: 600;
     }
 
+    /* Modal Dialog for Session Headers */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.65);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-dialog {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: 520px;
+      max-width: 90vw;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .modal-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .modal-footer {
+      background-color: var(--bg-darker);
+      border-top: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
     /* Footer Info Bar */
     .footer-bar {
       background-color: var(--bg-darker);
@@ -725,9 +767,9 @@
     <div class="new-tab-btn" onclick="addNewSessionTab()" title="Open new testing tab">+</div>
   </div>
 
-  <!-- Sub-Tabs Bar: Attack | HTTP History | Query | Schema Intelligence | Burp Request Editor -->
+  <!-- Sub-Tabs Bar: Auditing | HTTP History | Query | Schema Intelligence | Burp Request Editor -->
   <div class="sub-tabs-bar">
-    <div class="sub-tab-item active" id="subTabAttack" onclick="switchSubTab('attack')">Attack</div>
+    <div class="sub-tab-item active" id="subTabAttack" onclick="switchSubTab('attack')">Auditing & Probes</div>
     <div class="sub-tab-item" id="subTabHistory" onclick="switchSubTab('history')">HTTP History</div>
     <div class="sub-tab-item" id="subTabQuery" onclick="switchSubTab('query')">Query & Schema Voyager</div>
     <div class="sub-tab-item" id="subTabIntel" onclick="switchSubTab('intel')">Schema Intelligence (InQL)</div>
@@ -737,66 +779,64 @@
   <!-- Main Active Workspace -->
   <div class="workspace">
 
-    <!-- SUB-TAB 1: ATTACK VIEW -->
+    <!-- SUB-TAB 1: AUDITING & PROBES VIEW -->
     <div id="viewAttack" class="view-pane" style="display: flex;">
       
-      <!-- Target Configuration & Authentication Session Box -->
+      <!-- Target Configuration Bar with Session Headers Button & Stop Button -->
       <div class="config-panel">
-        <div class="config-left">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="input-label" style="min-width: 90px;">Target URL:</span>
-            <input type="text" class="text-input" id="targetUrlInput" value="https://api.target-app.com/graphql" style="flex: 1;">
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <button class="btn btn-accent" onclick="runAttack('ALL')">Run All Attacks</button>
-            <button class="btn" onclick="clearResults()">Clear Results</button>
-            <span class="status-pill" id="targetStatusPill">GraphQL Detected (Apollo Server)</span>
-          </div>
+        <div class="config-inputs-row">
+          <span class="input-label">Target URL:</span>
+          <input type="text" class="text-input" id="targetUrlInput" value="https://api.target-app.com/graphql" style="flex: 1; max-width: 450px;">
+          
+          <!-- Session Box as a Button -->
+          <button class="btn" onclick="openSessionModal()" id="sessionHeadersBtn">
+            <span>[Session Headers (3 set)]</span>
+          </button>
+
+          <!-- Run All Probes Button -->
+          <button class="btn btn-accent" id="runAllBtn" onclick="runProbes('ALL')">Run All Probes</button>
+
+          <!-- Stop Button -->
+          <button class="btn btn-stop" id="stopBtn" onclick="stopProbes()" style="display: none;">[Stop]</button>
+
+          <button class="btn" onclick="clearResults()">Clear</button>
         </div>
 
-        <!-- Session & Authentication Headers Text Box -->
-        <div class="config-right-auth">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="input-label">Session & Authentication Headers (Injected into All Attacks):</span>
-            <span style="font-size: 10px; color: var(--text-muted);">Format: Header-Name: value (one per line)</span>
-          </div>
-          <textarea class="auth-header-textarea" id="authHeadersInput" placeholder="Authorization: Bearer eyJhbGciOi...&#10;X-API-Key: 9fa8723c-412b...&#10;Cookie: session=abc12345">Authorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...
-X-API-Key: sec_live_9fa8723c412b55a9
-Cookie: session_token=usr_master_session_8891</textarea>
+        <div>
+          <span class="status-pill" id="targetStatusPill">GraphQL Detected (Apollo Server)</span>
         </div>
       </div>
 
-      <!-- Individual Attack Action Buttons -->
+      <!-- Individual Probe Action Buttons -->
       <div class="attack-buttons-container">
         <!-- Information Disclosure & Fingerprinting -->
         <div class="attack-group">
           <span class="attack-group-title">Recon & Engine:</span>
-          <!-- InQL Engine Fingerprinting Button -->
-          <button class="btn-attack" onclick="runAttack('ENGINE_FINGERPRINT')" style="background-color: #3b2f15; border-color: #cca700; color: #ffd666; font-weight: 600;">[Engine Fingerprinting (InQL)]</button>
-          <button class="btn-attack" onclick="runAttack('INTROSPECTION')">[Introspection Query]</button>
-          <button class="btn-attack" onclick="runAttack('GRAPHIQL')">[GraphiQL / IDE Interface]</button>
-          <button class="btn-attack" onclick="runAttack('FIELD_SUGGESTIONS')">[Field Suggestions]</button>
-          <button class="btn-attack" onclick="runAttack('CLAIRVOYANCE')" style="background-color: #244b36; border-color: #388a34; color: #a3e635;">[Clairvoyance Schema Oracle]</button>
-          <button class="btn-attack" onclick="runAttack('TRACE_MODE')">[Trace Mode]</button>
-          <button class="btn-attack" onclick="runAttack('UNHANDLED_ERROR')">[Unhandled Errors]</button>
+          <button class="btn-probe" onclick="runProbes('ENGINE_FINGERPRINT')" style="background-color: #3b2f15; border-color: #cca700; color: #ffd666; font-weight: 600;">[Engine Fingerprinting (InQL)]</button>
+          <button class="btn-probe" onclick="runProbes('INTROSPECTION')">[Introspection Query]</button>
+          <button class="btn-probe" onclick="runProbes('GRAPHIQL')">[GraphiQL / IDE Interface]</button>
+          <button class="btn-probe" onclick="runProbes('FIELD_SUGGESTIONS')">[Field Suggestions]</button>
+          <button class="btn-probe" onclick="runProbes('CLAIRVOYANCE')" style="background-color: #244b36; border-color: #388a34; color: #a3e635;">[Clairvoyance Schema Oracle]</button>
+          <button class="btn-probe" onclick="runProbes('TRACE_MODE')">[Trace Mode]</button>
+          <button class="btn-probe" onclick="runProbes('UNHANDLED_ERROR')">[Unhandled Errors]</button>
         </div>
 
         <!-- CSRF & Method Handling -->
         <div class="attack-group">
           <span class="attack-group-title">CSRF & Methods:</span>
-          <button class="btn-attack" onclick="runAttack('GET_QUERY')">[GET Query Support]</button>
-          <button class="btn-attack" onclick="runAttack('GET_MUTATION')">[GET Mutation Support (CSRF)]</button>
-          <button class="btn-attack" onclick="runAttack('POST_URLENCODED')">[POST Url-Encoded (CSRF)]</button>
+          <button class="btn-probe" onclick="runProbes('GET_QUERY')">[GET Query Support]</button>
+          <button class="btn-probe" onclick="runProbes('GET_MUTATION')">[GET Mutation Support (CSRF)]</button>
+          <button class="btn-probe" onclick="runProbes('POST_URLENCODED')">[POST Url-Encoded (CSRF)]</button>
         </div>
 
-        <!-- Denial of Service (Intrusive) -->
+        <!-- Denial of Service Probes -->
         <div class="attack-group">
           <span class="attack-group-title">Denial of Service:</span>
-          <button class="btn-attack btn-dos" onclick="runAttack('BATCH_QUERY')">[Array Batching (10+)]</button>
-          <button class="btn-attack btn-dos" onclick="runAttack('ALIAS_OVERLOAD')">[Alias Overloading (100+)]</button>
-          <button class="btn-attack btn-dos" onclick="runAttack('DIRECTIVE_OVERLOAD')">[Directive Overloading]</button>
-          <button class="btn-attack btn-dos" onclick="runAttack('CIRCULAR_QUERY')">[Circular Introspection]</button>
-          <button class="btn-attack btn-dos" onclick="runAttack('FIELD_DUPLICATION')">[Field Duplication (500x)]</button>
+          <button class="btn-probe btn-heavy" onclick="runProbes('BATCH_QUERY')">[Array Batching (10+)]</button>
+          <button class="btn-probe btn-heavy" onclick="runProbes('ALIAS_OVERLOAD')">[Alias Overloading (100+)]</button>
+          <button class="btn-probe btn-heavy" onclick="runProbes('DIRECTIVE_OVERLOAD')">[Directive Overloading]</button>
+          <button class="btn-probe btn-heavy" onclick="runProbes('CIRCULAR_QUERY')">[Circular Introspection]</button>
+          <button class="btn-probe btn-heavy" onclick="runProbes('FIELD_DUPLICATION')">[Field Duplication (500x)]</button>
         </div>
       </div>
 
@@ -860,7 +900,7 @@ Cookie: session_token=usr_master_session_8891</textarea>
         <div class="details-pane">
           <div class="viewer-box">
             <div class="viewer-header">
-              <span class="viewer-title">Request Editor (Montoya HttpRequestEditor)</span>
+              <span class="viewer-title">Request Editor (Montoya HttpRequestEditor - Default Burp Headers)</span>
               <div class="sub-sub-tabs">
                 <span class="sub-sub-tab active">Raw</span>
                 <span class="sub-sub-tab">Headers</span>
@@ -869,12 +909,10 @@ Cookie: session_token=usr_master_session_8891</textarea>
             </div>
             <div class="viewer-content" id="requestViewerContent">POST /graphql HTTP/1.1
 Host: api.target-app.com
-User-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...
 X-API-Key: sec_live_9fa8723c412b55a9
 Cookie: session_token=usr_master_session_8891
-X-GraphQL-Cop-Test: Engine Fingerprinting
 Content-Length: 48
 
 {"query":"query @skip { __typename }"}</div>
@@ -1147,7 +1185,6 @@ Connection: keep-alive
 
     <!-- SUB-TAB 4: SCHEMA INTELLIGENCE (InQL Port: Points of Interest, Cycle Detection, Batch Queries) -->
     <div id="viewIntel" class="view-pane">
-      <!-- Intelligence Sub-Navigation -->
       <div class="intelligence-subnav">
         <div class="intel-nav-item active" id="intelNavPoi" onclick="switchIntelTab('poi')">Points of Interest (Sensitive Fields)</div>
         <div class="intel-nav-item" id="intelNavCycles" onclick="switchIntelTab('cycles')">Cycle Detection (Recursion DOS)</div>
@@ -1290,21 +1327,21 @@ Connection: keep-alive
                   <td style="font-weight: 600;">getUserProfile</td>
                   <td>UserProfile (User) -> posts (Post) -> author (User) -> posts (Post)</td>
                   <td>4 types</td>
-                  <td><button class="btn" style="padding: 2px 6px;">Load Attack Payload</button></td>
+                  <td><button class="btn" style="padding: 2px 6px;">Load Payload</button></td>
                 </tr>
                 <tr class="odd" onclick="loadCyclePayload(2)">
                   <td>2</td>
                   <td style="font-weight: 600;">listOrganizations</td>
                   <td>Organization (Org) -> members (User) -> organization (Org)</td>
                   <td>3 types</td>
-                  <td><button class="btn" style="padding: 2px 6px;">Load Attack Payload</button></td>
+                  <td><button class="btn" style="padding: 2px 6px;">Load Payload</button></td>
                 </tr>
                 <tr class="even" onclick="loadCyclePayload(3)">
                   <td>3</td>
                   <td style="font-weight: 600;">listComments</td>
                   <td>Comment (Comment) -> parent (Comment) -> replies (Comment)</td>
                   <td>2 types</td>
-                  <td><button class="btn" style="padding: 2px 6px;">Load Attack Payload</button></td>
+                  <td><button class="btn" style="padding: 2px 6px;">Load Payload</button></td>
                 </tr>
               </tbody>
             </table>
@@ -1315,7 +1352,7 @@ Connection: keep-alive
           <div class="viewer-box" style="flex: 1;">
             <div class="viewer-header">
               <span class="viewer-title">Generated Cyclic Query Payload (Recursion Amplification DoS)</span>
-              <button class="btn btn-accent" onclick="sendCycleToAttack()">Send to Attack Runner</button>
+              <button class="btn btn-accent" onclick="sendCycleToAttack()">Send to Auditing Runner</button>
             </div>
             <div class="viewer-content" id="cyclePayloadViewer">query CyclicDoSExploit {
   getUserProfile(userId: "1001") {
@@ -1360,7 +1397,7 @@ Connection: keep-alive
             <button class="btn" onclick="executeBatchQuery()">Test Batch Execution</button>
           </div>
           <div>
-            <span>Used to bypass per-request rate limits and brute force credentials</span>
+            <span>Used to test rate limit bypasses and batch authorization</span>
           </div>
         </div>
 
@@ -1437,6 +1474,27 @@ Connection: keep-alive
       </div>
     </div>
 
+    <!-- MODAL DIALOG: SESSION & AUTHENTICATION HEADERS -->
+    <div class="modal-overlay" id="sessionModalOverlay">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <span>Session & Authentication Headers</span>
+          <span style="cursor: pointer; font-weight: bold; padding: 2px 6px;" onclick="closeSessionModal()">x</span>
+        </div>
+        <div class="modal-body">
+          <span style="font-size: 11px; color: var(--text);">Enter headers to inject into all outgoing requests and probes (one per line, format: Header-Name: value):</span>
+          <textarea class="viewer-content" id="modalHeadersInput" style="height: 180px; font-size: 11px; border: 1px solid var(--border); resize: vertical;">Authorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...
+X-API-Key: sec_live_9fa8723c412b55a9
+Cookie: session_token=usr_master_session_8891</textarea>
+          <span style="font-size: 10px; color: var(--text-muted);">Note: Standard headers like Host and Content-Length are generated automatically. Standard Burp/browser User-Agent is preserved without customization.</span>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeSessionModal()">Cancel</button>
+          <button class="btn btn-accent" onclick="saveSessionHeaders()">Save Headers</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer Bar -->
     <div class="footer-bar">
       <div class="footer-left">
@@ -1453,6 +1511,9 @@ Connection: keep-alive
   <script>
     /* Created with the help of an AI Agent and littlespidy. */
 
+    let isProbingRunning = false;
+    let configuredHeaders = `Authorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...\nX-API-Key: sec_live_9fa8723c412b55a9\nCookie: session_token=usr_master_session_8891`;
+
     const findingsData = [
       {
         id: 1,
@@ -1465,7 +1526,7 @@ Connection: keep-alive
         status: 200,
         length: 172,
         time: "65 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nUser-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)\nContent-Type: application/json\nAuthorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...\nX-API-Key: sec_live_9fa8723c412b55a9\nCookie: session_token=usr_master_session_8891\nX-GraphQL-Cop-Test: Engine Fingerprinting\nContent-Length: 48\n\n{"query":"query @skip { __typename }"}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nAuthorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...\nX-API-Key: sec_live_9fa8723c412b55a9\nCookie: session_token=usr_master_session_8891\nContent-Length: 48\n\n{"query":"query @skip { __typename }"}`,
         response: `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 12:00:00 GMT\nContent-Type: application/json; charset=utf-8\nContent-Length: 172\n\n{\n  "errors": [\n    {\n      "message": "Directive \\"@skip\\" argument \\"if\\" of type \\"Boolean!\\" is required, but it was not provided."\n    }\n  ]\n}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...' -d '{"query":"query @skip { __typename }"}' 'https://api.target-app.com/graphql'`
       },
@@ -1480,7 +1541,7 @@ Connection: keep-alive
         status: 200,
         length: 4291,
         time: "142 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nUser-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)\nContent-Type: application/json\nAuthorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...\nX-GraphQL-Cop-Test: Introspection\nContent-Length: 68\n\n{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nAuthorization: Bearer eyJhbGciOiJKV1QiLCJhbGciOi...\nContent-Length: 68\n\n{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}`,
         response: `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 12:00:00 GMT\nContent-Type: application/json; charset=utf-8\nContent-Length: 4291\n\n{\n  "data": {\n    "__schema": {\n      "types": [\n        {\n          "name": "Query",\n          "fields": [\n            { "name": "getUserProfile" },\n            { "name": "listTransactions" },\n            { "name": "adminGetSystemMetrics" }\n          ]\n        },\n        {\n          "name": "Mutation",\n          "fields": [\n            { "name": "updateUserPassword" },\n            { "name": "grantAdminRole" }\n          ]\n        }\n      ]\n    }\n  }\n}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOi...' -d '{"query":"query cop { __schema { types { name fields { name } } } }","operationName":"cop"}' 'https://api.target-app.com/graphql'`
       },
@@ -1495,7 +1556,7 @@ Connection: keep-alive
         status: 200,
         length: 8940,
         time: "1280 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Clairvoyance Schema Reconstruction\n\n{"query":"query { __schema { types { name } } }"}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\n\n{"query":"query { __schema { types { name } } }"}`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  "data": {\n    "__schema": {\n      "types": [\n        {"name": "Query"},\n        {"name": "UserProfile"},\n        {"name": "Transaction"},\n        {"name": "SystemMetrics"}\n      ]\n    }\n  }\n}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query { getUserProfile { id username email role } }"}' 'https://api.target-app.com/graphql'`
       },
@@ -1510,7 +1571,7 @@ Connection: keep-alive
         status: 200,
         length: 1250,
         time: "320 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Array-based Query Batching\n\n[{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"}]`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\n\n[{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"}]`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n[{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}},{"data":{"__typename":"Query"}}]`,
         curl: `curl -X POST -H 'Content-Type: application/json' -d '[{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"},{"query":"query cop { __typename }"}]' 'https://api.target-app.com/graphql'`
       },
@@ -1525,7 +1586,7 @@ Connection: keep-alive
         status: 200,
         length: 2840,
         time: "480 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Alias Overloading\n\n{"query":"query cop { alias0:__typename alias1:__typename alias2:__typename ... alias100:__typename }"}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\n\n{"query":"query cop { alias0:__typename alias1:__typename alias2:__typename ... alias100:__typename }"}`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"alias0":"Query","alias1":"Query",...,"alias100":"Query"}}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { alias0:__typename alias1:__typename alias2:__typename ... alias100:__typename }"}' 'https://api.target-app.com/graphql'`
       },
@@ -1540,7 +1601,7 @@ Connection: keep-alive
         status: 200,
         length: 980,
         time: "210 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Directive Overloading\n\n{"query":"query cop { __typename @aa@aa@aa@aa@aa@aa@aa@aa@aa@aa }"}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\n\n{"query":"query cop { __typename @aa@aa@aa@aa@aa@aa@aa@aa@aa@aa }"}`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"errors":[{"message":"Unknown directive '@aa'"},...]}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __typename @aa@aa@aa@aa@aa@aa@aa@aa@aa@aa }"}' 'https://api.target-app.com/graphql'`
       },
@@ -1555,7 +1616,7 @@ Connection: keep-alive
         status: 200,
         length: 42,
         time: "85 ms",
-        request: `GET /graphql?query=query+cop+{__typename} HTTP/1.1\nHost: api.target-app.com\nUser-Agent: Mozilla/5.0 (BurpSuite; GraphQL-Cop-littlespidy)\nX-GraphQL-Cop-Test: GET Method Query Support`,
+        request: `GET /graphql?query=query+cop+{__typename} HTTP/1.1\nHost: api.target-app.com`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Query"}}`,
         curl: `curl -X GET 'https://api.target-app.com/graphql?query=query+cop+{__typename}'`
       },
@@ -1570,7 +1631,7 @@ Connection: keep-alive
         status: 200,
         length: 42,
         time: "88 ms",
-        request: `GET /graphql?query=mutation+cop+{__typename} HTTP/1.1\nHost: api.target-app.com\nX-GraphQL-Cop-Test: Mutation is allowed over GET`,
+        request: `GET /graphql?query=mutation+cop+{__typename} HTTP/1.1\nHost: api.target-app.com`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Mutation"}}`,
         curl: `curl -X GET 'https://api.target-app.com/graphql?query=mutation+cop+{__typename}'`
       },
@@ -1585,7 +1646,7 @@ Connection: keep-alive
         status: 200,
         length: 42,
         time: "92 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/x-www-form-urlencoded\nX-GraphQL-Cop-Test: POST based url-encoded query (possible CSRF)\n\nquery=query+cop+{+__typename+}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/x-www-form-urlencoded\n\nquery=query+cop+{+__typename+}`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Query"}}`,
         curl: `curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d 'query=query+cop+{+__typename+}' 'https://api.target-app.com/graphql'`
       },
@@ -1600,7 +1661,7 @@ Connection: keep-alive
         status: 200,
         length: 8312,
         time: "115 ms",
-        request: `GET /graphiql HTTP/1.1\nHost: api.target-app.com\nAccept: text/html\nX-GraphQL-Cop-Test: GraphQL IDE`,
+        request: `GET /graphiql HTTP/1.1\nHost: api.target-app.com\nAccept: text/html`,
         response: `HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\n\n<!DOCTYPE html><html><head><title>GraphiQL Explorer</title><link rel="stylesheet" href="/graphiql.min.css"/>...</head><body>...</body></html>`,
         curl: `curl -X GET -H 'Accept: text/html' 'https://api.target-app.com/graphiql'`
       },
@@ -1615,7 +1676,7 @@ Connection: keep-alive
         status: 200,
         length: 154,
         time: "105 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Field Suggestions\n\n{"query":"query cop { __schema { directive } }"}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\n\n{"query":"query cop { __schema { directive } }"}`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"errors":[{"message":"Cannot query field 'directive' on type '__Schema'. Did you mean 'directives'?"}]}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __schema { directive } }"}' 'https://api.target-app.com/graphql'`
       },
@@ -1630,7 +1691,7 @@ Connection: keep-alive
         status: 200,
         length: 712,
         time: "130 ms",
-        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\nX-GraphQL-Cop-Test: Trace Mode\n\n{"query":"query cop { __typename }"}`,
+        request: `POST /graphql HTTP/1.1\nHost: api.target-app.com\nContent-Type: application/json\n\n{"query":"query cop { __typename }"}`,
         response: `HTTP/1.1 200 OK\nContent-Type: application/json\n\n{"data":{"__typename":"Query"},"extensions":{"tracing":{"version":1,"startTime":"2026-10-24T12:00:00.000Z","endTime":"2026-10-24T12:00:00.130Z","duration":130000000}}}`,
         curl: `curl -X POST -H 'Content-Type: application/json' -d '{"query":"query cop { __typename }"}' 'https://api.target-app.com/graphql'`
       }
@@ -1733,6 +1794,54 @@ Connection: keep-alive
 
     let currentSelectedFinding = findingsData[0];
     let currentActiveQuery = 'getUserProfile';
+
+    /* Session Modal Actions */
+    function openSessionModal() {
+      document.getElementById("modalHeadersInput").value = configuredHeaders;
+      document.getElementById("sessionModalOverlay").style.display = "flex";
+    }
+
+    function closeSessionModal() {
+      document.getElementById("sessionModalOverlay").style.display = "none";
+    }
+
+    function saveSessionHeaders() {
+      configuredHeaders = document.getElementById("modalHeadersInput").value.trim();
+      const count = configuredHeaders ? configuredHeaders.split("\n").filter(l => l.includes(":")).length : 0;
+      document.getElementById("sessionHeadersBtn").innerText = `[Session Headers (${count} set)]`;
+      closeSessionModal();
+      alert(`Saved ${count} session headers. These will be injected into all outgoing test requests.`);
+    }
+
+    /* Probe Execution & Stop Controls */
+    function runProbes(probeType) {
+      isProbingRunning = true;
+      document.getElementById("runAllBtn").style.display = "none";
+      document.getElementById("stopBtn").style.display = "inline-flex";
+      
+      const status = document.getElementById("scanStatusDisplay");
+      status.innerText = `Status: Executing probe [${probeType}] (standard Burp User-Agent, custom session headers attached)...`;
+
+      setTimeout(() => {
+        if (isProbingRunning) {
+          isProbingRunning = false;
+          document.getElementById("runAllBtn").style.display = "inline-flex";
+          document.getElementById("stopBtn").style.display = "none";
+          status.innerText = `Status: Probe [${probeType}] completed successfully.`;
+          alert(`Execution completed for: ${probeType}\nSession Headers applied: Yes\nCustom User-Agent: None (Standard Burp/Browser preserved)`);
+        }
+      }, 1200);
+    }
+
+    function stopProbes() {
+      if (isProbingRunning) {
+        isProbingRunning = false;
+        document.getElementById("runAllBtn").style.display = "inline-flex";
+        document.getElementById("stopBtn").style.display = "none";
+        document.getElementById("scanStatusDisplay").innerText = "Status: Audit stopped by user.";
+        alert("Active probes halted by user.");
+      }
+    }
 
     function switchSubTab(tabName) {
       document.querySelectorAll(".sub-tab-item").forEach(t => t.classList.remove("active"));
@@ -1905,20 +2014,6 @@ Connection: keep-alive
       document.getElementById("histRespViewer").innerText = "";
     }
 
-    function runAttack(attackType) {
-      const auth = document.getElementById("authHeadersInput").value.trim();
-      const status = document.getElementById("scanStatusDisplay");
-      status.innerText = `Status: Executing attack [${attackType}] with configured authentication headers...`;
-      setTimeout(() => {
-        status.innerText = `Status: Attack [${attackType}] completed cleanly.`;
-        if (attackType === "ENGINE_FINGERPRINT") {
-          alert(`Engine Fingerprinted:\nServer: Apollo Server\nTechnologies: JavaScript, Node.js, TypeScript\nThreat Matrix: Mapped\n\nAuthentication headers utilized:\n${auth}`);
-        } else {
-          alert(`Executed attack probe: ${attackType}\nTarget: https://api.target-app.com/graphql\nAuth Headers attached: ${auth.length > 0 ? "YES" : "NO"}`);
-        }
-      }, 500);
-    }
-
     function loadQueryTemplate(opName) {
       currentActiveQuery = opName;
       document.querySelectorAll(".tree-item").forEach(item => {
@@ -1987,7 +2082,7 @@ Connection: keep-alive
     }
 
     function sendCycleToAttack() {
-      alert("Dispatched cyclic DoS payload to Attack runner with 10 recursive nesting levels!");
+      alert("Dispatched cyclic DoS payload to Auditing runner with 10 recursive nesting levels!");
     }
 
     function generateBatchPayload() {
@@ -2205,7 +2300,7 @@ Connection: keep-alive
     }
 
     function showInfoDialog() {
-      alert("GraphQL Cop, Clairvoyance & InQL Extension (littlespidy)\n\nMontoya API Standard Extension\nIntegrates:\n- GraphQL Cop (13 Auditing Attacks)\n- InQL Engine Fingerprinting & Threat Matrix\n- InQL Points of Interest & Cycle Detection\n- InQL Batch Queries Generator\n- Clairvoyance Schema Oracle\n- Localhost GraphQL Voyager Server\n- Dedicated Session Auth Headers Box\n- Native Burp HTTP Request Editor 'GraphQL' Tab");
+      alert("GraphQL Cop, Clairvoyance & InQL Extension (littlespidy)\n\nMontoya API Standard Extension\nIntegrates:\n- Auditing Probes\n- InQL Engine Fingerprinting\n- InQL Points of Interest & Cycle Detection\n- InQL Batch Queries Generator\n- Clairvoyance Schema Oracle\n- Localhost GraphQL Voyager Server\n- Session Headers Dialog\n- Native Burp HTTP Request Editor 'GraphQL' Tab\n- Stop Probe Execution Controls\n- Standard Burp/Browser User-Agent (No Custom User-Agent)");
     }
 
     window.onload = () => {
