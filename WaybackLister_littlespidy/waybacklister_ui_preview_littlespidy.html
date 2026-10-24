@@ -22,7 +22,7 @@
       --badge-found: #e56b1f;
       --badge-success: #388a34;
       --badge-info: #0e639c;
-      --badge-warn: #c586c0;
+      --badge-warn: #cca700;
       --badge-error: #f14c4c;
       --code-bg: #111111;
       --btn-bg: #333333;
@@ -72,7 +72,7 @@
     .burp-header {
       background-color: var(--bg-darker);
       border-bottom: 1px solid var(--border);
-      padding: 6px 12px;
+      padding: 5px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -92,20 +92,15 @@
       letter-spacing: 0.5px;
     }
     .suite-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-bright);
-    }
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     .theme-toggle-btn {
       background-color: var(--btn-bg);
       color: var(--text-bright);
       border: 1px solid var(--border);
-      padding: 4px 10px;
+      padding: 3px 8px;
       font-size: 11px;
       border-radius: 3px;
       cursor: pointer;
@@ -123,11 +118,11 @@
       overflow-x: auto;
     }
     .burp-tab {
-      padding: 6px 14px;
+      padding: 5px 12px;
       color: var(--text-muted);
       cursor: pointer;
       border-top: 2px solid transparent;
-      font-size: 12px;
+      font-size: 11px;
       white-space: nowrap;
       user-select: none;
     }
@@ -145,29 +140,121 @@
       font-weight: 600;
     }
 
-    /* Sub Tabs Bar */
-    .sub-tabs-bar {
+    /* Persistent Session Management Toolbar */
+    .session-toolbar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .session-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .session-status-text {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .session-status-text strong {
+      color: var(--text-bright);
+    }
+
+    /* Domain Tabs (Parent Tabs) */
+    .domain-tabs-bar {
+      background-color: var(--bg-darker);
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+      gap: 2px;
+      overflow-x: auto;
+    }
+    .domain-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      border-top: 2px solid transparent;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      font-size: 11px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .domain-tab:hover {
+      color: var(--text-bright);
+    }
+    .domain-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      border-top: 2px solid var(--accent);
+      border-bottom: 1px solid var(--bg-dark);
+      margin-bottom: -1px;
+      font-weight: 600;
+    }
+    .domain-tab-title {
+      cursor: pointer;
+    }
+    .domain-tab-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .domain-tab-close:hover {
+      color: var(--badge-error);
+    }
+    .btn-add-domain-tab {
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-left: 4px;
+    }
+    .btn-add-domain-tab:hover {
+      color: var(--text-bright);
+      border-color: var(--accent);
+    }
+
+    /* Child Sub-tabs Bar (inside active domain) */
+    .child-tabs-bar {
       background-color: var(--bg-card);
       display: flex;
       border-bottom: 1px solid var(--border);
       padding: 0 10px;
     }
-    .sub-tab {
-      padding: 7px 16px;
+    .child-tab {
+      padding: 6px 14px;
       color: var(--text-muted);
       cursor: pointer;
       border-bottom: 2px solid transparent;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       user-select: none;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .sub-tab:hover {
+    .child-tab:hover {
       color: var(--text-bright);
     }
-    .sub-tab.active {
+    .child-tab.active {
       color: var(--accent);
       border-bottom: 2px solid var(--accent);
       font-weight: 600;
@@ -175,8 +262,8 @@
     .badge-count {
       background-color: var(--btn-bg);
       color: var(--text-bright);
-      padding: 1px 6px;
-      border-radius: 10px;
+      padding: 1px 5px;
+      border-radius: 8px;
       font-size: 10px;
       font-weight: bold;
     }
@@ -185,13 +272,23 @@
       color: #ffffff;
     }
 
-    /* Main Container */
+    /* Main Domain Workspace */
+    .domain-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .domain-content.active {
+      display: flex;
+    }
+
     .main-workspace {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      padding: 8px 12px;
+      padding: 8px 10px;
       gap: 8px;
     }
 
@@ -199,28 +296,28 @@
     .control-panel {
       background-color: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 10px 14px;
+      border-radius: 3px;
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .panel-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
     .input-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .input-label {
       font-weight: 600;
       color: var(--text-bright);
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -228,11 +325,11 @@
       background-color: var(--input-bg);
       color: var(--text-bright);
       border: 1px solid var(--border);
-      padding: 5px 9px;
-      border-radius: 3px;
-      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-size: 11px;
       outline: none;
-      min-width: 260px;
+      min-width: 240px;
     }
     .text-input:focus {
       border-color: var(--accent);
@@ -241,21 +338,21 @@
       background-color: var(--input-bg);
       color: var(--text-bright);
       border: 1px solid var(--border);
-      padding: 5px 6px;
-      border-radius: 3px;
-      font-size: 12px;
-      width: 65px;
+      padding: 4px 6px;
+      border-radius: 2px;
+      font-size: 11px;
+      width: 55px;
       outline: none;
     }
 
     .checkbox-label {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
       user-select: none;
       color: var(--text-bright);
-      font-size: 12px;
+      font-size: 11px;
     }
     .checkbox-label input[type="checkbox"] {
       accent-color: var(--accent);
@@ -263,18 +360,17 @@
     }
 
     .btn {
-      padding: 6px 14px;
-      font-size: 12px;
+      padding: 4px 10px;
+      font-size: 11px;
       font-weight: 600;
-      border-radius: 3px;
+      border-radius: 2px;
       cursor: pointer;
       border: 1px solid transparent;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       user-select: none;
-      transition: background-color 0.15s ease;
     }
     .btn-primary {
       background-color: var(--accent);
@@ -307,27 +403,27 @@
     /* Metric Summary Bar */
     .metric-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 6px;
     }
     .metric-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 8px 12px;
+      border-radius: 3px;
+      padding: 6px 10px;
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
     .metric-title {
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
       color: var(--text-muted);
       font-weight: 600;
       letter-spacing: 0.5px;
     }
     .metric-value {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: var(--text-bright);
     }
@@ -342,8 +438,8 @@
     .progress-bar-container {
       background-color: var(--bg-darker);
       border: 1px solid var(--border);
-      border-radius: 3px;
-      height: 16px;
+      border-radius: 2px;
+      height: 14px;
       overflow: hidden;
       position: relative;
       display: flex;
@@ -352,46 +448,38 @@
     .progress-bar-fill {
       background-color: var(--accent);
       height: 100%;
-      width: 68%;
+      width: 66%;
       transition: width 0.3s ease;
     }
     .progress-bar-text {
       position: absolute;
       width: 100%;
       text-align: center;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: bold;
       color: #ffffff;
-      text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+      text-shadow: 0 0 2px rgba(0, 0, 0, 0.9);
       pointer-events: none;
     }
 
-    /* Content Area & Split View */
-    .tab-content {
+    /* Child Tab Content */
+    .child-tab-content {
       flex: 1;
       display: none;
       flex-direction: column;
       overflow: hidden;
-      gap: 8px;
+      gap: 6px;
     }
-    .tab-content.active {
+    .child-tab-content.active {
       display: flex;
-    }
-
-    .split-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      gap: 8px;
     }
 
     .table-container {
       flex: 1;
-      min-height: 160px;
+      min-height: 140px;
       background-color: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 3px;
       overflow: auto;
     }
     table {
@@ -403,7 +491,7 @@
       background-color: var(--bg-darker);
       color: var(--text-bright);
       text-align: left;
-      padding: 6px 10px;
+      padding: 5px 8px;
       font-weight: 600;
       position: sticky;
       top: 0;
@@ -416,7 +504,7 @@
       border-right: none;
     }
     td {
-      padding: 5px 10px;
+      padding: 4px 8px;
       border-bottom: 1px solid var(--border);
       border-right: 1px solid var(--border);
       white-space: nowrap;
@@ -443,8 +531,8 @@
     }
 
     .status-tag {
-      padding: 2px 6px;
-      border-radius: 3px;
+      padding: 1px 5px;
+      border-radius: 2px;
       font-size: 10px;
       font-weight: bold;
       display: inline-block;
@@ -459,7 +547,7 @@
       color: #f14c4c;
       border: 1px solid rgba(241, 76, 76, 0.5);
     }
-    .status-301, .status-302 {
+    .status-301 {
       background-color: rgba(14, 99, 156, 0.25);
       color: #4fc1ff;
       border: 1px solid rgba(14, 99, 156, 0.5);
@@ -469,46 +557,60 @@
       background-color: rgba(229, 107, 31, 0.2);
       color: var(--accent);
       border: 1px solid rgba(229, 107, 31, 0.4);
-      padding: 1px 6px;
-      border-radius: 3px;
+      padding: 1px 5px;
+      border-radius: 2px;
       font-family: monospace;
       font-size: 10px;
     }
 
-    /* Bottom Preview Pane (Burp HTTP Inspector style) */
-    .preview-pane {
-      height: 220px;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 4px;
+    /* PARALLEL (SIDE-BY-SIDE) REQUEST & RESPONSE INSPECTOR */
+    .parallel-inspector-pane {
+      height: 250px;
       display: flex;
-      flex-direction: column;
+      gap: 6px;
       overflow: hidden;
     }
-    .preview-tabs {
-      background-color: var(--bg-darker);
-      display: flex;
-      border-bottom: 1px solid var(--border);
-      padding: 0 8px;
-    }
-    .preview-tab {
-      padding: 5px 12px;
-      font-size: 11px;
-      cursor: pointer;
-      color: var(--text-muted);
-      border-bottom: 2px solid transparent;
-    }
-    .preview-tab:hover {
-      color: var(--text-bright);
-    }
-    .preview-tab.active {
-      color: var(--text-bright);
-      border-bottom: 2px solid var(--accent);
-      font-weight: 600;
-    }
-    .preview-body {
+    .parallel-viewer-box {
       flex: 1;
-      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .parallel-viewer-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+    .viewer-submodes {
+      display: flex;
+      gap: 4px;
+    }
+    .viewer-submode-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .viewer-submode-btn.active {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border-color: var(--border);
+    }
+    .parallel-viewer-body {
+      flex: 1;
+      padding: 6px 10px;
       background-color: var(--code-bg);
       color: #d4d4d4;
       font-family: "Consolas", "Courier New", monospace;
@@ -521,122 +623,87 @@
     .filter-bar {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background-color: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 6px 12px;
+      border-radius: 3px;
+      padding: 5px 10px;
     }
     .search-input {
       background-color: var(--input-bg);
       border: 1px solid var(--border);
       color: var(--text-bright);
-      padding: 4px 8px;
-      border-radius: 3px;
+      padding: 3px 6px;
+      border-radius: 2px;
       font-size: 11px;
-      min-width: 200px;
-    }
-
-    /* Console / Log tab */
-    .console-view {
-      flex: 1;
-      background-color: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 10px;
-      font-family: "Consolas", "Courier New", monospace;
-      font-size: 11px;
-      color: #d4d4d4;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .log-line {
-      line-height: 1.5;
-    }
-    .log-ts {
-      color: #6a9955;
-    }
-    .log-info {
-      color: #4fc1ff;
-    }
-    .log-found {
-      color: #e56b1f;
-      font-weight: bold;
-    }
-    .log-warn {
-      color: #cca700;
-    }
-    .log-error {
-      color: #f14c4c;
+      min-width: 180px;
     }
 
     /* Settings Tab */
     .settings-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 8px;
       overflow-y: auto;
       flex: 1;
     }
     .settings-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 14px;
+      border-radius: 3px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .settings-card-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-bright);
       border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
+      padding-bottom: 4px;
     }
     .signature-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       max-height: 180px;
       overflow-y: auto;
       border: 1px solid var(--border);
-      padding: 6px;
-      border-radius: 3px;
+      padding: 4px;
+      border-radius: 2px;
       background-color: var(--input-bg);
     }
     .signature-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 8px;
+      padding: 3px 6px;
       background-color: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 2px;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 10px;
     }
     .btn-icon-del {
       background: none;
       border: none;
       color: var(--badge-error);
       cursor: pointer;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
     }
 
-    /* Context menu preview notification */
+    /* Toast Notification */
     .toast-notice {
       position: fixed;
-      bottom: 20px;
+      bottom: 24px;
       right: 20px;
       background-color: var(--bg-darker);
       border: 1px solid var(--accent);
       color: var(--text-bright);
-      padding: 8px 16px;
-      border-radius: 4px;
+      padding: 6px 14px;
+      border-radius: 3px;
       font-size: 11px;
       display: none;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
@@ -656,15 +723,15 @@
     }
     .status-indicator {
       display: inline-block;
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background-color: var(--badge-success);
       margin-right: 6px;
     }
     .status-indicator.scanning {
       background-color: var(--accent);
-      box-shadow: 0 0 6px var(--accent);
+      box-shadow: 0 0 5px var(--accent);
     }
     .status-indicator.stopped {
       background-color: var(--badge-error);
@@ -679,239 +746,280 @@
       <span class="burp-logo-badge">BURP SUITE</span>
       <span class="suite-title">WaybackLister (littlespidy) - Burp Suite Extension UI Preview</span>
     </div>
-    <div class="header-actions">
+    <div style="display: flex; align-items: center; gap: 8px;">
       <span style="font-size: 11px; color: var(--text-muted);">Montoya API Standard | Plain ASCII Mode</span>
       <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
     </div>
   </div>
 
-  <!-- Simulated Burp Suite Navigation Tabs -->
+  <!-- Burp Navigation Tabs -->
   <div class="burp-tabs-bar">
     <div class="burp-tab">Dashboard</div>
     <div class="burp-tab">Target</div>
     <div class="burp-tab">Proxy</div>
     <div class="burp-tab">Intruder</div>
     <div class="burp-tab">Repeater</div>
-    <div class="burp-tab">Sequencer</div>
-    <div class="burp-tab">Decoder</div>
-    <div class="burp-tab">Comparer</div>
-    <div class="burp-tab">Logger</div>
     <div class="burp-tab">Extensions</div>
     <div class="burp-tab active">WaybackLister</div>
   </div>
 
-  <!-- Extension Sub-tabs Bar -->
-  <div class="sub-tabs-bar">
-    <div class="sub-tab active" onclick="switchTab('tab-findings', this)">
-      Directory Listings
-      <span class="badge-count found" id="findingsCountBadge">4</span>
+  <!-- Persistent Session Management Toolbar -->
+  <div class="session-toolbar">
+    <div class="session-actions">
+      <button class="btn btn-secondary" onclick="sessionNewPrompt()">New Session</button>
+      <button class="btn btn-secondary" onclick="sessionOpenPrompt()">Open Session</button>
+      <button class="btn btn-secondary" onclick="sessionSaveAction()">Save</button>
+      <button class="btn btn-secondary" onclick="sessionSaveAsAction()">Save As...</button>
+      <button class="btn btn-secondary" onclick="sessionOffboardAction()">Offboard Session</button>
     </div>
-    <div class="sub-tab" onclick="switchTab('tab-paths', this)">
-      Discovered Paths
-      <span class="badge-count" id="pathsCountBadge">186</span>
-    </div>
-    <div class="sub-tab" onclick="switchTab('tab-subdomains', this)">
-      Discovered Subdomains
-      <span class="badge-count" id="subdomainsCountBadge">7</span>
-    </div>
-    <div class="sub-tab" onclick="switchTab('tab-console', this)">
-      Scanner Log &amp; Console
-    </div>
-    <div class="sub-tab" onclick="switchTab('tab-settings', this)">
-      Settings &amp; Signatures
+    <div>
+      <span class="session-status-text" id="sessionStatusLabel">
+        Session: <strong>session_vulnweb_recon.json</strong> (/home/littlespidy/recon/)
+      </span>
     </div>
   </div>
 
-  <!-- Main Content Workspace -->
-  <div class="main-workspace">
+  <!-- Dedicated Domain Tabs (Parent Tabs) -->
+  <div class="domain-tabs-bar" id="domainTabsContainer">
+    <div class="domain-tab active" id="tab-dom-1" onclick="switchDomainTab('domain-panel-1', this)">
+      <span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#1 testphp.vulnweb.com</span>
+      <button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('tab-dom-1', 'domain-panel-1')">x</button>
+    </div>
+    <div class="domain-tab" id="tab-dom-2" onclick="switchDomainTab('domain-panel-2', this)">
+      <span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#2 api.vulnweb.com</span>
+      <button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('tab-dom-2', 'domain-panel-2')">x</button>
+    </div>
+    <div class="domain-tab" id="tab-dom-3" onclick="switchDomainTab('domain-panel-3', this)">
+      <span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#3 admin.vulnweb.com</span>
+      <button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('tab-dom-3', 'domain-panel-3')">x</button>
+    </div>
+    <button class="btn-add-domain-tab" onclick="addNewDomainPrompt()">+ New Domain Scan</button>
+  </div>
 
-    <!-- Control Toolbar Panel -->
-    <div class="control-panel">
-      <div class="panel-row">
-        <div class="input-group">
-          <span class="input-label">Target Domain:</span>
-          <input type="text" id="targetDomainInput" class="text-input" value="testphp.vulnweb.com" placeholder="e.g. example.com or comma-separated domains">
-        </div>
-
-        <div class="input-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="autoSubdomainsChk" checked>
-            Auto-discover Subdomains (*.domain/*)
-          </label>
-        </div>
-
-        <div class="input-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="burpScopeOnlyChk">
-            In-Scope Only
-          </label>
-        </div>
-
-        <div class="input-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="addToSiteMapChk" checked>
-            Add to Burp Site Map
-          </label>
-        </div>
-
-        <div class="input-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="createAuditIssueChk" checked>
-            Create Audit Issue
-          </label>
-        </div>
+  <!-- DOMAIN PANEL 1: testphp.vulnweb.com (Active) -->
+  <div class="domain-content active" id="domain-panel-1">
+    
+    <!-- Child Sub-tabs Bar inside testphp.vulnweb.com -->
+    <div class="child-tabs-bar">
+      <div class="child-tab active" onclick="switchChildTab('panel1-tab-findings', this, 'domain-panel-1')">
+        Directory Listings
+        <span class="badge-count found" id="panel1-findingsCount">4</span>
       </div>
-
-      <div class="panel-row">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="input-group">
-            <span class="input-label">Threads:</span>
-            <input type="number" id="threadsInput" class="number-input" value="10" min="1" max="50">
-          </div>
-          <div class="input-group">
-            <span class="input-label">Delay (ms):</span>
-            <input type="number" id="delayInput" class="number-input" value="50" min="0" max="5000">
-          </div>
-          <div class="input-group">
-            <span class="input-label">Timeout (s):</span>
-            <input type="number" id="timeoutInput" class="number-input" value="10" min="2" max="60">
-          </div>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button class="btn btn-primary" id="startBtn" onclick="startScanSimulation()">Start Scan</button>
-          <button class="btn btn-secondary" id="pauseBtn" onclick="pauseScanSimulation()" disabled>Pause</button>
-          <button class="btn btn-danger" id="stopBtn" onclick="stopScanSimulation()" disabled>Stop</button>
-          <button class="btn btn-secondary" onclick="clearAllData()">Clear All</button>
-          <button class="btn btn-secondary" onclick="exportData('findings')">Export CSV</button>
-        </div>
+      <div class="child-tab" onclick="switchChildTab('panel1-tab-paths', this, 'domain-panel-1')">
+        Discovered Paths
+        <span class="badge-count">186</span>
       </div>
-
-      <!-- Live Metric Summary Cards -->
-      <div class="metric-cards">
-        <div class="metric-card">
-          <span class="metric-title">CDX URLs Harvested</span>
-          <span class="metric-value" id="kpiHarvested">1,428</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-title">Unique Directory Paths</span>
-          <span class="metric-value" id="kpiUniquePaths">186</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-title">Subdomains Found</span>
-          <span class="metric-value" id="kpiSubdomains">7</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-title">Requests Sent</span>
-          <span class="metric-value" id="kpiRequests">124 / 186</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-title">Open Listings Found</span>
-          <span class="metric-value highlight" id="kpiFindings">4</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-title">Engine Status</span>
-          <span class="metric-value success" id="kpiStatus" style="font-size: 13px; margin-top: 4px;">Running (Scanning)</span>
-        </div>
+      <div class="child-tab" onclick="switchChildTab('panel1-tab-subdomains', this, 'domain-panel-1')">
+        Discovered Subdomains
+        <span class="badge-count">7</span>
       </div>
-
-      <!-- Progress bar -->
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill" id="progressBarFill" style="width: 66%;"></div>
-        <span class="progress-bar-text" id="progressBarText">Checking path 124 of 186 (66%) - Scanning http://testphp.vulnweb.com/pictures/</span>
+      <div class="child-tab" onclick="switchChildTab('panel1-tab-settings', this, 'domain-panel-1')">
+        Settings &amp; Signatures
       </div>
     </div>
 
-    <!-- TAB 1: Directory Listings (Findings) -->
-    <div id="tab-findings" class="tab-content active">
-      <div class="filter-bar">
-        <span class="input-label">Filter Findings:</span>
-        <input type="text" class="search-input" id="findingsSearchInput" placeholder="Filter by host, path, signature..." onkeyup="filterFindingsTable()">
-        <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Select any row to inspect Burp HTTP Request &amp; Response below</span>
-      </div>
+    <!-- Main Workspace for Domain 1 -->
+    <div class="main-workspace">
 
-      <div class="split-container">
-        <!-- Table -->
-        <div class="table-container">
-          <table id="findingsTable">
-            <thead>
-              <tr>
-                <th style="width: 45px;">#</th>
-                <th style="width: 75px;">Protocol</th>
-                <th style="width: 180px;">Host</th>
-                <th>Exposed Directory Path</th>
-                <th style="width: 70px;">Status</th>
-                <th style="width: 170px;">Matched Signature</th>
-                <th style="width: 85px;">Length</th>
-                <th style="width: 110px;">Audit Issue</th>
-                <th style="width: 120px;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd selected" onclick="selectFindingRow(this, 1)">
-                <td>1</td>
-                <td>HTTP</td>
-                <td>testphp.vulnweb.com</td>
-                <td>/admin/</td>
-                <td><span class="status-tag status-200">200 OK</span></td>
-                <td><span class="signature-badge">Index of /admin</span></td>
-                <td>4,218 B</td>
-                <td><span class="status-tag status-200">Reported</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent http://testphp.vulnweb.com/admin/ to Repeater')">Repeater</button>
-                </td>
-              </tr>
-              <tr class="even" onclick="selectFindingRow(this, 2)">
-                <td>2</td>
-                <td>HTTP</td>
-                <td>testphp.vulnweb.com</td>
-                <td>/secured/</td>
-                <td><span class="status-tag status-200">200 OK</span></td>
-                <td><span class="signature-badge">&lt;title&gt;Index of</span></td>
-                <td>1,842 B</td>
-                <td><span class="status-tag status-200">Reported</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent http://testphp.vulnweb.com/secured/ to Repeater')">Repeater</button>
-                </td>
-              </tr>
-              <tr class="odd" onclick="selectFindingRow(this, 3)">
-                <td>3</td>
-                <td>HTTPS</td>
-                <td>testphp.vulnweb.com</td>
-                <td>/images/</td>
-                <td><span class="status-tag status-200">200 OK</span></td>
-                <td><span class="signature-badge">Parent Directory&lt;/a&gt;</span></td>
-                <td>6,712 B</td>
-                <td><span class="status-tag status-200">Reported</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent https://testphp.vulnweb.com/images/ to Repeater')">Repeater</button>
-                </td>
-              </tr>
-              <tr class="even" onclick="selectFindingRow(this, 4)">
-                <td>4</td>
-                <td>HTTP</td>
-                <td>testphp.vulnweb.com</td>
-                <td>/backup/</td>
-                <td><span class="status-tag status-200">200 OK</span></td>
-                <td><span class="signature-badge">Last modified&lt;/a&gt;</span></td>
-                <td>3,105 B</td>
-                <td><span class="status-tag status-200">Reported</span></td>
-                <td>
-                  <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent http://testphp.vulnweb.com/backup/ to Repeater')">Repeater</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <div class="panel-row">
+          <div class="input-group">
+            <span class="input-label">Target Domain:</span>
+            <input type="text" class="text-input" value="testphp.vulnweb.com" placeholder="e.g. example.com">
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Auto-discover Subdomains (*.domain/*)
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox">
+              In-Scope Only
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Add to Burp Site Map
+            </label>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-primary" onclick="triggerToast('Scan started on testphp.vulnweb.com')">Start Scan</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Scan paused')">Pause</button>
+            <button class="btn btn-danger" onclick="triggerToast('Scan stopped')">Stop</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Data cleared for this domain')">Clear</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Exported CSV for this domain')">Export CSV</button>
+          </div>
         </div>
 
-        <!-- Preview Pane -->
-        <div class="preview-pane">
-          <div class="preview-tabs">
-            <div class="preview-tab active" onclick="switchPreviewTab('preview-resp', this)">HTTP Response</div>
-            <div class="preview-tab" onclick="switchPreviewTab('preview-req', this)">HTTP Request</div>
-            <div class="preview-tab" onclick="switchPreviewTab('preview-issue', this)">Audit Issue Details</div>
+        <div class="panel-row">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="input-group">
+              <span class="input-label">Threads:</span>
+              <input type="number" class="number-input" value="10" min="1" max="50">
+            </div>
+            <div class="input-group">
+              <span class="input-label">Delay (ms):</span>
+              <input type="number" class="number-input" value="50" min="0" max="5000">
+            </div>
+            <div class="input-group">
+              <span class="input-label">Timeout (s):</span>
+              <input type="number" class="number-input" value="10" min="2" max="60">
+            </div>
           </div>
-          <div class="preview-body" id="previewResponse">HTTP/1.1 200 OK
+
+          <!-- Live Metric Summary Cards -->
+          <div class="metric-cards" style="flex: 1; max-width: 650px;">
+            <div class="metric-card">
+              <span class="metric-title">CDX Harvested</span>
+              <span class="metric-value">1,428</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Unique Paths</span>
+              <span class="metric-value">186</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Subdomains</span>
+              <span class="metric-value">7</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Probed</span>
+              <span class="metric-value">124 / 186</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Open Listings</span>
+              <span class="metric-value highlight">4</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: 66%;"></div>
+          <span class="progress-bar-text">Scanning path 124 of 186 (66%) - http://testphp.vulnweb.com/pictures/</span>
+        </div>
+      </div>
+
+      <!-- CHILD TAB 1: Directory Listings (Findings) -->
+      <div id="panel1-tab-findings" class="child-tab-content active">
+        <div class="filter-bar">
+          <span class="input-label">Filter Findings:</span>
+          <input type="text" class="search-input" placeholder="Filter by host, path, signature..." onkeyup="filterTable(this, 'panel1-findingsTable')">
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Select any row to inspect parallel HTTP Request &amp; Response side-by-side</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+          <!-- Table -->
+          <div class="table-container">
+            <table id="panel1-findingsTable">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th style="width: 65px;">Protocol</th>
+                  <th style="width: 170px;">Host</th>
+                  <th>Exposed Directory Path</th>
+                  <th style="width: 70px;">Status</th>
+                  <th style="width: 160px;">Matched Signature</th>
+                  <th style="width: 80px;">Length</th>
+                  <th style="width: 140px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="odd selected" onclick="selectFindingRow(this, 1)">
+                  <td>1</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/admin/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Index of /admin</span></td>
+                  <td>4,218 B</td>
+                  <td>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /admin/ to Repeater')">Repeater</button>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /admin/ to Intruder')">Intruder</button>
+                  </td>
+                </tr>
+                <tr class="even" onclick="selectFindingRow(this, 2)">
+                  <td>2</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/secured/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">&lt;title&gt;Index of</span></td>
+                  <td>1,842 B</td>
+                  <td>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /secured/ to Repeater')">Repeater</button>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /secured/ to Intruder')">Intruder</button>
+                  </td>
+                </tr>
+                <tr class="odd" onclick="selectFindingRow(this, 3)">
+                  <td>3</td>
+                  <td>HTTPS</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/images/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Parent Directory&lt;/a&gt;</span></td>
+                  <td>6,712 B</td>
+                  <td>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /images/ to Repeater')">Repeater</button>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /images/ to Intruder')">Intruder</button>
+                  </td>
+                </tr>
+                <tr class="even" onclick="selectFindingRow(this, 4)">
+                  <td>4</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/backup/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Last modified&lt;/a&gt;</span></td>
+                  <td>3,105 B</td>
+                  <td>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /backup/ to Repeater')">Repeater</button>
+                    <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="event.stopPropagation(); triggerToast('Sent /backup/ to Intruder')">Intruder</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PARALLEL SIDE-BY-SIDE HTTP REQUEST & RESPONSE VIEWERS -->
+          <div class="parallel-inspector-pane">
+            <!-- Left: HTTP Request -->
+            <div class="parallel-viewer-box">
+              <div class="parallel-viewer-header">
+                <span>HTTP Request</span>
+                <div class="viewer-submodes">
+                  <button class="viewer-submode-btn active">Raw</button>
+                  <button class="viewer-submode-btn">Headers</button>
+                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Request to clipboard')">Copy</button>
+                </div>
+              </div>
+              <div class="parallel-viewer-body" id="reqViewerText">GET /admin/ HTTP/1.1
+Host: testphp.vulnweb.com
+User-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Connection: close</div>
+            </div>
+
+            <!-- Right: HTTP Response -->
+            <div class="parallel-viewer-box">
+              <div class="parallel-viewer-header">
+                <span>HTTP Response (Status: 200 OK)</span>
+                <div class="viewer-submodes">
+                  <button class="viewer-submode-btn active">Raw</button>
+                  <button class="viewer-submode-btn">Headers</button>
+                  <button class="viewer-submode-btn">Render</button>
+                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Response to clipboard')">Copy</button>
+                </div>
+              </div>
+              <div class="parallel-viewer-body" id="respViewerText">HTTP/1.1 200 OK
 Date: Sat, 24 Oct 2026 05:22:10 GMT
 Server: Apache/2.4.41 (Ubuntu)
 Content-Type: text/html;charset=UTF-8
@@ -926,325 +1034,314 @@ Connection: close
  &lt;body&gt;
 &lt;h1&gt;Index of /admin&lt;/h1&gt;
   &lt;table&gt;
-   &lt;tr&gt;&lt;th valign="top"&gt;&lt;img src="/icons/blank.gif" alt="[ICO]"&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=N;O=D"&gt;Name&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=M;O=A"&gt;Last modified&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=S;O=A"&gt;Size&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=D;O=A"&gt;Description&lt;/a&gt;&lt;/th&gt;&lt;/tr&gt;
+   &lt;tr&gt;&lt;th&gt;&lt;a href="?C=N;O=D"&gt;Name&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=M;O=A"&gt;Last modified&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=S;O=A"&gt;Size&lt;/a&gt;&lt;/th&gt;&lt;/tr&gt;
    &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/back.gif" alt="[PARENTDIR]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="/"&gt;Parent Directory&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;td align="right"&gt;  - &lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/unknown.gif" alt="[   ]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="config.php.bak"&gt;config.php.bak&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2024-03-12 11:42  &lt;/td&gt;&lt;td align="right"&gt;2.4K&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/compressed.gif" alt="[   ]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="db_dump.sql.gz"&gt;db_dump.sql.gz&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-01-08 09:15  &lt;/td&gt;&lt;td align="right"&gt;1.8M&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td valign="top"&gt;&lt;img src="/icons/text.gif" alt="[TXT]"&gt;&lt;/td&gt;&lt;td&gt;&lt;a href="secret_keys.txt"&gt;secret_keys.txt&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-06-19 14:02  &lt;/td&gt;&lt;td align="right"&gt;512 &lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="/"&gt;Parent Directory&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;td align="right"&gt;  - &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="config.php.bak"&gt;config.php.bak&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2024-03-12 11:42&lt;/td&gt;&lt;td align="right"&gt;2.4K&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="db_dump.sql.gz"&gt;db_dump.sql.gz&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-01-08 09:15&lt;/td&gt;&lt;td align="right"&gt;1.8M&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="secret_keys.txt"&gt;secret_keys.txt&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-06-19 14:02&lt;/td&gt;&lt;td align="right"&gt;512 &lt;/td&gt;&lt;/tr&gt;
    &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
 &lt;/table&gt;
 &lt;address&gt;Apache/2.4.41 (Ubuntu) Server at testphp.vulnweb.com Port 80&lt;/address&gt;
 &lt;/body&gt;&lt;/html&gt;</div>
-          <div class="preview-body" id="previewRequest" style="display:none;">GET /admin/ HTTP/1.1
-Host: testphp.vulnweb.com
-User-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Connection: close</div>
-          <div class="preview-body" id="previewIssue" style="display:none;">Issue Name: Open Directory Listing Discovered (WaybackLister)
-Severity: Medium
-Confidence: Certain
-Host: http://testphp.vulnweb.com
-Path: /admin/
-Matched Signature: "Index of /admin"
-
-Remediation Background:
-Directory listing is enabled on the web server, allowing unauthorized users to browse and download files within the server directory hierarchy. This frequently leaks database backups, configuration files, source code archives, and sensitive administrative utilities.
-
-Remediation Recommendation:
-Disable directory indexing in web server configuration (e.g. 'Options -Indexes' in Apache httpd, or remove 'autoindex on;' in Nginx).</div>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- CHILD TAB 2: Discovered Paths -->
+      <div id="panel1-tab-paths" class="child-tab-content">
+        <div class="filter-bar">
+          <span class="input-label">Filter Harvested Paths:</span>
+          <input type="text" class="search-input" placeholder="Filter paths e.g. /api, .php, /admin..." onkeyup="filterTable(this, 'panel1-pathsTable')">
+          <button class="btn btn-secondary" onclick="triggerToast('Exported paths for testphp.vulnweb.com')">Export Paths</button>
+          <button class="btn btn-secondary" onclick="triggerToast('Submitted 186 paths to Burp Site Map')">Send All to Site Map</button>
+        </div>
+
+        <div class="table-container">
+          <table id="panel1-pathsTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;">#</th>
+                <th style="width: 220px;">Target Host</th>
+                <th>Archived Path Prefix</th>
+                <th style="width: 120px;">Probe Status</th>
+                <th style="width: 120px;">Directory Result</th>
+                <th style="width: 100px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>1</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/admin/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /admin/')">Re-test</button></td>
+              </tr>
+              <tr class="even">
+                <td>2</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/secured/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /secured/')">Re-test</button></td>
+              </tr>
+              <tr class="odd">
+                <td>3</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/images/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /images/')">Re-test</button></td>
+              </tr>
+              <tr class="even">
+                <td>4</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/backup/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /backup/')">Re-test</button></td>
+              </tr>
+              <tr class="odd">
+                <td>5</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/cart/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Normal Page</span></td>
+                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /cart/')">Re-test</button></td>
+              </tr>
+              <tr class="even">
+                <td>6</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/categories/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Normal Page</span></td>
+                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /categories/')">Re-test</button></td>
+              </tr>
+              <tr class="odd">
+                <td>7</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/login.php</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Not Directory</span></td>
+                <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Testing /login.php')">Re-test</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHILD TAB 3: Discovered Subdomains -->
+      <div id="panel1-tab-subdomains" class="child-tab-content">
+        <div class="filter-bar">
+          <span class="input-label">Discovered Subdomains (Wayback CDX):</span>
+          <button class="btn btn-secondary" onclick="triggerToast('Added all subdomains to Burp Target Scope')">Add All to Burp Scope</button>
+          <button class="btn btn-secondary" onclick="triggerToast('Exported subdomain list')">Export Subdomains</button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 45px;">#</th>
+                <th>Discovered Subdomain</th>
+                <th style="width: 140px;">Archived Paths Found</th>
+                <th style="width: 140px;">Scan Status</th>
+                <th style="width: 200px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>1</td>
+                <td>testphp.vulnweb.com</td>
+                <td>186 paths</td>
+                <td><span class="status-tag status-301">Scanning (66%)</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Active tab')">Current Tab</button>
+                </td>
+              </tr>
+              <tr class="even">
+                <td>2</td>
+                <td>api.vulnweb.com</td>
+                <td>42 paths</td>
+                <td><span class="status-tag status-200">Completed (1 Listing)</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="switchToDomain('tab-dom-2', 'domain-panel-2')">Switch to Tab #2</button>
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>3</td>
+                <td>admin.vulnweb.com</td>
+                <td>18 paths</td>
+                <td><span class="status-tag status-403">Queued</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="switchToDomain('tab-dom-3', 'domain-panel-3')">Switch to Tab #3</button>
+                </td>
+              </tr>
+              <tr class="even">
+                <td>4</td>
+                <td>dev.vulnweb.com</td>
+                <td>29 paths</td>
+                <td><span class="status-tag status-403">Queued</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="addSpecificDomainTab('dev.vulnweb.com')">Scan in Dedicated Tab</button>
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>5</td>
+                <td>staging.vulnweb.com</td>
+                <td>15 paths</td>
+                <td><span class="status-tag status-403">Queued</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="addSpecificDomainTab('staging.vulnweb.com')">Scan in Dedicated Tab</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHILD TAB 4: Settings & Signatures -->
+      <div id="panel1-tab-settings" class="child-tab-content">
+        <div class="settings-grid">
+          <div class="settings-card">
+            <div class="settings-card-title">Directory Listing Detection Signatures</div>
+            <p style="font-size: 11px; color: var(--text-muted);">Responses containing any of these substrings when returning HTTP 200 will be flagged as open directory listings.</p>
+            <div class="signature-list" id="signatureListContainer">
+              <div class="signature-item"><span>Index of /</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+              <div class="signature-item"><span>Directory Listing for</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+              <div class="signature-item"><span>&lt;title&gt;Index of</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+              <div class="signature-item"><span>Parent Directory&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+              <div class="signature-item"><span>Last modified&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+              <div class="signature-item"><span>Name&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+              <div class="signature-item"><span>Size&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+              <div class="signature-item"><span>Description&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <input type="text" id="newSigInput" class="text-input" style="min-width: 140px; flex: 1;" placeholder="New signature substring">
+              <button class="btn btn-secondary" onclick="addSignature()">Add</button>
+              <button class="btn btn-secondary" onclick="resetSignatures()">Reset</button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-title">Wayback CDX &amp; HTTP Settings</div>
+            <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+              <span class="input-label">CDX API Template:</span>
+              <input type="text" class="text-input" style="width: 100%;" value="https://web.archive.org/cdx/search/cdx?url={DOMAIN}&amp;output=txt&amp;fl=original&amp;collapse=urlkey">
+            </div>
+            <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+              <span class="input-label">Custom User-Agent:</span>
+              <input type="text" class="text-input" style="width: 100%;" value="WaybackLister/2.0 (BurpSuite-Extension-littlespidy)">
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <div class="input-group">
+                <span class="input-label">CDX Retries:</span>
+                <input type="number" class="number-input" value="3" min="1" max="10">
+              </div>
+              <div class="input-group">
+                <span class="input-label">Retry Backoff (s):</span>
+                <input type="number" class="number-input" value="5" min="1" max="30">
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="checkbox-label">
+                <input type="checkbox" checked>
+                Test both HTTP and HTTPS protocols for each path
+              </label>
+            </div>
+            <div style="margin-top: auto;">
+              <button class="btn btn-primary" onclick="triggerToast('Settings saved')">Save Settings</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 
-    <!-- TAB 2: Discovered Paths -->
-    <div id="tab-paths" class="tab-content">
-      <div class="filter-bar">
-        <span class="input-label">Filter Harvested Paths:</span>
-        <input type="text" class="search-input" id="pathsSearchInput" placeholder="Filter paths e.g. /api, .php, /admin..." onkeyup="filterPathsTable()">
-        <button class="btn btn-secondary" onclick="exportData('paths')">Export Paths</button>
-        <button class="btn btn-secondary" onclick="triggerToast('All unique paths submitted to Burp Site Map')">Send All to Site Map</button>
-      </div>
-
-      <div class="table-container">
-        <table id="pathsTable">
-          <thead>
-            <tr>
-              <th style="width: 50px;">#</th>
-              <th style="width: 220px;">Target Host</th>
-              <th>Archived Path Prefix</th>
-              <th style="width: 120px;">Probe Status</th>
-              <th style="width: 100px;">Directory Result</th>
-              <th style="width: 100px;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="odd">
-              <td>1</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/admin/</td>
-              <td><span class="status-tag status-200">Checked</span></td>
-              <td><span class="status-tag status-200">Open Listing</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /admin/')">Re-test</button></td>
-            </tr>
-            <tr class="even">
-              <td>2</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/secured/</td>
-              <td><span class="status-tag status-200">Checked</span></td>
-              <td><span class="status-tag status-200">Open Listing</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /secured/')">Re-test</button></td>
-            </tr>
-            <tr class="odd">
-              <td>3</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/images/</td>
-              <td><span class="status-tag status-200">Checked</span></td>
-              <td><span class="status-tag status-200">Open Listing</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /images/')">Re-test</button></td>
-            </tr>
-            <tr class="even">
-              <td>4</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/backup/</td>
-              <td><span class="status-tag status-200">Checked</span></td>
-              <td><span class="status-tag status-200">Open Listing</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /backup/')">Re-test</button></td>
-            </tr>
-            <tr class="odd">
-              <td>5</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/cart/</td>
-              <td><span class="status-tag status-200">Checked</span></td>
-              <td><span class="status-tag status-403">Normal Page</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /cart/')">Re-test</button></td>
-            </tr>
-            <tr class="even">
-              <td>6</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/categories/</td>
-              <td><span class="status-tag status-200">Checked</span></td>
-              <td><span class="status-tag status-403">Normal Page</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /categories/')">Re-test</button></td>
-            </tr>
-            <tr class="odd">
-              <td>7</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/login.php</td>
-              <td><span class="status-tag status-200">Checked</span></td>
-              <td><span class="status-tag status-403">Not Directory</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="triggerToast('Testing /login.php')">Re-test</button></td>
-            </tr>
-            <tr class="even">
-              <td>8</td>
-              <td>testphp.vulnweb.com</td>
-              <td>/pictures/</td>
-              <td><span class="status-tag status-301">Scanning...</span></td>
-              <td><span class="status-tag status-301">In Progress</span></td>
-              <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" disabled>Re-test</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <!-- DOMAIN PANEL 2: api.vulnweb.com (Simulated Second Domain Tab) -->
+  <div class="domain-content" id="domain-panel-2">
+    <div class="child-tabs-bar">
+      <div class="child-tab active">Directory Listings <span class="badge-count found">1</span></div>
+      <div class="child-tab">Discovered Paths <span class="badge-count">42</span></div>
+      <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
+      <div class="child-tab">Settings &amp; Signatures</div>
     </div>
-
-    <!-- TAB 3: Subdomains -->
-    <div id="tab-subdomains" class="tab-content">
-      <div class="filter-bar">
-        <span class="input-label">Discovered Subdomains (Wayback CDX):</span>
-        <button class="btn btn-secondary" onclick="triggerToast('All 7 subdomains added to Burp Target Scope')">Add All to Burp Scope</button>
-        <button class="btn btn-secondary" onclick="exportData('subdomains')">Export Subdomain List</button>
+    <div class="main-workspace">
+      <div class="control-panel">
+        <div class="panel-row">
+          <div class="input-group">
+            <span class="input-label">Target Domain:</span>
+            <input type="text" class="text-input" value="api.vulnweb.com" readonly>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" disabled>Scan Finished</button>
+            <button class="btn btn-primary" onclick="triggerToast('Rescanning api.vulnweb.com')">Re-Scan</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Exported CSV for api.vulnweb.com')">Export CSV</button>
+          </div>
+        </div>
+        <div class="metric-cards">
+          <div class="metric-card"><span class="metric-title">CDX Harvested</span><span class="metric-value">312</span></div>
+          <div class="metric-card"><span class="metric-title">Unique Paths</span><span class="metric-value">42</span></div>
+          <div class="metric-card"><span class="metric-title">Probed</span><span class="metric-value">42 / 42</span></div>
+          <div class="metric-card"><span class="metric-title">Open Listings</span><span class="metric-value highlight">1</span></div>
+        </div>
       </div>
-
       <div class="table-container">
         <table>
           <thead>
-            <tr>
-              <th style="width: 50px;">#</th>
-              <th>Discovered Subdomain Host</th>
-              <th style="width: 140px;">Archived Paths Found</th>
-              <th style="width: 140px;">Scan Status</th>
-              <th style="width: 180px;">Actions</th>
-            </tr>
+            <tr><th>#</th><th>Protocol</th><th>Host</th><th>Exposed Directory Path</th><th>Status</th><th>Matched Signature</th><th>Length</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr class="odd">
-              <td>1</td>
-              <td>testphp.vulnweb.com</td>
-              <td>186 paths</td>
-              <td><span class="status-tag status-301">Scanning (66%)</span></td>
-              <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added testphp.vulnweb.com to Scope')">Scope</button>
-              </td>
-            </tr>
-            <tr class="even">
-              <td>2</td>
-              <td>api.vulnweb.com</td>
-              <td>42 paths</td>
-              <td><span class="status-tag status-200">Completed (1 Listing)</span></td>
-              <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added api.vulnweb.com to Scope')">Scope</button>
-              </td>
-            </tr>
-            <tr class="odd">
-              <td>3</td>
-              <td>admin.vulnweb.com</td>
-              <td>18 paths</td>
-              <td><span class="status-tag status-403">Queued</span></td>
-              <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added admin.vulnweb.com to Scope')">Scope</button>
-              </td>
-            </tr>
-            <tr class="even">
-              <td>4</td>
-              <td>dev.vulnweb.com</td>
-              <td>29 paths</td>
-              <td><span class="status-tag status-403">Queued</span></td>
-              <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added dev.vulnweb.com to Scope')">Scope</button>
-              </td>
-            </tr>
-            <tr class="odd">
-              <td>5</td>
-              <td>staging.vulnweb.com</td>
-              <td>15 paths</td>
-              <td><span class="status-tag status-403">Queued</span></td>
-              <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added staging.vulnweb.com to Scope')">Scope</button>
-              </td>
-            </tr>
-            <tr class="even">
-              <td>6</td>
-              <td>static.vulnweb.com</td>
-              <td>84 paths</td>
-              <td><span class="status-tag status-403">Queued</span></td>
-              <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added static.vulnweb.com to Scope')">Scope</button>
-              </td>
-            </tr>
-            <tr class="odd">
-              <td>7</td>
-              <td>portal.vulnweb.com</td>
-              <td>9 paths</td>
-              <td><span class="status-tag status-403">Queued</span></td>
-              <td>
-                <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="triggerToast('Added portal.vulnweb.com to Scope')">Scope</button>
-              </td>
+            <tr class="odd selected">
+              <td>1</td><td>HTTPS</td><td>api.vulnweb.com</td><td>/v1/docs/</td><td><span class="status-tag status-200">200 OK</span></td>
+              <td><span class="signature-badge">Index of /v1/docs</span></td><td>1,240 B</td>
+              <td><button class="btn btn-secondary" style="padding: 1px 5px; font-size: 10px;" onclick="triggerToast('Sent to Repeater')">Repeater</button></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+  </div>
 
-    <!-- TAB 4: Scanner Log & Console -->
-    <div id="tab-console" class="tab-content">
-      <div class="filter-bar">
-        <span class="input-label">Scanner Output:</span>
-        <button class="btn btn-secondary" onclick="clearConsoleLog()">Clear Log</button>
-        <button class="btn btn-secondary" onclick="triggerToast('Logs copied to clipboard')">Copy All</button>
-      </div>
-
-      <div class="console-view" id="consoleLogContainer">
-        <div class="log-line"><span class="log-ts">[10:48:02]</span> <span class="log-info">[INIT]</span> WaybackLister Burp Extension v2.0 initialized (by FR13ND0x7F &amp; littlespidy).</div>
-        <div class="log-line"><span class="log-ts">[10:48:05]</span> <span class="log-info">[INFO]</span> Target domain set to: testphp.vulnweb.com. Auto-subdomains: ENABLED.</div>
-        <div class="log-line"><span class="log-ts">[10:48:06]</span> <span class="log-info">[WAYBACK]</span> Querying Wayback CDX API: https://web.archive.org/cdx/search/cdx?url=*.testphp.vulnweb.com/*&amp;output=txt&amp;fl=original&amp;collapse=urlkey</div>
-        <div class="log-line"><span class="log-ts">[10:48:09]</span> <span class="log-info">[WAYBACK]</span> Received 1,428 archived URLs. Parsing paths and subdomains...</div>
-        <div class="log-line"><span class="log-ts">[10:48:10]</span> <span class="log-info">[INFO]</span> Discovered 7 unique subdomains and 186 unique paths for testphp.vulnweb.com.</div>
-        <div class="log-line"><span class="log-ts">[10:48:11]</span> <span class="log-info">[SCAN]</span> Starting multi-threaded probe pool (Threads: 10, Delay: 50ms, Timeout: 10s)...</div>
-        <div class="log-line"><span class="log-ts">[10:48:12]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: http://testphp.vulnweb.com/admin/ (Matched: "Index of /admin", Length: 4218 B)</div>
-        <div class="log-line"><span class="log-ts">[10:48:12]</span> <span class="log-info">[BURP]</span> Created Burp Suite Audit Issue: "Open Directory Listing - /admin/" (Severity: Medium)</div>
-        <div class="log-line"><span class="log-ts">[10:48:13]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: http://testphp.vulnweb.com/secured/ (Matched: "&lt;title&gt;Index of", Length: 1842 B)</div>
-        <div class="log-line"><span class="log-ts">[10:48:15]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: https://testphp.vulnweb.com/images/ (Matched: "Parent Directory&lt;/a&gt;", Length: 6712 B)</div>
-        <div class="log-line"><span class="log-ts">[10:48:18]</span> <span class="log-found">[FOUND]</span> Open Directory Listing confirmed: http://testphp.vulnweb.com/backup/ (Matched: "Last modified&lt;/a&gt;", Length: 3105 B)</div>
-        <div class="log-line"><span class="log-ts">[10:48:21]</span> <span class="log-info">[SCAN]</span> Progress: 124 / 186 paths verified (4 open directories found so far)...</div>
-      </div>
+  <!-- DOMAIN PANEL 3: admin.vulnweb.com (Simulated Third Domain Tab) -->
+  <div class="domain-content" id="domain-panel-3">
+    <div class="child-tabs-bar">
+      <div class="child-tab active">Directory Listings <span class="badge-count">0</span></div>
+      <div class="child-tab">Discovered Paths <span class="badge-count">18</span></div>
+      <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
+      <div class="child-tab">Settings &amp; Signatures</div>
     </div>
-
-    <!-- TAB 5: Settings & Signatures -->
-    <div id="tab-settings" class="tab-content">
-      <div class="settings-grid">
-        <!-- Detection Signatures Card -->
-        <div class="settings-card">
-          <div class="settings-card-title">Directory Listing Detection Signatures</div>
-          <p style="font-size: 11px; color: var(--text-muted);">Responses containing any of these substrings when returning HTTP 200 will be flagged as open directory listings.</p>
-          <div class="signature-list" id="signatureListContainer">
-            <div class="signature-item"><span>Index of /</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
-            <div class="signature-item"><span>Directory Listing for</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
-            <div class="signature-item"><span>&lt;title&gt;Index of</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
-            <div class="signature-item"><span>Parent Directory&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
-            <div class="signature-item"><span>Last modified&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
-            <div class="signature-item"><span>Name&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
-            <div class="signature-item"><span>Size&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
-            <div class="signature-item"><span>Description&lt;/a&gt;</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button></div>
+    <div class="main-workspace">
+      <div class="control-panel">
+        <div class="panel-row">
+          <div class="input-group">
+            <span class="input-label">Target Domain:</span>
+            <input type="text" class="text-input" value="admin.vulnweb.com" readonly>
           </div>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="newSignatureInput" class="text-input" style="min-width: 140px; flex: 1;" placeholder="New pattern (e.g. Volume Serial Number)">
-            <button class="btn btn-secondary" onclick="addSignature()">Add Pattern</button>
-            <button class="btn btn-secondary" onclick="resetSignatures()">Reset Defaults</button>
+            <button class="btn btn-primary" onclick="triggerToast('Starting scan on admin.vulnweb.com')">Start Scan</button>
           </div>
         </div>
-
-        <!-- Engine & Network Settings Card -->
-        <div class="settings-card">
-          <div class="settings-card-title">Wayback CDX &amp; Engine Settings</div>
-          
-          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-            <span class="input-label">Wayback Machine CDX API URL Template:</span>
-            <input type="text" class="text-input" style="width: 100%;" value="https://web.archive.org/cdx/search/cdx?url={DOMAIN}&amp;output=txt&amp;fl=original&amp;collapse=urlkey">
-          </div>
-
-          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-            <span class="input-label">Custom User-Agent:</span>
-            <input type="text" class="text-input" style="width: 100%;" value="WaybackLister/2.0 (BurpSuite-Extension-littlespidy)">
-          </div>
-
-          <div style="display: flex; gap: 14px;">
-            <div class="input-group">
-              <span class="input-label">CDX Retries:</span>
-              <input type="number" class="number-input" value="3" min="1" max="10">
-            </div>
-            <div class="input-group">
-              <span class="input-label">Retry Backoff (s):</span>
-              <input type="number" class="number-input" value="5" min="1" max="30">
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label class="checkbox-label">
-              <input type="checkbox" checked>
-              Test both HTTP and HTTPS protocols for each path
-            </label>
-          </div>
-
-          <div class="input-group">
-            <label class="checkbox-label">
-              <input type="checkbox" checked>
-              Honor Burp Suite upstream proxies and SOCKS settings
-            </label>
-          </div>
-
-          <div style="margin-top: auto; display: flex; gap: 8px;">
-            <button class="btn btn-primary" onclick="triggerToast('Settings saved successfully')">Save Settings</button>
-          </div>
-        </div>
+        <p style="font-size: 11px; color: var(--text-muted); padding: 8px 0;">Domain queued for scanning. Click Start Scan to begin harvesting and probing.</p>
       </div>
     </div>
-
   </div>
 
   <!-- Footer Status Bar -->
   <div class="footer-bar">
     <div style="display: flex; align-items: center;">
-      <span class="status-indicator scanning" id="statusIndicator"></span>
-      <span id="footerStatusText">Engine: Running | Scanning paths on testphp.vulnweb.com (124/186)</span>
+      <span class="status-indicator scanning"></span>
+      <span>Active Session: session_vulnweb_recon.json | Scanning #1 testphp.vulnweb.com</span>
     </div>
     <div>
-      <span>WaybackLister v2.0 for Burp Suite (Montoya API) | Author: FR13ND0x7F &amp; littlespidy</span>
+      <span>WaybackLister v2.0 for Burp Suite (Montoya API) | Dedicated Domain Multi-Session Model | Plain ASCII</span>
     </div>
   </div>
 
-  <!-- Notification Toast -->
+  <!-- Toast Notification -->
   <div class="toast-notice" id="toastNotice">Notification</div>
 
   <script>
@@ -1255,78 +1352,199 @@ Disable directory indexing in web server configuration (e.g. 'Options -Indexes' 
       btn.textContent = isLight ? 'Theme: Light' : 'Theme: Dark';
     }
 
-    // Switch main sub-tabs
-    function switchTab(tabId, tabElement) {
-      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      tabElement.classList.add('active');
-      document.getElementById(tabId).classList.add('active');
-    }
-
-    // Switch HTTP Inspector preview tabs
-    function switchPreviewTab(panelId, tabElement) {
-      document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.preview-body').forEach(b => b.style.display = 'none');
-      tabElement.classList.add('active');
-
-      if (panelId === 'preview-resp') {
-        document.getElementById('previewResponse').style.display = 'block';
-      } else if (panelId === 'preview-req') {
-        document.getElementById('previewRequest').style.display = 'block';
-      } else if (panelId === 'preview-issue') {
-        document.getElementById('previewIssue').style.display = 'block';
+    // Domain Parent Tabs Switching
+    function switchDomainTab(panelId, tabElem) {
+      document.querySelectorAll('.domain-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.domain-content').forEach(p => p.classList.remove('active'));
+      tabElem.classList.add('active');
+      const targetPanel = document.getElementById(panelId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
       }
     }
 
-    // Select row in findings table
+    function switchToDomain(tabId, panelId) {
+      const tab = document.getElementById(tabId);
+      if (tab) {
+        switchDomainTab(panelId, tab);
+      }
+    }
+
+    // Double-click inline in-place tab header renaming (Zero modal popups)
+    function editDomainTabTitle(titleSpan) {
+      const currentTitle = titleSpan.textContent;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentTitle;
+      input.style.fontSize = '11px';
+      input.style.padding = '1px 4px';
+      input.style.border = '1px solid var(--accent)';
+      input.style.backgroundColor = 'var(--input-bg)';
+      input.style.color = 'var(--text-bright)';
+      input.style.outline = 'none';
+      input.style.width = Math.max(120, currentTitle.length * 8) + 'px';
+
+      function commit() {
+        const val = input.value.trim();
+        titleSpan.textContent = val ? val : currentTitle;
+        input.replaceWith(titleSpan);
+      }
+
+      function cancel() {
+        input.replaceWith(titleSpan);
+      }
+
+      input.onkeydown = function(e) {
+        if (e.key === 'Enter') commit();
+        else if (e.key === 'Escape') cancel();
+      };
+      input.onblur = commit;
+
+      titleSpan.replaceWith(input);
+      input.focus();
+      input.select();
+    }
+
+    // Close domain tab
+    function closeDomainTab(tabId, panelId) {
+      if (confirm('Close this domain tab and abort any active scan on this target?')) {
+        const tab = document.getElementById(tabId);
+        const panel = document.getElementById(panelId);
+        if (tab) tab.remove();
+        if (panel) panel.remove();
+        const firstTab = document.querySelector('.domain-tab');
+        if (firstTab) firstTab.click();
+        triggerToast('Domain tab closed');
+      }
+    }
+
+    // Add new domain prompt
+    let domainCounter = 4;
+    function addNewDomainPrompt() {
+      const domain = prompt('Enter target domain for new scan tab:', 'newtarget.com');
+      if (domain && domain.trim()) {
+        addSpecificDomainTab(domain.trim());
+      }
+    }
+
+    function addSpecificDomainTab(domain) {
+      const id = domainCounter++;
+      const tabId = `tab-dom-${id}`;
+      const panelId = `domain-panel-${id}`;
+
+      const tabElem = document.createElement('div');
+      tabElem.className = 'domain-tab';
+      tabElem.id = tabId;
+      tabElem.innerHTML = `<span class="domain-tab-title" ondblclick="editDomainTabTitle(this)">#${id} ${domain}</span><button class="domain-tab-close" onclick="event.stopPropagation(); closeDomainTab('${tabId}', '${panelId}')">x</button>`;
+      tabElem.onclick = () => switchDomainTab(panelId, tabElem);
+
+      const addBtn = document.querySelector('.btn-add-domain-tab');
+      document.getElementById('domainTabsContainer').insertBefore(tabElem, addBtn);
+
+      const panelElem = document.createElement('div');
+      panelElem.className = 'domain-content';
+      panelElem.id = panelId;
+      panelElem.innerHTML = `
+        <div class="child-tabs-bar">
+          <div class="child-tab active">Directory Listings <span class="badge-count found">0</span></div>
+          <div class="child-tab">Discovered Paths <span class="badge-count">0</span></div>
+          <div class="child-tab">Discovered Subdomains <span class="badge-count">0</span></div>
+          <div class="child-tab">Settings &amp; Signatures</div>
+        </div>
+        <div class="main-workspace">
+          <div class="control-panel">
+            <div class="panel-row">
+              <div class="input-group">
+                <span class="input-label">Target Domain:</span>
+                <input type="text" class="text-input" value="${domain}">
+              </div>
+              <button class="btn btn-primary" onclick="triggerToast('Starting scan on ${domain}')">Start Scan</button>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); padding: 8px 0;">Ready to scan ${domain}. Click Start Scan to begin harvesting.</p>
+          </div>
+        </div>
+      `;
+      document.body.insertBefore(panelElem, document.querySelector('.footer-bar'));
+
+      switchDomainTab(panelId, tabElem);
+      triggerToast(`Created dedicated tab for ${domain}`);
+    }
+
+    // Child Sub-tabs switching
+    function switchChildTab(contentId, tabElem, domainPanelId) {
+      const container = document.getElementById(domainPanelId);
+      container.querySelectorAll('.child-tab').forEach(t => t.classList.remove('active'));
+      container.querySelectorAll('.child-tab-content').forEach(c => c.classList.remove('active'));
+      tabElem.classList.add('active');
+      const targetContent = document.getElementById(contentId);
+      if (targetContent) targetContent.classList.add('active');
+    }
+
+    // Select row in findings table to update parallel viewers
     function selectFindingRow(row, id) {
-      document.querySelectorAll('#findingsTable tbody tr').forEach(r => r.classList.remove('selected'));
+      document.querySelectorAll('#panel1-findingsTable tbody tr').forEach(r => r.classList.remove('selected'));
       row.classList.add('selected');
 
-      const reqBox = document.getElementById('previewRequest');
-      const respBox = document.getElementById('previewResponse');
-      const issueBox = document.getElementById('previewIssue');
+      const reqBox = document.getElementById('reqViewerText');
+      const respBox = document.getElementById('respViewerText');
 
       if (id === 1) {
-        reqBox.textContent = `GET /admin/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nAccept: */*\nConnection: close`;
-        respBox.textContent = `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 05:22:10 GMT\nServer: Apache/2.4.41 (Ubuntu)\nContent-Type: text/html;charset=UTF-8\nContent-Length: 4218\nConnection: close\n\n<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<html>\n <head>\n  <title>Index of /admin</title>\n </head>\n <body>\n<h1>Index of /admin</h1>\n  <table>\n   <tr><th><a href="?C=N;O=D">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th></tr>\n   <tr><th colspan="5"><hr></th></tr>\n<tr><td><a href="/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td></tr>\n<tr><td><a href="config.php.bak">config.php.bak</a></td><td align="right">2024-03-12 11:42</td><td align="right">2.4K</td></tr>\n<tr><td><a href="db_dump.sql.gz">db_dump.sql.gz</a></td><td align="right">2025-01-08 09:15</td><td align="right">1.8M</td></tr>\n</table>\n</body></html>`;
-        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Medium\nConfidence: Certain\nHost: http://testphp.vulnweb.com\nPath: /admin/\nMatched Signature: "Index of /admin"\n\nRemediation Recommendation:\nDisable directory indexing in web server configuration ('Options -Indexes' in Apache).`;
+        reqBox.textContent = `GET /admin/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 05:22:10 GMT\nServer: Apache/2.4.41 (Ubuntu)\nContent-Type: text/html;charset=UTF-8\nContent-Length: 4218\nConnection: close\n\n<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<html>\n <head>\n  <title>Index of /admin</title>\n </head>\n <body>\n<h1>Index of /admin</h1>\n  <table>\n   <tr><th><a href="?C=N;O=D">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th></tr>\n   <tr><th colspan="5"><hr></th></tr>\n<tr><td><a href="/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td></tr>\n<tr><td><a href="config.php.bak">config.php.bak</a></td><td align="right">2024-03-12 11:42</td><td align="right">2.4K</td></tr>\n<tr><td><a href="db_dump.sql.gz">db_dump.sql.gz</a></td><td align="right">2025-01-08 09:15</td><td align="right">1.8M</td></tr>\n<tr><td><a href="secret_keys.txt">secret_keys.txt</a></td><td align="right">2025-06-19 14:02</td><td align="right">512 </td></tr>\n</table>\n</body></html>`;
       } else if (id === 2) {
         reqBox.textContent = `GET /secured/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
         respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache/2.4.41\nContent-Length: 1842\n\n<html><head><title>Index of /secured</title></head><body><h1>Index of /secured</h1><p><a href="passwords.kdbx">passwords.kdbx</a></p></body></html>`;
-        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Medium\nConfidence: Certain\nHost: http://testphp.vulnweb.com\nPath: /secured/\nMatched Signature: "<title>Index of"`;
       } else if (id === 3) {
         reqBox.textContent = `GET /images/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
         respBox.textContent = `HTTP/1.1 200 OK\nServer: nginx/1.18.0\nContent-Length: 6712\n\n<html><body><h1>Directory listing for /images/</h1><a href="../">Parent Directory</a><br><a href="logo.png">logo.png</a></body></html>`;
-        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Low\nConfidence: Certain\nHost: https://testphp.vulnweb.com\nPath: /images/\nMatched Signature: "Parent Directory</a>"`;
       } else if (id === 4) {
         reqBox.textContent = `GET /backup/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: WaybackLister/2.0 (BurpSuite-Extension-littlespidy)\nConnection: close`;
         respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache\nContent-Length: 3105\n\n<html><head><title>Index of /backup</title></head><body><a href="archive_2025.tar.gz">archive_2025.tar.gz</a> Last modified: 2025-08-10</body></html>`;
-        issueBox.textContent = `Issue Name: Open Directory Listing Discovered (WaybackLister)\nSeverity: Medium\nConfidence: Certain\nHost: http://testphp.vulnweb.com\nPath: /backup/\nMatched Signature: "Last modified</a>"`;
       }
     }
 
-    // Filter findings
-    function filterFindingsTable() {
-      const q = document.getElementById('findingsSearchInput').value.toLowerCase();
-      const rows = document.querySelectorAll('#findingsTable tbody tr');
-      rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(q) ? '' : 'none';
+    // Filter tables
+    function filterTable(input, tableId) {
+      const q = input.value.toLowerCase();
+      const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+      rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none';
       });
     }
 
-    // Filter paths
-    function filterPathsTable() {
-      const q = document.getElementById('pathsSearchInput').value.toLowerCase();
-      const rows = document.querySelectorAll('#pathsTable tbody tr');
-      rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(q) ? '' : 'none';
-      });
+    // Session Management Actions
+    function sessionNewPrompt() {
+      const filename = prompt('Enter filename for new session JSON:', 'new_recon_session.json');
+      if (filename) {
+        document.getElementById('sessionStatusLabel').innerHTML = `Session: <strong>${filename}</strong> (/home/littlespidy/recon/)`;
+        triggerToast(`New session bound to ${filename}`);
+      }
     }
 
-    // Toast notification
+    function sessionOpenPrompt() {
+      triggerToast('Opened file dialog: Selected session_vulnweb_recon.json');
+    }
+
+    function sessionSaveAction() {
+      triggerToast('Session data saved successfully (atomic flush)');
+    }
+
+    function sessionSaveAsAction() {
+      const filename = prompt('Save Session As:', 'session_backup.json');
+      if (filename) {
+        document.getElementById('sessionStatusLabel').innerHTML = `Session: <strong>${filename}</strong> (/home/littlespidy/recon/)`;
+        triggerToast(`Session exported as ${filename}`);
+      }
+    }
+
+    function sessionOffboardAction() {
+      if (confirm('Offboard current session? Unsaved changes will be committed and workspace reset.')) {
+        document.getElementById('sessionStatusLabel').innerHTML = `Session: <strong>[Temporary / In-Memory]</strong>`;
+        triggerToast('Session offboarded. Clean in-memory workspace.');
+      }
+    }
+
+    // Toast Notice
     function triggerToast(msg) {
       const toast = document.getElementById('toastNotice');
       toast.textContent = msg;
@@ -1336,98 +1554,28 @@ Disable directory indexing in web server configuration (e.g. 'Options -Indexes' 
       }, 2500);
     }
 
-    // Scan control simulation
-    let isScanning = true;
-    function startScanSimulation() {
-      isScanning = true;
-      document.getElementById('startBtn').disabled = true;
-      document.getElementById('pauseBtn').disabled = false;
-      document.getElementById('stopBtn').disabled = false;
-      document.getElementById('kpiStatus').textContent = 'Running (Scanning)';
-      document.getElementById('kpiStatus').className = 'metric-value success';
-      document.getElementById('statusIndicator').className = 'status-indicator scanning';
-      document.getElementById('footerStatusText').textContent = 'Engine: Running | Scanning paths on testphp.vulnweb.com';
-      triggerToast('Scan started');
-    }
-
-    function pauseScanSimulation() {
-      isScanning = false;
-      document.getElementById('startBtn').disabled = false;
-      document.getElementById('pauseBtn').disabled = true;
-      document.getElementById('kpiStatus').textContent = 'Paused';
-      document.getElementById('kpiStatus').className = 'metric-value';
-      document.getElementById('statusIndicator').className = 'status-indicator stopped';
-      document.getElementById('footerStatusText').textContent = 'Engine: Paused';
-      triggerToast('Scan paused');
-    }
-
-    function stopScanSimulation() {
-      isScanning = false;
-      document.getElementById('startBtn').disabled = false;
-      document.getElementById('pauseBtn').disabled = true;
-      document.getElementById('stopBtn').disabled = true;
-      document.getElementById('kpiStatus').textContent = 'Idle (Stopped)';
-      document.getElementById('kpiStatus').className = 'metric-value';
-      document.getElementById('statusIndicator').className = 'status-indicator stopped';
-      document.getElementById('footerStatusText').textContent = 'Engine: Idle';
-      triggerToast('Scan stopped');
-    }
-
-    function clearAllData() {
-      if (confirm('Clear all findings, harvested paths, and scanner logs?')) {
-        document.querySelector('#findingsTable tbody').innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 16px;">No open directory listings discovered yet.</td></tr>';
-        document.getElementById('findingsCountBadge').textContent = '0';
-        document.getElementById('kpiFindings').textContent = '0';
-        document.getElementById('kpiRequests').textContent = '0 / 0';
-        document.getElementById('kpiHarvested').textContent = '0';
-        document.getElementById('kpiUniquePaths').textContent = '0';
-        document.getElementById('kpiSubdomains').textContent = '0';
-        document.getElementById('progressBarFill').style.width = '0%';
-        document.getElementById('progressBarText').textContent = 'Idle';
-        clearConsoleLog();
-        triggerToast('All data cleared');
-      }
-    }
-
-    function clearConsoleLog() {
-      document.getElementById('consoleLogContainer').innerHTML = '<div class="log-line"><span class="log-ts">[LOG]</span> Console cleared.</div>';
-    }
-
-    function exportData(type) {
-      triggerToast(`Exported ${type} data successfully (CSV format simulated)`);
-    }
-
-    // Signature management
+    // Signatures
     function addSignature() {
-      const input = document.getElementById('newSignatureInput');
+      const input = document.getElementById('newSigInput');
       const val = input.value.trim();
       if (!val) return;
       const list = document.getElementById('signatureListContainer');
       const item = document.createElement('div');
       item.className = 'signature-item';
-      item.innerHTML = `<span>${val.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button>`;
+      item.innerHTML = `<span>${val.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button>`;
       list.appendChild(item);
       input.value = '';
-      triggerToast(`Added signature pattern: "${val}"`);
-    }
-
-    function deleteSignature(btn) {
-      btn.parentElement.remove();
-      triggerToast('Removed signature pattern');
+      triggerToast(`Added signature: "${val}"`);
     }
 
     function resetSignatures() {
-      const defaults = [
-        "Index of /", "Directory Listing for", "<title>Index of",
-        "Parent Directory</a>", "Last modified</a>", "Name</a>",
-        "Size</a>", "Description</a>"
-      ];
+      const defaults = ["Index of /", "Directory Listing for", "<title>Index of", "Parent Directory</a>", "Last modified</a>", "Name</a>", "Size</a>", "Description</a>"];
       const list = document.getElementById('signatureListContainer');
       list.innerHTML = '';
       defaults.forEach(d => {
         const item = document.createElement('div');
         item.className = 'signature-item';
-        item.innerHTML = `<span>${d.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="deleteSignature(this)">Remove</button>`;
+        item.innerHTML = `<span>${d.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button>`;
         list.appendChild(item);
       });
       triggerToast('Reset signatures to defaults');
