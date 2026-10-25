@@ -55,11 +55,7 @@ public class ResponseInspectorTab extends JPanel {
 
         tabbedPane = new JTabbedPane();
 
-        // Tab 0: Welcome & Guide Dashboard
-        WelcomeGuidePanel welcomePanel = new WelcomeGuidePanel();
-        tabbedPane.addTab("Welcome & Guide", welcomePanel);
-
-        // Tabs 1-5: Category Findings Panels
+        // Category Findings Panels
         for (FindingCategory category : FindingCategory.values()) {
             CategoryFindingsPanel panel = new CategoryFindingsPanel(
                     api,
@@ -138,8 +134,7 @@ public class ResponseInspectorTab extends JPanel {
 
     public void refreshAllTabs() {
         SwingUtilities.invokeLater(() -> {
-            // Index 0 is Welcome & Guide
-            int index = 1;
+            int index = 0;
             for (FindingCategory category : FindingCategory.values()) {
                 CategoryFindingsPanel panel = panels.get(category);
                 if (panel != null) {

@@ -119,77 +119,15 @@ public class HSTSInspectorTab extends JPanel {
 
         dataStore.addListener(() -> needsRefresh = true);
 
-        rootTabbedPane.addTab("Welcome & Guide", createWelcomePanel());
+        if (storageManager != null) {
+            add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
+        }
         rootTabbedPane.addTab("HSTS Inspector",  createInspectorPanel());
         add(rootTabbedPane, BorderLayout.CENTER);
     }
 
     public void cleanup() {
         if (refreshTimer != null && refreshTimer.isRunning()) refreshTimer.stop();
-    }
-
-    // ── Welcome panel ─────────────────────────────────────────────────────────
-
-    private JComponent createWelcomePanel() {
-        JPanel panel = new JPanel(new BorderLayout(15, 15));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
-
-        JLabel title = new JLabel("HTTP Strict Transport Security (HSTS) Inspector");
-        title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
-
-        JTextArea desc = new JTextArea(
-            "HSTS Inspector audits the Strict-Transport-Security header across all target "
-            + "endpoints loaded from Burp Proxy history.\n\n"
-            + "Quickly identify:\n"
-            + "  • Missing HSTS headers (HTTPS downgrade risk)\n"
-            + "  • Short or zero max-age values\n"
-            + "  • Missing includeSubDomains (subdomain cookie theft risk)\n"
-            + "  • Missing preload directive (browser preload list eligibility)"
-        );
-        desc.setEditable(false);
-        desc.setOpaque(false);
-        desc.setLineWrap(true);
-        desc.setWrapStyleWord(true);
-        desc.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-
-        JPanel header = new JPanel(new BorderLayout(5, 10));
-        header.add(title, BorderLayout.NORTH);
-        header.add(desc,  BorderLayout.CENTER);
-
-        JPanel cards = new JPanel(new GridLayout(0, 2, 20, 20));
-        cards.add(createCard("1. On-Demand Ingestion & Deduplication",
-            "Load traffic from Burp Proxy history on-demand. Endpoints are deduplicated by "
-            + "Method + URL — no noise."));
-        cards.add(createCard("2. Assessment-First Grouping",
-            "Default 'Assessment' mode groups endpoints by severity: CRITICAL, HIGH, MEDIUM, GOOD. "
-            + "Rows are colour-coded for instant triage."));
-        cards.add(createCard("3. Directive Drill-Down Modes",
-            "Switch to max-age, includeSubDomains, or preload modes to see the distribution "
-            + "of individual directive values across all endpoints."));
-        cards.add(createCard("4. Multi-Select Filters + Master-Detail",
-            "Filter by HTTP Method, Status Code, or Content-Type — multi-select supported. "
-            + "Click any URL row to open the raw request/response in Burp's native editors."));
-
-        panel.add(header, BorderLayout.NORTH);
-        panel.add(cards,  BorderLayout.CENTER);
-        return new JScrollPane(panel);
-    }
-
-    private JPanel createCard(String title, String description) {
-        JPanel card = new JPanel(new BorderLayout(8, 8));
-        card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-        JLabel lbl = new JLabel(title);
-        lbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
-        JTextArea ta = new JTextArea(description);
-        ta.setEditable(false); ta.setOpaque(false);
-        ta.setLineWrap(true);  ta.setWrapStyleWord(true);
-        ta.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
-        card.add(lbl, BorderLayout.NORTH);
-        card.add(ta,  BorderLayout.CENTER);
-        return card;
     }
 
     // ── Inspector panel ───────────────────────────────────────────────────────
@@ -199,14 +137,7 @@ public class HSTSInspectorTab extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        if (storageManager != null) {
-            JPanel headerBars = new JPanel(new BorderLayout());
-            headerBars.add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
-            headerBars.add(createMainToolbar(), BorderLayout.SOUTH);
-            topContainer.add(headerBars, BorderLayout.NORTH);
-        } else {
-            topContainer.add(createMainToolbar(), BorderLayout.NORTH);
-        }
+        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
         topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
         panel.add(topContainer, BorderLayout.NORTH);
 
@@ -256,12 +187,25 @@ public class HSTSInspectorTab extends JPanel {
         });
         setupTableKeyboardCopy(entryTable);
 
-        JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("Request",  requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
+        JPanel reqContainer = new JPanel(new BorderLayout());
+        reqContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Request",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        reqContainer.add(requestEditor.uiComponent(), BorderLayout.CENTER);
+
+        JPanel respContainer = new JPanel(new BorderLayout());
+        respContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Response",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        respContainer.add(responseEditor.uiComponent(), BorderLayout.CENTER);
+
+        JSplitPane httpViewerSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, reqContainer, respContainer);
+        httpViewerSplit.setResizeWeight(0.5);
 
         JSplitPane masterDetail = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-            new JScrollPane(entryTable), editorTabs);
+            new JScrollPane(entryTable), httpViewerSplit);
         masterDetail.setResizeWeight(0.55);
         detailPanel.add(masterDetail, BorderLayout.CENTER);
 

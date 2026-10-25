@@ -27,6 +27,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -73,7 +74,7 @@ public class CategoryFindingsPanel extends JPanel {
 
     private final HttpRequestEditor reqEditor;
     private final HttpResponseEditor respEditor;
-    private final JTabbedPane editorTabs;
+    private final JSplitPane editorSplit;
 
     private final JLabel statsLabel;
     private final JLabel liveStatusLabel;
@@ -166,9 +167,22 @@ public class CategoryFindingsPanel extends JPanel {
         reqEditor = api.userInterface().createHttpRequestEditor();
         respEditor = api.userInterface().createHttpResponseEditor();
 
-        editorTabs = new JTabbedPane();
-        editorTabs.addTab("Request", reqEditor.uiComponent());
-        editorTabs.addTab("Response", respEditor.uiComponent());
+        JPanel reqContainer = new JPanel(new BorderLayout());
+        reqContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Request",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        reqContainer.add(reqEditor.uiComponent(), BorderLayout.CENTER);
+
+        JPanel respContainer = new JPanel(new BorderLayout());
+        respContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Response",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        respContainer.add(respEditor.uiComponent(), BorderLayout.CENTER);
+
+        editorSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, reqContainer, respContainer);
+        editorSplit.setResizeWeight(0.5);
 
         // Deep-Linking Table Selection Listener
         table.getSelectionModel().addListSelectionListener(e -> {
@@ -394,7 +408,7 @@ public class CategoryFindingsPanel extends JPanel {
         // Master-Detail Split Pane
         JScrollPane tableScroll = new JScrollPane(table);
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroll, editorTabs);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroll, editorSplit);
         splitPane.setResizeWeight(0.55);
         splitPane.setDividerLocation(320);
 
@@ -472,8 +486,6 @@ public class CategoryFindingsPanel extends JPanel {
             HttpResponse response = message.response();
             if (response == null) return;
 
-            editorTabs.setSelectedComponent(respEditor.uiComponent());
-
             int rawStart = finding.startOffset();
             int rawEnd = finding.endOffset();
             int bodyOffset = response.bodyOffset();
@@ -518,8 +530,6 @@ public class CategoryFindingsPanel extends JPanel {
         } else {
             HttpRequest request = message.request();
             if (request == null) return;
-
-            editorTabs.setSelectedComponent(reqEditor.uiComponent());
 
             int rawStart = finding.startOffset();
             int rawEnd = finding.endOffset();

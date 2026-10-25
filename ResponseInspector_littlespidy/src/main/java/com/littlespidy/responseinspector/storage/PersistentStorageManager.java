@@ -422,7 +422,11 @@ public class PersistentStorageManager {
     }
 
     public JPanel createSessionToolbarComponent(Component parent, Runnable onRefresh, Runnable onAnalyzeFile) {
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        JPanel toolbar = new JPanel(new BorderLayout(8, 0));
+        toolbar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
 
         JButton newBtn = new JButton("New Session");
         newBtn.setToolTipText("Create a new session file in a user-specified directory");
@@ -472,6 +476,7 @@ public class PersistentStorageManager {
         saveAsBtn.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser(getLastDirectory());
             chooser.setDialogTitle("Save Session As");
+            chooser.setSelectedFile(new File(getLastDirectory(), DEFAULT_SESSION_FILENAME));
             chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
             if (chooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
                 File sel = chooser.getSelectedFile();
@@ -505,15 +510,20 @@ public class PersistentStorageManager {
             analyzeFileBtn.addActionListener(e -> onAnalyzeFile.run());
         }
 
-        toolbar.add(sessionStatusLabel);
-        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
-        toolbar.add(newBtn);
-        toolbar.add(openBtn);
-        toolbar.add(offboardBtn);
-        toolbar.add(saveAsBtn);
-        toolbar.add(saveNowBtn);
-        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
-        toolbar.add(analyzeFileBtn);
+        JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        leftActions.add(newBtn);
+        leftActions.add(openBtn);
+        leftActions.add(offboardBtn);
+        leftActions.add(saveAsBtn);
+        leftActions.add(saveNowBtn);
+        leftActions.add(new JSeparator(SwingConstants.VERTICAL));
+        leftActions.add(analyzeFileBtn);
+
+        JPanel rightStatus = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        rightStatus.add(sessionStatusLabel);
+
+        toolbar.add(leftActions, BorderLayout.WEST);
+        toolbar.add(rightStatus, BorderLayout.EAST);
 
         return toolbar;
     }

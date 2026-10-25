@@ -156,12 +156,10 @@ public class CSPInspectorTab extends JPanel {
 
         dataStore.addListener(() -> needsRefresh = true);
 
-        // Tab 1: Welcome & Guide
-        rootTabbedPane.addTab("Welcome & Guide", createWelcomePanel());
-
-        // Tab 2: CSP Inspector
+        if (storageManager != null) {
+            add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
+        }
         rootTabbedPane.addTab("CSP Inspector", createInspectorPanel());
-
         add(rootTabbedPane, BorderLayout.CENTER);
     }
 
@@ -171,93 +169,14 @@ public class CSPInspectorTab extends JPanel {
         }
     }
 
-    private JComponent createWelcomePanel() {
-        JPanel panel = new JPanel(new BorderLayout(15, 15));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
-
-        JLabel titleLabel = new JLabel("Content Security Policy (CSP) Inspector");
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
-
-        JTextArea descArea = new JTextArea();
-        descArea.setEditable(false);
-        descArea.setOpaque(false);
-        descArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-        descArea.setLineWrap(true);
-        descArea.setWrapStyleWord(true);
-        descArea.setText(
-            "CSP Inspector is an interactive analysis tool for Burp Suite designed to rapidly audit, group, "
-                + "and analyze Content Security Policy implementations across target applications.\n\n"
-                + "Identify missing CSP protection, dangerous source expressions ('unsafe-inline', 'unsafe-eval', wildcard domains), "
-                + "Clickjacking risks (missing frame-ancestors), plugin injection surfaces (missing object-src), "
-                + "and Report-Only test configurations in seconds."
-        );
-
-        JPanel headerPanel = new JPanel(new BorderLayout(5, 10));
-        headerPanel.add(titleLabel, BorderLayout.NORTH);
-        headerPanel.add(descArea, BorderLayout.CENTER);
-
-        JPanel cardsPanel = new JPanel(new GridLayout(0, 2, 20, 20));
-        cardsPanel.add(createCard(
-            "1. On-Demand Ingestion & Deduplication",
-            "Import target traffic from Burp Proxy history on-demand via 'Load Proxy History'. "
-                + "Endpoints are automatically deduplicated by Method + URL to prevent table clutter."
-        ));
-        cardsPanel.add(createCard(
-            "2. Multi-Mode Directive Breakdown",
-            "Analyze policies by Full CSP string, by individual directives (script-src, frame-ancestors, object-src, etc.), "
-                + "or by specific source tokens ('unsafe-inline', 'unsafe-eval', data:, https://*)."
-        ));
-        cardsPanel.add(createCard(
-            "3. Multi-Select Triage Filters & Preset Chips",
-            "Filter instantly by HTTP Method, Status Code, and Content-Type using multi-select dropdowns. "
-                + "Select multiple values at once (e.g. GET + POST). Use one-click quick chips for immediate vulnerability identification."
-        ));
-        cardsPanel.add(createCard(
-            "4. Integrated Master-Detail Viewer",
-            "Click any URL row to view the full, raw HTTP request and response in Burp's native Pretty/Raw/Hex editors."
-        ));
-
-        panel.add(headerPanel, BorderLayout.NORTH);
-        panel.add(cardsPanel, BorderLayout.CENTER);
-
-        return new JScrollPane(panel);
-    }
-
-    private JPanel createCard(String title, String description) {
-        JPanel card = new JPanel(new BorderLayout(8, 8));
-        card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-
-        JLabel titleLbl = new JLabel(title);
-        titleLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
-
-        JTextArea desc = new JTextArea(description);
-        desc.setEditable(false);
-        desc.setOpaque(false);
-        desc.setLineWrap(true);
-        desc.setWrapStyleWord(true);
-        desc.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
-
-        card.add(titleLbl, BorderLayout.NORTH);
-        card.add(desc, BorderLayout.CENTER);
-        return card;
-    }
-
     private JPanel createInspectorPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Top Toolbars
         JPanel topContainer = new JPanel(new BorderLayout(5, 5));
-        if (storageManager != null) {
-            topContainer.add(storageManager.createSessionToolbarComponent(this, this::refreshView), BorderLayout.NORTH);
-        }
-        JPanel subTop = new JPanel(new BorderLayout(5, 5));
-        subTop.add(createMainToolbar(),   BorderLayout.NORTH);
-        subTop.add(createStatusToolbar(), BorderLayout.SOUTH);
-        topContainer.add(subTop, BorderLayout.CENTER);
+        topContainer.add(createMainToolbar(),   BorderLayout.NORTH);
+        topContainer.add(createStatusToolbar(), BorderLayout.SOUTH);
         panel.add(topContainer, BorderLayout.NORTH);
 
         // Center Workspaces
@@ -309,14 +228,31 @@ public class CSPInspectorTab extends JPanel {
         });
         setupTableKeyboardCopy(entryTable);
 
-        JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("Request", requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
+        JPanel reqContainer = new JPanel(new BorderLayout());
+        reqContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Request",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        reqContainer.add(requestEditor.uiComponent(), BorderLayout.CENTER);
+
+        JPanel respContainer = new JPanel(new BorderLayout());
+        respContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Response",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        respContainer.add(responseEditor.uiComponent(), BorderLayout.CENTER);
+
+        JSplitPane httpViewerSplit = new JSplitPane(
+            JSplitPane.HORIZONTAL_SPLIT,
+            reqContainer,
+            respContainer
+        );
+        httpViewerSplit.setResizeWeight(0.5);
 
         JSplitPane masterDetailSplit = new JSplitPane(
             JSplitPane.VERTICAL_SPLIT,
             new JScrollPane(entryTable),
-            editorTabs
+            httpViewerSplit
         );
         masterDetailSplit.setResizeWeight(0.55);
         detailsPanel.add(masterDetailSplit, BorderLayout.CENTER);

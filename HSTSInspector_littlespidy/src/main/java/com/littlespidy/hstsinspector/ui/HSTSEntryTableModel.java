@@ -63,8 +63,8 @@ public class HSTSEntryTableModel extends AbstractTableModel {
             case 4  -> e.url();
             case 5  -> e.contentType();
             case 6  -> e.isMissingHsts() ? "(missing)" : e.maxAge() < 0 ? "(not set)" : String.valueOf(e.maxAge()) + "s (" + e.maxAgeSummary() + ")";
-            case 7  -> e.isMissingHsts() ? "(missing)" : e.includeSubDomains() ? "✔ yes" : "✘ no";
-            case 8  -> e.isMissingHsts() ? "(missing)" : e.preload() ? "✔ yes" : "✘ no";
+            case 7  -> e.isMissingHsts() ? "(missing)" : e.includeSubDomains() ? "yes" : "no";
+            case 8  -> e.isMissingHsts() ? "(missing)" : e.preload() ? "yes" : "no";
             case 9  -> e.assessment();
             case 10 -> e.isMissingHsts() ? "" : e.hstsHeader();
             default -> null;

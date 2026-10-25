@@ -295,6 +295,7 @@ public class HSTSPersistentStorageManager_littlespidy {
     public synchronized void saveAs(Component parent) {
         JFileChooser chooser = new JFileChooser(getLastDirectory());
         chooser.setDialogTitle("Save HSTS Inspector Session As");
+        chooser.setSelectedFile(new File(getLastDirectory(), "hsts_inspector_session.json"));
         chooser.setFileFilter(new FileNameExtensionFilter("JSON Session Files (*.json)", "json"));
         int res = chooser.showSaveDialog(parent);
         if (res == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
@@ -312,7 +313,11 @@ public class HSTSPersistentStorageManager_littlespidy {
     }
 
     public JPanel createSessionToolbarComponent(Component parent, Runnable onRefresh) {
-        JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        JPanel bar = new JPanel(new BorderLayout(8, 0));
+        bar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
 
         JButton newBtn = new JButton("New Session");
         newBtn.addActionListener(e -> {
@@ -370,12 +375,18 @@ public class HSTSPersistentStorageManager_littlespidy {
             }
         });
 
-        bar.add(sessionStatusLabel);
-        bar.add(newBtn);
-        bar.add(openBtn);
-        bar.add(offboardBtn);
-        bar.add(saveAsBtn);
-        bar.add(saveNowBtn);
+        JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        leftActions.add(newBtn);
+        leftActions.add(openBtn);
+        leftActions.add(offboardBtn);
+        leftActions.add(saveAsBtn);
+        leftActions.add(saveNowBtn);
+
+        JPanel rightStatus = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        rightStatus.add(sessionStatusLabel);
+
+        bar.add(leftActions, BorderLayout.WEST);
+        bar.add(rightStatus, BorderLayout.EAST);
         return bar;
     }
 

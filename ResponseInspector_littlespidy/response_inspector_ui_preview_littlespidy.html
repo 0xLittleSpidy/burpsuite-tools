@@ -1,0 +1,325 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Response Inspector - UI Preview (littlespidy)</title>
+  <style>
+    :root {
+      --bg: #2b2b2b;
+      --panel-bg: #3c3f41;
+      --border: #4e5254;
+      --text: #bbbbbb;
+      --text-highlight: #ffffff;
+      --accent: #ff6633;
+      --btn-bg: #4c5052;
+      --btn-border: #5a5d60;
+      --table-header: #313335;
+      --table-alt: #36393b;
+      --table-selected: #2d4360;
+      --code-bg: #1e1e1e;
+    }
+    body.light-theme {
+      --bg: #f2f2f2;
+      --panel-bg: #ffffff;
+      --border: #d0d0d0;
+      --text: #222222;
+      --text-highlight: #000000;
+      --accent: #e05500;
+      --btn-bg: #e6e6e6;
+      --btn-border: #cccccc;
+      --table-header: #eaeaea;
+      --table-alt: #f9f9f9;
+      --table-selected: #b8cfe5;
+      --code-bg: #f8f8f8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 12px;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    /* Session Management Bar */
+    .session-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .session-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .session-status {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: bold;
+    }
+    button.btn {
+      background: var(--btn-bg);
+      color: var(--text-highlight);
+      border: 1px solid var(--btn-border);
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button.btn:hover {
+      border-color: var(--accent);
+    }
+    .separator {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+    /* Parent Tabs */
+    .parent-tabs {
+      display: flex;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      padding-left: 8px;
+    }
+    .parent-tab {
+      padding: 7px 14px;
+      cursor: pointer;
+      border-top: 2px solid transparent;
+      color: var(--text);
+    }
+    .parent-tab.active {
+      color: var(--text-highlight);
+      background: var(--bg);
+      border-top: 2px solid var(--accent);
+      font-weight: bold;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+    /* Workspace Content */
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 8px;
+      gap: 8px;
+      overflow: hidden;
+    }
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-bg);
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .toolbar input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-highlight);
+      padding: 4px 8px;
+      border-radius: 3px;
+    }
+    /* Table Container */
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      border: 1px solid var(--border);
+      background: var(--panel-bg);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      background: var(--table-header);
+      color: var(--text-highlight);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+    }
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    tr:nth-child(even) {
+      background: var(--table-alt);
+    }
+    tr.selected {
+      background: var(--table-selected);
+      color: #fff;
+    }
+    /* Parallel Request / Response Viewers */
+    .parallel-viewers {
+      display: flex;
+      gap: 8px;
+      height: 260px;
+    }
+    .viewer-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      background: var(--panel-bg);
+      border-radius: 3px;
+    }
+    .pane-header {
+      padding: 4px 8px;
+      font-weight: bold;
+      color: var(--text-highlight);
+      border-bottom: 1px solid var(--border);
+      background: var(--table-header);
+    }
+    .pane-content {
+      flex: 1;
+      padding: 8px;
+      background: var(--code-bg);
+      color: var(--text-highlight);
+      font-family: monospace;
+      font-size: 11px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+    /* Theme toggle */
+    .theme-toggle {
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Session Management Bar (At root, above all parent tabs) -->
+  <div class="session-bar">
+    <div class="session-actions">
+      <button class="btn" onclick="alert('Creating session: response_inspector_session.json')">New Session</button>
+      <button class="btn" onclick="alert('Open Session Dialog')">Open Session</button>
+      <button class="btn" onclick="alert('Offboard Session')">Offboard Session</button>
+      <button class="btn" onclick="alert('Save As default: response_inspector_session.json')">Save As...</button>
+      <button class="btn" onclick="alert('Session saved')">Save Now</button>
+      <div class="separator"></div>
+      <button class="btn" onclick="alert('Analyze File Dialog')">Analyze File...</button>
+    </div>
+    <div class="session-status" id="sessionStatus">
+      Session: response_inspector_session.json (/home/user/burp-sessions)
+    </div>
+  </div>
+
+  <!-- 2. Parent Tabs (No Welcome Guide, starts on Passwords) -->
+  <div class="parent-tabs">
+    <div class="parent-tab active" onclick="switchTab(this, 'Passwords (4)')">Passwords (4)</div>
+    <div class="parent-tab" onclick="switchTab(this, 'PII, Network & Paths (12)')">PII, Network & Paths (12)</div>
+    <div class="parent-tab" onclick="switchTab(this, 'Errors & Exceptions (7)')">Errors & Exceptions (7)</div>
+    <div class="parent-tab" onclick="switchTab(this, 'Secrets (3)')">Secrets (3)</div>
+    <div class="parent-tab" onclick="switchTab(this, 'Comments (18)')">Comments (18)</div>
+    <button class="btn theme-toggle" onclick="toggleTheme()">Toggle Dark/Light</button>
+  </div>
+
+  <!-- 3. Workspace with Table and Parallel Request/Response Panes -->
+  <div class="workspace">
+    <div class="toolbar">
+      <span>Search:</span>
+      <input type="text" placeholder="Filter regex or keywords..." style="width: 200px;">
+      <label><input type="checkbox" checked> In Scope Only</label>
+      <button class="btn">Clear</button>
+      <button class="btn">Export TSV</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Finding Type</th>
+            <th>Match Excerpt</th>
+            <th>Location</th>
+            <th>Length</th>
+            <th>Content-Type</th>
+            <th>URL</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected">
+            <td>1</td>
+            <td>POST</td>
+            <td>200 OK</td>
+            <td>Password Parameter</td>
+            <td>user_password=AdminPass2026</td>
+            <td>Body Parameter</td>
+            <td>1420</td>
+            <td>application/json</td>
+            <td>https://target.local/api/v1/auth/login</td>
+            <td>21:24:00</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>POST</td>
+            <td>200 OK</td>
+            <td>API Key Token</td>
+            <td>api_secret=sec_live_9a7b1c4e</td>
+            <td>JSON Attribute</td>
+            <td>942</td>
+            <td>application/json</td>
+            <td>https://target.local/api/v1/users/create</td>
+            <td>21:24:02</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4. Parallel Request and Response Panes -->
+    <div class="parallel-viewers">
+      <div class="viewer-pane">
+        <div class="pane-header">Request</div>
+        <div class="pane-content">POST /api/v1/auth/login HTTP/1.1
+Host: target.local
+User-Agent: Mozilla/5.0
+Content-Type: application/json
+Content-Length: 64
+
+{
+  "username": "admin@target.local",
+  "user_password": "AdminPass2026"
+}</div>
+      </div>
+      <div class="viewer-pane">
+        <div class="pane-header">Response</div>
+        <div class="pane-content">HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Content-Length: 128
+Set-Cookie: auth_session=eyJhbGciOi...; Path=/; HttpOnly; Secure
+
+{
+  "status": "success",
+  "token": "tok_live_admin_91827364"
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+    function switchTab(el, title) {
+      document.querySelectorAll('.parent-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+  </script>
+</body>
+</html>
