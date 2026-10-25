@@ -22,7 +22,7 @@
 2. **Ghost-Js Secret Mining & Shannon Entropy Suppression**:
    - **40+ Curated Secret Signatures**: High-fidelity detection across Cloud (AWS, GCP, Azure, DigitalOcean, Cloudflare, Heroku), Payment (Stripe, PayPal, Square), CI/CD & DevOps (GitHub, GitLab, Bitbucket, Vercel, Netlify, npm), SaaS (Slack, Discord, SendGrid, Twilio, Mailgun, OpenAI), and Auth (JWTs, private keys).
    - **Confidence Tracking & Entropy Scoring**: Numeric confidence scores (70–98%) with Shannon entropy bit-per-character calculation (`shannon` / `calculate`) to eliminate low-entropy false positives.
-   - **Interactive Signatures & Pattern Catalog (`📋 Signatures Catalog`)**: In-GUI dialog displaying all 48 supported signatures with their exact regular expressions, categories, confidence, and entropy requirements.
+   - **Interactive Signatures & Pattern Catalog (`Signatures Catalog`)**: In-GUI dialog displaying all 48 supported signatures with their exact regular expressions, categories, confidence, and entropy requirements.
    - **Intelligent FP Suppression**: Suppresses documented tutorial sample credentials (`AKIAIOSFODNN7EXAMPLE`, `EXAMPLEKEY`), public-by-design keys (`pk_live_`, `pk_test_`, reCAPTCHA tokens), placeholder templates (`YOUR_API_KEY_HERE`, `change_me`), 32-hex hash collisions (with exemptions for legitimate 32-hex formats), repetitive character junk, and natural-language UI text.
    - **Exact Character Offsets**: Tracks `startOffset` and `endOffset` for every discovered secret and endpoint to enable instantaneous editor deep-linking.
 
@@ -64,13 +64,13 @@
 
 7. **Visual Tab Navigation**:
    - Clear emoji symbol prefixes across all suite tabs and sub-tabs:
-     - `📖 Welcome & Guide`
-     - `🗺️ JS & SourceMap Workspace`
-     - `🔍 Recon & Secret Mining`
-     - `✨ AI Security Analyst`
-     - `🌲 Reconstructed Source Tree`
-     - `📤 Request` / `📥 Response`
-     - `🛣️ Paths`, `🔑 Secrets`, `💬 Comments`, `🛡️ Security Bypasses`, `☁️ Cloud URLs`, `📦 Dependencies`
+     - `Welcome & Guide`
+     - `JS & SourceMap Workspace`
+     - `Recon & Secret Mining`
+     - `AI Security Analyst`
+     - `Reconstructed Source Tree`
+     - `Request` / `Response`
+     - `Paths`, `Secrets`, `Comments`, `Security Bypasses`, `Cloud URLs`, `Dependencies`
 
 8. **Automatic URL Deduplication**:
    - Duplicate JavaScript URLs and requests are automatically deduplicated by default so each script is tracked and analyzed once.
@@ -96,19 +96,19 @@
 
 12. **4-Way Raw HTTP Message Inspection**:
     - Select any script to view:
-      - **`JS Request`** & **`JS Response`** in Burp's native Pretty/Raw/Hex editors.
-      - **`SourceMap Request`** & **`SourceMap Response`** when a source map is found, probed, or unpacked.
+      - **`JS Viewer`**: Parallel Request & Response in Burp's native Pretty/Raw/Hex editors.
+      - **`Source map Viewer`**: Parallel Request & Response in Burp's native Pretty/Raw/Hex editors when a source map is found, probed, or unpacked.
 
 13. **Dedicated Top-Level "Recon & Secret Mining" Suite Tab**:
     - Sequential request-first master-detail layout:
       - **Master Table (Top)**: Lists requests sequentially with method, URL, status, and counts of discovered paths, secrets, comments, security bypasses, cloud URLs, and dependencies.
-      - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **💬 Comments**, **🛡️ Security Bypasses**, **Cloud URLs**, and **Dependencies** tabs on the right. In all panels, the Location/File columns have been streamlined away, as well as Entropy and Confidence columns.
+      - **Bottom Detail Split**: Selecting any request updates native Montoya HTTP Request and Response editors on the left, paired with dedicated **Paths**, **Secrets**, **Comments**, **Security Bypasses**, **Cloud URLs**, and **Dependencies** tabs on the right. In all panels, the Location/File columns have been streamlined away, as well as Entropy and Confidence columns.
     - **Multi-Select Technique, Category, and Header Filtering**:
       - **Top Filter Toolbar**: Includes `In-Scope Only` (enabled by default), `Domains ▾` multi-select button, `Method ▾`, `Status ▾` multi-select filter buttons, `Source Type` selector, and real-time search with 300ms debounce.
       - **Paths Tab**: Features `Method ▾` (GET, POST, etc.) and `Technique ▾` (Regex/Pattern, LinkFinder, etc.) multi-select buttons alongside search and TSV export.
-      - **Secrets Tab**: Features `Category ▾` and `Signature ▾` multi-select buttons, search, and the `📋 Signatures Catalog` modal viewer (Entropy and Confidence columns removed, Confidence filter removed).
-      - **💬 Comments Tab**: Extracts all developer comments (single-line `//`, multi-line `/* */`, HTML `<!-- -->`) with line numbers, code offsets for Burp editor deep-linking, and category tags (`TODO/FIXME`, `Credentials/Auth`, `Debug/Config`, `General`), plus `Type ▾` multi-select filter (Category filter removed).
-      - **🛡️ Security Bypasses Tab (DOM XSS & Sanitizer Bypasses)**:
+      - **Secrets Tab**: Features `Category ▾` and `Signature ▾` multi-select buttons, search, and the `Signatures Catalog` modal viewer (Entropy and Confidence columns removed, Confidence filter removed).
+      - **Comments Tab**: Extracts all developer comments (single-line `//`, multi-line `/* */`, HTML `<!-- -->`) with line numbers, code offsets for Burp editor deep-linking, and category tags (`TODO/FIXME`, `Credentials/Auth`, `Debug/Config`, `General`), plus `Type ▾` multi-select filter (Category filter removed).
+      - **Security Bypasses Tab (DOM XSS & Sanitizer Bypasses)**:
         - **Framework Detection**: Detects sanitization bypasses and dangerous sinks across **Angular** (`bypassSecurityTrustHtml`, `bypassSecurityTrustScript`, `bypassSecurityTrustStyle`, `bypassSecurityTrustUrl`, `bypassSecurityTrustResourceUrl`, `ɵɵtrustConstantHtml`, `$sce.trustAs*`), **React** (`dangerouslySetInnerHTML`), **Vue.js** (`v-html`, `domProps.innerHTML`, `{{{ }}}`), **Svelte** (`{@html ...}`), **Sanitizers & Policies** (`DOMPurify.sanitize` loose configs, `trustedTypes.createPolicy` passthrough), and **Vanilla DOM Sinks** (`innerHTML` / `outerHTML` assignments, `document.write`, `insertAdjacentHTML`, `eval()`, `new Function()`, `$.html()`).
         - **Intelligent FP Suppression**: Suppresses harmless empty innerHTML cleanups (`""`, `''`, `null`, `undefined`).
         - **Multi-Select Filtering**: `Framework ▾` and `Risk ▾` (Critical, High, Medium) multi-select buttons, full-text search, TSV export, and 4-pillar deep-linking quad into Burp editors.

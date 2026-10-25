@@ -8,6 +8,9 @@ import com.littlespidy.jssourcemapexplorer.model.PassiveMapStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -81,5 +84,20 @@ class JsInspectorImprovementsTest_littlespidy {
         String formatted = JsBeautifier_littlespidy.beautify(jsWithSpecialStrings);
 
         assertTrue(formatted.contains("'query { user(id: 1) { name; email } }'"), "Strings with braces and semicolons must remain untouched");
+    }
+
+    @Test
+    @DisplayName("Verify Source map Viewer sub-tab and parallel split layout")
+    void testSourceMapViewerSubTabAndParallelLayout() throws IOException {
+        Path tabPath = Path.of("src/main/java/com/littlespidy/jssourcemapexplorer/ui/JSSourceMapExplorerTab.java");
+        assertTrue(Files.exists(tabPath), "JSSourceMapExplorerTab.java must exist");
+
+        String content = Files.readString(tabPath);
+        assertTrue(content.contains("\"Source map Viewer\""), "Sub-tab must be named 'Source map Viewer'");
+        assertFalse(content.contains("\"SourceMap (.map) HTTP Message\""), "Old tab title 'SourceMap (.map) HTTP Message' must be removed");
+        assertTrue(content.contains("mapViewerSplit = new JSplitPane("), "Source map viewer must use a split pane");
+        assertTrue(content.contains("JSplitPane.HORIZONTAL_SPLIT"), "Source map viewer split must be horizontal (parallel)");
+        assertTrue(content.contains("mapRequestContainer.setBorder("), "Request pane must have its own border container");
+        assertTrue(content.contains("mapResponseContainer.setBorder("), "Response pane must have its own border container");
     }
 }

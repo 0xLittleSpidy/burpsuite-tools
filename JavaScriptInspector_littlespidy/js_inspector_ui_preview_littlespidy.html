@@ -667,11 +667,11 @@
       <!-- Bottom Inspection Section -->
       <div class="inspection-container">
 
-        <!-- Sub-Tabs: Source Tree (Renamed), JS Viewer (Renamed), SourceMap Message -->
+        <!-- Sub-Tabs: Source Tree (Renamed), JS Viewer (Renamed), Source map Viewer -->
         <div class="sub-tabs">
           <div class="sub-tab active" onclick="switchSubTab('tree', this)">Source Tree</div>
           <div class="sub-tab" onclick="switchSubTab('js-viewer', this)">JS Viewer</div>
-          <div class="sub-tab" onclick="switchSubTab('map-message', this)">SourceMap (.map) HTTP Message</div>
+          <div class="sub-tab" onclick="switchSubTab('map-message', this)">Source map Viewer</div>
         </div>
 
         <!-- Sub-Tab 1: Source Tree Panel with JS Beautiful Viewer -->
@@ -775,12 +775,12 @@ Cache-Control: public, max-age=31536000, immutable
           </div>
         </div>
 
-        <!-- Sub-Tab 3: SourceMap HTTP Message -->
+        <!-- Sub-Tab 3: Source map Viewer -->
         <div id="tab-map-message" class="sub-tab-panel">
           <div class="parallel-viewer">
             <div class="pane-half">
               <div class="pane-header">
-                <span>SourceMap Request</span>
+                <span>Request</span>
                 <span style="color: var(--text-muted);">GET /_next/static/chunks/main-app.js.map HTTP/1.1</span>
               </div>
               <div class="editor-pane">GET /_next/static/chunks/main-app.js.map HTTP/1.1
@@ -791,7 +791,7 @@ Connection: keep-alive</div>
             </div>
             <div class="pane-half">
               <div class="pane-header">
-                <span>SourceMap Response</span>
+                <span>Response</span>
                 <span style="color: var(--text-muted);">HTTP/1.1 200 OK (894.2 KB JSON)</span>
               </div>
               <div class="editor-pane">HTTP/1.1 200 OK

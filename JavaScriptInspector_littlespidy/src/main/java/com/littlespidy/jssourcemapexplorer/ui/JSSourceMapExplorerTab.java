@@ -326,11 +326,28 @@ public class JSSourceMapExplorerTab extends JPanel {
         jsViewerSplit.setResizeWeight(0.5);
         bottomTabs.addTab("JS Viewer", jsViewerSplit);
 
-        // Sub-Tab 3: Raw SourceMap (.map) HTTP Messages
-        JTabbedPane mapHttpTabs = new JTabbedPane();
-        mapHttpTabs.addTab("SourceMap Request", mapRequestEditor.uiComponent());
-        mapHttpTabs.addTab("SourceMap Response", mapResponseEditor.uiComponent());
-        bottomTabs.addTab("SourceMap (.map) HTTP Message", mapHttpTabs);
+        // Sub-Tab 3: Source map Viewer (Parallel Request and Response Panes)
+        JPanel mapRequestContainer = new JPanel(new BorderLayout());
+        mapRequestContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Request",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        mapRequestContainer.add(mapRequestEditor.uiComponent(), BorderLayout.CENTER);
+
+        JPanel mapResponseContainer = new JPanel(new BorderLayout());
+        mapResponseContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Response",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        mapResponseContainer.add(mapResponseEditor.uiComponent(), BorderLayout.CENTER);
+
+        JSplitPane mapViewerSplit = new JSplitPane(
+            JSplitPane.HORIZONTAL_SPLIT,
+            mapRequestContainer,
+            mapResponseContainer
+        );
+        mapViewerSplit.setResizeWeight(0.5);
+        bottomTabs.addTab("Source map Viewer", mapViewerSplit);
 
         // Master Vertical Split: Scripts Table (Top) vs Project Details & Editors (Bottom)
         JSplitPane mainSplit = new JSplitPane(
