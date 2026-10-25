@@ -142,7 +142,7 @@ public class RootProbeEngineTest_littlespidy {
         assertNotNull(putReq);
 
         String reqStr = putReq.toString();
-        assertTrue(reqStr.startsWith("PUT /test_littlespidy.txt HTTP/1.1\r\n"));
+        assertTrue(reqStr.startsWith("PUT " + RootProbeEngine_littlespidy.DEFAULT_PUT_FILENAME + " HTTP/1.1\r\n"));
         assertTrue(reqStr.contains("Host: example.com\r\n"));
         assertTrue(reqStr.contains("User-Agent: Mozilla/5.0 Custom\r\n"));
         assertTrue(reqStr.contains("Cookie: session=abc123xyz\r\n"));

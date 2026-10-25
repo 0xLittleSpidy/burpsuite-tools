@@ -18,8 +18,8 @@ import java.nio.charset.StandardCharsets;
  */
 public class RootProbeEngine_littlespidy {
 
-    public static final String DEFAULT_PUT_FILENAME = "/test_littlespidy.txt";
-    public static final String DEFAULT_PUT_BODY = "Upload test verification file created by littlespidy (Burp Suite Payload Injector).\r\n";
+    public static final String DEFAULT_PUT_FILENAME = "/put_fileupload.txt";
+    public static final String DEFAULT_PUT_BODY = "Put File Upload verification.\r\n";
     public static final String ROBOTS_TXT_PATH = "/robots.txt";
 
     /**
@@ -46,7 +46,8 @@ public class RootProbeEngine_littlespidy {
         sb.append("Host: ").append(hostHeader).append("\r\n");
 
         // Preserve client headers if present in base request
-        copyHeaderIfPresent(baseRequest, sb, "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+        copyHeaderIfPresent(baseRequest, sb, "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
         copyHeaderIfPresent(baseRequest, sb, "Authorization", null);
         copyHeaderIfPresent(baseRequest, sb, "Cookie", null);
 
@@ -94,7 +95,8 @@ public class RootProbeEngine_littlespidy {
         sb.append("GET ").append(targetPath).append(" HTTP/1.1\r\n");
         sb.append("Host: ").append(hostHeader).append("\r\n");
 
-        copyHeaderIfPresent(baseRequest, sb, "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+        copyHeaderIfPresent(baseRequest, sb, "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
         copyHeaderIfPresent(baseRequest, sb, "Authorization", null);
         copyHeaderIfPresent(baseRequest, sb, "Cookie", null);
 

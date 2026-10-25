@@ -1153,7 +1153,7 @@ public class PayloadFeaturesTest_littlespidy {
     }
 
     @Test
-    void testSearchBarPreservesFilterAcrossReload() {
+    void testSearchBarPreservesFilterAcrossReload() throws Exception {
         ParamPayloadStore testStore = new ParamPayloadStore(null, "xss_payloads.json") {
             @Override public synchronized void reload() {}
             @Override public synchronized void save() {}
@@ -1170,7 +1170,11 @@ public class PayloadFeaturesTest_littlespidy {
 
         // Add an entry and notify change
         testStore.addEntry(new ParamPayloadEntry("3", "Another Beta", "<script>alert('beta 2')</script>", "Test beta 2", true));
-        tab.applySearchFilter();
+        if (javax.swing.SwingUtilities.isEventDispatchThread()) {
+            tab.applySearchFilter();
+        } else {
+            javax.swing.SwingUtilities.invokeAndWait(tab::applySearchFilter);
+        }
 
         // Should filter reloaded data showing 2 matching rows
         assertEquals(2, tab.getTable().getRowCount());

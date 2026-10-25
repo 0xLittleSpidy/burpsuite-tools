@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <!-- Created with the help of an AI Agent and littlespidy. -->
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +17,8 @@
       --text: #cccccc;
       --text-bright: #ffffff;
       --text-muted: #8e8e8e;
-      --accent: #e56b1f; /* Burp Orange */
+      --accent: #e56b1f;
+      /* Burp Orange */
       --accent-hover: #ff7f32;
       --accent-disabled: #8a481e;
       --badge-completed: #388a34;
@@ -224,7 +226,7 @@
       position: absolute;
       background-color: var(--bg-card);
       border: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       border-radius: 4px;
       padding: 4px 0;
       z-index: 100;
@@ -271,7 +273,7 @@
       left: 100%;
       background-color: var(--bg-card);
       border: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       border-radius: 4px;
       padding: 4px 0;
       min-width: 240px;
@@ -380,6 +382,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Top Banner -->
@@ -389,7 +392,8 @@
       <span class="burp-sub">Extension: Payload Injector (littlespidy) v1.0.0</span>
     </div>
     <div class="header-actions">
-      <span id="hintMsg" style="color: var(--accent); font-size: 11px; margin-right: 10px;">Right-click any table row to test PUT Upload or robots.txt</span>
+      <span id="hintMsg" style="color: var(--accent); font-size: 11px; margin-right: 10px;">Right-click any table row to
+        test PUT Upload or robots.txt</span>
       <button class="theme-btn" onclick="toggleTheme()">Toggle Dark / Light Theme</button>
     </div>
   </header>
@@ -519,16 +523,17 @@
             <span>Request (PUT Web Root Test)</span>
             <span>Target: target-app.example.com:443</span>
           </div>
-          <div class="editor-content">PUT /test_littlespidy.txt HTTP/1.1
-Host: target-app.example.com
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-Authorization: Bearer eyJhbGciOiJIUzI1Ni...
-Cookie: sessionid=littlespidy_sess_789432
-Content-Type: text/plain
-Content-Length: 78
-Connection: close
+          <div class="editor-content">PUT /put_fileupload.txt HTTP/1.1
+            Host: target-app.example.com
+            User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
+            Chrome/128.0.0.0 Safari/537.36
+            Authorization: Bearer eyJhbGciOiJIUzI1Ni...
+            Cookie: sessionid=littlespidy_sess_789432
+            Content-Type: text/plain
+            Content-Length: 78
+            Connection: close
 
-Upload test verification file created by littlespidy (Burp Suite Payload Injector).</div>
+            Put File Upload verification</div>
         </div>
         <div class="editor-box">
           <div class="editor-header">
@@ -536,20 +541,20 @@ Upload test verification file created by littlespidy (Burp Suite Payload Injecto
             <span class="status-badge status-201">201 Created</span>
           </div>
           <div class="editor-content">HTTP/1.1 201 Created
-Date: Sun, 25 Oct 2026 10:10:00 GMT
-Server: nginx/1.24.0
-Content-Type: text/html; charset=UTF-8
-Content-Length: 178
-Connection: close
-Location: /test_littlespidy.txt
+            Date: Sun, 25 Oct 2026 10:10:00 GMT
+            Server: nginx/1.24.0
+            Content-Type: text/html; charset=UTF-8
+            Content-Length: 178
+            Connection: close
+            Location: /test_littlespidy.txt
 
-&lt;html&gt;
-&lt;head&gt;&lt;title&gt;201 Created&lt;/title&gt;&lt;/head&gt;
-&lt;body&gt;
-&lt;center&gt;&lt;h1&gt;201 Created&lt;/h1&gt;&lt;/center&gt;
-&lt;hr&gt;&lt;center&gt;File successfully uploaded via HTTP PUT method.&lt;/center&gt;
-&lt;/body&gt;
-&lt;/html&gt;</div>
+            &lt;html&gt;
+            &lt;head&gt;&lt;title&gt;201 Created&lt;/title&gt;&lt;/head&gt;
+            &lt;body&gt;
+            &lt;center&gt;&lt;h1&gt;201 Created&lt;/h1&gt;&lt;/center&gt;
+            &lt;hr&gt;&lt;center&gt;File successfully uploaded via HTTP PUT method.&lt;/center&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;</div>
         </div>
       </div>
 
@@ -561,14 +566,15 @@ Location: /test_littlespidy.txt
             <span>Target: target-app.example.com:443</span>
           </div>
           <div class="editor-content">GET /robots.txt HTTP/1.1
-Host: target-app.example.com
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-Authorization: Bearer eyJhbGciOiJIUzI1Ni...
-Cookie: sessionid=littlespidy_sess_789432
-Accept: text/plain, */*
-Connection: close
+            Host: target-app.example.com
+            User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
+            Chrome/128.0.0.0 Safari/537.36
+            Authorization: Bearer eyJhbGciOiJIUzI1Ni...
+            Cookie: sessionid=littlespidy_sess_789432
+            Accept: text/plain, */*
+            Connection: close
 
-</div>
+          </div>
         </div>
         <div class="editor-box">
           <div class="editor-header">
@@ -576,18 +582,18 @@ Connection: close
             <span class="status-badge status-200">200 OK</span>
           </div>
           <div class="editor-content">HTTP/1.1 200 OK
-Date: Sun, 25 Oct 2026 10:10:05 GMT
-Server: nginx/1.24.0
-Content-Type: text/plain
-Content-Length: 132
-Connection: close
+            Date: Sun, 25 Oct 2026 10:10:05 GMT
+            Server: nginx/1.24.0
+            Content-Type: text/plain
+            Content-Length: 132
+            Connection: close
 
-User-agent: *
-Disallow: /admin/
-Disallow: /api/internal/
-Disallow: /backup/
-Disallow: /config/
-Disallow: /secret-token-login.php</div>
+            User-agent: *
+            Disallow: /admin/
+            Disallow: /api/internal/
+            Disallow: /backup/
+            Disallow: /config/
+            Disallow: /secret-token-login.php</div>
         </div>
       </div>
     </section>
@@ -619,7 +625,7 @@ Disallow: /secret-token-login.php</div>
     const contextMenu = document.getElementById('burpContextMenu');
     let selectedHost = 'target-app.example.com';
 
-    tableContainer.addEventListener('contextmenu', function(e) {
+    tableContainer.addEventListener('contextmenu', function (e) {
       e.preventDefault();
       const rect = tableContainer.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -630,7 +636,7 @@ Disallow: /secret-token-login.php</div>
       contextMenu.style.display = 'block';
     });
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       if (!contextMenu.contains(e.target)) {
         contextMenu.style.display = 'none';
       }
@@ -659,4 +665,5 @@ Disallow: /secret-token-login.php</div>
     }
   </script>
 </body>
+
 </html>

@@ -108,10 +108,10 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
         rootMenu.add(sendToRepeaterMenu);
 
         // -- 2. Web Root Probes (Send to Repeater): PUT File Upload & Important Files --
-        JMenuItem putUploadItem = new JMenuItem("Send PUT Upload Test to Repeater (/test_littlespidy.txt)");
+        JMenuItem putUploadItem = new JMenuItem("Send PUT Upload Test to Repeater (" + com.littlespidy.payloadinjector.engine.RootProbeEngine_littlespidy.DEFAULT_PUT_FILENAME + ")");
         putUploadItem.addActionListener(e -> {
             HttpRequest putReq = com.littlespidy.payloadinjector.engine.RootProbeEngine_littlespidy.buildPutUploadRequest(targetRequest);
-            String tabTitle = "PUT /test_littlespidy.txt [" + extractHostForTitle(targetRequest) + "]";
+            String tabTitle = "PUT " + com.littlespidy.payloadinjector.engine.RootProbeEngine_littlespidy.DEFAULT_PUT_FILENAME + " [" + extractHostForTitle(targetRequest) + "]";
             api.repeater().sendToRepeater(putReq, tabTitle);
         });
         rootMenu.add(putUploadItem);

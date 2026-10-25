@@ -40,7 +40,36 @@ public class PayloadInjectorPersistentStorageTest_littlespidy {
 
     @Test
     public void testSessionSaveAndOpen(@TempDir Path tempDir) throws Exception {
-        MontoyaApi api = mock(MontoyaApi.class);
+        burp.api.montoya.extension.Extension extensionMock = (burp.api.montoya.extension.Extension) Proxy.newProxyInstance(
+                burp.api.montoya.extension.Extension.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.extension.Extension.class},
+                (proxy, method, args) -> {
+                    if ("filename".equals(method.getName())) {
+                        return tempDir.resolve("dummy.jar").toString();
+                    }
+                    if (method.getReturnType().equals(String.class)) return "";
+                    if (method.getReturnType().isInterface()) return mock(method.getReturnType());
+                    return null;
+                }
+        );
+
+        MontoyaApi api = (MontoyaApi) Proxy.newProxyInstance(
+                MontoyaApi.class.getClassLoader(),
+                new Class<?>[]{MontoyaApi.class},
+                (proxy, method, args) -> {
+                    if ("extension".equals(method.getName())) {
+                        return extensionMock;
+                    }
+                    if (method.getReturnType().equals(Component.class) || method.getReturnType().equals(JComponent.class)) {
+                        return new JPanel();
+                    }
+                    if (method.getReturnType().equals(String.class)) return "";
+                    if (method.getReturnType().equals(boolean.class)) return false;
+                    if (method.getReturnType().equals(int.class)) return 0;
+                    if (method.getReturnType().isInterface()) return mock(method.getReturnType());
+                    return null;
+                }
+        );
 
         Map<String, ParamPayloadStore> paramStores = new LinkedHashMap<>();
         ParamPayloadStore xssStore = new ParamPayloadStore(api, "xss_payloads.json");
