@@ -1,6 +1,11 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.jssourcemapexplorer.ui;
 
+import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.core.ByteArray;
+import burp.api.montoya.ui.editor.EditorOptions;
+import burp.api.montoya.ui.editor.RawEditor;
+import com.littlespidy.jssourcemapexplorer.engine.JsBeautifier_littlespidy;
 import com.littlespidy.jssourcemapexplorer.model.UnpackedSourceFile;
 
 import javax.swing.*;
@@ -11,17 +16,22 @@ import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Monospace source code viewer with line numbers, metadata statistics,
- * copy tools, and file export options.
+ * Beautiful JavaScript source code viewer featuring native Burp syntax highlighting,
+ * automated and on-demand code beautification, line statistics, search capabilities,
+ * clipboard tools, and file export options.
  *
  * @author littlespidy
  */
 public class SourceCodeViewerPanel extends JPanel {
 
+    private final MontoyaApi api;
+    private final RawEditor rawEditor;
+
     private final JLabel filePathLabel = new JLabel("No file selected");
     private final JLabel fileStatsLabel = new JLabel("");
     private final JTextArea codeArea = new JTextArea();
     private final JTextArea lineNumbersArea = new JTextArea();
+    private final JToggleButton beautifyToggle = new JToggleButton("Beautify JS");
 
     private UnpackedSourceFile currentFile;
     private java.util.function.Consumer<UnpackedSourceFile> aiReviewListener;
@@ -31,6 +41,11 @@ public class SourceCodeViewerPanel extends JPanel {
     }
 
     public SourceCodeViewerPanel() {
+        this(null);
+    }
+
+    public SourceCodeViewerPanel(MontoyaApi api) {
+        this.api = api;
         setLayout(new BorderLayout(5, 5));
         setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
@@ -45,6 +60,10 @@ public class SourceCodeViewerPanel extends JPanel {
         pathBox.add(fileStatsLabel);
 
         JPanel actionsBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
+
+        beautifyToggle.setToolTipText("Toggle formatting and indentation for minified JavaScript");
+        beautifyToggle.addActionListener(e -> updateViewerContent());
+
         JButton aiReviewBtn = new JButton("AI Review");
         aiReviewBtn.setToolTipText("Send this file to AI Security Analyst (Local LLM / Antigravity)");
         aiReviewBtn.addActionListener(e -> {
@@ -59,6 +78,7 @@ public class SourceCodeViewerPanel extends JPanel {
         JButton saveBtn = new JButton("Save File As...");
         saveBtn.addActionListener(e -> saveCurrentFileToDisk());
 
+        actionsBox.add(beautifyToggle);
         actionsBox.add(aiReviewBtn);
         actionsBox.add(copyBtn);
         actionsBox.add(saveBtn);
@@ -66,22 +86,28 @@ public class SourceCodeViewerPanel extends JPanel {
         topToolbar.add(pathBox, BorderLayout.WEST);
         topToolbar.add(actionsBox, BorderLayout.EAST);
 
-        // ── Center Code Area ──
-        codeArea.setEditable(false);
-        codeArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        codeArea.setTabSize(4);
-
-        lineNumbersArea.setEditable(false);
-        lineNumbersArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        lineNumbersArea.setBackground(new Color(245, 245, 245));
-        lineNumbersArea.setForeground(Color.GRAY);
-        lineNumbersArea.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
-
-        JScrollPane scrollPane = new JScrollPane(codeArea);
-        scrollPane.setRowHeaderView(lineNumbersArea);
-
         add(topToolbar, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+
+        // ── Center Code Area ──
+        if (api != null && api.userInterface() != null) {
+            this.rawEditor = api.userInterface().createRawEditor(EditorOptions.READ_ONLY);
+            add(rawEditor.uiComponent(), BorderLayout.CENTER);
+        } else {
+            this.rawEditor = null;
+            codeArea.setEditable(false);
+            codeArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+            codeArea.setTabSize(4);
+
+            lineNumbersArea.setEditable(false);
+            lineNumbersArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+            lineNumbersArea.setBackground(new Color(245, 245, 245));
+            lineNumbersArea.setForeground(Color.GRAY);
+            lineNumbersArea.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+
+            JScrollPane scrollPane = new JScrollPane(codeArea);
+            scrollPane.setRowHeaderView(lineNumbersArea);
+            add(scrollPane, BorderLayout.CENTER);
+        }
     }
 
     public void displayFile(UnpackedSourceFile file) {
@@ -89,38 +115,72 @@ public class SourceCodeViewerPanel extends JPanel {
         if (file == null) {
             filePathLabel.setText("No file selected");
             fileStatsLabel.setText("");
+            if (rawEditor != null) {
+                rawEditor.setContents(ByteArray.byteArray(""));
+            }
             codeArea.setText("");
             lineNumbersArea.setText("");
             return;
         }
 
         filePathLabel.setText(file.relativePath());
-        int secretsCount = file.secrets() != null ? file.secrets().size() : 0;
-        int endpointsCount = file.endpoints() != null ? file.endpoints().size() : 0;
+        updateViewerContent();
+    }
 
-        fileStatsLabel.setText(String.format(
-            "(%d lines | %s | %d secrets | %d endpoints)",
-            file.lineCount(),
-            formatSize(file.sizeBytes()),
-            secretsCount,
-            endpointsCount
-        ));
+    private void updateViewerContent() {
+        if (currentFile == null || currentFile.content() == null) {
+            if (rawEditor != null) {
+                rawEditor.setContents(ByteArray.byteArray(""));
+            }
+            codeArea.setText("");
+            lineNumbersArea.setText("");
+            fileStatsLabel.setText("");
+            return;
+        }
 
-        codeArea.setText(file.content());
+        String content = currentFile.content();
+        boolean isBeautified = beautifyToggle.isSelected();
+        if (isBeautified) {
+            content = JsBeautifier_littlespidy.beautify(content);
+        }
+
+        if (rawEditor != null) {
+            rawEditor.setContents(ByteArray.byteArray(content));
+        }
+        codeArea.setText(content);
         codeArea.setCaretPosition(0);
 
-        // Generate line numbers
+        int lineCount = 1;
+        for (int i = 0; i < content.length(); i++) {
+            if (content.charAt(i) == '\n') lineCount++;
+        }
+
         StringBuilder linesText = new StringBuilder();
-        for (int i = 1; i <= file.lineCount(); i++) {
+        for (int i = 1; i <= lineCount; i++) {
             linesText.append(i).append("\n");
         }
         lineNumbersArea.setText(linesText.toString());
+
+        int secretsCount = currentFile.secrets() != null ? currentFile.secrets().size() : 0;
+        int endpointsCount = currentFile.endpoints() != null ? currentFile.endpoints().size() : 0;
+
+        fileStatsLabel.setText(String.format(
+            "(%d lines | %s | %d secrets | %d endpoints%s)",
+            lineCount,
+            formatSize(content.getBytes(StandardCharsets.UTF_8).length),
+            secretsCount,
+            endpointsCount,
+            isBeautified ? " | Beautified" : ""
+        ));
     }
 
     private void copyCurrentCodeToClipboard() {
         if (currentFile != null && currentFile.content() != null) {
+            String textToCopy = beautifyToggle.isSelected()
+                ? JsBeautifier_littlespidy.beautify(currentFile.content())
+                : currentFile.content();
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-                new StringSelection(currentFile.content()), null
+                new StringSelection(textToCopy), null
             );
             JOptionPane.showMessageDialog(this, "Copied source code to clipboard!", "Copy Code", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -135,8 +195,11 @@ public class SourceCodeViewerPanel extends JPanel {
 
         if (choice == JFileChooser.APPROVE_OPTION) {
             File chosen = fileChooser.getSelectedFile();
+            String textToSave = beautifyToggle.isSelected()
+                ? JsBeautifier_littlespidy.beautify(currentFile.content())
+                : currentFile.content();
             try (FileOutputStream fos = new FileOutputStream(chosen)) {
-                fos.write(currentFile.content().getBytes(StandardCharsets.UTF_8));
+                fos.write(textToSave.getBytes(StandardCharsets.UTF_8));
                 JOptionPane.showMessageDialog(this, "Saved file to: " + chosen.getAbsolutePath(), "Save Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Failed to save file: " + ex.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);

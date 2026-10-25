@@ -91,7 +91,7 @@ public class SourceTreePanel extends JPanel {
         rootNode.removeAllChildren();
 
         if (currentProject == null || currentProject.getFilesByPath().isEmpty()) {
-            rootNode.setUserObject("0 files in reconstructed source tree");
+            rootNode.setUserObject("0 files in source tree");
             countLabel.setText("Files: 0");
             treeModel.reload();
             return;

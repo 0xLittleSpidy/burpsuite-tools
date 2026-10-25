@@ -23,7 +23,7 @@ public class JsFilesTableModel extends AbstractTableModel {
         "Host",
         "JS Path",
         "Passive .map",
-        "On-Demand Probe",
+        "Active .map",
         "SourceMap Location",
         "Unpacked Files",
         "Size"

@@ -52,7 +52,7 @@ public class JSSourceMapExplorerTab extends JPanel {
 
     // Unpacked Source Tree & Code Viewer
     private final SourceTreePanel sourceTreePanel;
-    private final SourceCodeViewerPanel codeViewerPanel = new SourceCodeViewerPanel();
+    private final SourceCodeViewerPanel codeViewerPanel;
 
     // Dedicated Top-Level Recon Mining Panel
     private final ReconMiningPanel reconMiningPanel;
@@ -124,6 +124,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         this.mapRequestEditor = api.userInterface().createHttpRequestEditor();
         this.mapResponseEditor = api.userInterface().createHttpResponseEditor();
 
+        this.codeViewerPanel = new SourceCodeViewerPanel(api);
         this.sourceTreePanel = new SourceTreePanel(codeViewerPanel::displayFile);
         this.reconMiningPanel = new ReconMiningPanel(api, dataStore);
         this.reconMiningPanel.setHistoryLoader(this::loadProxyHistory);
@@ -293,20 +294,37 @@ public class JSSourceMapExplorerTab extends JPanel {
         // ── Bottom Section: Inspection Tabs (Tree Explorer & 4-Way HTTP Editors) ──
         JTabbedPane bottomTabs = new JTabbedPane();
 
-        // Sub-Tab 1: Reconstructed Project Tree & Code Viewer
+        // Sub-Tab 1: Source Tree & Code Viewer
         JSplitPane treeSplit = new JSplitPane(
             JSplitPane.HORIZONTAL_SPLIT,
             sourceTreePanel,
             codeViewerPanel
         );
         treeSplit.setResizeWeight(0.30);
-        bottomTabs.addTab("Reconstructed Source Tree", treeSplit);
+        bottomTabs.addTab("Source Tree", treeSplit);
 
-        // Sub-Tab 2: Raw JS HTTP Messages
-        JTabbedPane jsHttpTabs = new JTabbedPane();
-        jsHttpTabs.addTab("JS Request", jsRequestEditor.uiComponent());
-        jsHttpTabs.addTab("JS Response", jsResponseEditor.uiComponent());
-        bottomTabs.addTab("JS HTTP Message", jsHttpTabs);
+        // Sub-Tab 2: JS Viewer (Parallel Request and Response Panes)
+        JPanel jsRequestContainer = new JPanel(new BorderLayout());
+        jsRequestContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Request",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        jsRequestContainer.add(jsRequestEditor.uiComponent(), BorderLayout.CENTER);
+
+        JPanel jsResponseContainer = new JPanel(new BorderLayout());
+        jsResponseContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Response",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 12)
+        ));
+        jsResponseContainer.add(jsResponseEditor.uiComponent(), BorderLayout.CENTER);
+
+        JSplitPane jsViewerSplit = new JSplitPane(
+            JSplitPane.HORIZONTAL_SPLIT,
+            jsRequestContainer,
+            jsResponseContainer
+        );
+        jsViewerSplit.setResizeWeight(0.5);
+        bottomTabs.addTab("JS Viewer", jsViewerSplit);
 
         // Sub-Tab 3: Raw SourceMap (.map) HTTP Messages
         JTabbedPane mapHttpTabs = new JTabbedPane();
@@ -361,6 +379,10 @@ public class JSSourceMapExplorerTab extends JPanel {
         copyJsUrlsBtn.setToolTipText("Copy all JavaScript file URLs to clipboard, one per line");
         copyJsUrlsBtn.addActionListener(e -> copyAllJsUrls());
 
+        JButton copyMapsUrlsBtn = new JButton("Copy Maps URLs");
+        copyMapsUrlsBtn.setToolTipText("Copy found/exposed Source Map URLs to clipboard line by line");
+        copyMapsUrlsBtn.addActionListener(e -> copyExposedMapUrls());
+
         JButton probeSelectedBtn = new JButton("Probe Selected .map");
         probeSelectedBtn.setToolTipText("Actively probe selected rows for exposed .js.map files");
         probeSelectedBtn.addActionListener(e -> probeSelectedScripts());
@@ -412,6 +434,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         toolbar.add(selectAllBtn);
         toolbar.add(deselectAllBtn);
         toolbar.add(copyJsUrlsBtn);
+        toolbar.add(copyMapsUrlsBtn);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(probeSelectedBtn);
         toolbar.add(probeAllBtn);
@@ -873,6 +896,90 @@ public class JSSourceMapExplorerTab extends JPanel {
         JOptionPane.showMessageDialog(this, "Copied to clipboard.", "", JOptionPane.PLAIN_MESSAGE);
     }
 
+    private void copyExposedMapUrls() {
+        int[] selectedRows = jsTable.getSelectedRows();
+        List<JsFileEntry> candidates = new ArrayList<>();
+
+        if (selectedRows != null && selectedRows.length > 0) {
+            for (int row : selectedRows) {
+                int modelRow = jsTable.convertRowIndexToModel(row);
+                JsFileEntry entry = jsTableModel.getEntryAt(modelRow);
+                if (entry != null && entry.isMapExposed()) {
+                    candidates.add(entry);
+                }
+            }
+        } else {
+            for (JsFileEntry entry : jsTableModel.getAllEntries()) {
+                if (entry != null && entry.isMapExposed()) {
+                    candidates.add(entry);
+                }
+            }
+        }
+
+        if (candidates.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No exposed or found .map URLs available.", "Copy Maps URLs", JOptionPane.PLAIN_MESSAGE);
+            return;
+        }
+
+        Set<String> mapUrls = new LinkedHashSet<>();
+        for (JsFileEntry entry : candidates) {
+            String mapLoc = entry.getSourceMapLocation();
+            if (mapLoc != null && !mapLoc.isBlank() && !mapLoc.startsWith("data:")) {
+                String fullMapUrl = resolveMapUrl(entry.getUrl(), mapLoc.trim());
+                if (fullMapUrl != null && !fullMapUrl.isBlank()) {
+                    mapUrls.add(fullMapUrl);
+                }
+            } else if (entry.getActiveProbeStatus() == ActiveProbeStatus.PASS || entry.isUnpacked()) {
+                String fullMapUrl = resolveDefaultMapUrl(entry.getUrl());
+                if (fullMapUrl != null && !fullMapUrl.isBlank()) {
+                    mapUrls.add(fullMapUrl);
+                }
+            }
+        }
+
+        if (mapUrls.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No valid exposed .map HTTP URLs found.", "Copy Maps URLs", JOptionPane.PLAIN_MESSAGE);
+            return;
+        }
+
+        String result = String.join("\n", mapUrls);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
+            new StringSelection(result), null
+        );
+
+        JOptionPane.showMessageDialog(this, "Copied " + mapUrls.size() + " .map URLs to clipboard.", "Copy Maps URLs", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private String resolveMapUrl(String jsUrl, String mapLoc) {
+        if (mapLoc == null || mapLoc.isBlank()) return null;
+        if (mapLoc.startsWith("http://") || mapLoc.startsWith("https://")) {
+            return mapLoc;
+        }
+        if (mapLoc.startsWith("//")) {
+            String proto = (jsUrl != null && jsUrl.startsWith("https:")) ? "https:" : "http:";
+            return proto + mapLoc;
+        }
+        try {
+            if (jsUrl != null) {
+                java.net.URI baseUri = java.net.URI.create(jsUrl);
+                return baseUri.resolve(mapLoc).toString();
+            }
+        } catch (Exception ignored) {
+        }
+        if (jsUrl != null && jsUrl.contains("/")) {
+            String prefix = jsUrl.substring(0, jsUrl.lastIndexOf('/') + 1);
+            return prefix + (mapLoc.startsWith("/") ? mapLoc.substring(1) : mapLoc);
+        }
+        return mapLoc;
+    }
+
+    private String resolveDefaultMapUrl(String jsUrl) {
+        if (jsUrl == null || jsUrl.isBlank()) return null;
+        int qIdx = jsUrl.indexOf('?');
+        String cleanUrl = (qIdx != -1) ? jsUrl.substring(0, qIdx) : jsUrl;
+        return cleanUrl + ".map";
+    }
+
     private void loadProxyHistory() {
         if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(false);
         if (reconMiningPanel != null) reconMiningPanel.setHistoryLoading(true);
@@ -1117,7 +1224,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         jsTable.getColumnModel().getColumn(3).setPreferredWidth(140); // Host
         jsTable.getColumnModel().getColumn(4).setPreferredWidth(250); // JS Path
         jsTable.getColumnModel().getColumn(5).setPreferredWidth(125); // Passive .map
-        jsTable.getColumnModel().getColumn(6).setPreferredWidth(120); // On-Demand Probe
+        jsTable.getColumnModel().getColumn(6).setPreferredWidth(95);  // Active .map
         jsTable.getColumnModel().getColumn(7).setPreferredWidth(200); // SourceMap Location
         jsTable.getColumnModel().getColumn(8).setMaxWidth(95);        // Unpacked Files
         jsTable.getColumnModel().getColumn(9).setMaxWidth(80);        // Size
@@ -1156,7 +1263,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                             } else {
                                 c.setForeground(Color.GRAY);
                             }
-                        } else if (column == 6) { // On-Demand Probe column
+                        } else if (column == 6) { // Active .map column
                             if (entry.getActiveProbeStatus() == ActiveProbeStatus.PASS) {
                                 c.setForeground(new Color(0, 140, 0)); // dark green
                             } else if (entry.getActiveProbeStatus() == ActiveProbeStatus.FAIL) {

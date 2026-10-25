@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript Inspector (littlespidy) - UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --status-pass: #28a745;
+      --status-fail: #dc3545;
+      --status-probing: #007acc;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --btn-active: #094771;
+      --editor-kw: #569cd6;
+      --editor-str: #ce9178;
+      --editor-fn: #dcdcaa;
+      --editor-num: #b5cea8;
+      --editor-comment: #6a9955;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #b8d6fb;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --status-pass: #218838;
+      --status-fail: #c82333;
+      --status-probing: #0056b3;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --btn-active: #007acc;
+      --editor-kw: #0000ff;
+      --editor-str: #a31515;
+      --editor-fn: #795e26;
+      --editor-num: #098658;
+      --editor-comment: #008000;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Burp Header */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+    .burp-title {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 13px;
+    }
+    .theme-toggle-btn {
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    /* Primary Tabs */
+    .suite-tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+    }
+    .suite-tab {
+      padding: 7px 14px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      font-weight: 500;
+      font-size: 12px;
+      transition: all 0.15s ease;
+    }
+    .suite-tab:hover {
+      color: var(--text-bright);
+      background-color: var(--bg-hover);
+    }
+    .suite-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+
+    /* Main Workspace */
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      padding: 8px;
+      gap: 6px;
+    }
+
+    /* Toolbars */
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 3px;
+    }
+    .btn {
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      user-select: none;
+    }
+    .btn:hover {
+      background: var(--btn-hover);
+    }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent-hover);
+      color: #fff;
+      font-weight: 600;
+    }
+    .btn.primary:hover {
+      background: var(--accent-hover);
+    }
+    .btn.toggle-active {
+      background: var(--btn-active);
+      color: #ffffff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .toolbar-sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+    .filter-label {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+    input[type="text"], select {
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 3px 6px;
+      font-size: 11px;
+      border-radius: 3px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text-bright);
+    }
+
+    /* Status Banner */
+    .status-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 2px 4px;
+    }
+
+    /* Split Panes Layout */
+    .split-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 8px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* Scripts Table */
+    .table-container {
+      flex: 0 0 38%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .section-title {
+      background: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 10px;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+    th {
+      background: var(--bg-darker);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      user-select: none;
+    }
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+    tr:hover {
+      background: var(--bg-hover);
+      cursor: pointer;
+    }
+    tr.selected {
+      background: var(--bg-selected) !important;
+      color: var(--text-bright);
+    }
+    .status-pass-badge {
+      color: #28a745;
+      font-weight: 600;
+    }
+    .status-fail-badge {
+      color: #dc3545;
+      font-weight: 500;
+    }
+    .framework-badge {
+      color: #bb86fc;
+      font-weight: 600;
+    }
+
+    /* Inspection Area (Bottom) */
+    .inspection-container {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Sub Tabs */
+    .sub-tabs {
+      display: flex;
+      background: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 0 6px;
+    }
+    .sub-tab {
+      padding: 5px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      user-select: none;
+    }
+    .sub-tab:hover {
+      color: var(--text-bright);
+    }
+    .sub-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      background: var(--bg-card);
+      font-weight: 600;
+    }
+
+    .sub-tab-panel {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .sub-tab-panel.active {
+      display: flex;
+    }
+
+    /* Sub-Tab 1: Source Tree Layout */
+    .tree-layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+    .tree-sidebar {
+      width: 280px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-darker);
+    }
+    .tree-search-bar {
+      padding: 6px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 4px;
+    }
+    .tree-search-bar input {
+      flex: 1;
+    }
+    .tree-list {
+      flex: 1;
+      overflow: auto;
+      padding: 4px 0;
+    }
+    .tree-node {
+      padding: 4px 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text);
+      user-select: none;
+    }
+    .tree-node:hover {
+      background: var(--bg-hover);
+    }
+    .tree-node.selected {
+      background: var(--bg-selected);
+      color: var(--text-bright);
+    }
+    .tree-node.folder {
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+
+    .tree-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--code-bg);
+    }
+    .viewer-header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .file-path {
+      font-family: monospace;
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 12px;
+    }
+    .file-stats {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+    .viewer-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .code-view {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .line-numbers {
+      padding: 8px 6px;
+      text-align: right;
+      color: var(--text-muted);
+      background: var(--bg-darker);
+      border-right: 1px solid var(--border);
+      user-select: none;
+      min-width: 40px;
+    }
+    .code-body {
+      padding: 8px 12px;
+      white-space: pre;
+      color: var(--text-bright);
+      flex: 1;
+    }
+
+    /* Sub-Tab 2: JS Viewer Parallel Layout */
+    .parallel-viewer {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+    .pane-half {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .pane-half:first-child {
+      border-right: 1px solid var(--border);
+    }
+    .pane-header {
+      background: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 10px;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-bright);
+      display: flex;
+      justify-content: space-between;
+    }
+    .editor-pane {
+      flex: 1;
+      background: var(--code-bg);
+      overflow: auto;
+      padding: 8px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      white-space: pre;
+      color: var(--text);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333333;
+      border: 1px solid var(--accent);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Burp Top Header -->
+  <div class="burp-header">
+    <div class="title-area">
+      <span class="burp-logo-badge">BURP SUITE</span>
+      <span class="burp-title">JavaScript Inspector (littlespidy)</span>
+    </div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme (Dark / Light)</button>
+  </div>
+
+  <!-- Extension Main Suite Tabs -->
+  <div class="suite-tabs">
+    <div class="suite-tab active">JS and Source Map</div>
+    <div class="suite-tab">Recon and Secret Mining</div>
+    <div class="suite-tab">GraphQL</div>
+    <div class="suite-tab">AI Security Analyst</div>
+  </div>
+
+  <!-- Extension Workspace Area -->
+  <div class="workspace">
+
+    <!-- Top Action Toolbar -->
+    <div class="toolbar-row">
+      <button class="btn primary" onclick="showToast('Loading proxy history...')">Load Proxy History</button>
+      <label class="checkbox-label">
+        <input type="checkbox" checked> In-Scope Only
+      </label>
+      <button class="btn">Domains [All Domains]</button>
+
+      <div class="toolbar-sep"></div>
+
+      <button class="btn" onclick="selectAllRows()">Select All</button>
+      <button class="btn" onclick="deselectAllRows()">Deselect All</button>
+      <button class="btn" onclick="copyJsUrls()">Copy JS URLs</button>
+      <button class="btn primary" onclick="copyMapsUrls()">Copy Maps URLs</button>
+
+      <div class="toolbar-sep"></div>
+
+      <button class="btn" onclick="showToast('Probing selected .map...')">Probe Selected .map</button>
+      <button class="btn" onclick="showToast('Probing all visible .map...')">Probe All Visible .map</button>
+      <button class="btn" onclick="showToast('Unpacking source map...')">Unpack / Unmap Selected</button>
+      <button class="btn" onclick="showToast('Exporting source tree to disk...')">Export Project Tree to Disk...</button>
+      <button class="btn" onclick="showToast('Downloading JS files...')">Download JS File(s)...</button>
+      <button class="btn" onclick="showToast('Opening AI Security Analyst...')">Analyze with AI...</button>
+
+      <div class="toolbar-sep"></div>
+      <button class="btn" onclick="showToast('Data cleared')">Clear Data</button>
+    </div>
+
+    <!-- Filter Strip -->
+    <div class="toolbar-row">
+      <label class="checkbox-label">
+        <input type="checkbox"> Exposed .map Only
+      </label>
+      <div class="toolbar-sep"></div>
+      <span class="filter-label">Status:</span>
+      <select>
+        <option>200 OK Only</option>
+        <option>All Status Codes</option>
+        <option>2xx Success</option>
+        <option>3xx Redirects</option>
+        <option>4xx Client Errors</option>
+      </select>
+      <div class="toolbar-sep"></div>
+      <span class="filter-label">Search:</span>
+      <input type="text" placeholder="Filter URL or host..." style="width: 180px;">
+    </div>
+
+    <!-- Status Strip -->
+    <div class="status-strip">
+      <span>Ready. Loaded 4 JavaScript assets from Proxy history.</span>
+      <span>Total: 4 | 1st Party: 3 | .map Exposed: 2 | Unpacked: 1 | Displayed: 4</span>
+    </div>
+
+    <!-- Main Split Section -->
+    <div class="split-container">
+
+      <!-- Discovered Scripts Table -->
+      <div class="table-container">
+        <div class="section-title">Discovered JavaScript Scripts (Deduplicated)</div>
+        <table id="scriptsTable">
+          <thead>
+            <tr>
+              <th style="width: 35px;">#</th>
+              <th style="width: 90px;">Framework</th>
+              <th style="width: 55px;">Status</th>
+              <th style="width: 140px;">Host</th>
+              <th>JS Path</th>
+              <th style="width: 120px;">Passive .map</th>
+              <th style="width: 95px;">Active .map</th>
+              <th style="width: 200px;">SourceMap Location</th>
+              <th style="width: 90px;">Unpacked</th>
+              <th style="width: 75px;">Size</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected" onclick="selectRow(this, 0)">
+              <td>1</td>
+              <td><span class="framework-badge">Next.js</span></td>
+              <td>200</td>
+              <td>app.target.com</td>
+              <td>/_next/static/chunks/main-app.js</td>
+              <td style="color: #e56b1f; font-weight: 600;">Header (.map)</td>
+              <td><span class="status-pass-badge">Pass</span></td>
+              <td>https://app.target.com/_next/static/chunks/main-app.js.map</td>
+              <td>28 files</td>
+              <td>142.5 KB</td>
+            </tr>
+            <tr onclick="selectRow(this, 1)">
+              <td>2</td>
+              <td><span class="framework-badge">React</span></td>
+              <td>200</td>
+              <td>app.target.com</td>
+              <td>/static/js/bundle.min.js</td>
+              <td>Comment (.map)</td>
+              <td><span class="status-pass-badge">Pass</span></td>
+              <td>https://app.target.com/static/js/bundle.min.js.map</td>
+              <td>-</td>
+              <td>512.8 KB</td>
+            </tr>
+            <tr onclick="selectRow(this, 2)">
+              <td>3</td>
+              <td>-</td>
+              <td>200</td>
+              <td>api.target.com</td>
+              <td>/v1/auth/client.js</td>
+              <td style="color: #8e8e8e;">Not Found</td>
+              <td><span class="status-fail-badge">Fail</span></td>
+              <td>-</td>
+              <td>-</td>
+              <td>24.1 KB</td>
+            </tr>
+            <tr onclick="selectRow(this, 3)">
+              <td>4</td>
+              <td><span class="framework-badge">Vue</span></td>
+              <td>200</td>
+              <td>cdn.target.com</td>
+              <td>/lib/tracking.min.js</td>
+              <td style="color: #8e8e8e;">Not Found</td>
+              <td style="color: #8e8e8e;">-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>88.4 KB</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom Inspection Section -->
+      <div class="inspection-container">
+
+        <!-- Sub-Tabs: Source Tree (Renamed), JS Viewer (Renamed), SourceMap Message -->
+        <div class="sub-tabs">
+          <div class="sub-tab active" onclick="switchSubTab('tree', this)">Source Tree</div>
+          <div class="sub-tab" onclick="switchSubTab('js-viewer', this)">JS Viewer</div>
+          <div class="sub-tab" onclick="switchSubTab('map-message', this)">SourceMap (.map) HTTP Message</div>
+        </div>
+
+        <!-- Sub-Tab 1: Source Tree Panel with JS Beautiful Viewer -->
+        <div id="tab-tree" class="sub-tab-panel active">
+          <div class="tree-layout">
+
+            <!-- Folder & File Hierarchy -->
+            <div class="tree-sidebar">
+              <div class="tree-search-bar">
+                <input type="text" placeholder="Filter files...">
+                <button class="btn" style="padding: 2px 6px;">Clear</button>
+              </div>
+              <div class="tree-list">
+                <div class="tree-node folder">[+] Project (28 files)</div>
+                <div class="tree-node folder" style="padding-left: 20px;">[+] src/</div>
+                <div class="tree-node folder" style="padding-left: 32px;">[+] auth/</div>
+                <div class="tree-node selected" style="padding-left: 44px;" onclick="loadCodeFile('AuthContext.tsx')">[f] AuthContext.tsx</div>
+                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('tokenService.ts')">[f] tokenService.ts</div>
+                <div class="tree-node folder" style="padding-left: 32px;">[+] api/</div>
+                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('graphqlClient.ts')">[f] graphqlClient.ts</div>
+                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('endpoints.ts')">[f] endpoints.ts</div>
+                <div class="tree-node folder" style="padding-left: 20px;">[+] config/</div>
+                <div class="tree-node" style="padding-left: 32px;" onclick="loadCodeFile('environment.ts')">[f] environment.ts</div>
+              </div>
+            </div>
+
+            <!-- JS Beautiful Code Viewer -->
+            <div class="tree-content">
+              <div class="viewer-header">
+                <div>
+                  <span id="viewerFilePath" class="file-path">src/auth/AuthContext.tsx</span>
+                  <span id="viewerFileStats" class="file-stats">(24 lines | 1.2 KB | 1 secrets | 2 endpoints | Beautified)</span>
+                </div>
+                <div class="viewer-actions">
+                  <button id="beautifyBtn" class="btn toggle-active" onclick="toggleBeautify()">Beautify JS</button>
+                  <button class="btn" onclick="showToast('Sent to AI Security Analyst')">AI Review</button>
+                  <button class="btn" onclick="showToast('Copied code to clipboard')">Copy Code</button>
+                  <button class="btn" onclick="showToast('Saving file...')">Save File As...</button>
+                </div>
+              </div>
+              <div class="code-view">
+                <div id="lineNumbers" class="line-numbers">
+                  1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22<br>23<br>24
+                </div>
+                <div id="codeBody" class="code-body"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Sub-Tab 2: JS Viewer (Parallel Request and Response Panes) -->
+        <div id="tab-js-viewer" class="sub-tab-panel">
+          <div class="parallel-viewer">
+
+            <!-- Request Pane (Left) -->
+            <div class="pane-half">
+              <div class="pane-header">
+                <span>Request</span>
+                <span style="color: var(--text-muted);">GET /_next/static/chunks/main-app.js HTTP/1.1</span>
+              </div>
+              <div class="editor-pane">GET /_next/static/chunks/main-app.js HTTP/1.1
+Host: app.target.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+Accept: */*
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Referer: https://app.target.com/dashboard
+Cookie: session_id=s%3A_d93f812a...</div>
+            </div>
+
+            <!-- Response Pane (Right) -->
+            <div class="pane-half">
+              <div class="pane-header">
+                <span>Response</span>
+                <span style="color: var(--text-muted);">HTTP/1.1 200 OK (142.5 KB)</span>
+              </div>
+              <div class="editor-pane">HTTP/1.1 200 OK
+Date: Sun, 25 Oct 2026 09:50:00 GMT
+Content-Type: application/javascript; charset=UTF-8
+Content-Length: 145920
+SourceMap: main-app.js.map
+ETag: W/"239df-18e47f92a10"
+Cache-Control: public, max-age=31536000, immutable
+
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[179],{
+  7492: function(e,t,r){
+    "use strict";
+    r.d(t,{Z:function(){return a}});
+    var n=r(2140);
+    const a={
+      apiKey: "AIzaSyD-sample-production-key-991284",
+      apiHost: "https://api.target.com/v1",
+      authEndpoint: "/v1/auth/token"
+    };
+  }
+}]);
+//# sourceMappingURL=main-app.js.map</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Sub-Tab 3: SourceMap HTTP Message -->
+        <div id="tab-map-message" class="sub-tab-panel">
+          <div class="parallel-viewer">
+            <div class="pane-half">
+              <div class="pane-header">
+                <span>SourceMap Request</span>
+                <span style="color: var(--text-muted);">GET /_next/static/chunks/main-app.js.map HTTP/1.1</span>
+              </div>
+              <div class="editor-pane">GET /_next/static/chunks/main-app.js.map HTTP/1.1
+Host: app.target.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Accept: */*
+Connection: keep-alive</div>
+            </div>
+            <div class="pane-half">
+              <div class="pane-header">
+                <span>SourceMap Response</span>
+                <span style="color: var(--text-muted);">HTTP/1.1 200 OK (894.2 KB JSON)</span>
+              </div>
+              <div class="editor-pane">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 915660
+
+{
+  "version": 3,
+  "file": "main-app.js",
+  "sources": [
+    "webpack://app/src/auth/AuthContext.tsx",
+    "webpack://app/src/auth/tokenService.ts",
+    "webpack://app/src/api/graphqlClient.ts"
+  ],
+  "mappings": "AAAA,IAAI,EAAE,GAAG,SAAS..."
+}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Action triggered</div>
+
+  <script>
+    // Sample raw minified vs beautified code
+    const rawCode = `import React,{createContext,useContext,useState,useEffect}from"react";const AuthContext=createContext(null);export const AuthProvider=({children})=>{const[user,setUser]=useState(null);const[apiKey]=useState("AIzaSyD-sample-production-key-991284");useEffect(()=>{fetch("/api/v1/auth/me",{headers:{"Authorization":"Bearer "+localStorage.getItem("token"),"X-Api-Key":apiKey}}).then(res=>res.json()).then(data=>setUser(data)).catch(console.error);},[apiKey]);return<AuthContext.Provider value={{user,apiKey}}>{children}</AuthContext.Provider>;};export const useAuth=()=>useContext(AuthContext);`;
+
+    const beautifiedCode = `import React, { createContext, useContext, useState, useEffect } from "react";
+
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [apiKey] = useState("AIzaSyD-sample-production-key-991284");
+
+  useEffect(() => {
+    fetch("/api/v1/auth/me", {
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem("token"),
+        "X-Api-Key": apiKey
+      }
+    })
+    .then(res => res.json())
+    .then(data => setUser(data))
+    .catch(console.error);
+  }, [apiKey]);
+
+  return (
+    <AuthContext.Provider value={{ user, apiKey }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);`;
+
+    let isBeautified = true;
+
+    function renderCode() {
+      const code = isBeautified ? beautifiedCode : rawCode;
+      document.getElementById('codeBody').textContent = code;
+
+      const lines = code.split('\n').length;
+      let lineHtml = '';
+      for (let i = 1; i <= lines; i++) {
+        lineHtml += i + '<br>';
+      }
+      document.getElementById('lineNumbers').innerHTML = lineHtml;
+
+      const stats = document.getElementById('viewerFileStats');
+      stats.textContent = `(${lines} lines | 1.2 KB | 1 secrets | 2 endpoints${isBeautified ? ' | Beautified' : ''})`;
+
+      const btn = document.getElementById('beautifyBtn');
+      if (isBeautified) {
+        btn.classList.add('toggle-active');
+        btn.textContent = 'Beautify JS (On)';
+      } else {
+        btn.classList.remove('toggle-active');
+        btn.textContent = 'Beautify JS (Off)';
+      }
+    }
+
+    function toggleBeautify() {
+      isBeautified = !isBeautified;
+      renderCode();
+      showToast(isBeautified ? 'JS Beautifier enabled' : 'Showing raw minified code');
+    }
+
+    function switchSubTab(tabName, element) {
+      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sub-tab-panel').forEach(p => p.classList.remove('active'));
+
+      element.classList.add('active');
+      if (tabName === 'tree') {
+        document.getElementById('tab-tree').classList.add('active');
+      } else if (tabName === 'js-viewer') {
+        document.getElementById('tab-js-viewer').classList.add('active');
+      } else if (tabName === 'map-message') {
+        document.getElementById('tab-map-message').classList.add('active');
+      }
+    }
+
+    function selectRow(rowElement, index) {
+      document.querySelectorAll('#scriptsTable tbody tr').forEach(r => r.classList.remove('selected'));
+      rowElement.classList.add('selected');
+    }
+
+    function selectAllRows() {
+      document.querySelectorAll('#scriptsTable tbody tr').forEach(r => r.classList.add('selected'));
+      showToast('Selected all rows');
+    }
+
+    function deselectAllRows() {
+      document.querySelectorAll('#scriptsTable tbody tr').forEach(r => r.classList.remove('selected'));
+      showToast('Deselected all rows');
+    }
+
+    function copyJsUrls() {
+      const urls = [
+        "https://app.target.com/_next/static/chunks/main-app.js",
+        "https://app.target.com/static/js/bundle.min.js",
+        "https://api.target.com/v1/auth/client.js",
+        "https://cdn.target.com/lib/tracking.min.js"
+      ];
+      navigator.clipboard.writeText(urls.join('\n')).catch(() => {});
+      showToast('Copied 4 JS URLs to clipboard line by line');
+    }
+
+    function copyMapsUrls() {
+      const mapUrls = [
+        "https://app.target.com/_next/static/chunks/main-app.js.map",
+        "https://app.target.com/static/js/bundle.min.js.map"
+      ];
+      navigator.clipboard.writeText(mapUrls.join('\n')).catch(() => {});
+      showToast('Copied ' + mapUrls.length + ' exposed .map URLs to clipboard line by line');
+    }
+
+    function loadCodeFile(filename) {
+      document.getElementById('viewerFilePath').textContent = 'src/auth/' + filename;
+      document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      renderCode();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+      showToast('Theme switched');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Initialize
+    renderCode();
+  </script>
+</body>
+</html>

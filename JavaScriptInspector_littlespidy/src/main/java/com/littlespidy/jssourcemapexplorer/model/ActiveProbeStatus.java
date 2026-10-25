@@ -9,8 +9,8 @@ package com.littlespidy.jssourcemapexplorer.model;
 public enum ActiveProbeStatus {
     NOT_RUN("-"),
     PROBING("Probing..."),
-    PASS("Pass (200 OK)"),
-    FAIL("Fail (404/Error)");
+    PASS("Pass"),
+    FAIL("Fail");
 
     private final String label;
 
