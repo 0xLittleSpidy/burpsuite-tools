@@ -82,9 +82,12 @@ public class CacheInspectorTab extends JPanel {
         sel -> refreshView()
     );
 
+    private static final Set<String> DEFAULT_METHODS = Set.of("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD");
+
     private final MultiSelectFilterButton methodFilterBtn = new MultiSelectFilterButton(
         "Method",
         List.of("All Methods","GET","POST","PUT","PATCH","DELETE","OPTIONS","HEAD"),
+        DEFAULT_METHODS,
         sel -> refreshView()
     );
     // ─────────────────────────────────────────────────────────────────────────
@@ -240,7 +243,7 @@ public class CacheInspectorTab extends JPanel {
             valueFilterField.setText("");
             statusFilterBtn.clearSelection();
             contentTypeFilterBtn.clearSelection();
-            methodFilterBtn.clearSelection();
+            methodFilterBtn.resetToDefault();
             selectedSummaryRow = null;
             refreshView();
         });

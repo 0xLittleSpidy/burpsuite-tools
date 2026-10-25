@@ -20,15 +20,30 @@ public class MultiSelectFilterButton extends JButton {
 
     private final String label;
     private final List<String> options;
+    private final Set<String> defaultSelections = new LinkedHashSet<>();
     private final Map<String, JCheckBox> checkBoxMap = new LinkedHashMap<>();
     private final Consumer<Set<String>> onChange;
 
     public MultiSelectFilterButton(String label, List<String> options, Consumer<Set<String>> onChange) {
+        this(label, options, Collections.emptySet(), onChange);
+    }
+
+    public MultiSelectFilterButton(
+            String label,
+            List<String> options,
+            Set<String> defaultSelections,
+            Consumer<Set<String>> onChange) {
         super(label + " [v]");
         this.label = label;
         this.options = new ArrayList<>(options);
         this.onChange = onChange;
+        if (defaultSelections != null) {
+            this.defaultSelections.addAll(defaultSelections);
+        }
         buildCheckBoxes();
+        if (defaultSelections != null && !defaultSelections.isEmpty()) {
+            setSelected(defaultSelections);
+        }
         addActionListener(e -> showPopup());
     }
 
@@ -49,6 +64,28 @@ public class MultiSelectFilterButton extends JButton {
     public void clearSelection() {
         for (JCheckBox cb : checkBoxMap.values()) cb.setSelected(false);
         updateButtonText();
+    }
+
+    public void setSelected(Collection<String> selectedOptions) {
+        for (Map.Entry<String, JCheckBox> entry : checkBoxMap.entrySet()) {
+            if (!isAllSentinel(entry.getKey())) {
+                boolean checked = selectedOptions != null && selectedOptions.contains(entry.getKey());
+                entry.getValue().setSelected(checked);
+            }
+        }
+        JCheckBox allCb = checkBoxMap.get(options.get(0));
+        if (allCb != null && isAllSentinel(options.get(0))) {
+            allCb.setSelected(allOptionsChecked());
+        }
+        updateButtonText();
+    }
+
+    public void resetToDefault() {
+        if (defaultSelections.isEmpty()) {
+            clearSelection();
+        } else {
+            setSelected(defaultSelections);
+        }
     }
 
     private void buildCheckBoxes() {
@@ -106,6 +143,16 @@ public class MultiSelectFilterButton extends JButton {
         popup.add(scroll, BorderLayout.CENTER);
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
+        if (!defaultSelections.isEmpty()) {
+            JButton resetBtn = new JButton("Reset");
+            resetBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+            resetBtn.addActionListener(e -> {
+                resetToDefault();
+                fireOnChange();
+                popup.setVisible(false);
+            });
+            btnRow.add(resetBtn);
+        }
         JButton clearBtn = new JButton("Clear");
         clearBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         clearBtn.addActionListener(e -> {

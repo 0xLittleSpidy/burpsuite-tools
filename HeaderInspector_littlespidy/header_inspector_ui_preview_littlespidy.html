@@ -1,0 +1,571 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Inspector - UI Preview (littlespidy)</title>
+    <style>
+        :root {
+            --bg-color: #2b2b2b;
+            --panel-bg: #3c3f41;
+            --header-bg: #313335;
+            --border-color: #555555;
+            --text-color: #bbbbbb;
+            --text-bright: #ffffff;
+            --tab-active-bg: #4e5254;
+            --tab-hover-bg: #45494a;
+            --accent-orange: #ff6600;
+            --table-header-bg: #313335;
+            --table-alt-row: #383a3c;
+            --button-bg: #4c5052;
+            --button-hover: #5c6164;
+            --popup-bg: #3c3f41;
+            --popup-border: #646464;
+        }
+
+        body.light-theme {
+            --bg-color: #f2f2f2;
+            --panel-bg: #ffffff;
+            --header-bg: #e6e6e6;
+            --border-color: #c0c0c0;
+            --text-color: #333333;
+            --text-bright: #000000;
+            --tab-active-bg: #ffffff;
+            --tab-hover-bg: #e0e0e0;
+            --accent-orange: #e65100;
+            --table-header-bg: #eaeaea;
+            --table-alt-row: #f9f9f9;
+            --button-bg: #e0e0e0;
+            --button-hover: #d0d0d0;
+            --popup-bg: #ffffff;
+            --popup-border: #b0b0b0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 8px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .window-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            margin-bottom: 6px;
+        }
+
+        .window-title {
+            font-weight: bold;
+            color: var(--accent-orange);
+            font-size: 13px;
+        }
+
+        .theme-switch-btn {
+            background: var(--button-bg);
+            color: var(--text-bright);
+            border: 1px solid var(--border-color);
+            padding: 3px 10px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        /* Main Suite Tabs */
+        .main-tabs {
+            display: flex;
+            background-color: var(--header-bg);
+            border-bottom: 2px solid var(--accent-orange);
+            margin-bottom: 0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: 1px solid transparent;
+            border-bottom: none;
+            color: var(--text-color);
+            padding: 6px 14px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--tab-hover-bg);
+        }
+
+        .tab-btn.active {
+            background-color: var(--tab-active-bg);
+            color: var(--text-bright);
+            font-weight: bold;
+            border-color: var(--border-color) var(--border-color) var(--tab-active-bg);
+        }
+
+        /* Workspace Container */
+        .tab-content {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            overflow: hidden;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .btn {
+            background-color: var(--button-bg);
+            color: var(--text-bright);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 11px;
+        }
+
+        .btn:hover {
+            background-color: var(--button-hover);
+        }
+
+        .btn.highlight {
+            border-color: var(--accent-orange);
+        }
+
+        .btn-filter {
+            font-weight: bold;
+            color: var(--accent-orange);
+        }
+
+        .input-text {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-bright);
+            padding: 4px 6px;
+            border-radius: 2px;
+            font-size: 11px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-bright);
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .v-sep {
+            width: 1px;
+            height: 18px;
+            background-color: var(--border-color);
+            margin: 0 4px;
+        }
+
+        /* Multi-Select Dropdown Popup */
+        .filter-dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .filter-popup {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--popup-bg);
+            border: 1px solid var(--popup-border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            z-index: 1000;
+            width: 180px;
+            padding: 6px;
+            margin-top: 2px;
+        }
+
+        .filter-popup.show {
+            display: block;
+        }
+
+        .filter-option-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 4px;
+            cursor: pointer;
+        }
+
+        .filter-option-row:hover {
+            background-color: var(--tab-hover-bg);
+        }
+
+        .filter-option-row input {
+            cursor: pointer;
+        }
+
+        .filter-popup-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 6px;
+            margin-top: 4px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Status bar */
+        .status-strip {
+            font-size: 11px;
+            color: var(--text-color);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Table */
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            color: var(--text-bright);
+            text-align: left;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-alt-row);
+        }
+
+        tr:hover {
+            background-color: var(--tab-hover-bg);
+            color: var(--text-bright);
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .tag-get { background-color: #2d5a27; color: #a3e69d; }
+        .tag-post { background-color: #27476e; color: #a4cdfe; }
+        .tag-put { background-color: #6a4c1e; color: #fed093; }
+        .tag-delete { background-color: #6d2424; color: #ffa8a8; }
+        .tag-options { background-color: #555555; color: #dddddd; }
+
+        /* Notice Banner */
+        .info-callout {
+            background-color: var(--header-bg);
+            border-left: 3px solid var(--accent-orange);
+            padding: 6px 10px;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="window-header">
+        <span class="window-title">Burp Suite Extension - Header Inspector (littlespidy)</span>
+        <button class="theme-switch-btn" onclick="toggleTheme()">Toggle Dark / Light Theme</button>
+    </div>
+
+    <!-- Main Navigation: Note Welcome Tab has been removed -->
+    <div class="main-tabs">
+        <button class="tab-btn" onclick="selectTab('header')">Header Collector</button>
+        <button class="tab-btn" onclick="selectTab('method')">Method Collector</button>
+        <button class="tab-btn" onclick="selectTab('status')">Status Collector</button>
+        <button class="tab-btn active" onclick="selectTab('cache')">Cache Inspector</button>
+        <button class="tab-btn" onclick="selectTab('csp')">CSP Inspector</button>
+        <button class="tab-btn" onclick="selectTab('hsts')">HSTS Inspector</button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="tabContent">
+        <div class="info-callout">
+            <strong>Active Module: Cache Inspector</strong> | Welcome tab removed. Direct access enabled. Method filter defaults to selecting all methods except <strong>OPTIONS</strong>.
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <button class="btn highlight">Load Proxy History</button>
+            <label class="checkbox-label"><input type="checkbox" checked> In-Scope Only</label>
+            <div class="v-sep"></div>
+
+            <label>Header:</label>
+            <select class="input-text">
+                <option>Cache-Control</option>
+                <option>Pragma</option>
+                <option>Expires</option>
+                <option>ETag</option>
+                <option>Age</option>
+            </select>
+
+            <div class="v-sep"></div>
+
+            <!-- Method Filter Button with Popup -->
+            <div class="filter-dropdown-container">
+                <button class="btn btn-filter" id="methodFilterBtn" onclick="toggleMethodPopup()">Method: 6 selected [v]</button>
+                <div class="filter-popup" id="methodPopup">
+                    <label class="filter-option-row">
+                        <input type="checkbox" id="cbAll" onchange="toggleSelectAll(this.checked)">
+                        <strong>Select All</strong>
+                    </label>
+                    <label class="filter-option-row">
+                        <input type="checkbox" class="method-cb" value="GET" checked onchange="updateMethodSelection()"> GET
+                    </label>
+                    <label class="filter-option-row">
+                        <input type="checkbox" class="method-cb" value="POST" checked onchange="updateMethodSelection()"> POST
+                    </label>
+                    <label class="filter-option-row">
+                        <input type="checkbox" class="method-cb" value="PUT" checked onchange="updateMethodSelection()"> PUT
+                    </label>
+                    <label class="filter-option-row">
+                        <input type="checkbox" class="method-cb" value="PATCH" checked onchange="updateMethodSelection()"> PATCH
+                    </label>
+                    <label class="filter-option-row">
+                        <input type="checkbox" class="method-cb" value="DELETE" checked onchange="updateMethodSelection()"> DELETE
+                    </label>
+                    <label class="filter-option-row" style="background: rgba(255, 102, 0, 0.1);">
+                        <input type="checkbox" class="method-cb" value="OPTIONS" onchange="updateMethodSelection()"> <em>OPTIONS (Unchecked)</em>
+                    </label>
+                    <label class="filter-option-row">
+                        <input type="checkbox" class="method-cb" value="HEAD" checked onchange="updateMethodSelection()"> HEAD
+                    </label>
+                    <div class="filter-popup-footer">
+                        <button class="btn" style="font-size: 10px; padding: 2px 6px;" onclick="resetMethodsToDefault()">Reset Default</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn">Status [v]</button>
+            <button class="btn">Content-Type [v]</button>
+
+            <div class="v-sep"></div>
+            <label>Filter:</label>
+            <input type="text" class="input-text" placeholder="Directives or URL...">
+            <button class="btn" onclick="resetFilters()">Reset Filters</button>
+            <div class="v-sep"></div>
+            <button class="btn">Export TSV</button>
+            <button class="btn">Clear All Data</button>
+        </div>
+
+        <div class="status-strip">
+            <span id="statusText">Displaying 5 URL entries matching active filters (OPTIONS traffic excluded by default).</span>
+            <span>Total URLs: 18 | Scope: In-Scope Only</span>
+        </div>
+
+        <!-- Sample Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">ID</th>
+                        <th style="width: 75px;">Method</th>
+                        <th style="width: 65px;">Status</th>
+                        <th>Host</th>
+                        <th>Path</th>
+                        <th>Cache-Control</th>
+                        <th>Content-Type</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td>1</td>
+                        <td><span class="tag-pill tag-get">GET</span></td>
+                        <td>200</td>
+                        <td>api.example.com</td>
+                        <td>/v1/user/profile</td>
+                        <td>no-store, no-cache, must-revalidate</td>
+                        <td>application/json</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><span class="tag-pill tag-post">POST</span></td>
+                        <td>200</td>
+                        <td>api.example.com</td>
+                        <td>/v1/auth/login</td>
+                        <td>no-store, private</td>
+                        <td>application/json</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><span class="tag-pill tag-get">GET</span></td>
+                        <td>200</td>
+                        <td>cdn.example.com</td>
+                        <td>/assets/app.min.js</td>
+                        <td>public, max-age=31536000, immutable</td>
+                        <td>text/javascript</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><span class="tag-pill tag-put">PUT</span></td>
+                        <td>204</td>
+                        <td>api.example.com</td>
+                        <td>/v1/settings/notifications</td>
+                        <td>no-cache</td>
+                        <td>application/json</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><span class="tag-pill tag-delete">DELETE</span></td>
+                        <td>200</td>
+                        <td>api.example.com</td>
+                        <td>/v1/session/current</td>
+                        <td>no-store</td>
+                        <td>application/json</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
+
+        function selectTab(name) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            const callout = document.querySelector('.info-callout strong');
+            if (name === 'header') callout.innerText = 'Active Module: Header Collector';
+            else if (name === 'method') callout.innerText = 'Active Module: Method Collector';
+            else if (name === 'status') callout.innerText = 'Active Module: Status Collector';
+            else if (name === 'cache') callout.innerText = 'Active Module: Cache Inspector';
+            else if (name === 'csp') callout.innerText = 'Active Module: CSP Inspector';
+            else if (name === 'hsts') callout.innerText = 'Active Module: HSTS Inspector';
+        }
+
+        function toggleMethodPopup() {
+            const p = document.getElementById('methodPopup');
+            p.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.filter-dropdown-container');
+            if (!container.contains(e.target)) {
+                document.getElementById('methodPopup').classList.remove('show');
+            }
+        });
+
+        function updateMethodSelection() {
+            const cbs = document.querySelectorAll('.method-cb');
+            const selected = [];
+            cbs.forEach(cb => {
+                if (cb.checked) selected.push(cb.value);
+            });
+
+            const btn = document.getElementById('methodFilterBtn');
+            const cbAll = document.getElementById('cbAll');
+
+            cbAll.checked = (selected.length === cbs.length);
+
+            if (selected.length === 0) {
+                btn.innerText = "Method [v]";
+            } else if (selected.length === 1) {
+                btn.innerText = "Method: " + selected[0] + " [v]";
+            } else {
+                btn.innerText = "Method: " + selected.length + " selected [v]";
+            }
+
+            renderTable(selected);
+        }
+
+        function toggleSelectAll(checked) {
+            const cbs = document.querySelectorAll('.method-cb');
+            cbs.forEach(cb => cb.checked = checked);
+            updateMethodSelection();
+        }
+
+        function resetMethodsToDefault() {
+            const cbs = document.querySelectorAll('.method-cb');
+            cbs.forEach(cb => {
+                cb.checked = (cb.value !== 'OPTIONS');
+            });
+            updateMethodSelection();
+        }
+
+        function resetFilters() {
+            resetMethodsToDefault();
+        }
+
+        const sampleRecords = [
+            { id: 1, method: 'GET', status: 200, host: 'api.example.com', path: '/v1/user/profile', cc: 'no-store, no-cache, must-revalidate', ct: 'application/json' },
+            { id: 2, method: 'POST', status: 200, host: 'api.example.com', path: '/v1/auth/login', cc: 'no-store, private', ct: 'application/json' },
+            { id: 3, method: 'OPTIONS', status: 204, host: 'api.example.com', path: '/v1/auth/login', cc: '(not set)', ct: 'text/plain' },
+            { id: 4, method: 'GET', status: 200, host: 'cdn.example.com', path: '/assets/app.min.js', cc: 'public, max-age=31536000, immutable', ct: 'text/javascript' },
+            { id: 5, method: 'PUT', status: 204, host: 'api.example.com', path: '/v1/settings/notifications', cc: 'no-cache', ct: 'application/json' },
+            { id: 6, method: 'OPTIONS', status: 200, host: 'api.example.com', path: '/v1/user/profile', cc: '(not set)', ct: 'text/plain' },
+            { id: 7, method: 'DELETE', status: 200, host: 'api.example.com', path: '/v1/session/current', cc: 'no-store', ct: 'application/json' }
+        ];
+
+        function renderTable(selectedMethods) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            const filtered = sampleRecords.filter(r => selectedMethods.length === 0 || selectedMethods.includes(r.method));
+
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                const tagClass = 'tag-' + r.method.toLowerCase();
+                tr.innerHTML = `
+                    <td>${r.id}</td>
+                    <td><span class="tag-pill ${tagClass}">${r.method}</span></td>
+                    <td>${r.status}</td>
+                    <td>${r.host}</td>
+                    <td>${r.path}</td>
+                    <td>${r.cc}</td>
+                    <td>${r.ct}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('statusText').innerText =
+                `Displaying ${filtered.length} URL entries matching active filters (${selectedMethods.includes('OPTIONS') ? 'OPTIONS included' : 'OPTIONS traffic excluded by default'}).`;
+        }
+    </script>
+</body>
+</html>

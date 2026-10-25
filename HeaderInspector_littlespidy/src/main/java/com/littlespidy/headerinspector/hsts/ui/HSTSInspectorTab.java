@@ -58,9 +58,12 @@ public class HSTSInspectorTab extends JPanel {
     private final HttpResponseEditor responseEditor;
 
     // ── Multi-Select Filter Buttons ───────────────────────────────────────────
+    private static final Set<String> DEFAULT_METHODS = Set.of("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD");
+
     private final MultiSelectFilterButton methodFilterBtn = new MultiSelectFilterButton(
         "Method",
         List.of("All Methods", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"),
+        DEFAULT_METHODS,
         sel -> refreshView()
     );
 
@@ -218,7 +221,7 @@ public class HSTSInspectorTab extends JPanel {
         JButton resetBtn = new JButton("Reset Filters");
         resetBtn.addActionListener(e -> {
             valueFilterField.setText("");
-            methodFilterBtn.clearSelection();
+            methodFilterBtn.resetToDefault();
             statusFilterBtn.clearSelection();
             contentTypeFilterBtn.clearSelection();
             selectedSummaryRow = null;
