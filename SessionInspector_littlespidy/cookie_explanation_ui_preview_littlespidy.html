@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Inspector - Cookie Explanation UI Preview (littlespidy)</title>
+    <style>
+        :root {
+            --bg-color: #2b2b2b;
+            --panel-bg: #3c3f41;
+            --header-bg: #313335;
+            --text-color: #bbbbbb;
+            --text-bright: #ffffff;
+            --border-color: #555555;
+            --input-bg: #45494a;
+            --accent-orange: #e57000;
+            --accent-blue: #2980b9;
+            --accent-green: #27ae60;
+            --row-selected: #2d435c;
+            --row-hover: #4e5254;
+            --badge-bg: #4e5254;
+        }
+
+        body.light-theme {
+            --bg-color: #f2f2f2;
+            --panel-bg: #ffffff;
+            --header-bg: #e6e6e6;
+            --text-color: #222222;
+            --text-bright: #000000;
+            --border-color: #cccccc;
+            --input-bg: #ffffff;
+            --accent-orange: #d35400;
+            --accent-blue: #2980b9;
+            --accent-green: #27ae60;
+            --row-selected: #b8cfe5;
+            --row-hover: #e0e8f0;
+            --badge-bg: #dddddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .suite-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .suite-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-bright);
+        }
+
+        .theme-toggle-btn {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-bright);
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--accent-orange);
+        }
+
+        /* Top level tabs */
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .nav-tab {
+            padding: 6px 14px;
+            cursor: pointer;
+            background-color: var(--header-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            margin-right: 4px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        .nav-tab.active {
+            background-color: var(--panel-bg);
+            color: var(--text-bright);
+            font-weight: bold;
+            border-top: 2px solid var(--accent-orange);
+        }
+
+        /* Main Workspace layout */
+        .workspace-panel {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .workspace-panel.active {
+            display: flex;
+        }
+
+        /* Split panes */
+        .split-container {
+            display: flex;
+            flex: 1;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .split-left {
+            width: 38%;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .split-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .pane-header {
+            background-color: var(--header-bg);
+            padding: 6px 10px;
+            font-weight: bold;
+            color: var(--text-bright);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Tables */
+        .table-wrap {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--header-bg);
+            color: var(--text-bright);
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tr.selectable {
+            cursor: pointer;
+        }
+
+        tr.selectable:hover {
+            background-color: var(--row-hover);
+        }
+
+        tr.selectable.selected {
+            background-color: var(--row-selected);
+            color: var(--text-bright);
+        }
+
+        /* Value pane */
+        .values-box {
+            height: 40%;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Quick Info Banner without button */
+        .quick-info-bar {
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .quick-info-text {
+            color: var(--text-bright);
+            font-size: 11px;
+        }
+
+        /* Sub-tab pane */
+        .subtabs-box {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .subtab-header {
+            display: flex;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .subtab-btn {
+            padding: 6px 14px;
+            cursor: pointer;
+            background-color: transparent;
+            color: var(--text-color);
+            border: none;
+            border-bottom: 2px solid transparent;
+        }
+
+        .subtab-btn.active {
+            color: var(--text-bright);
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent-orange);
+            background-color: var(--panel-bg);
+        }
+
+        .subtab-content {
+            display: none;
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .subtab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cookie Explanation Card */
+        .cookie-doc-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .doc-header-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .doc-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cookie-name-heading {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-bright);
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        .badge-necessary { background-color: #27ae60; }
+        .badge-analytics { background-color: #2980b9; }
+        .badge-functional { background-color: #8e44ad; }
+        .badge-source { background-color: #7f8c8d; }
+
+        .doc-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .doc-btn {
+            background-color: var(--input-bg);
+            color: var(--text-bright);
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .doc-btn:hover {
+            border-color: var(--accent-orange);
+        }
+
+        /* Structured Metadata Grid */
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 6px 12px;
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: var(--text-bright);
+        }
+
+        .meta-value {
+            color: var(--text-color);
+            word-break: break-all;
+        }
+
+        /* Description Box (No horizontal scroll) */
+        .description-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .description-title {
+            font-weight: bold;
+            color: var(--text-bright);
+        }
+
+        .description-box {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 4px;
+            color: var(--text-bright);
+            line-height: 1.5;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            overflow-x: hidden;
+            overflow-y: auto;
+            max-height: 180px;
+        }
+
+        /* Related Cookies */
+        .related-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .related-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .related-tag-btn {
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .related-tag-btn:hover {
+            color: var(--text-bright);
+            border-color: var(--accent-orange);
+        }
+
+        /* Session Cookie Finder Empty State */
+        .empty-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-bright);
+            margin-bottom: 12px;
+        }
+
+        .empty-subtitle {
+            font-size: 12px;
+            color: var(--text-color);
+            line-height: 1.6;
+            max-width: 580px;
+        }
+
+        .empty-subtitle strong {
+            color: var(--text-bright);
+        }
+
+        .status-strip {
+            margin-top: 6px;
+            padding: 4px 8px;
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Suite Header -->
+    <div class="suite-bar">
+        <div class="suite-title">Burp Suite Professional - Session Inspector (littlespidy)</div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme (Dark / Light)</button>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="nav-tab" onclick="switchNavTab('monitor')">Session Monitor</div>
+        <div class="nav-tab" onclick="switchNavTab('finder')">Session Cookie Finder</div>
+        <div class="nav-tab active" onclick="switchNavTab('store')">Cookie Store</div>
+    </div>
+
+    <!-- TAB 1: Cookie Store (Active) -->
+    <div id="tab-store" class="workspace-panel active">
+        <div class="split-container">
+            <!-- Left: Discovered Cookies -->
+            <div class="split-left">
+                <div class="pane-header">
+                    <span>Discovered Cookies (Grouped by Name)</span>
+                    <span style="font-size: 11px; font-weight: normal; color: var(--text-color)">Total: 4</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cookie Name</th>
+                                <th>Source</th>
+                                <th>Unique</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="selectable selected" onclick="selectCookie('ApplicationGatewayAffinity', this)">
+                                <td>1</td>
+                                <td><strong>ApplicationGatewayAffinity</strong></td>
+                                <td><span class="badge badge-source">Response</span></td>
+                                <td>1</td>
+                                <td>32</td>
+                            </tr>
+                            <tr class="selectable" onclick="selectCookie('ai_session', this)">
+                                <td>2</td>
+                                <td><strong>ai_session</strong></td>
+                                <td><span class="badge badge-source">Request</span></td>
+                                <td>1</td>
+                                <td>58</td>
+                            </tr>
+                            <tr class="selectable" onclick="selectCookie('JSESSIONID', this)">
+                                <td>3</td>
+                                <td><strong>JSESSIONID</strong></td>
+                                <td><span class="badge badge-source">Response</span></td>
+                                <td>2</td>
+                                <td>12</td>
+                            </tr>
+                            <tr class="selectable" onclick="selectCookie('_ga', this)">
+                                <td>4</td>
+                                <td><strong>_ga</strong></td>
+                                <td><span class="badge badge-source">Request</span></td>
+                                <td>1</td>
+                                <td>94</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right: Observed Values & Sub-tabs -->
+            <div class="split-right">
+                <!-- Top: Values Box -->
+                <div class="values-box">
+                    <div class="pane-header">
+                        <span>Observed Cookie Values & Repetition Count</span>
+                    </div>
+                    <!-- Quick Info Bar (Button removed; clean ASCII text without raw HTML tags) -->
+                    <div class="quick-info-bar">
+                        <span id="quick-info-label" class="quick-info-text">Cookie: ApplicationGatewayAffinity | Category: Necessary</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Cookie Value</th>
+                                    <th>Repeated</th>
+                                    <th>Domain</th>
+                                    <th>Attributes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="values-table-body">
+                                <tr>
+                                    <td>1</td>
+                                    <td>fa53b479c72e2cf5e1829e248b17316972f...</td>
+                                    <td>32</td>
+                                    <td>app.target.local</td>
+                                    <td>Path=/; Secure; HttpOnly</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bottom: Sub-tabs (Request, Response, Cookie Explained) -->
+                <div class="subtabs-box">
+                    <div class="subtab-header">
+                        <button class="subtab-btn" onclick="switchSubTab('req')">Request</button>
+                        <button class="subtab-btn" onclick="switchSubTab('resp')">Response</button>
+                        <button class="subtab-btn active" onclick="switchSubTab('doc')">Cookie Explained (cookiesearch.org)</button>
+                    </div>
+
+                    <div id="subtab-req" class="subtab-content">
+                        <pre style="color: var(--text-color);">GET /api/v1/user/profile HTTP/1.1
+Host: app.target.local
+Cookie: ApplicationGatewayAffinity=fa53b479c72e2cf5e1829e248b17316972f...
+User-Agent: Mozilla/5.0</pre>
+                    </div>
+
+                    <div id="subtab-resp" class="subtab-content">
+                        <pre style="color: var(--text-color);">HTTP/1.1 200 OK
+Content-Type: application/json
+Set-Cookie: ApplicationGatewayAffinity=fa53b479c72e2cf5e1829e248b17316972f...; Path=/; Secure; HttpOnly</pre>
+                    </div>
+
+                    <!-- Cookie Explained Pane with Structured URL, Category, Script, and Wrapped Description -->
+                    <div id="subtab-doc" class="subtab-content active">
+                        <div class="cookie-doc-container">
+                            <div class="doc-header-banner">
+                                <div class="doc-title-row">
+                                    <span id="doc-cookie-name" class="cookie-name-heading">ApplicationGatewayAffinity</span>
+                                    <span id="doc-cat-badge" class="badge badge-necessary">Necessary</span>
+                                    <span id="doc-source-badge" class="badge badge-source">Response</span>
+                                </div>
+                                <div class="doc-actions">
+                                    <button class="doc-btn" onclick="alert('Querying cookiesearch.org live (bypasses cache)...')">Re-check cookiesearch.org</button>
+                                    <button class="doc-btn" onclick="alert('Reference link copied to clipboard.')">Copy Link</button>
+                                    <button class="doc-btn" onclick="alert('Opening browser reference...')">Open in Browser</button>
+                                </div>
+                            </div>
+
+                            <!-- Structured Metadata Grid: Category, URL, Script -->
+                            <div class="metadata-grid">
+                                <span class="meta-label">Category:</span>
+                                <span id="doc-category" class="meta-value">Necessary</span>
+
+                                <span class="meta-label">URL / Domains:</span>
+                                <span id="doc-url" class="meta-value">None specified</span>
+
+                                <span class="meta-label">Script / Provider:</span>
+                                <span id="doc-script" class="meta-value">None specified</span>
+
+                                <span class="meta-label">Reference:</span>
+                                <span id="doc-ref" class="meta-value">https://www.cookiesearch.org/cookie/necessary/applicationgatewayaffinity/</span>
+                            </div>
+
+                            <!-- Description Section: Word wrapped without horizontal scrollbar -->
+                            <div class="description-section">
+                                <span class="description-title">Description &amp; Purpose:</span>
+                                <div id="doc-description" class="description-box">
+                                    This cookie is set by the Laravel Framework. This cookie is used for managing browsing sessions. It enables keeping the web browser traffic assigned to single server.
+                                </div>
+                            </div>
+
+                            <!-- Related Cookies Section -->
+                            <div id="doc-related-section" class="related-section" style="display: none;">
+                                <span class="description-title">Related Cookies:</span>
+                                <div id="doc-related-tags" class="related-tags"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="status-strip">
+            <span>Ready. Cookies loaded and classified from cookiesearch.org knowledge base.</span>
+            <span>Total Cookies: 4 | Unique Values: 5</span>
+        </div>
+    </div>
+
+    <!-- TAB 2: Session Cookie Finder (Empty State Demo without raw HTML tags) -->
+    <div id="tab-finder" class="workspace-panel">
+        <div class="split-container">
+            <div style="flex: 1; background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 4px;">
+                <div class="empty-placeholder">
+                    <div class="empty-title">No Target Requests Loaded</div>
+                    <div class="empty-subtitle">
+                        Right-click any HTTP request in Burp Suite (<strong>Proxy, Repeater, Logger, Scanner</strong>)<br>
+                        and choose <strong>'Send to Session Cookie Finder'</strong>.<br><br>
+                        Each request will open as an independent tab with dedicated isolation tests and response editors.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="status-strip">
+            <span>Session Cookie Finder ready. No requests loaded.</span>
+            <span>Tabs: 0</span>
+        </div>
+    </div>
+
+    <!-- TAB 3: Session Monitor Demo -->
+    <div id="tab-monitor" class="workspace-panel">
+        <div class="split-container">
+            <div style="flex: 1; background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 20px;">
+                <div class="empty-title">Session Monitor Dashboard</div>
+                <div class="empty-subtitle">
+                    Active automated session expiration probes and milestone history tracking.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cookieData = {
+            'ApplicationGatewayAffinity': {
+                name: 'ApplicationGatewayAffinity',
+                category: 'Necessary',
+                badgeClass: 'badge-necessary',
+                source: 'Response',
+                url: 'None specified',
+                script: 'None specified',
+                ref: 'https://www.cookiesearch.org/cookie/necessary/applicationgatewayaffinity/',
+                desc: 'This cookie is set by the Laravel Framework. This cookie is used for managing browsing sessions. It enables keeping the web browser traffic assigned to single server.',
+                value: 'fa53b479c72e2cf5e1829e248b17316972f...',
+                count: '32',
+                domain: 'app.target.local',
+                attrs: 'Path=/; Secure; HttpOnly',
+                related: []
+            },
+            'ai_session': {
+                name: 'ai_session',
+                category: 'Analytics',
+                badgeClass: 'badge-analytics',
+                source: 'Request',
+                url: 'monitor.azure.com|azureedge.net',
+                script: 'Azure',
+                ref: 'https://www.cookiesearch.org/cookie/analytics/ai_session/',
+                desc: 'This is a unique anonymous session identifier cookie set by Microsoft Application Insights software to gather statistical usage and telemetry data for apps built on the Azure cloud platform.',
+                value: 's9F2+xYp5qVj...|2026-10-25T14:40:00.000Z',
+                count: '58',
+                domain: 'app.target.local',
+                attrs: 'Path=/',
+                related: ['ai_user']
+            },
+            'JSESSIONID': {
+                name: 'JSESSIONID',
+                category: 'Necessary',
+                badgeClass: 'badge-necessary',
+                source: 'Response',
+                url: 'None specified',
+                script: 'Java Servlet / Tomcat',
+                ref: 'https://www.cookiesearch.org/cookie/necessary/jsessionid/',
+                desc: 'Used by Java applications using Servlet specification (e.g. Apache Tomcat) to maintain session state across requests.',
+                value: '3C994DF183A8940C003D2E2B88147132',
+                count: '12',
+                domain: 'app.target.local',
+                attrs: 'Path=/; Secure; HttpOnly; SameSite=Lax',
+                related: []
+            },
+            '_ga': {
+                name: '_ga',
+                category: 'Analytics',
+                badgeClass: 'badge-analytics',
+                source: 'Request',
+                url: 'google-analytics.com',
+                script: 'Google Analytics',
+                ref: 'https://www.cookiesearch.org/cookie/analytics/_ga/',
+                desc: 'Used by Google Analytics to distinguish unique users by assigning a randomly generated number as a client identifier.',
+                value: 'GA1.2.1947294820.1718294820',
+                count: '94',
+                domain: '.target.local',
+                attrs: 'Path=/; Domain=.target.local',
+                related: ['_gid', '_gat']
+            }
+        };
+
+        function selectCookie(name, row) {
+            document.querySelectorAll('.split-left tbody tr').forEach(r => r.classList.remove('selected'));
+            row.classList.add('selected');
+
+            const item = cookieData[name];
+            if (!item) return;
+
+            // Update Quick Info Label (plain text, no HTML tags)
+            document.getElementById('quick-info-label').textContent = 'Cookie: ' + item.name + ' | Category: ' + item.category;
+
+            // Update Values table
+            document.getElementById('values-table-body').innerHTML = `
+                <tr>
+                    <td>1</td>
+                    <td>${item.value}</td>
+                    <td>${item.count}</td>
+                    <td>${item.domain}</td>
+                    <td>${item.attrs}</td>
+                </tr>
+            `;
+
+            // Update Cookie Explained Pane
+            document.getElementById('doc-cookie-name').textContent = item.name;
+            const catBadge = document.getElementById('doc-cat-badge');
+            catBadge.textContent = item.category;
+            catBadge.className = 'badge ' + item.badgeClass;
+
+            document.getElementById('doc-source-badge').textContent = item.source;
+            document.getElementById('doc-category').textContent = item.category;
+            document.getElementById('doc-url').textContent = item.url;
+            document.getElementById('doc-script').textContent = item.script;
+            document.getElementById('doc-ref').textContent = item.ref;
+            document.getElementById('doc-description').textContent = item.desc;
+
+            // Related cookies
+            const relSec = document.getElementById('doc-related-section');
+            const relTags = document.getElementById('doc-related-tags');
+            if (item.related && item.related.length > 0) {
+                relSec.style.display = 'flex';
+                relTags.innerHTML = item.related.map(r => `<button class="related-tag-btn" onclick="selectCookieByName('${r}')">${r}</button>`).join('');
+            } else {
+                relSec.style.display = 'none';
+                relTags.innerHTML = '';
+            }
+        }
+
+        function selectCookieByName(name) {
+            const rows = document.querySelectorAll('.split-left tbody tr');
+            for (let row of rows) {
+                if (row.textContent.includes(name)) {
+                    selectCookie(name, row);
+                    break;
+                }
+            }
+        }
+
+        function switchNavTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.workspace-panel').forEach(p => p.classList.remove('active'));
+
+            if (tab === 'store') {
+                document.querySelectorAll('.nav-tab')[2].classList.add('active');
+                document.getElementById('tab-store').classList.add('active');
+            } else if (tab === 'finder') {
+                document.querySelectorAll('.nav-tab')[1].classList.add('active');
+                document.getElementById('tab-finder').classList.add('active');
+            } else {
+                document.querySelectorAll('.nav-tab')[0].classList.add('active');
+                document.getElementById('tab-monitor').classList.add('active');
+            }
+        }
+
+        function switchSubTab(tab) {
+            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'req') {
+                document.querySelectorAll('.subtab-btn')[0].classList.add('active');
+                document.getElementById('subtab-req').classList.add('active');
+            } else if (tab === 'resp') {
+                document.querySelectorAll('.subtab-btn')[1].classList.add('active');
+                document.getElementById('subtab-resp').classList.add('active');
+            } else {
+                document.querySelectorAll('.subtab-btn')[2].classList.add('active');
+                document.getElementById('subtab-doc').classList.add('active');
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
+    </script>
+</body>
+</html>

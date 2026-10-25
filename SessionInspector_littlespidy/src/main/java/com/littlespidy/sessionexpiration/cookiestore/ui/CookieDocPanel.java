@@ -17,8 +17,8 @@ import java.net.URI;
  * embedding category classifications, behavioral explanations, scripts,
  * and related cookies scraped from https://www.cookiesearch.org/.
  *
- * Modeled after HeaderDocPanel with offline database support and automatic
- * live background fetching.
+ * Displays URL, Category, Script/Provider, and behavioral Description
+ * without horizontal scrollbars.
  *
  * @author littlespidy
  */
@@ -34,6 +34,11 @@ public class CookieDocPanel extends JPanel {
     private final JButton openBrowserBtn = new JButton("Open in Browser");
 
     private final JLabel statusIndicator = new JLabel("");
+
+    // Structured metadata fields
+    private final JLabel categoryField = new JLabel("-");
+    private final JTextField urlField = new JTextField("-");
+    private final JTextField scriptField = new JTextField("-");
 
     private final JTextArea explanationArea = new JTextArea();
 
@@ -131,10 +136,61 @@ public class CookieDocPanel extends JPanel {
         topContainer.add(statusIndicator, BorderLayout.SOUTH);
         add(topContainer, BorderLayout.NORTH);
 
-        // -- 2. Content Center Area -------------------------------------------
-        JPanel contentPanel = new JPanel();
+        // -- 2. Content Center Area (Viewport Tracking, No Horizontal Scroll) --
+        ScrollablePanel contentPanel = new ScrollablePanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setOpaque(false);
+
+        // Structured Metadata Card: Category, URL, Script
+        JPanel metaPanel = new JPanel(new GridBagLayout());
+        metaPanel.setOpaque(false);
+        metaPanel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(210, 215, 220), 1, true),
+                new EmptyBorder(8, 10, 8, 10)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 4, 3, 8);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Row 0: Category
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0; gbc.fill = GridBagConstraints.NONE;
+        JLabel catLbl = new JLabel("Category:");
+        catLbl.setFont(catLbl.getFont().deriveFont(Font.BOLD, 12f));
+        metaPanel.add(catLbl, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        categoryField.setFont(categoryField.getFont().deriveFont(Font.PLAIN, 12f));
+        metaPanel.add(categoryField, gbc);
+
+        // Row 1: URL / Associated Domains
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0; gbc.fill = GridBagConstraints.NONE;
+        JLabel urlLbl = new JLabel("URL / Domains:");
+        urlLbl.setFont(urlLbl.getFont().deriveFont(Font.BOLD, 12f));
+        metaPanel.add(urlLbl, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        urlField.setEditable(false);
+        urlField.setBorder(null);
+        urlField.setOpaque(false);
+        urlField.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        metaPanel.add(urlField, gbc);
+
+        // Row 2: Script / Provider
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0; gbc.fill = GridBagConstraints.NONE;
+        JLabel scriptLbl = new JLabel("Script / Provider:");
+        scriptLbl.setFont(scriptLbl.getFont().deriveFont(Font.BOLD, 12f));
+        metaPanel.add(scriptLbl, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        scriptField.setEditable(false);
+        scriptField.setBorder(null);
+        scriptField.setOpaque(false);
+        scriptField.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        metaPanel.add(scriptField, gbc);
+
+        contentPanel.add(metaPanel);
+        contentPanel.add(Box.createVerticalStrut(10));
 
         // Explanation & Behavioral Details Area
         JPanel explanationSection = new JPanel(new BorderLayout(4, 4));
@@ -146,6 +202,7 @@ public class CookieDocPanel extends JPanel {
         explanationArea.setEditable(false);
         explanationArea.setLineWrap(true);
         explanationArea.setWrapStyleWord(true);
+        explanationArea.setColumns(0);
         explanationArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
         explanationArea.setBackground(new Color(252, 253, 255));
         explanationArea.setText("Select a cookie from the table above to view its classification, purpose, and behavioral description from cookiesearch.org.");
@@ -172,6 +229,7 @@ public class CookieDocPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(null);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(12);
         add(scrollPane, BorderLayout.CENTER);
     }
@@ -214,6 +272,10 @@ public class CookieDocPanel extends JPanel {
             categoryBadge.setVisible(true);
             scriptBadge.setVisible(false);
 
+            categoryField.setText("Searching...");
+            urlField.setText("Searching...");
+            scriptField.setText("Searching...");
+
             statusIndicator.setText("Fetching live definition from cookiesearch.org for '" + currentCookieName + "'...");
             explanationArea.setText("Querying https://www.cookiesearch.org/ for cookie specifications and meaning...");
 
@@ -247,12 +309,17 @@ public class CookieDocPanel extends JPanel {
     private void renderDoc(CookieDocRecord doc) {
         if (doc == null) return;
 
-        // Category Badge
+        // Category Badge & Field
         categoryBadge.setText(doc.category());
         categoryBadge.setBackground(doc.categoryColor());
         categoryBadge.setVisible(true);
+        categoryField.setText(doc.category());
 
-        // Script Badge
+        // URL / Domains Field
+        urlField.setText(doc.hasUrl() ? doc.url() : "None specified");
+
+        // Script / Provider Badge & Field
+        scriptField.setText(doc.hasScript() ? doc.script() : "None specified");
         if (doc.hasScript()) {
             scriptBadge.setText("Script: " + doc.script());
             scriptBadge.setVisible(true);
@@ -291,6 +358,9 @@ public class CookieDocPanel extends JPanel {
         categoryBadge.setVisible(false);
         sourceBadge.setVisible(false);
         scriptBadge.setVisible(false);
+        categoryField.setText("-");
+        urlField.setText("-");
+        scriptField.setText("-");
         fetchLiveBtn.setEnabled(false);
         copyLinkBtn.setEnabled(false);
         openBrowserBtn.setEnabled(false);
@@ -308,5 +378,35 @@ public class CookieDocPanel extends JPanel {
         label.setForeground(fgColor);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 11f));
         label.setBorder(new EmptyBorder(2, 6, 2, 6));
+    }
+
+    /**
+     * Scrollable panel that tracks viewport width to avoid horizontal scrollbars.
+     */
+    private static class ScrollablePanel extends JPanel implements Scrollable {
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 32;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 }

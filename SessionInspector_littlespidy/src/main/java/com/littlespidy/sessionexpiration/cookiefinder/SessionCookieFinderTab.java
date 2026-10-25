@@ -71,17 +71,25 @@ public class SessionCookieFinderTab extends JPanel {
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel subtitleLabel = new JLabel("<html><center>"
-                + "Right-click any HTTP request in Burp Suite (<b>Proxy, Repeater, Logger, Scanner</b>)<br>"
-                + "and choose <b>'Send to Session Cookie Finder'</b>.<br><br>"
-                + "Each request will open as an independent tab with dedicated isolation tests and response editors."
-                + "</center></html>", SwingConstants.CENTER);
-        subtitleLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel line1 = new JLabel("Right-click any HTTP request in Burp Suite (Proxy, Repeater, Logger, Scanner)", SwingConstants.CENTER);
+        line1.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        line1.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel line2 = new JLabel("and choose 'Send to Session Cookie Finder'.", SwingConstants.CENTER);
+        line2.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+        line2.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel line3 = new JLabel("Each request opens as an independent tab with dedicated isolation tests and response editors.", SwingConstants.CENTER);
+        line3.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        line3.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         centerBox.add(titleLabel);
+        centerBox.add(Box.createVerticalStrut(12));
+        centerBox.add(line1);
+        centerBox.add(Box.createVerticalStrut(4));
+        centerBox.add(line2);
         centerBox.add(Box.createVerticalStrut(8));
-        centerBox.add(subtitleLabel);
+        centerBox.add(line3);
 
         emptyPlaceholderPanel.add(centerBox);
     }

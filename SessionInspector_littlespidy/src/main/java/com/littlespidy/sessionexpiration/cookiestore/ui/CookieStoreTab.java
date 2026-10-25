@@ -56,7 +56,6 @@ public class CookieStoreTab extends JPanel {
     private final CookieDocPanel cookieDocPanel = new CookieDocPanel();
     private final JPanel quickInfoPanel = new JPanel(new BorderLayout(8, 0));
     private final JLabel quickInfoLabel = new JLabel("Select a cookie to view its classification and documentation from cookiesearch.org.");
-    private final JButton quickInfoDocsBtn = new JButton("Cookie Explained (cookiesearch.org)");
 
     // Native Montoya HTTP Editors
     private final HttpRequestEditor requestEditor;
@@ -191,14 +190,7 @@ public class CookieStoreTab extends JPanel {
                 BorderFactory.createEmptyBorder(4, 6, 4, 6)
         ));
         quickInfoLabel.setFont(quickInfoLabel.getFont().deriveFont(Font.PLAIN, 11f));
-        quickInfoDocsBtn.setFont(quickInfoDocsBtn.getFont().deriveFont(11f));
-        quickInfoDocsBtn.setMargin(new Insets(2, 6, 2, 6));
-        quickInfoDocsBtn.setEnabled(false);
-        quickInfoDocsBtn.addActionListener(e -> {
-            editorTabs.setSelectedComponent(cookieDocPanel);
-        });
         quickInfoPanel.add(quickInfoLabel, BorderLayout.CENTER);
-        quickInfoPanel.add(quickInfoDocsBtn, BorderLayout.EAST);
 
         valuePanel.add(quickInfoPanel, BorderLayout.NORTH);
         valuePanel.add(new JScrollPane(valueTable), BorderLayout.CENTER);
@@ -265,7 +257,6 @@ public class CookieStoreTab extends JPanel {
             clearEditors();
             cookieDocPanel.setCookie(null, null);
             quickInfoLabel.setText("Select a cookie to view its classification and documentation from cookiesearch.org.");
-            quickInfoDocsBtn.setEnabled(false);
             if (autoSaveCallback != null) {
                 autoSaveCallback.run();
             }
@@ -280,15 +271,13 @@ public class CookieStoreTab extends JPanel {
                     updateValueTableForSelectedGroup();
                     if (selectedGroup != null) {
                         String cat = CookieSearchKnowledgeBase.getCategory(selectedGroup.displayName());
-                        quickInfoLabel.setText("<html>Cookie: <b>" + escapeHtml(selectedGroup.displayName()) + "</b> &nbsp;|&nbsp; Category: <b>" + escapeHtml(cat) + "</b></html>");
-                        quickInfoDocsBtn.setEnabled(true);
+                        quickInfoLabel.setText("Cookie: " + selectedGroup.displayName() + " | Category: " + cat);
                         cookieDocPanel.setCookie(selectedGroup.displayName(), selectedGroup.source().getDisplayName());
                     }
                 } else {
                     selectedGroup = null;
                     valueTableModel.setRecords(null);
                     quickInfoLabel.setText("Select a cookie to view its classification and documentation from cookiesearch.org.");
-                    quickInfoDocsBtn.setEnabled(false);
                     cookieDocPanel.setCookie(null, null);
                 }
             }
@@ -542,8 +531,7 @@ public class CookieStoreTab extends JPanel {
         valueTableModel.setRecords(values);
 
         String cat = CookieSearchKnowledgeBase.getCategory(selectedGroup.displayName());
-        quickInfoLabel.setText("<html>Cookie: <b>" + escapeHtml(selectedGroup.displayName()) + "</b> &nbsp;|&nbsp; Category: <b>" + escapeHtml(cat) + "</b></html>");
-        quickInfoDocsBtn.setEnabled(true);
+        quickInfoLabel.setText("Cookie: " + selectedGroup.displayName() + " | Category: " + cat);
         cookieDocPanel.setCookie(selectedGroup.displayName(), selectedGroup.source().getDisplayName());
 
         if (!values.isEmpty()) {
@@ -610,12 +598,6 @@ public class CookieStoreTab extends JPanel {
     private void clearEditors() {
         cookieDocPanel.setCookie(null, null);
         quickInfoLabel.setText("Select a cookie to view its classification and documentation from cookiesearch.org.");
-        quickInfoDocsBtn.setEnabled(false);
-    }
-
-    private String escapeHtml(String text) {
-        if (text == null) return "";
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 
     private boolean isPointOverCopyButton(Point p) {

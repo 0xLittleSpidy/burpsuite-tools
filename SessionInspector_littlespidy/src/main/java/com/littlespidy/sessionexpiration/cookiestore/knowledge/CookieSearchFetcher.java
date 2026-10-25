@@ -141,14 +141,38 @@ public class CookieSearchFetcher {
         return fetchSync(cookieName, false);
     }
 
-    private static CookieDocRecord parseHtml(String cookieName, String referenceUrl, String html) {
+    static CookieDocRecord parseHtml(String cookieName, String referenceUrl, String html) {
         String name = extractRegex(html, "<p class=\"cname\">([^<]+)</p>", cookieName);
         String category = extractRegex(html, "<p class=\"ccat\">([^<]+)</p>", "");
-        String cookieId = extractRegex(html, "<strong>Cookie ID</strong>:\\s*&nbsp;<span>([^<]*)</span>", cookieName);
-        String url = extractRegex(html, "<strong>URL</strong>:\\s*&nbsp;<span>([^<]*)</span>", "");
-        String script = extractRegex(html, "<strong>Script</strong>:\\s*&nbsp;<span>([^<]*)</span>", "");
-        String description = extractRegex(html, "<strong>Description</strong>:\\s*&nbsp;<span>(.*?)</span>", "");
+        if (category.isBlank()) {
+            category = extractRegex(html, "<span>Category</span>:\\s*(?:&nbsp;)?([^<]*)", "");
+        }
 
+        String cookieId = extractRegex(html, "<span>Cookie ID</span>:\\s*(?:&nbsp;)?([^<]*)", "");
+        if (cookieId.isBlank()) {
+            cookieId = extractRegex(html, "<strong>Cookie ID</strong>:\\s*&nbsp;<span>([^<]*)</span>", cookieName);
+        }
+
+        String url = extractRegex(html, "<span>URL</span>:\\s*(?:&nbsp;)?([^<]*)", "");
+        if (url.isBlank()) {
+            url = extractRegex(html, "<strong>URL</strong>:\\s*&nbsp;<span>([^<]*)</span>", "");
+        }
+
+        String script = extractRegex(html, "<span>Script</span>:\\s*(?:&nbsp;)?([^<]*)", "");
+        if (script.isBlank()) {
+            script = extractRegex(html, "<strong>Script</strong>:\\s*&nbsp;<span>([^<]*)</span>", "");
+        }
+
+        String description = extractRegex(html, "<span>Description</span>:\\s*(?:&nbsp;)?(.*?)</p>", "");
+        if (description.isBlank()) {
+            description = extractRegex(html, "<strong>Description</strong>:\\s*&nbsp;<span>(.*?)</span>", "");
+        }
+
+        name = cleanHtml(name);
+        category = cleanHtml(category);
+        cookieId = cleanHtml(cookieId);
+        url = cleanHtml(url);
+        script = cleanHtml(script);
         description = cleanHtml(description);
 
         if (description.isBlank() && category.isBlank()) {
@@ -158,6 +182,10 @@ public class CookieSearchFetcher {
         if (category.isBlank()) {
             category = "Others";
         }
+
+        // Canonical URL detection if available
+        String canonicalUrl = extractRegex(html, "<link rel=\"canonical\" href=\"([^\"]+)\"", referenceUrl);
+        String finalRefUrl = (canonicalUrl != null && !canonicalUrl.isBlank()) ? canonicalUrl : referenceUrl;
 
         // Extract related cookies
         List<String> related = new ArrayList<>();
@@ -177,18 +205,22 @@ public class CookieSearchFetcher {
                 url,
                 script,
                 description,
-                referenceUrl,
+                finalRefUrl,
                 related
         );
     }
 
-    private static CookieDocRecord createInferredOrUnknownRecord(String cookieName) {
+    static CookieDocRecord createInferredOrUnknownRecord(String cookieName) {
         String lower = cookieName.toLowerCase(Locale.ROOT);
         String category = "Others";
         String description;
         String script = "";
 
-        if (lower.contains("session") || lower.contains("sess") || lower.contains("sid") || lower.contains("phpsessid")
+        if (lower.equals("ai_session") || lower.equals("ai_user") || lower.startsWith("ai_")) {
+            category = "Analytics";
+            script = "Azure";
+            description = "Unique anonymous session identifier cookie set by Microsoft Application Insights software to gather statistical usage and telemetry data for apps built on the Azure cloud platform.";
+        } else if (lower.contains("session") || lower.contains("sess") || lower.contains("sid") || lower.contains("phpsessid")
                 || lower.contains("jsessionid") || lower.contains("token") || lower.contains("auth") || lower.contains("jwt")
                 || lower.contains("login") || lower.contains("connect.sid")) {
             category = "Necessary";
@@ -204,7 +236,8 @@ public class CookieSearchFetcher {
             category = "Analytics";
             description = "Web analytics and traffic measurement cookie. "
                     + "Used to record visitor metrics, navigation funnels, and usage statistics.";
-        } else if (lower.contains("cf_") || lower.contains("cloudflare") || lower.contains("akamai") || lower.contains("awsalb")) {
+        } else if (lower.contains("cf_") || lower.contains("cloudflare") || lower.contains("akamai") || lower.contains("awsalb")
+                || lower.contains("affinity") || lower.contains("gateway")) {
             category = "Necessary";
             description = "Reverse proxy, Content Delivery Network (CDN), or load balancer infrastructure cookie. "
                     + "Used to manage client routing affinity and edge security protections.";
