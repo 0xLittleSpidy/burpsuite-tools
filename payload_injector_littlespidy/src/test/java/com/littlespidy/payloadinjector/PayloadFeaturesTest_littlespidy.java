@@ -90,9 +90,30 @@ public class PayloadFeaturesTest_littlespidy {
                 new Class<?>[]{burp.api.montoya.http.message.requests.HttpRequest.class},
                 (proxy, method, args) -> {
                     String name = method.getName();
+                    if ("equals".equals(name)) return proxy == args[0];
+                    if ("hashCode".equals(name)) return System.identityHashCode(proxy);
                     if ("toString".equals(name)) return raw;
                     if ("httpService".equals(name)) return service;
                     if ("toByteArray".equals(name)) return createMockByteArray(raw.getBytes(StandardCharsets.UTF_8));
+                    if ("headerValue".equals(name) && args != null && args.length > 0) {
+                        String headerName = (String) args[0];
+                        String lower = raw.toLowerCase();
+                        String search = "\n" + headerName.toLowerCase() + ":";
+                        int idx = lower.indexOf(search);
+                        if (idx == -1 && lower.startsWith(headerName.toLowerCase() + ":")) {
+                            idx = 0;
+                        } else if (idx != -1) {
+                            idx += 1;
+                        }
+                        if (idx != -1) {
+                            int colon = raw.indexOf(':', idx);
+                            int lineEnd = raw.indexOf("\r\n", colon);
+                            if (lineEnd == -1) lineEnd = raw.indexOf('\n', colon);
+                            if (lineEnd == -1) lineEnd = raw.length();
+                            return raw.substring(colon + 1, lineEnd).trim();
+                        }
+                        return null;
+                    }
                     if ("parameters".equals(name)) {
                         List<burp.api.montoya.http.message.params.ParsedHttpParameter> params = new ArrayList<>();
                         int qIdx = raw.indexOf('?');
@@ -147,6 +168,8 @@ public class PayloadFeaturesTest_littlespidy {
                 new Class<?>[]{burp.api.montoya.core.ByteArray.class},
                 (proxy, method, args) -> {
                     String name = method.getName();
+                    if ("equals".equals(name)) return proxy == args[0];
+                    if ("hashCode".equals(name)) return System.identityHashCode(proxy);
                     if ("getBytes".equals(name)) return bytes;
                     if ("length".equals(name)) return bytes.length;
                     if ("toString".equals(name)) return new String(bytes, StandardCharsets.UTF_8);

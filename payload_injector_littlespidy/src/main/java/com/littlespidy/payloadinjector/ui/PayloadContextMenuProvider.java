@@ -107,6 +107,33 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
         }
         rootMenu.add(sendToRepeaterMenu);
 
+        // -- 2. Web Root Probes (Send to Repeater): PUT File Upload & Important Files --
+        JMenuItem putUploadItem = new JMenuItem("Send PUT Upload Test to Repeater (/test_littlespidy.txt)");
+        putUploadItem.addActionListener(e -> {
+            HttpRequest putReq = com.littlespidy.payloadinjector.engine.RootProbeEngine_littlespidy.buildPutUploadRequest(targetRequest);
+            String tabTitle = "PUT /test_littlespidy.txt [" + extractHostForTitle(targetRequest) + "]";
+            api.repeater().sendToRepeater(putReq, tabTitle);
+        });
+        rootMenu.add(putUploadItem);
+
+        JMenuItem robotsTxtItem = new JMenuItem("Send robots.txt Request to Repeater (/robots.txt)");
+        robotsTxtItem.addActionListener(e -> {
+            HttpRequest robotsReq = com.littlespidy.payloadinjector.engine.RootProbeEngine_littlespidy.buildRobotsTxtRequest(targetRequest);
+            String tabTitle = "GET /robots.txt [" + extractHostForTitle(targetRequest) + "]";
+            api.repeater().sendToRepeater(robotsReq, tabTitle);
+        });
+        rootMenu.add(robotsTxtItem);
+
+        JMenu importantFilesMenu = new JMenu("Check Important Files & Directories (Send to Repeater)");
+        JMenuItem subRobotsItem = new JMenuItem("robots.txt (/robots.txt)");
+        subRobotsItem.addActionListener(e -> {
+            HttpRequest robotsReq = com.littlespidy.payloadinjector.engine.RootProbeEngine_littlespidy.buildRobotsTxtRequest(targetRequest);
+            String tabTitle = "GET /robots.txt [" + extractHostForTitle(targetRequest) + "]";
+            api.repeater().sendToRepeater(robotsReq, tabTitle);
+        });
+        importantFilesMenu.add(subRobotsItem);
+        rootMenu.add(importantFilesMenu);
+
         // -- 2. Editor In-Place Modifications (if in Message Editor) --
         Optional<MessageEditorHttpRequestResponse> editorOpt = event.messageEditorRequestResponse();
         if (editorOpt.isPresent()) {
@@ -294,12 +321,42 @@ public class PayloadContextMenuProvider implements ContextMenuItemsProvider {
         return String.format("%s %s [%s: %s]", method, path, category, entry.getName());
     }
 
-    private HttpRequest extractTargetRequest(ContextMenuEvent event) {
-        if (event.messageEditorRequestResponse().isPresent()) {
-            return event.messageEditorRequestResponse().get().requestResponse().request();
+    private String extractHostForTitle(HttpRequest request) {
+        if (request != null) {
+            String host = request.headerValue("Host");
+            if (host != null && !host.isBlank()) {
+                return host.trim();
+            }
+            if (request.httpService() != null && request.httpService().host() != null) {
+                return request.httpService().host();
+            }
         }
-        if (!event.selectedRequestResponses().isEmpty()) {
-            return event.selectedRequestResponses().get(0).request();
+        return "Target";
+    }
+
+    private HttpRequest extractTargetRequest(ContextMenuEvent event) {
+        if (event == null) {
+            return null;
+        }
+        try {
+            Optional<MessageEditorHttpRequestResponse> editorOpt = event.messageEditorRequestResponse();
+            if (editorOpt.isPresent()) {
+                MessageEditorHttpRequestResponse editor = editorOpt.get();
+                if (editor.requestResponse() != null && editor.requestResponse().request() != null) {
+                    return editor.requestResponse().request();
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            List<burp.api.montoya.http.message.HttpRequestResponse> selected = event.selectedRequestResponses();
+            if (selected != null && !selected.isEmpty()) {
+                var rr = selected.get(0);
+                if (rr != null && rr.request() != null) {
+                    return rr.request();
+                }
+            }
+        } catch (Exception ignored) {
         }
         return null;
     }

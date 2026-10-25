@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payload Injector (littlespidy) - Web Root Probes UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --accent-disabled: #8a481e;
+      --badge-completed: #388a34;
+      --badge-downloading: #0e639c;
+      --badge-pending: #6e6e6e;
+      --badge-failed: #f14c4c;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Burp Suite Top Banner */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      user-select: none;
+    }
+
+    .burp-logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .burp-logo {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    .burp-sub {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-btn {
+      background-color: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .theme-btn:hover {
+      background-color: var(--btn-hover);
+      color: var(--text-bright);
+    }
+
+    /* Suite Tabs */
+    .suite-tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+    }
+
+    .suite-tab {
+      padding: 6px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .suite-tab:hover {
+      color: var(--text-bright);
+    }
+
+    .suite-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background-color: var(--bg-dark);
+    }
+
+    /* Main Container */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Left side: HTTP History Table */
+    .history-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background-color: var(--bg-dark);
+    }
+
+    .panel-header {
+      padding: 6px 10px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-container {
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 11px;
+    }
+
+    th {
+      background-color: var(--bg-darker);
+      color: var(--text-muted);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--row-even);
+    }
+
+    tr:nth-child(odd) {
+      background-color: var(--row-odd);
+    }
+
+    tr:hover {
+      background-color: var(--bg-hover);
+      cursor: pointer;
+    }
+
+    tr.selected {
+      background-color: var(--bg-selected) !important;
+      color: #ffffff !important;
+    }
+
+    /* Right-click Context Menu Simulation */
+    .context-menu {
+      position: absolute;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-radius: 4px;
+      padding: 4px 0;
+      z-index: 100;
+      min-width: 280px;
+      display: none;
+    }
+
+    .menu-item {
+      padding: 6px 14px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .menu-item:hover {
+      background-color: var(--bg-selected);
+      color: #ffffff;
+    }
+
+    .menu-separator {
+      height: 1px;
+      background-color: var(--border);
+      margin: 4px 0;
+    }
+
+    .menu-item.has-submenu:after {
+      content: ">";
+      font-size: 10px;
+      margin-left: 10px;
+      color: var(--text-muted);
+    }
+
+    .menu-item:hover.has-submenu:after {
+      color: #ffffff;
+    }
+
+    .submenu {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-radius: 4px;
+      padding: 4px 0;
+      min-width: 240px;
+    }
+
+    .menu-item.has-submenu:hover .submenu {
+      display: block;
+    }
+
+    /* Right side: Repeater Simulation */
+    .repeater-panel {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-dark);
+    }
+
+    .repeater-tab-bar {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .rep-tab {
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rep-tab.active {
+      color: var(--accent);
+      background-color: var(--bg-dark);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .rep-editors {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .editor-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+    }
+
+    .editor-box:last-child {
+      border-right: none;
+    }
+
+    .editor-header {
+      padding: 5px 10px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .editor-content {
+      flex: 1;
+      background-color: var(--code-bg);
+      color: var(--text-bright);
+      padding: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .status-201 {
+      background-color: var(--badge-completed);
+    }
+
+    .status-200 {
+      background-color: var(--badge-completed);
+    }
+
+    .notification-pill {
+      margin-left: 8px;
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Banner -->
+  <header class="burp-header">
+    <div class="burp-logo-area">
+      <span class="burp-logo">Burp Suite Pro</span>
+      <span class="burp-sub">Extension: Payload Injector (littlespidy) v1.0.0</span>
+    </div>
+    <div class="header-actions">
+      <span id="hintMsg" style="color: var(--accent); font-size: 11px; margin-right: 10px;">Right-click any table row to test PUT Upload or robots.txt</span>
+      <button class="theme-btn" onclick="toggleTheme()">Toggle Dark / Light Theme</button>
+    </div>
+  </header>
+
+  <!-- Burp Suite Tabs -->
+  <nav class="suite-tabs">
+    <div class="suite-tab">Dashboard</div>
+    <div class="suite-tab active">Target</div>
+    <div class="suite-tab">Proxy</div>
+    <div class="suite-tab">Repeater</div>
+    <div class="suite-tab">Payload Injector</div>
+  </nav>
+
+  <!-- Workspace Container -->
+  <main class="workspace">
+    <!-- Left: HTTP History Table -->
+    <section class="history-panel">
+      <div class="panel-header">
+        <span>HTTP Proxy History (Right-click row to open Payload Injector context menu)</span>
+        <span>Target: https://target-app.example.com</span>
+      </div>
+
+      <div class="table-container" id="tableContainer">
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Host</th>
+              <th>Method</th>
+              <th>URL</th>
+              <th>Status</th>
+              <th>Length</th>
+              <th>MIME</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-host="target-app.example.com" data-path="/api/v1/profile" class="selected">
+              <td>1</td>
+              <td>target-app.example.com</td>
+              <td>GET</td>
+              <td>/api/v1/profile</td>
+              <td>200</td>
+              <td>1,420</td>
+              <td>JSON</td>
+            </tr>
+            <tr data-host="target-app.example.com" data-path="/auth/login">
+              <td>2</td>
+              <td>target-app.example.com</td>
+              <td>POST</td>
+              <td>/auth/login</td>
+              <td>200</td>
+              <td>845</td>
+              <td>JSON</td>
+            </tr>
+            <tr data-host="api.external.com" data-path="/v2/users?page=1">
+              <td>3</td>
+              <td>api.external.com</td>
+              <td>GET</td>
+              <td>/v2/users?page=1</td>
+              <td>200</td>
+              <td>3,120</td>
+              <td>JSON</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Right-click Simulated Context Menu -->
+        <div class="context-menu" id="burpContextMenu">
+          <div class="menu-item has-submenu">
+            <span>Payload Injector (littlespidy)</span>
+            <div class="submenu">
+              <div class="menu-item has-submenu">
+                <span>Send to Repeater with Armed Payloads</span>
+                <div class="submenu">
+                  <div class="menu-item">XSS (45 payloads)</div>
+                  <div class="menu-item">SQL Injection (52 payloads)</div>
+                  <div class="menu-item">Path Traversal (80 payloads)</div>
+                  <div class="menu-item">File Upload (60 payloads)</div>
+                </div>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-item" onclick="triggerPutUpload()">
+                <span>Send PUT Upload Test to Repeater (/test_littlespidy.txt)</span>
+              </div>
+              <div class="menu-item" onclick="triggerRobotsTxt()">
+                <span>Send robots.txt Request to Repeater (/robots.txt)</span>
+              </div>
+              <div class="menu-item has-submenu">
+                <span>Check Important Files &amp; Directories</span>
+                <div class="submenu">
+                  <div class="menu-item" onclick="triggerRobotsTxt()">robots.txt (/robots.txt)</div>
+                </div>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-item has-submenu">
+                <span>Inject into All Parameters (In-Place)</span>
+                <div class="submenu">
+                  <div class="menu-item">XSS Payloads</div>
+                  <div class="menu-item">SQL Payloads</div>
+                </div>
+              </div>
+              <div class="menu-item">Replace Target File Path (&lt;FILE_PATH&gt;)</div>
+            </div>
+          </div>
+          <div class="menu-separator"></div>
+          <div class="menu-item">Send to Repeater (Standard)</div>
+          <div class="menu-item">Send to Intruder</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Repeater Panel -->
+    <section class="repeater-panel">
+      <div class="repeater-tab-bar" id="repTabBar">
+        <div class="rep-tab active" id="tabPut" onclick="showTab('put')">
+          <span>PUT /test_littlespidy.txt [target-app.example.com]</span>
+        </div>
+        <div class="rep-tab" id="tabRobots" onclick="showTab('robots')">
+          <span>GET /robots.txt [target-app.example.com]</span>
+        </div>
+      </div>
+
+      <!-- PUT View -->
+      <div class="rep-editors" id="viewPut">
+        <div class="editor-box">
+          <div class="editor-header">
+            <span>Request (PUT Web Root Test)</span>
+            <span>Target: target-app.example.com:443</span>
+          </div>
+          <div class="editor-content">PUT /test_littlespidy.txt HTTP/1.1
+Host: target-app.example.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+Authorization: Bearer eyJhbGciOiJIUzI1Ni...
+Cookie: sessionid=littlespidy_sess_789432
+Content-Type: text/plain
+Content-Length: 78
+Connection: close
+
+Upload test verification file created by littlespidy (Burp Suite Payload Injector).</div>
+        </div>
+        <div class="editor-box">
+          <div class="editor-header">
+            <span>Response</span>
+            <span class="status-badge status-201">201 Created</span>
+          </div>
+          <div class="editor-content">HTTP/1.1 201 Created
+Date: Sun, 25 Oct 2026 10:10:00 GMT
+Server: nginx/1.24.0
+Content-Type: text/html; charset=UTF-8
+Content-Length: 178
+Connection: close
+Location: /test_littlespidy.txt
+
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;201 Created&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;201 Created&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;File successfully uploaded via HTTP PUT method.&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;</div>
+        </div>
+      </div>
+
+      <!-- Robots View -->
+      <div class="rep-editors" id="viewRobots" style="display: none;">
+        <div class="editor-box">
+          <div class="editor-header">
+            <span>Request (GET robots.txt Probe)</span>
+            <span>Target: target-app.example.com:443</span>
+          </div>
+          <div class="editor-content">GET /robots.txt HTTP/1.1
+Host: target-app.example.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+Authorization: Bearer eyJhbGciOiJIUzI1Ni...
+Cookie: sessionid=littlespidy_sess_789432
+Accept: text/plain, */*
+Connection: close
+
+</div>
+        </div>
+        <div class="editor-box">
+          <div class="editor-header">
+            <span>Response</span>
+            <span class="status-badge status-200">200 OK</span>
+          </div>
+          <div class="editor-content">HTTP/1.1 200 OK
+Date: Sun, 25 Oct 2026 10:10:05 GMT
+Server: nginx/1.24.0
+Content-Type: text/plain
+Content-Length: 132
+Connection: close
+
+User-agent: *
+Disallow: /admin/
+Disallow: /api/internal/
+Disallow: /backup/
+Disallow: /config/
+Disallow: /secret-token-login.php</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    // Tab switching
+    function showTab(type) {
+      if (type === 'put') {
+        document.getElementById('viewPut').style.display = 'flex';
+        document.getElementById('viewRobots').style.display = 'none';
+        document.getElementById('tabPut').classList.add('active');
+        document.getElementById('tabRobots').classList.remove('active');
+      } else {
+        document.getElementById('viewPut').style.display = 'none';
+        document.getElementById('viewRobots').style.display = 'flex';
+        document.getElementById('tabRobots').classList.add('active');
+        document.getElementById('tabPut').classList.remove('active');
+      }
+    }
+
+    // Context Menu Simulation
+    const tableContainer = document.getElementById('tableContainer');
+    const contextMenu = document.getElementById('burpContextMenu');
+    let selectedHost = 'target-app.example.com';
+
+    tableContainer.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      const rect = tableContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      contextMenu.style.left = x + 'px';
+      contextMenu.style.top = y + 'px';
+      contextMenu.style.display = 'block';
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!contextMenu.contains(e.target)) {
+        contextMenu.style.display = 'none';
+      }
+    });
+
+    // Row selection
+    const rows = document.querySelectorAll('#historyTable tbody tr');
+    rows.forEach(row => {
+      row.addEventListener('click', () => {
+        rows.forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+        selectedHost = row.getAttribute('data-host');
+      });
+    });
+
+    function triggerPutUpload() {
+      contextMenu.style.display = 'none';
+      showTab('put');
+      document.getElementById('hintMsg').innerText = 'Dispatched PUT upload test to Repeater for ' + selectedHost + '!';
+    }
+
+    function triggerRobotsTxt() {
+      contextMenu.style.display = 'none';
+      showTab('robots');
+      document.getElementById('hintMsg').innerText = 'Dispatched robots.txt probe to Repeater for ' + selectedHost + '!';
+    }
+  </script>
+</body>
+</html>
