@@ -667,64 +667,15 @@
       <!-- Bottom Inspection Section -->
       <div class="inspection-container">
 
-        <!-- Sub-Tabs: Source Tree (Renamed), JS Viewer (Renamed), Source map Viewer -->
+        <!-- Sub-Tabs: JS Viewer, Source map Viewer, Source Tree -->
         <div class="sub-tabs">
-          <div class="sub-tab active" onclick="switchSubTab('tree', this)">Source Tree</div>
-          <div class="sub-tab" onclick="switchSubTab('js-viewer', this)">JS Viewer</div>
+          <div class="sub-tab active" onclick="switchSubTab('js-viewer', this)">JS Viewer</div>
           <div class="sub-tab" onclick="switchSubTab('map-message', this)">Source map Viewer</div>
+          <div class="sub-tab" onclick="switchSubTab('tree', this)">Source Tree</div>
         </div>
 
-        <!-- Sub-Tab 1: Source Tree Panel with JS Beautiful Viewer -->
-        <div id="tab-tree" class="sub-tab-panel active">
-          <div class="tree-layout">
-
-            <!-- Folder & File Hierarchy -->
-            <div class="tree-sidebar">
-              <div class="tree-search-bar">
-                <input type="text" placeholder="Filter files...">
-                <button class="btn" style="padding: 2px 6px;">Clear</button>
-              </div>
-              <div class="tree-list">
-                <div class="tree-node folder">[+] Project (28 files)</div>
-                <div class="tree-node folder" style="padding-left: 20px;">[+] src/</div>
-                <div class="tree-node folder" style="padding-left: 32px;">[+] auth/</div>
-                <div class="tree-node selected" style="padding-left: 44px;" onclick="loadCodeFile('AuthContext.tsx')">[f] AuthContext.tsx</div>
-                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('tokenService.ts')">[f] tokenService.ts</div>
-                <div class="tree-node folder" style="padding-left: 32px;">[+] api/</div>
-                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('graphqlClient.ts')">[f] graphqlClient.ts</div>
-                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('endpoints.ts')">[f] endpoints.ts</div>
-                <div class="tree-node folder" style="padding-left: 20px;">[+] config/</div>
-                <div class="tree-node" style="padding-left: 32px;" onclick="loadCodeFile('environment.ts')">[f] environment.ts</div>
-              </div>
-            </div>
-
-            <!-- JS Beautiful Code Viewer -->
-            <div class="tree-content">
-              <div class="viewer-header">
-                <div>
-                  <span id="viewerFilePath" class="file-path">src/auth/AuthContext.tsx</span>
-                  <span id="viewerFileStats" class="file-stats">(24 lines | 1.2 KB | 1 secrets | 2 endpoints | Beautified)</span>
-                </div>
-                <div class="viewer-actions">
-                  <button id="beautifyBtn" class="btn toggle-active" onclick="toggleBeautify()">Beautify JS</button>
-                  <button class="btn" onclick="showToast('Sent to AI Security Analyst')">AI Review</button>
-                  <button class="btn" onclick="showToast('Copied code to clipboard')">Copy Code</button>
-                  <button class="btn" onclick="showToast('Saving file...')">Save File As...</button>
-                </div>
-              </div>
-              <div class="code-view">
-                <div id="lineNumbers" class="line-numbers">
-                  1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22<br>23<br>24
-                </div>
-                <div id="codeBody" class="code-body"></div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Sub-Tab 2: JS Viewer (Parallel Request and Response Panes) -->
-        <div id="tab-js-viewer" class="sub-tab-panel">
+        <!-- Sub-Tab 1: JS Viewer (Parallel Request and Response Panes) -->
+        <div id="tab-js-viewer" class="sub-tab-panel active">
           <div class="parallel-viewer">
 
             <!-- Request Pane (Left) -->
@@ -775,7 +726,7 @@ Cache-Control: public, max-age=31536000, immutable
           </div>
         </div>
 
-        <!-- Sub-Tab 3: Source map Viewer -->
+        <!-- Sub-Tab 2: Source map Viewer -->
         <div id="tab-map-message" class="sub-tab-panel">
           <div class="parallel-viewer">
             <div class="pane-half">
@@ -809,6 +760,55 @@ Content-Length: 915660
   "mappings": "AAAA,IAAI,EAAE,GAAG,SAAS..."
 }</div>
             </div>
+          </div>
+        </div>
+
+        <!-- Sub-Tab 3: Source Tree Panel with JS Beautiful Viewer -->
+        <div id="tab-tree" class="sub-tab-panel">
+          <div class="tree-layout">
+
+            <!-- Folder & File Hierarchy -->
+            <div class="tree-sidebar">
+              <div class="tree-search-bar">
+                <input type="text" placeholder="Filter files...">
+                <button class="btn" style="padding: 2px 6px;">Clear</button>
+              </div>
+              <div class="tree-list">
+                <div class="tree-node folder">[+] Project (28 files)</div>
+                <div class="tree-node folder" style="padding-left: 20px;">[+] src/</div>
+                <div class="tree-node folder" style="padding-left: 32px;">[+] auth/</div>
+                <div class="tree-node selected" style="padding-left: 44px;" onclick="loadCodeFile('AuthContext.tsx')">[f] AuthContext.tsx</div>
+                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('tokenService.ts')">[f] tokenService.ts</div>
+                <div class="tree-node folder" style="padding-left: 32px;">[+] api/</div>
+                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('graphqlClient.ts')">[f] graphqlClient.ts</div>
+                <div class="tree-node" style="padding-left: 44px;" onclick="loadCodeFile('endpoints.ts')">[f] endpoints.ts</div>
+                <div class="tree-node folder" style="padding-left: 20px;">[+] config/</div>
+                <div class="tree-node" style="padding-left: 32px;" onclick="loadCodeFile('environment.ts')">[f] environment.ts</div>
+              </div>
+            </div>
+
+            <!-- JS Beautiful Code Viewer -->
+            <div class="tree-content">
+              <div class="viewer-header">
+                <div>
+                  <span id="viewerFilePath" class="file-path">src/auth/AuthContext.tsx</span>
+                  <span id="viewerFileStats" class="file-stats">(24 lines | 1.2 KB | 1 secrets | 2 endpoints | Beautified)</span>
+                </div>
+                <div class="viewer-actions">
+                  <button id="beautifyBtn" class="btn toggle-active" onclick="toggleBeautify()">Beautify JS</button>
+                  <button class="btn" onclick="showToast('Sent to AI Security Analyst')">AI Review</button>
+                  <button class="btn" onclick="showToast('Copied code to clipboard')">Copy Code</button>
+                  <button class="btn" onclick="showToast('Saving file...')">Save File As...</button>
+                </div>
+              </div>
+              <div class="code-view">
+                <div id="lineNumbers" class="line-numbers">
+                  1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22<br>23<br>24
+                </div>
+                <div id="codeBody" class="code-body"></div>
+              </div>
+            </div>
+
           </div>
         </div>
 

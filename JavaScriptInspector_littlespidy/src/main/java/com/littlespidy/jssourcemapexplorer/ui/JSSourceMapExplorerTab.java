@@ -294,16 +294,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         // ── Bottom Section: Inspection Tabs (Tree Explorer & 4-Way HTTP Editors) ──
         JTabbedPane bottomTabs = new JTabbedPane();
 
-        // Sub-Tab 1: Source Tree & Code Viewer
-        JSplitPane treeSplit = new JSplitPane(
-            JSplitPane.HORIZONTAL_SPLIT,
-            sourceTreePanel,
-            codeViewerPanel
-        );
-        treeSplit.setResizeWeight(0.30);
-        bottomTabs.addTab("Source Tree", treeSplit);
-
-        // Sub-Tab 2: JS Viewer (Parallel Request and Response Panes)
+        // Sub-Tab 1: JS Viewer (Parallel Request and Response Panes)
         JPanel jsRequestContainer = new JPanel(new BorderLayout());
         jsRequestContainer.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createEtchedBorder(), "Request",
@@ -326,7 +317,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         jsViewerSplit.setResizeWeight(0.5);
         bottomTabs.addTab("JS Viewer", jsViewerSplit);
 
-        // Sub-Tab 3: Source map Viewer (Parallel Request and Response Panes)
+        // Sub-Tab 2: Source map Viewer (Parallel Request and Response Panes)
         JPanel mapRequestContainer = new JPanel(new BorderLayout());
         mapRequestContainer.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createEtchedBorder(), "Request",
@@ -348,6 +339,15 @@ public class JSSourceMapExplorerTab extends JPanel {
         );
         mapViewerSplit.setResizeWeight(0.5);
         bottomTabs.addTab("Source map Viewer", mapViewerSplit);
+
+        // Sub-Tab 3: Source Tree & Code Viewer
+        JSplitPane treeSplit = new JSplitPane(
+            JSplitPane.HORIZONTAL_SPLIT,
+            sourceTreePanel,
+            codeViewerPanel
+        );
+        treeSplit.setResizeWeight(0.30);
+        bottomTabs.addTab("Source Tree", treeSplit);
 
         // Master Vertical Split: Scripts Table (Top) vs Project Details & Editors (Bottom)
         JSplitPane mainSplit = new JSplitPane(

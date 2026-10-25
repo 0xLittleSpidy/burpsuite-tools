@@ -99,5 +99,17 @@ class JsInspectorImprovementsTest_littlespidy {
         assertTrue(content.contains("JSplitPane.HORIZONTAL_SPLIT"), "Source map viewer split must be horizontal (parallel)");
         assertTrue(content.contains("mapRequestContainer.setBorder("), "Request pane must have its own border container");
         assertTrue(content.contains("mapResponseContainer.setBorder("), "Response pane must have its own border container");
+
+        // Verify Tab Order: JS Viewer -> Source map Viewer -> Source Tree
+        int jsViewerIdx = content.indexOf("bottomTabs.addTab(\"JS Viewer\"");
+        int mapViewerIdx = content.indexOf("bottomTabs.addTab(\"Source map Viewer\"");
+        int treeIdx = content.indexOf("bottomTabs.addTab(\"Source Tree\"");
+
+        assertTrue(jsViewerIdx != -1, "JS Viewer tab must be present");
+        assertTrue(mapViewerIdx != -1, "Source map Viewer tab must be present");
+        assertTrue(treeIdx != -1, "Source Tree tab must be present");
+
+        assertTrue(jsViewerIdx < mapViewerIdx, "JS Viewer must precede Source map Viewer");
+        assertTrue(mapViewerIdx < treeIdx, "Source map Viewer must precede Source Tree");
     }
 }
