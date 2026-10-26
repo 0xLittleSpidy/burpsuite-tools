@@ -477,15 +477,19 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
         int row = requestsTable.getSelectedRow();
         if (row < 0 || row >= requestsTable.getRowCount()) {
-            currentlyLoadedItem = null;
-            clearEditors();
+            if (requestsTable.getRowCount() == 0) {
+                currentlyLoadedItem = null;
+                clearEditors();
+            }
             return;
         }
 
         int modelRow = requestsTable.convertRowIndexToModel(row);
         if (modelRow < 0 || modelRow >= endpointItems.size()) {
-            currentlyLoadedItem = null;
-            clearEditors();
+            if (requestsTable.getRowCount() == 0) {
+                currentlyLoadedItem = null;
+                clearEditors();
+            }
             return;
         }
 
@@ -533,30 +537,67 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
     }
 
     private void onRunRequest() {
-        if (currentlyLoadedItem == null) {
+        int selectedViewRow = requestsTable.getSelectedRow();
+        if (selectedViewRow < 0 && currentlyLoadedItem == null) {
             JOptionPane.showMessageDialog(this, "Please select a request from the table to run.", "Selection Required", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Persist edits before sending
-        saveEditorChangesToEndpoint(currentlyLoadedItem);
-        tableModel.fireTableDataChanged();
+        int modelRow = (selectedViewRow >= 0) ? requestsTable.convertRowIndexToModel(selectedViewRow) : -1;
+        final EndpointItem item = (modelRow >= 0 && modelRow < endpointItems.size()) ? endpointItems.get(modelRow) : currentlyLoadedItem;
+        if (item == null) {
+            JOptionPane.showMessageDialog(this, "Please select a request from the table to run.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
+        // 1. Capture the request directly from the editor
         HttpRequest reqToSend = null;
         if (requestEditor != null) {
-            reqToSend = requestEditor.getRequest();
+            try {
+                reqToSend = requestEditor.getRequest();
+            } catch (Exception ignored) {}
         }
-        if (reqToSend == null) {
-            String targetBaseUrl = (currentlyLoadedItem.collection.getTargetBaseUrl() != null && !currentlyLoadedItem.collection.getTargetBaseUrl().isBlank())
-                    ? currentlyLoadedItem.collection.getTargetBaseUrl() : "https://localhost";
-            reqToSend = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, currentlyLoadedItem.endpoint, null, false);
-            if (sessionStore != null && sessionStore.appliesTo(currentlyLoadedItem.endpoint)) {
-                reqToSend = sessionStore.applyToRequest(reqToSend, currentlyLoadedItem.endpoint);
+
+        String targetBaseUrl = (item.collection.getTargetBaseUrl() != null && !item.collection.getTargetBaseUrl().isBlank())
+                ? item.collection.getTargetBaseUrl() : "https://localhost";
+
+        // 2. Persist any user modifications
+        if (reqToSend != null && reqToSend.toByteArray() != null && reqToSend.toByteArray().length() > 0) {
+            String currentRaw = new String(reqToSend.toByteArray().getBytes(), StandardCharsets.UTF_8);
+            item.endpoint.setCustomRawRequest(currentRaw);
+        } else {
+            reqToSend = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, item.endpoint, null, false);
+            if (sessionStore != null && sessionStore.appliesTo(item.endpoint)) {
+                reqToSend = sessionStore.applyToRequest(reqToSend, item.endpoint);
             }
         }
 
+        // 3. Ensure reqToSend has HttpService attached
+        if (reqToSend != null && reqToSend.httpService() == null) {
+            try {
+                java.net.URI u = java.net.URI.create(targetBaseUrl);
+                String host = u.getHost() != null ? u.getHost() : "localhost";
+                boolean secure = "https".equalsIgnoreCase(u.getScheme());
+                int port = u.getPort() > 0 ? u.getPort() : (secure ? 443 : 80);
+                burp.api.montoya.http.HttpService service = burp.api.montoya.http.HttpService.httpService(host, port, secure);
+                reqToSend = reqToSend.withService(service);
+                if (!reqToSend.hasHeader("Host")) {
+                    reqToSend = reqToSend.withHeader("Host", host);
+                }
+            } catch (Exception ignored) {}
+        }
+
         final HttpRequest finalReq = reqToSend;
-        final EndpointItem item = currentlyLoadedItem;
+        final int fModelRow = modelRow;
+        final int fViewRow = selectedViewRow;
+
+        // Update single row in table without resetting selection
+        if (fModelRow >= 0) {
+            tableModel.fireTableRowsUpdated(fModelRow, fModelRow);
+            if (fViewRow >= 0 && fViewRow < requestsTable.getRowCount()) {
+                requestsTable.setRowSelectionInterval(fViewRow, fViewRow);
+            }
+        }
 
         runBtn.setEnabled(false);
         runAllBtn.setEnabled(false);
@@ -578,16 +619,24 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
                             responseInfoLabel.setText("Status: " + httpResp.statusCode() + " | Length: " + (httpResp.body() != null ? httpResp.body().length() : 0) + " B");
                             runBtn.setEnabled(true);
                             runAllBtn.setEnabled(true);
-                            tableModel.fireTableDataChanged();
+                            if (fModelRow >= 0) {
+                                tableModel.fireTableRowsUpdated(fModelRow, fModelRow);
+                            }
+                            if (fViewRow >= 0 && fViewRow < requestsTable.getRowCount()) {
+                                requestsTable.setRowSelectionInterval(fViewRow, fViewRow);
+                            }
                         });
                         return;
                     }
                 }
 
                 SwingUtilities.invokeLater(() -> {
-                    responseInfoLabel.setText("No response received (check target URL or network connectivity)");
+                    responseInfoLabel.setText("No response received (check target URL: " + targetBaseUrl + ")");
                     runBtn.setEnabled(true);
                     runAllBtn.setEnabled(true);
+                    if (fModelRow >= 0) {
+                        tableModel.fireTableRowsUpdated(fModelRow, fModelRow);
+                    }
                 });
             } catch (Exception ex) {
                 SwingUtilities.invokeLater(() -> {
@@ -720,7 +769,14 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
             isUpdatingEditor = false;
         }
 
-        tableModel.fireTableDataChanged();
+        int viewRow = requestsTable.getSelectedRow();
+        if (viewRow >= 0) {
+            int modelRow = requestsTable.convertRowIndexToModel(viewRow);
+            tableModel.fireTableRowsUpdated(modelRow, modelRow);
+            requestsTable.setRowSelectionInterval(viewRow, viewRow);
+        } else {
+            tableModel.fireTableDataChanged();
+        }
         responseInfoLabel.setText("Request reset to original spec template.");
     }
 

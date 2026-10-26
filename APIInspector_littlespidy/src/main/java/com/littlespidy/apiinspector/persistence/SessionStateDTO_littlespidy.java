@@ -163,6 +163,7 @@ public class SessionStateDTO_littlespidy {
     public static class SessionStoreDTO {
         public boolean enabled;
         public String applyMode;
+        public String rawHeaders;
         public String bearerToken;
         public java.util.Map<String, String> customHeaders;
         public String cookieName;

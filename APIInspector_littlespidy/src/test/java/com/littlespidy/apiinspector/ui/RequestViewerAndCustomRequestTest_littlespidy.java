@@ -141,4 +141,63 @@ class RequestViewerAndCustomRequestTest_littlespidy {
         assertEquals("-", model.getValueAt(1, 3)); // Status
         assertEquals("Yes", model.getValueAt(1, 4)); // Edited
     }
+
+    @Test
+    @DisplayName("Verify SessionStore parses pasted raw headers and strictly replaces existing headers")
+    void testSessionStoreRawHeadersParsingAndStrictReplace() {
+        SessionStore_littlespidy store = new SessionStore_littlespidy();
+        store.setEnabled(true);
+
+        String pastedHeaders = "# Authentication and session headers\n" +
+                "Authorization: Bearer my_jwt_token_12345\n" +
+                "Cookie: session_id=sess_abcdef; tracking=none\n" +
+                "X-Api-Key: api_key_secret\n";
+
+        store.setRawHeaders(pastedHeaders);
+        assertEquals(3, store.getParsedHeaders().size());
+        assertEquals("Bearer my_jwt_token_12345", store.getParsedHeaders().get("Authorization"));
+        assertEquals("session_id=sess_abcdef; tracking=none", store.getParsedHeaders().get("Cookie"));
+        assertEquals("api_key_secret", store.getParsedHeaders().get("X-Api-Key"));
+        assertEquals("Session Store: Active (3 headers)", store.getStatusSummary());
+
+        // Baseline request with old credentials
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("GET", "/api/profile", "Profile");
+        ep.setRequiresAuth(true);
+        HttpRequest baseline = AuthTestEngine_littlespidy.buildRequest("https://api.example.com", ep, null, false);
+        baseline = baseline.withHeader("Authorization", "Bearer old_expired_token")
+                           .withHeader("Cookie", "session_id=old_expired_cookie");
+
+        assertEquals("Bearer old_expired_token", baseline.headerValue("Authorization"));
+        assertEquals("session_id=old_expired_cookie", baseline.headerValue("Cookie"));
+
+        // Applying session store should strictly replace matching headers
+        HttpRequest applied = store.applyToRequest(baseline, ep);
+        assertNotNull(applied);
+        assertEquals("Bearer my_jwt_token_12345", applied.headerValue("Authorization"), "Authorization must be strictly replaced");
+        assertEquals("session_id=sess_abcdef; tracking=none", applied.headerValue("Cookie"), "Cookie must be strictly replaced");
+        assertEquals("api_key_secret", applied.headerValue("X-Api-Key"), "New header must be injected");
+    }
+
+    @Test
+    @DisplayName("Verify SessionStore rawHeaders persistence")
+    void testSessionStorePersistence() {
+        SessionStore_littlespidy store = new SessionStore_littlespidy();
+        store.setEnabled(true);
+        store.setApplyMode(SessionStore_littlespidy.MODE_ALL_REQUESTS);
+        String raw = "Authorization: Bearer token_xyz\nCookie: auth=yes\n";
+        store.setRawHeaders(raw);
+
+        SessionStateDTO_littlespidy.SessionStoreDTO dto = APIInspectorPersistenceManager_littlespidy.serializeSessionStore(store);
+        assertNotNull(dto);
+        assertTrue(dto.enabled);
+        assertEquals(SessionStore_littlespidy.MODE_ALL_REQUESTS, dto.applyMode);
+        assertEquals(raw, dto.rawHeaders);
+
+        SessionStore_littlespidy recovered = APIInspectorPersistenceManager_littlespidy.deserializeSessionStore(dto);
+        assertNotNull(recovered);
+        assertTrue(recovered.isEnabled());
+        assertEquals(SessionStore_littlespidy.MODE_ALL_REQUESTS, recovered.getApplyMode());
+        assertEquals(raw, recovered.getRawHeaders());
+        assertEquals(2, recovered.getParsedHeaders().size());
+    }
 }

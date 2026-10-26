@@ -7,8 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Stores session-specific authentication information such as tokens,
- * custom headers, and cookies to be applied to requests in API Inspector.
+ * Stores session-specific HTTP headers to be applied to requests in API Inspector.
+ * Users can paste raw HTTP headers (one per line) which strictly replace
+ * matching headers on target requests.
  */
 public class SessionStore_littlespidy {
 
@@ -17,18 +18,14 @@ public class SessionStore_littlespidy {
 
     private boolean enabled;
     private String applyMode;
-    private String bearerToken;
-    private Map<String, String> customHeaders;
-    private String cookieName;
-    private String cookieValue;
+    private String rawHeaders;
+    private Map<String, String> parsedHeaders;
 
     public SessionStore_littlespidy() {
         this.enabled = false;
         this.applyMode = MODE_AUTH_REQUIRED_ONLY;
-        this.bearerToken = "";
-        this.customHeaders = new LinkedHashMap<>();
-        this.cookieName = "";
-        this.cookieValue = "";
+        this.rawHeaders = "";
+        this.parsedHeaders = new LinkedHashMap<>();
     }
 
     public boolean isEnabled() {
@@ -47,39 +44,44 @@ public class SessionStore_littlespidy {
         this.applyMode = applyMode != null ? applyMode : MODE_AUTH_REQUIRED_ONLY;
     }
 
-    public String getBearerToken() {
-        return bearerToken != null ? bearerToken : "";
+    public String getRawHeaders() {
+        return rawHeaders != null ? rawHeaders : "";
     }
 
-    public void setBearerToken(String bearerToken) {
-        this.bearerToken = bearerToken != null ? bearerToken : "";
+    public void setRawHeaders(String rawHeaders) {
+        this.rawHeaders = rawHeaders != null ? rawHeaders : "";
+        this.parsedHeaders = parseHeadersText(this.rawHeaders);
     }
 
-    public Map<String, String> getCustomHeaders() {
-        if (customHeaders == null) {
-            customHeaders = new LinkedHashMap<>();
+    public Map<String, String> getParsedHeaders() {
+        if (parsedHeaders == null) {
+            parsedHeaders = parseHeadersText(rawHeaders);
         }
-        return customHeaders;
+        return parsedHeaders;
     }
 
-    public void setCustomHeaders(Map<String, String> headers) {
-        this.customHeaders = headers != null ? new LinkedHashMap<>(headers) : new LinkedHashMap<>();
-    }
-
-    public String getCookieName() {
-        return cookieName != null ? cookieName : "";
-    }
-
-    public void setCookieName(String cookieName) {
-        this.cookieName = cookieName != null ? cookieName : "";
-    }
-
-    public String getCookieValue() {
-        return cookieValue != null ? cookieValue : "";
-    }
-
-    public void setCookieValue(String cookieValue) {
-        this.cookieValue = cookieValue != null ? cookieValue : "";
+    public static Map<String, String> parseHeadersText(String text) {
+        Map<String, String> map = new LinkedHashMap<>();
+        if (text == null || text.isBlank()) {
+            return map;
+        }
+        String[] lines = text.split("(\\r\\n|\\r|\\n)");
+        for (String line : lines) {
+            if (line == null) continue;
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                continue;
+            }
+            int colon = trimmed.indexOf(':');
+            if (colon > 0) {
+                String name = trimmed.substring(0, colon).trim();
+                String value = trimmed.substring(colon + 1).trim();
+                if (!name.isEmpty()) {
+                    map.put(name, value);
+                }
+            }
+        }
+        return map;
     }
 
     public boolean appliesTo(DiscoveredEndpoint_littlespidy endpoint) {
@@ -104,42 +106,18 @@ public class SessionStore_littlespidy {
             return request;
         }
 
+        Map<String, String> headers = getParsedHeaders();
+        if (headers == null || headers.isEmpty()) {
+            return request;
+        }
+
         HttpRequest modified = request;
-
-        // 1. Bearer Token
-        if (bearerToken != null && !bearerToken.isBlank()) {
-            String token = bearerToken.trim();
-            if (!token.toLowerCase().startsWith("bearer ")) {
-                token = "Bearer " + token;
-            }
-            modified = modified.withHeader("Authorization", token);
-        }
-
-        // 2. Custom Headers
-        if (customHeaders != null) {
-            for (Map.Entry<String, String> entry : customHeaders.entrySet()) {
-                String k = entry.getKey();
-                String v = entry.getValue();
-                if (k != null && !k.isBlank()) {
-                    modified = modified.withHeader(k.trim(), v != null ? v.trim() : "");
-                }
-            }
-        }
-
-        // 3. Cookie
-        if (cookieName != null && !cookieName.isBlank() && cookieValue != null && !cookieValue.isBlank()) {
-            String cookiePair = cookieName.trim() + "=" + cookieValue.trim();
-            if (modified.hasHeader("Cookie")) {
-                String existing = modified.headerValue("Cookie");
-                if (existing != null && !existing.isBlank()) {
-                    if (!existing.contains(cookieName.trim() + "=")) {
-                        modified = modified.withHeader("Cookie", existing.trim() + "; " + cookiePair);
-                    }
-                } else {
-                    modified = modified.withHeader("Cookie", cookiePair);
-                }
-            } else {
-                modified = modified.withHeader("Cookie", cookiePair);
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
+            if (name != null && !name.isBlank()) {
+                // Strict replace: withHeader replaces any existing header with the same name (including Cookie)
+                modified = modified.withHeader(name.trim(), value != null ? value : "");
             }
         }
 
@@ -150,30 +128,60 @@ public class SessionStore_littlespidy {
         if (!enabled) {
             return "Session Store: Inactive";
         }
-        int headerCount = customHeaders != null ? customHeaders.size() : 0;
-        boolean hasToken = bearerToken != null && !bearerToken.isBlank();
-        boolean hasCookie = cookieName != null && !cookieName.isBlank() && cookieValue != null && !cookieValue.isBlank();
+        Map<String, String> headers = getParsedHeaders();
+        int headerCount = headers != null ? headers.size() : 0;
+        if (headerCount == 0) {
+            return "Session Store: Active (No Headers)";
+        }
+        return "Session Store: Active (" + headerCount + " header" + (headerCount == 1 ? "" : "s") + ")";
+    }
 
-        StringBuilder sb = new StringBuilder("Session Store: Active (");
-        boolean first = true;
-        if (hasToken) {
-            sb.append("Token");
-            first = false;
+    // Deprecated compatibility helpers for older callers
+    public String getBearerToken() {
+        return getParsedHeaders().getOrDefault("Authorization", "");
+    }
+
+    public void setBearerToken(String bearerToken) {
+        if (bearerToken != null && !bearerToken.isBlank()) {
+            String val = bearerToken.trim();
+            if (!val.toLowerCase().startsWith("bearer ")) {
+                val = "Bearer " + val;
+            }
+            addHeader("Authorization", val);
         }
-        if (headerCount > 0) {
-            if (!first) sb.append(", ");
-            sb.append(headerCount).append(" Header(s)");
-            first = false;
+    }
+
+    public Map<String, String> getCustomHeaders() {
+        return getParsedHeaders();
+    }
+
+    public void setCustomHeaders(Map<String, String> headers) {
+        if (headers != null) {
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                addHeader(e.getKey(), e.getValue());
+            }
         }
-        if (hasCookie) {
-            if (!first) sb.append(", ");
-            sb.append("Cookie");
-            first = false;
+    }
+
+    public String getCookieName() {
+        return "";
+    }
+
+    public void setCookieName(String cookieName) {}
+
+    public String getCookieValue() {
+        return "";
+    }
+
+    public void setCookieValue(String cookieValue) {}
+
+    private void addHeader(String name, String value) {
+        Map<String, String> current = new LinkedHashMap<>(getParsedHeaders());
+        current.put(name, value);
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> e : current.entrySet()) {
+            sb.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
         }
-        if (first) {
-            sb.append("No Credentials Set");
-        }
-        sb.append(")");
-        return sb.toString();
+        setRawHeaders(sb.toString());
     }
 }

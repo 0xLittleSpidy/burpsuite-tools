@@ -1061,10 +1061,7 @@ public class APIInspectorPersistenceManager_littlespidy {
         SessionStoreDTO dto = new SessionStoreDTO();
         dto.enabled = s.isEnabled();
         dto.applyMode = s.getApplyMode();
-        dto.bearerToken = s.getBearerToken();
-        dto.customHeaders = new java.util.LinkedHashMap<>(s.getCustomHeaders());
-        dto.cookieName = s.getCookieName();
-        dto.cookieValue = s.getCookieValue();
+        dto.rawHeaders = s.getRawHeaders();
         return dto;
     }
 
@@ -1073,12 +1070,23 @@ public class APIInspectorPersistenceManager_littlespidy {
         SessionStore_littlespidy s = new SessionStore_littlespidy();
         s.setEnabled(dto.enabled);
         s.setApplyMode(dto.applyMode);
-        s.setBearerToken(dto.bearerToken);
-        if (dto.customHeaders != null) {
-            s.setCustomHeaders(dto.customHeaders);
+        if (dto.rawHeaders != null) {
+            s.setRawHeaders(dto.rawHeaders);
+        } else if (dto.customHeaders != null || (dto.bearerToken != null && !dto.bearerToken.isBlank())) {
+            StringBuilder sb = new StringBuilder();
+            if (dto.bearerToken != null && !dto.bearerToken.isBlank()) {
+                sb.append("Authorization: Bearer ").append(dto.bearerToken.trim()).append("\n");
+            }
+            if (dto.customHeaders != null) {
+                for (java.util.Map.Entry<String, String> e : dto.customHeaders.entrySet()) {
+                    sb.append(e.getKey()).append(": ").append(e.getValue()).append("\n");
+                }
+            }
+            if (dto.cookieName != null && !dto.cookieName.isBlank() && dto.cookieValue != null && !dto.cookieValue.isBlank()) {
+                sb.append("Cookie: ").append(dto.cookieName.trim()).append("=").append(dto.cookieValue.trim()).append("\n");
+            }
+            s.setRawHeaders(sb.toString());
         }
-        s.setCookieName(dto.cookieName);
-        s.setCookieValue(dto.cookieValue);
         return s;
     }
 

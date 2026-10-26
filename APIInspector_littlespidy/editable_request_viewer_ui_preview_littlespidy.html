@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Inspector - Editable Request Viewer and Runner Preview (littlespidy)</title>
+    <title>API Inspector - Editable Request Viewer and Session Store Preview (littlespidy)</title>
     <style>
         :root {
             --bg-color: #2b2b2b;
@@ -28,6 +28,7 @@
             --status-4xx: #ff9800;
             --status-5xx: #f44336;
             --status-blue: #64b5f6;
+            --modal-overlay: rgba(0, 0, 0, 0.65);
         }
 
         [data-theme="light"] {
@@ -52,6 +53,7 @@
             --status-4xx: #e65100;
             --status-5xx: #c62828;
             --status-blue: #1565c0;
+            --modal-overlay: rgba(0, 0, 0, 0.35);
         }
 
         * {
@@ -175,6 +177,7 @@
             padding: 8px;
             gap: 8px;
             overflow: hidden;
+            position: relative;
         }
 
         /* Top Toolbar Filters & Run Buttons */
@@ -412,6 +415,74 @@
             align-items: center;
             justify-content: space-between;
         }
+
+        /* Modal Dialog for Session Store */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--modal-overlay);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            width: 580px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 10px 14px;
+            background-color: var(--table-header);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--header-text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .section-box {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: var(--header-text);
+            font-size: 11.5px;
+        }
+
+        .modal-footer {
+            padding: 8px 14px;
+            background-color: var(--table-header);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -452,7 +523,7 @@
         <!-- Informational Banner -->
         <div class="notice-banner">
             <div>
-                <strong>Editable HTTP Request & Auto-Save Feature:</strong> Modify query parameters, URL path variables (e.g. replacing {id} with 42), headers, or request body directly in the editor below. Changes automatically persist to the endpoint and propagate to the Authentication Testing tab to prevent HTTP 400 failures.
+                <strong>Editable HTTP Request & Live Runner:</strong> Click 'Run' to execute the selected request immediately. The editor preserves your text and the response updates in real time without screen blanking. In 'Session Store', paste raw HTTP headers to strictly replace existing credentials.
             </div>
             <div>
                 <span id="banner-status-indicator" style="color: var(--status-2xx); font-weight: bold;">Auto-Save: Active</span>
@@ -483,8 +554,8 @@
             </div>
 
             <div class="toolbar-group">
-                <span style="font-style: italic; color: #4caf50;" id="session-summary">Bearer [Active]</span>
-                <button class="btn">Session Store</button>
+                <span style="font-style: italic; color: #4caf50;" id="session-summary">Session Store: Active (2 headers)</span>
+                <button class="btn" onclick="openSessionStoreDialog()">Session Store</button>
                 <button class="btn btn-primary" id="run-btn" onclick="runSelectedRequest()">Run</button>
                 <button class="btn" id="run-all-btn" onclick="runAllRequests()">Run All</button>
                 <button class="btn btn-danger" id="stop-btn" disabled onclick="stopRunAll()">Stop</button>
@@ -555,8 +626,51 @@
 
     </div>
 
+    <!-- Session Store Modal Dialog -->
+    <div class="modal-overlay" id="session-store-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span>Session Authentication Store</span>
+                <button class="btn" onclick="closeSessionStoreDialog()">X</button>
+            </div>
+            <div class="modal-body">
+                <!-- Scope settings -->
+                <div class="section-box">
+                    <div class="section-title">General & Scope Settings</div>
+                    <div>
+                        <input type="checkbox" id="modal-enable-store" checked>
+                        <label for="modal-enable-store" style="font-weight: bold; margin-left: 4px;">Enable Session Store Authentication</label>
+                    </div>
+                    <div style="display: flex; gap: 14px; margin-top: 4px;">
+                        <span>Apply to:</span>
+                        <label><input type="radio" name="modal-scope" id="scope-auth-only" checked> Only endpoints requiring authentication</label>
+                        <label><input type="radio" name="modal-scope" id="scope-all"> All endpoints</label>
+                    </div>
+                </div>
+
+                <!-- Raw Headers Text Area -->
+                <div class="section-box">
+                    <div class="section-title">Session HTTP Headers (one per line, e.g. Name: Value)</div>
+                    <textarea id="modal-raw-headers" class="raw-textarea" style="height: 150px; border: 1px solid var(--border-color); border-radius: 3px;" placeholder=""></textarea>
+                    <span style="font-size: 11px; font-style: italic; color: #888888;">
+                        Pasted headers strictly overwrite/replace any existing matching headers on outgoing requests (including Authorization and Cookie).
+                    </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeSessionStoreDialog()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSessionStoreDialog()">Save & Apply</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Sample realistic endpoint data with unedited vs edited state
+        let sessionStoreData = {
+            enabled: true,
+            applyMode: "AUTH_REQUIRED_ONLY",
+            rawHeaders: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.sampleToken\nCookie: session_id=sess_99882233; secure_flag=true"
+        };
+
         const sampleEndpoints = [
             {
                 id: "1",
@@ -656,9 +770,7 @@
         }
 
         function selectRow(idx) {
-            // Save current editor text before switching
             saveCurrentEditor();
-
             selectedIndex = idx;
             renderTable();
             loadSelectedIntoEditor();
@@ -688,17 +800,11 @@
             const ep = sampleEndpoints[selectedIndex];
             const currentVal = document.getElementById("request-editor").value;
             ep.currentRequest = currentVal;
-
-            if (currentVal !== ep.defaultRequest) {
-                ep.edited = true;
-            } else {
-                ep.edited = false;
-            }
+            ep.edited = (currentVal !== ep.defaultRequest);
         }
 
         function onRequestModified() {
             saveCurrentEditor();
-            // Re-render table row indicator
             renderTable();
         }
 
@@ -711,14 +817,14 @@
             runBtn.disabled = true;
             respInfo.innerText = "Running request...";
 
+            // Notice: Request editor text is PRESERVED, no white screen, selection is maintained!
             setTimeout(() => {
-                // If user replaced placeholder {customerId} or {invoiceId}, succeed with 200, else 400
                 if (ep.currentRequest.includes("{") && ep.currentRequest.includes("}")) {
                     ep.status = "400";
-                    ep.lastResponse = `HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 19:35:00 GMT\r\n\r\n{\r\n  \"error\": \"Bad Request: Unresolved parameter placeholder found in request.\"\r\n}`;
+                    ep.lastResponse = `HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 20:30:00 GMT\r\n\r\n{\r\n  \"error\": \"Bad Request: Unresolved parameter placeholder found in request.\"\r\n}`;
                 } else {
                     ep.status = "200";
-                    ep.lastResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 19:35:00 GMT\r\n\r\n{\r\n  \"status\": \"SUCCESS\",\r\n  \"message\": \"Request processed successfully.\",\r\n  \"endpoint\": \"${ep.path}\"\r\n}`;
+                    ep.lastResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 20:30:00 GMT\r\n\r\n{\r\n  \"status\": \"SUCCESS\",\r\n  \"message\": \"Request processed successfully.\",\r\n  \"endpoint\": \"${ep.path}\"\r\n}`;
                 }
 
                 runBtn.disabled = false;
@@ -801,16 +907,50 @@
             loadSelectedIntoEditor();
         }
 
+        // Modal methods for Session Store
+        function openSessionStoreDialog() {
+            document.getElementById("modal-enable-store").checked = sessionStoreData.enabled;
+            if (sessionStoreData.applyMode === "ALL_REQUESTS") {
+                document.getElementById("scope-all").checked = true;
+            } else {
+                document.getElementById("scope-auth-only").checked = true;
+            }
+            document.getElementById("modal-raw-headers").value = sessionStoreData.rawHeaders;
+            document.getElementById("session-store-modal").style.display = "flex";
+        }
+
+        function closeSessionStoreDialog() {
+            document.getElementById("session-store-modal").style.display = "none";
+        }
+
+        function saveSessionStoreDialog() {
+            sessionStoreData.enabled = document.getElementById("modal-enable-store").checked;
+            sessionStoreData.applyMode = document.getElementById("scope-all").checked ? "ALL_REQUESTS" : "AUTH_REQUIRED_ONLY";
+            sessionStoreData.rawHeaders = document.getElementById("modal-raw-headers").value;
+
+            // Count parsed lines
+            const lines = sessionStoreData.rawHeaders.split("\n").filter(l => l.trim().length > 0 && !l.trim().startsWith("#") && l.includes(":"));
+            const count = lines.length;
+
+            const summaryEl = document.getElementById("session-summary");
+            if (!sessionStoreData.enabled) {
+                summaryEl.innerText = "Session Store: Inactive";
+                summaryEl.style.color = "#888888";
+            } else {
+                summaryEl.innerText = `Session Store: Active (${count} header${count === 1 ? '' : 's'})`;
+                summaryEl.style.color = "#4caf50";
+            }
+
+            closeSessionStoreDialog();
+        }
+
         function toggleTheme() {
             const body = document.body;
             const currentTheme = body.getAttribute("data-theme");
             body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
         }
 
-        function filterTable() {
-            // Preview filtering stub
-        }
-
+        function filterTable() {}
         function clearFilters() {
             document.getElementById("collection-filter").value = "ALL";
             document.getElementById("method-filter").value = "ALL";
