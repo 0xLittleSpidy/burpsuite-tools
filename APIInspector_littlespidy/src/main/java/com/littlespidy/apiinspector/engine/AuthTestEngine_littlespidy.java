@@ -301,16 +301,41 @@ public class AuthTestEngine_littlespidy {
         }
     }
 
+    public static HttpRequest buildDefaultRequest(String targetBaseUrl, DiscoveredEndpoint_littlespidy ep) {
+        return buildRequestInternal(targetBaseUrl, ep, null, false, false);
+    }
+
     public static HttpRequest buildRequest(
             String targetBaseUrl,
             DiscoveredEndpoint_littlespidy ep,
             AuthProfile_littlespidy profile,
             boolean includeAuth) {
+        return buildRequestInternal(targetBaseUrl, ep, profile, includeAuth, true);
+    }
 
-        String path = ep.getPath() != null ? ep.getPath() : "/";
+    private static HttpRequest buildRequestInternal(
+            String targetBaseUrl,
+            DiscoveredEndpoint_littlespidy ep,
+            AuthProfile_littlespidy profile,
+            boolean includeAuth,
+            boolean allowCustom) {
+
+        if (allowCustom && ep != null && ep.hasCustomRequest()) {
+            HttpRequest customReq = buildFromCustomRequest(targetBaseUrl, ep.getCustomRawRequest());
+            if (customReq != null) {
+                if (includeAuth && profile != null) {
+                    customReq = applyAuthProfile(customReq, profile);
+                } else if (!includeAuth) {
+                    customReq = stripAuth(customReq, profile);
+                }
+                return customReq;
+            }
+        }
+
+        String path = (ep != null && ep.getPath() != null) ? ep.getPath() : "/";
 
         // Replace path variables
-        if (ep.getPathParams() != null && !ep.getPathParams().isEmpty()) {
+        if (ep != null && ep.getPathParams() != null && !ep.getPathParams().isEmpty()) {
             for (Map.Entry<String, String> entry : ep.getPathParams().entrySet()) {
                 String varKey = "{" + entry.getKey() + "}";
                 String val = (entry.getValue() != null && !entry.getValue().isBlank()) ? entry.getValue() : "1";
@@ -335,7 +360,7 @@ public class AuthTestEngine_littlespidy {
 
         // Query parameters
         StringBuilder queryBuilder = new StringBuilder();
-        if (ep.getQueryParams() != null && !ep.getQueryParams().isEmpty()) {
+        if (ep != null && ep.getQueryParams() != null && !ep.getQueryParams().isEmpty()) {
             for (Map.Entry<String, String> q : ep.getQueryParams().entrySet()) {
                 if (queryBuilder.length() > 0) queryBuilder.append("&");
                 queryBuilder.append(urlEncode(q.getKey())).append("=").append(urlEncode(q.getValue()));
@@ -360,70 +385,198 @@ public class AuthTestEngine_littlespidy {
         }
 
         String fullUrl = urlBuilder.toString();
+        String method = (ep != null && ep.getMethod() != null) ? ep.getMethod().toUpperCase(Locale.ROOT) : "GET";
         HttpRequest request = null;
         try {
             HttpRequest fromUrl = HttpRequest.httpRequestFromUrl(fullUrl);
             if (fromUrl != null) {
-                request = fromUrl.withMethod(ep.getMethod());
+                request = fromUrl.withMethod(method);
             }
         } catch (Throwable ignored) {
         }
         if (request == null) {
-            request = createFallbackHttpRequest(fullUrl, ep.getMethod());
+            request = createFallbackHttpRequest(fullUrl, method);
         }
 
         // Custom headers from endpoint definition
-        if (ep.getHeaders() != null && !ep.getHeaders().isEmpty()) {
+        if (ep != null && ep.getHeaders() != null && !ep.getHeaders().isEmpty()) {
             for (Map.Entry<String, String> h : ep.getHeaders().entrySet()) {
                 request = request.withHeader(h.getKey(), h.getValue());
             }
         }
 
         // Request Body
-        String method = ep.getMethod() != null ? ep.getMethod().toUpperCase(Locale.ROOT) : "GET";
         if (("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method))
-                && ep.getRequestBodySample() != null && !ep.getRequestBodySample().isBlank()) {
+                && ep != null && ep.getRequestBodySample() != null && !ep.getRequestBodySample().isBlank()) {
             request = request.withBody(ep.getRequestBodySample());
             if (!request.hasHeader("Content-Type")) {
                 request = request.withHeader("Content-Type", ep.getContentType() != null ? ep.getContentType() : "application/json");
             }
         }
 
-        // Apply Authentication Profile if requested
+        // Apply Authentication Profile or Strip for unauthenticated check
         if (includeAuth && profile != null) {
-            switch (profile.getAuthType()) {
-                case BEARER_TOKEN:
-                    if (!profile.getBearerToken().isBlank()) {
-                        request = request.withHeader("Authorization", "Bearer " + profile.getBearerToken().trim());
-                    }
-                    break;
-                case API_KEY:
-                    if (profile.getApiKeyLocation() == ApiKeyLocation_littlespidy.HEADER && !profile.getApiKeyName().isBlank()) {
-                        request = request.withHeader(profile.getApiKeyName().trim(), profile.getApiKeyValue().trim());
-                    }
-                    break;
-                case BASIC_AUTH:
-                    request = request.withHeader("Authorization", profile.getBasicAuthHeaderValue());
-                    break;
-                case COOKIE:
-                    if (!profile.getCookieName().isBlank()) {
-                        String cookiePair = profile.getCookieName().trim() + "=" + profile.getCookieValue().trim();
-                        if (request.hasHeader("Cookie")) {
-                            String existing = request.headerValue("Cookie");
-                            request = request.withHeader("Cookie", existing + "; " + cookiePair);
-                        } else {
-                            request = request.withHeader("Cookie", cookiePair);
-                        }
-                    }
-                    break;
-                case CUSTOM_HEADER:
-                    if (!profile.getCustomHeaderName().isBlank()) {
-                        request = request.withHeader(profile.getCustomHeaderName().trim(), profile.getCustomHeaderValue().trim());
-                    }
-                    break;
+            request = applyAuthProfile(request, profile);
+        } else if (!includeAuth) {
+            request = stripAuth(request, profile);
+        }
+
+        return request;
+    }
+
+    public static HttpRequest buildFromCustomRequest(String targetBaseUrl, String customRaw) {
+        if (customRaw == null || customRaw.isBlank()) return null;
+
+        String[] headerAndBody = customRaw.split("(\\r\\n\\r\\n|\\n\\n)", 2);
+        String headerSection = headerAndBody[0];
+        String bodySection = headerAndBody.length > 1 ? headerAndBody[1] : "";
+
+        String[] lines = headerSection.split("(\\r\\n|\\n)");
+        if (lines.length == 0) return null;
+
+        String requestLine = lines[0].trim();
+        String[] reqTokens = requestLine.split("\\s+");
+        String method = reqTokens.length > 0 ? reqTokens[0].toUpperCase(Locale.ROOT) : "GET";
+        String path = reqTokens.length > 1 ? reqTokens[1] : "/";
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        for (int i = 1; i < lines.length; i++) {
+            String line = lines[i];
+            int colon = line.indexOf(':');
+            if (colon > 0) {
+                String name = line.substring(0, colon).trim();
+                String value = line.substring(colon + 1).trim();
+                headers.put(name, value);
             }
         }
 
+        String fullUrl;
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            fullUrl = path;
+        } else {
+            String base = (targetBaseUrl != null && !targetBaseUrl.isBlank()) ? targetBaseUrl.trim() : null;
+            if (base == null) {
+                String hostHeader = headers.get("Host");
+                if (hostHeader == null) hostHeader = headers.get("host");
+                if (hostHeader != null && !hostHeader.isBlank()) {
+                    base = "https://" + hostHeader;
+                } else {
+                    base = "https://localhost";
+                }
+            }
+            if (base.endsWith("/") && path.startsWith("/")) {
+                fullUrl = base + path.substring(1);
+            } else if (!base.endsWith("/") && !path.startsWith("/")) {
+                fullUrl = base + "/" + path;
+            } else {
+                fullUrl = base + path;
+            }
+        }
+
+        HttpRequest request = null;
+        try {
+            HttpRequest fromUrl = HttpRequest.httpRequestFromUrl(fullUrl);
+            if (fromUrl != null) {
+                request = fromUrl.withMethod(method);
+            }
+        } catch (Throwable ignored) {}
+
+        if (request == null) {
+            request = createFallbackHttpRequest(fullUrl, method, headers, bodySection);
+        } else {
+            for (Map.Entry<String, String> h : headers.entrySet()) {
+                if (!h.getKey().equalsIgnoreCase("Content-Length")) {
+                    request = request.withHeader(h.getKey(), h.getValue());
+                }
+            }
+            if (!bodySection.isEmpty()) {
+                request = request.withBody(bodySection);
+            }
+        }
+
+        return request;
+    }
+
+    private static HttpRequest applyAuthProfile(HttpRequest request, AuthProfile_littlespidy profile) {
+        if (request == null || profile == null) return request;
+
+        switch (profile.getAuthType()) {
+            case BEARER_TOKEN:
+                if (!profile.getBearerToken().isBlank()) {
+                    request = request.withHeader("Authorization", "Bearer " + profile.getBearerToken().trim());
+                }
+                break;
+            case API_KEY:
+                if (profile.getApiKeyLocation() == ApiKeyLocation_littlespidy.HEADER && !profile.getApiKeyName().isBlank()) {
+                    request = request.withHeader(profile.getApiKeyName().trim(), profile.getApiKeyValue().trim());
+                } else if (profile.getApiKeyLocation() == ApiKeyLocation_littlespidy.QUERY_PARAM && !profile.getApiKeyName().isBlank()) {
+                    String param = urlEncode(profile.getApiKeyName()) + "=" + urlEncode(profile.getApiKeyValue());
+                    String currentPath = request.path();
+                    if (currentPath != null && currentPath.contains("?")) {
+                        request = request.withPath(currentPath + "&" + param);
+                    } else {
+                        request = request.withPath((currentPath != null ? currentPath : "/") + "?" + param);
+                    }
+                }
+                break;
+            case BASIC_AUTH:
+                request = request.withHeader("Authorization", profile.getBasicAuthHeaderValue());
+                break;
+            case COOKIE:
+                if (!profile.getCookieName().isBlank()) {
+                    String cookiePair = profile.getCookieName().trim() + "=" + profile.getCookieValue().trim();
+                    if (request.hasHeader("Cookie")) {
+                        String existing = request.headerValue("Cookie");
+                        request = request.withHeader("Cookie", existing + "; " + cookiePair);
+                    } else {
+                        request = request.withHeader("Cookie", cookiePair);
+                    }
+                }
+                break;
+            case CUSTOM_HEADER:
+                if (!profile.getCustomHeaderName().isBlank()) {
+                    request = request.withHeader(profile.getCustomHeaderName().trim(), profile.getCustomHeaderValue().trim());
+                }
+                break;
+        }
+        return request;
+    }
+
+    private static HttpRequest stripAuth(HttpRequest request, AuthProfile_littlespidy profile) {
+        if (request == null) return null;
+
+        if (request.hasHeader("Authorization")) {
+            request = request.withRemovedHeader("Authorization");
+        }
+
+        if (profile != null) {
+            if (profile.getAuthType() == AuthType_littlespidy.API_KEY && profile.getApiKeyLocation() == ApiKeyLocation_littlespidy.HEADER) {
+                if (!profile.getApiKeyName().isBlank() && request.hasHeader(profile.getApiKeyName())) {
+                    request = request.withRemovedHeader(profile.getApiKeyName());
+                }
+            } else if (profile.getAuthType() == AuthType_littlespidy.CUSTOM_HEADER) {
+                if (!profile.getCustomHeaderName().isBlank() && request.hasHeader(profile.getCustomHeaderName())) {
+                    request = request.withRemovedHeader(profile.getCustomHeaderName());
+                }
+            } else if (profile.getAuthType() == AuthType_littlespidy.COOKIE) {
+                if (request.hasHeader("Cookie") && !profile.getCookieName().isBlank()) {
+                    String existing = request.headerValue("Cookie");
+                    String toRemovePrefix = profile.getCookieName().trim() + "=";
+                    String[] parts = existing.split(";\\s*");
+                    List<String> remaining = new ArrayList<>();
+                    for (String p : parts) {
+                        if (!p.startsWith(toRemovePrefix)) {
+                            remaining.add(p);
+                        }
+                    }
+                    if (remaining.isEmpty()) {
+                        request = request.withRemovedHeader("Cookie");
+                    } else {
+                        request = request.withHeader("Cookie", String.join("; ", remaining));
+                    }
+                }
+            }
+        }
         return request;
     }
 

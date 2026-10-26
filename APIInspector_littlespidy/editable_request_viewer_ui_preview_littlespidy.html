@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Inspector - Editable Request Viewer and Runner Preview (littlespidy)</title>
+    <style>
+        :root {
+            --bg-color: #2b2b2b;
+            --panel-bg: #3c3f41;
+            --text-color: #bbbbbb;
+            --header-text: #ffffff;
+            --border-color: #555555;
+            --accent-orange: #ff7700;
+            --accent-orange-hover: #ff9933;
+            --tab-active-bg: #4e5254;
+            --input-bg: #2b2b2b;
+            --table-header: #313335;
+            --table-stripe: #36393b;
+            --table-hover: #2d4359;
+            --table-selected: #1d3557;
+            --btn-bg: #4c5052;
+            --btn-hover: #5c6164;
+            --code-bg: #1e1e1e;
+            --code-color: #dcdcdc;
+            --status-2xx: #4caf50;
+            --status-4xx: #ff9800;
+            --status-5xx: #f44336;
+            --status-blue: #64b5f6;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5f5f5;
+            --panel-bg: #ffffff;
+            --text-color: #222222;
+            --header-text: #111111;
+            --border-color: #cccccc;
+            --accent-orange: #e65100;
+            --accent-orange-hover: #ff6d00;
+            --tab-active-bg: #ffffff;
+            --input-bg: #ffffff;
+            --table-header: #e0e0e0;
+            --table-stripe: #f9f9f9;
+            --table-hover: #e3f2fd;
+            --table-selected: #bbdefb;
+            --btn-bg: #e0e0e0;
+            --btn-hover: #d5d5d5;
+            --code-bg: #f8f9fa;
+            --code-color: #212529;
+            --status-2xx: #2e7d32;
+            --status-4xx: #e65100;
+            --status-5xx: #c62828;
+            --status-blue: #1565c0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Burp Suite Title & Theme Toggle Bar */
+        .burp-header {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--header-text);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-orange {
+            background-color: var(--accent-orange);
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .theme-toggle-btn {
+            background-color: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        /* Suite Tabs */
+        .suite-tabs {
+            background-color: var(--panel-bg);
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            padding-left: 8px;
+        }
+
+        .suite-tab {
+            padding: 8px 14px;
+            color: var(--text-color);
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-bottom: -1px;
+            font-weight: 500;
+        }
+
+        .suite-tab.active {
+            background-color: var(--bg-color);
+            color: var(--header-text);
+            border-color: var(--border-color);
+            border-top: 2px solid var(--accent-orange);
+            font-weight: 600;
+        }
+
+        /* Sub Navigation Tabs */
+        .sub-tabs {
+            background-color: var(--panel-bg);
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            padding: 4px 10px 0 10px;
+            gap: 4px;
+        }
+
+        .sub-tab {
+            padding: 6px 12px;
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid transparent;
+            border-bottom: none;
+            font-weight: 500;
+        }
+
+        .sub-tab.active {
+            background-color: var(--bg-color);
+            color: var(--header-text);
+            border-color: var(--border-color);
+            border-top: 2px solid var(--accent-orange);
+            font-weight: 600;
+        }
+
+        /* Main Content Container */
+        .tab-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        /* Top Toolbar Filters & Run Buttons */
+        .toolbar {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn {
+            background-color: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background-color: var(--btn-hover);
+            color: var(--header-text);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-orange);
+            color: #ffffff;
+            border-color: var(--accent-orange);
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-orange-hover);
+        }
+
+        .btn-danger {
+            background-color: #8b2525;
+            color: #ffffff;
+            border-color: #a83232;
+        }
+
+        .btn-danger:disabled, .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .input-box {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+
+        .progress-bar-container {
+            width: 120px;
+            height: 18px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent-orange);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+
+        .progress-bar-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 2px;
+            font-size: 10px;
+            color: var(--header-text);
+            font-weight: bold;
+        }
+
+        /* Split Panes */
+        .workspace-split {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+
+        /* Top Table */
+        .table-pane {
+            height: 45%;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .table-title {
+            padding: 6px 10px;
+            background-color: var(--table-header);
+            font-weight: bold;
+            color: var(--header-text);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--table-header);
+            color: var(--header-text);
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        td {
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-stripe);
+        }
+
+        tr:hover {
+            background-color: var(--table-hover);
+            cursor: pointer;
+        }
+
+        tr.selected {
+            background-color: var(--table-selected);
+            color: var(--header-text);
+        }
+
+        .status-badge {
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .status-200 { color: var(--status-2xx); }
+        .status-400 { color: var(--status-4xx); font-weight: bold; }
+        .status-500 { color: var(--status-5xx); }
+        .edited-yes { color: var(--status-blue); font-weight: bold; }
+
+        /* Bottom Side-by-Side Message Editors */
+        .viewer-split {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            min-height: 0;
+        }
+
+        .editor-pane {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-header {
+            padding: 6px 10px;
+            background-color: var(--table-header);
+            font-weight: bold;
+            color: var(--header-text);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .editor-info {
+            font-size: 11px;
+            font-weight: normal;
+            color: var(--text-color);
+        }
+
+        .raw-textarea {
+            flex: 1;
+            background-color: var(--code-bg);
+            color: var(--code-color);
+            border: none;
+            padding: 8px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 11.5px;
+            line-height: 1.4;
+            resize: none;
+            outline: none;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        .notice-banner {
+            background-color: rgba(255, 119, 0, 0.15);
+            border: 1px solid var(--accent-orange);
+            color: var(--header-text);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- Top Burp Suite Header -->
+    <div class="burp-header">
+        <div class="header-title">
+            <span>Burp Suite Professional - API Inspector</span>
+            <span class="badge-orange">littlespidy</span>
+        </div>
+        <div>
+            <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme (Dark / Light)</button>
+        </div>
+    </div>
+
+    <!-- Suite Tabs -->
+    <div class="suite-tabs">
+        <div class="suite-tab">Target</div>
+        <div class="suite-tab">Proxy</div>
+        <div class="suite-tab">Intruder</div>
+        <div class="suite-tab">Repeater</div>
+        <div class="suite-tab active">API Inspector (littlespidy)</div>
+        <div class="suite-tab">Extensions</div>
+    </div>
+
+    <!-- API Inspector Sub Tabs -->
+    <div class="sub-tabs">
+        <div class="sub-tab">API Collections</div>
+        <div class="sub-tab active">Request & Response Viewer</div>
+        <div class="sub-tab">Authentication Testing</div>
+        <div class="sub-tab">ResAPI Version Finder</div>
+        <div class="sub-tab">Intruder Strategies</div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="tab-content">
+
+        <!-- Informational Banner -->
+        <div class="notice-banner">
+            <div>
+                <strong>Editable HTTP Request & Auto-Save Feature:</strong> Modify query parameters, URL path variables (e.g. replacing {id} with 42), headers, or request body directly in the editor below. Changes automatically persist to the endpoint and propagate to the Authentication Testing tab to prevent HTTP 400 failures.
+            </div>
+            <div>
+                <span id="banner-status-indicator" style="color: var(--status-2xx); font-weight: bold;">Auto-Save: Active</span>
+            </div>
+        </div>
+
+        <!-- Top Controls Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <label>Collection:</label>
+                <select class="input-box" id="collection-filter" onchange="filterTable()">
+                    <option value="ALL">All Collections</option>
+                    <option value="Customer API">Customer API (v2)</option>
+                    <option value="Billing Service">Billing Service (v1)</option>
+                </select>
+
+                <label>Method:</label>
+                <select class="input-box" id="method-filter" onchange="filterTable()">
+                    <option value="ALL">All Methods</option>
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+
+                <input type="text" class="input-box" id="search-box" placeholder="Search path or summary..." onkeyup="filterTable()">
+                <button class="btn" onclick="clearFilters()">Clear Filters</button>
+            </div>
+
+            <div class="toolbar-group">
+                <span style="font-style: italic; color: #4caf50;" id="session-summary">Bearer [Active]</span>
+                <button class="btn">Session Store</button>
+                <button class="btn btn-primary" id="run-btn" onclick="runSelectedRequest()">Run</button>
+                <button class="btn" id="run-all-btn" onclick="runAllRequests()">Run All</button>
+                <button class="btn btn-danger" id="stop-btn" disabled onclick="stopRunAll()">Stop</button>
+                <button class="btn" id="reset-btn" onclick="resetSelectedRequest()">Reset</button>
+
+                <div class="progress-bar-container" id="progress-container">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                    <div class="progress-bar-text" id="progress-text">0%</div>
+                </div>
+
+                <span id="run-status-label" style="font-size: 11px;">Ready</span>
+                <span id="count-label" style="font-weight: bold; margin-left: 6px;">Requests: 4 of 4</span>
+            </div>
+        </div>
+
+        <!-- Split View: Requests Table Top, Message Editors Bottom -->
+        <div class="workspace-split">
+
+            <!-- Requests Table -->
+            <div class="table-pane">
+                <div class="table-title">Discovered API Requests</div>
+                <div class="table-container">
+                    <table id="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Collection</th>
+                                <th>Method</th>
+                                <th>Path</th>
+                                <th>Status</th>
+                                <th>Edited</th>
+                                <th>Summary</th>
+                                <th>Requires Auth</th>
+                                <th>Content Type</th>
+                                <th>Parameters</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Horizontal Message Viewer: Request (Editable) vs Response -->
+            <div class="viewer-split">
+
+                <!-- Left: Request Editor (Editable) -->
+                <div class="editor-pane">
+                    <div class="editor-header">
+                        <span>HTTP Request (Editable - edits persist to endpoint and auth testing)</span>
+                        <span class="editor-info" id="req-info">Method: POST | Path: /api/v2/customers/{customerId}</span>
+                    </div>
+                    <textarea class="raw-textarea" id="request-editor" oninput="onRequestModified()"></textarea>
+                </div>
+
+                <!-- Right: Response Viewer -->
+                <div class="editor-pane">
+                    <div class="editor-header">
+                        <span>HTTP Response</span>
+                        <span class="editor-info" id="resp-info">Status: - | Length: 0 B</span>
+                    </div>
+                    <textarea class="raw-textarea" id="response-editor" readonly></textarea>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // Sample realistic endpoint data with unedited vs edited state
+        const sampleEndpoints = [
+            {
+                id: "1",
+                collection: "Customer API",
+                method: "POST",
+                path: "/api/v2/customers/{customerId}",
+                status: "-",
+                edited: false,
+                summary: "Update customer details",
+                requiresAuth: "Yes",
+                contentType: "application/json",
+                parameters: "Path: [customerId]; Body: [name, email]",
+                defaultRequest: "POST /api/v2/customers/{customerId} HTTP/1.1\r\nHost: api.target.com\r\nContent-Type: application/json\r\nAccept: application/json\r\n\r\n{\r\n  \"name\": \"\",\r\n  \"email\": \"\"\r\n}",
+                currentRequest: "POST /api/v2/customers/{customerId} HTTP/1.1\r\nHost: api.target.com\r\nContent-Type: application/json\r\nAccept: application/json\r\n\r\n{\r\n  \"name\": \"\",\r\n  \"email\": \"\"\r\n}",
+                lastResponse: null
+            },
+            {
+                id: "2",
+                collection: "Customer API",
+                method: "GET",
+                path: "/api/v2/customers/search?query={searchQuery}",
+                status: "-",
+                edited: false,
+                summary: "Search customers by keyword",
+                requiresAuth: "Yes",
+                contentType: "application/json",
+                parameters: "Query: [searchQuery]",
+                defaultRequest: "GET /api/v2/customers/search?query={searchQuery} HTTP/1.1\r\nHost: api.target.com\r\nAccept: application/json\r\n\r\n",
+                currentRequest: "GET /api/v2/customers/search?query={searchQuery} HTTP/1.1\r\nHost: api.target.com\r\nAccept: application/json\r\n\r\n",
+                lastResponse: null
+            },
+            {
+                id: "3",
+                collection: "Billing Service",
+                method: "POST",
+                path: "/api/v1/invoices/generate",
+                status: "200",
+                edited: true,
+                summary: "Generate invoice for account",
+                requiresAuth: "Yes",
+                contentType: "application/json",
+                parameters: "Body: [accountId, amount]",
+                defaultRequest: "POST /api/v1/invoices/generate HTTP/1.1\r\nHost: billing.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"accountId\": \"{accountId}\",\r\n  \"amount\": 0\r\n}",
+                currentRequest: "POST /api/v1/invoices/generate HTTP/1.1\r\nHost: billing.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"accountId\": \"ACC-9921\",\r\n  \"amount\": 250.00\r\n}",
+                lastResponse: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 19:30:00 GMT\r\n\r\n{\r\n  \"invoiceId\": \"INV-2026-8819\",\r\n  \"status\": \"CREATED\",\r\n  \"amount\": 250.00\r\n}"
+            },
+            {
+                id: "4",
+                collection: "Billing Service",
+                method: "DELETE",
+                path: "/api/v1/invoices/{invoiceId}",
+                status: "400",
+                edited: false,
+                summary: "Void unpaid invoice",
+                requiresAuth: "Yes",
+                contentType: "application/json",
+                parameters: "Path: [invoiceId]",
+                defaultRequest: "DELETE /api/v1/invoices/{invoiceId} HTTP/1.1\r\nHost: billing.target.com\r\n\r\n",
+                currentRequest: "DELETE /api/v1/invoices/{invoiceId} HTTP/1.1\r\nHost: billing.target.com\r\n\r\n",
+                lastResponse: "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\r\n  \"error\": \"Invalid invoiceId format: '{invoiceId}' is not an integer\"\r\n}"
+            }
+        ];
+
+        let selectedIndex = 0;
+        let isRunningAll = false;
+        let runAllTimer = null;
+
+        function renderTable() {
+            const tbody = document.getElementById("table-body");
+            tbody.innerHTML = "";
+
+            sampleEndpoints.forEach((ep, idx) => {
+                const tr = document.createElement("tr");
+                if (idx === selectedIndex) tr.classList.add("selected");
+                tr.onclick = () => selectRow(idx);
+
+                let statusClass = "";
+                if (ep.status.startsWith("2")) statusClass = "status-200";
+                else if (ep.status.startsWith("4")) statusClass = "status-400";
+                else if (ep.status.startsWith("5")) statusClass = "status-500";
+
+                tr.innerHTML = `
+                    <td>${ep.collection}</td>
+                    <td><strong>${ep.method}</strong></td>
+                    <td>${ep.path}</td>
+                    <td class="status-badge ${statusClass}">${ep.status}</td>
+                    <td class="${ep.edited ? 'edited-yes' : ''}">${ep.edited ? 'Yes' : '-'}</td>
+                    <td>${ep.summary}</td>
+                    <td>${ep.requiresAuth}</td>
+                    <td>${ep.contentType}</td>
+                    <td>${ep.parameters}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById("count-label").innerText = `Requests: ${sampleEndpoints.length} of ${sampleEndpoints.length}`;
+        }
+
+        function selectRow(idx) {
+            // Save current editor text before switching
+            saveCurrentEditor();
+
+            selectedIndex = idx;
+            renderTable();
+            loadSelectedIntoEditor();
+        }
+
+        function loadSelectedIntoEditor() {
+            const ep = sampleEndpoints[selectedIndex];
+            document.getElementById("request-editor").value = ep.currentRequest;
+            document.getElementById("req-info").innerText = `Method: ${ep.method} | Path: ${ep.path}`;
+
+            const respEditor = document.getElementById("response-editor");
+            const respInfo = document.getElementById("resp-info");
+
+            if (ep.lastResponse) {
+                respEditor.value = ep.lastResponse;
+                const statusMatch = ep.lastResponse.match(/HTTP\/1\.[01]\s+(\d+)/);
+                const code = statusMatch ? statusMatch[1] : ep.status;
+                respInfo.innerText = `Status: ${code} | Length: ${ep.lastResponse.length} B`;
+            } else {
+                respEditor.value = "";
+                respInfo.innerText = "Status: [Not Run] | Click 'Run' to execute request";
+            }
+        }
+
+        function saveCurrentEditor() {
+            if (selectedIndex < 0 || selectedIndex >= sampleEndpoints.length) return;
+            const ep = sampleEndpoints[selectedIndex];
+            const currentVal = document.getElementById("request-editor").value;
+            ep.currentRequest = currentVal;
+
+            if (currentVal !== ep.defaultRequest) {
+                ep.edited = true;
+            } else {
+                ep.edited = false;
+            }
+        }
+
+        function onRequestModified() {
+            saveCurrentEditor();
+            // Re-render table row indicator
+            renderTable();
+        }
+
+        function runSelectedRequest() {
+            saveCurrentEditor();
+            const ep = sampleEndpoints[selectedIndex];
+            const runBtn = document.getElementById("run-btn");
+            const respInfo = document.getElementById("resp-info");
+
+            runBtn.disabled = true;
+            respInfo.innerText = "Running request...";
+
+            setTimeout(() => {
+                // If user replaced placeholder {customerId} or {invoiceId}, succeed with 200, else 400
+                if (ep.currentRequest.includes("{") && ep.currentRequest.includes("}")) {
+                    ep.status = "400";
+                    ep.lastResponse = `HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 19:35:00 GMT\r\n\r\n{\r\n  \"error\": \"Bad Request: Unresolved parameter placeholder found in request.\"\r\n}`;
+                } else {
+                    ep.status = "200";
+                    ep.lastResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 19:35:00 GMT\r\n\r\n{\r\n  \"status\": \"SUCCESS\",\r\n  \"message\": \"Request processed successfully.\",\r\n  \"endpoint\": \"${ep.path}\"\r\n}`;
+                }
+
+                runBtn.disabled = false;
+                renderTable();
+                loadSelectedIntoEditor();
+                document.getElementById("run-status-label").innerText = `Run complete (${ep.status}).`;
+            }, 300);
+        }
+
+        function resetSelectedRequest() {
+            const ep = sampleEndpoints[selectedIndex];
+            ep.currentRequest = ep.defaultRequest;
+            ep.edited = false;
+            renderTable();
+            loadSelectedIntoEditor();
+            document.getElementById("run-status-label").innerText = "Reset to original template.";
+        }
+
+        function runAllRequests() {
+            saveCurrentEditor();
+            isRunningAll = true;
+
+            const runBtn = document.getElementById("run-btn");
+            const runAllBtn = document.getElementById("run-all-btn");
+            const stopBtn = document.getElementById("stop-btn");
+            const progressContainer = document.getElementById("progress-container");
+            const progressFill = document.getElementById("progress-fill");
+            const progressText = document.getElementById("progress-text");
+            const statusLabel = document.getElementById("run-status-label");
+
+            runBtn.disabled = true;
+            runAllBtn.disabled = true;
+            stopBtn.disabled = false;
+            progressContainer.style.display = "block";
+
+            let currentIdx = 0;
+            const total = sampleEndpoints.length;
+
+            runAllTimer = setInterval(() => {
+                if (currentIdx >= total || !isRunningAll) {
+                    clearInterval(runAllTimer);
+                    runBtn.disabled = false;
+                    runAllBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    progressContainer.style.display = "none";
+                    isRunningAll = false;
+                    statusLabel.innerText = `Run All completed (${total} requests).`;
+                    renderTable();
+                    loadSelectedIntoEditor();
+                    return;
+                }
+
+                const ep = sampleEndpoints[currentIdx];
+                if (ep.currentRequest.includes("{") && ep.currentRequest.includes("}")) {
+                    ep.status = "400";
+                    ep.lastResponse = `HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"error\":\"Placeholder parameter syntax error\"}`;
+                } else {
+                    ep.status = "200";
+                    ep.lastResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"SUCCESS\"}`;
+                }
+
+                currentIdx++;
+                const pct = Math.round((currentIdx / total) * 100);
+                progressFill.style.width = pct + "%";
+                progressText.innerText = pct + "%";
+                statusLabel.innerText = `Running: ${currentIdx} / ${total}`;
+                renderTable();
+            }, 350);
+        }
+
+        function stopRunAll() {
+            isRunningAll = false;
+            if (runAllTimer) clearInterval(runAllTimer);
+            document.getElementById("stop-btn").disabled = true;
+            document.getElementById("run-btn").disabled = false;
+            document.getElementById("run-all-btn").disabled = false;
+            document.getElementById("progress-container").style.display = "none";
+            document.getElementById("run-status-label").innerText = "Run All stopped by user.";
+            renderTable();
+            loadSelectedIntoEditor();
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute("data-theme");
+            body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
+        }
+
+        function filterTable() {
+            // Preview filtering stub
+        }
+
+        function clearFilters() {
+            document.getElementById("collection-filter").value = "ALL";
+            document.getElementById("method-filter").value = "ALL";
+            document.getElementById("search-box").value = "";
+        }
+
+        // Initialize UI
+        renderTable();
+        loadSelectedIntoEditor();
+    </script>
+</body>
+</html>

@@ -116,6 +116,7 @@ public class SessionStateDTO_littlespidy {
         public String contentType;
         public boolean requiresAuth;
         public List<String> authSchemes;
+        public String customRawRequest;
     }
 
     public static class AuthProfileDTO {

@@ -892,6 +892,7 @@ public class APIInspectorPersistenceManager_littlespidy {
                 epDto.contentType = ep.getContentType();
                 epDto.requiresAuth = ep.isRequiresAuth();
                 epDto.authSchemes = ep.getAuthSchemes();
+                epDto.customRawRequest = ep.getCustomRawRequest();
                 dto.endpoints.add(epDto);
             }
         }
@@ -930,6 +931,7 @@ public class APIInspectorPersistenceManager_littlespidy {
                 ep.setContentType(epDto.contentType);
                 ep.setRequiresAuth(epDto.requiresAuth);
                 ep.setAuthSchemes(epDto.authSchemes);
+                ep.setCustomRawRequest(epDto.customRawRequest);
                 eps.add(ep);
             }
         }

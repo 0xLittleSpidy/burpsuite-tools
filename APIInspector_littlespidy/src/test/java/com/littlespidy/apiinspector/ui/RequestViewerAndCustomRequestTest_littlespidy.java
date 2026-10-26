@@ -1,0 +1,144 @@
+// Created with the help of an AI Agent and littlespidy.
+package com.littlespidy.apiinspector.ui;
+
+import burp.api.montoya.http.message.requests.HttpRequest;
+import com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy;
+import com.littlespidy.apiinspector.model.*;
+import com.littlespidy.apiinspector.persistence.APIInspectorPersistenceManager_littlespidy;
+import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Tests for editable Request Viewer, custom request persistence,
+ * and propagation of user edits to the Auth Testing Engine.
+ */
+class RequestViewerAndCustomRequestTest_littlespidy {
+
+    @Test
+    @DisplayName("Verify customRawRequest setter, getter, and reset on DiscoveredEndpoint")
+    void testDiscoveredEndpointCustomRequest() {
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/users/{id}", "Create or update user");
+        assertFalse(ep.hasCustomRequest(), "Initially endpoint should have no custom request");
+        assertNull(ep.getCustomRawRequest());
+
+        String custom = "POST /api/v1/users/42 HTTP/1.1\r\nHost: target.com\r\nContent-Type: application/json\r\n\r\n{\"name\":\"Alice\"}";
+        ep.setCustomRawRequest(custom);
+        assertTrue(ep.hasCustomRequest(), "Endpoint should report custom request present");
+        assertEquals(custom, ep.getCustomRawRequest());
+
+        ep.resetCustomRequest();
+        assertFalse(ep.hasCustomRequest(), "Endpoint should reset custom request to null");
+        assertNull(ep.getCustomRawRequest());
+    }
+
+    @Test
+    @DisplayName("Verify persistence manager serializes and deserializes customRawRequest")
+    void testPersistenceManagerCustomRequest() {
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy(
+                "Test Collection",
+                "OpenAPI 3.0",
+                "FILE",
+                "/tmp/test.json"
+        );
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("PUT", "/api/v1/items/{itemId}", "Update item");
+        String customRaw = "PUT /api/v1/items/99 HTTP/1.1\r\nHost: api.example.com\r\n\r\n{\"quantity\":5}";
+        ep.setCustomRawRequest(customRaw);
+        col.setEndpoints(List.of(ep));
+
+        SessionStateDTO_littlespidy.ImportedCollectionDTO dto = APIInspectorPersistenceManager_littlespidy.serializeImportedCollection(col);
+        assertNotNull(dto);
+        assertEquals(1, dto.endpoints.size());
+        assertEquals(customRaw, dto.endpoints.get(0).customRawRequest);
+
+        ImportedCollection_littlespidy deserialized = APIInspectorPersistenceManager_littlespidy.deserializeImportedCollection(dto);
+        assertNotNull(deserialized);
+        assertEquals(1, deserialized.getEndpoints().size());
+        DiscoveredEndpoint_littlespidy recoveredEp = deserialized.getEndpoints().get(0);
+        assertTrue(recoveredEp.hasCustomRequest());
+        assertEquals(customRaw, recoveredEp.getCustomRawRequest());
+    }
+
+    @Test
+    @DisplayName("Verify AuthTestEngine uses custom request template and reflects user edits")
+    void testAuthTestEngineBuildsFromCustomRequest() {
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/payments/{paymentId}", "Process payment");
+        ep.getPathParams().put("paymentId", "{paymentId}"); // dummy unedited param
+
+        // 1. Baseline without edits has dummy value
+        HttpRequest defaultReq = AuthTestEngine_littlespidy.buildRequest("https://api.example.com", ep, null, false);
+        assertNotNull(defaultReq);
+        assertEquals("POST", defaultReq.method());
+
+        // 2. User edits the request to replace invalid placeholder with real payload
+        String customReqStr = "POST /api/v1/payments/pay_12345 HTTP/1.1\r\n" +
+                "Host: api.example.com\r\n" +
+                "Content-Type: application/json\r\n" +
+                "X-Custom-Client: BurpInspector\r\n\r\n" +
+                "{\"amount\": 1500, \"currency\": \"USD\"}";
+        ep.setCustomRawRequest(customReqStr);
+
+        // 3. Auth test engine with no auth should use the edited path, body, and headers
+        HttpRequest editedReq = AuthTestEngine_littlespidy.buildRequest("https://api.example.com", ep, null, false);
+        assertNotNull(editedReq);
+        assertEquals("POST", editedReq.method());
+        assertEquals("/api/v1/payments/pay_12345", editedReq.path());
+        assertEquals("{\"amount\": 1500, \"currency\": \"USD\"}", editedReq.bodyToString());
+        assertEquals("BurpInspector", editedReq.headerValue("X-Custom-Client"));
+
+        // 4. Auth test engine with Bearer Token auth profile should inject the Bearer token onto the edited request
+        AuthProfile_littlespidy bearerProfile = new AuthProfile_littlespidy("User Profile", AuthType_littlespidy.BEARER_TOKEN);
+        bearerProfile.setBearerToken("secret_token_abc");
+
+        HttpRequest authReq = AuthTestEngine_littlespidy.buildRequest("https://api.example.com", ep, bearerProfile, true);
+        assertNotNull(authReq);
+        assertEquals("/api/v1/payments/pay_12345", authReq.path());
+        assertEquals("{\"amount\": 1500, \"currency\": \"USD\"}", authReq.bodyToString());
+        assertEquals("Bearer secret_token_abc", authReq.headerValue("Authorization"));
+        assertEquals("BurpInspector", authReq.headerValue("X-Custom-Client"));
+
+        // 5. Auth test engine with unauthenticated comparison (includeAuth = false) should strip Authorization header
+        String customWithAuth = "POST /api/v1/payments/pay_12345 HTTP/1.1\r\n" +
+                "Host: api.example.com\r\n" +
+                "Authorization: Bearer old_token\r\n\r\n" +
+                "{\"amount\": 1500}";
+        ep.setCustomRawRequest(customWithAuth);
+
+        HttpRequest unauthReq = AuthTestEngine_littlespidy.buildRequest("https://api.example.com", ep, bearerProfile, false);
+        assertNotNull(unauthReq);
+        assertFalse(unauthReq.hasHeader("Authorization"), "Unauthenticated request must have Authorization header stripped");
+    }
+
+    @Test
+    @DisplayName("Verify RequestTableModel displays Status and Edited columns correctly")
+    void testRequestTableModelColumns() {
+        RequestResponseViewerTab_littlespidy tab = new RequestResponseViewerTab_littlespidy(null);
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy("Store API", "OpenAPI 3.0", "FILE", "/tmp/store.json");
+        DiscoveredEndpoint_littlespidy ep1 = new DiscoveredEndpoint_littlespidy("GET", "/api/v1/items", "List items");
+        DiscoveredEndpoint_littlespidy ep2 = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/orders", "Place order");
+        ep2.setCustomRawRequest("POST /api/v1/orders HTTP/1.1\r\nHost: store.com\r\n\r\n{\"sku\":\"SKU-1\"}");
+        col.setEndpoints(List.of(ep1, ep2));
+
+        tab.updateCollections(List.of(col));
+        RequestResponseViewerTab_littlespidy.RequestTableModel model = tab.getTableModel();
+        assertNotNull(model);
+        assertEquals(9, model.getColumnCount());
+        assertEquals("Status", model.getColumnName(3));
+        assertEquals("Edited", model.getColumnName(4));
+
+        assertEquals(2, model.getRowCount());
+
+        // ep1 is unedited
+        assertEquals("-", model.getValueAt(0, 3)); // Status
+        assertEquals("-", model.getValueAt(0, 4)); // Edited
+
+        // ep2 is edited
+        assertEquals("-", model.getValueAt(1, 3)); // Status
+        assertEquals("Yes", model.getValueAt(1, 4)); // Edited
+    }
+}

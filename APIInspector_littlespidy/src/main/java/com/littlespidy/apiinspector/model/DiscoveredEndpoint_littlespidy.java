@@ -24,6 +24,7 @@ public class DiscoveredEndpoint_littlespidy {
     private String contentType;
     private boolean requiresAuth;
     private List<String> authSchemes;
+    private String customRawRequest;
 
     public DiscoveredEndpoint_littlespidy() {
         this.id = UUID.randomUUID().toString();
@@ -185,6 +186,22 @@ public class DiscoveredEndpoint_littlespidy {
 
     public void setAuthSchemes(List<String> authSchemes) {
         this.authSchemes = authSchemes != null ? authSchemes : new ArrayList<>();
+    }
+
+    public boolean hasCustomRequest() {
+        return customRawRequest != null && !customRawRequest.isBlank();
+    }
+
+    public String getCustomRawRequest() {
+        return customRawRequest;
+    }
+
+    public void setCustomRawRequest(String customRawRequest) {
+        this.customRawRequest = (customRawRequest != null && !customRawRequest.isBlank()) ? customRawRequest : null;
+    }
+
+    public void resetCustomRequest() {
+        this.customRawRequest = null;
     }
 
     public String getParametersSummary() {
