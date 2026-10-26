@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Inspector - Auth Testing &amp; Context Menu Preview (littlespidy)</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Suite Orange */
+      --accent-hover: #ff7f32;
+      --badge-green: #2e7d32;
+      --badge-orange: #b78103;
+      --badge-blue: #1565c0;
+      --badge-purple: #6a1b9a;
+      --badge-red: #c62828;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --input-bg: #2d2d2d;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --badge-green: #388e3c;
+      --badge-orange: #f57c00;
+      --badge-blue: #1976d2;
+      --badge-purple: #7b1fa2;
+      --badge-red: #d32f2f;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --input-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-darker);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Header & Burp Suite Top Bar */
+    header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .suite-tabs {
+      display: flex;
+      gap: 2px;
+    }
+
+    .suite-tab {
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 3px 3px 0 0;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .suite-tab:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-bright);
+    }
+
+    .suite-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      font-weight: bold;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .btn:hover {
+      background-color: var(--btn-hover);
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent-hover);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    /* Sub Tabs Bar */
+    .subtabs-bar {
+      background-color: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 8px;
+    }
+
+    .subtab {
+      padding: 8px 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    .subtab:hover {
+      color: var(--text-bright);
+    }
+
+    .subtab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* Main Container */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+    }
+
+    /* Left Sidebar: Profiles & Endpoints */
+    .left-panel {
+      width: 380px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-card);
+    }
+
+    .panel-section {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-container {
+      border: 1px solid var(--border);
+      background-color: var(--bg-dark);
+      overflow-y: auto;
+      max-height: 180px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--row-even);
+    }
+
+    tr:nth-child(odd) {
+      background-color: var(--row-odd);
+    }
+
+    tr:hover {
+      background-color: var(--bg-hover);
+    }
+
+    tr.selected {
+      background-color: var(--bg-selected) !important;
+      color: #ffffff !important;
+    }
+
+    tr.selected td {
+      color: #ffffff !important;
+    }
+
+    /* Right Main Workspace */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .filter-bar {
+      padding: 8px 12px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    select, input[type="text"] {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      outline: none;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+
+    /* Results Table Panel */
+    .results-table-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .results-table-container {
+      flex: 1;
+      overflow: auto;
+      background-color: var(--bg-dark);
+    }
+
+    /* Outcome Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge-success {
+      background-color: var(--badge-green);
+      color: #ffffff;
+    }
+
+    .badge-accessible {
+      background-color: var(--badge-orange);
+      color: #ffffff;
+    }
+
+    .badge-rejected {
+      background-color: var(--badge-red);
+      color: #ffffff;
+    }
+
+    .badge-error {
+      background-color: var(--badge-purple);
+      color: #ffffff;
+    }
+
+    /* Side-by-Side Message Inspector */
+    .inspector-section {
+      height: 330px;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-card);
+    }
+
+    .inspector-header {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-darker);
+    }
+
+    .inspector-title {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    .inspector-switch {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .switch-btn {
+      padding: 3px 10px;
+      background-color: var(--btn-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      border: none;
+      outline: none;
+    }
+
+    .switch-btn.active {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    .inspector-columns {
+      flex: 1;
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding: 8px;
+      background-color: var(--bg-dark);
+    }
+
+    .inspector-column {
+      flex: 1;
+      min-width: 320px;
+      max-width: 450px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-card);
+      overflow: hidden;
+    }
+
+    .col-header {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .col-header-admin {
+      background-color: rgba(90, 225, 110, 0.15);
+      border-left: 3px solid #2e7d32;
+    }
+
+    .col-header-auditor {
+      background-color: rgba(255, 120, 120, 0.15);
+      border-left: 3px solid #c62828;
+    }
+
+    .col-header-unauth {
+      background-color: rgba(255, 180, 70, 0.15);
+      border-left: 3px solid #b78103;
+    }
+
+    .col-editor {
+      flex: 1;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      background-color: var(--code-bg);
+      color: var(--text-bright);
+      overflow: auto;
+      white-space: pre;
+    }
+
+    /* Context Menu Mockup Overlay */
+    .context-menu-demo-overlay {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--accent);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      width: 360px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .demo-header {
+      background-color: var(--accent);
+      color: #ffffff;
+      padding: 6px 10px;
+      font-weight: bold;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .context-menu {
+      background-color: var(--bg-card);
+      padding: 4px 0;
+      border: 1px solid var(--border);
+    }
+
+    .menu-item {
+      padding: 5px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+
+    .menu-item:hover {
+      background-color: var(--bg-selected);
+      color: #ffffff;
+    }
+
+    .menu-separator {
+      height: 1px;
+      background-color: var(--border);
+      margin: 4px 0;
+    }
+
+    .submenu-arrow {
+      color: var(--text-muted);
+      font-size: 9px;
+    }
+
+    .nested-menu-view {
+      padding: 8px 12px;
+      background-color: var(--bg-dark);
+      font-size: 11px;
+    }
+
+    .toast-msg {
+      background-color: #2e7d32;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      margin-top: 6px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Suite Header -->
+  <header>
+    <div class="suite-tabs">
+      <div class="suite-tab">Dashboard</div>
+      <div class="suite-tab">Target</div>
+      <div class="suite-tab">Proxy</div>
+      <div class="suite-tab">Intruder</div>
+      <div class="suite-tab">Repeater</div>
+      <div class="suite-tab active">API Inspector</div>
+      <div class="suite-tab">Extensions</div>
+    </div>
+    <div class="header-controls">
+      <button class="btn" onclick="toggleTheme()">Toggle Theme</button>
+      <button class="btn btn-primary" onclick="toggleContextMenuDemo()">Show Context Menu Mockup</button>
+    </div>
+  </header>
+
+  <!-- Sub Tabs -->
+  <div class="subtabs-bar">
+    <div class="subtab">ResAPI Version Finder</div>
+    <div class="subtab">API Documentation Intruder</div>
+    <div class="subtab">API Endpoint Discovery Intruder</div>
+    <div class="subtab">Hidden API Storage</div>
+    <div class="subtab">API Import</div>
+    <div class="subtab active">Authentication Testing</div>
+  </div>
+
+  <!-- Main View -->
+  <div class="main-container">
+    
+    <!-- Left Sidebar -->
+    <div class="left-panel">
+      <!-- Section 1: Auth Profiles -->
+      <div class="panel-section">
+        <div class="panel-title">
+          <span>Authentication Profiles</span>
+          <span style="font-size: 10px; color: var(--text-muted);">2 Active</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25px;"><input type="checkbox" checked disabled></th>
+                <th>Profile Name</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" checked disabled></td>
+                <td><strong>Admin Profile</strong></td>
+                <td>Bearer Token</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked disabled></td>
+                <td><strong>Auditor Profile</strong></td>
+                <td>API Key (Header)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Endpoints to test -->
+      <div class="panel-section" style="flex: 1; display: flex; flex-direction: column;">
+        <div class="panel-title">
+          <span>Target API Endpoints</span>
+          <span style="font-size: 10px; color: var(--text-muted);">Orders API (3)</span>
+        </div>
+        <div class="table-container" style="flex: 1; max-height: none;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25px;"><input type="checkbox" checked disabled></th>
+                <th>Method</th>
+                <th>Path</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" checked disabled></td>
+                <td><span style="color: #4caf50; font-weight: bold;">GET</span></td>
+                <td>/api/v1/orders</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked disabled></td>
+                <td><span style="color: #2196f3; font-weight: bold;">POST</span></td>
+                <td>/api/v1/orders/create</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked disabled></td>
+                <td><span style="color: #f44336; font-weight: bold;">DELETE</span></td>
+                <td>/api/v1/orders/{id}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" style="flex: 1;">Run All (6 Tests)</button>
+          <button class="btn" style="flex: 1;">Run Selected</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Workspace -->
+    <div class="right-panel">
+      
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label style="font-weight: 500;">Filter Outcome:</label>
+          <select id="outcomeFilter" onchange="filterResults()">
+            <option value="ALL">All Outcomes</option>
+            <option value="UNAUTHENTICATED_ACCESSIBLE">Unauthenticated Accessible</option>
+            <option value="AUTHENTICATED_ONLY">Authenticated Only</option>
+            <option value="AUTH_REJECTED">Auth Rejected</option>
+            <option value="SUCCESS">Success</option>
+          </select>
+          <label class="checkbox-label" style="margin-left: 12px;">
+            <input type="checkbox" id="unauthToggle" checked onchange="toggleUnauthColumns()">
+            Run unauthenticated comparison test for each endpoint
+          </label>
+        </div>
+        <div class="filter-group">
+          <button class="btn">Export CSV</button>
+          <button class="btn">Export JSON</button>
+          <button class="btn" onclick="resetDemo()">Clear Results</button>
+        </div>
+      </div>
+
+      <!-- Results Table Section -->
+      <div class="results-table-section">
+        <div class="results-table-container">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>Collection</th>
+                <th>Method</th>
+                <th>Path</th>
+                <!-- Admin Profile Columns -->
+                <th>Admin Status</th>
+                <th>Admin Length</th>
+                <th>Admin Outcome</th>
+                <!-- Auditor Profile Columns -->
+                <th>Auditor Status</th>
+                <th>Auditor Length</th>
+                <th>Auditor Outcome</th>
+                <!-- Unauth Columns -->
+                <th class="unauth-col">Unauth Status</th>
+                <th class="unauth-col">Unauth Length</th>
+                <th class="unauth-col">Unauth Outcome</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTbody">
+              <tr class="selected" onclick="selectRow(0, this)" data-outcome="ACCESSIBLE">
+                <td>Orders API</td>
+                <td><span style="color: #4caf50; font-weight: bold;">GET</span></td>
+                <td>/api/v1/orders</td>
+                <td>200</td>
+                <td>1420 B</td>
+                <td><span class="badge badge-success">SUCCESS</span></td>
+                <td>200</td>
+                <td>1420 B</td>
+                <td><span class="badge badge-success">SUCCESS</span></td>
+                <td class="unauth-col">200</td>
+                <td class="unauth-col">1420 B</td>
+                <td class="unauth-col"><span class="badge badge-accessible">UNAUTHENTICATED_ACCESSIBLE</span></td>
+              </tr>
+              <tr onclick="selectRow(1, this)" data-outcome="AUTH_ONLY">
+                <td>Orders API</td>
+                <td><span style="color: #2196f3; font-weight: bold;">POST</span></td>
+                <td>/api/v1/orders/create</td>
+                <td>201</td>
+                <td>320 B</td>
+                <td><span class="badge badge-success">SUCCESS</span></td>
+                <td>403</td>
+                <td>74 B</td>
+                <td><span class="badge badge-rejected">AUTH_REJECTED</span></td>
+                <td class="unauth-col">401</td>
+                <td class="unauth-col">62 B</td>
+                <td class="unauth-col"><span class="badge badge-success">AUTHENTICATED_ONLY</span></td>
+              </tr>
+              <tr onclick="selectRow(2, this)" data-outcome="AUTH_ONLY">
+                <td>Orders API</td>
+                <td><span style="color: #f44336; font-weight: bold;">DELETE</span></td>
+                <td>/api/v1/orders/102</td>
+                <td>204</td>
+                <td>0 B</td>
+                <td><span class="badge badge-success">SUCCESS</span></td>
+                <td>403</td>
+                <td>74 B</td>
+                <td><span class="badge badge-rejected">AUTH_REJECTED</span></td>
+                <td class="unauth-col">401</td>
+                <td class="unauth-col">62 B</td>
+                <td class="unauth-col"><span class="badge badge-success">AUTHENTICATED_ONLY</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Side-by-Side HTTP Message Inspector -->
+      <div class="inspector-section">
+        <div class="inspector-header">
+          <div class="inspector-title">HTTP Message Inspector (Side-by-Side Deterministic Profile Comparison)</div>
+          <div class="inspector-switch">
+            <button class="switch-btn active" id="btnReq" onclick="setViewMode('REQ')">Request</button>
+            <button class="switch-btn" id="btnResp" onclick="setViewMode('RESP')">Response</button>
+          </div>
+        </div>
+
+        <div class="inspector-columns" id="inspectorCols">
+          <!-- Column 1: Admin Profile (Always First) -->
+          <div class="inspector-column">
+            <div class="col-header col-header-admin">
+              <span>Admin Profile</span>
+              <span id="colInfo0" style="color: var(--text-muted); font-size: 10px;">200 | 1420 B | SUCCESS</span>
+            </div>
+            <div class="col-editor" id="colEditor0">GET /api/v1/orders HTTP/1.1
+Host: orders.example.com
+Authorization: Bearer eyJhbGciOi...admin_token
+Accept: application/json</div>
+          </div>
+
+          <!-- Column 2: Auditor Profile (Always Second) -->
+          <div class="inspector-column">
+            <div class="col-header col-header-auditor">
+              <span>Auditor Profile</span>
+              <span id="colInfo1" style="color: var(--text-muted); font-size: 10px;">200 | 1420 B | SUCCESS</span>
+            </div>
+            <div class="col-editor" id="colEditor1">GET /api/v1/orders HTTP/1.1
+Host: orders.example.com
+X-API-Key: key_auditor_secret_998
+Accept: application/json</div>
+          </div>
+
+          <!-- Column 3: Unauthenticated request (Always Last) -->
+          <div class="inspector-column unauth-col">
+            <div class="col-header col-header-unauth">
+              <span>Unauthenticated</span>
+              <span id="colInfo2" style="color: var(--text-muted); font-size: 10px;">200 | 1420 B | UNAUTHENTICATED_ACCESSIBLE</span>
+            </div>
+            <div class="col-editor" id="colEditor2">GET /api/v1/orders HTTP/1.1
+Host: orders.example.com
+Accept: application/json</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Context Menu Preview Dialog (Interactive Overlay) -->
+  <div class="context-menu-demo-overlay" id="contextMenuOverlay">
+    <div class="demo-header">
+      <span>Right-Click Menu Mockup</span>
+      <span style="cursor: pointer;" onclick="toggleContextMenuDemo()">[Close]</span>
+    </div>
+    <div style="padding: 8px; background-color: var(--bg-card); border-bottom: 1px solid var(--border); font-size: 11px;">
+      Target: <code>GET /api/v1/orders?filter=all&amp;sort=desc</code> (Proxy History)
+    </div>
+    <div class="context-menu">
+      <div class="menu-item" onclick="triggerContextMenuAction('API Inspector (littlespidy)')">
+        <strong>Extensions &gt; API Inspector (littlespidy)</strong>
+        <span class="submenu-arrow">&#9656;</span>
+      </div>
+    </div>
+    <div class="nested-menu-view">
+      <div style="font-weight: bold; color: var(--accent); margin-bottom: 6px;">Single Parent Menu (No Duplication):</div>
+      <div style="border: 1px solid var(--border); border-radius: 3px; background-color: var(--bg-card);">
+        <div class="menu-item" onclick="triggerContextMenuAction('Send to ResAPI Version Finder')">Send to ResAPI Version Finder</div>
+        <div class="menu-item" onclick="triggerContextMenuAction('Send to Hidden API Storage')">Send to Hidden API Storage</div>
+        <div class="menu-separator"></div>
+        <div class="menu-item" onclick="triggerContextMenuAction('API Documentation Intruder Strategy')">API Documentation Intruder Strategy</div>
+        <div class="menu-item" onclick="triggerContextMenuAction('API Endpoint Discovery Intruder Strategy')">
+          <strong>API Endpoint Discovery Intruder Strategy</strong>
+        </div>
+      </div>
+      <div id="toastMessage" class="toast-msg"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sample Endpoint Details
+    const endpointData = [
+      {
+        path: "/api/v1/orders",
+        method: "GET",
+        adminReq: "GET /api/v1/orders HTTP/1.1\nHost: orders.example.com\nAuthorization: Bearer eyJhbGciOi...admin_token\nAccept: application/json",
+        adminResp: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 1420\n\n[{\"orderId\": 101, \"total\": 45.00}, {\"orderId\": 102, \"total\": 120.50}]",
+        adminInfo: "200 | 1420 B | SUCCESS",
+        auditorReq: "GET /api/v1/orders HTTP/1.1\nHost: orders.example.com\nX-API-Key: key_auditor_secret_998\nAccept: application/json",
+        auditorResp: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 1420\n\n[{\"orderId\": 101, \"total\": 45.00}, {\"orderId\": 102, \"total\": 120.50}]",
+        auditorInfo: "200 | 1420 B | SUCCESS",
+        unauthReq: "GET /api/v1/orders HTTP/1.1\nHost: orders.example.com\nAccept: application/json",
+        unauthResp: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 1420\n\n[{\"orderId\": 101, \"total\": 45.00}, {\"orderId\": 102, \"total\": 120.50}]",
+        unauthInfo: "200 | 1420 B | UNAUTHENTICATED_ACCESSIBLE"
+      },
+      {
+        path: "/api/v1/orders/create",
+        method: "POST",
+        adminReq: "POST /api/v1/orders/create HTTP/1.1\nHost: orders.example.com\nAuthorization: Bearer eyJhbGciOi...admin_token\nContent-Type: application/json\n\n{\"item\": \"Widget\", \"quantity\": 2}",
+        adminResp: "HTTP/1.1 201 Created\nContent-Type: application/json\nContent-Length: 320\n\n{\"status\": \"created\", \"orderId\": 103}",
+        adminInfo: "201 | 320 B | SUCCESS",
+        auditorReq: "POST /api/v1/orders/create HTTP/1.1\nHost: orders.example.com\nX-API-Key: key_auditor_secret_998\nContent-Type: application/json\n\n{\"item\": \"Widget\", \"quantity\": 2}",
+        auditorResp: "HTTP/1.1 403 Forbidden\nContent-Type: application/json\nContent-Length: 74\n\n{\"error\": \"Forbidden: Auditor role lacks create permission\"}",
+        auditorInfo: "403 | 74 B | AUTH_REJECTED",
+        unauthReq: "POST /api/v1/orders/create HTTP/1.1\nHost: orders.example.com\nContent-Type: application/json\n\n{\"item\": \"Widget\", \"quantity\": 2}",
+        unauthResp: "HTTP/1.1 401 Unauthorized\nContent-Type: application/json\nContent-Length: 62\n\n{\"error\": \"Authentication Required\"}",
+        unauthInfo: "401 | 62 B | AUTHENTICATED_ONLY"
+      },
+      {
+        path: "/api/v1/orders/102",
+        method: "DELETE",
+        adminReq: "DELETE /api/v1/orders/102 HTTP/1.1\nHost: orders.example.com\nAuthorization: Bearer eyJhbGciOi...admin_token",
+        adminResp: "HTTP/1.1 204 No Content\nContent-Length: 0",
+        adminInfo: "204 | 0 B | SUCCESS",
+        auditorReq: "DELETE /api/v1/orders/102 HTTP/1.1\nHost: orders.example.com\nX-API-Key: key_auditor_secret_998",
+        auditorResp: "HTTP/1.1 403 Forbidden\nContent-Length: 74\n\n{\"error\": \"Forbidden: Auditor role lacks delete permission\"}",
+        auditorInfo: "403 | 74 B | AUTH_REJECTED",
+        unauthReq: "DELETE /api/v1/orders/102 HTTP/1.1\nHost: orders.example.com",
+        unauthResp: "HTTP/1.1 401 Unauthorized\nContent-Length: 62\n\n{\"error\": \"Authentication Required\"}",
+        unauthInfo: "401 | 62 B | AUTHENTICATED_ONLY"
+      }
+    ];
+
+    let currentSelectedRow = 0;
+    let currentViewMode = "REQ";
+
+    function selectRow(index, tr) {
+      currentSelectedRow = index;
+      document.querySelectorAll('#resultsTbody tr').forEach(r => r.classList.remove('selected'));
+      tr.classList.add('selected');
+      updateInspector();
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      document.getElementById('btnReq').classList.toggle('active', mode === 'REQ');
+      document.getElementById('btnResp').classList.toggle('active', mode === 'RESP');
+      updateInspector();
+    }
+
+    function updateInspector() {
+      const data = endpointData[currentSelectedRow];
+      document.getElementById('colInfo0').textContent = data.adminInfo;
+      document.getElementById('colInfo1').textContent = data.auditorInfo;
+      document.getElementById('colInfo2').textContent = data.unauthInfo;
+
+      if (currentViewMode === 'REQ') {
+        document.getElementById('colEditor0').textContent = data.adminReq;
+        document.getElementById('colEditor1').textContent = data.auditorReq;
+        document.getElementById('colEditor2').textContent = data.unauthReq;
+      } else {
+        document.getElementById('colEditor0').textContent = data.adminResp;
+        document.getElementById('colEditor1').textContent = data.auditorResp;
+        document.getElementById('colEditor2').textContent = data.unauthResp;
+      }
+    }
+
+    function toggleUnauthColumns() {
+      const show = document.getElementById('unauthToggle').checked;
+      document.querySelectorAll('.unauth-col').forEach(el => {
+        el.style.display = show ? '' : 'none';
+      });
+    }
+
+    function filterResults() {
+      const filter = document.getElementById('outcomeFilter').value;
+      const rows = document.querySelectorAll('#resultsTbody tr');
+      rows.forEach(r => {
+        if (filter === 'ALL') {
+          r.style.display = '';
+        } else if (filter === 'UNAUTHENTICATED_ACCESSIBLE' && r.dataset.outcome === 'ACCESSIBLE') {
+          r.style.display = '';
+        } else if (filter === 'AUTHENTICATED_ONLY' && r.dataset.outcome === 'AUTH_ONLY') {
+          r.style.display = '';
+        } else if (filter === 'SUCCESS') {
+          r.style.display = '';
+        } else {
+          r.style.display = 'none';
+        }
+      });
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    function toggleContextMenuDemo() {
+      const el = document.getElementById('contextMenuOverlay');
+      el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function triggerContextMenuAction(action) {
+      const toast = document.getElementById('toastMessage');
+      if (action.includes('API Endpoint Discovery Intruder Strategy')) {
+        toast.innerHTML = "Action Triggered:<br>1. GET parameters stripped: <code>/api/v1/orders</code><br>2. Intruder Tabs named:<br>&bull; <code>Auth - /api/v1 - orders.example.com</code><br>&bull; <code>No Auth - /api/v1 - orders.example.com</code>";
+      } else {
+        toast.innerHTML = "Selected Action: <strong>" + action + "</strong>";
+      }
+      toast.style.display = 'block';
+    }
+
+    // Initialize
+    updateInspector();
+  </script>
+</body>
+</html>

@@ -53,21 +53,21 @@ public class PathVariationGenerator_littlespidy {
     /**
      * Generates parent endpoint path variations for API Endpoint Discovery by progressively
      * removing path segments from right to left.
-     * Example: /api/admin/health -> ["/api/admin", "/api", "/"]
+     * All GET query parameters are removed.
+     * Example: /api/admin/health?page=1 -> ["/api/admin", "/api", "/"]
      */
     public static List<String> generateEndpointDiscoveryPaths(String originalFullPath) {
         List<String> results = new ArrayList<>();
         Set<String> seen = new HashSet<>();
 
         String pathOnly = extractPathOnly(originalFullPath);
-        String query = extractQueryString(originalFullPath);
         List<String> segments = splitSegments(pathOnly);
 
         if (segments.isEmpty()) {
-            return List.of("/" + query);
+            return List.of("/");
         }
 
-        // Generate parent endpoint paths from right to left
+        // Generate parent endpoint paths from right to left without GET parameters
         for (int count = segments.size() - 1; count >= 0; count--) {
             StringBuilder sb = new StringBuilder();
             if (count == 0) {
@@ -78,14 +78,14 @@ public class PathVariationGenerator_littlespidy {
                 }
             }
 
-            String candidate = sb.toString() + query;
-            if (!candidate.equals(originalFullPath) && seen.add(candidate)) {
+            String candidate = sb.toString();
+            if (!candidate.equals(pathOnly) && seen.add(candidate)) {
                 results.add(candidate);
             }
         }
 
         if (results.isEmpty()) {
-            results.add("/" + query);
+            results.add("/");
         }
 
         return results;

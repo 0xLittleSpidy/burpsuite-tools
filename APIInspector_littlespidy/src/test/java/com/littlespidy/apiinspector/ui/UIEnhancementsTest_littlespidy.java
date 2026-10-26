@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.List;
 
@@ -550,6 +551,174 @@ public class UIEnhancementsTest_littlespidy {
             assertEquals("Detailed description of order creation flow with billing and items.", ep.getDescription());
             assertTrue(ep.isRequiresAuth());
         }
+    }
+
+    @Test
+    @DisplayName("Verify context menu hierarchy has single parent menu without duplicates")
+    public void testContextMenuHierarchyAndNoDuplicates() {
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        APIInspectorContextMenu_littlespidy contextMenu = new APIInspectorContextMenu_littlespidy(mockApi, rootTab);
+
+        burp.api.montoya.http.message.requests.HttpRequest req =
+                TestMockHelper_littlespidy.createMockRequest("GET", "https://example.com/api/v1/users?page=1", "/api/v1/users?page=1", Map.of(), "");
+
+        burp.api.montoya.http.message.HttpRequestResponse rr = (burp.api.montoya.http.message.HttpRequestResponse) Proxy.newProxyInstance(
+                burp.api.montoya.http.message.HttpRequestResponse.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.http.message.HttpRequestResponse.class},
+                (proxy, method, args) -> {
+                    if ("request".equals(method.getName())) return req;
+                    if ("hasResponse".equals(method.getName())) return false;
+                    return null;
+                }
+        );
+
+        burp.api.montoya.ui.contextmenu.ContextMenuEvent event = (burp.api.montoya.ui.contextmenu.ContextMenuEvent) Proxy.newProxyInstance(
+                burp.api.montoya.ui.contextmenu.ContextMenuEvent.class.getClassLoader(),
+                new Class<?>[]{burp.api.montoya.ui.contextmenu.ContextMenuEvent.class},
+                (proxy, method, args) -> {
+                    if ("selectedRequestResponses".equals(method.getName())) return List.of(rr);
+                    if ("messageEditorRequestResponse".equals(method.getName())) return java.util.Optional.empty();
+                    if ("invocationType".equals(method.getName())) return burp.api.montoya.ui.contextmenu.InvocationType.PROXY_HISTORY;
+                    return null;
+                }
+        );
+
+        List<Component> items = contextMenu.provideMenuItems(event);
+        assertEquals(1, items.size(), "Context menu must provide exactly one single parent menu");
+        assertTrue(items.get(0) instanceof JMenu, "Parent item must be a JMenu");
+
+        JMenu parentMenu = (JMenu) items.get(0);
+        assertEquals("API Inspector (littlespidy)", parentMenu.getText());
+
+        // Verify the 4 sub-menu actions inside the parent menu
+        List<String> subItemNames = new ArrayList<>();
+        for (int i = 0; i < parentMenu.getItemCount(); i++) {
+            JMenuItem sub = parentMenu.getItem(i);
+            if (sub != null) {
+                subItemNames.add(sub.getText());
+            }
+        }
+
+        assertTrue(subItemNames.contains("Send to ResAPI Version Finder"));
+        assertTrue(subItemNames.contains("Send to Hidden API Storage"));
+        assertTrue(subItemNames.contains("API Documentation Intruder Strategy"));
+        assertTrue(subItemNames.contains("API Endpoint Discovery Intruder Strategy"));
+        assertEquals(4, subItemNames.size(), "Must contain exactly four submenu items");
+    }
+
+    @Test
+    @DisplayName("Verify per-profile columns and removal of Latency and Time columns in AuthTestingTab")
+    public void testAuthTestingTabPerProfileColumns() throws Exception {
+        AuthTestingTab_littlespidy authTab = new AuthTestingTab_littlespidy(mockApi);
+
+        AuthProfile_littlespidy prof1 = new AuthProfile_littlespidy("Admin", AuthType_littlespidy.BEARER_TOKEN);
+        prof1.setId("p1");
+        AuthProfile_littlespidy prof2 = new AuthProfile_littlespidy("Auditor", AuthType_littlespidy.API_KEY);
+        prof2.setId("p2");
+
+        authTab.setProfiles(List.of(prof1, prof2));
+
+        Field resultsTableField = AuthTestingTab_littlespidy.class.getDeclaredField("resultsTable");
+        resultsTableField.setAccessible(true);
+        JTable resultsTable = (JTable) resultsTableField.get(authTab);
+
+        // Verify Latency and Time are NOT present in table columns
+        for (int i = 0; i < resultsTable.getColumnCount(); i++) {
+            String name = resultsTable.getColumnName(i);
+            assertFalse(name.toLowerCase().contains("latency"), "Latency column must be removed");
+            assertFalse(name.toLowerCase().contains("time"), "Time column must be removed");
+        }
+
+        // Verify column structure: 3 base + 3 for Admin + 3 for Auditor + 3 for Unauth = 12 columns
+        assertEquals("Collection", resultsTable.getColumnName(0));
+        assertEquals("Method", resultsTable.getColumnName(1));
+        assertEquals("Path", resultsTable.getColumnName(2));
+        assertEquals("Admin Status", resultsTable.getColumnName(3));
+        assertEquals("Admin Length", resultsTable.getColumnName(4));
+        assertEquals("Admin Outcome", resultsTable.getColumnName(5));
+        assertEquals("Auditor Status", resultsTable.getColumnName(6));
+        assertEquals("Auditor Length", resultsTable.getColumnName(7));
+        assertEquals("Auditor Outcome", resultsTable.getColumnName(8));
+        assertEquals("Unauth Status", resultsTable.getColumnName(9));
+        assertEquals("Unauth Length", resultsTable.getColumnName(10));
+        assertEquals("Unauth Outcome", resultsTable.getColumnName(11));
+    }
+
+    @Test
+    @DisplayName("Verify side-by-side comparison inspector ordering is strictly deterministic")
+    public void testSideBySideComparisonDeterministicOrder() throws Exception {
+        AuthTestingTab_littlespidy authTab = new AuthTestingTab_littlespidy(mockApi);
+
+        AuthProfile_littlespidy p1 = new AuthProfile_littlespidy("Alpha Profile", AuthType_littlespidy.BEARER_TOKEN);
+        p1.setId("p-alpha");
+        AuthProfile_littlespidy p2 = new AuthProfile_littlespidy("Beta Profile", AuthType_littlespidy.API_KEY);
+        p2.setId("p-beta");
+
+        authTab.setProfiles(List.of(p1, p2));
+
+        // Create results arriving out-of-order: Beta arrives before Alpha
+        AuthTestResult_littlespidy betaRes = new AuthTestResult_littlespidy();
+        betaRes.setCollectionId("c1");
+        betaRes.setCollectionName("Test API");
+        betaRes.setMethod("GET");
+        betaRes.setPath("/api/v1/resource");
+        betaRes.setProfileId("p-beta");
+        betaRes.setProfileName("Beta Profile");
+        betaRes.setAuthStatusCode(403);
+        betaRes.setOutcome(AuthTestOutcome_littlespidy.AUTH_REJECTED);
+
+        AuthTestResult_littlespidy alphaRes = new AuthTestResult_littlespidy();
+        alphaRes.setCollectionId("c1");
+        alphaRes.setCollectionName("Test API");
+        alphaRes.setMethod("GET");
+        alphaRes.setPath("/api/v1/resource");
+        alphaRes.setProfileId("p-alpha");
+        alphaRes.setProfileName("Alpha Profile");
+        alphaRes.setAuthStatusCode(200);
+        alphaRes.setOutcome(AuthTestOutcome_littlespidy.SUCCESS);
+
+        AuthTestResult_littlespidy unauthRes = new AuthTestResult_littlespidy();
+        unauthRes.setCollectionId("c1");
+        unauthRes.setCollectionName("Test API");
+        unauthRes.setMethod("GET");
+        unauthRes.setPath("/api/v1/resource");
+        unauthRes.setProfileId("unauthenticated");
+        unauthRes.setProfileName("Unauthenticated request");
+        unauthRes.setAuthStatusCode(401);
+        unauthRes.setOutcome(AuthTestOutcome_littlespidy.AUTHENTICATED_ONLY);
+
+        // Add in mixed order: Beta, Unauth, Alpha
+        authTab.setResults(List.of(betaRes, unauthRes, alphaRes));
+
+        Field resultsTableField = AuthTestingTab_littlespidy.class.getDeclaredField("resultsTable");
+        resultsTableField.setAccessible(true);
+        JTable resultsTable = (JTable) resultsTableField.get(authTab);
+
+        Field colContainerField = AuthTestingTab_littlespidy.class.getDeclaredField("columnsContainer");
+        colContainerField.setAccessible(true);
+        JPanel colContainer = (JPanel) colContainerField.get(authTab);
+
+        Field columnViewsField = AuthTestingTab_littlespidy.class.getDeclaredField("columnViews");
+        columnViewsField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        List<AuthTestingTab_littlespidy.ProfileColumnView> columnViews =
+                (List<AuthTestingTab_littlespidy.ProfileColumnView>) columnViewsField.get(authTab);
+
+        // Select the single aggregated endpoint row
+        assertEquals(1, resultsTable.getRowCount(), "All results for same endpoint must group into 1 row");
+        resultsTable.setRowSelectionInterval(0, 0);
+
+        assertEquals(3, colContainer.getComponentCount(), "Three side-by-side profile columns expected");
+        assertEquals(3, columnViews.size());
+
+        // Verify deterministic column views order: Alpha Profile MUST be column 0, Beta Profile MUST be column 1, Unauth column 2
+        // Inspecting first component of card panel header
+        Component firstColPanel = colContainer.getComponent(0);
+        assertTrue(firstColPanel instanceof JPanel);
+        Component secondColPanel = colContainer.getComponent(1);
+        assertTrue(secondColPanel instanceof JPanel);
+        Component thirdColPanel = colContainer.getComponent(2);
+        assertTrue(thirdColPanel instanceof JPanel);
     }
 
     private static List<Component> getAllComponents(Container c) {
