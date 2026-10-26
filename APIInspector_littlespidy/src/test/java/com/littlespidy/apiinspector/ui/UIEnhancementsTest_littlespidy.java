@@ -629,19 +629,104 @@ public class UIEnhancementsTest_littlespidy {
             assertFalse(name.toLowerCase().contains("time"), "Time column must be removed");
         }
 
-        // Verify column structure: 3 base + 3 for Admin + 3 for Auditor + 3 for Unauth = 12 columns
+        // Verify column structure: 3 base + 1 for Admin + 1 for Auditor + 1 for Unauth = 6 columns
+        assertEquals(6, resultsTable.getColumnCount());
         assertEquals("Collection", resultsTable.getColumnName(0));
         assertEquals("Method", resultsTable.getColumnName(1));
         assertEquals("Path", resultsTable.getColumnName(2));
-        assertEquals("Admin Status", resultsTable.getColumnName(3));
-        assertEquals("Admin Length", resultsTable.getColumnName(4));
-        assertEquals("Admin Outcome", resultsTable.getColumnName(5));
-        assertEquals("Auditor Status", resultsTable.getColumnName(6));
-        assertEquals("Auditor Length", resultsTable.getColumnName(7));
-        assertEquals("Auditor Outcome", resultsTable.getColumnName(8));
-        assertEquals("Unauth Status", resultsTable.getColumnName(9));
-        assertEquals("Unauth Length", resultsTable.getColumnName(10));
-        assertEquals("Unauth Outcome", resultsTable.getColumnName(11));
+        assertEquals("Admin", resultsTable.getColumnName(3));
+        assertEquals("Auditor", resultsTable.getColumnName(4));
+        assertEquals("Unauth", resultsTable.getColumnName(5));
+    }
+
+    @Test
+    @DisplayName("Verify IDOR cross-comparison outcome calculation: SAME, SIMILAR, DIFFERENT, and N/A")
+    public void testCrossComparisonIDOROutcomes() throws Exception {
+        AuthTestingTab_littlespidy authTab = new AuthTestingTab_littlespidy(mockApi);
+
+        AuthProfile_littlespidy userA = new AuthProfile_littlespidy("User A", AuthType_littlespidy.BEARER_TOKEN);
+        userA.setId("user-a");
+        AuthProfile_littlespidy userB = new AuthProfile_littlespidy("User B", AuthType_littlespidy.BEARER_TOKEN);
+        userB.setId("user-b");
+
+        authTab.setProfiles(List.of(userA, userB));
+
+        // Case 1: Both User A and User B receive EXACT SAME 200 response -> SAME (IDOR Bypass)
+        AuthTestResult_littlespidy resA1 = new AuthTestResult_littlespidy();
+        resA1.setCollectionId("c1");
+        resA1.setMethod("GET");
+        resA1.setPath("/api/v1/orders/101");
+        resA1.setProfileId("user-a");
+        resA1.setProfileName("User A");
+        resA1.setAuthStatusCode(200);
+        resA1.setAuthResponseBytes("{\"orderId\": 101, \"total\": 100}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        resA1.setAuthResponseLength(31);
+
+        AuthTestResult_littlespidy resB1 = new AuthTestResult_littlespidy();
+        resB1.setCollectionId("c1");
+        resB1.setMethod("GET");
+        resB1.setPath("/api/v1/orders/101");
+        resB1.setProfileId("user-b");
+        resB1.setProfileName("User B");
+        resB1.setAuthStatusCode(200);
+        resB1.setAuthResponseBytes("{\"orderId\": 101, \"total\": 100}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        resB1.setAuthResponseLength(31);
+
+        authTab.setResults(List.of(resA1, resB1));
+
+        Field resultsTableField = AuthTestingTab_littlespidy.class.getDeclaredField("resultsTable");
+        resultsTableField.setAccessible(true);
+        JTable resultsTable = (JTable) resultsTableField.get(authTab);
+
+        assertEquals(1, resultsTable.getRowCount());
+        // Value for User A and User B should be SAME
+        assertEquals("SAME", resultsTable.getValueAt(0, 3));
+        assertEquals("SAME", resultsTable.getValueAt(0, 4));
+
+        // Case 2: User B is forbidden (403) -> DIFFERENT (Access Enforced)
+        AuthTestResult_littlespidy resB2 = new AuthTestResult_littlespidy();
+        resB2.setCollectionId("c1");
+        resB2.setMethod("GET");
+        resB2.setPath("/api/v1/orders/101");
+        resB2.setProfileId("user-b");
+        resB2.setProfileName("User B");
+        resB2.setAuthStatusCode(403);
+        resB2.setAuthResponseBytes("Forbidden".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        resB2.setAuthResponseLength(9);
+
+        authTab.setResults(List.of(resA1, resB2));
+        assertEquals("DIFFERENT", resultsTable.getValueAt(0, 3));
+        assertEquals("DIFFERENT", resultsTable.getValueAt(0, 4));
+
+        // Case 3: User B has similar length within 5% -> SIMILAR (Potential Bypass)
+        byte[] bodySimilar = new byte[100];
+        byte[] bodyTarget = new byte[102]; // diff 2 <= 5 (5% of 102)
+        java.util.Arrays.fill(bodySimilar, (byte) 'x');
+        java.util.Arrays.fill(bodyTarget, (byte) 'y');
+
+        AuthTestResult_littlespidy resA3 = new AuthTestResult_littlespidy();
+        resA3.setCollectionId("c1");
+        resA3.setMethod("GET");
+        resA3.setPath("/api/v1/data");
+        resA3.setProfileId("user-a");
+        resA3.setProfileName("User A");
+        resA3.setAuthStatusCode(200);
+        resA3.setAuthResponseBytes(bodyTarget);
+        resA3.setAuthResponseLength(102);
+
+        AuthTestResult_littlespidy resB3 = new AuthTestResult_littlespidy();
+        resB3.setCollectionId("c1");
+        resB3.setMethod("GET");
+        resB3.setPath("/api/v1/data");
+        resB3.setProfileId("user-b");
+        resB3.setProfileName("User B");
+        resB3.setAuthStatusCode(200);
+        resB3.setAuthResponseBytes(bodySimilar);
+        resB3.setAuthResponseLength(100);
+
+        authTab.setResults(List.of(resA3, resB3));
+        assertEquals("SIMILAR", resultsTable.getValueAt(0, 3));
+        assertEquals("SIMILAR", resultsTable.getValueAt(0, 4));
     }
 
     @Test

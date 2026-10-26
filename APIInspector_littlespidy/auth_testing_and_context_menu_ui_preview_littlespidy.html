@@ -644,10 +644,10 @@
           <label style="font-weight: 500;">Filter Outcome:</label>
           <select id="outcomeFilter" onchange="filterResults()">
             <option value="ALL">All Outcomes</option>
-            <option value="UNAUTHENTICATED_ACCESSIBLE">Unauthenticated Accessible</option>
-            <option value="AUTHENTICATED_ONLY">Authenticated Only</option>
-            <option value="AUTH_REJECTED">Auth Rejected</option>
-            <option value="SUCCESS">Success</option>
+            <option value="SAME">Status SAME (Bypassed)</option>
+            <option value="SIMILAR">Status SIMILAR (Potential Bypass)</option>
+            <option value="DIFFERENT">Status DIFFERENT (Enforced)</option>
+            <option value="NA">Status N/A</option>
           </select>
           <label class="checkbox-label" style="margin-left: 12px;">
             <input type="checkbox" id="unauthToggle" checked onchange="toggleUnauthColumns()">
@@ -670,62 +670,35 @@
                 <th>Collection</th>
                 <th>Method</th>
                 <th>Path</th>
-                <!-- Admin Profile Columns -->
-                <th>Admin Status</th>
-                <th>Admin Length</th>
-                <th>Admin Outcome</th>
-                <!-- Auditor Profile Columns -->
-                <th>Auditor Status</th>
-                <th>Auditor Length</th>
-                <th>Auditor Outcome</th>
-                <!-- Unauth Columns -->
-                <th class="unauth-col">Unauth Status</th>
-                <th class="unauth-col">Unauth Length</th>
-                <th class="unauth-col">Unauth Outcome</th>
+                <th>Admin Profile</th>
+                <th>Auditor Profile</th>
+                <th class="unauth-col">Unauth</th>
               </tr>
             </thead>
             <tbody id="resultsTbody">
-              <tr class="selected" onclick="selectRow(0, this)" data-outcome="ACCESSIBLE">
+              <tr class="selected" onclick="selectRow(0, this)" data-outcome="SAME">
                 <td>Orders API</td>
                 <td><span style="color: #4caf50; font-weight: bold;">GET</span></td>
                 <td>/api/v1/orders</td>
-                <td>200</td>
-                <td>1420 B</td>
-                <td><span class="badge badge-success">SUCCESS</span></td>
-                <td>200</td>
-                <td>1420 B</td>
-                <td><span class="badge badge-success">SUCCESS</span></td>
-                <td class="unauth-col">200</td>
-                <td class="unauth-col">1420 B</td>
-                <td class="unauth-col"><span class="badge badge-accessible">UNAUTHENTICATED_ACCESSIBLE</span></td>
+                <td style="background-color: rgba(255, 51, 51, 0.2);"><span class="badge badge-rejected">SAME</span></td>
+                <td style="background-color: rgba(255, 51, 51, 0.2);"><span class="badge badge-rejected">SAME</span></td>
+                <td class="unauth-col" style="background-color: rgba(255, 51, 51, 0.2);"><span class="badge badge-rejected">SAME</span></td>
               </tr>
-              <tr onclick="selectRow(1, this)" data-outcome="AUTH_ONLY">
+              <tr onclick="selectRow(1, this)" data-outcome="DIFFERENT">
                 <td>Orders API</td>
                 <td><span style="color: #2196f3; font-weight: bold;">POST</span></td>
                 <td>/api/v1/orders/create</td>
-                <td>201</td>
-                <td>320 B</td>
-                <td><span class="badge badge-success">SUCCESS</span></td>
-                <td>403</td>
-                <td>74 B</td>
-                <td><span class="badge badge-rejected">AUTH_REJECTED</span></td>
-                <td class="unauth-col">401</td>
-                <td class="unauth-col">62 B</td>
-                <td class="unauth-col"><span class="badge badge-success">AUTHENTICATED_ONLY</span></td>
+                <td style="background-color: rgba(0, 255, 51, 0.15);"><span class="badge badge-success">DIFFERENT</span></td>
+                <td style="background-color: rgba(0, 255, 51, 0.15);"><span class="badge badge-success">DIFFERENT</span></td>
+                <td class="unauth-col" style="background-color: rgba(0, 255, 51, 0.15);"><span class="badge badge-success">DIFFERENT</span></td>
               </tr>
-              <tr onclick="selectRow(2, this)" data-outcome="AUTH_ONLY">
+              <tr onclick="selectRow(2, this)" data-outcome="DIFFERENT">
                 <td>Orders API</td>
                 <td><span style="color: #f44336; font-weight: bold;">DELETE</span></td>
                 <td>/api/v1/orders/102</td>
-                <td>204</td>
-                <td>0 B</td>
-                <td><span class="badge badge-success">SUCCESS</span></td>
-                <td>403</td>
-                <td>74 B</td>
-                <td><span class="badge badge-rejected">AUTH_REJECTED</span></td>
-                <td class="unauth-col">401</td>
-                <td class="unauth-col">62 B</td>
-                <td class="unauth-col"><span class="badge badge-success">AUTHENTICATED_ONLY</span></td>
+                <td style="background-color: rgba(0, 255, 51, 0.15);"><span class="badge badge-success">DIFFERENT</span></td>
+                <td style="background-color: rgba(0, 255, 51, 0.15);"><span class="badge badge-success">DIFFERENT</span></td>
+                <td class="unauth-col" style="background-color: rgba(0, 255, 51, 0.15);"><span class="badge badge-success">DIFFERENT</span></td>
               </tr>
             </tbody>
           </table>
@@ -821,39 +794,39 @@ Accept: application/json</div>
         method: "GET",
         adminReq: "GET /api/v1/orders HTTP/1.1\nHost: orders.example.com\nAuthorization: Bearer eyJhbGciOi...admin_token\nAccept: application/json",
         adminResp: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 1420\n\n[{\"orderId\": 101, \"total\": 45.00}, {\"orderId\": 102, \"total\": 120.50}]",
-        adminInfo: "200 | 1420 B | SUCCESS",
+        adminInfo: "200 | 1420 B | SAME",
         auditorReq: "GET /api/v1/orders HTTP/1.1\nHost: orders.example.com\nX-API-Key: key_auditor_secret_998\nAccept: application/json",
         auditorResp: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 1420\n\n[{\"orderId\": 101, \"total\": 45.00}, {\"orderId\": 102, \"total\": 120.50}]",
-        auditorInfo: "200 | 1420 B | SUCCESS",
+        auditorInfo: "200 | 1420 B | SAME",
         unauthReq: "GET /api/v1/orders HTTP/1.1\nHost: orders.example.com\nAccept: application/json",
         unauthResp: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 1420\n\n[{\"orderId\": 101, \"total\": 45.00}, {\"orderId\": 102, \"total\": 120.50}]",
-        unauthInfo: "200 | 1420 B | UNAUTHENTICATED_ACCESSIBLE"
+        unauthInfo: "200 | 1420 B | SAME"
       },
       {
         path: "/api/v1/orders/create",
         method: "POST",
         adminReq: "POST /api/v1/orders/create HTTP/1.1\nHost: orders.example.com\nAuthorization: Bearer eyJhbGciOi...admin_token\nContent-Type: application/json\n\n{\"item\": \"Widget\", \"quantity\": 2}",
         adminResp: "HTTP/1.1 201 Created\nContent-Type: application/json\nContent-Length: 320\n\n{\"status\": \"created\", \"orderId\": 103}",
-        adminInfo: "201 | 320 B | SUCCESS",
+        adminInfo: "201 | 320 B | DIFFERENT",
         auditorReq: "POST /api/v1/orders/create HTTP/1.1\nHost: orders.example.com\nX-API-Key: key_auditor_secret_998\nContent-Type: application/json\n\n{\"item\": \"Widget\", \"quantity\": 2}",
         auditorResp: "HTTP/1.1 403 Forbidden\nContent-Type: application/json\nContent-Length: 74\n\n{\"error\": \"Forbidden: Auditor role lacks create permission\"}",
-        auditorInfo: "403 | 74 B | AUTH_REJECTED",
+        auditorInfo: "403 | 74 B | DIFFERENT",
         unauthReq: "POST /api/v1/orders/create HTTP/1.1\nHost: orders.example.com\nContent-Type: application/json\n\n{\"item\": \"Widget\", \"quantity\": 2}",
         unauthResp: "HTTP/1.1 401 Unauthorized\nContent-Type: application/json\nContent-Length: 62\n\n{\"error\": \"Authentication Required\"}",
-        unauthInfo: "401 | 62 B | AUTHENTICATED_ONLY"
+        unauthInfo: "401 | 62 B | DIFFERENT"
       },
       {
         path: "/api/v1/orders/102",
         method: "DELETE",
         adminReq: "DELETE /api/v1/orders/102 HTTP/1.1\nHost: orders.example.com\nAuthorization: Bearer eyJhbGciOi...admin_token",
         adminResp: "HTTP/1.1 204 No Content\nContent-Length: 0",
-        adminInfo: "204 | 0 B | SUCCESS",
+        adminInfo: "204 | 0 B | DIFFERENT",
         auditorReq: "DELETE /api/v1/orders/102 HTTP/1.1\nHost: orders.example.com\nX-API-Key: key_auditor_secret_998",
         auditorResp: "HTTP/1.1 403 Forbidden\nContent-Length: 74\n\n{\"error\": \"Forbidden: Auditor role lacks delete permission\"}",
-        auditorInfo: "403 | 74 B | AUTH_REJECTED",
+        auditorInfo: "403 | 74 B | DIFFERENT",
         unauthReq: "DELETE /api/v1/orders/102 HTTP/1.1\nHost: orders.example.com",
         unauthResp: "HTTP/1.1 401 Unauthorized\nContent-Length: 62\n\n{\"error\": \"Authentication Required\"}",
-        unauthInfo: "401 | 62 B | AUTHENTICATED_ONLY"
+        unauthInfo: "401 | 62 B | DIFFERENT"
       }
     ];
 

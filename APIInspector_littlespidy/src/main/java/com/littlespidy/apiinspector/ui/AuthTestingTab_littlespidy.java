@@ -271,11 +271,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         leftFilter.add(new JLabel("Filter Outcome:"));
         outcomeFilterCombo = new JComboBox<>(new String[]{
                 "All Outcomes",
-                "Unauthenticated Accessible",
-                "Authenticated Only",
-                "Auth Rejected",
-                "Success",
-                "Errors"
+                "Status SAME (Bypassed)",
+                "Status SIMILAR (Potential Bypass)",
+                "Status DIFFERENT (Enforced)",
+                "Status N/A"
         });
         outcomeFilterCombo.addActionListener(e -> applyOutcomeFilter());
         leftFilter.add(outcomeFilterCombo);
@@ -311,8 +310,8 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             private static final long serialVersionUID = 1L;
             @Override
             public TableCellRenderer getCellRenderer(int row, int column) {
-                // Any outcome column (column index >= 3 and offset % 3 == 2)
-                if (column >= 3 && (column - 3) % 3 == 2) {
+                // All profile columns (column index >= 3) are comparative outcome columns
+                if (column >= 3) {
                     return outcomeCellRenderer;
                 }
                 return super.getCellRenderer(row, column);
@@ -736,16 +735,16 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
             int code = r.getAuthStatusCode();
             int len = r.getAuthResponseLength();
-            String info = (code > 0 ? code : "-") + " | " + (len >= 0 ? len + " B" : "-") + " | "
-                    + (r.getOutcome() != null ? r.getOutcome().name() : "-");
+            String compOutcome = computeComparativeOutcome(def.getId(), selectedEndpointRow);
+            String info = (code > 0 ? code : "-") + " | " + (len >= 0 ? len + " B" : "-") + " | " + compOutcome;
 
             Color colHeaderBg = null;
-            if (r.getOutcome() == AuthTestOutcome_littlespidy.UNAUTHENTICATED_ACCESSIBLE) {
-                colHeaderBg = new Color(255, 180, 70, 90);
-            } else if (r.getOutcome() == AuthTestOutcome_littlespidy.SUCCESS || r.getOutcome() == AuthTestOutcome_littlespidy.AUTHENTICATED_ONLY) {
-                colHeaderBg = new Color(90, 225, 110, 90);
-            } else if (r.getOutcome() == AuthTestOutcome_littlespidy.AUTH_REJECTED) {
-                colHeaderBg = new Color(255, 120, 120, 90);
+            if ("SAME".equalsIgnoreCase(compOutcome)) {
+                colHeaderBg = new Color(255, 51, 51, 90);
+            } else if ("SIMILAR".equalsIgnoreCase(compOutcome)) {
+                colHeaderBg = new Color(255, 153, 0, 90);
+            } else if ("DIFFERENT".equalsIgnoreCase(compOutcome)) {
+                colHeaderBg = new Color(0, 255, 51, 90);
             } else {
                 colHeaderBg = new Color(225, 238, 255);
             }
@@ -784,20 +783,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                     return false;
                 }
                 EndpointResultRow_littlespidy epRow = endpointRows.get(rowIdx);
-                for (AuthTestResult_littlespidy r : epRow.getProfileResults().values()) {
-                    if (r == null || r.getOutcome() == null) continue;
-                    String outcomeName = r.getOutcome().name();
-                    if ("Unauthenticated Accessible".equals(sel) && "UNAUTHENTICATED_ACCESSIBLE".equalsIgnoreCase(outcomeName)) {
-                        return true;
-                    } else if ("Authenticated Only".equals(sel) && "AUTHENTICATED_ONLY".equalsIgnoreCase(outcomeName)) {
-                        return true;
-                    } else if ("Auth Rejected".equals(sel) && "AUTH_REJECTED".equalsIgnoreCase(outcomeName)) {
-                        return true;
-                    } else if ("Success".equals(sel) && "SUCCESS".equalsIgnoreCase(outcomeName)) {
-                        return true;
-                    } else if ("Errors".equals(sel) && (outcomeName.contains("ERROR") || outcomeName.contains("FAIL"))) {
-                        return true;
-                    }
+                for (ProfileColumnDef_littlespidy def : displayedProfiles) {
+                    String outcome = computeComparativeOutcome(def.getId(), epRow);
+                    if (sel.contains("SAME") && "SAME".equalsIgnoreCase(outcome)) return true;
+                    if (sel.contains("SIMILAR") && "SIMILAR".equalsIgnoreCase(outcome)) return true;
+                    if (sel.contains("DIFFERENT") && "DIFFERENT".equalsIgnoreCase(outcome)) return true;
+                    if (sel.contains("N/A") && "N/A".equalsIgnoreCase(outcome)) return true;
                 }
                 return false;
             }
@@ -1152,27 +1143,98 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         }
     }
 
+    public static String computeComparativeOutcome(String targetProfileId, EndpointResultRow_littlespidy epRow) {
+        if (targetProfileId == null || epRow == null) {
+            return "N/A";
+        }
+        AuthTestResult_littlespidy targetResult = epRow.getProfileResults().get(targetProfileId);
+        if (targetResult == null) {
+            return "N/A";
+        }
+        int targetCode = targetResult.getAuthStatusCode();
+        if (targetCode == 0) {
+            return "N/A";
+        }
+
+        byte[] targetBody = targetResult.getAuthResponseBytes();
+        int targetLen = targetResult.getAuthResponseLength();
+
+        if (targetCode == 401 || targetCode == 403) {
+            if (epRow.getProfileResults().size() > 1) {
+                return "DIFFERENT";
+            }
+            return "N/A";
+        }
+
+        String bestOutcome = null;
+
+        for (Map.Entry<String, AuthTestResult_littlespidy> entry : epRow.getProfileResults().entrySet()) {
+            String peerId = entry.getKey();
+            if (peerId.equals(targetProfileId)) {
+                continue;
+            }
+
+            AuthTestResult_littlespidy peerResult = entry.getValue();
+            if (peerResult == null) continue;
+            int peerCode = peerResult.getAuthStatusCode();
+            if (peerCode == 0) continue;
+
+            if (peerCode == 401 || peerCode == 403) {
+                if (bestOutcome == null) {
+                    bestOutcome = "DIFFERENT";
+                }
+                continue;
+            }
+
+            if (targetCode == peerCode) {
+                byte[] peerBody = peerResult.getAuthResponseBytes();
+                int peerLen = peerResult.getAuthResponseLength();
+
+                boolean exactMatch = false;
+                if (targetBody != null && peerBody != null && targetBody.length > 0) {
+                    exactMatch = Arrays.equals(targetBody, peerBody);
+                } else if (targetLen == peerLen && targetLen > 0) {
+                    exactMatch = true;
+                }
+
+                if (exactMatch) {
+                    return "SAME"; // Highest severity IDOR Bypass
+                }
+
+                int baseLength = Math.max(targetLen, peerLen);
+                int range = baseLength > 0 ? (baseLength / 20) : 0; // +-5% matching ng-auth-analyzer
+                int diff = Math.abs(targetLen - peerLen);
+                if (diff <= range) {
+                    bestOutcome = "SIMILAR";
+                } else {
+                    if (bestOutcome == null) {
+                        bestOutcome = "DIFFERENT";
+                    }
+                }
+            } else {
+                if (bestOutcome == null) {
+                    bestOutcome = "DIFFERENT";
+                }
+            }
+        }
+
+        return bestOutcome != null ? bestOutcome : "N/A";
+    }
+
     private class ResultsTableModel extends AbstractTableModel {
         private final String[] baseColumns = {"Collection", "Method", "Path"};
 
         @Override public int getRowCount() { return endpointRows.size(); }
-        @Override public int getColumnCount() { return baseColumns.length + (displayedProfiles.size() * 3); }
+        @Override public int getColumnCount() { return baseColumns.length + displayedProfiles.size(); }
 
         @Override
         public String getColumnName(int col) {
             if (col < baseColumns.length) {
                 return baseColumns[col];
             }
-            int profileIdx = (col - baseColumns.length) / 3;
-            int subCol = (col - baseColumns.length) % 3;
+            int profileIdx = col - baseColumns.length;
             if (profileIdx < displayedProfiles.size()) {
-                ProfileColumnDef_littlespidy def = displayedProfiles.get(profileIdx);
-                String name = def.getDisplayName();
-                switch (subCol) {
-                    case 0: return name + " Status";
-                    case 1: return name + " Length";
-                    case 2: return name + " Outcome";
-                }
+                return displayedProfiles.get(profileIdx).getDisplayName();
             }
             return "";
         }
@@ -1187,21 +1249,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             if (col == 1) return epRow.getMethod();
             if (col == 2) return epRow.getPath();
 
-            int profileIdx = (col - baseColumns.length) / 3;
-            int subCol = (col - baseColumns.length) % 3;
+            int profileIdx = col - baseColumns.length;
             if (profileIdx < displayedProfiles.size()) {
                 ProfileColumnDef_littlespidy def = displayedProfiles.get(profileIdx);
-                AuthTestResult_littlespidy r = epRow.getProfileResults().get(def.getId());
-                if (r == null) {
-                    return "-";
-                }
-                switch (subCol) {
-                    case 0: return r.getAuthStatusCode() > 0 ? r.getAuthStatusCode() : "-";
-                    case 1: return r.getAuthResponseLength() >= 0 ? r.getAuthResponseLength() + " B" : "-";
-                    case 2: return r.getOutcome() != null ? r.getOutcome().name() : "-";
-                }
+                return computeComparativeOutcome(def.getId(), epRow);
             }
-            return "-";
+            return "N/A";
         }
     }
 
@@ -1211,22 +1264,26 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
             if (!isSelected && value != null) {
                 String str = value.toString();
-                if ("UNAUTHENTICATED_ACCESSIBLE".equalsIgnoreCase(str)) {
-                    c.setForeground(new Color(204, 102, 0)); // Amber / Orange
+                if ("SAME".equalsIgnoreCase(str)) {
+                    c.setBackground(new Color(255, 51, 51, 80)); // Red (Bypass / IDOR)
+                    c.setForeground(new Color(180, 0, 0));
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
-                } else if ("AUTHENTICATED_ONLY".equalsIgnoreCase(str) || "SUCCESS".equalsIgnoreCase(str)) {
-                    c.setForeground(new Color(0, 128, 0)); // Green
-                    c.setFont(c.getFont().deriveFont(Font.PLAIN));
-                } else if ("AUTH_REJECTED".equalsIgnoreCase(str)) {
-                    c.setForeground(Color.RED);
-                    c.setFont(c.getFont().deriveFont(Font.PLAIN));
-                } else if ("NETWORK_ERROR".equalsIgnoreCase(str) || "SERVER_ERROR".equalsIgnoreCase(str)) {
-                    c.setForeground(Color.MAGENTA);
+                } else if ("SIMILAR".equalsIgnoreCase(str)) {
+                    c.setBackground(new Color(255, 153, 0, 80)); // Orange (Potential Bypass)
+                    c.setForeground(new Color(204, 102, 0));
+                    c.setFont(c.getFont().deriveFont(Font.BOLD));
+                } else if ("DIFFERENT".equalsIgnoreCase(str)) {
+                    c.setBackground(new Color(0, 255, 51, 80)); // Green (Enforced)
+                    c.setForeground(new Color(0, 128, 0));
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                 } else {
+                    c.setBackground(table.getBackground());
                     c.setForeground(table.getForeground());
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                 }
+            } else if (isSelected) {
+                c.setBackground(table.getSelectionBackground());
+                c.setForeground(table.getSelectionForeground());
             }
             return c;
         }
