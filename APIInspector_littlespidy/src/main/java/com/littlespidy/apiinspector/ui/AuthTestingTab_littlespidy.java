@@ -64,11 +64,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     private JLabel progressStatusLabel;
 
     // Results UI
-    private JCheckBox unauthCompareToggle;
     private ResultsTableModel resultsTableModel;
     private JTable resultsTable;
     private TableRowSorter<ResultsTableModel> resultsSorter;
     private JComboBox<String> outcomeFilterCombo;
+    private ProfileStatusFilterDropDown_littlespidy statusFilterDropDown;
+    private JButton deleteRunnerBtn;
 
     // Per-profile columns and endpoint-based result rows matching ng-auth-analyzer_littlespidy
     private final List<EndpointResultRow_littlespidy> endpointRows = new ArrayList<>();
@@ -275,7 +276,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         runnerNameField.setToolTipText("Name for this test run / runner");
         runBtnBox.add(runnerNameField);
 
-        runAllBtn = new JButton("Run Authentication Tests");
+        runAllBtn = new JButton("Attack");
         runAllBtn.setFont(runAllBtn.getFont().deriveFont(Font.BOLD));
         runAllBtn.addActionListener(e -> onRunAllInCollection());
         runSelectedBtn = new JButton("Test Selected");
@@ -326,6 +327,11 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         runnerCombo.addActionListener(e -> onRunnerSelected());
         leftFilter.add(runnerCombo);
 
+        deleteRunnerBtn = new JButton("Delete Runner");
+        deleteRunnerBtn.setToolTipText("Delete the currently selected runner from history");
+        deleteRunnerBtn.addActionListener(e -> onDeleteCurrentRunner());
+        leftFilter.add(deleteRunnerBtn);
+
         leftFilter.add(new JLabel("Outcome:"));
         outcomeFilterCombo = new JComboBox<>(new String[]{
                 "All Outcomes",
@@ -334,15 +340,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 "Status DIFFERENT (Enforced)",
                 "Status N/A"
         });
-        outcomeFilterCombo.addActionListener(e -> applyOutcomeFilter());
+        outcomeFilterCombo.addActionListener(e -> applyAllFilters());
         leftFilter.add(outcomeFilterCombo);
 
-        // Unauthenticated comparison option prominently positioned above results table
-        unauthCompareToggle = new JCheckBox("Run unauthenticated comparison test for each endpoint", true);
-        unauthCompareToggle.setFont(unauthCompareToggle.getFont().deriveFont(Font.BOLD));
-        unauthCompareToggle.setToolTipText("When enabled, includes unauthenticated test results alongside each profile for comparative analysis");
-        unauthCompareToggle.addActionListener(e -> rebuildModel());
-        leftFilter.add(unauthCompareToggle);
+        statusFilterDropDown = new ProfileStatusFilterDropDown_littlespidy();
+        statusFilterDropDown.addFilterChangeListener(this::applyAllFilters);
+        leftFilter.add(statusFilterDropDown);
 
         resultsFilterBar.add(leftFilter, BorderLayout.WEST);
 
@@ -600,11 +603,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         if (items.isEmpty()) return;
 
         List<AuthProfile_littlespidy> activeProfiles = getActiveProfiles();
-        boolean runUnauth = unauthCompareToggle.isSelected();
 
-        if (activeProfiles.isEmpty() && !runUnauth) {
+        if (activeProfiles.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "Please select at least one authentication profile or enable unauthenticated comparison testing.",
+                    "Please select at least one authentication profile.",
                     "Configuration Required",
                     JOptionPane.WARNING_MESSAGE);
             return;
@@ -614,9 +616,6 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         for (EndpointSelectionItem it : items) {
             for (AuthProfile_littlespidy p : activeProfiles) {
                 targets.add(new EndpointTestTarget(it.collection, it.endpoint, p));
-            }
-            if (runUnauth) {
-                targets.add(new EndpointTestTarget(it.collection, it.endpoint, null));
             }
         }
 
@@ -678,8 +677,45 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         results.clear();
         rebuildModel();
         clearInspector();
+        if (statusFilterDropDown != null) {
+            statusFilterDropDown.updateOptions(results);
+        }
+        applyAllFilters();
         updateRunnerCombo();
         notifyStateChanged();
+    }
+
+    private void onDeleteCurrentRunner() {
+        if (savedRuns.isEmpty() || runnerCombo == null) {
+            return;
+        }
+        int idx = runnerCombo.getSelectedIndex();
+        if (idx >= 0 && idx < savedRuns.size()) {
+            savedRuns.remove(idx);
+            if (!savedRuns.isEmpty()) {
+                int nextIdx = Math.max(0, idx - 1);
+                currentRun = savedRuns.get(nextIdx);
+                results.clear();
+                results.addAll(currentRun.getResults());
+                endpointRows.clear();
+                endpointRows.addAll(currentRun.getEndpointRows());
+                displayedProfiles.clear();
+                displayedProfiles.addAll(currentRun.getDisplayedProfiles());
+            } else {
+                currentRun = null;
+                results.clear();
+                endpointRows.clear();
+                displayedProfiles.clear();
+            }
+            updateRunnerCombo();
+            rebuildModel();
+            clearInspector();
+            if (statusFilterDropDown != null) {
+                statusFilterDropDown.updateOptions(results);
+            }
+            applyAllFilters();
+            notifyStateChanged();
+        }
     }
 
     private void onRunnerSelected() {
@@ -695,6 +731,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             displayedProfiles.clear();
             displayedProfiles.addAll(run.getDisplayedProfiles());
             resultsTableModel.fireTableStructureChanged();
+            if (statusFilterDropDown != null) {
+                statusFilterDropDown.updateOptions(results);
+            }
+            applyAllFilters();
             if (!endpointRows.isEmpty()) {
                 resultsTable.setRowSelectionInterval(0, 0);
             } else {
@@ -771,6 +811,9 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
             progressBar.setValue(completedCount);
             progressStatusLabel.setText("Completed " + completedCount + " of " + totalCount + " configurations");
+            if (statusFilterDropDown != null) {
+                statusFilterDropDown.updateOptions(results);
+            }
             notifyStateChanged();
         });
     }
@@ -796,6 +839,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             savedRuns.add(run);
             currentRun = run;
             updateRunnerCombo();
+            if (statusFilterDropDown != null) {
+                statusFilterDropDown.updateOptions(results);
+            }
+            applyAllFilters();
             runnerCounter++;
             if (runnerNameField != null) {
                 runnerNameField.setText("Runner " + runnerCounter);
@@ -877,12 +924,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         columnsContainer.repaint();
     }
 
-    private void applyOutcomeFilter() {
-        String sel = (String) outcomeFilterCombo.getSelectedItem();
-        if (sel == null || "All Outcomes".equals(sel)) {
-            resultsSorter.setRowFilter(null);
-            return;
-        }
+    public void applyAllFilters() {
+        if (resultsSorter == null) return;
+        String sel = outcomeFilterCombo != null ? (String) outcomeFilterCombo.getSelectedItem() : "All Outcomes";
+        boolean hasOutcomeFilter = sel != null && !"All Outcomes".equals(sel);
 
         RowFilter<ResultsTableModel, Integer> filter = new RowFilter<>() {
             @Override
@@ -892,17 +937,35 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                     return false;
                 }
                 EndpointResultRow_littlespidy epRow = endpointRows.get(rowIdx);
-                for (ProfileColumnDef_littlespidy def : displayedProfiles) {
-                    String outcome = computeComparativeOutcome(def.getId(), epRow);
-                    if (sel.contains("SAME") && "SAME".equalsIgnoreCase(outcome)) return true;
-                    if (sel.contains("SIMILAR") && "SIMILAR".equalsIgnoreCase(outcome)) return true;
-                    if (sel.contains("DIFFERENT") && "DIFFERENT".equalsIgnoreCase(outcome)) return true;
-                    if (sel.contains("N/A") && "N/A".equalsIgnoreCase(outcome)) return true;
+
+                // 1. Outcome filter
+                if (hasOutcomeFilter) {
+                    boolean outcomeMatch = false;
+                    for (ProfileColumnDef_littlespidy def : displayedProfiles) {
+                        String outcome = computeComparativeOutcome(def.getId(), epRow);
+                        if (sel.contains("SAME") && "SAME".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
+                        if (sel.contains("SIMILAR") && "SIMILAR".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
+                        if (sel.contains("DIFFERENT") && "DIFFERENT".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
+                        if (sel.contains("N/A") && "N/A".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
+                    }
+                    if (!outcomeMatch) {
+                        return false;
+                    }
                 }
-                return false;
+
+                // 2. Profile - Status Code filter
+                if (statusFilterDropDown != null && !statusFilterDropDown.matches(epRow)) {
+                    return false;
+                }
+
+                return true;
             }
         };
         resultsSorter.setRowFilter(filter);
+    }
+
+    public void applyOutcomeFilter() {
+        applyAllFilters();
     }
 
     // --- Export Actions ---
@@ -1024,12 +1087,16 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             results.addAll(list);
         }
         rebuildModel();
+        if (statusFilterDropDown != null) {
+            statusFilterDropDown.updateOptions(results);
+        }
+        applyAllFilters();
     }
 
     // --- Table Models & Renderers ---
 
     private class ProfileTableModel extends AbstractTableModel {
-        private final String[] columns = {"Test", "Profile Name", "Auth Type", "Credentials / Details"};
+        private final String[] columns = {"Test", "Profile Name", "Credentials / Details"};
 
         @Override public int getRowCount() { return profiles.size(); }
         @Override public int getColumnCount() { return columns.length; }
@@ -1058,8 +1125,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             switch (col) {
                 case 0: return activeProfileIds.contains(p.getId());
                 case 1: return p.getName();
-                case 2: return p.getAuthType().getDisplayName();
-                case 3: return p.getMaskedSummary();
+                case 2: return p.getMaskedSummary();
                 default: return "";
             }
         }
@@ -1169,7 +1235,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 break;
             }
         }
-        if (hasUnauthResults || (unauthCompareToggle != null && unauthCompareToggle.isSelected())) {
+        if (hasUnauthResults) {
             displayedProfiles.add(new ProfileColumnDef_littlespidy("unauthenticated", "Unauth"));
         }
     }

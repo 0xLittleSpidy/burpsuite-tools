@@ -235,7 +235,7 @@ public class UIEnhancementsTest_littlespidy {
         assertEquals("API Import", tabbedPane.getTitleAt(0));
         assertEquals("Request & Response Viewer", tabbedPane.getTitleAt(1));
         assertEquals("Parameter Collector", tabbedPane.getTitleAt(2));
-        assertEquals("Authentication Testing", tabbedPane.getTitleAt(3));
+        assertEquals("Auth Analyzer", tabbedPane.getTitleAt(3));
         assertEquals("REST API Version Finder", tabbedPane.getTitleAt(4));
         assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(5));
         assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(6));
@@ -330,14 +330,14 @@ public class UIEnhancementsTest_littlespidy {
         }
         assertNull(unauthCheckField, "unauthCompareCheck should be removed from AuthProfileDialog");
 
-        // 2. Verify profiles table columns: {"Test", "Profile Name", "Auth Type", "Credentials / Details"}
+        // 2. Verify profiles table columns: {"Test", "Profile Name", "Credentials / Details"} (Auth Type removed)
         Field profileTableField = AuthTestingTab_littlespidy.class.getDeclaredField("profileTable");
         profileTableField.setAccessible(true);
         JTable profileTable = (JTable) profileTableField.get(authTab);
+        assertEquals(3, profileTable.getColumnCount());
         assertEquals("Test", profileTable.getColumnName(0));
         assertEquals("Profile Name", profileTable.getColumnName(1));
-        assertEquals("Auth Type", profileTable.getColumnName(2));
-        assertEquals("Credentials / Details", profileTable.getColumnName(3));
+        assertEquals("Credentials / Details", profileTable.getColumnName(2));
 
         // 3. Verify multiple profiles can be added and toggled
         AuthProfile_littlespidy p1 = new AuthProfile_littlespidy("Admin Profile", AuthType_littlespidy.BEARER_TOKEN);
@@ -349,12 +349,21 @@ public class UIEnhancementsTest_littlespidy {
         authTab.setProfiles(List.of(p1, p2));
         assertEquals(2, authTab.getActiveProfiles().size());
 
-        // 4. Verify unauthCompareToggle is present above results table
-        Field unauthToggleField = AuthTestingTab_littlespidy.class.getDeclaredField("unauthCompareToggle");
-        unauthToggleField.setAccessible(true);
-        JCheckBox unauthToggle = (JCheckBox) unauthToggleField.get(authTab);
-        assertNotNull(unauthToggle);
-        assertTrue(unauthToggle.getText().contains("Run unauthenticated comparison test"));
+        // 4. Verify Delete Runner button and Status Filter Dropdown are present, Run button renamed to Attack
+        Field deleteRunnerBtnField = AuthTestingTab_littlespidy.class.getDeclaredField("deleteRunnerBtn");
+        deleteRunnerBtnField.setAccessible(true);
+        JButton deleteRunnerBtn = (JButton) deleteRunnerBtnField.get(authTab);
+        assertNotNull(deleteRunnerBtn);
+        assertEquals("Delete Runner", deleteRunnerBtn.getText());
+
+        Field runAllBtnField = AuthTestingTab_littlespidy.class.getDeclaredField("runAllBtn");
+        runAllBtnField.setAccessible(true);
+        JButton runAllBtn = (JButton) runAllBtnField.get(authTab);
+        assertEquals("Attack", runAllBtn.getText());
+
+        Field statusFilterField = AuthTestingTab_littlespidy.class.getDeclaredField("statusFilterDropDown");
+        statusFilterField.setAccessible(true);
+        assertNotNull(statusFilterField.get(authTab));
 
         // 5. Verify results table columns: NO "Unauthenticated Compare" column
         Field resultsTableField = AuthTestingTab_littlespidy.class.getDeclaredField("resultsTable");
@@ -629,8 +638,8 @@ public class UIEnhancementsTest_littlespidy {
             assertFalse(name.toLowerCase().contains("time"), "Time column must be removed");
         }
 
-        // Verify column structure: 3 base + 2 for Admin + 2 for Auditor + 2 for Unauth = 9 columns (Outcome + Status Code for each profile)
-        assertEquals(9, resultsTable.getColumnCount());
+        // Verify column structure: 3 base + 2 for Admin + 2 for Auditor = 7 columns (Outcome + Status Code for each profile)
+        assertEquals(7, resultsTable.getColumnCount());
         assertEquals("Collection", resultsTable.getColumnName(0));
         assertEquals("Method", resultsTable.getColumnName(1));
         assertEquals("Path", resultsTable.getColumnName(2));
@@ -638,8 +647,6 @@ public class UIEnhancementsTest_littlespidy {
         assertEquals("Admin - Status Code", resultsTable.getColumnName(4));
         assertEquals("Auditor", resultsTable.getColumnName(5));
         assertEquals("Auditor - Status Code", resultsTable.getColumnName(6));
-        assertEquals("Unauth", resultsTable.getColumnName(7));
-        assertEquals("Unauth - Status Code", resultsTable.getColumnName(8));
     }
 
     @Test
@@ -929,6 +936,52 @@ public class UIEnhancementsTest_littlespidy {
                 }
             }
         }
+    }
+
+    @Test
+    @DisplayName("Verify ProfileStatusFilterDropDown generates dynamic Profile - StatusCode options and filters rows")
+    public void testProfileStatusFilterDropDown() {
+        ProfileStatusFilterDropDown_littlespidy dropDown = new ProfileStatusFilterDropDown_littlespidy();
+
+        AuthTestResult_littlespidy r1 = new AuthTestResult_littlespidy();
+        r1.setProfileName("Admin");
+        r1.setAuthStatusCode(200);
+
+        AuthTestResult_littlespidy r2 = new AuthTestResult_littlespidy();
+        r2.setProfileName("Admin");
+        r2.setAuthStatusCode(404);
+
+        AuthTestResult_littlespidy r3 = new AuthTestResult_littlespidy();
+        r3.setProfileName("User");
+        r3.setAuthStatusCode(201);
+
+        AuthTestResult_littlespidy r4 = new AuthTestResult_littlespidy();
+        r4.setProfileName("User");
+        r4.setAuthStatusCode(403);
+
+        dropDown.updateOptions(List.of(r1, r2, r3, r4));
+
+        Map<String, JCheckBox> options = dropDown.getOptionCheckBoxMap();
+        assertEquals(4, options.size());
+        assertTrue(options.containsKey("Admin - 200"));
+        assertTrue(options.containsKey("Admin - 404"));
+        assertTrue(options.containsKey("User - 201"));
+        assertTrue(options.containsKey("User - 403"));
+
+        // When all selected, matching passes
+        AuthTestingTab_littlespidy.EndpointResultRow_littlespidy row =
+                new AuthTestingTab_littlespidy.EndpointResultRow_littlespidy("c1", "Col", "GET", "/test");
+        row.getProfileResults().put("Admin", r1);
+        assertTrue(dropDown.matches(row));
+
+        // When only User - 403 is selected, row with Admin 200 fails match
+        dropDown.selectAll(false);
+        options.get("User - 403").setSelected(true);
+        assertFalse(dropDown.matches(row));
+
+        // Add User 403 to row and verify it now matches
+        row.getProfileResults().put("User", r4);
+        assertTrue(dropDown.matches(row));
     }
 
     private static List<Component> getAllComponents(Container c) {

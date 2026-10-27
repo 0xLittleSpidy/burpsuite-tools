@@ -264,6 +264,48 @@
       text-align: center;
     }
 
+    .multi-select-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-menu-checkboxes {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 200;
+      min-width: 170px;
+      padding: 6px 0;
+      border-radius: 2px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .dropdown-menu-checkboxes.show {
+      display: block;
+    }
+
+    .dropdown-item-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+
+    .dropdown-item-check:hover {
+      background: var(--btn-hover);
+    }
+
+    .dropdown-item-check input {
+      margin: 0;
+      cursor: pointer;
+    }
+
     .runner-controls {
       display: flex;
       align-items: center;
@@ -402,16 +444,16 @@
   </header>
 
   <div class="tabs-bar">
-    <button class="tab-btn active" onclick="switchMainTab('authTab')">Authentication Testing</button>
+    <button class="tab-btn active" onclick="switchMainTab('authTab')">Auth Analyzer</button>
     <button class="tab-btn" onclick="switchMainTab('reqRespTab')">Request and Response View</button>
   </div>
 
-  <!-- 1. Authentication Testing Tab -->
+  <!-- 1. Auth Analyzer Tab -->
   <div id="authTab" class="tab-content active">
     <div class="auth-grid">
       <!-- Left Column: Profiles, Endpoints, Execution -->
       <div class="left-column">
-        <!-- Profiles Box (No Select All / Deselect All buttons) -->
+        <!-- Profiles Box (No Select All / Deselect All buttons, 3 columns: Act, Profile Name, Credentials / Details) -->
         <div class="pane-box">
           <div class="pane-box-header">
             <span>Authentication Profiles</span>
@@ -431,27 +473,23 @@
                 <tr>
                   <th style="width: 30px;">Act</th>
                   <th>Profile Name</th>
-                  <th>Type</th>
-                  <th>Details</th>
+                  <th>Credentials / Details</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="selected">
                   <td><input type="checkbox" checked></td>
-                  <td>admin</td>
-                  <td>Auth</td>
+                  <td>Admin</td>
                   <td>Authorization: Bearer adm...</td>
                 </tr>
                 <tr>
                   <td><input type="checkbox" checked></td>
-                  <td>user</td>
-                  <td>Auth</td>
+                  <td>User</td>
                   <td>Authorization: Bearer usr...</td>
                 </tr>
                 <tr>
                   <td><input type="checkbox" checked></td>
                   <td>unauth_strip</td>
-                  <td>Unauth</td>
                   <td>Strip: Cookie, Authorization</td>
                 </tr>
               </tbody>
@@ -520,7 +558,7 @@
           </div>
           <div class="runner-controls">
             <label><strong>Runner Name:</strong> <input type="text" id="runnerInput" value="Runner 1" style="width: 110px;"></label>
-            <button class="primary" onclick="simulateRun()">Run Authentication Tests</button>
+            <button class="primary" onclick="simulateRun()">Attack</button>
             <button>Test Selected</button>
             <button disabled>Cancel</button>
           </div>
@@ -535,15 +573,29 @@
             <div style="display: flex; align-items: center; gap: 8px;">
               <span><strong>Runner:</strong></span>
               <select id="runnerSelect" onchange="switchRunner()">
-                <option value="1">Runner 1 (Live Run - 4 endpoints)</option>
+                <option value="1">Runner 1 (Live Run - 3 endpoints)</option>
                 <option value="2">Runner 2 (Previous Run - 12 endpoints)</option>
               </select>
+              <button onclick="deleteCurrentRunner()">Delete Runner</button>
+              
               <span>Filter Outcome:</span>
-              <select>
-                <option>All Outcomes</option>
-                <option>Status SAME (Bypassed)</option>
-                <option>Status DIFFERENT (Enforced)</option>
+              <select id="outcomeFilterSelect" onchange="applyFilters()">
+                <option value="ALL">All Outcomes</option>
+                <option value="SAME">Status SAME (Bypassed)</option>
+                <option value="DIFFERENT">Status DIFFERENT (Enforced)</option>
               </select>
+
+              <!-- Dynamic Multi-Select Dropdown Filter -->
+              <div class="multi-select-container">
+                <button type="button" id="statusFilterBtn" onclick="toggleStatusDropdown()">Status Filter: All</button>
+                <div id="statusFilterMenu" class="dropdown-menu-checkboxes">
+                  <label class="dropdown-item-check"><input type="checkbox" id="checkSelectAll" checked onchange="toggleAllStatuses(this.checked)"> <strong>(Select All)</strong></label>
+                  <label class="dropdown-item-check"><input type="checkbox" class="status-check" value="Admin - 200" checked onchange="applyFilters()"> Admin - 200</label>
+                  <label class="dropdown-item-check"><input type="checkbox" class="status-check" value="Admin - 404" checked onchange="applyFilters()"> Admin - 404</label>
+                  <label class="dropdown-item-check"><input type="checkbox" class="status-check" value="User - 201" checked onchange="applyFilters()"> User - 201</label>
+                  <label class="dropdown-item-check"><input type="checkbox" class="status-check" value="User - 403" checked onchange="applyFilters()"> User - 403</label>
+                </div>
+              </div>
             </div>
             <div>
               <button>Retry Failed</button>
@@ -561,43 +613,44 @@
                   <th>Collection</th>
                   <th>Method</th>
                   <th>Path</th>
-                  <th>admin</th>
-                  <th>admin - Status Code</th>
-                  <th>user</th>
-                  <th>user - Status Code</th>
-                  <th>Unauth</th>
-                  <th>Unauth - Status Code</th>
+                  <th>Admin</th>
+                  <th>Admin - Status Code</th>
+                  <th>User</th>
+                  <th>User - Status Code</th>
                 </tr>
               </thead>
               <tbody id="resultsTableBody">
-                <tr class="selected">
+                <tr class="selected" data-admin-status="200" data-user-status="201" data-outcome="DIFFERENT">
                   <td>Petstore</td>
                   <td><strong>GET</strong></td>
                   <td>/api/v2/users/me</td>
                   <td><span class="badge-diff">DIFFERENT</span></td>
                   <td class="badge-code">200</td>
                   <td><span class="badge-diff">DIFFERENT</span></td>
-                  <td class="badge-code">200</td>
-                  <td><span class="badge-diff">DIFFERENT</span></td>
-                  <td class="badge-code">401</td>
+                  <td class="badge-code">201</td>
                 </tr>
-                <tr>
+                <tr data-admin-status="200" data-user-status="403" data-outcome="SAME">
                   <td>Petstore</td>
                   <td><strong>POST</strong></td>
                   <td>/api/v2/users/transfer</td>
                   <td><span class="badge-diff">DIFFERENT</span></td>
                   <td class="badge-code">200</td>
                   <td><span class="badge-same">SAME</span></td>
-                  <td class="badge-code">200</td>
-                  <td><span class="badge-diff">DIFFERENT</span></td>
                   <td class="badge-code">403</td>
                 </tr>
-                <tr>
+                <tr data-admin-status="404" data-user-status="403" data-outcome="DIFFERENT">
                   <td>Petstore</td>
                   <td><strong>DELETE</strong></td>
                   <td>/api/v2/admin/accounts/1</td>
                   <td><span class="badge-diff">DIFFERENT</span></td>
-                  <td class="badge-code">200</td>
+                  <td class="badge-code">404</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">403</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
                   <td><span class="badge-diff">DIFFERENT</span></td>
                   <td class="badge-code">403</td>
                   <td><span class="badge-diff">DIFFERENT</span></td>
@@ -842,6 +895,71 @@ Cookie: session_auth=abc123xyz</textarea>
       const select = document.getElementById('runnerSelect');
       const selText = select.options[select.selectedIndex].text;
       console.log('Switched view to runner:', selText);
+    }
+
+    function deleteCurrentRunner() {
+      const select = document.getElementById('runnerSelect');
+      if (select.options.length <= 1) {
+        alert('Cannot delete the only remaining runner.');
+        return;
+      }
+      const selIndex = select.selectedIndex;
+      const removedName = select.options[selIndex].text;
+      select.remove(selIndex);
+      select.selectedIndex = Math.max(0, selIndex - 1);
+      switchRunner();
+      alert('Deleted runner: ' + removedName);
+    }
+
+    function toggleStatusDropdown() {
+      const menu = document.getElementById('statusFilterMenu');
+      menu.classList.toggle('show');
+    }
+
+    document.addEventListener('click', function(e) {
+      const container = document.querySelector('.multi-select-container');
+      if (container && !container.contains(e.target)) {
+        const menu = document.getElementById('statusFilterMenu');
+        if (menu) menu.classList.remove('show');
+      }
+    });
+
+    function toggleAllStatuses(checked) {
+      document.querySelectorAll('.status-check').forEach(cb => {
+        cb.checked = checked;
+      });
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const outcomeVal = document.getElementById('outcomeFilterSelect').value;
+      const checkedStatuses = Array.from(document.querySelectorAll('.status-check:checked')).map(cb => cb.value);
+      const totalStatuses = document.querySelectorAll('.status-check').length;
+      
+      const btn = document.getElementById('statusFilterBtn');
+      if (checkedStatuses.length === 0) {
+        btn.innerText = 'Status Filter: None';
+      } else if (checkedStatuses.length === totalStatuses) {
+        btn.innerText = 'Status Filter: All';
+      } else {
+        btn.innerText = 'Status Filter: (' + checkedStatuses.length + '/' + totalStatuses + ')';
+      }
+
+      const rows = document.querySelectorAll('#resultsTableBody tr');
+      rows.forEach(row => {
+        const rowOutcome = row.getAttribute('data-outcome');
+        const adminStatus = 'Admin - ' + row.getAttribute('data-admin-status');
+        const userStatus = 'User - ' + row.getAttribute('data-user-status');
+
+        const outcomeMatch = (outcomeVal === 'ALL' || rowOutcome === outcomeVal);
+        const statusMatch = checkedStatuses.includes(adminStatus) || checkedStatuses.includes(userStatus);
+
+        if (outcomeMatch && statusMatch) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
     }
 
     function toggleInspectorMode(mode) {

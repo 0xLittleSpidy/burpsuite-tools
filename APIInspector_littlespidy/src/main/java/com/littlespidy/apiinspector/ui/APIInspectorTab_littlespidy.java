@@ -96,7 +96,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
         rootTabbedPane.addTab("API Import", importTab);
         rootTabbedPane.addTab("Request & Response Viewer", requestResponseViewerTab);
         rootTabbedPane.addTab("Parameter Collector", parameterCollectorTab);
-        rootTabbedPane.addTab("Authentication Testing", authTestingTab);
+        rootTabbedPane.addTab("Auth Analyzer", authTestingTab);
         rootTabbedPane.addTab("REST API Version Finder", versionFinderTab);
         rootTabbedPane.addTab("API Documentation Strategy", docStrategyTab);
         rootTabbedPane.addTab("API Endpoint Discovery Strategy", endpointDiscoveryTab);
