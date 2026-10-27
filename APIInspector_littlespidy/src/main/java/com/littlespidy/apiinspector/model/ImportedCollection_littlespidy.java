@@ -21,6 +21,7 @@ public class ImportedCollection_littlespidy {
     private long importedAt;
     private String assignedProfileId;
     private List<DiscoveredEndpoint_littlespidy> endpoints;
+    private java.util.Map<String, String> tagDescriptions;
 
     public ImportedCollection_littlespidy() {
         this.id = UUID.randomUUID().toString();
@@ -34,6 +35,7 @@ public class ImportedCollection_littlespidy {
         this.importedAt = System.currentTimeMillis();
         this.assignedProfileId = null;
         this.endpoints = new ArrayList<>();
+        this.tagDescriptions = new java.util.LinkedHashMap<>();
     }
 
     public ImportedCollection_littlespidy(String name, String formatType, String sourceType, String sourceLocation) {
@@ -135,6 +137,17 @@ public class ImportedCollection_littlespidy {
 
     public int getEndpointCount() {
         return endpoints != null ? endpoints.size() : 0;
+    }
+
+    public java.util.Map<String, String> getTagDescriptions() {
+        if (tagDescriptions == null) {
+            tagDescriptions = new java.util.LinkedHashMap<>();
+        }
+        return tagDescriptions;
+    }
+
+    public void setTagDescriptions(java.util.Map<String, String> tagDescriptions) {
+        this.tagDescriptions = tagDescriptions != null ? new java.util.LinkedHashMap<>(tagDescriptions) : new java.util.LinkedHashMap<>();
     }
 
     @Override

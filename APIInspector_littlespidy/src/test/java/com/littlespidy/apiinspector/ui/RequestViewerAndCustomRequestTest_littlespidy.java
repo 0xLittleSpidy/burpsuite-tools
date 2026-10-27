@@ -9,6 +9,9 @@ import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javax.swing.*;
+import java.awt.*;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -442,5 +445,84 @@ class RequestViewerAndCustomRequestTest_littlespidy {
             assertTrue(foundItem, "Collection body param item must be prefilled with sample value");
             assertTrue(foundQuantity, "Collection body param quantity must be prefilled with sample value");
         }
+    }
+
+    @Test
+    @DisplayName("Verify URLImportDialog has empty text and no dummy URL")
+    void testUrlImportDialogNoDummyUrl() {
+        if (!GraphicsEnvironment.isHeadless()) {
+            URLImportDialog_littlespidy dlg = new URLImportDialog_littlespidy(null, null);
+            JTextArea area = findComponent(dlg, JTextArea.class);
+            assertNotNull(area, "JTextArea should be present in URLImportDialog");
+            assertEquals("", area.getText().trim(), "URL text area must not contain dummy petstore URL");
+        }
+    }
+
+    @Test
+    @DisplayName("Verify SessionStoreDialog has line wrapping and vertical-only scrolling")
+    void testSessionStoreDialogLineWrap() {
+        if (!GraphicsEnvironment.isHeadless()) {
+            SessionStore_littlespidy store = new SessionStore_littlespidy();
+            SessionStoreDialog_littlespidy dlg = new SessionStoreDialog_littlespidy(null, store, null);
+            JTextArea area = findComponent(dlg, JTextArea.class);
+            assertNotNull(area, "JTextArea should be present in SessionStoreDialog");
+            assertTrue(area.getLineWrap(), "Line wrap must be enabled");
+            assertTrue(area.getWrapStyleWord(), "Word wrap style must be enabled");
+
+            JScrollPane scroll = findComponent(dlg, JScrollPane.class);
+            assertNotNull(scroll, "JScrollPane should be present in SessionStoreDialog");
+            assertEquals(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER, scroll.getHorizontalScrollBarPolicy(),
+                    "Horizontal scroll bar must be disabled in favor of vertical-only scrolling");
+        }
+    }
+
+    @Test
+    @DisplayName("Verify RequestResponseViewerTab pane borders are renamed to Request and Response")
+    void testRequestResponseViewerPaneTitles() {
+        RequestResponseViewerTab_littlespidy tab = new RequestResponseViewerTab_littlespidy(null);
+        List<javax.swing.border.TitledBorder> borders = findTitledBorders(tab);
+
+        boolean foundRequest = false;
+        boolean foundResponse = false;
+        boolean foundOldHttpRequest = false;
+        boolean foundOldHttpResponse = false;
+
+        for (javax.swing.border.TitledBorder b : borders) {
+            String title = b.getTitle();
+            if ("Request".equals(title)) foundRequest = true;
+            if ("Response".equals(title)) foundResponse = true;
+            if ("HTTP Request (Editable)".equals(title)) foundOldHttpRequest = true;
+            if ("HTTP Response".equals(title)) foundOldHttpResponse = true;
+        }
+
+        assertTrue(foundRequest, "Must have pane titled 'Request'");
+        assertTrue(foundResponse, "Must have pane titled 'Response'");
+        assertFalse(foundOldHttpRequest, "Must not have old title 'HTTP Request (Editable)'");
+        assertFalse(foundOldHttpResponse, "Must not have old title 'HTTP Response'");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Component> T findComponent(Container root, Class<T> clazz) {
+        for (Component c : root.getComponents()) {
+            if (clazz.isInstance(c)) return (T) c;
+            if (c instanceof Container) {
+                T found = findComponent((Container) c, clazz);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    private static List<javax.swing.border.TitledBorder> findTitledBorders(Container root) {
+        List<javax.swing.border.TitledBorder> list = new java.util.ArrayList<>();
+        if (root instanceof JComponent jc && jc.getBorder() instanceof javax.swing.border.TitledBorder tb) {
+            list.add(tb);
+        }
+        for (Component c : root.getComponents()) {
+            if (c instanceof Container cont) {
+                list.addAll(findTitledBorders(cont));
+            }
+        }
+        return list;
     }
 }

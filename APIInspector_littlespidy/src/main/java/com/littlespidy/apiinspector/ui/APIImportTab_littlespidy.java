@@ -44,6 +44,11 @@ public class APIImportTab_littlespidy extends JPanel {
     private JTable endpointTable;
     private TableRowSorter<EndpointTableModel> endpointSorter;
 
+    private CardLayout endpointsCardLayout;
+    private JPanel endpointsCardPanel;
+    private JPanel groupedContainer;
+    private JComboBox<String> viewModeCombo;
+
     private JLabel collectionCountLabel;
     private JLabel endpointCountLabel;
     private JTextField endpointSearchField;
@@ -208,6 +213,18 @@ public class APIImportTab_littlespidy extends JPanel {
             filterEndpoints();
         });
         searchBox.add(clearFilterBtn);
+
+        searchBox.add(Box.createHorizontalStrut(8));
+        searchBox.add(new JLabel("View:"));
+        viewModeCombo = new JComboBox<>(new String[]{"Flat View", "Grouped by Tag/Folder"});
+        viewModeCombo.addActionListener(e -> {
+            boolean isGrouped = "Grouped by Tag/Folder".equals(viewModeCombo.getSelectedItem());
+            endpointsCardLayout.show(endpointsCardPanel, isGrouped ? "GROUPED" : "FLAT");
+            if (isGrouped) {
+                updateGroupedView();
+            }
+        });
+        searchBox.add(viewModeCombo);
         filterRow.add(searchBox, BorderLayout.WEST);
 
         endpointCountLabel = new JLabel("Endpoints: 0");
@@ -270,59 +287,26 @@ public class APIImportTab_littlespidy extends JPanel {
                     int modelRow = endpointTable.convertRowIndexToModel(row);
                     DiscoveredEndpoint_littlespidy ep = endpointTableModel.getEndpointAt(modelRow);
                     if (ep != null) {
-                        JPopupMenu menu = new JPopupMenu();
-
-                        JMenuItem viewDetails = new JMenuItem("View Endpoint Details");
-                        viewDetails.addActionListener(ev -> showEndpointDetailsDialog(ep));
-                        menu.add(viewDetails);
-
-                        menu.addSeparator();
-
-                        JMenuItem sendToVF = new JMenuItem("Send to ResAPI Version Finder");
-                        sendToVF.addActionListener(ev -> {
-                            ImportedCollection_littlespidy col = getSelectedCollection();
-                            if (col != null && onSendToVersionFinderListener != null) {
-                                onSendToVersionFinderListener.onSendToVersionFinder(col, ep);
-                            }
-                        });
-                        menu.add(sendToVF);
-
-                        JMenuItem sendToRepeater = new JMenuItem("Send to Repeater");
-                        sendToRepeater.addActionListener(ev -> {
-                            try {
-                                ImportedCollection_littlespidy col = getSelectedCollection();
-                                String targetBaseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
-                                        ? col.getTargetBaseUrl() : "https://localhost";
-                                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, ep, null, false);
-                                if (api != null && api.repeater() != null) {
-                                    api.repeater().sendToRepeater(req, ep.getMethod() + " " + ep.getPath());
-                                }
-                            } catch (Exception ignored) {}
-                        });
-                        menu.add(sendToRepeater);
-
-                        JMenuItem sendToIntruder = new JMenuItem("Send to Intruder");
-                        sendToIntruder.addActionListener(ev -> {
-                            try {
-                                ImportedCollection_littlespidy col = getSelectedCollection();
-                                String targetBaseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
-                                        ? col.getTargetBaseUrl() : "https://localhost";
-                                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, ep, null, false);
-                                if (api != null && api.intruder() != null) {
-                                    api.intruder().sendToIntruder(req, ep.getMethod() + " " + ep.getPath());
-                                }
-                            } catch (Exception ignored) {}
-                        });
-                        menu.add(sendToIntruder);
-
+                        JPopupMenu menu = createEndpointContextMenu(ep);
                         menu.show(endpointTable, e.getX(), e.getY());
                     }
                 }
             }
         });
 
+        endpointsCardLayout = new CardLayout();
+        endpointsCardPanel = new JPanel(endpointsCardLayout);
+
         JScrollPane epScroll = new JScrollPane(endpointTable);
-        endpointsPanel.add(epScroll, BorderLayout.CENTER);
+        endpointsCardPanel.add(epScroll, "FLAT");
+
+        groupedContainer = new JPanel();
+        groupedContainer.setLayout(new BoxLayout(groupedContainer, BoxLayout.Y_AXIS));
+        JScrollPane groupedScroll = new JScrollPane(groupedContainer);
+        groupedScroll.getVerticalScrollBar().setUnitIncrement(16);
+        endpointsCardPanel.add(groupedScroll, "GROUPED");
+
+        endpointsPanel.add(endpointsCardPanel, BorderLayout.CENTER);
 
         splitPane.setBottomComponent(endpointsPanel);
         add(splitPane, BorderLayout.CENTER);
@@ -339,6 +323,54 @@ public class APIImportTab_littlespidy extends JPanel {
         };
         EndpointDetailsDialog_littlespidy dialog = new EndpointDetailsDialog_littlespidy(parent, ep, sendToVFAction);
         dialog.setVisible(true);
+    }
+
+    private JPopupMenu createEndpointContextMenu(DiscoveredEndpoint_littlespidy ep) {
+        JPopupMenu menu = new JPopupMenu();
+
+        JMenuItem viewDetails = new JMenuItem("View Endpoint Details");
+        viewDetails.addActionListener(ev -> showEndpointDetailsDialog(ep));
+        menu.add(viewDetails);
+
+        menu.addSeparator();
+
+        JMenuItem sendToVF = new JMenuItem("Send to ResAPI Version Finder");
+        sendToVF.addActionListener(ev -> {
+            ImportedCollection_littlespidy col = getSelectedCollection();
+            if (col != null && onSendToVersionFinderListener != null) {
+                onSendToVersionFinderListener.onSendToVersionFinder(col, ep);
+            }
+        });
+        menu.add(sendToVF);
+
+        JMenuItem sendToRepeater = new JMenuItem("Send to Repeater");
+        sendToRepeater.addActionListener(ev -> {
+            try {
+                ImportedCollection_littlespidy col = getSelectedCollection();
+                String targetBaseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
+                        ? col.getTargetBaseUrl() : "https://localhost";
+                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, ep, null, false);
+                if (api != null && api.repeater() != null) {
+                    api.repeater().sendToRepeater(req, ep.getMethod() + " " + ep.getPath());
+                }
+            } catch (Exception ignored) {}
+        });
+        menu.add(sendToRepeater);
+
+        JMenuItem sendToIntruder = new JMenuItem("Send to Intruder");
+        sendToIntruder.addActionListener(ev -> {
+            try {
+                ImportedCollection_littlespidy col = getSelectedCollection();
+                String targetBaseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
+                        ? col.getTargetBaseUrl() : "https://localhost";
+                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, ep, null, false);
+                if (api != null && api.intruder() != null) {
+                    api.intruder().sendToIntruder(req, ep.getMethod() + " " + ep.getPath());
+                }
+            } catch (Exception ignored) {}
+        });
+        menu.add(sendToIntruder);
+        return menu;
     }
 
     private void onImportFiles() {
@@ -514,6 +546,7 @@ public class APIImportTab_littlespidy extends JPanel {
             endpointCountLabel.setText("Endpoints: 0");
             baseUrlField.setText("");
             updateEndpointSummary(Collections.emptyList());
+            updateGroupedView();
             return;
         }
         int modelRow = collectionTable.convertRowIndexToModel(row);
@@ -576,46 +609,195 @@ public class APIImportTab_littlespidy extends JPanel {
         notifyStateChanged();
     }
 
+    private boolean matchesEndpointFilters(DiscoveredEndpoint_littlespidy ep) {
+        if (ep == null) return false;
+
+        // 1. HTTP Method multi-select filter
+        if (endpointMethodFilter != null && !endpointMethodFilter.isMethodSelected(ep.getMethod())) {
+            return false;
+        }
+
+        // 2. Authentication requirement multi-select filter
+        if (endpointAuthFilter != null && !endpointAuthFilter.isAuthOptionSelected(ep.isRequiresAuth())) {
+            return false;
+        }
+
+        // 3. Search text query
+        String query = endpointSearchField != null ? endpointSearchField.getText().trim() : "";
+        if (!query.isEmpty()) {
+            String q = query.toLowerCase(Locale.ROOT);
+            boolean matches = (ep.getPath() != null && ep.getPath().toLowerCase(Locale.ROOT).contains(q))
+                    || (ep.getMethod() != null && ep.getMethod().toLowerCase(Locale.ROOT).contains(q))
+                    || (ep.getSummary() != null && ep.getSummary().toLowerCase(Locale.ROOT).contains(q))
+                    || (ep.getParametersSummary() != null && ep.getParametersSummary().toLowerCase(Locale.ROOT).contains(q))
+                    || (ep.getTag() != null && ep.getTag().toLowerCase(Locale.ROOT).contains(q));
+            if (!matches) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private List<DiscoveredEndpoint_littlespidy> getFilteredEndpointsList() {
+        ImportedCollection_littlespidy col = getSelectedCollection();
+        if (col == null || col.getEndpoints() == null) return Collections.emptyList();
+        List<DiscoveredEndpoint_littlespidy> result = new ArrayList<>();
+        for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
+            if (matchesEndpointFilters(ep)) {
+                result.add(ep);
+            }
+        }
+        return result;
+    }
+
     private void filterEndpoints() {
-        if (endpointSorter == null) return;
+        if (endpointSorter != null) {
+            endpointSorter.setRowFilter(new RowFilter<>() {
+                @Override
+                public boolean include(Entry<? extends EndpointTableModel, ? extends Integer> entry) {
+                    int modelRow = entry.getIdentifier();
+                    DiscoveredEndpoint_littlespidy ep = endpointTableModel.getEndpointAt(modelRow);
+                    return matchesEndpointFilters(ep);
+                }
+            });
+            int displayed = endpointTable.getRowCount();
+            int total = endpointTableModel.getRowCount();
+            endpointCountLabel.setText("Showing " + displayed + " of " + total + " Endpoints");
+        }
+        updateGroupedView();
+    }
 
-        endpointSorter.setRowFilter(new RowFilter<>() {
+    private void updateGroupedView() {
+        if (groupedContainer == null) return;
+        groupedContainer.removeAll();
+
+        ImportedCollection_littlespidy col = getSelectedCollection();
+        if (col == null || col.getEndpoints().isEmpty()) {
+            JLabel emptyLabel = new JLabel("No endpoints available in selected collection.", JLabel.CENTER);
+            emptyLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            groupedContainer.add(emptyLabel);
+            groupedContainer.revalidate();
+            groupedContainer.repaint();
+            return;
+        }
+
+        List<DiscoveredEndpoint_littlespidy> visibleEndpoints = getFilteredEndpointsList();
+        if (visibleEndpoints.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No endpoints match current filters.", JLabel.CENTER);
+            emptyLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            groupedContainer.add(emptyLabel);
+            groupedContainer.revalidate();
+            groupedContainer.repaint();
+            return;
+        }
+
+        Map<String, List<DiscoveredEndpoint_littlespidy>> groups = new LinkedHashMap<>();
+        for (DiscoveredEndpoint_littlespidy ep : visibleEndpoints) {
+            String tag = ep.getTag();
+            if (tag == null || tag.isBlank()) tag = "Default";
+            groups.computeIfAbsent(tag, k -> new ArrayList<>()).add(ep);
+        }
+
+        Map<String, String> tagDescriptions = col.getTagDescriptions();
+
+        for (Map.Entry<String, List<DiscoveredEndpoint_littlespidy>> entry : groups.entrySet()) {
+            String groupName = entry.getKey();
+            List<DiscoveredEndpoint_littlespidy> groupEps = entry.getValue();
+            String description = tagDescriptions != null ? tagDescriptions.get(groupName) : null;
+
+            JPanel groupCard = createGroupSectionCard(groupName, description, groupEps);
+            groupedContainer.add(groupCard);
+            groupedContainer.add(Box.createVerticalStrut(8));
+        }
+
+        groupedContainer.revalidate();
+        groupedContainer.repaint();
+    }
+
+    private JPanel createGroupSectionCard(String groupName, String description, List<DiscoveredEndpoint_littlespidy> groupEps) {
+        JPanel card = new JPanel(new BorderLayout(4, 4));
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(6, 8, 6, 8)
+        ));
+
+        // Header panel
+        JPanel headerPanel = new JPanel(new BorderLayout(6, 2));
+        JPanel titleBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        JButton toggleBtn = new JButton("[-]");
+        toggleBtn.setFont(new Font(Font.MONOSPACED, Font.BOLD, 11));
+        toggleBtn.setMargin(new Insets(1, 4, 1, 4));
+
+        JLabel titleLabel = new JLabel(groupName + " (" + groupEps.size() + " endpoints)");
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 12f));
+        titleBox.add(toggleBtn);
+        titleBox.add(titleLabel);
+        headerPanel.add(titleBox, BorderLayout.WEST);
+
+        if (description != null && !description.isBlank()) {
+            JLabel descLabel = new JLabel("  " + description);
+            descLabel.setFont(descLabel.getFont().deriveFont(Font.ITALIC, 11f));
+            descLabel.setForeground(Color.DARK_GRAY);
+            headerPanel.add(descLabel, BorderLayout.SOUTH);
+        }
+        card.add(headerPanel, BorderLayout.NORTH);
+
+        // Group Table
+        EndpointTableModel model = new EndpointTableModel(false);
+        model.setEndpoints(groupEps);
+        JTable table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.addMouseListener(new MouseAdapter() {
             @Override
-            public boolean include(Entry<? extends EndpointTableModel, ? extends Integer> entry) {
-                int modelRow = entry.getIdentifier();
-                DiscoveredEndpoint_littlespidy ep = endpointTableModel.getEndpointAt(modelRow);
-                if (ep == null) return false;
-
-                // 1. HTTP Method multi-select filter
-                if (endpointMethodFilter != null && !endpointMethodFilter.isMethodSelected(ep.getMethod())) {
-                    return false;
-                }
-
-                // 2. Authentication requirement multi-select filter
-                if (endpointAuthFilter != null && !endpointAuthFilter.isAuthOptionSelected(ep.isRequiresAuth())) {
-                    return false;
-                }
-
-                // 3. Search text query
-                String query = endpointSearchField.getText().trim();
-                if (!query.isEmpty()) {
-                    String q = query.toLowerCase(Locale.ROOT);
-                    boolean matches = ep.getPath().toLowerCase(Locale.ROOT).contains(q)
-                            || ep.getMethod().toLowerCase(Locale.ROOT).contains(q)
-                            || ep.getSummary().toLowerCase(Locale.ROOT).contains(q)
-                            || ep.getParametersSummary().toLowerCase(Locale.ROOT).contains(q);
-                    if (!matches) {
-                        return false;
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    int r = table.rowAtPoint(e.getPoint());
+                    if (r >= 0 && r < groupEps.size()) {
+                        showEndpointDetailsDialog(groupEps.get(r));
                     }
                 }
+            }
 
-                return true;
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            private void showContextMenu(MouseEvent e) {
+                int r = table.rowAtPoint(e.getPoint());
+                if (r >= 0) {
+                    if (!table.isRowSelected(r)) {
+                        table.setRowSelectionInterval(r, r);
+                    }
+                    if (r < groupEps.size()) {
+                        DiscoveredEndpoint_littlespidy ep = groupEps.get(r);
+                        createEndpointContextMenu(ep).show(table, e.getX(), e.getY());
+                    }
+                }
             }
         });
 
-        int displayed = endpointTable.getRowCount();
-        int total = endpointTableModel.getRowCount();
-        endpointCountLabel.setText("Showing " + displayed + " of " + total + " Endpoints");
+        int rowCount = Math.max(1, groupEps.size());
+        int preferredHeight = Math.min(rowCount * 22 + 26, 220);
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setPreferredSize(new Dimension(table.getPreferredSize().width, preferredHeight));
+        card.add(scroll, BorderLayout.CENTER);
+
+        toggleBtn.addActionListener(e -> {
+            boolean visible = scroll.isVisible();
+            scroll.setVisible(!visible);
+            toggleBtn.setText(visible ? "[+]" : "[-]");
+            card.revalidate();
+            card.repaint();
+        });
+
+        return card;
     }
 
     public void updateAvailableProfiles(List<AuthProfile_littlespidy> profiles) {
@@ -685,8 +867,22 @@ public class APIImportTab_littlespidy extends JPanel {
     }
 
     private static class EndpointTableModel extends AbstractTableModel {
-        private final String[] columns = {"Method", "Path", "Summary", "Parameters", "Requires Auth"};
+        private final String[] columns;
+        private final boolean showTag;
         private List<DiscoveredEndpoint_littlespidy> endpoints = new ArrayList<>();
+
+        public EndpointTableModel() {
+            this(true);
+        }
+
+        public EndpointTableModel(boolean showTag) {
+            this.showTag = showTag;
+            if (showTag) {
+                this.columns = new String[]{"Tag", "Method", "Path", "Summary", "Parameters", "Requires Auth"};
+            } else {
+                this.columns = new String[]{"Method", "Path", "Summary", "Parameters", "Requires Auth"};
+            }
+        }
 
         public void setEndpoints(List<DiscoveredEndpoint_littlespidy> list) {
             this.endpoints = (list != null) ? list : new ArrayList<>();
@@ -705,13 +901,25 @@ public class APIImportTab_littlespidy extends JPanel {
         @Override
         public Object getValueAt(int row, int col) {
             DiscoveredEndpoint_littlespidy ep = endpoints.get(row);
-            switch (col) {
-                case 0: return ep.getMethod();
-                case 1: return ep.getPath();
-                case 2: return ep.getSummary();
-                case 3: return ep.getParametersSummary();
-                case 4: return ep.isRequiresAuth() ? "Yes" : "No";
-                default: return "";
+            if (showTag) {
+                switch (col) {
+                    case 0: return ep.getTag();
+                    case 1: return ep.getMethod();
+                    case 2: return ep.getPath();
+                    case 3: return ep.getSummary();
+                    case 4: return ep.getParametersSummary();
+                    case 5: return ep.isRequiresAuth() ? "Yes" : "No";
+                    default: return "";
+                }
+            } else {
+                switch (col) {
+                    case 0: return ep.getMethod();
+                    case 1: return ep.getPath();
+                    case 2: return ep.getSummary();
+                    case 3: return ep.getParametersSummary();
+                    case 4: return ep.isRequiresAuth() ? "Yes" : "No";
+                    default: return "";
+                }
             }
         }
     }

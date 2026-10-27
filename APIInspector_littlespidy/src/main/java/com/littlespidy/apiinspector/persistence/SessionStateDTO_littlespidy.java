@@ -20,6 +20,8 @@ public class SessionStateDTO_littlespidy {
         public List<AuthTestResultDTO> authTestResults = new ArrayList<>();
         public List<HiddenEndpointDTO> hiddenEndpoints = new ArrayList<>();
         public SessionStoreDTO sessionStore;
+        public java.util.Map<String, CachedResponseDTO> viewerResponses = new java.util.LinkedHashMap<>();
+        public String selectedEndpointKey;
     }
 
     public static class SessionTabDTO {
@@ -96,6 +98,7 @@ public class SessionStateDTO_littlespidy {
         public String statusMessage;
         public long importedAt;
         public String assignedProfileId;
+        public java.util.Map<String, String> tagDescriptions = new java.util.LinkedHashMap<>();
         public List<DiscoveredEndpointDTO> endpoints = new ArrayList<>();
     }
 
@@ -105,6 +108,8 @@ public class SessionStateDTO_littlespidy {
         public String path;
         public String summary;
         public String description;
+        public String tag;
+        public List<String> tags = new ArrayList<>();
         public java.util.Map<String, String> headers;
         public java.util.Map<String, String> queryParams;
         public java.util.Map<String, String> pathParams;
@@ -182,5 +187,12 @@ public class SessionStateDTO_littlespidy {
         public long discoveredAt;
         public HttpMessageDTO request;
         public HttpMessageDTO response;
+    }
+
+    public static class CachedResponseDTO {
+        public int statusCode;
+        public List<String> headers = new ArrayList<>();
+        public String body;
+        public String rawResponseBase64;
     }
 }

@@ -56,7 +56,7 @@ public class URLImportDialog_littlespidy extends JDialog {
 
         urlTextArea = new JTextArea(8, 45);
         urlTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        urlTextArea.setText("https://petstore.swagger.io/v2/swagger.json\n");
+        urlTextArea.setText("");
         JScrollPane scroll = new JScrollPane(urlTextArea);
         contentPane.add(scroll, BorderLayout.CENTER);
 

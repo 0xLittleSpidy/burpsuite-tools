@@ -25,6 +25,8 @@ public class DiscoveredEndpoint_littlespidy {
     private boolean requiresAuth;
     private List<String> authSchemes;
     private String customRawRequest;
+    private String tag;
+    private List<String> tags;
 
     public DiscoveredEndpoint_littlespidy() {
         this.id = UUID.randomUUID().toString();
@@ -32,6 +34,8 @@ public class DiscoveredEndpoint_littlespidy {
         this.path = "/";
         this.summary = "";
         this.description = "";
+        this.tag = "Default";
+        this.tags = new ArrayList<>();
         this.headers = new LinkedHashMap<>();
         this.queryParams = new LinkedHashMap<>();
         this.pathParams = new LinkedHashMap<>();
@@ -359,5 +363,33 @@ public class DiscoveredEndpoint_littlespidy {
             parts.add("Headers: " + headers.keySet());
         }
         return parts.isEmpty() ? "None" : String.join("; ", parts);
+    }
+
+    public String getTag() {
+        if (tag != null && !tag.isBlank()) {
+            return tag;
+        }
+        if (tags != null && !tags.isEmpty()) {
+            return tags.get(0);
+        }
+        return "Default";
+    }
+
+    public void setTag(String tag) {
+        this.tag = (tag != null && !tag.isBlank()) ? tag : "Default";
+    }
+
+    public List<String> getTags() {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = (tags != null) ? new ArrayList<>(tags) : new ArrayList<>();
+        if (!this.tags.isEmpty() && (this.tag == null || "Default".equals(this.tag))) {
+            this.tag = this.tags.get(0);
+        }
     }
 }

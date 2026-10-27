@@ -87,4 +87,44 @@ public class APIInspectorSessionManagementTest_littlespidy {
         manager.shutdown();
         System.out.println("[TEST] Done!");
     }
+
+    @Test
+    public void testLoadSessionDoesNotOverwriteDataLoss(@TempDir Path tempDir) throws Exception {
+        MontoyaApi api = mock(MontoyaApi.class);
+        APIInspectorPersistenceManager_littlespidy manager = new APIInspectorPersistenceManager_littlespidy(api);
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(api);
+        manager.setRootTab(rootTab);
+        rootTab.setPersistenceManager(manager);
+
+        // 1. Create a previous saved session file on disk (Session A)
+        File sessionFileA = tempDir.resolve("session_a.json").toFile();
+        manager.createNewSessionFile(sessionFileA);
+        AuthProfile_littlespidy profileA = new AuthProfile_littlespidy("ProfileA", AuthType_littlespidy.BEARER_TOKEN);
+        profileA.setBearerToken("token_alpha");
+        rootTab.getAuthTestingTab().setProfiles(List.of(profileA));
+        manager.saveActiveSession();
+
+        String contentA = Files.readString(sessionFileA.toPath());
+        assertTrue(contentA.contains("ProfileA"));
+        assertFalse(contentA.contains("ProfileB"));
+
+        // 2. Modify in-memory workspace to have Profile B (current data)
+        AuthProfile_littlespidy profileB = new AuthProfile_littlespidy("ProfileB", AuthType_littlespidy.BASIC_AUTH);
+        profileB.setBasicUsername("admin_beta");
+        rootTab.getAuthTestingTab().setProfiles(List.of(profileB));
+
+        // 3. User clicks load session to open Session A
+        manager.openSessionFile(sessionFileA);
+
+        // 4. Verify that sessionFileA on disk was NOT corrupted or overwritten by Profile B
+        String contentAfterLoad = Files.readString(sessionFileA.toPath());
+        assertTrue(contentAfterLoad.contains("ProfileA"), "Loaded session file must still contain ProfileA");
+        assertFalse(contentAfterLoad.contains("ProfileB"), "Loaded session file must NOT be overwritten with current ProfileB data");
+
+        // 5. Verify that the workspace accurately loaded ProfileA
+        assertEquals(1, rootTab.getAuthTestingTab().getAllProfiles().size());
+        assertEquals("ProfileA", rootTab.getAuthTestingTab().getAllProfiles().get(0).getName());
+
+        manager.shutdown();
+    }
 }

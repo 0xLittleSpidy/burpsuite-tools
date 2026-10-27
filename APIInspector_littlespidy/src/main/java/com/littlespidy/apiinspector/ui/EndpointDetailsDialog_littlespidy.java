@@ -16,6 +16,10 @@ import java.util.Map;
  */
 public class EndpointDetailsDialog_littlespidy extends JDialog {
 
+    public EndpointDetailsDialog_littlespidy(Window parent, DiscoveredEndpoint_littlespidy endpoint) {
+        this(parent, endpoint, null);
+    }
+
     public EndpointDetailsDialog_littlespidy(Window parent, DiscoveredEndpoint_littlespidy endpoint, Runnable onSendToVersionFinder) {
         super(parent, "Endpoint Details: " + (endpoint != null ? (endpoint.getMethod() + " " + endpoint.getPath()) : "Unknown"), ModalityType.APPLICATION_MODAL);
 

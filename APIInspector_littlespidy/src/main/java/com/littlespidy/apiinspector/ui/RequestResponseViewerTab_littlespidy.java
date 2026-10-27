@@ -13,6 +13,7 @@ import com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
 import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
 import com.littlespidy.apiinspector.model.SessionStore_littlespidy;
+import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -79,6 +80,17 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         void onSendToVersionFinder(ImportedCollection_littlespidy collection, DiscoveredEndpoint_littlespidy endpoint);
     }
     private SendToVersionFinderCallback onSendToVersionFinderListener;
+    private Runnable onStateChangedCallback;
+
+    public void setOnStateChangedCallback(Runnable onStateChangedCallback) {
+        this.onStateChangedCallback = onStateChangedCallback;
+    }
+
+    private void notifyStateChanged() {
+        if (onStateChangedCallback != null) {
+            onStateChangedCallback.run();
+        }
+    }
 
     public void setOnSendToVersionFinderListener(SendToVersionFinderCallback listener) {
         this.onSendToVersionFinderListener = listener;
@@ -229,6 +241,32 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
         requestsTable.addMouseListener(new MouseAdapter() {
             @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    int row = requestsTable.rowAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        int modelRow = requestsTable.convertRowIndexToModel(row);
+                        if (modelRow >= 0 && modelRow < endpointItems.size()) {
+                            EndpointItem item = endpointItems.get(modelRow);
+                            if (item != null && item.endpoint != null) {
+                                Window win = SwingUtilities.getWindowAncestor(RequestResponseViewerTab_littlespidy.this);
+                                EndpointDetailsDialog_littlespidy dlg = new EndpointDetailsDialog_littlespidy(
+                                        win,
+                                        item.endpoint,
+                                        () -> {
+                                            if (onSendToVersionFinderListener != null) {
+                                                onSendToVersionFinderListener.onSendToVersionFinder(item.collection, item.endpoint);
+                                            }
+                                        }
+                                );
+                                dlg.setVisible(true);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isPopupTrigger()) showContextMenu(e);
             }
@@ -306,7 +344,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
         // Left Component: Request Viewer (Editable)
         JPanel reqPanel = new JPanel(new BorderLayout());
-        reqPanel.setBorder(new TitledBorder("HTTP Request (Editable)"));
+        reqPanel.setBorder(new TitledBorder("Request"));
         if (api != null && api.userInterface() != null) {
             // Omit EditorOptions.READ_ONLY so the request editor is fully editable by user
             requestEditor = api.userInterface().createHttpRequestEditor();
@@ -318,10 +356,8 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
         // Right Component: Response Viewer
         JPanel respPanel = new JPanel(new BorderLayout());
-        respPanel.setBorder(new TitledBorder("HTTP Response"));
-        responseInfoLabel = new JLabel("Status: - | Length: 0 B");
-        responseInfoLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
-        respPanel.add(responseInfoLabel, BorderLayout.NORTH);
+        respPanel.setBorder(new TitledBorder("Response"));
+        responseInfoLabel = new JLabel("");
 
         if (api != null && api.userInterface() != null) {
             responseEditor = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
@@ -762,6 +798,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
                             if (fViewRow >= 0 && fViewRow < requestsTable.getRowCount()) {
                                 requestsTable.setRowSelectionInterval(fViewRow, fViewRow);
                             }
+                            notifyStateChanged();
                         });
                         return;
                     }
@@ -871,6 +908,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
                 runStatusLabel.setText(stopped ? "Stopped (" + completed.get() + " / " + total + ")." : "Finished (" + completed.get() + " / " + total + " requests).");
                 tableModel.fireTableDataChanged();
                 onEndpointRowSelected();
+                notifyStateChanged();
             });
         });
         coordinator.setDaemon(true);
@@ -915,6 +953,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
             tableModel.fireTableDataChanged();
         }
         responseInfoLabel.setText("Request reset to original spec template.");
+        notifyStateChanged();
     }
 
     private void clearEditors() {
@@ -989,6 +1028,100 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
 
     public List<EndpointItem> getEndpointItems() {
         return endpointItems;
+    }
+
+    public Map<String, SessionStateDTO_littlespidy.CachedResponseDTO> getViewerResponses() {
+        Map<String, SessionStateDTO_littlespidy.CachedResponseDTO> result = new LinkedHashMap<>();
+        for (Map.Entry<String, HttpResponse> entry : cachedResponses.entrySet()) {
+            HttpResponse resp = entry.getValue();
+            if (resp != null) {
+                SessionStateDTO_littlespidy.CachedResponseDTO dto = new SessionStateDTO_littlespidy.CachedResponseDTO();
+                dto.statusCode = resp.statusCode();
+                try {
+                    dto.body = resp.bodyToString();
+                } catch (Exception ignored) {}
+                try {
+                    List<String> hList = new ArrayList<>();
+                    if (resp.headers() != null) {
+                        for (burp.api.montoya.http.message.HttpHeader h : resp.headers()) {
+                            hList.add(h.toString());
+                        }
+                    }
+                    dto.headers = hList;
+                } catch (Exception ignored) {}
+                try {
+                    if (resp.toByteArray() != null) {
+                        dto.rawResponseBase64 = Base64.getEncoder().encodeToString(resp.toByteArray().getBytes());
+                    }
+                } catch (Exception ignored) {}
+                result.put(entry.getKey(), dto);
+            }
+        }
+        return result;
+    }
+
+    public String getSelectedEndpointKey() {
+        int row = requestsTable.getSelectedRow();
+        if (row >= 0) {
+            int modelRow = requestsTable.convertRowIndexToModel(row);
+            if (modelRow >= 0 && modelRow < endpointItems.size()) {
+                EndpointItem it = endpointItems.get(modelRow);
+                return it.collection.getId() + ":" + it.endpoint.getMethod() + ":" + it.endpoint.getPath();
+            }
+        }
+        return null;
+    }
+
+    public void restoreViewerResponses(Map<String, SessionStateDTO_littlespidy.CachedResponseDTO> map, String selectedKey) {
+        cachedResponses.clear();
+        if (map != null) {
+            for (Map.Entry<String, SessionStateDTO_littlespidy.CachedResponseDTO> entry : map.entrySet()) {
+                SessionStateDTO_littlespidy.CachedResponseDTO dto = entry.getValue();
+                if (dto != null) {
+                    HttpResponse resp = null;
+                    if (dto.rawResponseBase64 != null && !dto.rawResponseBase64.isBlank()) {
+                        try {
+                            byte[] raw = Base64.getDecoder().decode(dto.rawResponseBase64);
+                            resp = HttpResponse.httpResponse(burp.api.montoya.core.ByteArray.byteArray(raw));
+                        } catch (Exception ignored) {}
+                    }
+                    if (resp == null) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("HTTP/1.1 ").append(dto.statusCode).append(" OK\r\n");
+                        if (dto.headers != null) {
+                            for (String h : dto.headers) {
+                                sb.append(h).append("\r\n");
+                            }
+                        }
+                        sb.append("\r\n");
+                        if (dto.body != null) {
+                            sb.append(dto.body);
+                        }
+                        try {
+                            resp = HttpResponse.httpResponse(sb.toString());
+                        } catch (Exception ignored) {}
+                    }
+                    if (resp != null) {
+                        cachedResponses.put(entry.getKey(), resp);
+                    }
+                }
+            }
+        }
+        tableModel.fireTableDataChanged();
+        if (selectedKey != null && !selectedKey.isBlank()) {
+            for (int i = 0; i < endpointItems.size(); i++) {
+                EndpointItem it = endpointItems.get(i);
+                String key = it.collection.getId() + ":" + it.endpoint.getMethod() + ":" + it.endpoint.getPath();
+                if (selectedKey.equals(key)) {
+                    int viewRow = requestsTable.convertRowIndexToView(i);
+                    if (viewRow >= 0 && viewRow < requestsTable.getRowCount()) {
+                        requestsTable.setRowSelectionInterval(viewRow, viewRow);
+                        onEndpointRowSelected();
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     public static class EndpointItem {

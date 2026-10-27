@@ -57,6 +57,7 @@ public class APIInspectorPersistenceManager_littlespidy {
 
     private ScheduledFuture<?> pendingSaveTask;
     private final Object saveLock = new Object();
+    private volatile boolean isRestoringSession = false;
 
     private APIInspectorTab_littlespidy rootTab;
 
@@ -220,7 +221,7 @@ public class APIInspectorPersistenceManager_littlespidy {
      * Schedules a debounced asynchronous save (1500ms delay) for the entire root tab.
      */
     public synchronized void saveAsync(APIInspectorTab_littlespidy rootTab) {
-        if (activeSessionFile == null) {
+        if (activeSessionFile == null || isRestoringSession) {
             return;
         }
         if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
@@ -230,7 +231,7 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     public synchronized void saveAsync(ResAPIVersionFinderTab_littlespidy tab) {
-        if (activeSessionFile == null) {
+        if (activeSessionFile == null || isRestoringSession) {
             return;
         }
         if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
@@ -240,6 +241,7 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     public void saveSync(ResAPIVersionFinderTab_littlespidy tab) {
+        if (isRestoringSession) return;
         if (this.rootTab != null) {
             saveSync(this.rootTab);
             return;
@@ -249,7 +251,7 @@ public class APIInspectorPersistenceManager_littlespidy {
     }
 
     public void saveSync(APIInspectorTab_littlespidy rootTab) {
-        if (rootTab == null) return;
+        if (isRestoringSession || rootTab == null) return;
         saveSyncInternal(rootTab.getVersionFinderTab(),
                 rootTab.getDocStrategyTab() != null ? rootTab.getDocStrategyTab().getAllEntries() : null,
                 rootTab.getEndpointDiscoveryTab() != null ? rootTab.getEndpointDiscoveryTab().getAllEntries() : null,
@@ -325,8 +327,12 @@ public class APIInspectorPersistenceManager_littlespidy {
                     }
                 }
 
-                if (rootTab.getRequestResponseViewerTab() != null && rootTab.getRequestResponseViewerTab().getSessionStore() != null) {
-                    root.sessionStore = serializeSessionStore(rootTab.getRequestResponseViewerTab().getSessionStore());
+                if (rootTab != null && rootTab.getRequestResponseViewerTab() != null) {
+                    if (rootTab.getRequestResponseViewerTab().getSessionStore() != null) {
+                        root.sessionStore = serializeSessionStore(rootTab.getRequestResponseViewerTab().getSessionStore());
+                    }
+                    root.viewerResponses = rootTab.getRequestResponseViewerTab().getViewerResponses();
+                    root.selectedEndpointKey = rootTab.getRequestResponseViewerTab().getSelectedEndpointKey();
                 }
 
                 String json = gson.toJson(root);
@@ -362,10 +368,48 @@ public class APIInspectorPersistenceManager_littlespidy {
 
     public synchronized void openSessionFile(File file) {
         if (file == null || !file.exists()) return;
-        this.activeSessionFile = file;
-        this.storageDirectory = file.getParentFile();
-        loadSession(this.rootTab);
-        updateStatusLabel("Session: " + file.getName() + " (Auto-save Enabled)");
+
+        // Cancel pending debounce save to protect target file from being overwritten by current state
+        if (pendingSaveTask != null && !pendingSaveTask.isDone()) {
+            pendingSaveTask.cancel(true);
+        }
+
+        try {
+            String json = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+            SessionRootDTO root = gson.fromJson(json, SessionRootDTO.class);
+            if (root == null) {
+                throw new IllegalStateException("Parsed session file is empty.");
+            }
+
+            Runnable restoreTask = () -> {
+                this.isRestoringSession = true;
+                try {
+                    if (rootTab != null) {
+                        rootTab.resetWorkspace();
+                    }
+                    restoreRootDTOSync(root);
+                    this.activeSessionFile = file;
+                    this.storageDirectory = file.getParentFile();
+                    updateStatusLabel("Session: " + file.getName() + " (Auto-save Enabled)");
+                    log("[API Inspector] Successfully restored session data from " + file.getAbsolutePath());
+                } finally {
+                    this.isRestoringSession = false;
+                }
+            };
+
+            if (SwingUtilities.isEventDispatchThread()) {
+                restoreTask.run();
+            } else {
+                SwingUtilities.invokeAndWait(restoreTask);
+            }
+
+        } catch (Exception ex) {
+            log("[API Inspector] Error loading session file: " + ex.getMessage());
+            if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless")) {
+                JOptionPane.showMessageDialog(null, "Error loading session file:\n" + ex.getMessage(),
+                        "Load Session Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     public synchronized void createNewSessionFile(File file) {
@@ -421,7 +465,48 @@ public class APIInspectorPersistenceManager_littlespidy {
         }
     }
 
+    public boolean hasWorkspaceData() {
+        if (rootTab == null) return false;
+        if (rootTab.getVersionFinderTab() != null && !rootTab.getVersionFinderTab().getAllSessionPanels().isEmpty()) return true;
+        if (rootTab.getImportTab() != null && !rootTab.getImportTab().getAllCollections().isEmpty()) return true;
+        if (rootTab.getAuthTestingTab() != null && !rootTab.getAuthTestingTab().getAllProfiles().isEmpty()) return true;
+        if (rootTab.getDocStrategyTab() != null && !rootTab.getDocStrategyTab().getAllEntries().isEmpty()) return true;
+        if (rootTab.getEndpointDiscoveryTab() != null && !rootTab.getEndpointDiscoveryTab().getAllEntries().isEmpty()) return true;
+        if (rootTab.getHiddenApiStorageTab() != null && !rootTab.getHiddenApiStorageTab().getAllEndpoints().isEmpty()) return true;
+        return false;
+    }
+
     public synchronized void loadSessionPrompt(Component parent) {
+        if (!GraphicsEnvironment.isHeadless() && !Boolean.getBoolean("java.awt.headless") && parent != null && parent.isShowing()) {
+            if (hasWorkspaceData()) {
+                Object[] options = {"Save", "Discard", "Cancel"};
+                int choice = JOptionPane.showOptionDialog(
+                        parent,
+                        "Your current workspace has active session data.\n" +
+                                "Do you want to save current changes before loading a session file?",
+                        "Unsaved Workspace Changes",
+                        JOptionPane.YES_NO_CANCEL_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
+                    return; // Cancelled
+                } else if (choice == 0) {
+                    // Save
+                    if (activeSessionFile != null) {
+                        saveSync(rootTab);
+                    } else {
+                        saveAsSession(parent);
+                        if (activeSessionFile == null) {
+                            return; // User cancelled Save As dialog
+                        }
+                    }
+                }
+            }
+        }
+
         File lastDir = getLastDirectory();
         JFileChooser chooser = new JFileChooser(lastDir);
         chooser.setDialogTitle("Open API Inspector Session File");
@@ -610,90 +695,112 @@ public class APIInspectorPersistenceManager_littlespidy {
                 SessionRootDTO root = gson.fromJson(json, SessionRootDTO.class);
                 if (root == null) return;
 
-                SwingUtilities.invokeLater(() -> {
-                    // 1. Restore ResAPI Version Finder tabs
-                    if (root.tabs != null) {
-                        for (SessionTabDTO tabDTO : root.tabs) {
-                            rootTab.getVersionFinderTab().restoreSession(tabDTO);
-                        }
+                Runnable restoreTask = () -> {
+                    this.isRestoringSession = true;
+                    try {
+                        rootTab.resetWorkspace();
+                        restoreRootDTOSync(root);
+                        log("[API Inspector] Successfully restored session data from " + sessionFile.getAbsolutePath());
+                    } finally {
+                        this.isRestoringSession = false;
                     }
+                };
 
-                    // 2. Restore API Documentation Strategy entries
-                    if (root.documentationEntries != null && !root.documentationEntries.isEmpty()) {
-                        List<ReferenceRequestEntry> list = new ArrayList<>();
-                        for (ReferenceRequestDTO rDto : root.documentationEntries) {
-                            ReferenceRequestEntry ref = deserializeReferenceRequest(rDto);
-                            if (ref != null) list.add(ref);
-                        }
-                        rootTab.getDocStrategyTab().restoreEntries(list);
-                    }
-
-                    // 3. Restore API Endpoint Discovery Strategy entries
-                    if (root.endpointDiscoveryEntries != null && !root.endpointDiscoveryEntries.isEmpty()) {
-                        List<ReferenceRequestEntry> list = new ArrayList<>();
-                        for (ReferenceRequestDTO rDto : root.endpointDiscoveryEntries) {
-                            ReferenceRequestEntry ref = deserializeReferenceRequest(rDto);
-                            if (ref != null) list.add(ref);
-                        }
-                        rootTab.getEndpointDiscoveryTab().restoreEntries(list);
-                    }
-
-                    // 4. Restore Imported Collections
-                    if (root.importedCollections != null && !root.importedCollections.isEmpty()) {
-                        List<ImportedCollection_littlespidy> colList = new ArrayList<>();
-                        for (ImportedCollectionDTO cDto : root.importedCollections) {
-                            ImportedCollection_littlespidy col = deserializeImportedCollection(cDto);
-                            if (col != null) colList.add(col);
-                        }
-                        rootTab.getImportTab().setCollections(colList);
-                    }
-
-                    // 5. Restore Authentication Profiles
-                    if (root.authProfiles != null && !root.authProfiles.isEmpty()) {
-                        List<AuthProfile_littlespidy> profList = new ArrayList<>();
-                        for (AuthProfileDTO pDto : root.authProfiles) {
-                            AuthProfile_littlespidy prof = deserializeAuthProfile(pDto);
-                            if (prof != null) profList.add(prof);
-                        }
-                        rootTab.getAuthTestingTab().setProfiles(profList);
-                    }
-
-                    // 6. Restore Authentication Test Results
-                    if (root.authTestResults != null && !root.authTestResults.isEmpty()) {
-                        List<AuthTestResult_littlespidy> resList = new ArrayList<>();
-                        for (AuthTestResultDTO rDto : root.authTestResults) {
-                            AuthTestResult_littlespidy res = deserializeAuthTestResult(rDto);
-                            if (res != null) resList.add(res);
-                        }
-                        rootTab.getAuthTestingTab().setResults(resList);
-                    }
-
-                    // 7. Restore Session Store
-                    if (root.sessionStore != null && rootTab.getRequestResponseViewerTab() != null) {
-                        rootTab.getRequestResponseViewerTab().setSessionStore(deserializeSessionStore(root.sessionStore));
-                    }
-
-                    // 8. Restore Hidden API Storage Endpoints
-                    if (root.hiddenEndpoints != null && !root.hiddenEndpoints.isEmpty() && rootTab.getHiddenApiStorageTab() != null) {
-                        List<HiddenEndpoint_littlespidy> epList = new ArrayList<>();
-                        for (HiddenEndpointDTO hDto : root.hiddenEndpoints) {
-                            HiddenEndpoint_littlespidy ep = deserializeHiddenEndpoint(hDto);
-                            if (ep != null) epList.add(ep);
-                        }
-                        rootTab.getHiddenApiStorageTab().setEndpoints(epList);
-                    }
-
-                    // Resync profile selections across tabs
-                    rootTab.getImportTab().updateAvailableProfiles(rootTab.getAuthTestingTab().getAllProfiles());
-                    rootTab.getAuthTestingTab().refreshCollectionsCombo();
-
-                    log("[API Inspector] Successfully restored session data from " + sessionFile.getAbsolutePath());
-                });
+                if (SwingUtilities.isEventDispatchThread()) {
+                    restoreTask.run();
+                } else {
+                    SwingUtilities.invokeAndWait(restoreTask);
+                }
 
             } catch (Exception ex) {
                 log("[API Inspector] Error loading session from disk: " + ex.getMessage());
             }
         }
+    }
+
+    private void restoreRootDTOSync(SessionRootDTO root) {
+        if (root == null || rootTab == null) return;
+
+        // 1. Restore ResAPI Version Finder tabs
+        if (root.tabs != null) {
+            for (SessionTabDTO tabDTO : root.tabs) {
+                rootTab.getVersionFinderTab().restoreSession(tabDTO);
+            }
+        }
+
+        // 2. Restore API Documentation Strategy entries
+        if (root.documentationEntries != null && !root.documentationEntries.isEmpty()) {
+            List<ReferenceRequestEntry> list = new ArrayList<>();
+            for (ReferenceRequestDTO rDto : root.documentationEntries) {
+                ReferenceRequestEntry ref = deserializeReferenceRequest(rDto);
+                if (ref != null) list.add(ref);
+            }
+            rootTab.getDocStrategyTab().restoreEntries(list);
+        }
+
+        // 3. Restore API Endpoint Discovery Strategy entries
+        if (root.endpointDiscoveryEntries != null && !root.endpointDiscoveryEntries.isEmpty()) {
+            List<ReferenceRequestEntry> list = new ArrayList<>();
+            for (ReferenceRequestDTO rDto : root.endpointDiscoveryEntries) {
+                ReferenceRequestEntry ref = deserializeReferenceRequest(rDto);
+                if (ref != null) list.add(ref);
+            }
+            rootTab.getEndpointDiscoveryTab().restoreEntries(list);
+        }
+
+        // 4. Restore Imported Collections
+        if (root.importedCollections != null && !root.importedCollections.isEmpty()) {
+            List<ImportedCollection_littlespidy> colList = new ArrayList<>();
+            for (ImportedCollectionDTO cDto : root.importedCollections) {
+                ImportedCollection_littlespidy col = deserializeImportedCollection(cDto);
+                if (col != null) colList.add(col);
+            }
+            rootTab.getImportTab().setCollections(colList);
+        }
+
+        // 5. Restore Authentication Profiles
+        if (root.authProfiles != null && !root.authProfiles.isEmpty()) {
+            List<AuthProfile_littlespidy> profList = new ArrayList<>();
+            for (AuthProfileDTO pDto : root.authProfiles) {
+                AuthProfile_littlespidy prof = deserializeAuthProfile(pDto);
+                if (prof != null) profList.add(prof);
+            }
+            rootTab.getAuthTestingTab().setProfiles(profList);
+        }
+
+        // 6. Restore Authentication Test Results
+        if (root.authTestResults != null && !root.authTestResults.isEmpty()) {
+            List<AuthTestResult_littlespidy> resList = new ArrayList<>();
+            for (AuthTestResultDTO rDto : root.authTestResults) {
+                AuthTestResult_littlespidy res = deserializeAuthTestResult(rDto);
+                if (res != null) resList.add(res);
+            }
+            rootTab.getAuthTestingTab().setResults(resList);
+        }
+
+        // 7. Restore Session Store
+        if (root.sessionStore != null && rootTab.getRequestResponseViewerTab() != null) {
+            rootTab.getRequestResponseViewerTab().setSessionStore(deserializeSessionStore(root.sessionStore));
+        }
+
+        // 8. Restore Hidden API Storage Endpoints
+        if (root.hiddenEndpoints != null && !root.hiddenEndpoints.isEmpty() && rootTab.getHiddenApiStorageTab() != null) {
+            List<HiddenEndpoint_littlespidy> epList = new ArrayList<>();
+            for (HiddenEndpointDTO hDto : root.hiddenEndpoints) {
+                HiddenEndpoint_littlespidy ep = deserializeHiddenEndpoint(hDto);
+                if (ep != null) epList.add(ep);
+            }
+            rootTab.getHiddenApiStorageTab().setEndpoints(epList);
+        }
+
+        // 9. Restore Viewer Responses and Selected Request
+        if (root.viewerResponses != null && rootTab.getRequestResponseViewerTab() != null) {
+            rootTab.getRequestResponseViewerTab().restoreViewerResponses(root.viewerResponses, root.selectedEndpointKey);
+        }
+
+        // Resync profile selections across tabs
+        rootTab.getImportTab().updateAvailableProfiles(rootTab.getAuthTestingTab().getAllProfiles());
+        rootTab.getAuthTestingTab().refreshCollectionsCombo();
     }
 
     // --- Helper Serialization Methods ---
@@ -872,6 +979,7 @@ public class APIInspectorPersistenceManager_littlespidy {
         dto.statusMessage = col.getStatusMessage();
         dto.importedAt = col.getImportedAt();
         dto.assignedProfileId = col.getAssignedProfileId();
+        dto.tagDescriptions = col.getTagDescriptions();
 
         if (col.getEndpoints() != null) {
             for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
@@ -881,6 +989,8 @@ public class APIInspectorPersistenceManager_littlespidy {
                 epDto.path = ep.getPath();
                 epDto.summary = ep.getSummary();
                 epDto.description = ep.getDescription();
+                epDto.tag = ep.getTag();
+                epDto.tags = ep.getTags();
                 epDto.headers = ep.getHeaders();
                 epDto.queryParams = ep.getQueryParams();
                 epDto.pathParams = ep.getPathParams();
@@ -913,6 +1023,9 @@ public class APIInspectorPersistenceManager_littlespidy {
         col.setStatusMessage(dto.statusMessage);
         col.setImportedAt(dto.importedAt);
         col.setAssignedProfileId(dto.assignedProfileId);
+        if (dto.tagDescriptions != null) {
+            col.setTagDescriptions(dto.tagDescriptions);
+        }
 
         List<DiscoveredEndpoint_littlespidy> eps = new ArrayList<>();
         if (dto.endpoints != null) {
@@ -920,6 +1033,8 @@ public class APIInspectorPersistenceManager_littlespidy {
                 DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy(epDto.method, epDto.path, epDto.summary);
                 ep.setId(epDto.id);
                 ep.setDescription(epDto.description);
+                if (epDto.tag != null) ep.setTag(epDto.tag);
+                if (epDto.tags != null) ep.setTags(epDto.tags);
                 ep.setHeaders(epDto.headers);
                 ep.setQueryParams(epDto.queryParams);
                 ep.setPathParams(epDto.pathParams);

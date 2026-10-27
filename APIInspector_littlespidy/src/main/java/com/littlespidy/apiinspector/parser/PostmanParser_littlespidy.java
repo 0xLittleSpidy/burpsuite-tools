@@ -62,7 +62,7 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
             String[] detectedBaseUrl = new String[1];
 
             if (root.has("item") && root.get("item").isJsonArray()) {
-                traverseItems(root.getAsJsonArray("item"), endpoints, detectedBaseUrl);
+                traverseItems(root.getAsJsonArray("item"), endpoints, detectedBaseUrl, collection, "General");
             }
 
             if (detectedBaseUrl[0] != null && !detectedBaseUrl[0].isBlank()) {
@@ -78,17 +78,27 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
         }
     }
 
-    private void traverseItems(JsonArray items, List<DiscoveredEndpoint_littlespidy> endpoints, String[] detectedBaseUrl) {
+    private void traverseItems(JsonArray items, List<DiscoveredEndpoint_littlespidy> endpoints, String[] detectedBaseUrl, ImportedCollection_littlespidy collection, String currentFolder) {
         for (JsonElement itemElem : items) {
             if (!itemElem.isJsonObject()) continue;
             JsonObject itemObj = itemElem.getAsJsonObject();
 
             if (itemObj.has("item") && itemObj.get("item").isJsonArray()) {
                 // Folder - recurse
-                traverseItems(itemObj.getAsJsonArray("item"), endpoints, detectedBaseUrl);
+                String folderName = itemObj.has("name") ? itemObj.get("name").getAsString().trim() : currentFolder;
+                if (folderName.isEmpty()) folderName = currentFolder;
+                if (itemObj.has("description") && !itemObj.get("description").isJsonNull()) {
+                    String desc = itemObj.get("description").isJsonObject()
+                            ? (itemObj.getAsJsonObject("description").has("content") ? itemObj.getAsJsonObject("description").get("content").getAsString() : "")
+                            : itemObj.get("description").getAsString();
+                    if (!desc.isBlank()) {
+                        collection.getTagDescriptions().put(folderName, desc.trim());
+                    }
+                }
+                traverseItems(itemObj.getAsJsonArray("item"), endpoints, detectedBaseUrl, collection, folderName);
             } else if (itemObj.has("request")) {
                 // Request item
-                DiscoveredEndpoint_littlespidy ep = parsePostmanRequest(itemObj, detectedBaseUrl);
+                DiscoveredEndpoint_littlespidy ep = parsePostmanRequest(itemObj, detectedBaseUrl, currentFolder);
                 if (ep != null) {
                     endpoints.add(ep);
                 }
@@ -96,7 +106,7 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
         }
     }
 
-    private DiscoveredEndpoint_littlespidy parsePostmanRequest(JsonObject itemObj, String[] detectedBaseUrl) {
+    private DiscoveredEndpoint_littlespidy parsePostmanRequest(JsonObject itemObj, String[] detectedBaseUrl, String currentFolder) {
         JsonElement reqElem = itemObj.get("request");
         String name = itemObj.has("name") ? itemObj.get("name").getAsString() : "";
 
@@ -104,6 +114,7 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
             // Simple URL string request
             String urlStr = reqElem.getAsString();
             DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("GET", extractPath(urlStr), name);
+            ep.setTag(currentFolder != null && !currentFolder.isBlank() ? currentFolder : "General");
             checkAndSetBaseUrl(urlStr, detectedBaseUrl);
             return ep;
         }
@@ -240,6 +251,7 @@ public class PostmanParser_littlespidy implements APIParser_littlespidy {
         boolean hasAuth = req.has("auth") && !req.get("auth").isJsonNull();
 
         DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy(method, path, name);
+        ep.setTag(currentFolder != null && !currentFolder.isBlank() ? currentFolder : "General");
         ep.setQueryParams(queryParams);
         ep.setHeaders(headers);
         ep.setPathParams(pathParams);

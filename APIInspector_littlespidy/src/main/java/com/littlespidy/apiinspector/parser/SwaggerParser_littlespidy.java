@@ -71,6 +71,21 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
                 collection.setTargetBaseUrl(targetBaseUrl);
             }
 
+            // Extract Swagger top-level tags and descriptions
+            if (root.has("tags") && root.get("tags").isJsonArray()) {
+                JsonArray tagsArr = root.getAsJsonArray("tags");
+                for (JsonElement tElem : tagsArr) {
+                    if (tElem.isJsonObject()) {
+                        JsonObject tObj = tElem.getAsJsonObject();
+                        String tName = tObj.has("name") && !tObj.get("name").isJsonNull() ? tObj.get("name").getAsString().trim() : "";
+                        String tDesc = tObj.has("description") && !tObj.get("description").isJsonNull() ? tObj.get("description").getAsString().trim() : "";
+                        if (!tName.isEmpty()) {
+                            collection.getTagDescriptions().put(tName, tDesc);
+                        }
+                    }
+                }
+            }
+
             // Extract Endpoints
             List<DiscoveredEndpoint_littlespidy> endpoints = new ArrayList<>();
             if (root.has("paths") && root.get("paths").isJsonObject()) {
@@ -106,6 +121,22 @@ public class SwaggerParser_littlespidy implements APIParser_littlespidy {
 
                             if (op.has("description") && !op.get("description").isJsonNull()) {
                                 ep.setDescription(op.get("description").getAsString());
+                            }
+
+                            List<String> opTags = new ArrayList<>();
+                            if (op.has("tags") && op.get("tags").isJsonArray()) {
+                                for (JsonElement te : op.getAsJsonArray("tags")) {
+                                    if (!te.isJsonNull()) {
+                                        String ts = te.getAsString().trim();
+                                        if (!ts.isEmpty()) opTags.add(ts);
+                                    }
+                                }
+                            }
+                            if (!opTags.isEmpty()) {
+                                ep.setTags(opTags);
+                                ep.setTag(opTags.get(0));
+                            } else {
+                                ep.setTag("Default");
                             }
 
                             Map<String, String> pathParams = new LinkedHashMap<>(commonPathParams);

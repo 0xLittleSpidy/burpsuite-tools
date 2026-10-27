@@ -69,8 +69,11 @@ public class SessionStoreDialog_littlespidy extends JDialog {
 
         headersTextArea = new JTextArea(12, 45);
         headersTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        headersTextArea.setLineWrap(false);
+        headersTextArea.setLineWrap(true);
+        headersTextArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(headersTextArea);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         headersCard.add(scrollPane, BorderLayout.CENTER);
 
         JLabel helpLabel = new JLabel("Pasted headers strictly overwrite/replace any existing matching headers on outgoing requests.");

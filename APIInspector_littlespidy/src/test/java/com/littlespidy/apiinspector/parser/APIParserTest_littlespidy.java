@@ -430,4 +430,63 @@ public class APIParserTest_littlespidy {
         assertNotNull(result.getErrorMessage());
         assertTrue(result.getErrorMessage().contains("Unsupported or invalid format"));
     }
+
+    @Test
+    @DisplayName("Parse tags and tag descriptions from Swagger 2.0 and OpenAPI 3.0 specs")
+    public void testSwaggerAndOpenApiTagAndDescriptionParsing() {
+        String swaggerJson = """
+        {
+          "swagger": "2.0",
+          "info": { "title": "Petstore API", "version": "1.0.0" },
+          "tags": [
+            { "name": "pet", "description": "Operations about pets" },
+            { "name": "store", "description": "Access to petstore orders" }
+          ],
+          "paths": {
+            "/pet/{petId}": {
+              "get": {
+                "tags": ["pet"],
+                "summary": "Find pet by ID"
+              }
+            },
+            "/store/order": {
+              "post": {
+                "tags": ["store"],
+                "summary": "Place an order"
+              }
+            }
+          }
+        }
+        """;
+        ParseResult_littlespidy swResult = APIParserFactory_littlespidy.parse(swaggerJson, "petstore.json", "FILE");
+        assertTrue(swResult.isSuccess());
+        ImportedCollection_littlespidy swCol = swResult.getCollection();
+        assertEquals("Operations about pets", swCol.getTagDescriptions().get("pet"));
+        assertEquals("Access to petstore orders", swCol.getTagDescriptions().get("store"));
+        assertEquals("pet", swCol.getEndpoints().get(0).getTag());
+        assertEquals("store", swCol.getEndpoints().get(1).getTag());
+
+        String openApiJson = """
+        {
+          "openapi": "3.0.0",
+          "info": { "title": "Inventory API", "version": "1.0" },
+          "tags": [
+            { "name": "inventory", "description": "Inventory management endpoints" }
+          ],
+          "paths": {
+            "/inventory/items": {
+              "get": {
+                "tags": ["inventory"],
+                "summary": "List items"
+              }
+            }
+          }
+        }
+        """;
+        ParseResult_littlespidy oasResult = APIParserFactory_littlespidy.parse(openApiJson, "inventory.json", "FILE");
+        assertTrue(oasResult.isSuccess());
+        ImportedCollection_littlespidy oasCol = oasResult.getCollection();
+        assertEquals("Inventory management endpoints", oasCol.getTagDescriptions().get("inventory"));
+        assertEquals("inventory", oasCol.getEndpoints().get(0).getTag());
+    }
 }
