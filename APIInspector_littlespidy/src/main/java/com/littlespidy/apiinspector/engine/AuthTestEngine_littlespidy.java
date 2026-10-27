@@ -500,6 +500,25 @@ public class AuthTestEngine_littlespidy {
     private static HttpRequest applyAuthProfile(HttpRequest request, AuthProfile_littlespidy profile) {
         if (request == null || profile == null) return request;
 
+        if (profile.isUnauthenticated()) {
+            return stripAuth(request, profile);
+        }
+
+        if (profile.getRawHeaders() != null && !profile.getRawHeaders().isBlank()) {
+            String[] lines = profile.getRawHeaders().split("[\\r\\n]+");
+            for (String line : lines) {
+                int colon = line.indexOf(':');
+                if (colon > 0) {
+                    String name = line.substring(0, colon).trim();
+                    String value = line.substring(colon + 1).trim();
+                    if (!name.isEmpty()) {
+                        request = request.withHeader(name, value);
+                    }
+                }
+            }
+            return request;
+        }
+
         switch (profile.getAuthType()) {
             case BEARER_TOKEN:
                 if (!profile.getBearerToken().isBlank()) {
@@ -544,6 +563,18 @@ public class AuthTestEngine_littlespidy {
 
     private static HttpRequest stripAuth(HttpRequest request, AuthProfile_littlespidy profile) {
         if (request == null) return null;
+
+        if (profile != null && profile.isUnauthenticated() && profile.getRawHeaders() != null && !profile.getRawHeaders().isBlank()) {
+            String[] tokens = profile.getRawHeaders().split("[\\r\\n,]+");
+            for (String tok : tokens) {
+                String h = tok.trim();
+                if (h.endsWith(":")) h = h.substring(0, h.length() - 1).trim();
+                if (!h.isEmpty() && request.hasHeader(h)) {
+                    request = request.withRemovedHeader(h);
+                }
+            }
+            return request;
+        }
 
         if (request.hasHeader("Authorization")) {
             request = request.withRemovedHeader("Authorization");

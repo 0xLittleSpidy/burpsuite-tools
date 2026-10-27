@@ -1,0 +1,867 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Inspector - UI Preview - littlespidy</title>
+  <style>
+    :root {
+      --bg-primary: #2b2b2b;
+      --bg-secondary: #3c3f41;
+      --bg-tertiary: #1e1e1e;
+      --text-primary: #bbbbbb;
+      --text-highlight: #ffffff;
+      --text-muted: #888888;
+      --border-color: #555555;
+      --accent: #ff6633;
+      --accent-hover: #e65522;
+      --btn-bg: #4c5052;
+      --btn-hover: #5c6164;
+      --table-stripe: #313335;
+      --table-select: #2d5a88;
+      --status-diff: #499c54;
+      --status-same: #c75450;
+      --status-similar: #e59866;
+      --code-bg: #1e1e1e;
+    }
+
+    body.light-theme {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #fafafa;
+      --text-primary: #333333;
+      --text-highlight: #000000;
+      --text-muted: #666666;
+      --border-color: #d0d0d0;
+      --accent: #e05510;
+      --accent-hover: #c9490b;
+      --btn-bg: #e4e4e4;
+      --btn-hover: #d5d5d5;
+      --table-stripe: #f9f9f9;
+      --table-select: #b3d7ff;
+      --status-diff: #2e7d32;
+      --status-same: #c62828;
+      --status-similar: #d84315;
+      --code-bg: #f8f8f8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .title-area h1 {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--accent);
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .title-area span {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    button, select, input {
+      background-color: var(--btn-bg);
+      color: var(--text-highlight);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    button:hover {
+      background-color: var(--btn-hover);
+    }
+
+    button.primary {
+      background-color: var(--accent);
+      color: #fff;
+      font-weight: bold;
+      border: none;
+    }
+
+    button.primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .tabs-bar {
+      display: flex;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-weight: bold;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      border-radius: 0;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      background-color: var(--bg-secondary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Request/Response View */
+    .top-actions-bar {
+      display: flex;
+      justify-content: space-between;
+      background: var(--bg-secondary);
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 8px;
+    }
+
+    .split-vertical {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pane-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      padding: 8px;
+    }
+
+    .pane-box-header {
+      font-weight: bold;
+      color: var(--text-highlight);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .http-editor {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      font-family: monospace;
+      font-size: 11px;
+      padding: 8px;
+      height: 220px;
+      white-space: pre;
+      overflow-y: auto;
+      color: var(--text-highlight);
+    }
+
+    /* Auth Testing View */
+    .auth-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 10px;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .table-container {
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--bg-secondary);
+      color: var(--text-highlight);
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:nth-child(even) {
+      background: var(--table-stripe);
+    }
+
+    tr.selected {
+      background: var(--table-select);
+      color: #fff;
+    }
+
+    .badge-diff {
+      color: var(--status-diff);
+      font-weight: bold;
+    }
+
+    .badge-same {
+      color: var(--status-same);
+      font-weight: bold;
+    }
+
+    .badge-similar {
+      color: var(--status-similar);
+      font-weight: bold;
+    }
+
+    .badge-code {
+      font-family: monospace;
+      text-align: center;
+    }
+
+    .runner-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .results-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Modal / Modeless dialog preview */
+    .dialog-overlay {
+      position: fixed;
+      top: 80px;
+      right: 40px;
+      width: 480px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--accent);
+      border-radius: 4px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      z-index: 100;
+      padding: 12px;
+    }
+
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+
+    .dialog-header h3 {
+      font-size: 13px;
+      color: var(--accent);
+    }
+
+    .dialog-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      padding: 4px 0;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    textarea.headers-area {
+      width: 100%;
+      height: 110px;
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-highlight);
+      font-family: monospace;
+      font-size: 11px;
+      padding: 6px;
+      resize: vertical;
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 10px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 8px;
+    }
+
+    .inspector-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+    }
+
+    .toggle-group {
+      display: flex;
+    }
+
+    .toggle-group button {
+      border-radius: 0;
+    }
+
+    .toggle-group button:first-child {
+      border-top-left-radius: 2px;
+      border-bottom-left-radius: 2px;
+    }
+
+    .toggle-group button:last-child {
+      border-top-right-radius: 2px;
+      border-bottom-right-radius: 2px;
+    }
+
+    .toggle-group button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .note-box {
+      padding: 6px;
+      background: rgba(255, 102, 51, 0.1);
+      border-left: 3px solid var(--accent);
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-area">
+      <h1>API Inspector - UI Preview</h1>
+      <span>Author: littlespidy | Burp Suite Extension</span>
+    </div>
+    <div class="header-actions">
+      <button onclick="toggleTheme()">Toggle Theme (Light / Dark)</button>
+      <button onclick="toggleProfileDialog()">Open Modeless Profile Dialog</button>
+    </div>
+  </header>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchMainTab('authTab')">Authentication Testing</button>
+    <button class="tab-btn" onclick="switchMainTab('reqRespTab')">Request and Response View</button>
+  </div>
+
+  <!-- 1. Authentication Testing Tab -->
+  <div id="authTab" class="tab-content active">
+    <div class="auth-grid">
+      <!-- Left Column: Profiles, Endpoints, Execution -->
+      <div class="left-column">
+        <!-- Profiles Box (No Select All / Deselect All buttons) -->
+        <div class="pane-box">
+          <div class="pane-box-header">
+            <span>Authentication Profiles</span>
+            <div>
+              <button onclick="toggleProfileDialog()">New Profile</button>
+              <button>Edit Profile</button>
+              <button>Duplicate</button>
+              <button>Delete</button>
+            </div>
+          </div>
+          <div class="note-box">
+            Hint: Use Shift+Arrows or Ctrl+A to select multiple profiles, and Space to toggle active state.
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 30px;">Act</th>
+                  <th>Profile Name</th>
+                  <th>Type</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="selected">
+                  <td><input type="checkbox" checked></td>
+                  <td>admin</td>
+                  <td>Auth</td>
+                  <td>Authorization: Bearer adm...</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" checked></td>
+                  <td>user</td>
+                  <td>Auth</td>
+                  <td>Authorization: Bearer usr...</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" checked></td>
+                  <td>unauth_strip</td>
+                  <td>Unauth</td>
+                  <td>Strip: Cookie, Authorization</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Endpoints Box (No Select All / Deselect All buttons) -->
+        <div class="pane-box">
+          <div class="pane-box-header">
+            <span>Endpoints to Test</span>
+            <div>
+              <span>Collection:</span>
+              <select>
+                <option>Swagger Petstore API (12 endpoints)</option>
+                <option>Internal Payments API (8 endpoints)</option>
+              </select>
+            </div>
+          </div>
+          <div class="note-box">
+            Hint: Multi-select rows with Ctrl+A or Shift+Arrows, press Space to toggle.
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 30px;">Sel</th>
+                  <th style="width: 60px;">Method</th>
+                  <th>Path</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="selected">
+                  <td><input type="checkbox" checked></td>
+                  <td><strong>GET</strong></td>
+                  <td>/api/v2/users/me</td>
+                </tr>
+                <tr class="selected">
+                  <td><input type="checkbox" checked></td>
+                  <td><strong>POST</strong></td>
+                  <td>/api/v2/users/transfer</td>
+                </tr>
+                <tr class="selected">
+                  <td><input type="checkbox" checked></td>
+                  <td><strong>DELETE</strong></td>
+                  <td>/api/v2/admin/accounts/1</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" checked></td>
+                  <td><strong>GET</strong></td>
+                  <td>/api/v2/reports/summary</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Execution Controls with Runner Name -->
+        <div class="pane-box">
+          <div class="pane-box-header">
+            <span>Execution Controls</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 6px;">
+            <label>Threads: <input type="number" value="4" style="width: 45px;"></label>
+            <label>Delay (ms): <input type="number" value="50" style="width: 60px;"></label>
+          </div>
+          <div class="runner-controls">
+            <label><strong>Runner Name:</strong> <input type="text" id="runnerInput" value="Runner 1" style="width: 110px;"></label>
+            <button class="primary" onclick="simulateRun()">Run Authentication Tests</button>
+            <button>Test Selected</button>
+            <button disabled>Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results Table & Inspector -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Results Table -->
+        <div class="pane-box">
+          <div class="results-header-bar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span><strong>Runner:</strong></span>
+              <select id="runnerSelect" onchange="switchRunner()">
+                <option value="1">Runner 1 (Live Run - 4 endpoints)</option>
+                <option value="2">Runner 2 (Previous Run - 12 endpoints)</option>
+              </select>
+              <span>Filter Outcome:</span>
+              <select>
+                <option>All Outcomes</option>
+                <option>Status SAME (Bypassed)</option>
+                <option>Status DIFFERENT (Enforced)</option>
+              </select>
+            </div>
+            <div>
+              <button>Retry Failed</button>
+              <button>Export CSV</button>
+              <button>Export JSON</button>
+              <button>Clear Results</button>
+            </div>
+          </div>
+
+          <!-- Results Table with Outcome and adjacent Status Code Columns -->
+          <div class="table-container" style="max-height: 240px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Collection</th>
+                  <th>Method</th>
+                  <th>Path</th>
+                  <th>admin</th>
+                  <th>admin - Status Code</th>
+                  <th>user</th>
+                  <th>user - Status Code</th>
+                  <th>Unauth</th>
+                  <th>Unauth - Status Code</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody">
+                <tr class="selected">
+                  <td>Petstore</td>
+                  <td><strong>GET</strong></td>
+                  <td>/api/v2/users/me</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">200</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">200</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">401</td>
+                </tr>
+                <tr>
+                  <td>Petstore</td>
+                  <td><strong>POST</strong></td>
+                  <td>/api/v2/users/transfer</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">200</td>
+                  <td><span class="badge-same">SAME</span></td>
+                  <td class="badge-code">200</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">403</td>
+                </tr>
+                <tr>
+                  <td>Petstore</td>
+                  <td><strong>DELETE</strong></td>
+                  <td>/api/v2/admin/accounts/1</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">200</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">403</td>
+                  <td><span class="badge-diff">DIFFERENT</span></td>
+                  <td class="badge-code">401</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Inspector View: Notice Header label removed, Request/Response buttons on LEFT -->
+        <div class="pane-box">
+          <div class="inspector-header">
+            <div class="toggle-group">
+              <button class="active" id="inspReqBtn" onclick="toggleInspectorMode('req')">Request</button>
+              <button id="inspRespBtn" onclick="toggleInspectorMode('resp')">Response</button>
+            </div>
+            <span style="color: var(--text-muted); margin-left: 8px;">Viewing /api/v2/users/me across profiles</span>
+          </div>
+          <div class="grid-two-col" style="margin-top: 6px;">
+            <div>
+              <div style="font-weight: bold; margin-bottom: 4px; color: var(--accent);">admin (Auth)</div>
+              <div class="http-editor" id="adminViewer">GET /api/v2/users/me HTTP/1.1
+Host: petstore.swagger.io
+Authorization: Bearer admin-jwt-token-xyz
+User-Agent: BurpSuite APIInspector
+Accept: application/json</div>
+            </div>
+            <div>
+              <div style="font-weight: bold; margin-bottom: 4px; color: var(--accent);">user (Auth)</div>
+              <div class="http-editor" id="userViewer">GET /api/v2/users/me HTTP/1.1
+Host: petstore.swagger.io
+Authorization: Bearer regular-user-token-abc
+User-Agent: BurpSuite APIInspector
+Accept: application/json</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Request and Response View Tab -->
+  <div id="reqRespTab" class="tab-content">
+    <div class="top-actions-bar">
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span>Filter:</span>
+        <input type="text" placeholder="Search requests..." style="width: 200px;">
+        <span>Method:</span>
+        <select><option>ALL</option><option>GET</option><option>POST</option></select>
+        <button>Refresh</button>
+      </div>
+      <!-- Notice: Individual 'Run' button removed from top, kept 'Run All', 'Stop', 'Reset' -->
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <span style="color: green; font-size: 11px;">Active Session: Standard</span>
+        <button>Session Store</button>
+        <button>Fill Parameters</button>
+        <button class="primary">Run All</button>
+        <button disabled>Stop</button>
+        <button>Reset</button>
+        <span>Requests: 12</span>
+      </div>
+    </div>
+
+    <div class="split-vertical">
+      <!-- Requests Table -->
+      <div class="pane-box">
+        <div class="pane-box-header">Discovered API Requests</div>
+        <div class="table-container" style="max-height: 140px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Path</th>
+                <th>Status</th>
+                <th>Length</th>
+                <th>Content-Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected">
+                <td><strong>GET</strong></td>
+                <td>/api/v2/users/me</td>
+                <td>200 OK</td>
+                <td>412 B</td>
+                <td>application/json</td>
+              </tr>
+              <tr>
+                <td><strong>POST</strong></td>
+                <td>/api/v2/users/transfer</td>
+                <td>200 OK</td>
+                <td>188 B</td>
+                <td>application/json</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Request and Response Panes: Run button embedded inside Request Header -->
+      <div class="grid-two-col">
+        <div class="pane-box">
+          <div class="pane-box-header">
+            <span>Request</span>
+            <!-- 'Run' button moved inside Request pane -->
+            <button class="primary" onclick="alert('Running request against target server...')">Run</button>
+          </div>
+          <div class="http-editor" contenteditable="true">GET /api/v2/users/me HTTP/1.1
+Host: petstore.swagger.io
+Authorization: Bearer test-session-1234
+User-Agent: Mozilla/5.0 (BurpSuite APIInspector)
+Accept: application/json</div>
+        </div>
+
+        <div class="pane-box">
+          <div class="pane-box-header">
+            <span>Response</span>
+            <span style="color: #499c54; font-weight: normal;">Status: 200 OK (38 ms)</span>
+          </div>
+          <div class="http-editor">HTTP/1.1 200 OK
+Date: Tue, 27 Oct 2026 12:15:00 GMT
+Content-Type: application/json
+Content-Length: 412
+
+{
+  "id": 1042,
+  "username": "tester",
+  "email": "tester@example.com",
+  "role": "member"
+}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modeless New / Edit Profile Dialog Mockup -->
+  <div id="profileDialog" class="dialog-overlay">
+    <div class="dialog-header">
+      <h3 id="dialogTitle">Create Authentication Profile (Modeless)</h3>
+      <button onclick="toggleProfileDialog()">X</button>
+    </div>
+    <div class="dialog-body">
+      <div>
+        <label><strong>Profile Name:</strong></label>
+        <input type="text" id="profNameInput" value="dev_admin" style="width: 100%; margin-top: 2px;">
+      </div>
+
+      <div>
+        <label><strong>Profile Type:</strong></label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="profType" value="auth" checked onchange="switchProfileType('auth')">
+            <strong>Authenticated (auth)</strong>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="profType" value="unauth" onchange="switchProfileType('unauth')">
+            <strong>Unauthenticated (unauth)</strong>
+          </label>
+        </div>
+      </div>
+
+      <div id="headersSection">
+        <label id="headersLabel"><strong>Session Headers (Full Header Lines):</strong></label>
+        <div style="color: var(--text-muted); font-size: 10px; margin-bottom: 4px;" id="headersHelp">
+          Provide complete header lines. Multiple headers are supported, one per line.
+        </div>
+        <textarea class="headers-area" id="headersText" placeholder="Authorization: Bearer <token>&#10;Cookie: sessionid=<id>&#10;X-Custom-Auth: secret">Authorization: Bearer dev-secret-token-999
+Cookie: session_auth=abc123xyz</textarea>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button onclick="toggleProfileDialog()">Cancel</button>
+      <button class="primary" onclick="saveProfileMock()">Save Profile</button>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    function switchMainTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      if (tabId === 'authTab') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('authTab').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('reqRespTab').classList.add('active');
+      }
+    }
+
+    function toggleProfileDialog() {
+      const dialog = document.getElementById('profileDialog');
+      dialog.style.display = dialog.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function switchProfileType(type) {
+      const label = document.getElementById('headersLabel');
+      const help = document.getElementById('headersHelp');
+      const textarea = document.getElementById('headersText');
+
+      if (type === 'unauth') {
+        label.innerHTML = '<strong>Headers to Remove (Header Names):</strong>';
+        help.innerText = 'Specify header names to strip from requests (e.g., Authorization:, Cookie:).';
+        textarea.placeholder = 'Authorization:\nCookie:\nX-API-Key:';
+        textarea.value = 'Authorization:\nCookie:';
+      } else {
+        label.innerHTML = '<strong>Session Headers (Full Header Lines):</strong>';
+        help.innerText = 'Provide complete header lines. Multiple headers are supported, one per line.';
+        textarea.placeholder = 'Authorization: Bearer <token>\nCookie: sessionid=<id>\nX-Custom-Auth: secret';
+        textarea.value = 'Authorization: Bearer dev-secret-token-999\nCookie: session_auth=abc123xyz';
+      }
+    }
+
+    function saveProfileMock() {
+      const name = document.getElementById('profNameInput').value;
+      alert('Saved profile: ' + name + ' (Non-modal operation)');
+      toggleProfileDialog();
+    }
+
+    function simulateRun() {
+      const runnerName = document.getElementById('runnerInput').value;
+      const select = document.getElementById('runnerSelect');
+      const opt = document.createElement('option');
+      opt.value = select.options.length + 1;
+      opt.text = runnerName + ' (Just finished)';
+      select.add(opt);
+      select.value = opt.value;
+      alert('Finished run for: ' + runnerName);
+      
+      // Auto-increment runner name
+      const numMatch = runnerName.match(/\d+/);
+      const nextNum = numMatch ? parseInt(numMatch[0]) + 1 : select.options.length;
+      document.getElementById('runnerInput').value = 'Runner ' + nextNum;
+    }
+
+    function switchRunner() {
+      const select = document.getElementById('runnerSelect');
+      const selText = select.options[select.selectedIndex].text;
+      console.log('Switched view to runner:', selText);
+    }
+
+    function toggleInspectorMode(mode) {
+      const reqBtn = document.getElementById('inspReqBtn');
+      const respBtn = document.getElementById('inspRespBtn');
+      const adminViewer = document.getElementById('adminViewer');
+      const userViewer = document.getElementById('userViewer');
+
+      if (mode === 'req') {
+        reqBtn.classList.add('active');
+        respBtn.classList.remove('active');
+        adminViewer.innerText = 'GET /api/v2/users/me HTTP/1.1\nHost: petstore.swagger.io\nAuthorization: Bearer admin-jwt-token-xyz\nUser-Agent: BurpSuite APIInspector\nAccept: application/json';
+        userViewer.innerText = 'GET /api/v2/users/me HTTP/1.1\nHost: petstore.swagger.io\nAuthorization: Bearer regular-user-token-abc\nUser-Agent: BurpSuite APIInspector\nAccept: application/json';
+      } else {
+        respBtn.classList.add('active');
+        reqBtn.classList.remove('active');
+        adminViewer.innerText = 'HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 412\n\n{\n  "role": "admin",\n  "status": "active"\n}';
+        userViewer.innerText = 'HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 215\n\n{\n  "role": "user",\n  "status": "active"\n}';
+      }
+    }
+  </script>
+</body>
+</html>

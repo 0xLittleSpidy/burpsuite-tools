@@ -34,6 +34,10 @@ public class AuthProfile_littlespidy {
     private String customHeaderName;
     private String customHeaderValue;
 
+    // Unauthenticated profile flag and raw session headers / strip headers
+    private boolean unauthenticated;
+    private String rawHeaders;
+
     // Unauthenticated comparison setting
     private boolean testUnauthenticatedComparison;
 
@@ -51,6 +55,8 @@ public class AuthProfile_littlespidy {
         this.cookieValue = "";
         this.customHeaderName = "Authorization";
         this.customHeaderValue = "";
+        this.unauthenticated = false;
+        this.rawHeaders = "";
         this.testUnauthenticatedComparison = true;
     }
 
@@ -75,6 +81,8 @@ public class AuthProfile_littlespidy {
         clone.cookieValue = this.cookieValue;
         clone.customHeaderName = this.customHeaderName;
         clone.customHeaderValue = this.customHeaderValue;
+        clone.unauthenticated = this.unauthenticated;
+        clone.rawHeaders = this.rawHeaders;
         clone.testUnauthenticatedComparison = this.testUnauthenticatedComparison;
         return clone;
     }
@@ -183,6 +191,22 @@ public class AuthProfile_littlespidy {
         this.customHeaderValue = customHeaderValue != null ? customHeaderValue : "";
     }
 
+    public boolean isUnauthenticated() {
+        return unauthenticated;
+    }
+
+    public void setUnauthenticated(boolean unauthenticated) {
+        this.unauthenticated = unauthenticated;
+    }
+
+    public String getRawHeaders() {
+        return rawHeaders != null ? rawHeaders : "";
+    }
+
+    public void setRawHeaders(String rawHeaders) {
+        this.rawHeaders = rawHeaders != null ? rawHeaders : "";
+    }
+
     public boolean isTestUnauthenticatedComparison() {
         return testUnauthenticatedComparison;
     }
@@ -197,6 +221,20 @@ public class AuthProfile_littlespidy {
     }
 
     public String getMaskedSummary() {
+        if (unauthenticated) {
+            if (rawHeaders != null && !rawHeaders.isBlank()) {
+                String singleLine = rawHeaders.replaceAll("[\\r\\n]+", ", ").trim();
+                return "Unauth (Strip: " + singleLine + ")";
+            }
+            return "Unauth (Strip Auth Headers)";
+        }
+        if (rawHeaders != null && !rawHeaders.isBlank()) {
+            String[] lines = rawHeaders.split("[\\r\\n]+");
+            if (lines.length == 1) {
+                return lines[0].trim();
+            }
+            return lines[0].trim() + " (+" + (lines.length - 1) + " more)";
+        }
         switch (getAuthType()) {
             case BEARER_TOKEN:
                 return "Bearer " + maskSecret(bearerToken);
@@ -221,6 +259,9 @@ public class AuthProfile_littlespidy {
 
     @Override
     public String toString() {
-        return name + " (" + (authType != null ? authType.getDisplayName() : "None") + ")";
+        if (unauthenticated) {
+            return name + " (Unauth)";
+        }
+        return name + " (Auth)";
     }
 }

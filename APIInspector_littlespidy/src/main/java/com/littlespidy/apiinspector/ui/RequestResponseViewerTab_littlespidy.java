@@ -179,11 +179,6 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         fillParamsBtn.addActionListener(e -> onFillParameters());
         rightActions.add(fillParamsBtn);
 
-        runBtn = new JButton("Run");
-        runBtn.setToolTipText("Run the currently selected request (with any user edits) against the target server");
-        runBtn.addActionListener(e -> onRunRequest());
-        rightActions.add(runBtn);
-
         runAllBtn = new JButton("Run All");
         runAllBtn.setToolTipText("Run all filtered requests sequentially in the background");
         runAllBtn.addActionListener(e -> onRunAll());
@@ -345,6 +340,16 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         // Left Component: Request Viewer (Editable)
         JPanel reqPanel = new JPanel(new BorderLayout());
         reqPanel.setBorder(new TitledBorder("Request"));
+
+        JPanel reqHeaderBar = new JPanel(new BorderLayout());
+        reqHeaderBar.setBorder(new EmptyBorder(2, 4, 4, 4));
+        runBtn = new JButton("Run");
+        runBtn.setFont(runBtn.getFont().deriveFont(Font.BOLD));
+        runBtn.setToolTipText("Run the currently selected request (with any user edits) against the target server");
+        runBtn.addActionListener(e -> onRunRequest());
+        reqHeaderBar.add(runBtn, BorderLayout.EAST);
+        reqPanel.add(reqHeaderBar, BorderLayout.NORTH);
+
         if (api != null && api.userInterface() != null) {
             // Omit EditorOptions.READ_ONLY so the request editor is fully editable by user
             requestEditor = api.userInterface().createHttpRequestEditor();

@@ -1,7 +1,6 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.apiinspector.ui;
 
-import com.littlespidy.apiinspector.model.ApiKeyLocation_littlespidy;
 import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.AuthType_littlespidy;
 
@@ -9,57 +8,39 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.function.Consumer;
 
 /**
- * Modal dialog for creating and editing authentication profiles.
- * Provides dynamically switched input forms for Bearer token, API Key,
- * Basic Auth, Cookie, and Custom Header credentials with masked secret inputs.
+ * Modeless dialog for creating and editing authentication profiles.
+ * Allows entering raw session headers for Authenticated profiles or specifying
+ * header names to strip for Unauthenticated profiles.
  */
 public class AuthProfileDialog_littlespidy extends JDialog {
 
     private final AuthProfile_littlespidy profile;
+    private final Consumer<AuthProfile_littlespidy> onSaveCallback;
     private boolean confirmed = false;
 
     private JTextField nameField;
-    private JComboBox<AuthType_littlespidy> authTypeCombo;
-
-    // Card Layout container for mechanism fields
-    private JPanel cardPanel;
-    private CardLayout cardLayout;
-
-    // Bearer
-    private JPasswordField bearerTokenField;
-    private JToggleButton bearerShowBtn;
-
-    // API Key
-    private JTextField apiKeyNameField;
-    private JPasswordField apiKeyValueField;
-    private JComboBox<ApiKeyLocation_littlespidy> apiKeyLocCombo;
-    private JToggleButton apiKeyShowBtn;
-
-    // Basic
-    private JTextField basicUsernameField;
-    private JPasswordField basicPasswordField;
-    private JToggleButton basicShowBtn;
-
-    // Cookie
-    private JTextField cookieNameField;
-    private JPasswordField cookieValueField;
-    private JToggleButton cookieShowBtn;
-
-    // Custom Header
-    private JTextField customHeaderNameField;
-    private JPasswordField customHeaderValueField;
-    private JToggleButton customShowBtn;
+    private JRadioButton authRadio;
+    private JRadioButton unauthRadio;
+    private JLabel headersLabel;
+    private JLabel headersHelpLabel;
+    private JTextArea headersArea;
 
     public AuthProfileDialog_littlespidy(Window parent, String title, AuthProfile_littlespidy initialProfile) {
-        super(parent, title, ModalityType.APPLICATION_MODAL);
+        this(parent, title, initialProfile, null);
+    }
+
+    public AuthProfileDialog_littlespidy(Window parent, String title, AuthProfile_littlespidy initialProfile, Consumer<AuthProfile_littlespidy> onSaveCallback) {
+        super(parent, title, ModalityType.MODELESS);
         this.profile = initialProfile != null ? initialProfile : new AuthProfile_littlespidy();
+        this.onSaveCallback = onSaveCallback;
 
         initComponents();
         populateFields();
         pack();
-        setResizable(false);
+        setResizable(true);
         setLocationRelativeTo(parent);
     }
 
@@ -67,54 +48,61 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         JPanel contentPane = new JPanel(new BorderLayout(10, 10));
         contentPane.setBorder(new EmptyBorder(12, 12, 12, 12));
 
-        // Top Form: Name, Mechanism, Unauth Checkbox
-        JPanel topForm = new JPanel(new GridBagLayout());
-        topForm.setBorder(new TitledBorder("General Configuration"));
+        // Form Panel
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(new TitledBorder("Profile Configuration"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(4, 6, 4, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Profile Name
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        topForm.add(new JLabel("Profile Name:"), gbc);
+        formPanel.add(new JLabel("Profile Name:"), gbc);
         nameField = new JTextField(24);
         gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
-        topForm.add(nameField, gbc);
+        formPanel.add(nameField, gbc);
 
+        // Profile Type: Auth vs Unauth Radio buttons
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
-        topForm.add(new JLabel("Auth Mechanism:"), gbc);
-        authTypeCombo = new JComboBox<>(AuthType_littlespidy.values());
-        authTypeCombo.addActionListener(e -> {
-            AuthType_littlespidy sel = (AuthType_littlespidy) authTypeCombo.getSelectedItem();
-            if (sel != null && cardLayout != null) {
-                cardLayout.show(cardPanel, sel.name());
-            }
-        });
+        formPanel.add(new JLabel("Profile Type:"), gbc);
+
+        JPanel typePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        authRadio = new JRadioButton("Authenticated (auth)", true);
+        unauthRadio = new JRadioButton("Unauthenticated (unauth)", false);
+        ButtonGroup group = new ButtonGroup();
+        group.add(authRadio);
+        group.add(unauthRadio);
+        typePanel.add(authRadio);
+        typePanel.add(unauthRadio);
+
+        authRadio.addActionListener(e -> updateHeadersMode(false));
+        unauthRadio.addActionListener(e -> updateHeadersMode(true));
+
         gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        topForm.add(authTypeCombo, gbc);
+        formPanel.add(typePanel, gbc);
 
+        // Headers Section
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        headersLabel = new JLabel("Session Headers (Complete Headers):");
+        headersLabel.setFont(headersLabel.getFont().deriveFont(Font.BOLD));
+        formPanel.add(headersLabel, gbc);
 
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
+        headersHelpLabel = new JLabel("Enter complete headers (e.g. 'Authorization: Bearer <token>', 'Cookie: session=<id>'), one per line.");
+        headersHelpLabel.setFont(headersHelpLabel.getFont().deriveFont(Font.PLAIN, 11f));
+        headersHelpLabel.setForeground(Color.GRAY);
+        formPanel.add(headersHelpLabel, gbc);
 
-        contentPane.add(topForm, BorderLayout.NORTH);
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.weighty = 1.0; gbc.fill = GridBagConstraints.BOTH;
+        headersArea = new JTextArea(8, 30);
+        headersArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        JScrollPane headersScroll = new JScrollPane(headersArea);
+        headersScroll.setPreferredSize(new Dimension(380, 160));
+        formPanel.add(headersScroll, gbc);
 
-        // Center: Cards for credentials
-        cardLayout = new CardLayout();
-        cardPanel = new JPanel(cardLayout);
-        cardPanel.setBorder(new TitledBorder("Credentials & Headers"));
+        contentPane.add(formPanel, BorderLayout.CENTER);
 
-        // 1. Bearer Token Card
-        cardPanel.add(createBearerCard(), AuthType_littlespidy.BEARER_TOKEN.name());
-        // 2. API Key Card
-        cardPanel.add(createApiKeyCard(), AuthType_littlespidy.API_KEY.name());
-        // 3. Basic Auth Card
-        cardPanel.add(createBasicCard(), AuthType_littlespidy.BASIC_AUTH.name());
-        // 4. Cookie Card
-        cardPanel.add(createCookieCard(), AuthType_littlespidy.COOKIE.name());
-        // 5. Custom Header Card
-        cardPanel.add(createCustomHeaderCard(), AuthType_littlespidy.CUSTOM_HEADER.name());
-
-        contentPane.add(cardPanel, BorderLayout.CENTER);
-
-        // Bottom: Action Buttons
+        // Bottom Button Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         JButton cancelBtn = new JButton("Cancel");
         cancelBtn.addActionListener(e -> dispose());
@@ -129,163 +117,41 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         setContentPane(contentPane);
     }
 
-    private JPanel createBearerCard() {
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        p.add(new JLabel("Bearer Token:"), gbc);
-
-        bearerTokenField = new JPasswordField(24);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
-        p.add(bearerTokenField, gbc);
-
-        bearerShowBtn = createMaskToggleButton(bearerTokenField);
-        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0;
-        p.add(bearerShowBtn, gbc);
-
-        return p;
-    }
-
-    private JPanel createApiKeyCard() {
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 6, 4, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        p.add(new JLabel("Key Name:"), gbc);
-        apiKeyNameField = new JTextField("X-API-Key", 20);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; gbc.gridwidth = 2;
-        p.add(apiKeyNameField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0; gbc.gridwidth = 1;
-        p.add(new JLabel("Key Value:"), gbc);
-        apiKeyValueField = new JPasswordField(20);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        p.add(apiKeyValueField, gbc);
-        apiKeyShowBtn = createMaskToggleButton(apiKeyValueField);
-        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
-        p.add(apiKeyShowBtn, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
-        p.add(new JLabel("Key Location:"), gbc);
-        apiKeyLocCombo = new JComboBox<>(ApiKeyLocation_littlespidy.values());
-        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; gbc.gridwidth = 2;
-        p.add(apiKeyLocCombo, gbc);
-
-        return p;
-    }
-
-    private JPanel createBasicCard() {
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 6, 4, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        p.add(new JLabel("Username:"), gbc);
-        basicUsernameField = new JTextField(20);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; gbc.gridwidth = 2;
-        p.add(basicUsernameField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0; gbc.gridwidth = 1;
-        p.add(new JLabel("Password:"), gbc);
-        basicPasswordField = new JPasswordField(20);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        p.add(basicPasswordField, gbc);
-        basicShowBtn = createMaskToggleButton(basicPasswordField);
-        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
-        p.add(basicShowBtn, gbc);
-
-        return p;
-    }
-
-    private JPanel createCookieCard() {
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 6, 4, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        p.add(new JLabel("Cookie Name:"), gbc);
-        cookieNameField = new JTextField("sessionid", 20);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; gbc.gridwidth = 2;
-        p.add(cookieNameField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0; gbc.gridwidth = 1;
-        p.add(new JLabel("Cookie Value:"), gbc);
-        cookieValueField = new JPasswordField(20);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        p.add(cookieValueField, gbc);
-        cookieShowBtn = createMaskToggleButton(cookieValueField);
-        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
-        p.add(cookieShowBtn, gbc);
-
-        return p;
-    }
-
-    private JPanel createCustomHeaderCard() {
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 6, 4, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        p.add(new JLabel("Header Name:"), gbc);
-        customHeaderNameField = new JTextField("X-Custom-Auth", 20);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; gbc.gridwidth = 2;
-        p.add(customHeaderNameField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0; gbc.gridwidth = 1;
-        p.add(new JLabel("Header Value:"), gbc);
-        customHeaderValueField = new JPasswordField(20);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        p.add(customHeaderValueField, gbc);
-        customShowBtn = createMaskToggleButton(customHeaderValueField);
-        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
-        p.add(customShowBtn, gbc);
-
-        return p;
-    }
-
-    private JToggleButton createMaskToggleButton(JPasswordField pwdField) {
-        JToggleButton btn = new JToggleButton("Show");
-        btn.setFont(btn.getFont().deriveFont(Font.PLAIN, 11f));
-        btn.addActionListener(e -> {
-            if (btn.isSelected()) {
-                pwdField.setEchoChar((char) 0);
-                btn.setText("Hide");
-            } else {
-                pwdField.setEchoChar('\u2022');
-                btn.setText("Show");
-            }
-        });
-        return btn;
+    private void updateHeadersMode(boolean isUnauth) {
+        if (isUnauth) {
+            headersLabel.setText("Headers to Remove (Header Names):");
+            headersHelpLabel.setText("Enter header names to remove (e.g. 'Authorization:', 'Cookie:'), one per line.");
+        } else {
+            headersLabel.setText("Session Headers (Complete Headers):");
+            headersHelpLabel.setText("Enter complete headers (e.g. 'Authorization: Bearer <token>', 'Cookie: session=<id>'), one per line.");
+        }
     }
 
     private void populateFields() {
         nameField.setText(profile.getName());
-        authTypeCombo.setSelectedItem(profile.getAuthType());
+        boolean isUnauth = profile.isUnauthenticated();
+        authRadio.setSelected(!isUnauth);
+        unauthRadio.setSelected(isUnauth);
+        updateHeadersMode(isUnauth);
 
-        bearerTokenField.setText(profile.getBearerToken());
-
-        apiKeyNameField.setText(profile.getApiKeyName());
-        apiKeyValueField.setText(profile.getApiKeyValue());
-        apiKeyLocCombo.setSelectedItem(profile.getApiKeyLocation());
-
-        basicUsernameField.setText(profile.getBasicUsername());
-        basicPasswordField.setText(profile.getBasicPassword());
-
-        cookieNameField.setText(profile.getCookieName());
-        cookieValueField.setText(profile.getCookieValue());
-
-        customHeaderNameField.setText(profile.getCustomHeaderName());
-        customHeaderValueField.setText(profile.getCustomHeaderValue());
-
-        cardLayout.show(cardPanel, profile.getAuthType().name());
+        if (profile.getRawHeaders() != null && !profile.getRawHeaders().isBlank()) {
+            headersArea.setText(profile.getRawHeaders());
+        } else if (!isUnauth) {
+            // Populate from existing fields if rawHeaders is not set yet
+            StringBuilder sb = new StringBuilder();
+            if (!profile.getBearerToken().isBlank()) {
+                sb.append("Authorization: Bearer ").append(profile.getBearerToken()).append("\n");
+            }
+            if (!profile.getCookieValue().isBlank()) {
+                sb.append("Cookie: ").append(profile.getCookieName()).append("=").append(profile.getCookieValue()).append("\n");
+            }
+            if (!profile.getCustomHeaderValue().isBlank()) {
+                sb.append(profile.getCustomHeaderName()).append(": ").append(profile.getCustomHeaderValue()).append("\n");
+            }
+            headersArea.setText(sb.toString().trim());
+        } else {
+            headersArea.setText("Authorization:\nCookie:");
+        }
     }
 
     private void onSave() {
@@ -296,26 +162,44 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         }
 
         profile.setName(name);
-        AuthType_littlespidy selType = (AuthType_littlespidy) authTypeCombo.getSelectedItem();
-        profile.setAuthType(selType != null ? selType : AuthType_littlespidy.BEARER_TOKEN);
+        boolean isUnauth = unauthRadio.isSelected();
+        profile.setUnauthenticated(isUnauth);
+        String raw = headersArea.getText().trim();
+        profile.setRawHeaders(raw);
 
-        profile.setBearerToken(new String(bearerTokenField.getPassword()).trim());
-
-        profile.setApiKeyName(apiKeyNameField.getText().trim());
-        profile.setApiKeyValue(new String(apiKeyValueField.getPassword()).trim());
-        ApiKeyLocation_littlespidy loc = (ApiKeyLocation_littlespidy) apiKeyLocCombo.getSelectedItem();
-        profile.setApiKeyLocation(loc != null ? loc : ApiKeyLocation_littlespidy.HEADER);
-
-        profile.setBasicUsername(basicUsernameField.getText().trim());
-        profile.setBasicPassword(new String(basicPasswordField.getPassword()).trim());
-
-        profile.setCookieName(cookieNameField.getText().trim());
-        profile.setCookieValue(new String(cookieValueField.getPassword()).trim());
-
-        profile.setCustomHeaderName(customHeaderNameField.getText().trim());
-        profile.setCustomHeaderValue(new String(customHeaderValueField.getPassword()).trim());
+        // Sync helper fields for backward compatibility
+        if (!isUnauth && !raw.isEmpty()) {
+            String[] lines = raw.split("[\\r\\n]+");
+            for (String line : lines) {
+                int colon = line.indexOf(':');
+                if (colon > 0) {
+                    String hName = line.substring(0, colon).trim();
+                    String hVal = line.substring(colon + 1).trim();
+                    if (hName.equalsIgnoreCase("Authorization")) {
+                        if (hVal.toLowerCase().startsWith("bearer ")) {
+                            profile.setAuthType(AuthType_littlespidy.BEARER_TOKEN);
+                            profile.setBearerToken(hVal.substring(7).trim());
+                        } else {
+                            profile.setAuthType(AuthType_littlespidy.CUSTOM_HEADER);
+                            profile.setCustomHeaderName(hName);
+                            profile.setCustomHeaderValue(hVal);
+                        }
+                    } else if (hName.equalsIgnoreCase("Cookie")) {
+                        profile.setAuthType(AuthType_littlespidy.COOKIE);
+                        int eq = hVal.indexOf('=');
+                        if (eq > 0) {
+                            profile.setCookieName(hVal.substring(0, eq).trim());
+                            profile.setCookieValue(hVal.substring(eq + 1).trim());
+                        }
+                    }
+                }
+            }
+        }
 
         confirmed = true;
+        if (onSaveCallback != null) {
+            onSaveCallback.accept(profile);
+        }
         dispose();
     }
 

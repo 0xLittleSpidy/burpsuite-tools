@@ -629,14 +629,17 @@ public class UIEnhancementsTest_littlespidy {
             assertFalse(name.toLowerCase().contains("time"), "Time column must be removed");
         }
 
-        // Verify column structure: 3 base + 1 for Admin + 1 for Auditor + 1 for Unauth = 6 columns
-        assertEquals(6, resultsTable.getColumnCount());
+        // Verify column structure: 3 base + 2 for Admin + 2 for Auditor + 2 for Unauth = 9 columns (Outcome + Status Code for each profile)
+        assertEquals(9, resultsTable.getColumnCount());
         assertEquals("Collection", resultsTable.getColumnName(0));
         assertEquals("Method", resultsTable.getColumnName(1));
         assertEquals("Path", resultsTable.getColumnName(2));
         assertEquals("Admin", resultsTable.getColumnName(3));
-        assertEquals("Auditor", resultsTable.getColumnName(4));
-        assertEquals("Unauth", resultsTable.getColumnName(5));
+        assertEquals("Admin - Status Code", resultsTable.getColumnName(4));
+        assertEquals("Auditor", resultsTable.getColumnName(5));
+        assertEquals("Auditor - Status Code", resultsTable.getColumnName(6));
+        assertEquals("Unauth", resultsTable.getColumnName(7));
+        assertEquals("Unauth - Status Code", resultsTable.getColumnName(8));
     }
 
     @Test
@@ -679,9 +682,11 @@ public class UIEnhancementsTest_littlespidy {
         JTable resultsTable = (JTable) resultsTableField.get(authTab);
 
         assertEquals(1, resultsTable.getRowCount());
-        // Value for User A and User B should be SAME
+        // Value for User A outcome and User B outcome should be SAME, status codes should be 200
         assertEquals("SAME", resultsTable.getValueAt(0, 3));
-        assertEquals("SAME", resultsTable.getValueAt(0, 4));
+        assertEquals("200", resultsTable.getValueAt(0, 4));
+        assertEquals("SAME", resultsTable.getValueAt(0, 5));
+        assertEquals("200", resultsTable.getValueAt(0, 6));
 
         // Case 2: User B is forbidden (403) -> DIFFERENT (Access Enforced)
         AuthTestResult_littlespidy resB2 = new AuthTestResult_littlespidy();
@@ -696,7 +701,9 @@ public class UIEnhancementsTest_littlespidy {
 
         authTab.setResults(List.of(resA1, resB2));
         assertEquals("DIFFERENT", resultsTable.getValueAt(0, 3));
-        assertEquals("DIFFERENT", resultsTable.getValueAt(0, 4));
+        assertEquals("200", resultsTable.getValueAt(0, 4));
+        assertEquals("DIFFERENT", resultsTable.getValueAt(0, 5));
+        assertEquals("403", resultsTable.getValueAt(0, 6));
 
         // Case 3: User B has similar length within 5% -> SIMILAR (Potential Bypass)
         byte[] bodySimilar = new byte[100];
@@ -726,7 +733,9 @@ public class UIEnhancementsTest_littlespidy {
 
         authTab.setResults(List.of(resA3, resB3));
         assertEquals("SIMILAR", resultsTable.getValueAt(0, 3));
-        assertEquals("SIMILAR", resultsTable.getValueAt(0, 4));
+        assertEquals("200", resultsTable.getValueAt(0, 4));
+        assertEquals("SIMILAR", resultsTable.getValueAt(0, 5));
+        assertEquals("200", resultsTable.getValueAt(0, 6));
     }
 
     @Test
@@ -804,6 +813,122 @@ public class UIEnhancementsTest_littlespidy {
         assertTrue(secondColPanel instanceof JPanel);
         Component thirdColPanel = colContainer.getComponent(2);
         assertTrue(thirdColPanel instanceof JPanel);
+    }
+
+    @Test
+    @DisplayName("Verify Request pane contains Run button and top toolbar does not contain single Run button")
+    public void testRequestPaneRunButtonPlacement() throws Exception {
+        RequestResponseViewerTab_littlespidy tab = new RequestResponseViewerTab_littlespidy(mockApi);
+
+        Field runBtnField = RequestResponseViewerTab_littlespidy.class.getDeclaredField("runBtn");
+        runBtnField.setAccessible(true);
+        JButton runBtn = (JButton) runBtnField.get(tab);
+        assertNotNull(runBtn, "Run button must exist");
+        assertEquals("Run", runBtn.getText());
+
+        // Verify parent container of runBtn is inside the Request panel header bar
+        Container runBtnParent = runBtn.getParent();
+        assertNotNull(runBtnParent);
+        Container reqPanel = runBtnParent.getParent();
+        assertNotNull(reqPanel);
+        assertTrue(reqPanel instanceof JPanel);
+        if (((JPanel) reqPanel).getBorder() instanceof javax.swing.border.TitledBorder) {
+            assertEquals("Request", ((javax.swing.border.TitledBorder) ((JPanel) reqPanel).getBorder()).getTitle());
+        }
+
+        // Verify top action bar does not contain the single Run button
+        Field runAllBtnField = RequestResponseViewerTab_littlespidy.class.getDeclaredField("runAllBtn");
+        runAllBtnField.setAccessible(true);
+        JButton runAllBtn = (JButton) runAllBtnField.get(tab);
+        Container topBar = runAllBtn.getParent();
+        assertNotSame(runBtnParent, topBar, "Run button must not be in the top action toolbar");
+    }
+
+    @Test
+    @DisplayName("Verify AuthProfile raw headers and unauth header stripping in AuthTestEngine")
+    public void testAuthProfileRawHeadersAndUnauthStripping() throws Exception {
+        // 1. Auth Profile with raw headers
+        AuthProfile_littlespidy authProf = new AuthProfile_littlespidy("Custom Auth", AuthType_littlespidy.CUSTOM_HEADER);
+        authProf.setUnauthenticated(false);
+        authProf.setRawHeaders("Authorization: Bearer my-secret-token\nX-Tenant-ID: 1042\nCookie: session=abc");
+
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("GET", "/api/v1/user", "Get User");
+        burp.api.montoya.http.message.requests.HttpRequest req =
+                com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy.buildRequest("https://example.com", ep, authProf, true);
+
+        assertEquals("Bearer my-secret-token", req.headerValue("Authorization"));
+        assertEquals("1042", req.headerValue("X-Tenant-ID"));
+        assertTrue(req.hasHeader("Cookie"));
+        assertEquals("session=abc", req.headerValue("Cookie"));
+
+        // 2. Unauth Profile with specific headers to strip
+        AuthProfile_littlespidy unauthProf = new AuthProfile_littlespidy("Strip Profile", AuthType_littlespidy.CUSTOM_HEADER);
+        unauthProf.setUnauthenticated(true);
+        unauthProf.setRawHeaders("Authorization:\nCookie:\nX-Tenant-ID:");
+
+        burp.api.montoya.http.message.requests.HttpRequest strippedReq =
+                com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy.buildRequest("https://example.com", ep, unauthProf, true);
+
+        assertFalse(strippedReq.hasHeader("Authorization"), "Authorization must be stripped");
+        assertFalse(strippedReq.hasHeader("Cookie"), "Cookie must be stripped");
+        assertFalse(strippedReq.hasHeader("X-Tenant-ID"), "X-Tenant-ID must be stripped");
+    }
+
+    @Test
+    @DisplayName("Verify modeless profile dialog and runner history tracking in AuthTestingTab")
+    public void testModelessProfileDialogAndRunnerHistory() throws Exception {
+        AuthTestingTab_littlespidy tab = new AuthTestingTab_littlespidy(mockApi);
+
+        // 1. Verify Modeless dialog if non-headless
+        if (!GraphicsEnvironment.isHeadless()) {
+            final boolean[] callbackInvoked = {false};
+            AuthProfileDialog_littlespidy dialog = new AuthProfileDialog_littlespidy(null, "Test Profile", null, p -> {
+                callbackInvoked[0] = true;
+            });
+            assertEquals(Dialog.ModalityType.MODELESS, dialog.getModalityType(), "Profile dialog must be modeless");
+        }
+
+        // 2. Verify Runner Name field and Runner Combo
+        Field runnerNameFieldF = AuthTestingTab_littlespidy.class.getDeclaredField("runnerNameField");
+        runnerNameFieldF.setAccessible(true);
+        JTextField runnerNameField = (JTextField) runnerNameFieldF.get(tab);
+        assertNotNull(runnerNameField);
+        assertEquals("Runner 1", runnerNameField.getText());
+
+        Field runnerComboF = AuthTestingTab_littlespidy.class.getDeclaredField("runnerCombo");
+        runnerComboF.setAccessible(true);
+        JComboBox<?> runnerCombo = (JComboBox<?>) runnerComboF.get(tab);
+        assertNotNull(runnerCombo);
+
+        // 3. Verify Runner history can store and switch runs
+        AuthTestResult_littlespidy res1 = new AuthTestResult_littlespidy();
+        res1.setCollectionId("c1");
+        res1.setMethod("GET");
+        res1.setPath("/api/v1/test");
+        res1.setProfileId("admin");
+        res1.setProfileName("Admin");
+        res1.setAuthStatusCode(200);
+
+        AuthTestingTab_littlespidy.AuthTestRun_littlespidy run =
+                new AuthTestingTab_littlespidy.AuthTestRun_littlespidy("Runner 1", List.of(res1), Collections.emptyList(), Collections.emptyList());
+        assertEquals("Runner 1", run.getName());
+        assertEquals(1, run.getResults().size());
+    }
+
+    @Test
+    @DisplayName("Verify Select All and Deselect All buttons are removed from AuthTestingTab")
+    public void testSelectAllButtonsRemovedFromTables() {
+        AuthTestingTab_littlespidy tab = new AuthTestingTab_littlespidy(mockApi);
+        List<Component> allComps = getAllComponents(tab);
+        for (Component c : allComps) {
+            if (c instanceof JButton) {
+                String text = ((JButton) c).getText();
+                if (text != null) {
+                    assertFalse("Select All".equalsIgnoreCase(text.trim()), "Select All button must be removed from UI");
+                    assertFalse("Deselect All".equalsIgnoreCase(text.trim()), "Deselect All button must be removed from UI");
+                }
+            }
+        }
     }
 
     private static List<Component> getAllComponents(Container c) {

@@ -75,7 +75,16 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     private final List<ProfileColumnDef_littlespidy> displayedProfiles = new ArrayList<>();
     private final OutcomeCellRenderer outcomeCellRenderer = new OutcomeCellRenderer();
 
-    // HTTP Message Inspector (Compare View following ng-auth-analyzer_littlespidy)
+    // Runner History Management
+    private final List<AuthTestRun_littlespidy> savedRuns = new ArrayList<>();
+    private AuthTestRun_littlespidy currentRun;
+    private int runnerCounter = 1;
+    private String currentRunName = "Runner 1";
+    private JTextField runnerNameField;
+    private JComboBox<String> runnerCombo;
+    private boolean updatingRunnerCombo = false;
+
+    // HTTP Message Inspector (Compare View)
     private JToggleButton requestToggleButton;
     private JToggleButton responseToggleButton;
     private int activeInspectorViewMode = 0; // 0 = Request, 1 = Response
@@ -137,9 +146,36 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
         profileTableModel = new ProfileTableModel();
         profileTable = new JTable(profileTableModel);
-        profileTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        profileTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         profileTable.getColumnModel().getColumn(0).setMaxWidth(45);
         profileTable.getColumnModel().getColumn(0).setPreferredWidth(45);
+        profileTable.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE) {
+                    int[] rows = profileTable.getSelectedRows();
+                    if (rows.length > 0) {
+                        int firstModelRow = profileTable.convertRowIndexToModel(rows[0]);
+                        boolean newState = !activeProfileIds.contains(profiles.get(firstModelRow).getId());
+                        for (int r : rows) {
+                            int modelRow = profileTable.convertRowIndexToModel(r);
+                            if (modelRow >= 0 && modelRow < profiles.size()) {
+                                AuthProfile_littlespidy p = profiles.get(modelRow);
+                                if (newState) {
+                                    activeProfileIds.add(p.getId());
+                                } else {
+                                    activeProfileIds.remove(p.getId());
+                                }
+                            }
+                        }
+                        profileTableModel.fireTableDataChanged();
+                        rebuildModel();
+                        notifyStateChanged();
+                        e.consume();
+                    }
+                }
+            }
+        });
         JScrollPane profileScroll = new JScrollPane(profileTable);
         profileScroll.setPreferredSize(new Dimension(380, 140));
         profilesPanel.add(profileScroll, BorderLayout.CENTER);
@@ -153,17 +189,11 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         dupProfBtn.addActionListener(e -> onDuplicateProfile());
         JButton delProfBtn = new JButton("Delete");
         delProfBtn.addActionListener(e -> onDeleteProfile());
-        JButton selectAllProfBtn = new JButton("Select All");
-        selectAllProfBtn.addActionListener(e -> selectAllProfiles(true));
-        JButton deselectAllProfBtn = new JButton("Deselect All");
-        deselectAllProfBtn.addActionListener(e -> selectAllProfiles(false));
 
         profileActions.add(addProfBtn);
         profileActions.add(editProfBtn);
         profileActions.add(dupProfBtn);
         profileActions.add(delProfBtn);
-        profileActions.add(selectAllProfBtn);
-        profileActions.add(deselectAllProfBtn);
         profilesPanel.add(profileActions, BorderLayout.SOUTH);
 
         // 2. Center Left: Collection & Endpoints Selection Panel
@@ -185,19 +215,34 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
         endpointSelectionModel = new EndpointSelectionTableModel();
         endpointSelectionTable = new JTable(endpointSelectionModel);
+        endpointSelectionTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         endpointSelectionTable.getColumnModel().getColumn(0).setMaxWidth(40);
         endpointSelectionTable.getColumnModel().getColumn(1).setMaxWidth(70);
+        endpointSelectionTable.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE) {
+                    int[] rows = endpointSelectionTable.getSelectedRows();
+                    if (rows.length > 0) {
+                        int firstModelRow = endpointSelectionTable.convertRowIndexToModel(rows[0]);
+                        List<EndpointSelectionItem> items = endpointSelectionModel.getItems();
+                        if (firstModelRow >= 0 && firstModelRow < items.size()) {
+                            boolean newState = !items.get(firstModelRow).selected;
+                            for (int r : rows) {
+                                int modelRow = endpointSelectionTable.convertRowIndexToModel(r);
+                                if (modelRow >= 0 && modelRow < items.size()) {
+                                    items.get(modelRow).selected = newState;
+                                }
+                            }
+                            endpointSelectionModel.fireTableDataChanged();
+                            e.consume();
+                        }
+                    }
+                }
+            }
+        });
         JScrollPane epScroll = new JScrollPane(endpointSelectionTable);
         endpointsPanel.add(epScroll, BorderLayout.CENTER);
-
-        JPanel epSelectControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        JButton selectAllBtn = new JButton("Select All");
-        selectAllBtn.addActionListener(e -> endpointSelectionModel.selectAll(true));
-        JButton deselectAllBtn = new JButton("Deselect All");
-        deselectAllBtn.addActionListener(e -> endpointSelectionModel.selectAll(false));
-        epSelectControls.add(selectAllBtn);
-        epSelectControls.add(deselectAllBtn);
-        endpointsPanel.add(epSelectControls, BorderLayout.SOUTH);
 
         // Combine Profiles and Endpoints in Left Split
         JSplitPane leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, profilesPanel, endpointsPanel);
@@ -224,7 +269,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 0.5;
         execControlsPanel.add(delaySpinner, gbc);
 
-        JPanel runBtnBox = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 2));
+        JPanel runBtnBox = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 2));
+        runBtnBox.add(new JLabel("Runner:"));
+        runnerNameField = new JTextField("Runner 1", 9);
+        runnerNameField.setToolTipText("Name for this test run / runner");
+        runBtnBox.add(runnerNameField);
+
         runAllBtn = new JButton("Run Authentication Tests");
         runAllBtn.setFont(runAllBtn.getFont().deriveFont(Font.BOLD));
         runAllBtn.addActionListener(e -> onRunAllInCollection());
@@ -268,7 +318,15 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         // Results Filter Bar located above results table
         JPanel resultsFilterBar = new JPanel(new BorderLayout(6, 2));
         JPanel leftFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        leftFilter.add(new JLabel("Filter Outcome:"));
+
+        leftFilter.add(new JLabel("Runner:"));
+        runnerCombo = new JComboBox<>();
+        runnerCombo.setPreferredSize(new Dimension(160, 24));
+        runnerCombo.setToolTipText("Select a test runner to inspect its results");
+        runnerCombo.addActionListener(e -> onRunnerSelected());
+        leftFilter.add(runnerCombo);
+
+        leftFilter.add(new JLabel("Outcome:"));
         outcomeFilterCombo = new JComboBox<>(new String[]{
                 "All Outcomes",
                 "Status SAME (Bypassed)",
@@ -310,9 +368,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             private static final long serialVersionUID = 1L;
             @Override
             public TableCellRenderer getCellRenderer(int row, int column) {
-                // All profile columns (column index >= 3) are comparative outcome columns
+                // Profile outcome columns are even offsets starting from index 3
                 if (column >= 3) {
-                    return outcomeCellRenderer;
+                    int rel = column - 3;
+                    if ((rel % 2) == 0) {
+                        return outcomeCellRenderer;
+                    }
                 }
                 return super.getCellRenderer(row, column);
             }
@@ -330,13 +391,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         resultsPanel.add(resScroll, BorderLayout.CENTER);
         rightSplit.setTopComponent(resultsPanel);
 
-        // Bottom Right: Multi-Column Compare Viewer (HTTP Message Inspector following ng-auth-analyzer)
+        // Bottom Right: Multi-Column Compare Viewer
         JPanel messageViewHeaderPanel = new JPanel(new BorderLayout());
-        JLabel compareTitleLabel = new JLabel("HTTP Message Inspector (Side-by-Side Profile Comparison)");
-        compareTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
 
-        JPanel rightSwitchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
-        JLabel switchLabel = new JLabel("View:");
+        JPanel leftSwitchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         ButtonGroup viewGroup = new ButtonGroup();
         requestToggleButton = new JToggleButton("Request");
         responseToggleButton = new JToggleButton("Response");
@@ -346,12 +404,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         requestToggleButton.addActionListener(e -> setInspectorViewMode(0));
         responseToggleButton.addActionListener(e -> setInspectorViewMode(1));
 
-        rightSwitchPanel.add(switchLabel);
-        rightSwitchPanel.add(requestToggleButton);
-        rightSwitchPanel.add(responseToggleButton);
+        leftSwitchPanel.add(requestToggleButton);
+        leftSwitchPanel.add(responseToggleButton);
 
-        messageViewHeaderPanel.add(compareTitleLabel, BorderLayout.WEST);
-        messageViewHeaderPanel.add(rightSwitchPanel, BorderLayout.EAST);
+        messageViewHeaderPanel.add(leftSwitchPanel, BorderLayout.WEST);
 
         columnsContainer = new JPanel(new GridLayout(1, 0, 8, 0)) {
             private static final long serialVersionUID = 1L;
@@ -402,17 +458,14 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
     private void onNewProfile() {
         Window win = SwingUtilities.getWindowAncestor(this);
-        AuthProfileDialog_littlespidy dialog = new AuthProfileDialog_littlespidy(win, "Create Authentication Profile", null);
-        dialog.setVisible(true);
-
-        if (dialog.isConfirmed()) {
-            AuthProfile_littlespidy p = dialog.getProfile();
+        AuthProfileDialog_littlespidy dialog = new AuthProfileDialog_littlespidy(win, "Create Authentication Profile", null, p -> {
             profiles.add(p);
             activeProfileIds.add(p.getId());
             profileTableModel.fireTableDataChanged();
             rebuildModel();
             notifyStateChanged();
-        }
+        });
+        dialog.setVisible(true);
     }
 
     private void onEditProfile() {
@@ -421,16 +474,15 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             JOptionPane.showMessageDialog(this, "Please select a profile to edit.", "Selection Required", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        AuthProfile_littlespidy p = profiles.get(row);
+        int modelRow = profileTable.convertRowIndexToModel(row);
+        AuthProfile_littlespidy p = profiles.get(modelRow);
         Window win = SwingUtilities.getWindowAncestor(this);
-        AuthProfileDialog_littlespidy dialog = new AuthProfileDialog_littlespidy(win, "Edit Authentication Profile", p);
-        dialog.setVisible(true);
-
-        if (dialog.isConfirmed()) {
-            profileTableModel.fireTableRowsUpdated(row, row);
+        AuthProfileDialog_littlespidy dialog = new AuthProfileDialog_littlespidy(win, "Edit Authentication Profile", p, updated -> {
+            profileTableModel.fireTableRowsUpdated(modelRow, modelRow);
             rebuildModel();
             notifyStateChanged();
-        }
+        });
+        dialog.setVisible(true);
     }
 
     private void onDuplicateProfile() {
@@ -571,6 +623,12 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         int threads = (Integer) threadSpinner.getValue();
         int delay = (Integer) delaySpinner.getValue();
 
+        currentRunName = (runnerNameField != null && !runnerNameField.getText().trim().isEmpty())
+                ? runnerNameField.getText().trim()
+                : ("Runner " + runnerCounter);
+        results.clear();
+        endpointRows.clear();
+
         rebuildDisplayedProfiles();
         resultsTableModel.fireTableStructureChanged();
 
@@ -613,10 +671,52 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     }
 
     private void onClearResults() {
+        if (currentRun != null) {
+            savedRuns.remove(currentRun);
+            currentRun = null;
+        }
         results.clear();
         rebuildModel();
         clearInspector();
+        updateRunnerCombo();
         notifyStateChanged();
+    }
+
+    private void onRunnerSelected() {
+        if (updatingRunnerCombo || runnerCombo == null) return;
+        int idx = runnerCombo.getSelectedIndex();
+        if (idx >= 0 && idx < savedRuns.size()) {
+            AuthTestRun_littlespidy run = savedRuns.get(idx);
+            currentRun = run;
+            results.clear();
+            results.addAll(run.getResults());
+            endpointRows.clear();
+            endpointRows.addAll(run.getEndpointRows());
+            displayedProfiles.clear();
+            displayedProfiles.addAll(run.getDisplayedProfiles());
+            resultsTableModel.fireTableStructureChanged();
+            if (!endpointRows.isEmpty()) {
+                resultsTable.setRowSelectionInterval(0, 0);
+            } else {
+                clearInspector();
+            }
+        }
+    }
+
+    private void updateRunnerCombo() {
+        if (runnerCombo == null) return;
+        updatingRunnerCombo = true;
+        try {
+            runnerCombo.removeAllItems();
+            for (AuthTestRun_littlespidy r : savedRuns) {
+                runnerCombo.addItem(r.getName() + " (" + r.getResults().size() + " results)");
+            }
+            if (!savedRuns.isEmpty()) {
+                runnerCombo.setSelectedIndex(savedRuns.size() - 1);
+            }
+        } finally {
+            updatingRunnerCombo = false;
+        }
     }
 
     private void setExecutionUIState(boolean running) {
@@ -690,6 +790,15 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 progressStatusLabel.setText("Test run cancelled. Total completed: " + totalCompleted);
             } else {
                 progressStatusLabel.setText("Test run finished. Total completed: " + totalCompleted);
+            }
+            rebuildModel();
+            AuthTestRun_littlespidy run = new AuthTestRun_littlespidy(currentRunName, results, endpointRows, displayedProfiles);
+            savedRuns.add(run);
+            currentRun = run;
+            updateRunnerCombo();
+            runnerCounter++;
+            if (runnerNameField != null) {
+                runnerNameField.setText("Runner " + runnerCounter);
             }
         });
     }
@@ -1225,16 +1334,19 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         private final String[] baseColumns = {"Collection", "Method", "Path"};
 
         @Override public int getRowCount() { return endpointRows.size(); }
-        @Override public int getColumnCount() { return baseColumns.length + displayedProfiles.size(); }
+        @Override public int getColumnCount() { return baseColumns.length + (displayedProfiles.size() * 2); }
 
         @Override
         public String getColumnName(int col) {
             if (col < baseColumns.length) {
                 return baseColumns[col];
             }
-            int profileIdx = col - baseColumns.length;
+            int rel = col - baseColumns.length;
+            int profileIdx = rel / 2;
+            boolean isStatusCodeCol = (rel % 2) != 0;
             if (profileIdx < displayedProfiles.size()) {
-                return displayedProfiles.get(profileIdx).getDisplayName();
+                String profName = displayedProfiles.get(profileIdx).getDisplayName();
+                return isStatusCodeCol ? (profName + " - Status Code") : profName;
             }
             return "";
         }
@@ -1249,12 +1361,22 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             if (col == 1) return epRow.getMethod();
             if (col == 2) return epRow.getPath();
 
-            int profileIdx = col - baseColumns.length;
+            int rel = col - baseColumns.length;
+            int profileIdx = rel / 2;
+            boolean isStatusCodeCol = (rel % 2) != 0;
             if (profileIdx < displayedProfiles.size()) {
                 ProfileColumnDef_littlespidy def = displayedProfiles.get(profileIdx);
-                return computeComparativeOutcome(def.getId(), epRow);
+                if (!isStatusCodeCol) {
+                    return computeComparativeOutcome(def.getId(), epRow);
+                } else {
+                    AuthTestResult_littlespidy res = epRow.getProfileResults().get(def.getId());
+                    if (res != null && res.getAuthStatusCode() > 0) {
+                        return String.valueOf(res.getAuthStatusCode());
+                    }
+                    return "-";
+                }
             }
-            return "N/A";
+            return isStatusCodeCol ? "-" : "N/A";
         }
     }
 
@@ -1341,6 +1463,42 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             } else {
                 cardLayout.show(cardPanel, "RESP");
             }
+        }
+    }
+
+    /**
+     * Named test run entity representing completed or active auth test execution.
+     */
+    public static class AuthTestRun_littlespidy {
+        private final String id;
+        private final String name;
+        private final long timestamp;
+        private final List<AuthTestResult_littlespidy> results = new ArrayList<>();
+        private final List<EndpointResultRow_littlespidy> endpointRows = new ArrayList<>();
+        private final List<ProfileColumnDef_littlespidy> displayedProfiles = new ArrayList<>();
+
+        public AuthTestRun_littlespidy(String name,
+                                       List<AuthTestResult_littlespidy> results,
+                                       List<EndpointResultRow_littlespidy> endpointRows,
+                                       List<ProfileColumnDef_littlespidy> displayedProfiles) {
+            this.id = UUID.randomUUID().toString();
+            this.name = name != null ? name : "Run";
+            this.timestamp = System.currentTimeMillis();
+            if (results != null) this.results.addAll(results);
+            if (endpointRows != null) this.endpointRows.addAll(endpointRows);
+            if (displayedProfiles != null) this.displayedProfiles.addAll(displayedProfiles);
+        }
+
+        public String getId() { return id; }
+        public String getName() { return name; }
+        public long getTimestamp() { return timestamp; }
+        public List<AuthTestResult_littlespidy> getResults() { return results; }
+        public List<EndpointResultRow_littlespidy> getEndpointRows() { return endpointRows; }
+        public List<ProfileColumnDef_littlespidy> getDisplayedProfiles() { return displayedProfiles; }
+
+        @Override
+        public String toString() {
+            return name + " (" + results.size() + " results)";
         }
     }
 }
