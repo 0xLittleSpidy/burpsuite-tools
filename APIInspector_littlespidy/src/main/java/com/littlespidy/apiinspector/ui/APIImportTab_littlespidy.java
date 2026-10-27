@@ -2,6 +2,8 @@
 package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.http.message.requests.HttpRequest;
+import com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy;
 import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
 import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
@@ -284,6 +286,34 @@ public class APIImportTab_littlespidy extends JPanel {
                             }
                         });
                         menu.add(sendToVF);
+
+                        JMenuItem sendToRepeater = new JMenuItem("Send to Repeater");
+                        sendToRepeater.addActionListener(ev -> {
+                            try {
+                                ImportedCollection_littlespidy col = getSelectedCollection();
+                                String targetBaseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
+                                        ? col.getTargetBaseUrl() : "https://localhost";
+                                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, ep, null, false);
+                                if (api != null && api.repeater() != null) {
+                                    api.repeater().sendToRepeater(req, ep.getMethod() + " " + ep.getPath());
+                                }
+                            } catch (Exception ignored) {}
+                        });
+                        menu.add(sendToRepeater);
+
+                        JMenuItem sendToIntruder = new JMenuItem("Send to Intruder");
+                        sendToIntruder.addActionListener(ev -> {
+                            try {
+                                ImportedCollection_littlespidy col = getSelectedCollection();
+                                String targetBaseUrl = (col != null && col.getTargetBaseUrl() != null && !col.getTargetBaseUrl().isBlank())
+                                        ? col.getTargetBaseUrl() : "https://localhost";
+                                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, ep, null, false);
+                                if (api != null && api.intruder() != null) {
+                                    api.intruder().sendToIntruder(req, ep.getMethod() + " " + ep.getPath());
+                                }
+                            } catch (Exception ignored) {}
+                        });
+                        menu.add(sendToIntruder);
 
                         menu.show(endpointTable, e.getX(), e.getY());
                     }

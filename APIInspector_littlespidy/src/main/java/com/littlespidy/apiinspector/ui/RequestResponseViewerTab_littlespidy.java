@@ -55,6 +55,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
     private JButton runAllBtn;
     private JButton stopBtn;
     private JButton resetBtn;
+    private JButton fillParamsBtn;
     private JProgressBar progressBar;
     private JLabel runStatusLabel;
     private JButton sessionStoreBtn;
@@ -155,6 +156,11 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
             dialog.setVisible(true);
         });
         rightActions.add(sessionStoreBtn);
+
+        fillParamsBtn = new JButton("Fill Parameters");
+        fillParamsBtn.setToolTipText("View and edit Path, Query, and Body parameters for the selected request");
+        fillParamsBtn.addActionListener(e -> onFillParameters());
+        rightActions.add(fillParamsBtn);
 
         runBtn = new JButton("Run");
         runBtn.setToolTipText("Run the currently selected request (with any user edits) against the target server");
@@ -262,6 +268,22 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
                         });
                         menu.add(sendToRepeater);
 
+                        JMenuItem sendToIntruder = new JMenuItem("Send to Intruder");
+                        sendToIntruder.addActionListener(ev -> {
+                            try {
+                                String targetBaseUrl = (item.collection.getTargetBaseUrl() != null && !item.collection.getTargetBaseUrl().isBlank())
+                                        ? item.collection.getTargetBaseUrl() : "https://localhost";
+                                HttpRequest req = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, item.endpoint, null, false);
+                                if (sessionStore != null && sessionStore.appliesTo(item.endpoint)) {
+                                    req = sessionStore.applyToRequest(req, item.endpoint);
+                                }
+                                if (api != null && api.intruder() != null) {
+                                    api.intruder().sendToIntruder(req, item.endpoint.getMethod() + " " + item.endpoint.getPath());
+                                }
+                            } catch (Exception ignored) {}
+                        });
+                        menu.add(sendToIntruder);
+
                         menu.show(requestsTable, e.getX(), e.getY());
                     }
                 }
@@ -271,13 +293,11 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         topTablePanel.add(new JScrollPane(requestsTable), BorderLayout.CENTER);
         mainSplit.setTopComponent(topTablePanel);
 
-        // Bottom Pane: Request & Response Arranged Horizontally
+        // Bottom Pane: Request & Response Arranged Horizontally in Equal 50/50 Grid (No Resizer)
         JPanel bottomViewerPanel = new JPanel(new BorderLayout(4, 4));
         bottomViewerPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
-        JSplitPane horizontalMessageSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        horizontalMessageSplit.setResizeWeight(0.50);
-        horizontalMessageSplit.setContinuousLayout(true);
+        JPanel messageGrid = new JPanel(new GridLayout(1, 2, 8, 0));
 
         // Left Component: Request Viewer (Editable)
         JPanel reqPanel = new JPanel(new BorderLayout());
@@ -289,7 +309,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         } else {
             reqPanel.add(new JLabel("Request editor unavailable in mock environment.", JLabel.CENTER), BorderLayout.CENTER);
         }
-        horizontalMessageSplit.setLeftComponent(reqPanel);
+        messageGrid.add(reqPanel);
 
         // Right Component: Response Viewer
         JPanel respPanel = new JPanel(new BorderLayout());
@@ -304,34 +324,54 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         } else {
             respPanel.add(new JLabel("Response editor unavailable in mock environment.", JLabel.CENTER), BorderLayout.CENTER);
         }
-        horizontalMessageSplit.setRightComponent(respPanel);
+        messageGrid.add(respPanel);
 
-        bottomViewerPanel.add(horizontalMessageSplit, BorderLayout.CENTER);
+        bottomViewerPanel.add(messageGrid, BorderLayout.CENTER);
         mainSplit.setBottomComponent(bottomViewerPanel);
 
         add(mainSplit, BorderLayout.CENTER);
     }
 
     private void initTableRenderers() {
-        if (requestsTable.getColumnModel().getColumnCount() >= 9) {
+        if (requestsTable.getColumnModel().getColumnCount() >= 8) {
             requestsTable.getColumnModel().getColumn(0).setPreferredWidth(110); // Collection
             requestsTable.getColumnModel().getColumn(1).setPreferredWidth(60);  // Method
-            requestsTable.getColumnModel().getColumn(2).setPreferredWidth(210); // Path
-            requestsTable.getColumnModel().getColumn(3).setPreferredWidth(60);  // Status
+            requestsTable.getColumnModel().getColumn(2).setPreferredWidth(230); // Path
+            requestsTable.getColumnModel().getColumn(3).setPreferredWidth(65);  // Status
             requestsTable.getColumnModel().getColumn(4).setPreferredWidth(55);  // Edited
-            requestsTable.getColumnModel().getColumn(5).setPreferredWidth(170); // Summary
-            requestsTable.getColumnModel().getColumn(6).setPreferredWidth(85);  // Requires Auth
-            requestsTable.getColumnModel().getColumn(7).setPreferredWidth(110); // Content Type
-            requestsTable.getColumnModel().getColumn(8).setPreferredWidth(170); // Parameters
+            requestsTable.getColumnModel().getColumn(5).setPreferredWidth(180); // Summary
+            requestsTable.getColumnModel().getColumn(6).setPreferredWidth(90);  // Requires Auth
+            requestsTable.getColumnModel().getColumn(7).setPreferredWidth(180); // Parameters
         }
 
-        // Status column renderer
+        // Status column and error row renderer
         requestsTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+
+                int modelRow = table.convertRowIndexToModel(row);
+                boolean isErrorStatus = false;
+                if (modelRow >= 0 && modelRow < endpointItems.size()) {
+                    EndpointItem item = endpointItems.get(modelRow);
+                    String key = item.collection.getId() + ":" + item.endpoint.getMethod() + ":" + item.endpoint.getPath();
+                    HttpResponse cachedResp = cachedResponses.get(key);
+                    if (cachedResp != null) {
+                        int code = cachedResp.statusCode();
+                        if (code >= 400 && code < 600) {
+                            isErrorStatus = true;
+                        }
+                    }
+                }
+
                 if (isSelected) {
                     return c;
+                }
+
+                if (isErrorStatus) {
+                    c.setBackground(new Color(255, 234, 234));
+                } else {
+                    c.setBackground(table.getBackground());
                 }
                 c.setForeground(table.getForeground());
                 c.setFont(table.getFont());
@@ -345,9 +385,11 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
                         } else if (code >= 300 && code < 400) {
                             c.setForeground(new Color(0, 80, 200)); // Blue
                         } else if (code >= 400 && code < 500) {
-                            c.setForeground(new Color(200, 100, 0)); // Amber / Orange
+                            c.setForeground(new Color(180, 50, 0)); // Amber / Orange-Red
+                            c.setFont(c.getFont().deriveFont(Font.BOLD));
                         } else if (code >= 500) {
                             c.setForeground(new Color(180, 0, 0)); // Red
+                            c.setFont(c.getFont().deriveFont(Font.BOLD));
                         }
                     } catch (NumberFormatException ignored) {
                         c.setForeground(Color.GRAY);
@@ -536,6 +578,46 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         }
     }
 
+    private void onFillParameters() {
+        int selectedViewRow = requestsTable.getSelectedRow();
+        if (selectedViewRow < 0 && currentlyLoadedItem == null) {
+            JOptionPane.showMessageDialog(this, "Please select a request from the table to fill parameters.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int modelRow = (selectedViewRow >= 0) ? requestsTable.convertRowIndexToModel(selectedViewRow) : -1;
+        final EndpointItem item = (modelRow >= 0 && modelRow < endpointItems.size()) ? endpointItems.get(modelRow) : currentlyLoadedItem;
+        if (item == null || item.endpoint == null) {
+            JOptionPane.showMessageDialog(this, "Please select a request from the table to fill parameters.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String targetBaseUrl = (item.collection.getTargetBaseUrl() != null && !item.collection.getTargetBaseUrl().isBlank())
+                ? item.collection.getTargetBaseUrl() : "https://localhost";
+
+        Window owner = SwingUtilities.getWindowAncestor(this);
+        FillParametersDialog_littlespidy dialog = new FillParametersDialog_littlespidy(
+                owner,
+                item.endpoint,
+                targetBaseUrl,
+                sessionStore,
+                (updatedReq) -> {
+                    isUpdatingEditor = true;
+                    try {
+                        if (requestEditor != null && updatedReq != null) {
+                            requestEditor.setRequest(updatedReq);
+                        }
+                    } finally {
+                        isUpdatingEditor = false;
+                    }
+                    if (modelRow >= 0) {
+                        tableModel.fireTableRowsUpdated(modelRow, modelRow);
+                    }
+                }
+        );
+        dialog.setVisible(true);
+    }
+
     private void onRunRequest() {
         int selectedViewRow = requestsTable.getSelectedRow();
         if (selectedViewRow < 0 && currentlyLoadedItem == null) {
@@ -550,26 +632,25 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
             return;
         }
 
-        // 1. Capture the request directly from the editor
-        HttpRequest reqToSend = null;
+        // 1. Capture the request directly from the editor and persist raw text
         if (requestEditor != null) {
             try {
-                reqToSend = requestEditor.getRequest();
+                HttpRequest edReq = requestEditor.getRequest();
+                if (edReq != null && edReq.toByteArray() != null && edReq.toByteArray().length() > 0) {
+                    String currentRaw = new String(edReq.toByteArray().getBytes(), StandardCharsets.UTF_8);
+                    item.endpoint.setCustomRawRequest(currentRaw);
+                }
             } catch (Exception ignored) {}
         }
 
         String targetBaseUrl = (item.collection.getTargetBaseUrl() != null && !item.collection.getTargetBaseUrl().isBlank())
                 ? item.collection.getTargetBaseUrl() : "https://localhost";
 
-        // 2. Persist any user modifications
-        if (reqToSend != null && reqToSend.toByteArray() != null && reqToSend.toByteArray().length() > 0) {
-            String currentRaw = new String(reqToSend.toByteArray().getBytes(), StandardCharsets.UTF_8);
-            item.endpoint.setCustomRawRequest(currentRaw);
-        } else {
-            reqToSend = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, item.endpoint, null, false);
-            if (sessionStore != null && sessionStore.appliesTo(item.endpoint)) {
-                reqToSend = sessionStore.applyToRequest(reqToSend, item.endpoint);
-            }
+        // 2. Rebuild request via AuthTestEngine (which calls buildFromCustomRequest)
+        // This ensures stale Content-Length is stripped and recalculated, and HttpService/Host are correctly attached
+        HttpRequest reqToSend = AuthTestEngine_littlespidy.buildRequest(targetBaseUrl, item.endpoint, null, false);
+        if (sessionStore != null && sessionStore.appliesTo(item.endpoint)) {
+            reqToSend = sessionStore.applyToRequest(reqToSend, item.endpoint);
         }
 
         // 3. Ensure reqToSend has HttpService attached
@@ -865,7 +946,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
     }
 
     public class RequestTableModel extends AbstractTableModel {
-        private final String[] columns = {"Collection", "Method", "Path", "Status", "Edited", "Summary", "Requires Auth", "Content Type", "Parameters"};
+        private final String[] columns = {"Collection", "Method", "Path", "Status", "Edited", "Summary", "Requires Auth", "Parameters"};
 
         @Override public int getRowCount() { return endpointItems.size(); }
         @Override public int getColumnCount() { return columns.length; }
@@ -887,8 +968,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
                 case 4: return it.endpoint.hasCustomRequest() ? "Yes" : "-";
                 case 5: return it.endpoint.getSummary();
                 case 6: return it.endpoint.isRequiresAuth() ? "Yes" : "No";
-                case 7: return it.endpoint.getContentType();
-                case 8: return it.endpoint.getParametersSummary();
+                case 7: return it.endpoint.getParametersSummary();
                 default: return "";
             }
         }

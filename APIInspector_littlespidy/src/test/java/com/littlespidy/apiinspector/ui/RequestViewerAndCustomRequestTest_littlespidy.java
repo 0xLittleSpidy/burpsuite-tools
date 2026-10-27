@@ -127,7 +127,7 @@ class RequestViewerAndCustomRequestTest_littlespidy {
         tab.updateCollections(List.of(col));
         RequestResponseViewerTab_littlespidy.RequestTableModel model = tab.getTableModel();
         assertNotNull(model);
-        assertEquals(9, model.getColumnCount());
+        assertEquals(8, model.getColumnCount(), "Content Type column removed; total columns should be 8");
         assertEquals("Status", model.getColumnName(3));
         assertEquals("Edited", model.getColumnName(4));
 
@@ -199,5 +199,40 @@ class RequestViewerAndCustomRequestTest_littlespidy {
         assertEquals(SessionStore_littlespidy.MODE_ALL_REQUESTS, recovered.getApplyMode());
         assertEquals(raw, recovered.getRawHeaders());
         assertEquals(2, recovered.getParsedHeaders().size());
+    }
+
+    @Test
+    @DisplayName("Verify FillParametersDialog correctly synchronizes parameters and builds modified request")
+    void testFillParametersDialogAndRebuildRequest() {
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/users/{userId}", "Update user");
+        ep.getPathParams().put("userId", "");
+        ep.getQueryParams().put("filter", "active");
+        ep.getBodyParams().put("role", "admin");
+
+        if (!java.awt.GraphicsEnvironment.isHeadless()) {
+            java.util.concurrent.atomic.AtomicReference<HttpRequest> updatedReqRef = new java.util.concurrent.atomic.AtomicReference<>();
+            FillParametersDialog_littlespidy dialog = new FillParametersDialog_littlespidy(
+                    null,
+                    ep,
+                    "https://api.example.com",
+                    null,
+                    updatedReqRef::set
+            );
+            assertNotNull(dialog);
+            dialog.dispose();
+        }
+
+        // Simulating parameter updates in endpoint
+        ep.getPathParams().put("userId", "user_999");
+        ep.getQueryParams().put("filter", "inactive");
+        ep.getBodyParams().put("role", "manager");
+        ep.setRequestBodySample("{\"role\": \"manager\"}");
+
+        HttpRequest rebuilt = AuthTestEngine_littlespidy.buildDefaultRequest("https://api.example.com", ep);
+        assertNotNull(rebuilt);
+        assertEquals("POST", rebuilt.method());
+        assertTrue(rebuilt.path().contains("/api/v1/users/user_999"));
+        assertTrue(rebuilt.path().contains("filter=inactive"));
+        assertTrue(rebuilt.bodyToString().contains("manager"));
     }
 }

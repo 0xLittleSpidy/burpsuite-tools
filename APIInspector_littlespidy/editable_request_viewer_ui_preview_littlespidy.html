@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Inspector - Editable Request Viewer and Session Store Preview (littlespidy)</title>
+    <title>API Inspector - Request Viewer, 50-50 Layout, and Parameter Filler (littlespidy)</title>
     <style>
         :root {
             --bg-color: #2b2b2b;
@@ -28,6 +28,7 @@
             --status-4xx: #ff9800;
             --status-5xx: #f44336;
             --status-blue: #64b5f6;
+            --error-row-bg: rgba(244, 67, 54, 0.22);
             --modal-overlay: rgba(0, 0, 0, 0.65);
         }
 
@@ -53,6 +54,7 @@
             --status-4xx: #e65100;
             --status-5xx: #c62828;
             --status-blue: #1565c0;
+            --error-row-bg: #ffeaea;
             --modal-overlay: rgba(0, 0, 0, 0.35);
         }
 
@@ -78,18 +80,18 @@
             background-color: var(--panel-bg);
             border-bottom: 1px solid var(--border-color);
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 6px 12px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--header-text);
+            align-items: center;
+            padding: 5px 12px;
         }
 
         .header-title {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            font-weight: bold;
+            color: var(--header-text);
+            font-size: 13px;
         }
 
         .badge-orange {
@@ -99,7 +101,7 @@
             border-radius: 3px;
             font-size: 10px;
             font-weight: bold;
-            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .theme-toggle-btn {
@@ -109,64 +111,58 @@
             padding: 4px 10px;
             border-radius: 3px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .theme-toggle-btn:hover {
             background-color: var(--btn-hover);
+            color: var(--header-text);
         }
 
         /* Suite Tabs */
         .suite-tabs {
             background-color: var(--panel-bg);
-            display: flex;
             border-bottom: 1px solid var(--border-color);
-            padding-left: 8px;
+            display: flex;
+            padding: 0 10px;
         }
 
         .suite-tab {
-            padding: 8px 14px;
-            color: var(--text-color);
+            padding: 6px 14px;
             cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            margin-bottom: -1px;
+            border-bottom: 2px solid transparent;
+            color: var(--text-color);
             font-weight: 500;
         }
 
         .suite-tab.active {
-            background-color: var(--bg-color);
-            color: var(--header-text);
-            border-color: var(--border-color);
-            border-top: 2px solid var(--accent-orange);
-            font-weight: 600;
+            border-bottom: 2px solid var(--accent-orange);
+            color: var(--accent-orange);
+            background-color: var(--tab-active-bg);
+            font-weight: bold;
         }
 
-        /* Sub Navigation Tabs */
+        /* API Inspector Sub Tabs */
         .sub-tabs {
-            background-color: var(--panel-bg);
-            display: flex;
+            background-color: var(--table-header);
             border-bottom: 1px solid var(--border-color);
-            padding: 4px 10px 0 10px;
-            gap: 4px;
+            display: flex;
+            padding: 0 10px;
         }
 
         .sub-tab {
-            padding: 6px 12px;
-            color: var(--text-color);
+            padding: 5px 12px;
             cursor: pointer;
-            border-radius: 4px 4px 0 0;
-            border: 1px solid transparent;
-            border-bottom: none;
-            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            color: var(--text-color);
+            font-size: 11.5px;
         }
 
         .sub-tab.active {
-            background-color: var(--bg-color);
+            border-bottom: 2px solid var(--accent-orange);
             color: var(--header-text);
-            border-color: var(--border-color);
-            border-top: 2px solid var(--accent-orange);
-            font-weight: 600;
+            font-weight: bold;
+            background-color: var(--panel-bg);
         }
 
         /* Main Content Container */
@@ -176,21 +172,21 @@
             flex-direction: column;
             padding: 8px;
             gap: 8px;
+            min-height: 0;
             overflow: hidden;
-            position: relative;
         }
 
-        /* Top Toolbar Filters & Run Buttons */
+        /* Top Controls Toolbar */
         .toolbar {
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 6px 10px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
+            align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .toolbar-group {
@@ -225,17 +221,6 @@
             background-color: var(--accent-orange-hover);
         }
 
-        .btn-danger {
-            background-color: #8b2525;
-            color: #ffffff;
-            border-color: #a83232;
-        }
-
-        .btn-danger:disabled, .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .input-box {
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
@@ -244,35 +229,7 @@
             border-radius: 3px;
         }
 
-        .progress-bar-container {
-            width: 120px;
-            height: 18px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 3px;
-            overflow: hidden;
-            display: none;
-            position: relative;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background-color: var(--accent-orange);
-            width: 0%;
-            transition: width 0.2s ease;
-        }
-
-        .progress-bar-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            top: 2px;
-            font-size: 10px;
-            color: var(--header-text);
-            font-weight: bold;
-        }
-
-        /* Split Panes */
+        /* Split Workspace: Top Table, Bottom Equal 50/50 Message Grid */
         .workspace-split {
             flex: 1;
             display: flex;
@@ -281,9 +238,9 @@
             min-height: 0;
         }
 
-        /* Top Table */
+        /* Top Requests Table */
         .table-pane {
-            height: 45%;
+            height: 44%;
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
@@ -298,6 +255,9 @@
             font-weight: bold;
             color: var(--header-text);
             border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .table-container {
@@ -339,8 +299,17 @@
         }
 
         tr.selected {
-            background-color: var(--table-selected);
+            background-color: var(--table-selected) !important;
             color: var(--header-text);
+        }
+
+        /* 4xx and 5xx Status Code Row Highlight (Light Red) */
+        tr.error-status {
+            background-color: var(--error-row-bg) !important;
+        }
+
+        tr.error-status:hover {
+            background-color: var(--table-hover) !important;
         }
 
         .status-badge {
@@ -351,25 +320,26 @@
 
         .status-200 { color: var(--status-2xx); }
         .status-400 { color: var(--status-4xx); font-weight: bold; }
-        .status-500 { color: var(--status-5xx); }
+        .status-500 { color: var(--status-5xx); font-weight: bold; }
         .edited-yes { color: var(--status-blue); font-weight: bold; }
 
-        /* Bottom Side-by-Side Message Editors */
-        .viewer-split {
-            flex: 1;
-            display: flex;
+        /* Bottom 50/50 Equal-Sized Message Grid (Strictly No Resizer Divider) */
+        .viewer-grid-5050 {
+            height: 56%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
             min-height: 0;
         }
 
         .editor-pane {
-            flex: 1;
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-width: 0;
         }
 
         .editor-header {
@@ -404,19 +374,7 @@
             overflow: auto;
         }
 
-        .notice-banner {
-            background-color: rgba(255, 119, 0, 0.15);
-            border: 1px solid var(--accent-orange);
-            color: var(--header-text);
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 11.5px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* Modal Dialog for Session Store */
+        /* Modal Dialogs */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -434,7 +392,8 @@
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            width: 580px;
+            width: 650px;
+            max-height: 85vh;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             display: flex;
             flex-direction: column;
@@ -458,21 +417,58 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            overflow-y: auto;
         }
 
-        .section-box {
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 10px;
+        .modal-tabs {
             display: flex;
+            border-bottom: 1px solid var(--border-color);
+            gap: 4px;
+        }
+
+        .modal-tab-btn {
+            background-color: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            color: var(--text-color);
+            padding: 6px 14px;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            font-weight: 500;
+        }
+
+        .modal-tab-btn.active {
+            background-color: var(--table-header);
+            color: var(--header-text);
+            font-weight: bold;
+        }
+
+        .modal-tab-content {
+            display: none;
             flex-direction: column;
             gap: 8px;
         }
 
-        .section-title {
-            font-weight: bold;
+        .modal-tab-content.active {
+            display: flex;
+        }
+
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modal-table th {
+            position: static;
+        }
+
+        .modal-table td input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
             color: var(--header-text);
-            font-size: 11.5px;
+            padding: 3px 6px;
+            border-radius: 3px;
         }
 
         .modal-footer {
@@ -482,6 +478,40 @@
             display: flex;
             justify-content: flex-end;
             gap: 8px;
+        }
+
+        /* Right-Click Context Menu */
+        .context-menu {
+            position: absolute;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+            display: none;
+            flex-direction: column;
+            z-index: 2000;
+            border-radius: 3px;
+            min-width: 220px;
+            overflow: hidden;
+        }
+
+        .context-item {
+            padding: 7px 14px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .context-item:hover {
+            background-color: var(--accent-orange);
+            color: #ffffff;
+        }
+
+        .context-divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 2px 0;
         }
     </style>
 </head>
@@ -520,28 +550,18 @@
     <!-- Main Content Area -->
     <div class="tab-content">
 
-        <!-- Informational Banner -->
-        <div class="notice-banner">
-            <div>
-                <strong>Editable HTTP Request & Live Runner:</strong> Click 'Run' to execute the selected request immediately. The editor preserves your text and the response updates in real time without screen blanking. In 'Session Store', paste raw HTTP headers to strictly replace existing credentials.
-            </div>
-            <div>
-                <span id="banner-status-indicator" style="color: var(--status-2xx); font-weight: bold;">Auto-Save: Active</span>
-            </div>
-        </div>
-
         <!-- Top Controls Toolbar -->
         <div class="toolbar">
             <div class="toolbar-group">
                 <label>Collection:</label>
-                <select class="input-box" id="collection-filter" onchange="filterTable()">
+                <select class="input-box" id="collection-filter" onchange="renderTable()">
                     <option value="ALL">All Collections</option>
-                    <option value="Customer API">Customer API (v2)</option>
-                    <option value="Billing Service">Billing Service (v1)</option>
+                    <option value="Customer API">Customer API</option>
+                    <option value="Billing Service">Billing Service</option>
                 </select>
 
                 <label>Method:</label>
-                <select class="input-box" id="method-filter" onchange="filterTable()">
+                <select class="input-box" id="method-filter" onchange="renderTable()">
                     <option value="ALL">All Methods</option>
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
@@ -549,173 +569,226 @@
                     <option value="DELETE">DELETE</option>
                 </select>
 
-                <input type="text" class="input-box" id="search-box" placeholder="Search path or summary..." onkeyup="filterTable()">
+                <label>Search:</label>
+                <input type="text" class="input-box" id="search-box" placeholder="Filter path or summary..." onkeyup="renderTable()" style="width: 140px;">
                 <button class="btn" onclick="clearFilters()">Clear Filters</button>
             </div>
 
             <div class="toolbar-group">
-                <span style="font-style: italic; color: #4caf50;" id="session-summary">Session Store: Active (2 headers)</span>
+                <span id="session-summary" style="font-size: 11px; color: #4caf50; font-style: italic; margin-right: 6px;">Session Store: Active (2 headers)</span>
                 <button class="btn" onclick="openSessionStoreDialog()">Session Store</button>
+                <button class="btn btn-primary" onclick="openFillParamsDialog()">Fill Parameters</button>
                 <button class="btn btn-primary" id="run-btn" onclick="runSelectedRequest()">Run</button>
                 <button class="btn" id="run-all-btn" onclick="runAllRequests()">Run All</button>
-                <button class="btn btn-danger" id="stop-btn" disabled onclick="stopRunAll()">Stop</button>
                 <button class="btn" id="reset-btn" onclick="resetSelectedRequest()">Reset</button>
-
-                <div class="progress-bar-container" id="progress-container">
-                    <div class="progress-bar-fill" id="progress-fill"></div>
-                    <div class="progress-bar-text" id="progress-text">0%</div>
-                </div>
-
-                <span id="run-status-label" style="font-size: 11px;">Ready</span>
-                <span id="count-label" style="font-weight: bold; margin-left: 6px;">Requests: 4 of 4</span>
+                <span id="count-label" style="margin-left: 6px; font-weight: bold; color: var(--header-text);">Requests: 4 of 4</span>
             </div>
         </div>
 
-        <!-- Split View: Requests Table Top, Message Editors Bottom -->
+        <!-- Main Split Workspace -->
         <div class="workspace-split">
 
-            <!-- Requests Table -->
+            <!-- Top Requests Table (8 Columns: Content Type Removed, Error Rows Highlighted in Light Red) -->
             <div class="table-pane">
-                <div class="table-title">Discovered API Requests</div>
-                <div class="table-container">
-                    <table id="requests-table">
+                <div class="table-title">
+                    <span>Discovered API Requests (Right-click row for context menu)</span>
+                    <span style="font-size: 11px; font-weight: normal; color: var(--text-color);">Notice: Rows with status 400, 404, 500 are highlighted in light red</span>
+                </div>
+                <div class="table-container" id="table-container">
+                    <table>
                         <thead>
                             <tr>
-                                <th>Collection</th>
-                                <th>Method</th>
-                                <th>Path</th>
-                                <th>Status</th>
-                                <th>Edited</th>
-                                <th>Summary</th>
-                                <th>Requires Auth</th>
-                                <th>Content Type</th>
+                                <th style="width: 120px;">Collection</th>
+                                <th style="width: 65px;">Method</th>
+                                <th style="width: 240px;">Path</th>
+                                <th style="width: 70px;">Status</th>
+                                <th style="width: 60px;">Edited</th>
+                                <th style="width: 200px;">Summary</th>
+                                <th style="width: 95px;">Requires Auth</th>
                                 <th>Parameters</th>
                             </tr>
                         </thead>
                         <tbody id="table-body">
-                            <!-- Populated dynamically via JS -->
+                            <!-- Populated dynamically -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Horizontal Message Viewer: Request (Editable) vs Response -->
-            <div class="viewer-split">
+            <!-- Bottom 50/50 Equal Split (Grid Layout, No Resizer Dots) -->
+            <div class="viewer-grid-5050">
 
-                <!-- Left: Request Editor (Editable) -->
+                <!-- Left 50%: Request Editor -->
                 <div class="editor-pane">
                     <div class="editor-header">
-                        <span>HTTP Request (Editable - edits persist to endpoint and auth testing)</span>
-                        <span class="editor-info" id="req-info">Method: POST | Path: /api/v2/customers/{customerId}</span>
+                        <span>HTTP Request (Editable)</span>
+                        <span class="editor-info" id="req-info">Method: POST | Path: /api/v2/customers</span>
                     </div>
-                    <textarea class="raw-textarea" id="request-editor" oninput="onRequestModified()"></textarea>
+                    <textarea class="raw-textarea" id="request-editor" oninput="onRequestModified()" spellcheck="false"></textarea>
                 </div>
 
-                <!-- Right: Response Viewer -->
+                <!-- Right 50%: Response Viewer -->
                 <div class="editor-pane">
                     <div class="editor-header">
                         <span>HTTP Response</span>
-                        <span class="editor-info" id="resp-info">Status: - | Length: 0 B</span>
+                        <span class="editor-info" id="resp-info">Status: 200 | Length: 142 B</span>
                     </div>
-                    <textarea class="raw-textarea" id="response-editor" readonly></textarea>
+                    <textarea class="raw-textarea" id="response-editor" readonly spellcheck="false"></textarea>
                 </div>
 
             </div>
 
         </div>
 
+    </div>
+
+    <!-- Fill Parameters Modal Dialog -->
+    <div class="modal-overlay" id="fill-params-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span id="fill-params-title">Fill Parameters - POST /api/v2/customers</span>
+                <button class="btn" onclick="closeFillParamsDialog()">Close</button>
+            </div>
+            <div class="modal-body">
+                <div style="background-color: var(--table-stripe); padding: 8px 10px; border-radius: 4px; border: 1px solid var(--border-color);">
+                    <strong>Parameter Value Configuration:</strong> Edit Path, Query, or Body parameter values. Values synchronize into the HTTP Request in real-time on Apply or OK.
+                </div>
+
+                <!-- Section Tabs -->
+                <div class="modal-tabs">
+                    <button class="modal-tab-btn active" id="tab-btn-path" onclick="switchParamTab('path')">Path Parameters (<span id="count-path">0</span>)</button>
+                    <button class="modal-tab-btn" id="tab-btn-query" onclick="switchParamTab('query')">Query Parameters (<span id="count-query">1</span>)</button>
+                    <button class="modal-tab-btn" id="tab-btn-body" onclick="switchParamTab('body')">Body Parameters (<span id="count-body">3</span>)</button>
+                </div>
+
+                <!-- Tab 1: Path Parameters -->
+                <div class="modal-tab-content active" id="tab-content-path">
+                    <table class="modal-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 150px;">Parameter</th>
+                                <th style="width: 100px;">Type</th>
+                                <th>Value (Editable)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="params-path-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Tab 2: Query Parameters -->
+                <div class="modal-tab-content" id="tab-content-query">
+                    <table class="modal-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 150px;">Parameter</th>
+                                <th style="width: 100px;">Type</th>
+                                <th>Value (Editable)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="params-query-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Tab 3: Body Parameters -->
+                <div class="modal-tab-content" id="tab-content-body">
+                    <table class="modal-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 150px;">Parameter</th>
+                                <th style="width: 100px;">Type</th>
+                                <th>Value (Editable)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="params-body-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="applyParameterEdits(false)">Apply</button>
+                <button class="btn btn-primary" onclick="applyParameterEdits(true)">OK</button>
+                <button class="btn" onclick="closeFillParamsDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right-Click Context Menu -->
+    <div class="context-menu" id="table-context-menu">
+        <div class="context-item" onclick="handleContextMenuAction('repeater')">Send to Repeater</div>
+        <div class="context-item" onclick="handleContextMenuAction('intruder')">Send to Intruder</div>
+        <div class="context-divider"></div>
+        <div class="context-item" onclick="handleContextMenuAction('version-finder')">Send to ResAPI Version Finder</div>
     </div>
 
     <!-- Session Store Modal Dialog -->
     <div class="modal-overlay" id="session-store-modal">
         <div class="modal-card">
             <div class="modal-header">
-                <span>Session Authentication Store</span>
-                <button class="btn" onclick="closeSessionStoreDialog()">X</button>
+                <span>Session Store Configuration (littlespidy)</span>
+                <button class="btn" onclick="closeSessionStoreDialog()">Close</button>
             </div>
             <div class="modal-body">
-                <!-- Scope settings -->
-                <div class="section-box">
-                    <div class="section-title">General & Scope Settings</div>
-                    <div>
-                        <input type="checkbox" id="modal-enable-store" checked>
-                        <label for="modal-enable-store" style="font-weight: bold; margin-left: 4px;">Enable Session Store Authentication</label>
-                    </div>
-                    <div style="display: flex; gap: 14px; margin-top: 4px;">
-                        <span>Apply to:</span>
-                        <label><input type="radio" name="modal-scope" id="scope-auth-only" checked> Only endpoints requiring authentication</label>
-                        <label><input type="radio" name="modal-scope" id="scope-all"> All endpoints</label>
-                    </div>
-                </div>
-
-                <!-- Raw Headers Text Area -->
-                <div class="section-box">
-                    <div class="section-title">Session HTTP Headers (one per line, e.g. Name: Value)</div>
-                    <textarea id="modal-raw-headers" class="raw-textarea" style="height: 150px; border: 1px solid var(--border-color); border-radius: 3px;" placeholder=""></textarea>
-                    <span style="font-size: 11px; font-style: italic; color: #888888;">
-                        Pasted headers strictly overwrite/replace any existing matching headers on outgoing requests (including Authorization and Cookie).
-                    </span>
-                </div>
+                <label style="font-weight: bold;">Raw Headers to Inject / Strictly Replace:</label>
+                <textarea id="modal-raw-headers" class="raw-textarea" style="height: 120px;" spellcheck="false"></textarea>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSessionStoreDialog()">Save & Apply</button>
                 <button class="btn" onclick="closeSessionStoreDialog()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveSessionStoreDialog()">Save & Apply</button>
             </div>
         </div>
     </div>
 
     <script>
-        let sessionStoreData = {
-            enabled: true,
-            applyMode: "AUTH_REQUIRED_ONLY",
-            rawHeaders: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.sampleToken\nCookie: session_id=sess_99882233; secure_flag=true"
-        };
-
         const sampleEndpoints = [
             {
                 id: "1",
                 collection: "Customer API",
                 method: "POST",
-                path: "/api/v2/customers/{customerId}",
-                status: "-",
+                path: "/api/v2/customers",
+                status: "200",
                 edited: false,
-                summary: "Update customer details",
-                requiresAuth: "Yes",
-                contentType: "application/json",
-                parameters: "Path: [customerId]; Body: [name, email]",
-                defaultRequest: "POST /api/v2/customers/{customerId} HTTP/1.1\r\nHost: api.target.com\r\nContent-Type: application/json\r\nAccept: application/json\r\n\r\n{\r\n  \"name\": \"\",\r\n  \"email\": \"\"\r\n}",
-                currentRequest: "POST /api/v2/customers/{customerId} HTTP/1.1\r\nHost: api.target.com\r\nContent-Type: application/json\r\nAccept: application/json\r\n\r\n{\r\n  \"name\": \"\",\r\n  \"email\": \"\"\r\n}",
-                lastResponse: null
+                summary: "Register new customer",
+                requiresAuth: "No",
+                parameters: "Body: [name, email, plan]",
+                pathParams: {},
+                queryParams: { notify: "true" },
+                bodyParams: { name: "John Doe", email: "john@example.com", plan: "premium" },
+                defaultRequest: "POST /api/v2/customers?notify=true HTTP/1.1\r\nHost: api.customer.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"john@example.com\",\r\n  \"plan\": \"premium\"\r\n}",
+                currentRequest: "POST /api/v2/customers?notify=true HTTP/1.1\r\nHost: api.customer.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"john@example.com\",\r\n  \"plan\": \"premium\"\r\n}",
+                lastResponse: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Tue, 27 Oct 2026 12:00:00 GMT\r\n\r\n{\r\n  \"customerId\": \"CUST-98214\",\r\n  \"status\": \"ACTIVE\"\r\n}"
             },
             {
                 id: "2",
                 collection: "Customer API",
                 method: "GET",
-                path: "/api/v2/customers/search?query={searchQuery}",
-                status: "-",
+                path: "/api/v2/customers/{customerId}",
+                status: "404",
                 edited: false,
-                summary: "Search customers by keyword",
+                summary: "Retrieve customer by ID",
                 requiresAuth: "Yes",
-                contentType: "application/json",
-                parameters: "Query: [searchQuery]",
-                defaultRequest: "GET /api/v2/customers/search?query={searchQuery} HTTP/1.1\r\nHost: api.target.com\r\nAccept: application/json\r\n\r\n",
-                currentRequest: "GET /api/v2/customers/search?query={searchQuery} HTTP/1.1\r\nHost: api.target.com\r\nAccept: application/json\r\n\r\n",
-                lastResponse: null
+                parameters: "Path: [customerId]",
+                pathParams: { customerId: "99999" },
+                queryParams: {},
+                bodyParams: {},
+                defaultRequest: "GET /api/v2/customers/99999 HTTP/1.1\r\nHost: api.customer.target.com\r\nAuthorization: Bearer token_sample\r\n\r\n",
+                currentRequest: "GET /api/v2/customers/99999 HTTP/1.1\r\nHost: api.customer.target.com\r\nAuthorization: Bearer token_sample\r\n\r\n",
+                lastResponse: "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\r\n  \"error\": \"Customer not found\"\r\n}"
             },
             {
                 id: "3",
                 collection: "Billing Service",
                 method: "POST",
-                path: "/api/v1/invoices/generate",
-                status: "200",
-                edited: true,
-                summary: "Generate invoice for account",
+                path: "/api/v1/invoices/process",
+                status: "500",
+                edited: false,
+                summary: "Process pending invoice batch",
                 requiresAuth: "Yes",
-                contentType: "application/json",
-                parameters: "Body: [accountId, amount]",
-                defaultRequest: "POST /api/v1/invoices/generate HTTP/1.1\r\nHost: billing.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"accountId\": \"{accountId}\",\r\n  \"amount\": 0\r\n}",
-                currentRequest: "POST /api/v1/invoices/generate HTTP/1.1\r\nHost: billing.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"accountId\": \"ACC-9921\",\r\n  \"amount\": 250.00\r\n}",
-                lastResponse: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 19:30:00 GMT\r\n\r\n{\r\n  \"invoiceId\": \"INV-2026-8819\",\r\n  \"status\": \"CREATED\",\r\n  \"amount\": 250.00\r\n}"
+                parameters: "Query: [batchId]; Body: [dryRun]",
+                pathParams: {},
+                queryParams: { batchId: "BATCH-01" },
+                bodyParams: { dryRun: "false" },
+                defaultRequest: "POST /api/v1/invoices/process?batchId=BATCH-01 HTTP/1.1\r\nHost: billing.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"dryRun\": false\r\n}",
+                currentRequest: "POST /api/v1/invoices/process?batchId=BATCH-01 HTTP/1.1\r\nHost: billing.target.com\r\nContent-Type: application/json\r\n\r\n{\r\n  \"dryRun\": false\r\n}",
+                lastResponse: "HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/json\r\n\r\n{\r\n  \"error\": \"Database lock timeout processing batch BATCH-01\"\r\n}"
             },
             {
                 id: "4",
@@ -724,19 +797,19 @@
                 path: "/api/v1/invoices/{invoiceId}",
                 status: "400",
                 edited: false,
-                summary: "Void unpaid invoice",
+                summary: "Cancel invoice",
                 requiresAuth: "Yes",
-                contentType: "application/json",
                 parameters: "Path: [invoiceId]",
+                pathParams: { invoiceId: "{invoiceId}" },
+                queryParams: {},
+                bodyParams: {},
                 defaultRequest: "DELETE /api/v1/invoices/{invoiceId} HTTP/1.1\r\nHost: billing.target.com\r\n\r\n",
                 currentRequest: "DELETE /api/v1/invoices/{invoiceId} HTTP/1.1\r\nHost: billing.target.com\r\n\r\n",
-                lastResponse: "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\r\n  \"error\": \"Invalid invoiceId format: '{invoiceId}' is not an integer\"\r\n}"
+                lastResponse: "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\r\n  \"error\": \"Invalid parameter '{invoiceId}' is not an integer\"\r\n}"
             }
         ];
 
         let selectedIndex = 0;
-        let isRunningAll = false;
-        let runAllTimer = null;
 
         function renderTable() {
             const tbody = document.getElementById("table-body");
@@ -745,12 +818,23 @@
             sampleEndpoints.forEach((ep, idx) => {
                 const tr = document.createElement("tr");
                 if (idx === selectedIndex) tr.classList.add("selected");
-                tr.onclick = () => selectRow(idx);
 
-                let statusClass = "";
-                if (ep.status.startsWith("2")) statusClass = "status-200";
-                else if (ep.status.startsWith("4")) statusClass = "status-400";
-                else if (ep.status.startsWith("5")) statusClass = "status-500";
+                // Mark rows with 4xx or 5xx status codes (400, 404, 500) in light red
+                const code = parseInt(ep.status, 10);
+                if (code >= 400 && code < 600) {
+                    tr.classList.add("error-status");
+                }
+
+                tr.onclick = () => selectRow(idx);
+                tr.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    selectRow(idx);
+                    showContextMenu(e.pageX, e.pageY);
+                };
+
+                let statusClass = "status-200";
+                if (code >= 400 && code < 500) statusClass = "status-400";
+                else if (code >= 500) statusClass = "status-500";
 
                 tr.innerHTML = `
                     <td>${ep.collection}</td>
@@ -760,7 +844,6 @@
                     <td class="${ep.edited ? 'edited-yes' : ''}">${ep.edited ? 'Yes' : '-'}</td>
                     <td>${ep.summary}</td>
                     <td>${ep.requiresAuth}</td>
-                    <td>${ep.contentType}</td>
                     <td>${ep.parameters}</td>
                 `;
                 tbody.appendChild(tr);
@@ -791,7 +874,7 @@
                 respInfo.innerText = `Status: ${code} | Length: ${ep.lastResponse.length} B`;
             } else {
                 respEditor.value = "";
-                respInfo.innerText = "Status: [Not Run] | Click 'Run' to execute request";
+                respInfo.innerText = "Status: [Not Run]";
             }
         }
 
@@ -812,26 +895,33 @@
             saveCurrentEditor();
             const ep = sampleEndpoints[selectedIndex];
             const runBtn = document.getElementById("run-btn");
-            const respInfo = document.getElementById("resp-info");
-
             runBtn.disabled = true;
-            respInfo.innerText = "Running request...";
 
-            // Notice: Request editor text is PRESERVED, no white screen, selection is maintained!
             setTimeout(() => {
+                // Fixed: normalized Content-Length and valid parameter execution
                 if (ep.currentRequest.includes("{") && ep.currentRequest.includes("}")) {
                     ep.status = "400";
-                    ep.lastResponse = `HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 20:30:00 GMT\r\n\r\n{\r\n  \"error\": \"Bad Request: Unresolved parameter placeholder found in request.\"\r\n}`;
+                    ep.lastResponse = "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\r\n  \"error\": \"Unresolved placeholder parameter in path/body\"\r\n}";
                 } else {
                     ep.status = "200";
-                    ep.lastResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Mon, 26 Oct 2026 20:30:00 GMT\r\n\r\n{\r\n  \"status\": \"SUCCESS\",\r\n  \"message\": \"Request processed successfully.\",\r\n  \"endpoint\": \"${ep.path}\"\r\n}`;
+                    ep.lastResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Tue, 27 Oct 2026 12:05:00 GMT\r\n\r\n{\r\n  \"status\": \"SUCCESS\",\r\n  \"message\": \"Request processed successfully with normalized Content-Length\"\r\n}`;
                 }
-
                 runBtn.disabled = false;
                 renderTable();
                 loadSelectedIntoEditor();
-                document.getElementById("run-status-label").innerText = `Run complete (${ep.status}).`;
             }, 300);
+        }
+
+        function runAllRequests() {
+            sampleEndpoints.forEach(ep => {
+                if (ep.currentRequest.includes("{") && ep.currentRequest.includes("}")) {
+                    ep.status = "400";
+                } else {
+                    ep.status = "200";
+                }
+            });
+            renderTable();
+            loadSelectedIntoEditor();
         }
 
         function resetSelectedRequest() {
@@ -840,82 +930,152 @@
             ep.edited = false;
             renderTable();
             loadSelectedIntoEditor();
-            document.getElementById("run-status-label").innerText = "Reset to original template.";
         }
 
-        function runAllRequests() {
-            saveCurrentEditor();
-            isRunningAll = true;
+        /* Fill Parameters Modal Logic */
+        function openFillParamsDialog() {
+            const ep = sampleEndpoints[selectedIndex];
+            document.getElementById("fill-params-title").innerText = `Fill Parameters - ${ep.method} ${ep.path}`;
 
-            const runBtn = document.getElementById("run-btn");
-            const runAllBtn = document.getElementById("run-all-btn");
-            const stopBtn = document.getElementById("stop-btn");
-            const progressContainer = document.getElementById("progress-container");
-            const progressFill = document.getElementById("progress-fill");
-            const progressText = document.getElementById("progress-text");
-            const statusLabel = document.getElementById("run-status-label");
+            // Populate Path
+            const pathBody = document.getElementById("params-path-body");
+            pathBody.innerHTML = "";
+            const pathKeys = Object.keys(ep.pathParams || {});
+            document.getElementById("count-path").innerText = pathKeys.length;
+            pathKeys.forEach(k => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><strong>${k}</strong></td><td>string</td><td><input type="text" id="input-path-${k}" value="${ep.pathParams[k]}"></td>`;
+                pathBody.appendChild(tr);
+            });
+            if (pathKeys.length === 0) {
+                pathBody.innerHTML = `<tr><td colspan="3" style="color: gray; text-align: center; padding: 12px;">No path parameters defined</td></tr>`;
+            }
 
-            runBtn.disabled = true;
-            runAllBtn.disabled = true;
-            stopBtn.disabled = false;
-            progressContainer.style.display = "block";
+            // Populate Query
+            const queryBody = document.getElementById("params-query-body");
+            queryBody.innerHTML = "";
+            const queryKeys = Object.keys(ep.queryParams || {});
+            document.getElementById("count-query").innerText = queryKeys.length;
+            queryKeys.forEach(k => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><strong>${k}</strong></td><td>string</td><td><input type="text" id="input-query-${k}" value="${ep.queryParams[k]}"></td>`;
+                queryBody.appendChild(tr);
+            });
+            if (queryKeys.length === 0) {
+                queryBody.innerHTML = `<tr><td colspan="3" style="color: gray; text-align: center; padding: 12px;">No query parameters defined</td></tr>`;
+            }
 
-            let currentIdx = 0;
-            const total = sampleEndpoints.length;
+            // Populate Body
+            const bodyBody = document.getElementById("params-body-body");
+            bodyBody.innerHTML = "";
+            const bodyKeys = Object.keys(ep.bodyParams || {});
+            document.getElementById("count-body").innerText = bodyKeys.length;
+            bodyKeys.forEach(k => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><strong>${k}</strong></td><td>string</td><td><input type="text" id="input-body-${k}" value="${ep.bodyParams[k]}"></td>`;
+                bodyBody.appendChild(tr);
+            });
+            if (bodyKeys.length === 0) {
+                bodyBody.innerHTML = `<tr><td colspan="3" style="color: gray; text-align: center; padding: 12px;">No body parameters defined</td></tr>`;
+            }
 
-            runAllTimer = setInterval(() => {
-                if (currentIdx >= total || !isRunningAll) {
-                    clearInterval(runAllTimer);
-                    runBtn.disabled = false;
-                    runAllBtn.disabled = false;
-                    stopBtn.disabled = true;
-                    progressContainer.style.display = "none";
-                    isRunningAll = false;
-                    statusLabel.innerText = `Run All completed (${total} requests).`;
-                    renderTable();
-                    loadSelectedIntoEditor();
-                    return;
-                }
-
-                const ep = sampleEndpoints[currentIdx];
-                if (ep.currentRequest.includes("{") && ep.currentRequest.includes("}")) {
-                    ep.status = "400";
-                    ep.lastResponse = `HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"error\":\"Placeholder parameter syntax error\"}`;
-                } else {
-                    ep.status = "200";
-                    ep.lastResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"SUCCESS\"}`;
-                }
-
-                currentIdx++;
-                const pct = Math.round((currentIdx / total) * 100);
-                progressFill.style.width = pct + "%";
-                progressText.innerText = pct + "%";
-                statusLabel.innerText = `Running: ${currentIdx} / ${total}`;
-                renderTable();
-            }, 350);
+            document.getElementById("fill-params-modal").style.display = "flex";
         }
 
-        function stopRunAll() {
-            isRunningAll = false;
-            if (runAllTimer) clearInterval(runAllTimer);
-            document.getElementById("stop-btn").disabled = true;
-            document.getElementById("run-btn").disabled = false;
-            document.getElementById("run-all-btn").disabled = false;
-            document.getElementById("progress-container").style.display = "none";
-            document.getElementById("run-status-label").innerText = "Run All stopped by user.";
+        function closeFillParamsDialog() {
+            document.getElementById("fill-params-modal").style.display = "none";
+        }
+
+        function switchParamTab(tab) {
+            document.getElementById("tab-btn-path").classList.toggle("active", tab === 'path');
+            document.getElementById("tab-btn-query").classList.toggle("active", tab === 'query');
+            document.getElementById("tab-btn-body").classList.toggle("active", tab === 'body');
+
+            document.getElementById("tab-content-path").classList.toggle("active", tab === 'path');
+            document.getElementById("tab-content-query").classList.toggle("active", tab === 'query');
+            document.getElementById("tab-content-body").classList.toggle("active", tab === 'body');
+        }
+
+        function applyParameterEdits(closeDialog) {
+            const ep = sampleEndpoints[selectedIndex];
+
+            // Sync Path
+            Object.keys(ep.pathParams || {}).forEach(k => {
+                const el = document.getElementById(`input-path-${k}`);
+                if (el) ep.pathParams[k] = el.value;
+            });
+
+            // Sync Query
+            Object.keys(ep.queryParams || {}).forEach(k => {
+                const el = document.getElementById(`input-query-${k}`);
+                if (el) ep.queryParams[k] = el.value;
+            });
+
+            // Sync Body
+            Object.keys(ep.bodyParams || {}).forEach(k => {
+                const el = document.getElementById(`input-body-${k}`);
+                if (el) ep.bodyParams[k] = el.value;
+            });
+
+            // Rebuild raw request
+            let newPath = ep.path;
+            Object.keys(ep.pathParams || {}).forEach(k => {
+                newPath = newPath.replace(`{${k}}`, ep.pathParams[k]);
+            });
+
+            const qParts = [];
+            Object.keys(ep.queryParams || {}).forEach(k => {
+                qParts.push(`${encodeURIComponent(k)}=${encodeURIComponent(ep.queryParams[k])}`);
+            });
+            if (qParts.length > 0) newPath += "?" + qParts.join("&");
+
+            let host = "api.customer.target.com";
+            if (ep.collection.includes("Billing")) host = "billing.target.com";
+
+            let bodyStr = "";
+            const bodyKeys = Object.keys(ep.bodyParams || {});
+            if (bodyKeys.length > 0) {
+                const obj = {};
+                bodyKeys.forEach(k => obj[k] = ep.bodyParams[k]);
+                bodyStr = JSON.stringify(obj, null, 2);
+            }
+
+            let raw = `${ep.method} ${newPath} HTTP/1.1\r\nHost: ${host}\r\n`;
+            if (bodyStr) {
+                raw += `Content-Type: application/json\r\nContent-Length: ${bodyStr.length}\r\n\r\n${bodyStr}`;
+            } else {
+                raw += `\r\n`;
+            }
+
+            ep.currentRequest = raw;
+            ep.edited = true;
             renderTable();
             loadSelectedIntoEditor();
+
+            if (closeDialog) closeFillParamsDialog();
         }
 
-        // Modal methods for Session Store
+        /* Context Menu Actions */
+        function showContextMenu(x, y) {
+            const menu = document.getElementById("table-context-menu");
+            menu.style.left = x + "px";
+            menu.style.top = y + "px";
+            menu.style.display = "flex";
+        }
+
+        function hideContextMenu() {
+            document.getElementById("table-context-menu").style.display = "none";
+        }
+
+        document.addEventListener("click", hideContextMenu);
+
+        function handleContextMenuAction(action) {
+            const ep = sampleEndpoints[selectedIndex];
+            hideContextMenu();
+            alert(`[Action Dispatched]: Request '${ep.method} ${ep.path}' sent to ${action.toUpperCase()}`);
+        }
+
         function openSessionStoreDialog() {
-            document.getElementById("modal-enable-store").checked = sessionStoreData.enabled;
-            if (sessionStoreData.applyMode === "ALL_REQUESTS") {
-                document.getElementById("scope-all").checked = true;
-            } else {
-                document.getElementById("scope-auth-only").checked = true;
-            }
-            document.getElementById("modal-raw-headers").value = sessionStoreData.rawHeaders;
             document.getElementById("session-store-modal").style.display = "flex";
         }
 
@@ -923,41 +1083,19 @@
             document.getElementById("session-store-modal").style.display = "none";
         }
 
-        function saveSessionStoreDialog() {
-            sessionStoreData.enabled = document.getElementById("modal-enable-store").checked;
-            sessionStoreData.applyMode = document.getElementById("scope-all").checked ? "ALL_REQUESTS" : "AUTH_REQUIRED_ONLY";
-            sessionStoreData.rawHeaders = document.getElementById("modal-raw-headers").value;
-
-            // Count parsed lines
-            const lines = sessionStoreData.rawHeaders.split("\n").filter(l => l.trim().length > 0 && !l.trim().startsWith("#") && l.includes(":"));
-            const count = lines.length;
-
-            const summaryEl = document.getElementById("session-summary");
-            if (!sessionStoreData.enabled) {
-                summaryEl.innerText = "Session Store: Inactive";
-                summaryEl.style.color = "#888888";
-            } else {
-                summaryEl.innerText = `Session Store: Active (${count} header${count === 1 ? '' : 's'})`;
-                summaryEl.style.color = "#4caf50";
-            }
-
-            closeSessionStoreDialog();
-        }
-
         function toggleTheme() {
             const body = document.body;
-            const currentTheme = body.getAttribute("data-theme");
-            body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
+            body.setAttribute("data-theme", body.getAttribute("data-theme") === "dark" ? "light" : "dark");
         }
 
-        function filterTable() {}
         function clearFilters() {
             document.getElementById("collection-filter").value = "ALL";
             document.getElementById("method-filter").value = "ALL";
             document.getElementById("search-box").value = "";
+            renderTable();
         }
 
-        // Initialize UI
+        // Initial Render
         renderTable();
         loadSelectedIntoEditor();
     </script>
