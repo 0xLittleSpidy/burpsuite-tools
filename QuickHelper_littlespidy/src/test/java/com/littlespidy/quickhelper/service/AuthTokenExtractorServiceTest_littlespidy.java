@@ -72,7 +72,9 @@ class AuthTokenExtractorServiceTest_littlespidy {
         HttpRequest req = createMockRequest(headers);
 
         assertEquals(token, service.extractBearerToken(req));
-        assertEquals("Bearer " + token, service.extractAuthHeader(req));
+        assertEquals("Bearer " + token, service.extractAuthHeaderValue(req));
+        assertEquals("Authorization: Bearer " + token, service.extractFullAuthHeader(req));
+        assertEquals("Authorization: Bearer " + token, service.extractAuthHeader(req));
 
         List<AuthItem_littlespidy> items = service.extractAll(req);
         assertEquals(2, items.size());
@@ -83,7 +85,7 @@ class AuthTokenExtractorServiceTest_littlespidy {
 
         assertEquals("Auth Header", items.get(1).getType());
         assertEquals("Authorization", items.get(1).getName());
-        assertEquals("Bearer " + token, items.get(1).getValue());
+        assertEquals("Authorization: Bearer " + token, items.get(1).getValue());
     }
 
     @Test
@@ -96,12 +98,14 @@ class AuthTokenExtractorServiceTest_littlespidy {
         HttpRequest req = createMockRequest(headers);
 
         assertNull(service.extractBearerToken(req));
-        assertEquals(basicVal, service.extractAuthHeader(req));
+        assertEquals(basicVal, service.extractAuthHeaderValue(req));
+        assertEquals("Authorization: " + basicVal, service.extractFullAuthHeader(req));
+        assertEquals("Authorization: " + basicVal, service.extractAuthHeader(req));
 
         List<AuthItem_littlespidy> items = service.extractAll(req);
         assertEquals(1, items.size());
         assertEquals("Auth Header", items.get(0).getType());
-        assertEquals(basicVal, items.get(0).getValue());
+        assertEquals("Authorization: " + basicVal, items.get(0).getValue());
     }
 
     @Test

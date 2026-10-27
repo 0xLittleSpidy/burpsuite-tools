@@ -75,7 +75,7 @@ public class AuthTokenExtractorService_littlespidy {
                 }
             }
 
-            items.add(new AuthItem_littlespidy("Auth Header", "Authorization", authHeaderValue));
+            items.add(new AuthItem_littlespidy("Auth Header", "Authorization", "Authorization: " + authHeaderValue));
         }
 
         // Process Cookie header
@@ -129,17 +129,17 @@ public class AuthTokenExtractorService_littlespidy {
      * Extracts pure Bearer token without scheme prefix if present.
      */
     public String extractBearerToken(HttpRequest request) {
-        String authHeader = extractAuthHeader(request);
-        if (authHeader != null && authHeader.regionMatches(true, 0, "Bearer ", 0, 7)) {
-            return authHeader.substring(7).trim();
+        String authValue = extractAuthHeaderValue(request);
+        if (authValue != null && authValue.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return authValue.substring(7).trim();
         }
         return null;
     }
 
     /**
-     * Extracts the raw Authorization header value if present.
+     * Extracts the raw Authorization header value (without 'Authorization: ' prefix).
      */
-    public String extractAuthHeader(HttpRequest request) {
+    public String extractAuthHeaderValue(HttpRequest request) {
         if (request == null) {
             return null;
         }
@@ -153,6 +153,24 @@ public class AuthTokenExtractorService_littlespidy {
         } catch (Exception ignored) {
         }
         return null;
+    }
+
+    /**
+     * Extracts the complete Authorization header including 'Authorization: ' prefix.
+     */
+    public String extractFullAuthHeader(HttpRequest request) {
+        String val = extractAuthHeaderValue(request);
+        if (val != null && !val.isEmpty()) {
+            return "Authorization: " + val;
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the Authorization header with 'Authorization: ' prefix.
+     */
+    public String extractAuthHeader(HttpRequest request) {
+        return extractFullAuthHeader(request);
     }
 
     /**
