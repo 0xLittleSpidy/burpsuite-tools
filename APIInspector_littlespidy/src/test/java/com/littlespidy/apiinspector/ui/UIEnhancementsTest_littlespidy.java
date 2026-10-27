@@ -235,10 +235,12 @@ public class UIEnhancementsTest_littlespidy {
         assertEquals("API Import", tabbedPane.getTitleAt(0));
         assertEquals("Request & Response Viewer", tabbedPane.getTitleAt(1));
         assertEquals("Parameter Collector", tabbedPane.getTitleAt(2));
-        assertEquals("Auth Analyzer", tabbedPane.getTitleAt(3));
-        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(4));
-        assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(5));
-        assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(6));
+        assertEquals("Auth Analyzer Config", tabbedPane.getTitleAt(3));
+        assertEquals("Auth Analyzer", tabbedPane.getTitleAt(4));
+        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(5));
+        assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(6));
+        assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(7));
+        assertEquals("Hidden API Storage", tabbedPane.getTitleAt(8));
     }
 
     @Test
@@ -319,7 +321,9 @@ public class UIEnhancementsTest_littlespidy {
     @Test
     @DisplayName("Verify Authenticated Testing multiple profiles, no unauth prompt on creation, and unauth toggle position")
     public void testAuthenticatedTestingEnhancements() throws Exception {
-        AuthTestingTab_littlespidy authTab = new AuthTestingTab_littlespidy(mockApi);
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        AuthAnalyzerConfigTab_littlespidy configTab = rootTab.getAuthAnalyzerConfigTab();
+        AuthTestingTab_littlespidy authTab = rootTab.getAuthTestingTab();
 
         // 1. Verify Unauth Compare checkbox is NOT in AuthProfileDialog
         Field unauthCheckField = null;
@@ -331,9 +335,9 @@ public class UIEnhancementsTest_littlespidy {
         assertNull(unauthCheckField, "unauthCompareCheck should be removed from AuthProfileDialog");
 
         // 2. Verify profiles table columns: {"Test", "Profile Name", "Credentials / Details"} (Auth Type removed)
-        Field profileTableField = AuthTestingTab_littlespidy.class.getDeclaredField("profileTable");
+        Field profileTableField = AuthAnalyzerConfigTab_littlespidy.class.getDeclaredField("profileTable");
         profileTableField.setAccessible(true);
-        JTable profileTable = (JTable) profileTableField.get(authTab);
+        JTable profileTable = (JTable) profileTableField.get(configTab);
         assertEquals(3, profileTable.getColumnCount());
         assertEquals("Test", profileTable.getColumnName(0));
         assertEquals("Profile Name", profileTable.getColumnName(1));
@@ -349,17 +353,17 @@ public class UIEnhancementsTest_littlespidy {
         authTab.setProfiles(List.of(p1, p2));
         assertEquals(2, authTab.getActiveProfiles().size());
 
-        // 4. Verify Delete Runner button and Status Filter Dropdown are present, Run button renamed to Attack
+        // 4. Verify Delete Runner button and Status Filter Dropdown are present, Attack button is present on Config tab
         Field deleteRunnerBtnField = AuthTestingTab_littlespidy.class.getDeclaredField("deleteRunnerBtn");
         deleteRunnerBtnField.setAccessible(true);
         JButton deleteRunnerBtn = (JButton) deleteRunnerBtnField.get(authTab);
         assertNotNull(deleteRunnerBtn);
         assertEquals("Delete Runner", deleteRunnerBtn.getText());
 
-        Field runAllBtnField = AuthTestingTab_littlespidy.class.getDeclaredField("runAllBtn");
-        runAllBtnField.setAccessible(true);
-        JButton runAllBtn = (JButton) runAllBtnField.get(authTab);
-        assertEquals("Attack", runAllBtn.getText());
+        Field attackBtnField = AuthAnalyzerConfigTab_littlespidy.class.getDeclaredField("attackBtn");
+        attackBtnField.setAccessible(true);
+        JButton attackBtn = (JButton) attackBtnField.get(configTab);
+        assertEquals("Attack", attackBtn.getText());
 
         Field statusFilterField = AuthTestingTab_littlespidy.class.getDeclaredField("statusFilterDropDown");
         statusFilterField.setAccessible(true);
@@ -884,7 +888,9 @@ public class UIEnhancementsTest_littlespidy {
     @Test
     @DisplayName("Verify modeless profile dialog and runner history tracking in AuthTestingTab")
     public void testModelessProfileDialogAndRunnerHistory() throws Exception {
-        AuthTestingTab_littlespidy tab = new AuthTestingTab_littlespidy(mockApi);
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        AuthAnalyzerConfigTab_littlespidy configTab = rootTab.getAuthAnalyzerConfigTab();
+        AuthTestingTab_littlespidy tab = rootTab.getAuthTestingTab();
 
         // 1. Verify Modeless dialog if non-headless
         if (!GraphicsEnvironment.isHeadless()) {
@@ -895,10 +901,10 @@ public class UIEnhancementsTest_littlespidy {
             assertEquals(Dialog.ModalityType.MODELESS, dialog.getModalityType(), "Profile dialog must be modeless");
         }
 
-        // 2. Verify Runner Name field and Runner Combo
-        Field runnerNameFieldF = AuthTestingTab_littlespidy.class.getDeclaredField("runnerNameField");
+        // 2. Verify Runner Name field in config tab and Runner Combo in results tab
+        Field runnerNameFieldF = AuthAnalyzerConfigTab_littlespidy.class.getDeclaredField("runnerNameField");
         runnerNameFieldF.setAccessible(true);
-        JTextField runnerNameField = (JTextField) runnerNameFieldF.get(tab);
+        JTextField runnerNameField = (JTextField) runnerNameFieldF.get(configTab);
         assertNotNull(runnerNameField);
         assertEquals("Runner 1", runnerNameField.getText());
 
@@ -982,6 +988,46 @@ public class UIEnhancementsTest_littlespidy {
         // Add User 403 to row and verify it now matches
         row.getProfileResults().put("User", r4);
         assertTrue(dropDown.matches(row));
+    }
+
+    @Test
+    @DisplayName("Verify Auth Analyzer tab split into Config and Attack tabs and auto-switching")
+    public void testAuthAnalyzerTabSplitAndSwitching() throws Exception {
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        AuthAnalyzerConfigTab_littlespidy configTab = rootTab.getAuthAnalyzerConfigTab();
+        AuthTestingTab_littlespidy attackTab = rootTab.getAuthTestingTab();
+
+        assertNotNull(configTab, "AuthAnalyzerConfigTab must be instantiated");
+        assertNotNull(attackTab, "AuthTestingTab must be instantiated");
+
+        Field rootTabbedPaneField = APIInspectorTab_littlespidy.class.getDeclaredField("rootTabbedPane");
+        rootTabbedPaneField.setAccessible(true);
+        JTabbedPane tabbedPane = (JTabbedPane) rootTabbedPaneField.get(rootTab);
+
+        assertEquals(configTab, tabbedPane.getComponentAt(3), "Tab 3 must be config tab");
+        assertEquals("Auth Analyzer Config", tabbedPane.getTitleAt(3));
+        assertEquals(attackTab, tabbedPane.getComponentAt(4), "Tab 4 must be attack tab");
+        assertEquals("Auth Analyzer", tabbedPane.getTitleAt(4));
+
+        // Test switchToAuthAnalyzer
+        tabbedPane.setSelectedIndex(3);
+        assertEquals(3, tabbedPane.getSelectedIndex());
+        rootTab.switchToAuthAnalyzer();
+        assertEquals(4, tabbedPane.getSelectedIndex(), "switchToAuthAnalyzer must activate Tab 4 (Auth Analyzer)");
+
+        // Test delegation of profiles
+        AuthProfile_littlespidy p1 = new AuthProfile_littlespidy("Admin", AuthType_littlespidy.BEARER_TOKEN);
+        attackTab.setProfiles(List.of(p1));
+        assertEquals(1, configTab.getAllProfiles().size());
+        assertEquals(1, attackTab.getAllProfiles().size());
+        assertEquals("Admin", attackTab.getAllProfiles().get(0).getName());
+
+        // Test runner counter delegation
+        configTab.setRunnerCounter(5);
+        assertEquals(5, attackTab.getRunnerCounter());
+        attackTab.clearAllRunners();
+        assertEquals(1, configTab.getRunnerCounter());
+        assertEquals(1, attackTab.getRunnerCounter());
     }
 
     private static List<Component> getAllComponents(Container c) {

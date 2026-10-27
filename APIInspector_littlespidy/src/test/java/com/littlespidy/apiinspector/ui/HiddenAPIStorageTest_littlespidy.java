@@ -177,14 +177,14 @@ public class HiddenAPIStorageTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify APIInspectorTab integrates Hidden API Storage as 8th Suite Tab")
+    @DisplayName("Verify APIInspectorTab integrates Hidden API Storage as 9th Suite Tab")
     public void testAPIInspectorTabIntegration() {
         APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(null);
         assertNotNull(rootTab.getHiddenApiStorageTab(), "Hidden API Storage tab must be instantiated and exposed");
 
         JTabbedPane pane = (JTabbedPane) rootTab.getComponent(1);
-        assertEquals(8, pane.getTabCount(), "Suite tabbed pane must contain 8 tabs");
-        assertEquals("Hidden API Storage", pane.getTitleAt(7));
+        assertEquals(9, pane.getTabCount(), "Suite tabbed pane must contain 9 tabs");
+        assertEquals("Hidden API Storage", pane.getTitleAt(8));
     }
 
     private static JSplitPane findHorizontalSplitPane(Container container) {

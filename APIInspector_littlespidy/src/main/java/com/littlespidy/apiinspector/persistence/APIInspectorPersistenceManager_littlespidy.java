@@ -827,6 +827,9 @@ public class APIInspectorPersistenceManager_littlespidy {
 
         // Resync profile selections across tabs
         rootTab.getImportTab().updateAvailableProfiles(rootTab.getAuthTestingTab().getAllProfiles());
+        if (rootTab.getAuthAnalyzerConfigTab() != null) {
+            rootTab.getAuthAnalyzerConfigTab().refreshCollectionsCombo();
+        }
         rootTab.getAuthTestingTab().refreshCollectionsCombo();
     }
 

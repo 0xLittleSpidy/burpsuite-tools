@@ -1,0 +1,721 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth Analyzer Split Tabs UI Preview - littlespidy</title>
+  <style>
+    :root {
+      --bg-primary: #2b2b2b;
+      --bg-secondary: #3c3f41;
+      --bg-tertiary: #1e1e1e;
+      --text-primary: #bbbbbb;
+      --text-highlight: #ffffff;
+      --text-muted: #888888;
+      --border-color: #555555;
+      --accent: #ff6633;
+      --accent-hover: #e65522;
+      --btn-bg: #4c5052;
+      --btn-hover: #5c6164;
+      --table-stripe: #313335;
+      --table-select: #2d5a88;
+      --status-diff: #499c54;
+      --status-same: #c75450;
+      --status-similar: #e59866;
+      --code-bg: #1e1e1e;
+    }
+
+    body.light-theme {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #fafafa;
+      --text-primary: #333333;
+      --text-highlight: #000000;
+      --text-muted: #666666;
+      --border-color: #d0d0d0;
+      --accent: #e05510;
+      --accent-hover: #c9490b;
+      --btn-bg: #e4e4e4;
+      --btn-hover: #d5d5d5;
+      --table-stripe: #f9f9f9;
+      --table-select: #b3d7ff;
+      --status-diff: #2e7d32;
+      --status-same: #c62828;
+      --status-similar: #d84315;
+      --code-bg: #f8f8f8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .title-area h1 {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--accent);
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .title-area span {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    button, select, input {
+      background-color: var(--btn-bg);
+      color: var(--text-highlight);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    button:hover {
+      background-color: var(--btn-hover);
+    }
+
+    button.primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+
+    button.primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 8px 14px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-weight: normal;
+      white-space: nowrap;
+      border-radius: 0;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--btn-bg);
+      color: var(--text-highlight);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      font-weight: bold;
+      background-color: var(--bg-primary);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 10px 0;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .titled-box {
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: var(--bg-secondary);
+    }
+
+    .titled-box legend {
+      font-weight: bold;
+      color: var(--text-highlight);
+      padding: 0 6px;
+      font-size: 11px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 5px 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--btn-bg);
+      color: var(--text-highlight);
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--table-stripe);
+    }
+
+    tr.selected {
+      background-color: var(--table-select) !important;
+      color: #ffffff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .badge-diff { background-color: var(--status-diff); }
+    .badge-same { background-color: var(--status-same); }
+    .badge-similar { background-color: var(--status-similar); }
+
+    .flex-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .flex-grow {
+      flex: 1;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      height: 14px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--accent);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .inspector-pane {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      height: 280px;
+    }
+
+    .inspector-col {
+      border: 1px solid var(--border-color);
+      background-color: var(--code-bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inspector-header {
+      background-color: var(--btn-bg);
+      padding: 4px 8px;
+      font-weight: bold;
+      color: var(--text-highlight);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .inspector-body {
+      padding: 8px;
+      overflow: auto;
+      flex: 1;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+    }
+
+    .dropdown-check-list {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-check-list .items {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px;
+      min-width: 180px;
+      z-index: 100;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .dropdown-check-list.visible .items {
+      display: block;
+    }
+
+    .dropdown-check-list .items label {
+      display: block;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-area">
+      <h1>API Inspector</h1>
+      <span>Burp Suite Extension - Auth Analyzer Tab Split (littlespidy)</span>
+    </div>
+    <div class="header-actions">
+      <button id="themeToggleBtn" onclick="toggleTheme()">Switch to Light Theme</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs (Mirroring Burp Suite Extension Root Tabs) -->
+  <div class="tabs-nav">
+    <button class="tab-btn" onclick="showRootTab('apiImport')">API Import</button>
+    <button class="tab-btn" onclick="showRootTab('reqViewer')">Request & Response Viewer</button>
+    <button class="tab-btn" onclick="showRootTab('paramCollector')">Parameter Collector</button>
+    <button class="tab-btn active" id="configTabNav" onclick="showRootTab('authConfig')">Auth Analyzer Config</button>
+    <button class="tab-btn" id="attackTabNav" onclick="showRootTab('authAttack')">Auth Analyzer</button>
+    <button class="tab-btn" onclick="showRootTab('versionFinder')">REST API Version Finder</button>
+    <button class="tab-btn" onclick="showRootTab('docStrategy')">API Documentation Strategy</button>
+    <button class="tab-btn" onclick="showRootTab('discoveryStrategy')">API Endpoint Discovery Strategy</button>
+    <button class="tab-btn" onclick="showRootTab('hiddenStorage')">Hidden API Storage</button>
+  </div>
+
+  <!-- Tab 1: Auth Analyzer Config -->
+  <div id="authConfig" class="tab-content active">
+
+    <!-- Section 1: Authentication Profiles -->
+    <fieldset class="titled-box">
+      <legend>Authentication Profiles</legend>
+      <div style="max-height: 140px; overflow-y: auto;">
+        <table id="profileTable">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">Test</th>
+              <th style="width: 220px;">Profile Name</th>
+              <th>Credentials / Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td style="text-align: center;"><input type="checkbox" checked onchange="toggleProfile(this, 'Admin Profile')"></td>
+              <td><strong>Admin Profile</strong></td>
+              <td>Authorization: Bearer adm...99</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><input type="checkbox" checked onchange="toggleProfile(this, 'User Profile')"></td>
+              <td><strong>User Profile</strong></td>
+              <td>Cookie: sessionid=usr...21</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><input type="checkbox" checked onchange="toggleProfile(this, 'Unauthenticated')"></td>
+              <td><strong>Unauthenticated</strong></td>
+              <td>Unauth (Strip: Authorization, Cookie)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex-row" style="margin-top: 8px;">
+        <button onclick="alert('New Profile dialog opened')">New Profile</button>
+        <button onclick="alert('Edit Profile dialog opened')">Edit Profile</button>
+        <button onclick="alert('Profile duplicated')">Duplicate</button>
+        <button onclick="alert('Profile deleted')">Delete</button>
+      </div>
+    </fieldset>
+
+    <!-- Section 2: Endpoints to Test -->
+    <fieldset class="titled-box">
+      <legend>Endpoints to Test</legend>
+      <div class="flex-row" style="margin-bottom: 6px;">
+        <label for="collectionSelect"><strong>Target Collection:</strong></label>
+        <select id="collectionSelect" onchange="updateCollectionEndpoints()">
+          <option value="all">All Collections (4 endpoints)</option>
+          <option value="col1">Order Service API (2 endpoints)</option>
+          <option value="col2">User Management API (2 endpoints)</option>
+        </select>
+        <button onclick="updateCollectionEndpoints()">Refresh</button>
+        <div style="margin-left: auto;">
+          <button onclick="selectAllEndpoints(true)">Select All</button>
+          <button onclick="selectAllEndpoints(false)">Deselect All</button>
+        </div>
+      </div>
+      <div style="max-height: 180px; overflow-y: auto;">
+        <table id="endpointsTable">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">Sel</th>
+              <th style="width: 70px;">Method</th>
+              <th style="width: 280px;">Path</th>
+              <th>Summary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><input type="checkbox" checked class="ep-check"></td>
+              <td><span class="badge" style="background:#28a745;">GET</span></td>
+              <td><code>/api/v1/orders</code></td>
+              <td>Retrieve order list for current tenant</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><input type="checkbox" checked class="ep-check"></td>
+              <td><span class="badge" style="background:#ffc107; color:#000;">POST</span></td>
+              <td><code>/api/v1/orders/checkout</code></td>
+              <td>Submit order for processing</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><input type="checkbox" checked class="ep-check"></td>
+              <td><span class="badge" style="background:#28a745;">GET</span></td>
+              <td><code>/api/v1/admin/users</code></td>
+              <td>List all user accounts in domain</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><input type="checkbox" checked class="ep-check"></td>
+              <td><span class="badge" style="background:#dc3545;">DELETE</span></td>
+              <td><code>/api/v1/admin/users/12</code></td>
+              <td>Delete user account by identifier</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+
+    <!-- Section 3: Attack Execution Controls -->
+    <fieldset class="titled-box">
+      <legend>Attack Execution Controls</legend>
+      <div class="flex-row">
+        <label>Threads: <input type="number" id="threads" value="5" min="1" max="50" style="width: 55px;"></label>
+        <label>Delay (ms): <input type="number" id="delay" value="100" min="0" step="50" style="width: 65px;"></label>
+        <label>Runner Name: <input type="text" id="runnerNameInput" value="Runner 1" style="width: 140px;"></label>
+        <button id="attackBtn" class="primary" onclick="launchAttack()">Attack</button>
+        <button id="testSelectedBtn" onclick="launchAttack()">Test Selected</button>
+        <button id="cancelBtn" disabled onclick="cancelAttack()">Cancel</button>
+      </div>
+      <div class="progress-bar-container">
+        <div id="progressFill" class="progress-bar-fill"></div>
+      </div>
+      <div id="progressStatus" style="margin-top: 4px; color: var(--text-muted); font-size: 11px;">
+        Ready to launch attack. Clicking Attack will switch to the Auth Analyzer tab and display real-time results.
+      </div>
+    </fieldset>
+
+  </div>
+
+  <!-- Tab 2: Auth Analyzer (Attack / Results Tab) -->
+  <div id="authAttack" class="tab-content">
+
+    <!-- Top Toolbar: Runner & Filters -->
+    <div class="titled-box flex-row" style="margin-bottom: 8px;">
+      <label><strong>Runner:</strong></label>
+      <select id="runnerSelect" onchange="switchRunner(this.value)">
+        <option value="run1">Runner 1 (4 endpoints, 8 tests)</option>
+        <option value="run2">Runner 2 (2 endpoints, 4 tests)</option>
+      </select>
+      <button onclick="deleteCurrentRunner()">Delete Runner</button>
+
+      <div style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 4px;"></div>
+
+      <label>Outcome Filter:</label>
+      <select id="outcomeFilter" onchange="filterResults()">
+        <option value="all">All Outcomes</option>
+        <option value="DIFFERENT">Different</option>
+        <option value="SAME">Same</option>
+        <option value="SIMILAR">Similar</option>
+      </select>
+
+      <div class="dropdown-check-list" id="statusFilterDropdown">
+        <button onclick="toggleDropdownList()">Filter Status... [2/4]</button>
+        <div class="items">
+          <label><input type="checkbox" checked onchange="filterResults()"> Admin - 200</label>
+          <label><input type="checkbox" checked onchange="filterResults()"> Admin - 404</label>
+          <label><input type="checkbox" checked onchange="filterResults()"> User - 200</label>
+          <label><input type="checkbox" checked onchange="filterResults()"> User - 403</label>
+        </div>
+      </div>
+
+      <button onclick="resetFilters()">Clear Filters</button>
+
+      <div style="margin-left: auto;" class="flex-row">
+        <button onclick="alert('Exported results to CSV')">Export CSV</button>
+        <button onclick="alert('Exported results to JSON')">Export JSON</button>
+      </div>
+    </div>
+
+    <!-- Comparative Results Table -->
+    <div style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); background-color: var(--bg-secondary);">
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th style="width: 140px;">Collection</th>
+            <th style="width: 60px;">Method</th>
+            <th style="width: 200px;">Path</th>
+            <th style="width: 80px;">Admin Code</th>
+            <th style="width: 100px;">Admin Outcome</th>
+            <th style="width: 80px;">User Code</th>
+            <th style="width: 100px;">User Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected" onclick="selectResultRow(this, 'orders')">
+            <td>Order Service API</td>
+            <td><span class="badge" style="background:#28a745;">GET</span></td>
+            <td><code>/api/v1/orders</code></td>
+            <td><span class="badge" style="background:#28a745;">200 OK</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+            <td><span class="badge" style="background:#28a745;">200 OK</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+          </tr>
+          <tr onclick="selectResultRow(this, 'checkout')">
+            <td>Order Service API</td>
+            <td><span class="badge" style="background:#ffc107; color:#000;">POST</span></td>
+            <td><code>/api/v1/orders/checkout</code></td>
+            <td><span class="badge" style="background:#28a745;">200 OK</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+            <td><span class="badge" style="background:#dc3545;">403 Forbidden</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+          </tr>
+          <tr onclick="selectResultRow(this, 'adminUsers')">
+            <td>User Management API</td>
+            <td><span class="badge" style="background:#28a745;">GET</span></td>
+            <td><code>/api/v1/admin/users</code></td>
+            <td><span class="badge" style="background:#28a745;">200 OK</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+            <td><span class="badge" style="background:#dc3545;">403 Forbidden</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+          </tr>
+          <tr onclick="selectResultRow(this, 'deleteUser')">
+            <td>User Management API</td>
+            <td><span class="badge" style="background:#dc3545;">DELETE</span></td>
+            <td><code>/api/v1/admin/users/12</code></td>
+            <td><span class="badge" style="background:#28a745;">200 OK</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+            <td><span class="badge" style="background:#dc3545;">403 Forbidden</span></td>
+            <td><span class="badge badge-diff">DIFFERENT</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Comparative Side-by-Side HTTP Message Inspector -->
+    <div class="inspector-pane">
+      <div class="inspector-col">
+        <div class="inspector-header">
+          <span>Admin Profile - Request & Response</span>
+          <div class="flex-row">
+            <button onclick="setInspectorView('admin', 'req')">Request</button>
+            <button onclick="setInspectorView('admin', 'resp')">Response</button>
+          </div>
+        </div>
+        <div id="adminInspectorBody" class="inspector-body">GET /api/v1/orders HTTP/1.1
+Host: api.target.local
+Authorization: Bearer admin-super-secret-token-12345
+Accept: application/json
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 124
+
+[
+  {"id": 101, "total": 99.00, "status": "COMPLETED"},
+  {"id": 102, "total": 240.50, "status": "PENDING"}
+]</div>
+      </div>
+
+      <div class="inspector-col">
+        <div class="inspector-header">
+          <span>User Profile - Request & Response</span>
+          <div class="flex-row">
+            <button onclick="setInspectorView('user', 'req')">Request</button>
+            <button onclick="setInspectorView('user', 'resp')">Response</button>
+          </div>
+        </div>
+        <div id="userInspectorBody" class="inspector-body">GET /api/v1/orders HTTP/1.1
+Host: api.target.local
+Cookie: sessionid=user-normal-session-67890
+Accept: application/json
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 68
+
+[
+  {"id": 201, "total": 15.00, "status": "DELIVERED"}
+]</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Other Suite Tabs (Mock Placeholders) -->
+  <div id="apiImport" class="tab-content"><div class="titled-box">API Import Tab Content</div></div>
+  <div id="reqViewer" class="tab-content"><div class="titled-box">Request & Response Viewer Content</div></div>
+  <div id="paramCollector" class="tab-content"><div class="titled-box">Parameter Collector Content</div></div>
+  <div id="versionFinder" class="tab-content"><div class="titled-box">REST API Version Finder Content</div></div>
+  <div id="docStrategy" class="tab-content"><div class="titled-box">API Documentation Strategy Content</div></div>
+  <div id="discoveryStrategy" class="tab-content"><div class="titled-box">API Endpoint Discovery Strategy Content</div></div>
+  <div id="hiddenStorage" class="tab-content"><div class="titled-box">Hidden API Storage Content</div></div>
+
+  <script>
+    // Tab switching logic
+    function showRootTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.add('active');
+      }
+
+      if (tabId === 'authConfig') {
+        document.getElementById('configTabNav').classList.add('active');
+      } else if (tabId === 'authAttack') {
+        document.getElementById('attackTabNav').classList.add('active');
+      }
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById('themeToggleBtn');
+      if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        btn.textContent = 'Switch to Light Theme';
+      } else {
+        body.classList.add('light-theme');
+        btn.textContent = 'Switch to Dark Theme';
+      }
+    }
+
+    // Select all endpoints
+    function selectAllEndpoints(checked) {
+      document.querySelectorAll('.ep-check').forEach(cb => cb.checked = checked);
+    }
+
+    // Dropdown list toggle
+    function toggleDropdownList() {
+      const dd = document.getElementById('statusFilterDropdown');
+      dd.classList.toggle('visible');
+    }
+
+    // Launch attack simulation with auto-switch
+    let attackTimer = null;
+    function launchAttack() {
+      const runnerName = document.getElementById('runnerNameInput').value || 'Runner 1';
+      document.getElementById('progressStatus').textContent = 'Launching attack for: ' + runnerName + '... Switching to Auth Analyzer tab';
+      const fill = document.getElementById('progressFill');
+      fill.style.width = '10%';
+
+      document.getElementById('attackBtn').disabled = true;
+      document.getElementById('testSelectedBtn').disabled = true;
+      document.getElementById('cancelBtn').disabled = false;
+
+      // Auto switch to Auth Analyzer results tab
+      setTimeout(() => {
+        showRootTab('authAttack');
+      }, 400);
+
+      let step = 10;
+      attackTimer = setInterval(() => {
+        step += 25;
+        if (step > 100) {
+          clearInterval(attackTimer);
+          fill.style.width = '100%';
+          document.getElementById('progressStatus').textContent = 'Attack completed for ' + runnerName + '. 4/4 endpoints completed.';
+          document.getElementById('attackBtn').disabled = false;
+          document.getElementById('testSelectedBtn').disabled = false;
+          document.getElementById('cancelBtn').disabled = true;
+          // Increment runner counter
+          const num = parseInt(runnerName.replace(/[^0-9]/g, '')) || 1;
+          document.getElementById('runnerNameInput').value = 'Runner ' + (num + 1);
+        } else {
+          fill.style.width = step + '%';
+          document.getElementById('progressStatus').textContent = 'Running attack ' + step + '%...';
+        }
+      }, 400);
+    }
+
+    function cancelAttack() {
+      if (attackTimer) {
+        clearInterval(attackTimer);
+        attackTimer = null;
+      }
+      document.getElementById('progressStatus').textContent = 'Attack cancelled by user.';
+      document.getElementById('attackBtn').disabled = false;
+      document.getElementById('testSelectedBtn').disabled = false;
+      document.getElementById('cancelBtn').disabled = true;
+    }
+
+    function switchRunner(val) {
+      console.log('Switched to runner:', val);
+    }
+
+    function deleteCurrentRunner() {
+      if (confirm('Delete current runner results?')) {
+        alert('Runner deleted.');
+      }
+    }
+
+    function filterResults() {
+      console.log('Filters applied');
+    }
+
+    function resetFilters() {
+      document.getElementById('outcomeFilter').value = 'all';
+      filterResults();
+    }
+
+    function selectResultRow(row, key) {
+      document.querySelectorAll('#resultsTable tbody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+    }
+
+    function setInspectorView(profile, view) {
+      console.log(profile, view);
+    }
+  </script>
+</body>
+</html>

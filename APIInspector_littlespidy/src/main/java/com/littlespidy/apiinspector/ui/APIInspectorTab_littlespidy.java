@@ -23,6 +23,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
     private final APIImportTab_littlespidy importTab;
     private final ParameterCollectorTab_littlespidy parameterCollectorTab;
     private final RequestResponseViewerTab_littlespidy requestResponseViewerTab;
+    private final AuthAnalyzerConfigTab_littlespidy authAnalyzerConfigTab;
     private final AuthTestingTab_littlespidy authTestingTab;
     private final IntruderStrategyTrackingTab_littlespidy docStrategyTab;
     private final IntruderStrategyTrackingTab_littlespidy endpointDiscoveryTab;
@@ -38,10 +39,14 @@ public class APIInspectorTab_littlespidy extends JPanel {
         this.parameterCollectorTab = new ParameterCollectorTab_littlespidy();
         this.requestResponseViewerTab = new RequestResponseViewerTab_littlespidy(api);
         this.authTestingTab = new AuthTestingTab_littlespidy(api);
+        this.authAnalyzerConfigTab = new AuthAnalyzerConfigTab_littlespidy(api, this.authTestingTab);
         this.docStrategyTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Documentation Intruder Strategy");
         this.endpointDiscoveryTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Endpoint Discovery Intruder Strategy");
         this.hiddenStorageTab = new HiddenAPIStorageTab_littlespidy(api);
 
+        this.authAnalyzerConfigTab.setRootTab(this);
+        this.authAnalyzerConfigTab.setImportTabRef(this.importTab);
+        this.authTestingTab.setConfigTab(this.authAnalyzerConfigTab);
         this.authTestingTab.setImportTabRef(this.importTab);
 
         // Parameter double click navigates directly to exact request in Request & Response Viewer tab
@@ -78,6 +83,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
         this.importTab.addStateChangedListener(() -> {
             parameterCollectorTab.updateCollections(importTab.getAllCollections());
             requestResponseViewerTab.updateCollections(importTab.getAllCollections());
+            authAnalyzerConfigTab.refreshCollectionsCombo();
             authTestingTab.refreshCollectionsCombo();
         });
 
@@ -88,6 +94,8 @@ public class APIInspectorTab_littlespidy extends JPanel {
                 parameterCollectorTab.updateCollections(importTab.getAllCollections());
             } else if (selected == requestResponseViewerTab) {
                 requestResponseViewerTab.updateCollections(importTab.getAllCollections());
+            } else if (selected == authAnalyzerConfigTab) {
+                authAnalyzerConfigTab.refreshCollectionsCombo();
             } else if (selected == authTestingTab) {
                 authTestingTab.refreshCollectionsCombo();
             }
@@ -96,6 +104,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
         rootTabbedPane.addTab("API Import", importTab);
         rootTabbedPane.addTab("Request & Response Viewer", requestResponseViewerTab);
         rootTabbedPane.addTab("Parameter Collector", parameterCollectorTab);
+        rootTabbedPane.addTab("Auth Analyzer Config", authAnalyzerConfigTab);
         rootTabbedPane.addTab("Auth Analyzer", authTestingTab);
         rootTabbedPane.addTab("REST API Version Finder", versionFinderTab);
         rootTabbedPane.addTab("API Documentation Strategy", docStrategyTab);
@@ -162,6 +171,16 @@ public class APIInspectorTab_littlespidy extends JPanel {
 
     public AuthTestingTab_littlespidy getAuthTestingTab() {
         return authTestingTab;
+    }
+
+    public AuthAnalyzerConfigTab_littlespidy getAuthAnalyzerConfigTab() {
+        return authAnalyzerConfigTab;
+    }
+
+    public void switchToAuthAnalyzer() {
+        if (rootTabbedPane != null && authTestingTab != null) {
+            rootTabbedPane.setSelectedComponent(authTestingTab);
+        }
     }
 
     public IntruderStrategyTrackingTab_littlespidy getDocStrategyTab() {
