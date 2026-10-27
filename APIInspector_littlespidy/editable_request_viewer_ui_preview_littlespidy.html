@@ -979,22 +979,37 @@
             const colSelect = document.getElementById("modal-collection-select");
             const targetCol = colSelect ? colSelect.value : ep.collection;
 
-            // 1. Gather all unique parameters from selected collection(s) (Matching Parameter Collector)
+            // 1. Gather all unique parameters and sample values from selected collection(s) (Matching Parameter Collector)
             const targetEndpoints = targetCol === "ALL" 
                 ? sampleEndpoints 
                 : sampleEndpoints.filter(e => e.collection === targetCol);
 
-            const discoveredPath = new Set();
-            const discoveredQuery = new Set();
-            const discoveredBody = new Set();
+            const discoveredPath = new Map();
+            const discoveredQuery = new Map();
+            const discoveredBody = new Map();
 
             targetEndpoints.forEach(item => {
-                Object.keys(item.pathParams || {}).forEach(k => discoveredPath.add(k));
-                Object.keys(item.queryParams || {}).forEach(k => discoveredQuery.add(k));
-                Object.keys(item.bodyParams || {}).forEach(k => discoveredBody.add(k));
+                Object.keys(item.pathParams || {}).forEach(k => {
+                    const v = item.pathParams[k];
+                    if (!discoveredPath.has(k) || (!discoveredPath.get(k) && v && !v.includes('{') && !v.includes(':'))) {
+                        discoveredPath.set(k, (v && !v.includes('{') && !v.includes(':')) ? v : '');
+                    }
+                });
+                Object.keys(item.queryParams || {}).forEach(k => {
+                    const v = item.queryParams[k];
+                    if (!discoveredQuery.has(k) || (!discoveredQuery.get(k) && v)) {
+                        discoveredQuery.set(k, v || '');
+                    }
+                });
+                Object.keys(item.bodyParams || {}).forEach(k => {
+                    const v = item.bodyParams[k];
+                    if (!discoveredBody.has(k) || (!discoveredBody.get(k) && v)) {
+                        discoveredBody.set(k, v || '');
+                    }
+                });
             });
 
-            // 2. Populate Path Parameters (Active first, then collection-wide Empty)
+            // 2. Populate Path Parameters (Active first, then collection-wide sample values)
             const pathBody = document.getElementById("params-path-body");
             pathBody.innerHTML = "";
             let pathEmpty = 0;
@@ -1005,19 +1020,23 @@
             Object.keys(ep.pathParams || {}).forEach(k => {
                 renderedPath.add(k);
                 pathTotal++;
-                const val = ep.pathParams[k] || "";
+                let val = ep.pathParams[k] || "";
+                if ((!val || val.includes("{") || val.includes(":")) && discoveredPath.get(k)) {
+                    val = discoveredPath.get(k);
+                }
                 const isEmpty = !val || val.includes("{") || val.includes(":");
                 if (isEmpty) pathEmpty++;
                 appendParamRow(pathBody, "path", k, val, isEmpty, "string");
             });
 
             // Collection-wide discovered path params
-            discoveredPath.forEach(k => {
+            discoveredPath.forEach((sampleVal, k) => {
                 if (!renderedPath.has(k)) {
                     renderedPath.add(k);
                     pathTotal++;
-                    pathEmpty++;
-                    appendParamRow(pathBody, "path", k, "", true, "string");
+                    const isEmpty = !sampleVal;
+                    if (isEmpty) pathEmpty++;
+                    appendParamRow(pathBody, "path", k, sampleVal, isEmpty, "string");
                 }
             });
 
@@ -1027,7 +1046,7 @@
                 document.getElementById("count-path").innerText = "0";
             }
 
-            // 3. Populate Query Parameters (Active first, then collection-wide Empty)
+            // 3. Populate Query Parameters (Active first, then collection-wide sample values)
             const queryBody = document.getElementById("params-query-body");
             queryBody.innerHTML = "";
             let queryEmpty = 0;
@@ -1037,18 +1056,22 @@
             Object.keys(ep.queryParams || {}).forEach(k => {
                 renderedQuery.add(k);
                 queryTotal++;
-                const val = ep.queryParams[k] || "";
+                let val = ep.queryParams[k] || "";
+                if (!val && discoveredQuery.get(k)) {
+                    val = discoveredQuery.get(k);
+                }
                 const isEmpty = !val;
                 if (isEmpty) queryEmpty++;
                 appendParamRow(queryBody, "query", k, val, isEmpty, "string");
             });
 
-            discoveredQuery.forEach(k => {
+            discoveredQuery.forEach((sampleVal, k) => {
                 if (!renderedQuery.has(k)) {
                     renderedQuery.add(k);
                     queryTotal++;
-                    queryEmpty++;
-                    appendParamRow(queryBody, "query", k, "", true, "string");
+                    const isEmpty = !sampleVal;
+                    if (isEmpty) queryEmpty++;
+                    appendParamRow(queryBody, "query", k, sampleVal, isEmpty, "string");
                 }
             });
 
@@ -1058,7 +1081,7 @@
                 document.getElementById("count-query").innerText = "0";
             }
 
-            // 4. Populate Body Parameters (Active first, then collection-wide Empty)
+            // 4. Populate Body Parameters (Active first, then collection-wide sample values)
             const bodyBody = document.getElementById("params-body-body");
             bodyBody.innerHTML = "";
             let bodyEmpty = 0;
@@ -1068,18 +1091,22 @@
             Object.keys(ep.bodyParams || {}).forEach(k => {
                 renderedBody.add(k);
                 bodyTotal++;
-                const val = ep.bodyParams[k] || "";
+                let val = ep.bodyParams[k] || "";
+                if (!val && discoveredBody.get(k)) {
+                    val = discoveredBody.get(k);
+                }
                 const isEmpty = !val;
                 if (isEmpty) bodyEmpty++;
                 appendParamRow(bodyBody, "body", k, val, isEmpty, "string");
             });
 
-            discoveredBody.forEach(k => {
+            discoveredBody.forEach((sampleVal, k) => {
                 if (!renderedBody.has(k)) {
                     renderedBody.add(k);
                     bodyTotal++;
-                    bodyEmpty++;
-                    appendParamRow(bodyBody, "body", k, "", true, "string");
+                    const isEmpty = !sampleVal;
+                    if (isEmpty) bodyEmpty++;
+                    appendParamRow(bodyBody, "body", k, sampleVal, isEmpty, "string");
                 }
             });
 

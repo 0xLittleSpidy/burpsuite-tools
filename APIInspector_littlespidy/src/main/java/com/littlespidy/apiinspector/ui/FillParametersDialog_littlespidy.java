@@ -63,6 +63,10 @@ public class FillParametersDialog_littlespidy extends JDialog {
     private final Set<String> originalActiveQueryKeys = new HashSet<>();
     private final Set<String> originalActiveBodyKeys = new HashSet<>();
 
+    private final Set<String> userEditedPathKeys = new HashSet<>();
+    private final Set<String> userEditedQueryKeys = new HashSet<>();
+    private final Set<String> userEditedBodyKeys = new HashSet<>();
+
     public FillParametersDialog_littlespidy(
             Window owner,
             DiscoveredEndpoint_littlespidy endpoint,
@@ -343,12 +347,22 @@ public class FillParametersDialog_littlespidy extends JDialog {
         originalActiveBodyKeys.clear();
         originalActiveBodyKeys.addAll(activeBodyParams.keySet());
 
-        // 4. Populate Path Table
+        userEditedPathKeys.clear();
+        userEditedQueryKeys.clear();
+        userEditedBodyKeys.clear();
+
+        // 4. Populate Path Table (Prefilling active values or Parameter Collector sample values)
         pathTableModel.setRowCount(0);
         Set<String> addedPath = new HashSet<>();
         for (Map.Entry<String, String> entry : activePathParams.entrySet()) {
             String name = entry.getKey();
             String val = entry.getValue() != null ? entry.getValue() : "";
+            if (isValueEmptyOrPlaceholder(val) && discovered.pathParams.containsKey(name)) {
+                String sample = discovered.pathParams.get(name).sampleValue;
+                if (sample != null && !sample.isBlank() && !isValueEmptyOrPlaceholder(sample)) {
+                    val = sample;
+                }
+            }
             String type = activePathTypes.getOrDefault(name, inferType(val));
             String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
             pathTableModel.addRow(new Object[]{name, type, status, val});
@@ -358,17 +372,26 @@ public class FillParametersDialog_littlespidy extends JDialog {
             if (!addedPath.contains(pe.getKey())) {
                 String name = pe.getKey();
                 String type = pe.getValue().dataType != null ? pe.getValue().dataType : "string";
-                pathTableModel.addRow(new Object[]{name, type, "Empty", ""});
+                String sample = pe.getValue().sampleValue != null ? pe.getValue().sampleValue : "";
+                String val = isValueEmptyOrPlaceholder(sample) ? "" : sample;
+                String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
+                pathTableModel.addRow(new Object[]{name, type, status, val});
                 addedPath.add(name);
             }
         }
 
-        // 5. Populate Query Table
+        // 5. Populate Query Table (Prefilling active values or Parameter Collector sample values)
         queryTableModel.setRowCount(0);
         Set<String> addedQuery = new HashSet<>();
         for (Map.Entry<String, String> entry : activeQueryParams.entrySet()) {
             String name = entry.getKey();
             String val = entry.getValue() != null ? entry.getValue() : "";
+            if (isValueEmptyOrPlaceholder(val) && discovered.queryParams.containsKey(name)) {
+                String sample = discovered.queryParams.get(name).sampleValue;
+                if (sample != null && !sample.isBlank() && !isValueEmptyOrPlaceholder(sample)) {
+                    val = sample;
+                }
+            }
             String type = activeQueryTypes.getOrDefault(name, inferType(val));
             String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
             queryTableModel.addRow(new Object[]{name, type, status, val});
@@ -378,17 +401,26 @@ public class FillParametersDialog_littlespidy extends JDialog {
             if (!addedQuery.contains(pe.getKey())) {
                 String name = pe.getKey();
                 String type = pe.getValue().dataType != null ? pe.getValue().dataType : "string";
-                queryTableModel.addRow(new Object[]{name, type, "Empty", ""});
+                String sample = pe.getValue().sampleValue != null ? pe.getValue().sampleValue : "";
+                String val = isValueEmptyOrPlaceholder(sample) ? "" : sample;
+                String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
+                queryTableModel.addRow(new Object[]{name, type, status, val});
                 addedQuery.add(name);
             }
         }
 
-        // 6. Populate Body Table
+        // 6. Populate Body Table (Prefilling active values or Parameter Collector sample values)
         bodyTableModel.setRowCount(0);
         Set<String> addedBody = new HashSet<>();
         for (Map.Entry<String, String> entry : activeBodyParams.entrySet()) {
             String name = entry.getKey();
             String val = entry.getValue() != null ? entry.getValue() : "";
+            if (isValueEmptyOrPlaceholder(val) && discovered.bodyParams.containsKey(name)) {
+                String sample = discovered.bodyParams.get(name).sampleValue;
+                if (sample != null && !sample.isBlank() && !isValueEmptyOrPlaceholder(sample)) {
+                    val = sample;
+                }
+            }
             String type = activeBodyTypes.getOrDefault(name, inferType(val));
             String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
             bodyTableModel.addRow(new Object[]{name, type, status, val});
@@ -398,7 +430,10 @@ public class FillParametersDialog_littlespidy extends JDialog {
             if (!addedBody.contains(pe.getKey())) {
                 String name = pe.getKey();
                 String type = pe.getValue().dataType != null ? pe.getValue().dataType : "string";
-                bodyTableModel.addRow(new Object[]{name, type, "Empty", ""});
+                String sample = pe.getValue().sampleValue != null ? pe.getValue().sampleValue : "";
+                String val = isValueEmptyOrPlaceholder(sample) ? "" : sample;
+                String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
+                bodyTableModel.addRow(new Object[]{name, type, status, val});
                 addedBody.add(name);
             }
         }
@@ -450,10 +485,17 @@ public class FillParametersDialog_littlespidy extends JDialog {
             String name = JOptionPane.showInputDialog(this, "Enter parameter name:", "Add " + sectionName + " Parameter", JOptionPane.PLAIN_MESSAGE);
             if (name != null && !name.trim().isEmpty()) {
                 tableModel.addRow(new Object[]{name.trim(), "string", "Empty", ""});
+                if ("Path".equals(sectionName)) userEditedPathKeys.add(name.trim());
+                else if ("Query".equals(sectionName)) userEditedQueryKeys.add(name.trim());
+                else if ("Body".equals(sectionName)) userEditedBodyKeys.add(name.trim());
                 updateAllTabTitles();
             }
         });
         rightControls.add(addBtn);
+
+        JButton includeBtn = new JButton("Include in Request");
+        includeBtn.setToolTipText("Explicitly mark selected parameter to be applied into the request");
+        rightControls.add(includeBtn);
 
         JButton removeBtn = new JButton("Remove Parameter");
         rightControls.add(removeBtn);
@@ -466,6 +508,56 @@ public class FillParametersDialog_littlespidy extends JDialog {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         table.setRowSorter(sorter);
+
+        includeBtn.addActionListener(e -> {
+            int selected = table.getSelectedRow();
+            if (selected >= 0) {
+                int modelIdx = table.convertRowIndexToModel(selected);
+                Object nameObj = tableModel.getValueAt(modelIdx, 0);
+                if (nameObj != null) {
+                    String nameStr = nameObj.toString().trim();
+                    if ("Path".equals(sectionName)) userEditedPathKeys.add(nameStr);
+                    else if ("Query".equals(sectionName)) userEditedQueryKeys.add(nameStr);
+                    else if ("Body".equals(sectionName)) userEditedBodyKeys.add(nameStr);
+                }
+            }
+        });
+
+        // Context menu for one-click Include / Exclude / Copy
+        JPopupMenu contextMenu = new JPopupMenu();
+        JMenuItem ctxInclude = new JMenuItem("Include in Request");
+        ctxInclude.addActionListener(e -> {
+            int selected = table.getSelectedRow();
+            if (selected >= 0) {
+                int modelIdx = table.convertRowIndexToModel(selected);
+                Object nameObj = tableModel.getValueAt(modelIdx, 0);
+                if (nameObj != null) {
+                    String nameStr = nameObj.toString().trim();
+                    if ("Path".equals(sectionName)) userEditedPathKeys.add(nameStr);
+                    else if ("Query".equals(sectionName)) userEditedQueryKeys.add(nameStr);
+                    else if ("Body".equals(sectionName)) userEditedBodyKeys.add(nameStr);
+                }
+            }
+        });
+        contextMenu.add(ctxInclude);
+
+        JMenuItem ctxExclude = new JMenuItem("Exclude from Request");
+        ctxExclude.addActionListener(e -> {
+            int selected = table.getSelectedRow();
+            if (selected >= 0) {
+                int modelIdx = table.convertRowIndexToModel(selected);
+                Object nameObj = tableModel.getValueAt(modelIdx, 0);
+                if (nameObj != null) {
+                    String nameStr = nameObj.toString().trim();
+                    if ("Path".equals(sectionName)) { userEditedPathKeys.remove(nameStr); originalActivePathKeys.remove(nameStr); }
+                    else if ("Query".equals(sectionName)) { userEditedQueryKeys.remove(nameStr); originalActiveQueryKeys.remove(nameStr); }
+                    else if ("Body".equals(sectionName)) { userEditedBodyKeys.remove(nameStr); originalActiveBodyKeys.remove(nameStr); }
+                }
+            }
+        });
+        contextMenu.add(ctxExclude);
+
+        table.setComponentPopupMenu(contextMenu);
 
         table.getColumnModel().getColumn(0).setPreferredWidth(170); // Name
         table.getColumnModel().getColumn(1).setPreferredWidth(85);  // Type
@@ -532,6 +624,13 @@ public class FillParametersDialog_littlespidy extends JDialog {
             if (e.getColumn() == 3) { // Value edited
                 int r = e.getFirstRow();
                 if (r >= 0 && r < tableModel.getRowCount()) {
+                    Object nameObj = tableModel.getValueAt(r, 0);
+                    if (nameObj != null) {
+                        String nameStr = nameObj.toString().trim();
+                        if ("Path".equals(sectionName)) userEditedPathKeys.add(nameStr);
+                        else if ("Query".equals(sectionName)) userEditedQueryKeys.add(nameStr);
+                        else if ("Body".equals(sectionName)) userEditedBodyKeys.add(nameStr);
+                    }
                     Object valObj = tableModel.getValueAt(r, 3);
                     String valStr = valObj != null ? valObj.toString().trim() : "";
                     String newStatus = isValueEmptyOrPlaceholder(valStr) ? "Empty" : "Pre-filled";
@@ -705,9 +804,12 @@ public class FillParametersDialog_littlespidy extends JDialog {
             Object k = queryTableModel.getValueAt(r, 0);
             Object v = queryTableModel.getValueAt(r, 3);
             if (k != null && !k.toString().trim().isEmpty()) {
+                String keyStr = k.toString().trim();
                 String valStr = v != null ? v.toString().trim() : "";
-                if (!valStr.isEmpty() || originalActiveQueryKeys.contains(k.toString().trim())) {
-                    updatedQuery.put(k.toString().trim(), valStr);
+                if (originalActiveQueryKeys.contains(keyStr)
+                        || userEditedQueryKeys.contains(keyStr)
+                        || isEndpointQueryParam(keyStr)) {
+                    updatedQuery.put(keyStr, valStr);
                 }
             }
         }
@@ -719,9 +821,12 @@ public class FillParametersDialog_littlespidy extends JDialog {
             Object k = bodyTableModel.getValueAt(r, 0);
             Object v = bodyTableModel.getValueAt(r, 3);
             if (k != null && !k.toString().trim().isEmpty()) {
+                String keyStr = k.toString().trim();
                 String valStr = v != null ? v.toString().trim() : "";
-                if (!valStr.isEmpty() || originalActiveBodyKeys.contains(k.toString().trim())) {
-                    updatedBody.put(k.toString().trim(), valStr);
+                if (originalActiveBodyKeys.contains(keyStr)
+                        || userEditedBodyKeys.contains(keyStr)
+                        || isEndpointBodyParam(keyStr)) {
+                    updatedBody.put(keyStr, valStr);
                 }
             }
         }
@@ -925,6 +1030,27 @@ public class FillParametersDialog_littlespidy extends JDialog {
                 current.addProperty(leaf, val);
             }
         }
+    }
+
+    private boolean isEndpointQueryParam(String key) {
+        if (endpoint == null || key == null) return false;
+        if (endpoint.getQueryParams().containsKey(key)) return true;
+        if (endpoint.getPath() != null) {
+            String p = endpoint.getPath();
+            return p.contains("?" + key + "=") || p.contains("&" + key + "=")
+                    || p.endsWith("?" + key) || p.contains("?" + key + "&")
+                    || p.endsWith("&" + key) || p.contains("&" + key + "&");
+        }
+        return false;
+    }
+
+    private boolean isEndpointBodyParam(String key) {
+        if (endpoint == null || key == null) return false;
+        if (endpoint.getBodyParams().containsKey(key)) return true;
+        if (endpoint.getRequestBodySample() != null && endpoint.getRequestBodySample().contains("\"" + key + "\"")) {
+            return true;
+        }
+        return false;
     }
 
     public DefaultTableModel getPathTableModel() {

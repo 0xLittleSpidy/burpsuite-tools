@@ -367,7 +367,7 @@ class RequestViewerAndCustomRequestTest_littlespidy {
                     null
             );
 
-            // Path Table: should contain both userId (Pre-filled) and orderId (Empty)
+            // Path Table: should contain both userId (Pre-filled with live value) and orderId (Empty because placeholder only)
             var pathModel = dialog.getPathTableModel();
             assertNotNull(pathModel);
             assertTrue(pathModel.getRowCount() >= 2);
@@ -376,18 +376,21 @@ class RequestViewerAndCustomRequestTest_littlespidy {
             for (int r = 0; r < pathModel.getRowCount(); r++) {
                 String param = (String) pathModel.getValueAt(r, 0);
                 String status = (String) pathModel.getValueAt(r, 2);
+                String val = (String) pathModel.getValueAt(r, 3);
                 if ("userId".equals(param)) {
                     foundUserId = true;
                     assertEquals("Pre-filled", status);
+                    assertEquals("usr_123", val, "Live request userId value must be prefilled");
                 } else if ("orderId".equals(param)) {
                     foundOrderId = true;
                     assertEquals("Empty", status);
+                    assertEquals("", val);
                 }
             }
             assertTrue(foundUserId, "Active endpoint path param userId must be in table");
             assertTrue(foundOrderId, "Collection path param orderId must be auto-populated in table as Empty");
 
-            // Query Table: should contain role (Pre-filled), plus status and page from collection (Empty)
+            // Query Table: should contain role (Pre-filled), plus status and page pre-filled with sample values from collection
             var queryModel = dialog.getQueryTableModel();
             assertNotNull(queryModel);
             assertTrue(queryModel.getRowCount() >= 3);
@@ -397,22 +400,26 @@ class RequestViewerAndCustomRequestTest_littlespidy {
             for (int r = 0; r < queryModel.getRowCount(); r++) {
                 String param = (String) queryModel.getValueAt(r, 0);
                 String status = (String) queryModel.getValueAt(r, 2);
+                String val = (String) queryModel.getValueAt(r, 3);
                 if ("role".equals(param)) {
                     foundRole = true;
                     assertEquals("Pre-filled", status);
+                    assertEquals("admin", val);
                 } else if ("status".equals(param)) {
                     foundStatus = true;
-                    assertEquals("Empty", status);
+                    assertEquals("Pre-filled", status);
+                    assertEquals("open", val, "Sample value from collection must be prefilled");
                 } else if ("page".equals(param)) {
                     foundPage = true;
-                    assertEquals("Empty", status);
+                    assertEquals("Pre-filled", status);
+                    assertEquals("1", val, "Sample value from collection must be prefilled");
                 }
             }
             assertTrue(foundRole, "Active query param role must be Pre-filled");
-            assertTrue(foundStatus, "Collection query param status must be Empty");
-            assertTrue(foundPage, "Collection query param page must be Empty");
+            assertTrue(foundStatus, "Collection query param status must be Pre-filled with sample value");
+            assertTrue(foundPage, "Collection query param page must be Pre-filled with sample value");
 
-            // Body Table: should contain item and quantity from collection as Empty
+            // Body Table: should contain item and quantity pre-filled with sample values from collection
             var bodyModel = dialog.getBodyTableModel();
             assertNotNull(bodyModel);
             assertTrue(bodyModel.getRowCount() >= 2);
@@ -421,16 +428,19 @@ class RequestViewerAndCustomRequestTest_littlespidy {
             for (int r = 0; r < bodyModel.getRowCount(); r++) {
                 String param = (String) bodyModel.getValueAt(r, 0);
                 String status = (String) bodyModel.getValueAt(r, 2);
+                String val = (String) bodyModel.getValueAt(r, 3);
                 if ("item".equals(param)) {
                     foundItem = true;
-                    assertEquals("Empty", status);
+                    assertEquals("Pre-filled", status);
+                    assertEquals("book", val, "Sample value from collection JSON must be prefilled");
                 } else if ("quantity".equals(param)) {
                     foundQuantity = true;
-                    assertEquals("Empty", status);
+                    assertEquals("Pre-filled", status);
+                    assertEquals("2", val, "Sample value from collection JSON must be prefilled");
                 }
             }
-            assertTrue(foundItem, "Collection body param item must be auto-populated as Empty");
-            assertTrue(foundQuantity, "Collection body param quantity must be auto-populated as Empty");
+            assertTrue(foundItem, "Collection body param item must be prefilled with sample value");
+            assertTrue(foundQuantity, "Collection body param quantity must be prefilled with sample value");
         }
     }
 }

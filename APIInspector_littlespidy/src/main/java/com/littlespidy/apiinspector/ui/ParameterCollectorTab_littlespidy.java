@@ -431,6 +431,12 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         public final Map<String, ParameterEntry> bodyParams = new LinkedHashMap<>();
     }
 
+    public static boolean isPlaceholderValue(String val) {
+        if (val == null || val.isBlank()) return true;
+        String t = val.trim();
+        return (t.startsWith("{") && t.endsWith("}")) || (t.startsWith(":") && t.length() > 1);
+    }
+
     public static DiscoveredParameters collectParameters(List<ImportedCollection_littlespidy> targetCols) {
         DiscoveredParameters result = new DiscoveredParameters();
         if (targetCols == null) return result;
@@ -452,7 +458,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
 
                         ParameterEntry p = result.queryParams.computeIfAbsent(name, ParameterEntry::new);
                         p.addEndpoint(epDesc, ep);
-                        if (p.sampleValue.isEmpty() && !val.isEmpty()) {
+                        if ((p.sampleValue.isEmpty() || isPlaceholderValue(p.sampleValue)) && !val.isEmpty() && !isPlaceholderValue(val)) {
                             p.sampleValue = val;
                         }
                         String dt = ep.getQueryParamTypes().get(name);
@@ -476,7 +482,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                             if (!qName.isBlank()) {
                                 ParameterEntry p = result.queryParams.computeIfAbsent(qName, ParameterEntry::new);
                                 p.addEndpoint(epDesc, ep);
-                                if (p.sampleValue.isEmpty() && !qVal.isEmpty()) {
+                                if ((p.sampleValue.isEmpty() || isPlaceholderValue(p.sampleValue)) && !qVal.isEmpty() && !isPlaceholderValue(qVal)) {
                                     p.sampleValue = qVal;
                                 }
                                 if (p.dataType == null || "string".equals(p.dataType)) {
@@ -497,7 +503,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
 
                         ParameterEntry p = result.pathParams.computeIfAbsent(name, ParameterEntry::new);
                         p.addEndpoint(epDesc, ep);
-                        if (p.sampleValue.isEmpty() && !val.isEmpty()) {
+                        if ((p.sampleValue.isEmpty() || isPlaceholderValue(p.sampleValue)) && !val.isEmpty() && !isPlaceholderValue(val)) {
                             p.sampleValue = val;
                         }
                         String dt = ep.getPathParamTypes().get(name);
@@ -536,7 +542,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
 
                         ParameterEntry p = result.bodyParams.computeIfAbsent(name, ParameterEntry::new);
                         p.addEndpoint(epDesc, ep);
-                        if (p.sampleValue.isEmpty() && !val.isEmpty()) {
+                        if ((p.sampleValue.isEmpty() || isPlaceholderValue(p.sampleValue)) && !val.isEmpty() && !isPlaceholderValue(val)) {
                             p.sampleValue = val;
                         }
                         String dt = ep.getBodyParamTypes().get(name);
@@ -580,7 +586,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                     JsonPrimitive prim = v.getAsJsonPrimitive();
                     ParameterEntry p = bodyMap.computeIfAbsent(fullPath, ParameterEntry::new);
                     p.addEndpoint(epDesc, ep);
-                    if (p.sampleValue.isEmpty()) {
+                    if (p.sampleValue.isEmpty() || isPlaceholderValue(p.sampleValue)) {
                         p.sampleValue = prim.getAsString();
                     }
                     if (prim.isBoolean()) p.dataType = "boolean";
