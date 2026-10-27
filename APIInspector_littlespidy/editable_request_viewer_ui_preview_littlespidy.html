@@ -654,11 +654,23 @@
                     <strong>Parameter Value Configuration:</strong> Edit Path, Query, or Body parameter values. Values synchronize into the HTTP Request in real-time on Apply or OK.
                 </div>
 
-                <!-- Section Tabs -->
+                <!-- Section Tabs with Dynamic Empty vs Filled Badges -->
                 <div class="modal-tabs">
                     <button class="modal-tab-btn active" id="tab-btn-path" onclick="switchParamTab('path')">Path Parameters (<span id="count-path">0</span>)</button>
                     <button class="modal-tab-btn" id="tab-btn-query" onclick="switchParamTab('query')">Query Parameters (<span id="count-query">1</span>)</button>
                     <button class="modal-tab-btn" id="tab-btn-body" onclick="switchParamTab('body')">Body Parameters (<span id="count-body">3</span>)</button>
+                </div>
+
+                <!-- Filter & Empty Only Controls -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 2px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label>Filter:</label>
+                        <input type="text" class="input-box" id="param-filter-input" placeholder="Search parameter or value..." onkeyup="filterModalParams()" style="width: 180px;">
+                        <label><input type="checkbox" id="param-empty-only-check" onchange="filterModalParams()"> Show Empty Only</label>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-color); font-style: italic;">
+                        Notice: Custom headers, cookies, and tokens are preserved in-place
+                    </div>
                 </div>
 
                 <!-- Tab 1: Path Parameters -->
@@ -666,8 +678,9 @@
                     <table class="modal-table">
                         <thead>
                             <tr>
-                                <th style="width: 150px;">Parameter</th>
-                                <th style="width: 100px;">Type</th>
+                                <th style="width: 160px;">Parameter</th>
+                                <th style="width: 85px;">Type</th>
+                                <th style="width: 95px;">Status</th>
                                 <th>Value (Editable)</th>
                             </tr>
                         </thead>
@@ -680,8 +693,9 @@
                     <table class="modal-table">
                         <thead>
                             <tr>
-                                <th style="width: 150px;">Parameter</th>
-                                <th style="width: 100px;">Type</th>
+                                <th style="width: 160px;">Parameter</th>
+                                <th style="width: 85px;">Type</th>
+                                <th style="width: 95px;">Status</th>
                                 <th>Value (Editable)</th>
                             </tr>
                         </thead>
@@ -694,8 +708,9 @@
                     <table class="modal-table">
                         <thead>
                             <tr>
-                                <th style="width: 150px;">Parameter</th>
-                                <th style="width: 100px;">Type</th>
+                                <th style="width: 160px;">Parameter</th>
+                                <th style="width: 85px;">Type</th>
+                                <th style="width: 95px;">Status</th>
                                 <th>Value (Editable)</th>
                             </tr>
                         </thead>
@@ -941,42 +956,90 @@
             const pathBody = document.getElementById("params-path-body");
             pathBody.innerHTML = "";
             const pathKeys = Object.keys(ep.pathParams || {});
-            document.getElementById("count-path").innerText = pathKeys.length;
+            let pathEmpty = 0;
             pathKeys.forEach(k => {
+                const val = ep.pathParams[k] || "";
+                const isEmpty = !val || val.includes("{") || val.includes(":");
+                if (isEmpty) pathEmpty++;
+                const statusBadge = isEmpty 
+                    ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
+                    : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
+
                 const tr = document.createElement("tr");
-                tr.innerHTML = `<td><strong>${k}</strong></td><td>string</td><td><input type="text" id="input-path-${k}" value="${ep.pathParams[k]}"></td>`;
+                tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
+                tr.setAttribute("data-param", k.toLowerCase());
+                tr.innerHTML = `
+                    <td><strong>${k}</strong></td>
+                    <td>string</td>
+                    <td>${statusBadge}</td>
+                    <td><input type="text" id="input-path-${k}" value="${val}" oninput="onParamInput(this)"></td>
+                `;
                 pathBody.appendChild(tr);
             });
+            document.getElementById("count-path").innerText = `${pathEmpty} empty, ${pathKeys.length - pathEmpty} filled`;
             if (pathKeys.length === 0) {
-                pathBody.innerHTML = `<tr><td colspan="3" style="color: gray; text-align: center; padding: 12px;">No path parameters defined</td></tr>`;
+                pathBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No path parameters defined</td></tr>`;
+                document.getElementById("count-path").innerText = "0";
             }
 
             // Populate Query
             const queryBody = document.getElementById("params-query-body");
             queryBody.innerHTML = "";
             const queryKeys = Object.keys(ep.queryParams || {});
-            document.getElementById("count-query").innerText = queryKeys.length;
+            let queryEmpty = 0;
             queryKeys.forEach(k => {
+                const val = ep.queryParams[k] || "";
+                const isEmpty = !val;
+                if (isEmpty) queryEmpty++;
+                const statusBadge = isEmpty 
+                    ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
+                    : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
+
                 const tr = document.createElement("tr");
-                tr.innerHTML = `<td><strong>${k}</strong></td><td>string</td><td><input type="text" id="input-query-${k}" value="${ep.queryParams[k]}"></td>`;
+                tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
+                tr.setAttribute("data-param", k.toLowerCase());
+                tr.innerHTML = `
+                    <td><strong>${k}</strong></td>
+                    <td>string</td>
+                    <td>${statusBadge}</td>
+                    <td><input type="text" id="input-query-${k}" value="${val}" oninput="onParamInput(this)"></td>
+                `;
                 queryBody.appendChild(tr);
             });
+            document.getElementById("count-query").innerText = `${queryEmpty} empty, ${queryKeys.length - queryEmpty} filled`;
             if (queryKeys.length === 0) {
-                queryBody.innerHTML = `<tr><td colspan="3" style="color: gray; text-align: center; padding: 12px;">No query parameters defined</td></tr>`;
+                queryBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No query parameters defined</td></tr>`;
+                document.getElementById("count-query").innerText = "0";
             }
 
             // Populate Body
             const bodyBody = document.getElementById("params-body-body");
             bodyBody.innerHTML = "";
             const bodyKeys = Object.keys(ep.bodyParams || {});
-            document.getElementById("count-body").innerText = bodyKeys.length;
+            let bodyEmpty = 0;
             bodyKeys.forEach(k => {
+                const val = ep.bodyParams[k] || "";
+                const isEmpty = !val;
+                if (isEmpty) bodyEmpty++;
+                const statusBadge = isEmpty 
+                    ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
+                    : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
+
                 const tr = document.createElement("tr");
-                tr.innerHTML = `<td><strong>${k}</strong></td><td>string</td><td><input type="text" id="input-body-${k}" value="${ep.bodyParams[k]}"></td>`;
+                tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
+                tr.setAttribute("data-param", k.toLowerCase());
+                tr.innerHTML = `
+                    <td><strong>${k}</strong></td>
+                    <td>string</td>
+                    <td>${statusBadge}</td>
+                    <td><input type="text" id="input-body-${k}" value="${val}" oninput="onParamInput(this)"></td>
+                `;
                 bodyBody.appendChild(tr);
             });
+            document.getElementById("count-body").innerText = `${bodyEmpty} empty, ${bodyKeys.length - bodyEmpty} filled`;
             if (bodyKeys.length === 0) {
-                bodyBody.innerHTML = `<tr><td colspan="3" style="color: gray; text-align: center; padding: 12px;">No body parameters defined</td></tr>`;
+                bodyBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No body parameters defined</td></tr>`;
+                document.getElementById("count-body").innerText = "0";
             }
 
             document.getElementById("fill-params-modal").style.display = "flex";
@@ -984,6 +1047,36 @@
 
         function closeFillParamsDialog() {
             document.getElementById("fill-params-modal").style.display = "none";
+        }
+
+        function onParamInput(inputEl) {
+            const tr = inputEl.closest("tr");
+            const val = inputEl.value.trim();
+            const isEmpty = !val || val.includes("{") || val.includes(":");
+            tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
+            const statusCell = tr.children[2];
+            if (statusCell) {
+                statusCell.innerHTML = isEmpty
+                    ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
+                    : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
+            }
+        }
+
+        function filterModalParams() {
+            const q = (document.getElementById("param-filter-input").value || "").trim().toLowerCase();
+            const emptyOnly = document.getElementById("param-empty-only-check").checked;
+
+            ["params-path-body", "params-query-body", "params-body-body"].forEach(bodyId => {
+                const rows = document.getElementById(bodyId).querySelectorAll("tr");
+                rows.forEach(tr => {
+                    const status = tr.getAttribute("data-status");
+                    const param = tr.getAttribute("data-param") || "";
+                    let visible = true;
+                    if (emptyOnly && status !== "Empty") visible = false;
+                    if (q && !param.includes(q)) visible = false;
+                    tr.style.display = visible ? "" : "none";
+                });
+            });
         }
 
         function switchParamTab(tab) {
@@ -1002,52 +1095,82 @@
             // Sync Path
             Object.keys(ep.pathParams || {}).forEach(k => {
                 const el = document.getElementById(`input-path-${k}`);
-                if (el) ep.pathParams[k] = el.value;
+                if (el) ep.pathParams[k] = el.value.trim();
             });
 
             // Sync Query
             Object.keys(ep.queryParams || {}).forEach(k => {
                 const el = document.getElementById(`input-query-${k}`);
-                if (el) ep.queryParams[k] = el.value;
+                if (el) ep.queryParams[k] = el.value.trim();
             });
 
             // Sync Body
             Object.keys(ep.bodyParams || {}).forEach(k => {
                 const el = document.getElementById(`input-body-${k}`);
-                if (el) ep.bodyParams[k] = el.value;
+                if (el) ep.bodyParams[k] = el.value.trim();
             });
 
-            // Rebuild raw request
-            let newPath = ep.path;
+            // Non-Destructive In-Place Request Mutator
+            let current = ep.currentRequest;
+            const parts = current.split(/(\r\n\r\n|\n\n)/, 2);
+            let headerSection = parts[0];
+            let bodySection = parts.length > 1 ? parts[1] : "";
+
+            const lines = headerSection.split(/\r\n|\n/);
+            let reqLine = lines[0];
+            let reqTokens = reqLine.split(/\s+/);
+            let method = reqTokens[0] || ep.method;
+            let path = reqTokens[1] || ep.path;
+            let ver = reqTokens[2] || "HTTP/1.1";
+
+            // In-place path variable replacement
+            let cleanPath = path.split('?')[0];
             Object.keys(ep.pathParams || {}).forEach(k => {
-                newPath = newPath.replace(`{${k}}`, ep.pathParams[k]);
+                const val = ep.pathParams[k];
+                if (val) {
+                    cleanPath = cleanPath.replace(`{${k}}`, val).replace(`:${k}`, val);
+                }
             });
 
+            // In-place query params
             const qParts = [];
             Object.keys(ep.queryParams || {}).forEach(k => {
-                qParts.push(`${encodeURIComponent(k)}=${encodeURIComponent(ep.queryParams[k])}`);
+                const val = ep.queryParams[k];
+                if (val) qParts.push(`${encodeURIComponent(k)}=${encodeURIComponent(val)}`);
             });
-            if (qParts.length > 0) newPath += "?" + qParts.join("&");
+            let newUrl = cleanPath;
+            if (qParts.length > 0) newUrl += "?" + qParts.join("&");
 
-            let host = "api.customer.target.com";
-            if (ep.collection.includes("Billing")) host = "billing.target.com";
+            lines[0] = `${method} ${newUrl} ${ver}`;
 
-            let bodyStr = "";
+            // In-place body update
+            let newBody = bodySection;
             const bodyKeys = Object.keys(ep.bodyParams || {});
             if (bodyKeys.length > 0) {
-                const obj = {};
-                bodyKeys.forEach(k => obj[k] = ep.bodyParams[k]);
-                bodyStr = JSON.stringify(obj, null, 2);
+                try {
+                    let obj = bodySection.trim().startsWith("{") ? JSON.parse(bodySection) : {};
+                    bodyKeys.forEach(k => {
+                        obj[k] = ep.bodyParams[k];
+                    });
+                    newBody = JSON.stringify(obj, null, 2);
+                } catch (e) {
+                    newBody = bodySection;
+                }
             }
 
-            let raw = `${ep.method} ${newPath} HTTP/1.1\r\nHost: ${host}\r\n`;
-            if (bodyStr) {
-                raw += `Content-Type: application/json\r\nContent-Length: ${bodyStr.length}\r\n\r\n${bodyStr}`;
-            } else {
-                raw += `\r\n`;
+            // Update Content-Length header in-place while PRESERVING all other headers
+            let foundCl = false;
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].toLowerCase().startsWith("content-length:")) {
+                    lines[i] = `Content-Length: ${newBody.length}`;
+                    foundCl = true;
+                }
+            }
+            if (!foundCl && newBody.length > 0) {
+                lines.push(`Content-Length: ${newBody.length}`);
             }
 
-            ep.currentRequest = raw;
+            ep.currentRequest = lines.join("\r\n") + "\r\n\r\n" + newBody;
             ep.edited = true;
             renderTable();
             loadSelectedIntoEditor();

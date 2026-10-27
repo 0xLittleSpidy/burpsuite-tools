@@ -595,11 +595,25 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         String targetBaseUrl = (item.collection.getTargetBaseUrl() != null && !item.collection.getTargetBaseUrl().isBlank())
                 ? item.collection.getTargetBaseUrl() : "https://localhost";
 
+        String currentRaw = null;
+        if (requestEditor != null) {
+            try {
+                HttpRequest edReq = requestEditor.getRequest();
+                if (edReq != null && edReq.toByteArray() != null && edReq.toByteArray().length() > 0) {
+                    currentRaw = new String(edReq.toByteArray().getBytes(), StandardCharsets.UTF_8);
+                }
+            } catch (Exception ignored) {}
+        }
+        if (currentRaw == null && item.endpoint.hasCustomRequest()) {
+            currentRaw = item.endpoint.getCustomRawRequest();
+        }
+
         Window owner = SwingUtilities.getWindowAncestor(this);
         FillParametersDialog_littlespidy dialog = new FillParametersDialog_littlespidy(
                 owner,
                 item.endpoint,
                 targetBaseUrl,
+                currentRaw,
                 sessionStore,
                 (updatedReq) -> {
                     isUpdatingEditor = true;

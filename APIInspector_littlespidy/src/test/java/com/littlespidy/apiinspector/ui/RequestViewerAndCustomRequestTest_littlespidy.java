@@ -215,6 +215,7 @@ class RequestViewerAndCustomRequestTest_littlespidy {
                     null,
                     ep,
                     "https://api.example.com",
+                    "POST /api/v1/users/{userId}?filter=active HTTP/1.1\r\nHost: api.example.com\r\n\r\n",
                     null,
                     updatedReqRef::set
             );
@@ -234,5 +235,46 @@ class RequestViewerAndCustomRequestTest_littlespidy {
         assertTrue(rebuilt.path().contains("/api/v1/users/user_999"));
         assertTrue(rebuilt.path().contains("filter=inactive"));
         assertTrue(rebuilt.bodyToString().contains("manager"));
+    }
+
+    @Test
+    @DisplayName("Verify in-place parameter mutation preserves custom headers, authorization, and nested JSON fields")
+    void testInPlaceMutationPreservesHeadersAndNestedJson() {
+        String originalRaw = "POST /api/v1/accounts/{accountId}?region=us-east HTTP/1.1\r\n" +
+                "Host: billing.target.com\r\n" +
+                "Authorization: Bearer secret_jwt_token_999\r\n" +
+                "X-Custom-Tracing: trace_id_abc123\r\n" +
+                "Content-Type: application/json\r\n" +
+                "Content-Length: 64\r\n\r\n" +
+                "{\n" +
+                "  \"account\": {\n" +
+                "    \"tier\": \"free\"\n" +
+                "  },\n" +
+                "  \"keepThisField\": 42\n" +
+                "}";
+
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/accounts/{accountId}", "Update account");
+        ep.setCustomRawRequest(originalRaw);
+
+        // When mutating through buildFromCustomRequest after in-place replacement:
+        String mutatedRaw = originalRaw.replace("{accountId}", "acc_777")
+                                       .replace("tier\": \"free\"", "tier\": \"enterprise\"");
+
+        HttpRequest req = AuthTestEngine_littlespidy.buildFromCustomRequest("https://billing.target.com", mutatedRaw);
+        assertNotNull(req);
+
+        // Verify path substituted
+        assertTrue(req.path().contains("/api/v1/accounts/acc_777"));
+        assertTrue(req.path().contains("region=us-east"));
+
+        // Verify custom headers preserved
+        assertEquals("Bearer secret_jwt_token_999", req.headerValue("Authorization"));
+        assertEquals("trace_id_abc123", req.headerValue("X-Custom-Tracing"));
+
+        // Verify untouched JSON fields preserved and modified fields updated
+        String body = req.bodyToString();
+        assertTrue(body.contains("enterprise"), "Tier must be updated to enterprise");
+        assertTrue(body.contains("keepThisField"), "Untouched fields must be preserved");
+        assertTrue(body.contains("42"), "Untouched field value must be preserved");
     }
 }
