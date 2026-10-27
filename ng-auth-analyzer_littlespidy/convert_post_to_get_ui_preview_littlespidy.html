@@ -86,7 +86,7 @@
             overflow: hidden;
         }
 
-        /* Top Burp-style Suite Tabs Bar */
+        /* Top Burp-style Suite Tabs Bar - Note: NO Custom Menus in Top Menu Bar! */
         .suite-tabs-bar {
             background-color: var(--header-bg);
             border-bottom: 2px solid var(--border-color);
@@ -173,46 +173,11 @@
             background-color: #3b7cb6;
         }
 
-        .btn-danger {
-            background-color: #6a2b2b;
-            border-color: #8c3a3a;
-            color: #ffffff;
-        }
-
         .session-status {
             margin-left: auto;
             font-family: var(--code-font);
             font-size: 11px;
             color: #46b856;
-        }
-
-        /* Sub-tab Navigation (Live Conversions vs POST Traffic Discovery) */
-        .subtabs-bar {
-            background-color: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            padding: 4px 8px 0 8px;
-            gap: 2px;
-        }
-
-        .subtab {
-            padding: 6px 14px;
-            color: var(--text-color);
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-            user-select: none;
-            background-color: transparent;
-        }
-
-        .subtab.active {
-            background-color: var(--bg-color);
-            border-color: var(--border-color);
-            color: var(--accent-orange);
-            font-weight: bold;
         }
 
         /* Filter Controls Bar */
@@ -232,7 +197,7 @@
             color: var(--text-color);
             padding: 4px 8px;
             border-radius: 3px;
-            min-width: 200px;
+            min-width: 220px;
             font-size: 11px;
         }
 
@@ -283,7 +248,7 @@
             color: var(--badge-info-text);
         }
 
-        /* Main Workspace Split */
+        /* Direct Root Workspace */
         .main-workspace {
             display: flex;
             flex-direction: column;
@@ -420,19 +385,6 @@
             color: #1e1e1e;
         }
 
-        .highlight-param {
-            background-color: #7a5800;
-            color: #ffffff;
-            padding: 1px 3px;
-            border-radius: 2px;
-            font-weight: bold;
-        }
-
-        .light-theme .highlight-param {
-            background-color: #ffe082;
-            color: #000000;
-        }
-
         /* Evidence Alert Box */
         .evidence-box {
             background-color: rgba(255, 60, 60, 0.1);
@@ -446,7 +398,7 @@
 </head>
 <body>
 
-    <!-- Suite Tabs Header -->
+    <!-- Suite Tabs Header (Clean root tabs without duplicate top menu bars) -->
     <div class="suite-tabs-bar">
         <span class="suite-title">ng-auth-analyzer_littlespidy</span>
         <div class="suite-tab" onclick="switchSuiteTab('Configuration')">Configuration</div>
@@ -469,14 +421,8 @@
         <span class="session-status">Session: target_pentest_2026.json (Active)</span>
     </div>
 
-    <!-- Convert Sub-Tabs (Live Conversions vs POST Traffic Discovery) -->
-    <div class="subtabs-bar">
-        <div class="subtab active" id="subtab-live" onclick="showSubTab('live')">Live Conversions (4)</div>
-        <div class="subtab" id="subtab-discovery" onclick="showSubTab('discovery')">POST Traffic Discovery (12)</div>
-    </div>
-
-    <!-- LIVE CONVERSIONS VIEW -->
-    <div id="view-live" class="main-workspace">
+    <!-- DIRECT ROOT TAB WORKSPACE (No sub-tabs) -->
+    <div class="main-workspace">
         <div class="filters-bar">
             <span style="font-weight: bold; color: var(--text-highlight);">Filters:</span>
             <input type="text" class="search-input" id="search-input" placeholder="Search URL, Path, Signal..." oninput="filterRows()">
@@ -627,75 +573,6 @@ Connection: keep-alive
         </div>
     </div>
 
-    <!-- DISCOVERY VIEW -->
-    <div id="view-discovery" class="main-workspace" style="display: none;">
-        <div class="filters-bar">
-            <button class="btn btn-primary" onclick="alert('Loading POST traffic from Proxy History...')">Load from Proxy History</button>
-            <button class="btn" onclick="alert('Converting selected targets...')">Convert Selected (Attack)</button>
-            <span style="margin-left: 10px; color: var(--text-color);">Total Discovered POST Endpoints: 12 (Deduplicated)</span>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 40px;"><input type="checkbox" checked></th>
-                        <th style="width: 40px;">#</th>
-                        <th style="width: 60px;">Method</th>
-                        <th>Host</th>
-                        <th>Path</th>
-                        <th>Content-Type</th>
-                        <th style="width: 60px;">Params</th>
-                        <th>Param Names</th>
-                        <th style="width: 70px;">Status</th>
-                        <th style="width: 70px;">Length</th>
-                        <th>Auth</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="checkbox" checked></td>
-                        <td>1</td>
-                        <td>POST</td>
-                        <td>api.example.com</td>
-                        <td>/api/v1/user/role</td>
-                        <td>application/json</td>
-                        <td>2</td>
-                        <td>role, user_id</td>
-                        <td>403</td>
-                        <td>45</td>
-                        <td>Bearer</td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" checked></td>
-                        <td>2</td>
-                        <td>POST</td>
-                        <td>app.example.com</td>
-                        <td>/account/update_email</td>
-                        <td>application/x-www-form-urlencoded</td>
-                        <td>2</td>
-                        <td>email, confirm</td>
-                        <td>200</td>
-                        <td>1240</td>
-                        <td>Cookie</td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" checked></td>
-                        <td>3</td>
-                        <td>POST</td>
-                        <td>payment.example.com</td>
-                        <td>/checkout/process</td>
-                        <td>application/json</td>
-                        <td>2</td>
-                        <td>orderId, token</td>
-                        <td>200</td>
-                        <td>340</td>
-                        <td>Cookie</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <script>
         function toggleTheme() {
             document.body.classList.toggle('light-theme');
@@ -703,13 +580,6 @@ Connection: keep-alive
 
         function switchSuiteTab(tabName) {
             alert("Switched to suite tab: " + tabName);
-        }
-
-        function showSubTab(tab) {
-            document.getElementById('subtab-live').classList.toggle('active', tab === 'live');
-            document.getElementById('subtab-discovery').classList.toggle('active', tab === 'discovery');
-            document.getElementById('view-live').style.display = (tab === 'live') ? 'flex' : 'none';
-            document.getElementById('view-discovery').style.display = (tab === 'discovery') ? 'flex' : 'none';
         }
 
         const sampleRows = {

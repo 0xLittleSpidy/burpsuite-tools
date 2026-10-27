@@ -7,10 +7,8 @@ import java.awt.FlowLayout;
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.swing.BorderFactory;
@@ -23,7 +21,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
@@ -35,19 +32,15 @@ import burp.IHttpRequestResponse;
 import burp.IHttpService;
 import burp.IMessageEditor;
 import burp.IMessageEditorController;
-import burp.IRequestInfo;
 import com.protect7.authanalyzer.convert.ConversionResult_littlespidy;
 import com.protect7.authanalyzer.convert.ConversionTableModel_littlespidy;
 import com.protect7.authanalyzer.convert.ConvertEngine_littlespidy;
-import com.protect7.authanalyzer.convert.PostCandidate_littlespidy;
-import com.protect7.authanalyzer.convert.PostCandidatesTableModel_littlespidy;
 import com.protect7.authanalyzer.gui.main.MainPanel;
 import com.protect7.authanalyzer.gui.util.DomainFilterDropDown_littlespidy;
-import com.protect7.authanalyzer.gui.util.MethodFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.PlaceholderTextField;
 
 /**
- * Master UI panel for Convert POST to GET containing Live Conversions and POST Traffic Discovery sub-tabs.
+ * Root suite tab panel for Convert POST to GET displaying real-time conversions, filters, and HTTP message viewers.
  *
  * @author littlespidy
  */
@@ -55,9 +48,8 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private final MainPanel mainPanel;
-	private final JTabbedPane subTabbedPane = new JTabbedPane();
 
-	// Live Conversions Sub-Tab
+	// Conversions Table & Models
 	private final ConversionTableModel_littlespidy conversionTableModel = new ConversionTableModel_littlespidy();
 	private final JTable conversionTable = new JTable(conversionTableModel);
 	private TableRowSorter<ConversionTableModel_littlespidy> conversionSorter;
@@ -73,40 +65,15 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 	private IMessageEditor convGetRequestEditor;
 	private IMessageEditor convGetResponseEditor;
 
-	// POST Traffic Discovery Sub-Tab
-	private final PostCandidatesTableModel_littlespidy discoveryTableModel = new PostCandidatesTableModel_littlespidy();
-	private final JTable discoveryTable = new JTable(discoveryTableModel);
-	private TableRowSorter<PostCandidatesTableModel_littlespidy> discoverySorter;
-	private final JButton loadProxyHistoryButton = new JButton("Load from Proxy History");
-	private final JButton convertSelectedButton = new JButton("Convert Selected (Attack)");
-	private final JButton selectAllButton = new JButton("Select All");
-	private final JButton deselectAllButton = new JButton("Deselect All");
-	private final JButton clearDiscoveryButton = new JButton("Clear Discovery");
-	private final JTabbedPane discoveryViewerTabbedPane = new JTabbedPane();
-	private final JLabel discoveryViewerInfoLabel = new JLabel("Select a discovered candidate above to view request/response");
-	private IMessageEditor discoveryRequestEditor;
-	private IMessageEditor discoveryResponseEditor;
-
 	private int nextResultId = 1;
-	private int nextCandidateId = 1;
-	private boolean allSelectedToggle = true;
 
 	public ConvertPostToGetPanel_littlespidy(MainPanel mainPanel) {
 		this.mainPanel = mainPanel;
 		setLayout(new BorderLayout());
-
-		JPanel livePanel = createLiveConversionsPanel();
-		JPanel discoveryPanel = createDiscoveryPanel();
-
-		subTabbedPane.addTab("Live Conversions", livePanel);
-		subTabbedPane.addTab("POST Traffic Discovery", discoveryPanel);
-
-		add(subTabbedPane, BorderLayout.CENTER);
+		initUI();
 	}
 
-	private JPanel createLiveConversionsPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-
+	private void initUI() {
 		// Top Toolbar
 		JPanel topToolbar = new JPanel(new BorderLayout(6, 4));
 		topToolbar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -127,9 +94,9 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		rightActions.add(liveExportButton);
 		topToolbar.add(rightActions, BorderLayout.EAST);
 
-		panel.add(topToolbar, BorderLayout.NORTH);
+		add(topToolbar, BorderLayout.NORTH);
 
-		// Table
+		// Conversions Table
 		conversionTable.setDefaultRenderer(String.class, new ConversionTableModel_littlespidy.ConversionCellRenderer());
 		conversionTable.setDefaultRenderer(Integer.class, new ConversionTableModel_littlespidy.ConversionCellRenderer());
 
@@ -167,7 +134,7 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		tableContainer.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 		tableContainer.add(new JScrollPane(conversionTable), BorderLayout.CENTER);
 
-		// Bottom Viewers
+		// Bottom HTTP Message Viewers
 		JPanel viewerContainer = new JPanel(new BorderLayout());
 		viewerContainer.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 		liveViewerInfoLabel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
@@ -179,15 +146,13 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableContainer, viewerContainer);
 		splitPane.setDividerSize(6);
 		splitPane.setResizeWeight(0.5d);
-		panel.add(splitPane, BorderLayout.CENTER);
+		add(splitPane, BorderLayout.CENTER);
 
 		conversionTable.getSelectionModel().addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) {
 				displaySelectedLiveConversion();
 			}
 		});
-
-		return panel;
 	}
 
 	private void initLiveMessageEditors() {
@@ -291,121 +256,6 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		}
 	}
 
-	private JPanel createDiscoveryPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-
-		// Top Toolbar
-		JPanel topToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
-		loadProxyHistoryButton.addActionListener(e -> loadFromProxyHistory());
-		convertSelectedButton.addActionListener(e -> convertSelectedCandidates());
-		selectAllButton.addActionListener(e -> {
-			discoveryTableModel.selectAll(allSelectedToggle);
-			allSelectedToggle = !allSelectedToggle;
-			selectAllButton.setText(allSelectedToggle ? "Select All" : "Deselect All");
-		});
-		clearDiscoveryButton.addActionListener(e -> clearDiscovery());
-
-		topToolbar.add(loadProxyHistoryButton);
-		topToolbar.add(convertSelectedButton);
-		topToolbar.add(selectAllButton);
-		topToolbar.add(clearDiscoveryButton);
-
-		panel.add(topToolbar, BorderLayout.NORTH);
-
-		// Discovery Table
-		discoveryTable.getColumnModel().getColumn(0).setMaxWidth(50);
-		discoveryTable.getColumnModel().getColumn(1).setMaxWidth(50);
-		discoveryTable.getColumnModel().getColumn(2).setMaxWidth(60);
-
-		discoverySorter = new TableRowSorter<PostCandidatesTableModel_littlespidy>(discoveryTableModel);
-		discoveryTable.setRowSorter(discoverySorter);
-
-		JPanel tableContainer = new JPanel(new BorderLayout());
-		tableContainer.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		tableContainer.add(new JScrollPane(discoveryTable), BorderLayout.CENTER);
-
-		// Bottom Viewers
-		JPanel viewerContainer = new JPanel(new BorderLayout());
-		viewerContainer.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		discoveryViewerInfoLabel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-		viewerContainer.add(discoveryViewerInfoLabel, BorderLayout.NORTH);
-
-		initDiscoveryMessageEditors();
-		viewerContainer.add(discoveryViewerTabbedPane, BorderLayout.CENTER);
-
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableContainer, viewerContainer);
-		splitPane.setDividerSize(6);
-		splitPane.setResizeWeight(0.5d);
-		panel.add(splitPane, BorderLayout.CENTER);
-
-		discoveryTable.getSelectionModel().addListSelectionListener(e -> {
-			if (!e.getValueIsAdjusting()) {
-				displaySelectedDiscoveryCandidate();
-			}
-		});
-
-		return panel;
-	}
-
-	private void initDiscoveryMessageEditors() {
-		if (BurpExtender.callbacks != null) {
-			IMessageEditorController controller = new IMessageEditorController() {
-				@Override
-				public IHttpService getHttpService() {
-					PostCandidate_littlespidy c = getSelectedCandidate();
-					return (c != null && c.getRequestResponse() != null) ? c.getRequestResponse().getHttpService() : null;
-				}
-				@Override
-				public byte[] getRequest() {
-					PostCandidate_littlespidy c = getSelectedCandidate();
-					return (c != null && c.getRequestResponse() != null) ? c.getRequestResponse().getRequest() : null;
-				}
-				@Override
-				public byte[] getResponse() {
-					PostCandidate_littlespidy c = getSelectedCandidate();
-					return (c != null && c.getRequestResponse() != null) ? c.getRequestResponse().getResponse() : null;
-				}
-			};
-
-			discoveryRequestEditor = BurpExtender.callbacks.createMessageEditor(controller, false);
-			discoveryResponseEditor = BurpExtender.callbacks.createMessageEditor(controller, false);
-
-			discoveryViewerTabbedPane.addTab("Request", discoveryRequestEditor.getComponent());
-			discoveryViewerTabbedPane.addTab("Response", discoveryResponseEditor.getComponent());
-		} else {
-			discoveryViewerTabbedPane.addTab("Request", new JLabel("Request Viewer", JLabel.CENTER));
-			discoveryViewerTabbedPane.addTab("Response", new JLabel("Response Viewer", JLabel.CENTER));
-		}
-	}
-
-	private PostCandidate_littlespidy getSelectedCandidate() {
-		int viewRow = discoveryTable.getSelectedRow();
-		if (viewRow != -1) {
-			int modelRow = discoveryTable.convertRowIndexToModel(viewRow);
-			return discoveryTableModel.getCandidate(modelRow);
-		}
-		return null;
-	}
-
-	private void displaySelectedDiscoveryCandidate() {
-		PostCandidate_littlespidy c = getSelectedCandidate();
-		if (c != null) {
-			discoveryViewerInfoLabel.setText("Candidate #" + c.getId() + " - " + c.getMethod() + " " + c.getHost() + c.getPath() +
-					" | Params: " + c.getParameterCount() + " (" + String.join(", ", c.getParameterNames()) + ")");
-			if (discoveryRequestEditor != null && c.getRequestResponse() != null) {
-				discoveryRequestEditor.setMessage(c.getRequestResponse().getRequest(), true);
-				discoveryResponseEditor.setMessage(c.getRequestResponse().getResponse() != null ?
-						c.getRequestResponse().getResponse() : new byte[0], false);
-			}
-		} else {
-			discoveryViewerInfoLabel.setText("Select a discovered candidate above to view request/response");
-			if (discoveryRequestEditor != null) {
-				discoveryRequestEditor.setMessage(new byte[0], true);
-				discoveryResponseEditor.setMessage(new byte[0], false);
-			}
-		}
-	}
-
 	public void analyzePostRequestAsync(IHttpRequestResponse messageInfo) {
 		if (messageInfo == null || BurpExtender.callbacks == null) return;
 
@@ -418,88 +268,11 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 				Set<String> domains = new HashSet<String>();
 				domains.add(result.getHost());
 
-				int candId = nextCandidateId++;
-				PostCandidate_littlespidy candidate = ConvertEngine_littlespidy.createCandidate(
-						messageInfo, BurpExtender.callbacks, candId);
-
 				SwingUtilities.invokeLater(() -> {
 					conversionTableModel.addResult(result);
 					domainFilterDropDown.updateDomains(domains);
-					if (candidate != null) {
-						discoveryTableModel.addCandidate(candidate);
-					}
 				});
 			}
-		}).start();
-	}
-
-	public void loadFromProxyHistory() {
-		if (BurpExtender.callbacks == null) {
-			JOptionPane.showMessageDialog(this, "Burp callbacks not available.", "Information", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
-
-		new Thread(() -> {
-			IHttpRequestResponse[] history = BurpExtender.callbacks.getProxyHistory();
-			if (history == null || history.length == 0) {
-				SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "No requests found in Proxy History.",
-						"Proxy History Empty", JOptionPane.INFORMATION_MESSAGE));
-				return;
-			}
-
-			List<PostCandidate_littlespidy> newCandidates = new ArrayList<PostCandidate_littlespidy>();
-			Set<String> seenEndpoints = new HashSet<String>();
-
-			for (IHttpRequestResponse item : history) {
-				if (item == null || item.getRequest() == null) continue;
-				IRequestInfo reqInfo = BurpExtender.callbacks.getHelpers().analyzeRequest(item);
-				if ("POST".equalsIgnoreCase(reqInfo.getMethod())) {
-					String key = (reqInfo.getUrl() != null) ? reqInfo.getUrl().toString() : "";
-					if (!key.isEmpty() && seenEndpoints.add(key)) {
-						PostCandidate_littlespidy cand = ConvertEngine_littlespidy.createCandidate(
-								item, BurpExtender.callbacks, nextCandidateId++);
-						if (cand != null) {
-							newCandidates.add(cand);
-						}
-					}
-				}
-			}
-
-			SwingUtilities.invokeLater(() -> {
-				discoveryTableModel.addCandidates(newCandidates);
-				JOptionPane.showMessageDialog(this, "Discovered and loaded " + newCandidates.size() + " unique POST endpoint(s) from Proxy History.",
-						"Load Complete", JOptionPane.INFORMATION_MESSAGE);
-			});
-		}).start();
-	}
-
-	public void convertSelectedCandidates() {
-		List<PostCandidate_littlespidy> selected = discoveryTableModel.getSelectedCandidates();
-		if (selected == null || selected.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Please select at least one POST candidate checkbox to test.",
-					"No Targets Selected", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
-
-		new Thread(() -> {
-			for (PostCandidate_littlespidy cand : selected) {
-				if (cand.getRequestResponse() != null) {
-					int resId = nextResultId++;
-					ConversionResult_littlespidy result = ConvertEngine_littlespidy.convertAndTest(
-							cand.getRequestResponse(), BurpExtender.callbacks, resId);
-					if (result != null) {
-						SwingUtilities.invokeLater(() -> {
-							conversionTableModel.addResult(result);
-							domainFilterDropDown.updateDomains(Collections.singleton(result.getHost()));
-						});
-					}
-				}
-			}
-			SwingUtilities.invokeLater(() -> {
-				subTabbedPane.setSelectedIndex(0); // Switch to Live Conversions to see results
-				JOptionPane.showMessageDialog(this, "Converted and tested " + selected.size() + " candidate(s). Switched to Live Conversions.",
-						"Conversion Finished", JOptionPane.INFORMATION_MESSAGE);
-			});
 		}).start();
 	}
 
@@ -514,15 +287,6 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		if (convGetRequestEditor != null) {
 			convGetRequestEditor.setMessage(new byte[0], true);
 			convGetResponseEditor.setMessage(new byte[0], false);
-		}
-	}
-
-	public void clearDiscovery() {
-		discoveryTableModel.clear();
-		discoveryViewerInfoLabel.setText("Select a discovered candidate above to view request/response");
-		if (discoveryRequestEditor != null) {
-			discoveryRequestEditor.setMessage(new byte[0], true);
-			discoveryResponseEditor.setMessage(new byte[0], false);
 		}
 	}
 
@@ -557,19 +321,7 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		return conversionTableModel;
 	}
 
-	public PostCandidatesTableModel_littlespidy getDiscoveryTableModel() {
-		return discoveryTableModel;
-	}
-
 	public JTable getConversionTable() {
 		return conversionTable;
-	}
-
-	public JTable getDiscoveryTable() {
-		return discoveryTable;
-	}
-
-	public JTabbedPane getSubTabbedPane() {
-		return subTabbedPane;
 	}
 }

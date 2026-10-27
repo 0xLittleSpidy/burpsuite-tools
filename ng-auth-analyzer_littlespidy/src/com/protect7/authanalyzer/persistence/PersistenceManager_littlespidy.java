@@ -490,7 +490,6 @@ public class PersistenceManager_littlespidy {
 		}
 		if (mainPanel.getConvertPanel() != null) {
 			mainPanel.getConvertPanel().clearLiveConversions();
-			mainPanel.getConvertPanel().clearDiscovery();
 		}
 		updateStatusLabel();
 		JOptionPane.showMessageDialog(mainPanel, "Session offboarded. Workspace restored to clean state.");

@@ -13,7 +13,6 @@ import burp.IBurpExtenderCallbacks;
 import burp.IExtensionHelpers;
 import burp.IHttpRequestResponse;
 import burp.IHttpService;
-import burp.IParameter;
 import burp.IRequestInfo;
 import burp.IResponseInfo;
 import com.protect7.authanalyzer.entities.CustomHttpRequestResponse_littlespidy;
@@ -215,60 +214,6 @@ public class ConvertEngine_littlespidy {
 
 		// Fallback: URL encode non-empty raw body
 		return urlEncode(body);
-	}
-
-	public static PostCandidate_littlespidy createCandidate(IHttpRequestResponse messageInfo,
-			IBurpExtenderCallbacks callbacks, int candidateId) {
-		if (messageInfo == null || messageInfo.getRequest() == null || callbacks == null) {
-			return null;
-		}
-
-		IExtensionHelpers helpers = callbacks.getHelpers();
-		IHttpService service = messageInfo.getHttpService();
-		IRequestInfo reqInfo = helpers.analyzeRequest(service, messageInfo.getRequest());
-
-		String method = reqInfo.getMethod();
-		URL url = reqInfo.getUrl();
-		String host = (url != null && url.getHost() != null) ? url.getHost() : (service != null ? service.getHost() : "");
-		String path = (url != null && url.getPath() != null) ? url.getPath() : "/";
-		String fullUrl = (url != null) ? url.toString() : host + path;
-
-		String contentType = "";
-		for (String h : reqInfo.getHeaders()) {
-			if (h.toLowerCase(Locale.ROOT).startsWith("content-type:")) {
-				contentType = h.substring(13).trim();
-				break;
-			}
-		}
-
-		List<String> paramNames = new ArrayList<String>();
-		for (IParameter p : reqInfo.getParameters()) {
-			if (p.getType() == IParameter.PARAM_BODY || p.getType() == IParameter.PARAM_JSON || p.getType() == IParameter.PARAM_MULTIPART_ATTR) {
-				paramNames.add(p.getName());
-			}
-		}
-
-		int statusCode = 0;
-		int contentLength = 0;
-		if (messageInfo.getResponse() != null) {
-			IResponseInfo respInfo = helpers.analyzeResponse(messageInfo.getResponse());
-			statusCode = respInfo.getStatusCode();
-			contentLength = messageInfo.getResponse().length - respInfo.getBodyOffset();
-		}
-
-		String auth = "None";
-		for (String h : reqInfo.getHeaders()) {
-			String lower = h.toLowerCase(Locale.ROOT);
-			if (lower.startsWith("authorization:")) {
-				auth = "Authorization Header";
-				break;
-			} else if (lower.startsWith("cookie:")) {
-				auth = "Cookie";
-			}
-		}
-
-		return new PostCandidate_littlespidy(candidateId, method, host, path, fullUrl, contentType,
-				paramNames.size(), paramNames, statusCode, contentLength, auth, messageInfo);
 	}
 
 	public static String urlEncode(String text) {

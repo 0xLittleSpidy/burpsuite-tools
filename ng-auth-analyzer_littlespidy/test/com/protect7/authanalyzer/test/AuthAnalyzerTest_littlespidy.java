@@ -370,43 +370,12 @@ public class AuthAnalyzerTest_littlespidy {
 	}
 
 	@Test
-	public void testPostCandidatesTableModelOperations() {
-		com.protect7.authanalyzer.convert.PostCandidatesTableModel_littlespidy model =
-				new com.protect7.authanalyzer.convert.PostCandidatesTableModel_littlespidy();
-		assertEquals(0, model.getRowCount());
-
-		com.protect7.authanalyzer.convert.PostCandidate_littlespidy c1 =
-				new com.protect7.authanalyzer.convert.PostCandidate_littlespidy(
-						1, "POST", "api.target.com", "/api/role", "https://api.target.com/api/role",
-						"application/json", 1, List.of("role"), 403, 45, "Bearer", null);
-
-		model.addCandidate(c1);
-		assertEquals(1, model.getRowCount());
-		assertEquals(true, model.getValueAt(0, 0));
-		assertEquals("POST", model.getValueAt(0, 2));
-		assertEquals("api.target.com", model.getValueAt(0, 3));
-		assertEquals(1, model.getSelectedCandidates().size());
-
-		model.selectAll(false);
-		assertEquals(0, model.getSelectedCandidates().size());
-
-		model.selectAll(true);
-		assertEquals(1, model.getSelectedCandidates().size());
-
-		model.clear();
-		assertEquals(0, model.getRowCount());
-	}
-
-	@Test
 	public void testConvertPostToGetPanelInitialization() {
 		com.protect7.authanalyzer.gui.convert.ConvertPostToGetPanel_littlespidy panel =
 				new com.protect7.authanalyzer.gui.convert.ConvertPostToGetPanel_littlespidy(null);
-		assertNotNull(panel.getSubTabbedPane());
-		assertEquals(2, panel.getSubTabbedPane().getTabCount());
-		assertEquals("Live Conversions", panel.getSubTabbedPane().getTitleAt(0));
-		assertEquals("POST Traffic Discovery", panel.getSubTabbedPane().getTitleAt(1));
+		assertNotNull(panel.getConversionTable());
 		assertNotNull(panel.getConversionTableModel());
-		assertNotNull(panel.getDiscoveryTableModel());
+		assertEquals(panel.getConversionTableModel(), panel.getConversionTable().getModel());
 	}
 
 	@Test
