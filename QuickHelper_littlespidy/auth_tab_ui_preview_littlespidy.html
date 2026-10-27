@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Helper (littlespidy) - Auth and Tokens Request Tab UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --accent-disabled: #8a481e;
+      --badge-completed: #388a34;
+      --badge-pending: #6e6e6e;
+      --badge-bearer: #0e639c;
+      --badge-cookie: #8b5cf6;
+      --badge-header: #0284c7;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --status-success-bg: #1e3a1e;
+      --status-success-border: #2e662e;
+      --status-success-text: #66bb6a;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --status-success-bg: #e8f5e9;
+      --status-success-border: #a5d6a7;
+      --status-success-text: #2e7d32;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo {
+      background-color: var(--accent);
+      color: #fff;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    .burp-title {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 13px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--btn-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--btn-hover);
+      color: var(--text-bright);
+    }
+
+    /* Suite Tabs */
+    .suite-tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+      gap: 2px;
+    }
+    .suite-tab {
+      padding: 7px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-size: 12px;
+      user-select: none;
+    }
+    .suite-tab:hover {
+      color: var(--text-bright);
+    }
+    .suite-tab.active {
+      color: var(--text-bright);
+      border-bottom: 2px solid var(--accent);
+      font-weight: 600;
+    }
+
+    /* Main Container */
+    .main-workspace {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      padding: 8px 12px;
+      gap: 8px;
+    }
+
+    /* Repeater / Tool Header */
+    .tool-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 12px;
+    }
+    .tool-request-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+    .method-tag {
+      background: #007acc;
+      color: #fff;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+    .url-display {
+      font-family: monospace;
+      color: var(--text-bright);
+      font-size: 12px;
+    }
+
+    /* Split Pane for Request and Response */
+    .panes-container {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .request-pane, .response-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* Sub Tabs inside Request Pane */
+    .pane-tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px;
+      align-items: center;
+    }
+    .pane-tab {
+      padding: 5px 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      border-bottom: 2px solid transparent;
+      user-select: none;
+    }
+    .pane-tab:hover {
+      color: var(--text-bright);
+    }
+    .pane-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      font-weight: bold;
+    }
+
+    /* Content inside Auth and Tokens Tab */
+    .auth-tab-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 10px;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    /* Quick Action Buttons Bar */
+    .quick-actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+    .bar-label {
+      font-weight: bold;
+      color: var(--text-bright);
+      margin-right: 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn {
+      background: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn:hover {
+      background: var(--btn-hover);
+      border-color: var(--text-muted);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Status Banner */
+    .status-banner {
+      background: var(--status-success-bg);
+      border: 1px solid var(--status-success-border);
+      color: var(--status-success-text);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 28px;
+    }
+    .status-text {
+      display: inline-block;
+    }
+    .status-time {
+      font-size: 10px;
+      opacity: 0.8;
+      font-family: monospace;
+    }
+
+    /* Table Container */
+    .table-container {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: auto;
+      background: var(--bg-dark);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    table.data-table th {
+      background: var(--bg-darker);
+      color: var(--text-bright);
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      font-weight: 600;
+    }
+    table.data-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    table.data-table tr:nth-child(even) {
+      background: var(--row-even);
+    }
+    table.data-table tr:nth-child(odd) {
+      background: var(--row-odd);
+    }
+    table.data-table tr.selected {
+      background: var(--bg-selected) !important;
+      color: #ffffff;
+    }
+    table.data-table tr:hover:not(.selected) {
+      background: var(--bg-hover);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-bearer {
+      background: rgba(14, 99, 156, 0.25);
+      color: #58a6ff;
+      border: 1px solid rgba(14, 99, 156, 0.5);
+    }
+    .badge-cookie {
+      background: rgba(139, 92, 246, 0.25);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.5);
+    }
+    .badge-header {
+      background: rgba(2, 132, 199, 0.25);
+      color: #38bdf8;
+      border: 1px solid rgba(2, 132, 199, 0.5);
+    }
+
+    .value-cell {
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 280px;
+    }
+    .btn-copy-small {
+      padding: 2px 8px;
+      font-size: 10px;
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .btn-copy-small:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Detail Inspector Panel at bottom */
+    .detail-panel {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 140px;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .detail-title {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+    .detail-textarea {
+      flex: 1;
+      width: 100%;
+      height: 60px;
+      background: var(--code-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 6px;
+      font-family: monospace;
+      font-size: 11px;
+      resize: none;
+      word-break: break-all;
+    }
+
+    /* Preset switcher */
+    .scenario-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+    .scenario-picker select {
+      background: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 8px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Suite Header -->
+  <header class="burp-header">
+    <div class="title-area">
+      <div class="burp-logo">BURP</div>
+      <div class="burp-title">Burp Suite Professional - Quick Helper [littlespidy] Preview</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="scenario-picker">
+        <label for="scenarioSelect">Sample Request:</label>
+        <select id="scenarioSelect" onchange="changeScenario(this.value)">
+          <option value="bearer_and_cookies">Bearer JWT + Session Cookies</option>
+          <option value="apikey_only">X-API-Key + CSRF Token</option>
+          <option value="basic_auth">Basic Auth + Auth0 Cookies</option>
+          <option value="no_auth">Unauthenticated Request (Empty State)</option>
+        </select>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+  </header>
+
+  <!-- Burp Suite Main Tabs -->
+  <nav class="suite-tabs">
+    <div class="suite-tab">Dashboard</div>
+    <div class="suite-tab">Target</div>
+    <div class="suite-tab">Proxy</div>
+    <div class="suite-tab">Intruder</div>
+    <div class="suite-tab active">Repeater</div>
+    <div class="suite-tab">Collaborator</div>
+    <div class="suite-tab">Quick Helper</div>
+  </nav>
+
+  <!-- Workspace Container -->
+  <main class="main-workspace">
+    <div class="tool-header-bar">
+      <div class="tool-request-info">
+        <span class="method-tag" id="displayMethod">POST</span>
+        <span class="url-display" id="displayUrl">https://api.internal.target.local/v2/user/profile</span>
+      </div>
+      <div style="color: var(--text-muted); font-size: 11px;">
+        Editor Mode: ExtensionProvidedHttpRequestEditor
+      </div>
+    </div>
+
+    <div class="panes-container">
+      <!-- Request Pane -->
+      <section class="request-pane">
+        <div class="pane-tabs">
+          <div class="pane-tab" onclick="switchPaneTab(this, 'pretty')">Pretty</div>
+          <div class="pane-tab" onclick="switchPaneTab(this, 'raw')">Raw</div>
+          <div class="pane-tab" onclick="switchPaneTab(this, 'hex')">Hex</div>
+          <div class="pane-tab" onclick="switchPaneTab(this, 'headers')">Headers</div>
+          <div class="pane-tab active" onclick="switchPaneTab(this, 'auth')">Auth &amp; Tokens</div>
+        </div>
+
+        <!-- Auth and Tokens Sub-tab Content -->
+        <div class="auth-tab-content" id="authTabContent">
+          
+          <!-- Top Quick Actions Bar -->
+          <div class="quick-actions-bar">
+            <span class="bar-label">Quick Copy:</span>
+            <button class="btn btn-primary" id="btnCopyBearer" onclick="copyBearerToken()">
+              Copy Bearer Token
+            </button>
+            <button class="btn" id="btnCopyAuthHeader" onclick="copyAuthHeader()">
+              Copy Auth Header
+            </button>
+            <button class="btn" id="btnCopyCookieHeader" onclick="copyCookieHeader()">
+              Copy Cookie Header
+            </button>
+            <button class="btn" id="btnCopyAllCookies" onclick="copyAllCookies()">
+              Copy All Cookies
+            </button>
+          </div>
+
+          <!-- Dynamic Status Banner -->
+          <div class="status-banner" id="statusBanner">
+            <span class="status-text" id="statusText">Ready - 4 session tokens and cookies detected</span>
+            <span class="status-time" id="statusTime">13:25:00</span>
+          </div>
+
+          <!-- Extracted Items Table -->
+          <div class="table-container">
+            <table class="data-table" id="dataTable">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 160px;">Name / Key</th>
+                  <th style="width: 80px;">Length</th>
+                  <th>Value Preview</th>
+                  <th style="width: 90px; text-align: center;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <!-- Rows injected dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Detail View of Selected Item -->
+          <div class="detail-panel">
+            <div class="detail-header">
+              <span class="detail-title" id="detailTitle">Selected Item: Bearer Token (raw)</span>
+              <button class="btn-copy-small" onclick="copySelectedDetail()">Copy Selected Value</button>
+            </div>
+            <textarea class="detail-textarea" id="detailTextArea" readonly></textarea>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Response Pane (Mock) -->
+      <section class="response-pane">
+        <div class="pane-tabs">
+          <div class="pane-tab active">Pretty</div>
+          <div class="pane-tab">Raw</div>
+          <div class="pane-tab">Hex</div>
+          <div class="pane-tab">Headers</div>
+        </div>
+        <div style="flex: 1; padding: 10px; background: var(--code-bg); font-family: monospace; font-size: 11px; color: #a6e22e; overflow: auto;">
+          HTTP/2 200 OK<br>
+          Content-Type: application/json; charset=utf-8<br>
+          Date: Tue, 27 Oct 2026 07:55:00 GMT<br>
+          Server: cloudflare<br><br>
+          {<br>
+          &nbsp;&nbsp;"status": "success",<br>
+          &nbsp;&nbsp;"user_id": 98124,<br>
+          &nbsp;&nbsp;"authenticated": true<br>
+          }
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Scenarios data
+    const scenarios = {
+      bearer_and_cookies: {
+        method: "POST",
+        url: "https://api.internal.target.local/v2/user/profile",
+        bearer: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        authHeader: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        cookieHeader: "session_id=s%3A_z0M5Q2N8rP9L.1098410294; csrf_token=ab7f920bc48109d; user_pref=dark_theme",
+        items: [
+          {
+            type: "Bearer Token",
+            badgeClass: "badge-bearer",
+            name: "Bearer (raw token)",
+            value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          {
+            type: "Auth Header",
+            badgeClass: "badge-header",
+            name: "Authorization",
+            value: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          {
+            type: "Cookie Header",
+            badgeClass: "badge-cookie",
+            name: "Cookie (complete)",
+            value: "session_id=s%3A_z0M5Q2N8rP9L.1098410294; csrf_token=ab7f920bc48109d; user_pref=dark_theme"
+          },
+          {
+            type: "Cookie",
+            badgeClass: "badge-cookie",
+            name: "session_id",
+            value: "s%3A_z0M5Q2N8rP9L.1098410294"
+          },
+          {
+            type: "Cookie",
+            badgeClass: "badge-cookie",
+            name: "csrf_token",
+            value: "ab7f920bc48109d"
+          },
+          {
+            type: "Cookie",
+            badgeClass: "badge-cookie",
+            name: "user_pref",
+            value: "dark_theme"
+          }
+        ]
+      },
+      apikey_only: {
+        method: "GET",
+        url: "https://api.partner.service.com/api/v1/metrics",
+        bearer: null,
+        authHeader: null,
+        cookieHeader: "app_session=99104fa28",
+        items: [
+          {
+            type: "Custom Header",
+            badgeClass: "badge-header",
+            name: "X-API-Key",
+            value: "sec_live_92048f029a01e40291ba90"
+          },
+          {
+            type: "Custom Header",
+            badgeClass: "badge-header",
+            name: "X-Auth-Token",
+            value: "tok_881920acbfe"
+          },
+          {
+            type: "Cookie Header",
+            badgeClass: "badge-cookie",
+            name: "Cookie (complete)",
+            value: "app_session=99104fa28"
+          },
+          {
+            type: "Cookie",
+            badgeClass: "badge-cookie",
+            name: "app_session",
+            value: "99104fa28"
+          }
+        ]
+      },
+      basic_auth: {
+        method: "GET",
+        url: "https://admin.staging.internal/admin/dashboard",
+        bearer: null,
+        authHeader: "Basic YWRtaW46U3VwZXJTZWNyZXRQYXNzISE=",
+        cookieHeader: "auth0=s%3Asome_random_secret_cookie_payload; JSESSIONID=ABCD1234EF5678",
+        items: [
+          {
+            type: "Auth Header",
+            badgeClass: "badge-header",
+            name: "Authorization",
+            value: "Basic YWRtaW46U3VwZXJTZWNyZXRQYXNzISE="
+          },
+          {
+            type: "Cookie Header",
+            badgeClass: "badge-cookie",
+            name: "Cookie (complete)",
+            value: "auth0=s%3Asome_random_secret_cookie_payload; JSESSIONID=ABCD1234EF5678"
+          },
+          {
+            type: "Cookie",
+            badgeClass: "badge-cookie",
+            name: "auth0",
+            value: "s%3Asome_random_secret_cookie_payload"
+          },
+          {
+            type: "Cookie",
+            badgeClass: "badge-cookie",
+            name: "JSESSIONID",
+            value: "ABCD1234EF5678"
+          }
+        ]
+      },
+      no_auth: {
+        method: "GET",
+        url: "https://public.example.com/robots.txt",
+        bearer: null,
+        authHeader: null,
+        cookieHeader: null,
+        items: []
+      }
+    };
+
+    let currentScenario = scenarios.bearer_and_cookies;
+    let selectedIndex = 0;
+
+    function renderCurrentScenario() {
+      document.getElementById('displayMethod').innerText = currentScenario.method;
+      document.getElementById('displayUrl').innerText = currentScenario.url;
+
+      const btnBearer = document.getElementById('btnCopyBearer');
+      const btnAuth = document.getElementById('btnCopyAuthHeader');
+      const btnCookie = document.getElementById('btnCopyCookieHeader');
+      const btnAllCookies = document.getElementById('btnCopyAllCookies');
+
+      btnBearer.disabled = !currentScenario.bearer;
+      btnAuth.disabled = !currentScenario.authHeader;
+      btnCookie.disabled = !currentScenario.cookieHeader;
+      btnAllCookies.disabled = !currentScenario.cookieHeader;
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      if (currentScenario.items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">
+              No authorization headers or cookies detected in this request.
+            </td>
+          </tr>
+        `;
+        document.getElementById('detailTitle').innerText = "Selected Item: (None)";
+        document.getElementById('detailTextArea').value = "";
+        updateStatus("No authentication tokens or cookies detected in request");
+        return;
+      }
+
+      selectedIndex = 0;
+
+      currentScenario.items.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        if (index === selectedIndex) {
+          tr.classList.add('selected');
+        }
+
+        tr.onclick = () => selectItem(index);
+
+        tr.innerHTML = `
+          <td><span class="badge ${item.badgeClass}">${item.type}</span></td>
+          <td style="font-weight: 600;">${item.name}</td>
+          <td style="font-family: monospace;">${item.value.length} chars</td>
+          <td class="value-cell" title="${item.value}">${item.value}</td>
+          <td style="text-align: center;">
+            <button class="btn-copy-small" onclick="event.stopPropagation(); copyDirect('${escapeHtml(item.name)}', '${escapeHtml(item.value)}')">Copy</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      selectItem(0);
+      updateStatus("Ready - " + currentScenario.items.length + " item(s) detected");
+    }
+
+    function selectItem(index) {
+      selectedIndex = index;
+      const rows = document.querySelectorAll('#tableBody tr');
+      rows.forEach((r, i) => {
+        if (i === index) {
+          r.classList.add('selected');
+        } else {
+          r.classList.remove('selected');
+        }
+      });
+
+      const item = currentScenario.items[index];
+      if (item) {
+        document.getElementById('detailTitle').innerText = "Selected Item: " + item.name + " (" + item.type + ")";
+        document.getElementById('detailTextArea').value = item.value;
+      }
+    }
+
+    function updateStatus(message) {
+      document.getElementById('statusText').innerText = message;
+      const now = new Date();
+      const timeStr = String(now.getHours()).padStart(2, '0') + ':' +
+                      String(now.getMinutes()).padStart(2, '0') + ':' +
+                      String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('statusTime').innerText = timeStr;
+    }
+
+    function copyBearerToken() {
+      if (currentScenario.bearer) {
+        navigator.clipboard.writeText(currentScenario.bearer).catch(() => {});
+        updateStatus("Copied Bearer Token to clipboard (" + currentScenario.bearer.length + " chars)");
+      }
+    }
+
+    function copyAuthHeader() {
+      if (currentScenario.authHeader) {
+        navigator.clipboard.writeText(currentScenario.authHeader).catch(() => {});
+        updateStatus("Copied Authorization Header to clipboard (" + currentScenario.authHeader.length + " chars)");
+      }
+    }
+
+    function copyCookieHeader() {
+      if (currentScenario.cookieHeader) {
+        navigator.clipboard.writeText(currentScenario.cookieHeader).catch(() => {});
+        updateStatus("Copied Complete Cookie Header to clipboard (" + currentScenario.cookieHeader.length + " chars)");
+      }
+    }
+
+    function copyAllCookies() {
+      if (currentScenario.cookieHeader) {
+        navigator.clipboard.writeText(currentScenario.cookieHeader).catch(() => {});
+        updateStatus("Copied All Cookies to clipboard");
+      }
+    }
+
+    function copyDirect(name, value) {
+      navigator.clipboard.writeText(value).catch(() => {});
+      updateStatus("Copied " + name + " to clipboard (" + value.length + " chars)");
+    }
+
+    function copySelectedDetail() {
+      const val = document.getElementById('detailTextArea').value;
+      if (val) {
+        navigator.clipboard.writeText(val).catch(() => {});
+        updateStatus("Copied selected item to clipboard (" + val.length + " chars)");
+      }
+    }
+
+    function changeScenario(key) {
+      currentScenario = scenarios[key];
+      renderCurrentScenario();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    function switchPaneTab(element, tabName) {
+      const tabs = document.querySelectorAll('.pane-tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;")
+                .replace(/'/g, "\\'")
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+    }
+
+    // Initialize on load
+    window.onload = function() {
+      renderCurrentScenario();
+    };
+  </script>
+</body>
+</html>

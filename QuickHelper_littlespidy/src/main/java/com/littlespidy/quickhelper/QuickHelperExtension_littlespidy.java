@@ -3,8 +3,10 @@ package com.littlespidy.quickhelper;
 
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
+import com.littlespidy.quickhelper.editor.AuthHttpRequestEditorProvider_littlespidy;
 import com.littlespidy.quickhelper.menu.QuickHelperContextMenu_littlespidy;
 import com.littlespidy.quickhelper.menu.QuickHelperMenuBar_littlespidy;
+import com.littlespidy.quickhelper.service.AuthTokenExtractorService_littlespidy;
 import com.littlespidy.quickhelper.service.ClipboardService_littlespidy;
 import com.littlespidy.quickhelper.service.DomainExtractorService_littlespidy;
 import com.littlespidy.quickhelper.service.ExtensionCatalogService_littlespidy;
@@ -28,6 +30,15 @@ public class QuickHelperExtension_littlespidy implements BurpExtension {
         DomainExtractorService_littlespidy extractorService = new DomainExtractorService_littlespidy(api, clipboardService);
         ExtensionCatalogService_littlespidy catalogService = new ExtensionCatalogService_littlespidy();
         ExtensionDownloaderService_littlespidy downloaderService = new ExtensionDownloaderService_littlespidy(api);
+        AuthTokenExtractorService_littlespidy authExtractorService = new AuthTokenExtractorService_littlespidy();
+
+        // Register Request Editor Tab: Auth & Tokens
+        AuthHttpRequestEditorProvider_littlespidy authEditorProvider = new AuthHttpRequestEditorProvider_littlespidy(
+                api,
+                clipboardService,
+                authExtractorService
+        );
+        api.userInterface().registerHttpRequestEditorProvider(authEditorProvider);
 
         // Register Suite Tab: Quick Helper (Extensions Downloader + Domain Extractor)
         QuickHelperRootTab_littlespidy rootTab = new QuickHelperRootTab_littlespidy(
@@ -58,8 +69,10 @@ public class QuickHelperExtension_littlespidy implements BurpExtension {
         api.logging().logToOutput("==================================================");
         api.logging().logToOutput("  " + EXTENSION_NAME + " loaded successfully");
         api.logging().logToOutput("  Suite Tab: 'Quick Helper' registered");
+        api.logging().logToOutput("  Request Editor Tab: 'Auth & Tokens' registered");
         api.logging().logToOutput("  Menu: Registered in top Menu Bar and Context Menu");
         api.logging().logToOutput("  Features:");
+        api.logging().logToOutput("    - Request Editor Tab: One-Click Copy for Bearer, Auth Header, Cookies");
         api.logging().logToOutput("    - Single-Click Extension Downloader (" + catalogService.getExtensionCount() + " extensions)");
         api.logging().logToOutput("    - Copy All Domain Names");
         api.logging().logToOutput("    - Copy All Domain Names with HTTP Schema");

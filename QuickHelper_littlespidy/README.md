@@ -4,7 +4,18 @@ Quick Helper is a high-performance Burp Suite extension written in Java using th
 
 ## Key Features
 
-1. **Single-Click Extension Downloader**:
+1. **Request Editor Tab ('Auth & Tokens')**:
+   - Registers a dedicated Request Editor tab in Burp Suite's HTTP request viewer/editor across all Burp tools (Repeater, Proxy HTTP history, Logger, Target SiteMap).
+   - Single-click quick copy buttons for:
+     - **Copy Bearer Token**: Extracts the pure Bearer JWT / access token string stripped of scheme prefix.
+     - **Copy Auth Header**: Copies the full `Authorization` header value.
+     - **Copy Cookie Header**: Copies the complete raw `Cookie` header string.
+     - **Copy All Cookies**: Copies all cookies formatted as key-value pairs.
+   - Interactive table listing all parsed tokens, headers, and individual cookies with type badges, lengths, value previews, and instant copy actions.
+   - In-tab dynamic status indicator confirming copy operations and character counts.
+   - Detailed item inspector panel allowing full review of untruncated tokens.
+
+2. **Single-Click Extension Downloader**:
    - Bundles a comprehensive catalog of all 21 official Burp Suite extensions published by littlespidy.
    - One-click action to download all extensions (`.jar` files) directly to a local directory (`~/Downloads/burpsuite-extensions/` or custom folder).
    - Real-time download progress tracking, speed calculation, status badges, and table filtering.
@@ -37,14 +48,17 @@ Quick Helper is a high-performance Burp Suite extension written in Java using th
 
 ## UI and Navigation
 
-The extension registers across three key locations in Burp Suite:
+The extension registers across four key locations in Burp Suite:
 
-### 1. Dedicated Suite Tab ("Quick Helper")
+### 1. HTTP Request Editor Tab ("Auth & Tokens")
+Appears directly in the request editor pane alongside Pretty, Raw, Hex, and Headers across Repeater, Proxy HTTP history, Logger, and Target Site Map. Tester can view detected auth tokens, bearer credentials, and parsed cookies, and copy them with a single click.
+
+### 2. Dedicated Suite Tab ("Quick Helper")
 A dedicated top-level tab in Burp Suite containing two sub-tabs:
 - **Extensions Downloader**: Table of all 21 extensions with one-click "Download All Extensions (Single Click)", selective downloading, destination directory picker, progress bar, activity log console, and Burp installation instructions.
 - **Domain Extractor**: Visual interface with checkboxes for HTTP schema and in-scope filtering, domain extraction, and formatted text output area.
 
-### 2. Top Menu Bar
+### 3. Top Menu Bar
 A dedicated **Quick Helper** menu appears on Burp Suite's top navigation bar:
 - Quick Helper -> Download All Extensions (Single Click)
 - Quick Helper -> Open Extension Downloader Tab
@@ -55,7 +69,7 @@ A dedicated **Quick Helper** menu appears on Burp Suite's top navigation bar:
 - Quick Helper -> Copy In-Scope Domain Names
 - Quick Helper -> Copy In-Scope Domain Names with HTTP Schema
 
-### 3. Context Menu (Right-Click)
+### 4. Context Menu (Right-Click)
 Right-clicking anywhere across Burp Suite (Target Site Map tree/table, Proxy HTTP History, Repeater, Logger) displays the **Quick Helper** submenu with the same actions.
 
 ## Building and Packaging
