@@ -644,9 +644,16 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         }
 
         Window owner = SwingUtilities.getWindowAncestor(this);
+        List<ImportedCollection_littlespidy> allCols = (collectionsSupplier != null) ? collectionsSupplier.get() : this.collections;
+        if (allCols == null || allCols.isEmpty()) {
+            allCols = this.collections;
+        }
+
         FillParametersDialog_littlespidy dialog = new FillParametersDialog_littlespidy(
                 owner,
                 item.endpoint,
+                item.collection,
+                allCols,
                 targetBaseUrl,
                 currentRaw,
                 sessionStore,

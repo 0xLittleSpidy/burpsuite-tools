@@ -3,6 +3,10 @@ package com.littlespidy.apiinspector.ui;
 
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
 import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -421,25 +425,21 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
         rebuildParameterLists();
     }
 
-    public synchronized void rebuildParameterLists() {
-        queryParamsList.clear();
-        pathParamsList.clear();
-        bodyParamsList.clear();
+    public static class DiscoveredParameters {
+        public final Map<String, ParameterEntry> queryParams = new LinkedHashMap<>();
+        public final Map<String, ParameterEntry> pathParams = new LinkedHashMap<>();
+        public final Map<String, ParameterEntry> bodyParams = new LinkedHashMap<>();
+    }
 
-        CollectionComboItem sel = (CollectionComboItem) collectionSelector.getSelectedItem();
-        List<ImportedCollection_littlespidy> targetCols = new ArrayList<>();
-        if (sel == null || sel.collection == null) {
-            targetCols.addAll(collections);
-        } else {
-            targetCols.add(sel.collection);
-        }
-
-        Map<String, ParameterEntry> queryMap = new LinkedHashMap<>();
-        Map<String, ParameterEntry> pathMap = new LinkedHashMap<>();
-        Map<String, ParameterEntry> bodyMap = new LinkedHashMap<>();
+    public static DiscoveredParameters collectParameters(List<ImportedCollection_littlespidy> targetCols) {
+        DiscoveredParameters result = new DiscoveredParameters();
+        if (targetCols == null) return result;
 
         for (ImportedCollection_littlespidy col : targetCols) {
+            if (col == null || col.getEndpoints() == null) continue;
             for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
+                if (ep == null) continue;
+                ep.ensureParametersDiscovered();
                 String epDesc = ep.getMethod() + " " + ep.getPath();
 
                 // 1. Query parameters from endpoint queryParams map
@@ -450,7 +450,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         name = name.trim();
                         String val = qEntry.getValue() != null ? qEntry.getValue() : "";
 
-                        ParameterEntry p = queryMap.computeIfAbsent(name, ParameterEntry::new);
+                        ParameterEntry p = result.queryParams.computeIfAbsent(name, ParameterEntry::new);
                         p.addEndpoint(epDesc, ep);
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
@@ -474,7 +474,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                             String qName = eq > 0 ? pair.substring(0, eq).trim() : pair.trim();
                             String qVal = eq > 0 && eq < pair.length() - 1 ? pair.substring(eq + 1).trim() : "";
                             if (!qName.isBlank()) {
-                                ParameterEntry p = queryMap.computeIfAbsent(qName, ParameterEntry::new);
+                                ParameterEntry p = result.queryParams.computeIfAbsent(qName, ParameterEntry::new);
                                 p.addEndpoint(epDesc, ep);
                                 if (p.sampleValue.isEmpty() && !qVal.isEmpty()) {
                                     p.sampleValue = qVal;
@@ -495,7 +495,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         name = name.trim();
                         String val = pEntry.getValue() != null ? pEntry.getValue() : "";
 
-                        ParameterEntry p = pathMap.computeIfAbsent(name, ParameterEntry::new);
+                        ParameterEntry p = result.pathParams.computeIfAbsent(name, ParameterEntry::new);
                         p.addEndpoint(epDesc, ep);
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
@@ -517,7 +517,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         String name = m.group(1) != null ? m.group(1) : m.group(2);
                         if (name != null && !name.isBlank()) {
                             name = name.trim();
-                            ParameterEntry p = pathMap.computeIfAbsent(name, ParameterEntry::new);
+                            ParameterEntry p = result.pathParams.computeIfAbsent(name, ParameterEntry::new);
                             p.addEndpoint(epDesc, ep);
                             if (p.dataType == null) {
                                 p.dataType = "string";
@@ -534,7 +534,7 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         name = name.trim();
                         String val = bEntry.getValue() != null ? bEntry.getValue() : "";
 
-                        ParameterEntry p = bodyMap.computeIfAbsent(name, ParameterEntry::new);
+                        ParameterEntry p = result.bodyParams.computeIfAbsent(name, ParameterEntry::new);
                         p.addEndpoint(epDesc, ep);
                         if (p.sampleValue.isEmpty() && !val.isEmpty()) {
                             p.sampleValue = val;
@@ -547,12 +547,73 @@ public class ParameterCollectorTab_littlespidy extends JPanel {
                         }
                     }
                 }
+
+                // 6. Body parameters from requestBodySample (JSON / form-encoded)
+                if (ep.getRequestBodySample() != null && !ep.getRequestBodySample().isBlank()) {
+                    String sample = ep.getRequestBodySample().trim();
+                    if (sample.startsWith("{") || sample.startsWith("[")) {
+                        try {
+                            JsonElement el = JsonParser.parseString(sample);
+                            extractJsonParamsRecursively(el, "", result.bodyParams, epDesc, ep);
+                        } catch (Exception ignored) {}
+                    }
+                }
             }
         }
+        return result;
+    }
 
-        queryParamsList.addAll(queryMap.values());
-        pathParamsList.addAll(pathMap.values());
-        bodyParamsList.addAll(bodyMap.values());
+    private static void extractJsonParamsRecursively(
+            JsonElement el,
+            String prefix,
+            Map<String, ParameterEntry> bodyMap,
+            String epDesc,
+            DiscoveredEndpoint_littlespidy ep) {
+        if (el == null || el.isJsonNull()) return;
+        if (el.isJsonObject()) {
+            JsonObject obj = el.getAsJsonObject();
+            for (Map.Entry<String, JsonElement> e : obj.entrySet()) {
+                String key = e.getKey();
+                String fullPath = prefix.isEmpty() ? key : prefix + "." + key;
+                JsonElement v = e.getValue();
+                if (v.isJsonPrimitive()) {
+                    JsonPrimitive prim = v.getAsJsonPrimitive();
+                    ParameterEntry p = bodyMap.computeIfAbsent(fullPath, ParameterEntry::new);
+                    p.addEndpoint(epDesc, ep);
+                    if (p.sampleValue.isEmpty()) {
+                        p.sampleValue = prim.getAsString();
+                    }
+                    if (prim.isBoolean()) p.dataType = "boolean";
+                    else if (prim.isNumber()) p.dataType = "number";
+                    else p.dataType = "string";
+                } else if (v.isJsonObject()) {
+                    extractJsonParamsRecursively(v, fullPath, bodyMap, epDesc, ep);
+                } else if (v.isJsonArray()) {
+                    ParameterEntry p = bodyMap.computeIfAbsent(fullPath, ParameterEntry::new);
+                    p.addEndpoint(epDesc, ep);
+                    p.dataType = "array";
+                }
+            }
+        }
+    }
+
+    public synchronized void rebuildParameterLists() {
+        queryParamsList.clear();
+        pathParamsList.clear();
+        bodyParamsList.clear();
+
+        CollectionComboItem sel = (CollectionComboItem) collectionSelector.getSelectedItem();
+        List<ImportedCollection_littlespidy> targetCols = new ArrayList<>();
+        if (sel == null || sel.collection == null) {
+            targetCols.addAll(collections);
+        } else {
+            targetCols.add(sel.collection);
+        }
+
+        DiscoveredParameters discovered = collectParameters(targetCols);
+        queryParamsList.addAll(discovered.queryParams.values());
+        pathParamsList.addAll(discovered.pathParams.values());
+        bodyParamsList.addAll(discovered.bodyParams.values());
 
         queryTableModel.fireTableDataChanged();
         pathTableModel.fireTableDataChanged();

@@ -652,7 +652,23 @@
             </div>
             <div class="modal-body">
                 <div style="background-color: var(--table-stripe); padding: 8px 10px; border-radius: 4px; border: 1px solid var(--border-color);">
-                    <strong>Parameter Value Configuration:</strong> Edit Path, Query, or Body parameter values. Values synchronize into the HTTP Request in real-time on Apply or OK.
+                    <strong>Parameter Value Configuration:</strong> Parameters are auto-extracted matching Parameter Collector. Pre-filled values reflect the active request, while empty parameters can be filled and applied in-place.
+                </div>
+
+                <!-- Collection Selector Toolbar (Matching Parameter Collector) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 2px; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: bold;">Collection:</label>
+                        <select class="select-dropdown" id="modal-collection-select" onchange="renderModalParameters()" style="width: 250px;">
+                            <option value="ALL">[All Imported Collections]</option>
+                            <option value="Customer Management API" selected>Customer Management API (3)</option>
+                            <option value="Legacy Inventory API">Legacy Inventory API (2)</option>
+                        </select>
+                        <button class="btn" onclick="renderModalParameters()">Refresh</button>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-color); font-style: italic;">
+                        Notice: Custom headers, cookies, and tokens are preserved in-place
+                    </div>
                 </div>
 
                 <!-- Section Tabs with Dynamic Empty vs Filled Badges -->
@@ -948,100 +964,148 @@
             loadSelectedIntoEditor();
         }
 
-        /* Fill Parameters Modal Logic */
+        /* Fill Parameters Modal Logic (Matching Parameter Collector Discovery) */
         function openFillParamsDialog() {
             const ep = sampleEndpoints[selectedIndex];
             document.getElementById("fill-params-title").innerText = `Fill Parameters - ${ep.method} ${ep.path}`;
+            const colSelect = document.getElementById("modal-collection-select");
+            colSelect.value = ep.collection;
+            renderModalParameters();
+            document.getElementById("fill-params-modal").style.display = "flex";
+        }
 
-            // Populate Path
+        function renderModalParameters() {
+            const ep = sampleEndpoints[selectedIndex];
+            const colSelect = document.getElementById("modal-collection-select");
+            const targetCol = colSelect ? colSelect.value : ep.collection;
+
+            // 1. Gather all unique parameters from selected collection(s) (Matching Parameter Collector)
+            const targetEndpoints = targetCol === "ALL" 
+                ? sampleEndpoints 
+                : sampleEndpoints.filter(e => e.collection === targetCol);
+
+            const discoveredPath = new Set();
+            const discoveredQuery = new Set();
+            const discoveredBody = new Set();
+
+            targetEndpoints.forEach(item => {
+                Object.keys(item.pathParams || {}).forEach(k => discoveredPath.add(k));
+                Object.keys(item.queryParams || {}).forEach(k => discoveredQuery.add(k));
+                Object.keys(item.bodyParams || {}).forEach(k => discoveredBody.add(k));
+            });
+
+            // 2. Populate Path Parameters (Active first, then collection-wide Empty)
             const pathBody = document.getElementById("params-path-body");
             pathBody.innerHTML = "";
-            const pathKeys = Object.keys(ep.pathParams || {});
             let pathEmpty = 0;
-            pathKeys.forEach(k => {
+            let pathTotal = 0;
+            const renderedPath = new Set();
+
+            // Active request path params
+            Object.keys(ep.pathParams || {}).forEach(k => {
+                renderedPath.add(k);
+                pathTotal++;
                 const val = ep.pathParams[k] || "";
                 const isEmpty = !val || val.includes("{") || val.includes(":");
                 if (isEmpty) pathEmpty++;
-                const statusBadge = isEmpty 
-                    ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
-                    : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
-
-                const tr = document.createElement("tr");
-                tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
-                tr.setAttribute("data-param", k.toLowerCase());
-                tr.innerHTML = `
-                    <td><strong>${k}</strong></td>
-                    <td>string</td>
-                    <td>${statusBadge}</td>
-                    <td><input type="text" id="input-path-${k}" value="${val}" oninput="onParamInput(this)"></td>
-                `;
-                pathBody.appendChild(tr);
+                appendParamRow(pathBody, "path", k, val, isEmpty, "string");
             });
-            document.getElementById("count-path").innerText = `${pathEmpty} empty, ${pathKeys.length - pathEmpty} filled`;
-            if (pathKeys.length === 0) {
-                pathBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No path parameters defined</td></tr>`;
+
+            // Collection-wide discovered path params
+            discoveredPath.forEach(k => {
+                if (!renderedPath.has(k)) {
+                    renderedPath.add(k);
+                    pathTotal++;
+                    pathEmpty++;
+                    appendParamRow(pathBody, "path", k, "", true, "string");
+                }
+            });
+
+            document.getElementById("count-path").innerText = `${pathEmpty} empty, ${pathTotal - pathEmpty} filled`;
+            if (pathTotal === 0) {
+                pathBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No path parameters found in collection</td></tr>`;
                 document.getElementById("count-path").innerText = "0";
             }
 
-            // Populate Query
+            // 3. Populate Query Parameters (Active first, then collection-wide Empty)
             const queryBody = document.getElementById("params-query-body");
             queryBody.innerHTML = "";
-            const queryKeys = Object.keys(ep.queryParams || {});
             let queryEmpty = 0;
-            queryKeys.forEach(k => {
+            let queryTotal = 0;
+            const renderedQuery = new Set();
+
+            Object.keys(ep.queryParams || {}).forEach(k => {
+                renderedQuery.add(k);
+                queryTotal++;
                 const val = ep.queryParams[k] || "";
                 const isEmpty = !val;
                 if (isEmpty) queryEmpty++;
-                const statusBadge = isEmpty 
-                    ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
-                    : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
-
-                const tr = document.createElement("tr");
-                tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
-                tr.setAttribute("data-param", k.toLowerCase());
-                tr.innerHTML = `
-                    <td><strong>${k}</strong></td>
-                    <td>string</td>
-                    <td>${statusBadge}</td>
-                    <td><input type="text" id="input-query-${k}" value="${val}" oninput="onParamInput(this)"></td>
-                `;
-                queryBody.appendChild(tr);
+                appendParamRow(queryBody, "query", k, val, isEmpty, "string");
             });
-            document.getElementById("count-query").innerText = `${queryEmpty} empty, ${queryKeys.length - queryEmpty} filled`;
-            if (queryKeys.length === 0) {
-                queryBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No query parameters defined</td></tr>`;
+
+            discoveredQuery.forEach(k => {
+                if (!renderedQuery.has(k)) {
+                    renderedQuery.add(k);
+                    queryTotal++;
+                    queryEmpty++;
+                    appendParamRow(queryBody, "query", k, "", true, "string");
+                }
+            });
+
+            document.getElementById("count-query").innerText = `${queryEmpty} empty, ${queryTotal - queryEmpty} filled`;
+            if (queryTotal === 0) {
+                queryBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No query parameters found in collection</td></tr>`;
                 document.getElementById("count-query").innerText = "0";
             }
 
-            // Populate Body
+            // 4. Populate Body Parameters (Active first, then collection-wide Empty)
             const bodyBody = document.getElementById("params-body-body");
             bodyBody.innerHTML = "";
-            const bodyKeys = Object.keys(ep.bodyParams || {});
             let bodyEmpty = 0;
-            bodyKeys.forEach(k => {
+            let bodyTotal = 0;
+            const renderedBody = new Set();
+
+            Object.keys(ep.bodyParams || {}).forEach(k => {
+                renderedBody.add(k);
+                bodyTotal++;
                 const val = ep.bodyParams[k] || "";
                 const isEmpty = !val;
                 if (isEmpty) bodyEmpty++;
-                const statusBadge = isEmpty 
-                    ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
-                    : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
-
-                const tr = document.createElement("tr");
-                tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
-                tr.setAttribute("data-param", k.toLowerCase());
-                tr.innerHTML = `
-                    <td><strong>${k}</strong></td>
-                    <td>string</td>
-                    <td>${statusBadge}</td>
-                    <td><input type="text" id="input-body-${k}" value="${val}" oninput="onParamInput(this)"></td>
-                `;
-                bodyBody.appendChild(tr);
+                appendParamRow(bodyBody, "body", k, val, isEmpty, "string");
             });
-            document.getElementById("count-body").innerText = `${bodyEmpty} empty, ${bodyKeys.length - bodyEmpty} filled`;
-            if (bodyKeys.length === 0) {
-                bodyBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No body parameters defined</td></tr>`;
+
+            discoveredBody.forEach(k => {
+                if (!renderedBody.has(k)) {
+                    renderedBody.add(k);
+                    bodyTotal++;
+                    bodyEmpty++;
+                    appendParamRow(bodyBody, "body", k, "", true, "string");
+                }
+            });
+
+            document.getElementById("count-body").innerText = `${bodyEmpty} empty, ${bodyTotal - bodyEmpty} filled`;
+            if (bodyTotal === 0) {
+                bodyBody.innerHTML = `<tr><td colspan="4" style="color: gray; text-align: center; padding: 12px;">No body parameters found in collection</td></tr>`;
                 document.getElementById("count-body").innerText = "0";
             }
+        }
+
+        function appendParamRow(tbody, type, name, val, isEmpty, dataType) {
+            const statusBadge = isEmpty 
+                ? `<span style="color: #d97706; font-weight: bold;">Empty</span>`
+                : `<span style="color: #16a34a; font-weight: bold;">Pre-filled</span>`;
+
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-status", isEmpty ? "Empty" : "Pre-filled");
+            tr.setAttribute("data-param", name.toLowerCase());
+            tr.innerHTML = `
+                <td><strong>${name}</strong></td>
+                <td>${dataType}</td>
+                <td>${statusBadge}</td>
+                <td><input type="text" id="input-${type}-${name}" value="${val}" oninput="onParamInput(this)" placeholder="${isEmpty ? 'Enter value...' : ''}"></td>
+            `;
+            tbody.appendChild(tr);
+        }
 
             document.getElementById("fill-params-modal").style.display = "flex";
         }

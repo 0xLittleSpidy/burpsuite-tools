@@ -5,6 +5,7 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import com.google.gson.*;
 import com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
+import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
 import com.littlespidy.apiinspector.model.SessionStore_littlespidy;
 
 import javax.swing.*;
@@ -22,8 +23,8 @@ import java.util.regex.Pattern;
 
 /**
  * Dedicated modeless dialog providing structured editing of Path, Query, and Body parameters.
- * Employs comprehensive auto-population (matching Parameter Collector discovery), visual
- * identification of empty vs pre-filled values, and non-destructive in-place request modification
+ * Employs comprehensive collection-wide auto-population matching Parameter Collector discovery,
+ * visual identification of empty vs pre-filled values, and non-destructive in-place request modification
  * to preserve custom headers, authentication tokens, and nested JSON structures.
  */
 public class FillParametersDialog_littlespidy extends JDialog {
@@ -32,11 +33,14 @@ public class FillParametersDialog_littlespidy extends JDialog {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final DiscoveredEndpoint_littlespidy endpoint;
+    private final ImportedCollection_littlespidy initialCollection;
+    private final List<ImportedCollection_littlespidy> allCollections = new ArrayList<>();
     private final String targetBaseUrl;
     private String currentRawRequest;
     private final SessionStore_littlespidy sessionStore;
     private final Consumer<HttpRequest> onApplyCallback;
 
+    private JComboBox<CollectionComboItem> collectionSelector;
     private JTabbedPane tabbedPane;
 
     private DefaultTableModel pathTableModel;
@@ -55,15 +59,27 @@ public class FillParametersDialog_littlespidy extends JDialog {
     private JCheckBox queryEmptyOnlyCheck;
     private JCheckBox bodyEmptyOnlyCheck;
 
+    private final Set<String> originalActivePathKeys = new HashSet<>();
+    private final Set<String> originalActiveQueryKeys = new HashSet<>();
+    private final Set<String> originalActiveBodyKeys = new HashSet<>();
+
     public FillParametersDialog_littlespidy(
             Window owner,
             DiscoveredEndpoint_littlespidy endpoint,
+            ImportedCollection_littlespidy initialCollection,
+            List<ImportedCollection_littlespidy> allCollections,
             String targetBaseUrl,
             String currentRawRequest,
             SessionStore_littlespidy sessionStore,
             Consumer<HttpRequest> onApplyCallback) {
         super(owner, "Fill Parameters - " + (endpoint != null ? endpoint.getMethod() + " " + endpoint.getPath() : ""), ModalityType.MODELESS);
         this.endpoint = endpoint;
+        this.initialCollection = initialCollection;
+        if (allCollections != null) {
+            this.allCollections.addAll(allCollections);
+        } else if (initialCollection != null) {
+            this.allCollections.add(initialCollection);
+        }
         this.targetBaseUrl = targetBaseUrl != null && !targetBaseUrl.isBlank() ? targetBaseUrl : "https://localhost";
         this.currentRawRequest = (currentRawRequest != null && !currentRawRequest.isBlank())
                 ? currentRawRequest
@@ -72,15 +88,29 @@ public class FillParametersDialog_littlespidy extends JDialog {
         this.onApplyCallback = onApplyCallback;
 
         initComponents();
-        setSize(760, 520);
+        setSize(800, 560);
         setLocationRelativeTo(owner);
+    }
+
+    public FillParametersDialog_littlespidy(
+            Window owner,
+            DiscoveredEndpoint_littlespidy endpoint,
+            String targetBaseUrl,
+            String currentRawRequest,
+            SessionStore_littlespidy sessionStore,
+            Consumer<HttpRequest> onApplyCallback) {
+        this(owner, endpoint, null, null, targetBaseUrl, currentRawRequest, sessionStore, onApplyCallback);
     }
 
     private void initComponents() {
         JPanel contentPanel = new JPanel(new BorderLayout(8, 8));
         contentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Info Banner
+        // Top Container: Info Banner & Collection Selector
+        JPanel topContainer = new JPanel();
+        topContainer.setLayout(new BoxLayout(topContainer, BoxLayout.Y_AXIS));
+
+        // 1. Info Banner
         JPanel bannerPanel = new JPanel(new BorderLayout(4, 4));
         bannerPanel.setBackground(new Color(245, 247, 250));
         bannerPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -90,29 +120,61 @@ public class FillParametersDialog_littlespidy extends JDialog {
 
         JLabel titleLabel = new JLabel("Parameter Auto-Population and Configuration");
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 13f));
-        JLabel descLabel = new JLabel("Parameters are auto-extracted from spec templates and active requests. Edit values below; changes apply in-place preserving custom headers and JSON structure.");
+        JLabel descLabel = new JLabel("Parameters are auto-extracted matching Parameter Collector. Pre-filled values reflect the active request, while empty parameters can be filled and applied in-place.");
         descLabel.setFont(descLabel.getFont().deriveFont(Font.PLAIN, 11f));
         descLabel.setForeground(Color.DARK_GRAY);
 
         bannerPanel.add(titleLabel, BorderLayout.NORTH);
         bannerPanel.add(descLabel, BorderLayout.SOUTH);
-        contentPanel.add(bannerPanel, BorderLayout.NORTH);
+        topContainer.add(bannerPanel);
+
+        // 2. Collection Selector Toolbar (Matching Parameter Collector)
+        JPanel collectionBar = new JPanel(new BorderLayout(8, 4));
+        collectionBar.setBorder(new EmptyBorder(6, 2, 4, 2));
+
+        JPanel leftColPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
+        leftColPanel.add(new JLabel("Collection:"));
+
+        collectionSelector = new JComboBox<>();
+        collectionSelector.setPreferredSize(new Dimension(280, 26));
+        populateCollectionSelector();
+        collectionSelector.addActionListener(e -> rebuildDialogTables());
+        leftColPanel.add(collectionSelector);
+
+        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn.setToolTipText("Re-discover and synchronize parameters from the selected collection");
+        refreshBtn.addActionListener(e -> rebuildDialogTables());
+        leftColPanel.add(refreshBtn);
+
+        collectionBar.add(leftColPanel, BorderLayout.WEST);
+        topContainer.add(collectionBar);
+
+        contentPanel.add(topContainer, BorderLayout.NORTH);
 
         tabbedPane = new JTabbedPane();
 
+        // Initialize Table Models
+        String[] columnNames = {"Parameter", "Type", "Status", "Value"};
+        pathTableModel = createNonEditableNameTableModel(columnNames);
+        queryTableModel = createNonEditableNameTableModel(columnNames);
+        bodyTableModel = createNonEditableNameTableModel(columnNames);
+
         // 1. Path Parameters Tab
-        JPanel pathPanel = createParameterSectionPanel("Path", createPathTableModel());
-        tabbedPane.addTab(formatTabTitle("Path", pathTableModel), pathPanel);
+        JPanel pathPanel = createParameterSectionPanel("Path", pathTableModel);
+        tabbedPane.addTab("Path", pathPanel);
 
         // 2. Query Parameters Tab
-        JPanel queryPanel = createParameterSectionPanel("Query", createQueryTableModel());
-        tabbedPane.addTab(formatTabTitle("Query", queryTableModel), queryPanel);
+        JPanel queryPanel = createParameterSectionPanel("Query", queryTableModel);
+        tabbedPane.addTab("Query", queryPanel);
 
         // 3. Body Parameters Tab
-        JPanel bodyPanel = createParameterSectionPanel("Body", createBodyTableModel());
-        tabbedPane.addTab(formatTabTitle("Body", bodyTableModel), bodyPanel);
+        JPanel bodyPanel = createParameterSectionPanel("Body", bodyTableModel);
+        tabbedPane.addTab("Body", bodyPanel);
 
         contentPanel.add(tabbedPane, BorderLayout.CENTER);
+
+        // Rebuild tables with collection-wide discovered parameters
+        rebuildDialogTables();
 
         // Bottom Actions Bar
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -142,6 +204,206 @@ public class FillParametersDialog_littlespidy extends JDialog {
 
         contentPanel.add(bottomPanel, BorderLayout.SOUTH);
         setContentPane(contentPanel);
+    }
+
+    private void populateCollectionSelector() {
+        collectionSelector.removeAllItems();
+        collectionSelector.addItem(new CollectionComboItem(null, "[All Imported Collections]"));
+        int selectedIndex = 0;
+        for (int i = 0; i < allCollections.size(); i++) {
+            ImportedCollection_littlespidy c = allCollections.get(i);
+            collectionSelector.addItem(new CollectionComboItem(c, c.getName() + " (" + c.getEndpointCount() + ")"));
+            if (initialCollection != null && initialCollection.getId() != null && initialCollection.getId().equals(c.getId())) {
+                selectedIndex = i + 1; // 0 is [All Imported Collections]
+            }
+        }
+        if (selectedIndex < collectionSelector.getItemCount()) {
+            collectionSelector.setSelectedIndex(selectedIndex);
+        }
+    }
+
+    private DefaultTableModel createNonEditableNameTableModel(String[] columnNames) {
+        return new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 3 || column == 0;
+            }
+        };
+    }
+
+    /**
+     * Rebuilds all parameter tables using Parameter Collector's collection-wide discovery algorithm.
+     * Identifies active endpoint/request parameters and pre-fills them, while listing remaining
+     * collection parameters as Empty so the user can easily see, fill, and apply them.
+     */
+    public synchronized void rebuildDialogTables() {
+        if (pathTableModel == null || queryTableModel == null || bodyTableModel == null) {
+            return;
+        }
+
+        // 1. Determine Target Collections
+        List<ImportedCollection_littlespidy> targetCols = new ArrayList<>();
+        CollectionComboItem sel = (collectionSelector != null) ? (CollectionComboItem) collectionSelector.getSelectedItem() : null;
+        if (sel == null || sel.collection == null) {
+            if (!allCollections.isEmpty()) {
+                targetCols.addAll(allCollections);
+            } else if (initialCollection != null) {
+                targetCols.add(initialCollection);
+            }
+        } else {
+            targetCols.add(sel.collection);
+        }
+
+        // 2. Discover collection-wide parameters matching Parameter Collector
+        ParameterCollectorTab_littlespidy.DiscoveredParameters discovered =
+                ParameterCollectorTab_littlespidy.collectParameters(targetCols);
+
+        // 3. Inspect Active Endpoint & Live Request Parameters
+        Map<String, String> activePathParams = new LinkedHashMap<>();
+        Map<String, String> activePathTypes = new LinkedHashMap<>();
+        if (endpoint != null && endpoint.getPathParams() != null) {
+            for (Map.Entry<String, String> e : endpoint.getPathParams().entrySet()) {
+                if (e.getKey() != null && !e.getKey().isBlank()) {
+                    activePathParams.put(e.getKey().trim(), e.getValue() != null ? e.getValue() : "");
+                }
+            }
+            if (endpoint.getPathParamTypes() != null) {
+                activePathTypes.putAll(endpoint.getPathParamTypes());
+            }
+        }
+        if (endpoint != null && endpoint.getPath() != null) {
+            String cleanPath = endpoint.getPath().contains("?")
+                    ? endpoint.getPath().substring(0, endpoint.getPath().indexOf('?'))
+                    : endpoint.getPath();
+            Matcher m = PATH_VARIABLE_PATTERN.matcher(cleanPath);
+            while (m.find()) {
+                String name = m.group(1) != null ? m.group(1) : m.group(2);
+                if (name != null && !name.isBlank()) {
+                    activePathParams.putIfAbsent(name.trim(), "");
+                }
+            }
+        }
+        String reqPath = extractPathFromRawRequest(currentRawRequest);
+        if (reqPath != null && !reqPath.isBlank() && endpoint != null && endpoint.getPath() != null) {
+            extractPathValuesFromLiveRequest(endpoint.getPath(), reqPath, activePathParams);
+        }
+
+        Map<String, String> activeQueryParams = new LinkedHashMap<>();
+        Map<String, String> activeQueryTypes = new LinkedHashMap<>();
+        if (endpoint != null && endpoint.getQueryParams() != null) {
+            for (Map.Entry<String, String> e : endpoint.getQueryParams().entrySet()) {
+                if (e.getKey() != null && !e.getKey().isBlank()) {
+                    activeQueryParams.put(e.getKey().trim(), e.getValue() != null ? e.getValue() : "");
+                }
+            }
+            if (endpoint.getQueryParamTypes() != null) {
+                activeQueryTypes.putAll(endpoint.getQueryParamTypes());
+            }
+        }
+        if (endpoint != null && endpoint.getPath() != null && endpoint.getPath().contains("?")) {
+            parseQueryString(endpoint.getPath().substring(endpoint.getPath().indexOf('?') + 1), activeQueryParams);
+        }
+        if (reqPath != null && reqPath.contains("?")) {
+            parseQueryString(reqPath.substring(reqPath.indexOf('?') + 1), activeQueryParams);
+        }
+
+        Map<String, String> activeBodyParams = new LinkedHashMap<>();
+        Map<String, String> activeBodyTypes = new LinkedHashMap<>();
+        if (endpoint != null && endpoint.getBodyParams() != null) {
+            for (Map.Entry<String, String> e : endpoint.getBodyParams().entrySet()) {
+                if (e.getKey() != null && !e.getKey().isBlank()) {
+                    activeBodyParams.put(e.getKey().trim(), e.getValue() != null ? e.getValue() : "");
+                }
+            }
+            if (endpoint.getBodyParamTypes() != null) {
+                activeBodyTypes.putAll(endpoint.getBodyParamTypes());
+            }
+        }
+        String bodyContent = extractBodyFromRawRequest(currentRawRequest);
+        if (bodyContent == null || bodyContent.isBlank()) {
+            bodyContent = (endpoint != null && endpoint.getRequestBodySample() != null) ? endpoint.getRequestBodySample() : "";
+        }
+        if (!bodyContent.isBlank()) {
+            String trimmedBody = bodyContent.trim();
+            if (trimmedBody.startsWith("{") || trimmedBody.startsWith("[")) {
+                try {
+                    JsonElement elem = JsonParser.parseString(trimmedBody);
+                    extractJsonParamsRecursively(elem, "", activeBodyParams, activeBodyTypes);
+                } catch (Exception ignored) {}
+            } else if (trimmedBody.contains("=") && !trimmedBody.contains("\n")) {
+                parseQueryString(trimmedBody, activeBodyParams);
+            }
+        }
+
+        // Save original keys for accurate non-destructive mutation
+        originalActivePathKeys.clear();
+        originalActivePathKeys.addAll(activePathParams.keySet());
+        originalActiveQueryKeys.clear();
+        originalActiveQueryKeys.addAll(activeQueryParams.keySet());
+        originalActiveBodyKeys.clear();
+        originalActiveBodyKeys.addAll(activeBodyParams.keySet());
+
+        // 4. Populate Path Table
+        pathTableModel.setRowCount(0);
+        Set<String> addedPath = new HashSet<>();
+        for (Map.Entry<String, String> entry : activePathParams.entrySet()) {
+            String name = entry.getKey();
+            String val = entry.getValue() != null ? entry.getValue() : "";
+            String type = activePathTypes.getOrDefault(name, inferType(val));
+            String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
+            pathTableModel.addRow(new Object[]{name, type, status, val});
+            addedPath.add(name);
+        }
+        for (Map.Entry<String, ParameterCollectorTab_littlespidy.ParameterEntry> pe : discovered.pathParams.entrySet()) {
+            if (!addedPath.contains(pe.getKey())) {
+                String name = pe.getKey();
+                String type = pe.getValue().dataType != null ? pe.getValue().dataType : "string";
+                pathTableModel.addRow(new Object[]{name, type, "Empty", ""});
+                addedPath.add(name);
+            }
+        }
+
+        // 5. Populate Query Table
+        queryTableModel.setRowCount(0);
+        Set<String> addedQuery = new HashSet<>();
+        for (Map.Entry<String, String> entry : activeQueryParams.entrySet()) {
+            String name = entry.getKey();
+            String val = entry.getValue() != null ? entry.getValue() : "";
+            String type = activeQueryTypes.getOrDefault(name, inferType(val));
+            String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
+            queryTableModel.addRow(new Object[]{name, type, status, val});
+            addedQuery.add(name);
+        }
+        for (Map.Entry<String, ParameterCollectorTab_littlespidy.ParameterEntry> pe : discovered.queryParams.entrySet()) {
+            if (!addedQuery.contains(pe.getKey())) {
+                String name = pe.getKey();
+                String type = pe.getValue().dataType != null ? pe.getValue().dataType : "string";
+                queryTableModel.addRow(new Object[]{name, type, "Empty", ""});
+                addedQuery.add(name);
+            }
+        }
+
+        // 6. Populate Body Table
+        bodyTableModel.setRowCount(0);
+        Set<String> addedBody = new HashSet<>();
+        for (Map.Entry<String, String> entry : activeBodyParams.entrySet()) {
+            String name = entry.getKey();
+            String val = entry.getValue() != null ? entry.getValue() : "";
+            String type = activeBodyTypes.getOrDefault(name, inferType(val));
+            String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
+            bodyTableModel.addRow(new Object[]{name, type, status, val});
+            addedBody.add(name);
+        }
+        for (Map.Entry<String, ParameterCollectorTab_littlespidy.ParameterEntry> pe : discovered.bodyParams.entrySet()) {
+            if (!addedBody.contains(pe.getKey())) {
+                String name = pe.getKey();
+                String type = pe.getValue().dataType != null ? pe.getValue().dataType : "string";
+                bodyTableModel.addRow(new Object[]{name, type, "Empty", ""});
+                addedBody.add(name);
+            }
+        }
+
+        updateAllTabTitles();
     }
 
     private String formatTabTitle(String section, DefaultTableModel model) {
@@ -308,165 +570,7 @@ public class FillParametersDialog_littlespidy extends JDialog {
         return (t.startsWith("{") && t.endsWith("}")) || (t.startsWith(":") && t.length() > 1);
     }
 
-    private DefaultTableModel createPathTableModel() {
-        String[] columnNames = {"Parameter", "Type", "Status", "Value"};
-        pathTableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 3 || column == 0;
-            }
-        };
-
-        Map<String, String> pathParams = new LinkedHashMap<>();
-        Map<String, String> pathTypes = new LinkedHashMap<>();
-
-        // 1. From endpoint pathParams map
-        if (endpoint != null && endpoint.getPathParams() != null) {
-            for (Map.Entry<String, String> e : endpoint.getPathParams().entrySet()) {
-                if (e.getKey() != null && !e.getKey().isBlank()) {
-                    pathParams.put(e.getKey().trim(), e.getValue() != null ? e.getValue() : "");
-                }
-            }
-            if (endpoint.getPathParamTypes() != null) {
-                pathTypes.putAll(endpoint.getPathParamTypes());
-            }
-        }
-
-        // 2. Discover from endpoint.getPath() using PATH_VARIABLE_PATTERN
-        if (endpoint != null && endpoint.getPath() != null) {
-            String cleanPath = endpoint.getPath().contains("?")
-                    ? endpoint.getPath().substring(0, endpoint.getPath().indexOf('?'))
-                    : endpoint.getPath();
-            Matcher m = PATH_VARIABLE_PATTERN.matcher(cleanPath);
-            while (m.find()) {
-                String name = m.group(1) != null ? m.group(1) : m.group(2);
-                if (name != null && !name.isBlank()) {
-                    name = name.trim();
-                    if (!pathParams.containsKey(name)) {
-                        pathParams.put(name, "");
-                    }
-                }
-            }
-        }
-
-        // 3. Inspect active request URI path to extract existing filled values
-        String reqPath = extractPathFromRawRequest(currentRawRequest);
-        if (reqPath != null && !reqPath.isBlank() && endpoint != null && endpoint.getPath() != null) {
-            extractPathValuesFromLiveRequest(endpoint.getPath(), reqPath, pathParams);
-        }
-
-        for (Map.Entry<String, String> entry : pathParams.entrySet()) {
-            String name = entry.getKey();
-            String val = entry.getValue();
-            String type = pathTypes.getOrDefault(name, inferType(val));
-            String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
-            pathTableModel.addRow(new Object[]{name, type, status, val});
-        }
-        return pathTableModel;
-    }
-
-    private DefaultTableModel createQueryTableModel() {
-        String[] columnNames = {"Parameter", "Type", "Status", "Value"};
-        queryTableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 3 || column == 0;
-            }
-        };
-
-        Map<String, String> queryParams = new LinkedHashMap<>();
-        Map<String, String> queryTypes = new LinkedHashMap<>();
-
-        // 1. From endpoint queryParams map
-        if (endpoint != null && endpoint.getQueryParams() != null) {
-            for (Map.Entry<String, String> e : endpoint.getQueryParams().entrySet()) {
-                if (e.getKey() != null && !e.getKey().isBlank()) {
-                    queryParams.put(e.getKey().trim(), e.getValue() != null ? e.getValue() : "");
-                }
-            }
-            if (endpoint.getQueryParamTypes() != null) {
-                queryTypes.putAll(endpoint.getQueryParamTypes());
-            }
-        }
-
-        // 2. From query string in endpoint.getPath()
-        if (endpoint != null && endpoint.getPath() != null && endpoint.getPath().contains("?")) {
-            parseQueryString(endpoint.getPath().substring(endpoint.getPath().indexOf('?') + 1), queryParams);
-        }
-
-        // 3. From current request URL query string
-        String reqPath = extractPathFromRawRequest(currentRawRequest);
-        if (reqPath != null && reqPath.contains("?")) {
-            parseQueryString(reqPath.substring(reqPath.indexOf('?') + 1), queryParams);
-        }
-
-        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
-            String name = entry.getKey();
-            String val = entry.getValue();
-            String type = queryTypes.getOrDefault(name, inferType(val));
-            String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
-            queryTableModel.addRow(new Object[]{name, type, status, val});
-        }
-        return queryTableModel;
-    }
-
-    private DefaultTableModel createBodyTableModel() {
-        String[] columnNames = {"Parameter", "Type", "Status", "Value"};
-        bodyTableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 3 || column == 0;
-            }
-        };
-
-        Map<String, String> bodyParams = new LinkedHashMap<>();
-        Map<String, String> bodyTypes = new LinkedHashMap<>();
-
-        // 1. From endpoint bodyParams map
-        if (endpoint != null && endpoint.getBodyParams() != null) {
-            for (Map.Entry<String, String> e : endpoint.getBodyParams().entrySet()) {
-                if (e.getKey() != null && !e.getKey().isBlank()) {
-                    bodyParams.put(e.getKey().trim(), e.getValue() != null ? e.getValue() : "");
-                }
-            }
-            if (endpoint.getBodyParamTypes() != null) {
-                bodyTypes.putAll(endpoint.getBodyParamTypes());
-            }
-        }
-
-        // 2. Parse from live request body or requestBodySample via Gson
-        String bodyContent = extractBodyFromRawRequest(currentRawRequest);
-        if (bodyContent == null || bodyContent.isBlank()) {
-            bodyContent = (endpoint != null && endpoint.getRequestBodySample() != null) ? endpoint.getRequestBodySample() : "";
-        }
-
-        if (!bodyContent.isBlank()) {
-            String trimmedBody = bodyContent.trim();
-            if (trimmedBody.startsWith("{") || trimmedBody.startsWith("[")) {
-                try {
-                    JsonElement elem = JsonParser.parseString(trimmedBody);
-                    extractJsonParamsRecursively(elem, "", bodyParams, bodyTypes);
-                } catch (Exception ignored) {}
-            } else if (trimmedBody.contains("=") && !trimmedBody.contains("\n")) {
-                parseQueryString(trimmedBody, bodyParams);
-            }
-        }
-
-        for (Map.Entry<String, String> entry : bodyParams.entrySet()) {
-            String name = entry.getKey();
-            String val = entry.getValue();
-            String type = bodyTypes.getOrDefault(name, inferType(val));
-            String status = isValueEmptyOrPlaceholder(val) ? "Empty" : "Pre-filled";
-            bodyTableModel.addRow(new Object[]{name, type, status, val});
-        }
-        return bodyTableModel;
-    }
-
-    private void extractJsonParamsRecursively(
-            JsonElement elem,
-            String prefix,
-            Map<String, String> outParams,
-            Map<String, String> outTypes) {
+    private void extractJsonParamsRecursively(JsonElement elem, String prefix, Map<String, String> outParams, Map<String, String> outTypes) {
         if (elem == null || elem.isJsonNull()) return;
 
         if (elem.isJsonObject()) {
@@ -587,7 +691,10 @@ public class FillParametersDialog_littlespidy extends JDialog {
             Object k = pathTableModel.getValueAt(r, 0);
             Object v = pathTableModel.getValueAt(r, 3);
             if (k != null && !k.toString().trim().isEmpty()) {
-                updatedPath.put(k.toString().trim(), v != null ? v.toString().trim() : "");
+                String valStr = v != null ? v.toString().trim() : "";
+                if (!valStr.isEmpty() || originalActivePathKeys.contains(k.toString().trim())) {
+                    updatedPath.put(k.toString().trim(), valStr);
+                }
             }
         }
         endpoint.setPathParams(updatedPath);
@@ -598,7 +705,10 @@ public class FillParametersDialog_littlespidy extends JDialog {
             Object k = queryTableModel.getValueAt(r, 0);
             Object v = queryTableModel.getValueAt(r, 3);
             if (k != null && !k.toString().trim().isEmpty()) {
-                updatedQuery.put(k.toString().trim(), v != null ? v.toString().trim() : "");
+                String valStr = v != null ? v.toString().trim() : "";
+                if (!valStr.isEmpty() || originalActiveQueryKeys.contains(k.toString().trim())) {
+                    updatedQuery.put(k.toString().trim(), valStr);
+                }
             }
         }
         endpoint.setQueryParams(updatedQuery);
@@ -609,7 +719,10 @@ public class FillParametersDialog_littlespidy extends JDialog {
             Object k = bodyTableModel.getValueAt(r, 0);
             Object v = bodyTableModel.getValueAt(r, 3);
             if (k != null && !k.toString().trim().isEmpty()) {
-                updatedBody.put(k.toString().trim(), v != null ? v.toString().trim() : "");
+                String valStr = v != null ? v.toString().trim() : "";
+                if (!valStr.isEmpty() || originalActiveBodyKeys.contains(k.toString().trim())) {
+                    updatedBody.put(k.toString().trim(), valStr);
+                }
             }
         }
         endpoint.setBodyParams(updatedBody);
@@ -689,7 +802,11 @@ public class FillParametersDialog_littlespidy extends JDialog {
         // In-place Query Parameters Update
         Map<String, String> existingQueryMap = new LinkedHashMap<>();
         parseQueryString(queryStr, existingQueryMap);
-        existingQueryMap.putAll(queryParams);
+        for (Map.Entry<String, String> q : queryParams.entrySet()) {
+            if (!q.getValue().isEmpty() || existingQueryMap.containsKey(q.getKey())) {
+                existingQueryMap.put(q.getKey(), q.getValue());
+            }
+        }
 
         StringBuilder newQuery = new StringBuilder();
         for (Map.Entry<String, String> q : existingQueryMap.entrySet()) {
@@ -715,7 +832,9 @@ public class FillParametersDialog_littlespidy extends JDialog {
                     if (rootEl.isJsonObject()) {
                         JsonObject rootObj = rootEl.getAsJsonObject();
                         for (Map.Entry<String, String> b : bodyParams.entrySet()) {
-                            setJsonFieldByPath(rootObj, b.getKey(), b.getValue());
+                            if (!b.getValue().isEmpty() || originalActiveBodyKeys.contains(b.getKey())) {
+                                setJsonFieldByPath(rootObj, b.getKey(), b.getValue());
+                            }
                         }
                         newBody = GSON.toJson(rootObj);
                     }
@@ -725,7 +844,11 @@ public class FillParametersDialog_littlespidy extends JDialog {
             } else if (trimmedBody.contains("=") && !trimmedBody.contains("\n")) {
                 Map<String, String> formMap = new LinkedHashMap<>();
                 parseQueryString(trimmedBody, formMap);
-                formMap.putAll(bodyParams);
+                for (Map.Entry<String, String> b : bodyParams.entrySet()) {
+                    if (!b.getValue().isEmpty() || originalActiveBodyKeys.contains(b.getKey())) {
+                        formMap.put(b.getKey(), b.getValue());
+                    }
+                }
                 StringBuilder sb = new StringBuilder();
                 for (Map.Entry<String, String> f : formMap.entrySet()) {
                     if (sb.length() > 0) sb.append("&");
@@ -735,9 +858,15 @@ public class FillParametersDialog_littlespidy extends JDialog {
             } else if (trimmedBody.isEmpty()) {
                 JsonObject newObj = new JsonObject();
                 for (Map.Entry<String, String> b : bodyParams.entrySet()) {
-                    setJsonFieldByPath(newObj, b.getKey(), b.getValue());
+                    if (!b.getValue().isEmpty()) {
+                        setJsonFieldByPath(newObj, b.getKey(), b.getValue());
+                    }
                 }
-                newBody = GSON.toJson(newObj);
+                if (newObj.keySet().isEmpty()) {
+                    newBody = "";
+                } else {
+                    newBody = GSON.toJson(newObj);
+                }
             }
         }
 
@@ -795,6 +924,33 @@ public class FillParametersDialog_littlespidy extends JDialog {
             } catch (NumberFormatException e) {
                 current.addProperty(leaf, val);
             }
+        }
+    }
+
+    public DefaultTableModel getPathTableModel() {
+        return pathTableModel;
+    }
+
+    public DefaultTableModel getQueryTableModel() {
+        return queryTableModel;
+    }
+
+    public DefaultTableModel getBodyTableModel() {
+        return bodyTableModel;
+    }
+
+    public static class CollectionComboItem {
+        public final ImportedCollection_littlespidy collection;
+        public final String label;
+
+        public CollectionComboItem(ImportedCollection_littlespidy collection, String label) {
+            this.collection = collection;
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
         }
     }
 }

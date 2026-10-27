@@ -329,4 +329,108 @@ class RequestViewerAndCustomRequestTest_littlespidy {
         assertEquals(1, model.getRowCount());
         assertEquals(tableParams, model.getValueAt(0, 7));
     }
+
+    @Test
+    @DisplayName("Verify Fill Parameters dialog discovers collection-wide parameters matching Parameter Collector")
+    void testFillParametersCollectionWideDiscovery() {
+        // Create an API collection with multiple endpoints
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy("Store API", "OpenAPI", "SESSION", "/tmp/store.session");
+
+        DiscoveredEndpoint_littlespidy ep1 = new DiscoveredEndpoint_littlespidy("GET", "/api/v1/users/{userId}?role=admin", "Get User");
+        DiscoveredEndpoint_littlespidy ep2 = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/orders/{orderId}?status=open&page=1", "Create Order");
+        ep2.setRequestBodySample("{\n  \"item\": \"book\",\n  \"quantity\": 2\n}");
+
+        col.setEndpoints(List.of(ep1, ep2));
+
+        // 1. Verify ParameterCollectorTab.collectParameters extracts all unique params across collection
+        ParameterCollectorTab_littlespidy.DiscoveredParameters discovered =
+                ParameterCollectorTab_littlespidy.collectParameters(List.of(col));
+
+        assertTrue(discovered.pathParams.containsKey("userId"));
+        assertTrue(discovered.pathParams.containsKey("orderId"));
+        assertTrue(discovered.queryParams.containsKey("role"));
+        assertTrue(discovered.queryParams.containsKey("status"));
+        assertTrue(discovered.queryParams.containsKey("page"));
+        assertTrue(discovered.bodyParams.containsKey("item"));
+        assertTrue(discovered.bodyParams.containsKey("quantity"));
+
+        // 2. Open FillParametersDialog for ep1 (which only has userId and role locally)
+        if (!java.awt.GraphicsEnvironment.isHeadless()) {
+            FillParametersDialog_littlespidy dialog = new FillParametersDialog_littlespidy(
+                    null,
+                    ep1,
+                    col,
+                    List.of(col),
+                    "https://api.store.com",
+                    "GET /api/v1/users/usr_123?role=admin HTTP/1.1\r\nHost: api.store.com\r\n\r\n",
+                    null,
+                    null
+            );
+
+            // Path Table: should contain both userId (Pre-filled) and orderId (Empty)
+            var pathModel = dialog.getPathTableModel();
+            assertNotNull(pathModel);
+            assertTrue(pathModel.getRowCount() >= 2);
+            boolean foundUserId = false;
+            boolean foundOrderId = false;
+            for (int r = 0; r < pathModel.getRowCount(); r++) {
+                String param = (String) pathModel.getValueAt(r, 0);
+                String status = (String) pathModel.getValueAt(r, 2);
+                if ("userId".equals(param)) {
+                    foundUserId = true;
+                    assertEquals("Pre-filled", status);
+                } else if ("orderId".equals(param)) {
+                    foundOrderId = true;
+                    assertEquals("Empty", status);
+                }
+            }
+            assertTrue(foundUserId, "Active endpoint path param userId must be in table");
+            assertTrue(foundOrderId, "Collection path param orderId must be auto-populated in table as Empty");
+
+            // Query Table: should contain role (Pre-filled), plus status and page from collection (Empty)
+            var queryModel = dialog.getQueryTableModel();
+            assertNotNull(queryModel);
+            assertTrue(queryModel.getRowCount() >= 3);
+            boolean foundRole = false;
+            boolean foundStatus = false;
+            boolean foundPage = false;
+            for (int r = 0; r < queryModel.getRowCount(); r++) {
+                String param = (String) queryModel.getValueAt(r, 0);
+                String status = (String) queryModel.getValueAt(r, 2);
+                if ("role".equals(param)) {
+                    foundRole = true;
+                    assertEquals("Pre-filled", status);
+                } else if ("status".equals(param)) {
+                    foundStatus = true;
+                    assertEquals("Empty", status);
+                } else if ("page".equals(param)) {
+                    foundPage = true;
+                    assertEquals("Empty", status);
+                }
+            }
+            assertTrue(foundRole, "Active query param role must be Pre-filled");
+            assertTrue(foundStatus, "Collection query param status must be Empty");
+            assertTrue(foundPage, "Collection query param page must be Empty");
+
+            // Body Table: should contain item and quantity from collection as Empty
+            var bodyModel = dialog.getBodyTableModel();
+            assertNotNull(bodyModel);
+            assertTrue(bodyModel.getRowCount() >= 2);
+            boolean foundItem = false;
+            boolean foundQuantity = false;
+            for (int r = 0; r < bodyModel.getRowCount(); r++) {
+                String param = (String) bodyModel.getValueAt(r, 0);
+                String status = (String) bodyModel.getValueAt(r, 2);
+                if ("item".equals(param)) {
+                    foundItem = true;
+                    assertEquals("Empty", status);
+                } else if ("quantity".equals(param)) {
+                    foundQuantity = true;
+                    assertEquals("Empty", status);
+                }
+            }
+            assertTrue(foundItem, "Collection body param item must be auto-populated as Empty");
+            assertTrue(foundQuantity, "Collection body param quantity must be auto-populated as Empty");
+        }
+    }
 }
