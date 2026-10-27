@@ -295,37 +295,54 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
     public void setRequestResponse(HttpRequestResponse requestResponse) {
         if (requestResponse == null || requestResponse.request() == null) {
             this.originalRequest = null;
-            tableModel.clear();
-            btnCopyBearer.setEnabled(false);
-            btnCopyAuthHeader.setEnabled(false);
-            btnCopyCookieHeader.setEnabled(false);
-            btnCopyAllCookies.setEnabled(false);
-            detailTitleLabel.setText("Selected Item: (None)");
-            detailTextArea.setText("");
-            statusLabel.setText("No request loaded");
+            Runnable clearUi = () -> {
+                tableModel.clear();
+                btnCopyBearer.setEnabled(false);
+                btnCopyAuthHeader.setEnabled(false);
+                btnCopyCookieHeader.setEnabled(false);
+                btnCopyAllCookies.setEnabled(false);
+                detailTitleLabel.setText("Selected Item: (None)");
+                detailTextArea.setText("");
+                statusLabel.setText("No request loaded");
+            };
+            if (SwingUtilities.isEventDispatchThread()) {
+                clearUi.run();
+            } else {
+                SwingUtilities.invokeLater(clearUi);
+            }
             return;
         }
 
         this.originalRequest = requestResponse.request();
         List<AuthItem_littlespidy> items = extractorService.extractAll(this.originalRequest);
-        tableModel.setItems(items);
 
         String bearer = extractorService.extractBearerToken(this.originalRequest);
         String authHeader = extractorService.extractAuthHeader(this.originalRequest);
         String cookieHeader = extractorService.extractCookieHeader(this.originalRequest);
 
-        btnCopyBearer.setEnabled(bearer != null && !bearer.isEmpty());
-        btnCopyAuthHeader.setEnabled(authHeader != null && !authHeader.isEmpty());
-        btnCopyCookieHeader.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
-        btnCopyAllCookies.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
+        Runnable updateUi = () -> {
+            tableModel.setItems(items);
+            btnCopyBearer.setEnabled(bearer != null && !bearer.isEmpty());
+            btnCopyAuthHeader.setEnabled(authHeader != null && !authHeader.isEmpty());
+            btnCopyCookieHeader.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
+            btnCopyAllCookies.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
 
-        if (items.isEmpty()) {
-            detailTitleLabel.setText("Selected Item: (None)");
-            detailTextArea.setText("");
-            statusLabel.setText("No authorization headers or cookies detected in this request");
+            if (items.isEmpty()) {
+                detailTitleLabel.setText("Selected Item: (None)");
+                detailTextArea.setText("");
+                statusLabel.setText("No authorization headers or cookies detected in this request");
+            } else {
+                statusLabel.setText("Ready - " + items.size() + " session token(s) and cookie(s) detected");
+                if (authTable.getRowCount() > 0) {
+                    authTable.setRowSelectionInterval(0, 0);
+                }
+            }
+        };
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            updateUi.run();
         } else {
-            statusLabel.setText("Ready - " + items.size() + " session token(s) and cookie(s) detected");
-            authTable.setRowSelectionInterval(0, 0);
+            SwingUtilities.invokeLater(updateUi);
         }
     }
 
@@ -336,7 +353,7 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
 
     @Override
     public String caption() {
-        return "Auth & Tokens";
+        return "Copy";
     }
 
     @Override

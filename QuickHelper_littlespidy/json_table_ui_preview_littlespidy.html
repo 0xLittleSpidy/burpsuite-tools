@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Helper (littlespidy) - Copy Tab and JSON Table UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --status-success-bg: #1e3a1e;
+      --status-success-border: #2e662e;
+      --status-success-text: #66bb6a;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --status-success-bg: #e8f5e9;
+      --status-success-border: #a5d6a7;
+      --status-success-text: #2e7d32;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo {
+      background-color: var(--accent);
+      color: #fff;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    .burp-title {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 13px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--btn-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--btn-hover);
+      color: var(--text-bright);
+    }
+
+    /* Suite Tabs */
+    .suite-tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+      gap: 2px;
+    }
+    .suite-tab {
+      padding: 7px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-size: 12px;
+      user-select: none;
+    }
+    .suite-tab:hover {
+      color: var(--text-bright);
+    }
+    .suite-tab.active {
+      color: var(--text-bright);
+      border-bottom: 2px solid var(--accent);
+      font-weight: 600;
+    }
+
+    /* Workspace */
+    .main-workspace {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      padding: 8px 12px;
+      gap: 8px;
+    }
+
+    .tool-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 12px;
+    }
+    .tool-request-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+    .method-tag {
+      background: #007acc;
+      color: #fff;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+    .url-display {
+      font-family: monospace;
+      color: var(--text-bright);
+      font-size: 12px;
+    }
+
+    /* Split Panes */
+    .panes-container {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .pane-tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px;
+      align-items: center;
+    }
+    .pane-tab {
+      padding: 5px 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      border-bottom: 2px solid transparent;
+      user-select: none;
+    }
+    .pane-tab:hover {
+      color: var(--text-bright);
+    }
+    .pane-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      font-weight: bold;
+    }
+
+    /* Pane Contents */
+    .pane-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 8px;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    /* Toolbar in JSON Table */
+    .json-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 10px;
+      gap: 8px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-input {
+      background: var(--code-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 11px;
+      width: 180px;
+    }
+    .btn-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn {
+      background: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background: var(--btn-hover);
+      border-color: var(--text-muted);
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Status Banner */
+    .status-banner {
+      background: var(--status-success-bg);
+      border: 1px solid var(--status-success-border);
+      color: var(--status-success-text);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Table styling */
+    .table-container {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: auto;
+      background: var(--bg-dark);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    table.data-table th {
+      background: var(--bg-darker);
+      color: var(--text-bright);
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    table.data-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: monospace;
+    }
+    table.data-table tr:nth-child(even) {
+      background: var(--row-even);
+    }
+    table.data-table tr:nth-child(odd) {
+      background: var(--row-odd);
+    }
+    table.data-table tr.selected {
+      background: var(--bg-selected) !important;
+      color: #ffffff;
+    }
+    table.data-table tr:hover:not(.selected) {
+      background: var(--bg-hover);
+    }
+
+    /* Cell Inspector Panel */
+    .cell-inspector {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 100px;
+    }
+    .inspector-title {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .inspector-text {
+      width: 100%;
+      height: 48px;
+      background: var(--code-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 4px 6px;
+      font-family: monospace;
+      font-size: 11px;
+      resize: none;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="burp-header">
+    <div class="title-area">
+      <div class="burp-logo">BURP</div>
+      <div class="burp-title">Burp Suite Professional - Quick Helper [littlespidy] Preview</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <label for="samplePicker" style="font-size: 11px;">Scenario:</label>
+        <select id="samplePicker" onchange="loadScenario(this.value)" style="background: var(--btn-bg); color: var(--text-bright); border: 1px solid var(--border); border-radius: 3px; padding: 3px 6px; font-size: 11px;">
+          <option value="user_list">JSON Array: Users List (7 Columns)</option>
+          <option value="profile_object">JSON Object: Single Profile (Flattened)</option>
+          <option value="data_wrapper">JSON Object with 'data' Array</option>
+        </select>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+  </header>
+
+  <!-- Suite Tabs -->
+  <nav class="suite-tabs">
+    <div class="suite-tab">Dashboard</div>
+    <div class="suite-tab">Target</div>
+    <div class="suite-tab">Proxy</div>
+    <div class="suite-tab">Intruder</div>
+    <div class="suite-tab active">Repeater</div>
+    <div class="suite-tab">Collaborator</div>
+    <div class="suite-tab">Quick Helper</div>
+  </nav>
+
+  <!-- Workspace -->
+  <main class="main-workspace">
+    <div class="tool-header-bar">
+      <div class="tool-request-info">
+        <span class="method-tag" id="dispMethod">GET</span>
+        <span class="url-display" id="dispUrl">https://api.target.local/v1/users</span>
+      </div>
+      <div style="color: var(--text-muted); font-size: 11px;">
+        Request Tab: [Copy] | Response Tab: [JSON Table]
+      </div>
+    </div>
+
+    <div class="panes-container">
+      <!-- Left: Request Pane with renamed 'Copy' tab -->
+      <section class="pane">
+        <div class="pane-tabs">
+          <div class="pane-tab">Pretty</div>
+          <div class="pane-tab">Raw</div>
+          <div class="pane-tab">Hex</div>
+          <div class="pane-tab">Headers</div>
+          <!-- Requirement 1: Tab name changed to 'Copy' -->
+          <div class="pane-tab active" title="Request Editor Tab for Quick Token and Cookie Copying">Copy</div>
+        </div>
+
+        <div class="pane-content">
+          <div style="background: var(--bg-dark); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="alert('Copied Bearer Token!')">Copy Bearer Token</button>
+            <button class="btn" onclick="alert('Copied Authorization: Bearer ...')">Copy Auth Header</button>
+            <button class="btn" onclick="alert('Copied Cookie Header!')">Copy Cookie Header</button>
+            <button class="btn" onclick="alert('Copied All Cookies!')">Copy All Cookies</button>
+          </div>
+          <div class="status-banner">
+            <span>[OK] Ready - 'Copy' tab active</span>
+            <span style="font-family: monospace; font-size: 10px;">15:50:00</span>
+          </div>
+          <div style="flex: 1; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-dark); padding: 8px; font-family: monospace; font-size: 11px; overflow: auto;">
+            <div style="color: var(--text-muted); margin-bottom: 6px;">Detected Items:</div>
+            <div>[Bearer Token] Bearer (raw token) = eyJhbGciOiJIUzI1Ni... (142 chars)</div>
+            <div>[Auth Header] Authorization = Authorization: Bearer eyJhbGci...</div>
+            <div>[Cookie] session_id = 9a01f82b1c4e78</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Response Pane with new 'JSON Table' tab -->
+      <section class="pane">
+        <div class="pane-tabs">
+          <div class="pane-tab">Pretty</div>
+          <div class="pane-tab">Raw</div>
+          <div class="pane-tab">Hex</div>
+          <div class="pane-tab">Headers</div>
+          <!-- Requirement 2: New Response Tab 'JSON Table' -->
+          <div class="pane-tab active" title="Convert JSON response into structured table view">JSON Table</div>
+        </div>
+
+        <div class="pane-content">
+          <!-- Toolbar -->
+          <div class="json-toolbar">
+            <div class="filter-group">
+              <label for="filterInput" style="font-weight: 600; font-size: 11px;">Filter:</label>
+              <input type="text" id="filterInput" class="filter-input" placeholder="Type to filter table..." onkeyup="filterTable(this.value)">
+            </div>
+            <div class="btn-group">
+              <button class="btn" onclick="copySelectedCell()">Copy Cell</button>
+              <button class="btn" onclick="copyRowJson()">Copy Row JSON</button>
+              <button class="btn" onclick="copyTableCsv()">Copy Table CSV</button>
+            </div>
+          </div>
+
+          <!-- Status Banner -->
+          <div class="status-banner" id="jsonStatusBanner">
+            <span id="jsonStatusText">[OK] JSON Table View: 5 rows, 6 columns loaded</span>
+            <span id="jsonStatusCount" style="font-family: monospace; font-size: 10px;">5 of 5 visible</span>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-container">
+            <table class="data-table" id="jsonTable">
+              <thead id="jsonTableHead"></thead>
+              <tbody id="jsonTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Cell Inspector -->
+          <div class="cell-inspector">
+            <div class="inspector-title">
+              <span id="inspectorTitle">Selected Cell: (row 1, id)</span>
+              <button class="btn" style="padding: 1px 6px; font-size: 10px;" onclick="copySelectedCell()">Copy Value</button>
+            </div>
+            <textarea class="inspector-text" id="inspectorText" readonly></textarea>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const sampleData = {
+      user_list: {
+        method: "GET",
+        url: "https://api.target.local/v1/users",
+        data: [
+          { id: 101, username: "admin_sec", email: "admin@target.local", role: "SuperAdmin", status: "Active", mfa: "true", last_ip: "10.0.4.12" },
+          { id: 102, username: "jdoe_ops", email: "jdoe@target.local", role: "Operator", status: "Active", mfa: "true", last_ip: "10.0.4.19" },
+          { id: 103, username: "audit_viewer", email: "audit@external.local", role: "Auditor", status: "Pending", mfa: "false", last_ip: "192.168.1.55" },
+          { id: 104, username: "staging_bot", email: "bot@ci.internal", role: "ServiceAccount", status: "Active", mfa: "false", last_ip: "172.16.10.88" },
+          { id: 105, username: "temp_guest", email: "guest@target.local", role: "Guest", status: "Disabled", mfa: "false", last_ip: "10.0.99.1" }
+        ]
+      },
+      profile_object: {
+        method: "GET",
+        url: "https://api.target.local/v1/user/101/profile",
+        data: {
+          "user.id": 101,
+          "user.name": "Alexander Vance",
+          "user.email": "admin@target.local",
+          "user.role": "SuperAdmin",
+          "user.organization.id": "org_99182",
+          "user.organization.tier": "Enterprise",
+          "security.mfa_enabled": true,
+          "security.pwd_expires_days": 45,
+          "security.session_timeout": "900s"
+        }
+      },
+      data_wrapper: {
+        method: "GET",
+        url: "https://api.target.local/v1/audit/logs",
+        data: [
+          { event_id: "evt_1001", action: "AUTH_LOGIN", actor: "admin_sec", result: "SUCCESS", timestamp: "2026-10-27T08:00:12Z" },
+          { event_id: "evt_1002", action: "TOKEN_ROTATE", actor: "staging_bot", result: "SUCCESS", timestamp: "2026-10-27T08:05:40Z" },
+          { event_id: "evt_1003", action: "FILE_DOWNLOAD", actor: "audit_viewer", result: "DENIED", timestamp: "2026-10-27T08:12:01Z" },
+          { event_id: "evt_1004", action: "PERMISSION_CHANGE", actor: "admin_sec", result: "SUCCESS", timestamp: "2026-10-27T08:19:22Z" }
+        ]
+      }
+    };
+
+    let activeScenario = sampleData.user_list;
+    let selectedRowIdx = 0;
+    let selectedColKey = "";
+    let selectedValue = "";
+
+    function renderTable(scenario) {
+      document.getElementById('dispMethod').innerText = scenario.method;
+      document.getElementById('dispUrl').innerText = scenario.url;
+
+      const thead = document.getElementById('jsonTableHead');
+      const tbody = document.getElementById('jsonTableBody');
+      thead.innerHTML = "";
+      tbody.innerHTML = "";
+
+      let rows = [];
+      let columns = [];
+
+      if (Array.isArray(scenario.data)) {
+        rows = scenario.data;
+        const colSet = new Set();
+        rows.forEach(r => Object.keys(r).forEach(k => colSet.add(k)));
+        columns = Array.from(colSet);
+
+        // Build Table Header
+        const trH = document.createElement('tr');
+        columns.forEach(col => {
+          const th = document.createElement('th');
+          th.innerText = col;
+          trH.appendChild(th);
+        });
+        thead.appendChild(trH);
+
+        // Build Table Body
+        rows.forEach((rowObj, rIdx) => {
+          const tr = document.createElement('tr');
+          if (rIdx === 0) tr.classList.add('selected');
+
+          columns.forEach(col => {
+            const td = document.createElement('td');
+            const val = rowObj[col] !== undefined ? String(rowObj[col]) : "";
+            td.innerText = val;
+            td.onclick = () => selectCell(rIdx, col, val, tr);
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+
+        if (columns.length > 0 && rows.length > 0) {
+          selectCell(0, columns[0], String(rows[0][columns[0]]), tbody.firstChild);
+        }
+        document.getElementById('jsonStatusText').innerText = `[OK] JSON Array: ${rows.length} rows, ${columns.length} columns`;
+        document.getElementById('jsonStatusCount').innerText = `${rows.length} of ${rows.length} visible`;
+
+      } else if (typeof scenario.data === 'object') {
+        // Flattened Key-Value view
+        columns = ["Key / JSON Path", "Value"];
+        const trH = document.createElement('tr');
+        columns.forEach(col => {
+          const th = document.createElement('th');
+          th.innerText = col;
+          trH.appendChild(th);
+        });
+        thead.appendChild(trH);
+
+        const keys = Object.keys(scenario.data);
+        keys.forEach((k, rIdx) => {
+          const tr = document.createElement('tr');
+          if (rIdx === 0) tr.classList.add('selected');
+
+          const tdKey = document.createElement('td');
+          tdKey.style.fontWeight = "600";
+          tdKey.innerText = k;
+          tdKey.onclick = () => selectCell(rIdx, k, String(scenario.data[k]), tr);
+
+          const tdVal = document.createElement('td');
+          tdVal.innerText = String(scenario.data[k]);
+          tdVal.onclick = () => selectCell(rIdx, k, String(scenario.data[k]), tr);
+
+          tr.appendChild(tdKey);
+          tr.appendChild(tdVal);
+          tbody.appendChild(tr);
+        });
+
+        if (keys.length > 0) {
+          selectCell(0, keys[0], String(scenario.data[keys[0]]), tbody.firstChild);
+        }
+        document.getElementById('jsonStatusText').innerText = `[OK] JSON Object: ${keys.length} fields (Flattened)`;
+        document.getElementById('jsonStatusCount').innerText = `${keys.length} of ${keys.length} visible`;
+      }
+    }
+
+    function selectCell(rIdx, colKey, val, trElement) {
+      selectedRowIdx = rIdx;
+      selectedColKey = colKey;
+      selectedValue = val;
+
+      const rows = document.querySelectorAll('#jsonTableBody tr');
+      rows.forEach(r => r.classList.remove('selected'));
+      if (trElement) trElement.classList.add('selected');
+
+      document.getElementById('inspectorTitle').innerText = `Selected Cell: (row ${rIdx + 1}, ${colKey})`;
+      document.getElementById('inspectorText').value = val;
+    }
+
+    function filterTable(query) {
+      const q = query.trim().toLowerCase();
+      const rows = document.querySelectorAll('#jsonTableBody tr');
+      let visible = 0;
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (!q || text.includes(q)) {
+          row.style.display = "";
+          visible++;
+        } else {
+          row.style.display = "none";
+        }
+      });
+      document.getElementById('jsonStatusCount').innerText = `${visible} of ${rows.length} visible`;
+    }
+
+    function copySelectedCell() {
+      if (selectedValue !== "") {
+        navigator.clipboard.writeText(selectedValue).catch(() => {});
+        updateStatus(`Copied cell [${selectedColKey}]: "${selectedValue.substring(0, 30)}..." to clipboard`);
+      }
+    }
+
+    function copyRowJson() {
+      let rowData;
+      if (Array.isArray(activeScenario.data)) {
+        rowData = activeScenario.data[selectedRowIdx];
+      } else {
+        rowData = activeScenario.data;
+      }
+      if (rowData) {
+        const jsonStr = JSON.stringify(rowData, null, 2);
+        navigator.clipboard.writeText(jsonStr).catch(() => {});
+        updateStatus(`Copied selected row JSON to clipboard (${jsonStr.length} chars)`);
+      }
+    }
+
+    function copyTableCsv() {
+      let csv = "";
+      if (Array.isArray(activeScenario.data)) {
+        const rows = activeScenario.data;
+        const colSet = new Set();
+        rows.forEach(r => Object.keys(r).forEach(k => colSet.add(k)));
+        const columns = Array.from(colSet);
+        csv += columns.join(",") + "\n";
+        rows.forEach(r => {
+          const line = columns.map(c => `"${String(r[c] || "").replace(/"/g, '""')}"`).join(",");
+          csv += line + "\n";
+        });
+      } else {
+        csv += "Key,Value\n";
+        Object.keys(activeScenario.data).forEach(k => {
+          csv += `"${k}","${String(activeScenario.data[k]).replace(/"/g, '""')}"\n`;
+        });
+      }
+      navigator.clipboard.writeText(csv).catch(() => {});
+      updateStatus(`Copied entire table as CSV to clipboard (${csv.length} chars)`);
+    }
+
+    function updateStatus(msg) {
+      document.getElementById('jsonStatusText').innerText = `[OK] ${msg}`;
+    }
+
+    function loadScenario(key) {
+      activeScenario = sampleData[key];
+      document.getElementById('filterInput').value = "";
+      renderTable(activeScenario);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    window.onload = function() {
+      renderTable(activeScenario);
+    };
+  </script>
+</body>
+</html>
