@@ -277,4 +277,56 @@ class RequestViewerAndCustomRequestTest_littlespidy {
         assertTrue(body.contains("keepThisField"), "Untouched fields must be preserved");
         assertTrue(body.contains("42"), "Untouched field value must be preserved");
     }
+
+    @Test
+    @DisplayName("Verify auto parameter discovery and viewer refresh populate parameters for early imported sessions")
+    void testEnsureParametersDiscoveredAndRefreshButton() {
+        // Simulating endpoint imported early or loaded from an old session file without pre-populated maps
+        DiscoveredEndpoint_littlespidy ep = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/orders/{orderId}?status=pending&limit=10", "Create order");
+        ep.setRequestBodySample("{\n  \"note\": \"rush\",\n  \"customer\": {\n    \"vip\": true\n  }\n}");
+
+        // Initially maps are empty
+        assertTrue(ep.getPathParams().isEmpty());
+        assertTrue(ep.getQueryParams().isEmpty());
+        assertTrue(ep.getBodyParams().isEmpty());
+
+        // Parameter summary automatically triggers discovery
+        String summary = ep.getParametersSummary();
+        assertNotNull(summary);
+        assertNotEquals("None", summary);
+        assertTrue(summary.contains("orderId"), "Must discover orderId from path template");
+        assertTrue(summary.contains("status"), "Must discover status from path query string");
+        assertTrue(summary.contains("note"), "Must discover note from JSON body");
+        assertTrue(summary.contains("customer.vip"), "Must discover nested customer.vip from JSON body");
+
+        // Verify maps are populated
+        assertEquals(1, ep.getPathParams().size());
+        assertTrue(ep.getPathParams().containsKey("orderId"));
+        assertEquals(2, ep.getQueryParams().size());
+        assertTrue(ep.getQueryParams().containsKey("status"));
+        assertTrue(ep.getQueryParams().containsKey("limit"));
+        assertEquals("pending", ep.getQueryParams().get("status"));
+        assertEquals("10", ep.getQueryParams().get("limit"));
+        assertTrue(ep.getBodyParams().containsKey("note"));
+        assertTrue(ep.getBodyParams().containsKey("customer.vip"));
+
+        // Verify Refresh in RequestResponseViewerTab updates the table
+        RequestResponseViewerTab_littlespidy tab = new RequestResponseViewerTab_littlespidy(null);
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy("Orders API", "OpenAPI", "SESSION", "/tmp/orders.session");
+        col.setEndpoints(List.of(ep));
+        tab.updateCollections(List.of(col));
+
+        RequestResponseViewerTab_littlespidy.RequestTableModel model = tab.getTableModel();
+        assertNotNull(model);
+        assertEquals(1, model.getRowCount());
+        String tableParams = (String) model.getValueAt(0, 7);
+        assertTrue(tableParams.contains("orderId"));
+        assertTrue(tableParams.contains("status"));
+        assertTrue(tableParams.contains("note"));
+
+        // Trigger onRefresh
+        tab.onRefresh();
+        assertEquals(1, model.getRowCount());
+        assertEquals(tableParams, model.getValueAt(0, 7));
+    }
 }

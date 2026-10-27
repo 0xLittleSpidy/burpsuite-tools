@@ -204,7 +204,147 @@ public class DiscoveredEndpoint_littlespidy {
         this.customRawRequest = null;
     }
 
+    private static final java.util.regex.Pattern PATH_VAR_REGEX = java.util.regex.Pattern.compile("\\{([a-zA-Z0-9_\\-]+)\\}|:([a-zA-Z0-9_\\-]+)");
+
+    /**
+     * Auto-discovers and populates parameters from path templates ({id}, :code),
+     * query strings (?k=v), sample request bodies, and custom raw requests.
+     * Ensures endpoints loaded from early sessions or specs immediately display their parameters.
+     */
+    public void ensureParametersDiscovered() {
+        // 1. Path parameters from path template
+        if (path != null) {
+            String cleanPath = path.contains("?") ? path.substring(0, path.indexOf('?')) : path;
+            java.util.regex.Matcher m = PATH_VAR_REGEX.matcher(cleanPath);
+            while (m.find()) {
+                String name = m.group(1) != null ? m.group(1) : m.group(2);
+                if (name != null && !name.isBlank()) {
+                    name = name.trim();
+                    if (!getPathParams().containsKey(name)) {
+                        getPathParams().put(name, "");
+                    }
+                }
+            }
+        }
+
+        // 2. Query parameters from path query string (?k=v)
+        if (path != null && path.contains("?")) {
+            String qStr = path.substring(path.indexOf('?') + 1);
+            parseAndMergeQueryString(qStr);
+        }
+
+        // 3. Body parameters from requestBodySample
+        if (requestBodySample != null && !requestBodySample.isBlank()) {
+            parseAndMergeBodyString(requestBodySample);
+        }
+
+        // 4. From customRawRequest if present
+        if (customRawRequest != null && !customRawRequest.isBlank()) {
+            String[] parts = customRawRequest.split("(\\r\\n\\r\\n|\\n\\n)", 2);
+            String headerSection = parts[0];
+            String bodySection = parts.length > 1 ? parts[1] : "";
+
+            String[] lines = headerSection.split("(\\r\\n|\\n)");
+            if (lines.length > 0) {
+                String reqLine = lines[0].trim();
+                String[] tokens = reqLine.split("\\s+");
+                if (tokens.length > 1) {
+                    String reqPath = tokens[1];
+                    if (reqPath.contains("?")) {
+                        String qStr = reqPath.substring(reqPath.indexOf('?') + 1);
+                        parseAndMergeQueryString(qStr);
+                    }
+                    if (path != null) {
+                        extractPathValuesFromLive(path, reqPath);
+                    }
+                }
+            }
+
+            if (!bodySection.isBlank()) {
+                parseAndMergeBodyString(bodySection);
+            }
+        }
+    }
+
+    private void parseAndMergeQueryString(String qStr) {
+        if (qStr == null || qStr.isBlank()) return;
+        String[] pairs = qStr.split("&");
+        for (String pair : pairs) {
+            if (!pair.isBlank()) {
+                int eq = pair.indexOf('=');
+                String k = eq > 0 ? pair.substring(0, eq).trim() : pair.trim();
+                String v = eq > 0 && eq < pair.length() - 1 ? pair.substring(eq + 1).trim() : "";
+                if (!k.isBlank() && !getQueryParams().containsKey(k)) {
+                    getQueryParams().put(k, v);
+                }
+            }
+        }
+    }
+
+    private void parseAndMergeBodyString(String body) {
+        if (body == null || body.isBlank()) return;
+        String trimmed = body.trim();
+        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+                com.google.gson.JsonElement el = com.google.gson.JsonParser.parseString(trimmed);
+                extractJsonKeys(el, "");
+            } catch (Exception ignored) {}
+        } else if (trimmed.contains("=") && !trimmed.contains("\n")) {
+            String[] pairs = trimmed.split("&");
+            for (String pair : pairs) {
+                if (!pair.isBlank()) {
+                    int eq = pair.indexOf('=');
+                    String k = eq > 0 ? pair.substring(0, eq).trim() : pair.trim();
+                    String v = eq > 0 && eq < pair.length() - 1 ? pair.substring(eq + 1).trim() : "";
+                    if (!k.isBlank() && !getBodyParams().containsKey(k)) {
+                        getBodyParams().put(k, v);
+                    }
+                }
+            }
+        }
+    }
+
+    private void extractJsonKeys(com.google.gson.JsonElement el, String prefix) {
+        if (el == null || el.isJsonNull()) return;
+        if (el.isJsonObject()) {
+            for (Map.Entry<String, com.google.gson.JsonElement> entry : el.getAsJsonObject().entrySet()) {
+                String key = entry.getKey();
+                String full = prefix.isEmpty() ? key : prefix + "." + key;
+                if (!getBodyParams().containsKey(full)) {
+                    if (entry.getValue().isJsonPrimitive()) {
+                        getBodyParams().put(full, entry.getValue().getAsString());
+                    } else {
+                        getBodyParams().put(full, "");
+                    }
+                }
+                if (entry.getValue().isJsonObject()) {
+                    extractJsonKeys(entry.getValue(), full);
+                }
+            }
+        }
+    }
+
+    private void extractPathValuesFromLive(String templatePath, String livePath) {
+        String cleanT = templatePath.contains("?") ? templatePath.substring(0, templatePath.indexOf('?')) : templatePath;
+        String cleanL = livePath.contains("?") ? livePath.substring(0, livePath.indexOf('?')) : livePath;
+        String[] tSegs = cleanT.split("/");
+        String[] lSegs = cleanL.split("/");
+        if (tSegs.length == lSegs.length) {
+            for (int i = 0; i < tSegs.length; i++) {
+                String t = tSegs[i];
+                if ((t.startsWith("{") && t.endsWith("}")) || t.startsWith(":")) {
+                    String paramName = t.startsWith("{") ? t.substring(1, t.length() - 1) : t.substring(1);
+                    String liveVal = lSegs[i];
+                    if (!liveVal.isBlank() && !liveVal.equals(t)) {
+                        getPathParams().put(paramName, liveVal);
+                    }
+                }
+            }
+        }
+    }
+
     public String getParametersSummary() {
+        ensureParametersDiscovered();
         List<String> parts = new ArrayList<>();
         if (pathParams != null && !pathParams.isEmpty()) {
             parts.add("Path: " + pathParams.keySet());

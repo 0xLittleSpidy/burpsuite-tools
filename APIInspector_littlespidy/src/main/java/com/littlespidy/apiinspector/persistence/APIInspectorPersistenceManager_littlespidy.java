@@ -932,6 +932,7 @@ public class APIInspectorPersistenceManager_littlespidy {
                 ep.setRequiresAuth(epDto.requiresAuth);
                 ep.setAuthSchemes(epDto.authSchemes);
                 ep.setCustomRawRequest(epDto.customRawRequest);
+                ep.ensureParametersDiscovered();
                 eps.add(ep);
             }
         }

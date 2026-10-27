@@ -572,6 +572,7 @@
                 <label>Search:</label>
                 <input type="text" class="input-box" id="search-box" placeholder="Filter path or summary..." onkeyup="renderTable()" style="width: 140px;">
                 <button class="btn" onclick="clearFilters()">Clear Filters</button>
+                <button class="btn" onclick="triggerRefresh()" title="Re-discover parameters from paths, query strings, and bodies across all endpoints">Refresh</button>
             </div>
 
             <div class="toolbar-group">
@@ -1216,6 +1217,30 @@
             document.getElementById("method-filter").value = "ALL";
             document.getElementById("search-box").value = "";
             renderTable();
+        }
+
+        function triggerRefresh() {
+            sampleEndpoints.forEach(ep => {
+                // Ensure parameters are discovered from path, query string, and body
+                if (ep.path && ep.path.includes("{")) {
+                    const match = ep.path.match(/\{([^}]+)\}/);
+                    if (match && !ep.pathParams[match[1]]) {
+                        ep.pathParams[match[1]] = "";
+                    }
+                }
+                if (ep.path && ep.path.includes("?")) {
+                    const q = ep.path.split("?")[1];
+                    q.split("&").forEach(pair => {
+                        const parts = pair.split("=");
+                        if (parts[0] && !ep.queryParams[parts[0]]) {
+                            ep.queryParams[parts[0]] = parts[1] || "";
+                        }
+                    });
+                }
+            });
+            renderTable();
+            loadSelectedIntoEditor();
+            alert("[Refresh Complete]: Re-discovered parameters from paths, query strings, and request bodies across all endpoints. Parameter column and viewer updated.");
         }
 
         // Initial Render

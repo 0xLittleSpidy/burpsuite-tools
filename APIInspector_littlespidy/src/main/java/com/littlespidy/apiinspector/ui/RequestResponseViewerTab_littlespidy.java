@@ -133,6 +133,11 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         });
         leftFilters.add(clearFilterBtn);
 
+        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn.setToolTipText("Re-discover parameters from paths, query strings, and request bodies across all endpoints and refresh viewer");
+        refreshBtn.addActionListener(e -> onRefresh());
+        leftFilters.add(refreshBtn);
+
         topContainer.add(leftFilters, BorderLayout.WEST);
 
         JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
@@ -407,6 +412,35 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
         });
     }
 
+    private java.util.function.Supplier<List<ImportedCollection_littlespidy>> collectionsSupplier;
+
+    public void setCollectionsSupplier(java.util.function.Supplier<List<ImportedCollection_littlespidy>> supplier) {
+        this.collectionsSupplier = supplier;
+    }
+
+    public synchronized void onRefresh() {
+        if (currentlyLoadedItem != null) {
+            saveEditorChangesToEndpoint(currentlyLoadedItem);
+        }
+
+        if (collectionsSupplier != null) {
+            List<ImportedCollection_littlespidy> fresh = collectionsSupplier.get();
+            if (fresh != null && !fresh.isEmpty()) {
+                updateCollections(fresh);
+                return;
+            }
+        }
+
+        for (ImportedCollection_littlespidy col : collections) {
+            for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
+                ep.ensureParametersDiscovered();
+            }
+        }
+        tableModel.fireTableDataChanged();
+        applyFilters();
+        onEndpointRowSelected();
+    }
+
     public synchronized void updateCollections(List<ImportedCollection_littlespidy> cols) {
         if (currentlyLoadedItem != null) {
             saveEditorChangesToEndpoint(currentlyLoadedItem);
@@ -419,6 +453,7 @@ public class RequestResponseViewerTab_littlespidy extends JPanel {
             collections.addAll(cols);
             for (ImportedCollection_littlespidy c : cols) {
                 for (DiscoveredEndpoint_littlespidy ep : c.getEndpoints()) {
+                    ep.ensureParametersDiscovered();
                     endpointItems.add(new EndpointItem(c, ep));
                     methodFilterDropDown.registerMethod(ep.getMethod());
                 }

@@ -68,6 +68,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
                     ? col.getTargetBaseUrl() : "https://localhost";
             sendEndpointToVersionFinder(ep, baseUrl);
         });
+        this.requestResponseViewerTab.setCollectionsSupplier(this.importTab::getAllCollections);
 
         // Wire "Save to Hidden API Storage" from strategy tabs
         this.endpointDiscoveryTab.setOnSaveToHiddenStorageCallback(this.hiddenStorageTab::addEndpoint);
