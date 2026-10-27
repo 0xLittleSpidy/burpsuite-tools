@@ -15,6 +15,26 @@ public class SessionStateDTO_littlespidy {
 	public List<MessageEntryDTO> liveMessages = new ArrayList<MessageEntryDTO>();
 	public List<String> importedSessionNames = new ArrayList<String>();
 	public List<MessageEntryDTO> importedMessages = new ArrayList<MessageEntryDTO>();
+	public List<ConvertResultEntryDTO> convertResults = new ArrayList<ConvertResultEntryDTO>();
+
+	public static class ConvertResultEntryDTO {
+		public int id;
+		public String method;
+		public String host;
+		public String path;
+		public int postStatus;
+		public int getStatus;
+		public int postLength;
+		public int getLength;
+		public String contentType;
+		public String signal;
+		public String severity;
+		public String evidence;
+		public String originalRequestBase64;
+		public String originalResponseBase64;
+		public String convertedRequestBase64;
+		public String convertedResponseBase64;
+	}
 
 	public static class MessageEntryDTO {
 		public int id;

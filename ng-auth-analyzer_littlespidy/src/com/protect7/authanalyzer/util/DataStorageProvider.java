@@ -38,6 +38,10 @@ public class DataStorageProvider {
 			filterArray.add(filterElement);
 		}
 		sessionsObject.add("filters", filterArray);
+		if (BurpExtender.mainPanel != null && BurpExtender.mainPanel.getConfigurationPanel() != null) {
+			sessionsObject.addProperty("testConvertPostToGet",
+					BurpExtender.mainPanel.getConfigurationPanel().isTestConvertPostToGetSelected());
+		}
 		return sessionsObject.toString();
 	}
 	

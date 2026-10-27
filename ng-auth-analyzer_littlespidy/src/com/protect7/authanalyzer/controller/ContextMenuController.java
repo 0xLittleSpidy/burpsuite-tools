@@ -55,6 +55,16 @@ public class ContextMenuController implements IContextMenuFactory {
 				}
 			});
 			authAnalyzerMenu.add(testCorsItem);
+
+			JMenuItem convertPostToGetItem = new JMenuItem("Convert POST to GET with " + Globals.EXTENSION_NAME);
+			convertPostToGetItem.addActionListener(e -> {
+				if (BurpExtender.mainPanel != null && BurpExtender.mainPanel.getConvertPanel() != null) {
+					for (IHttpRequestResponse message : invocation.getSelectedMessages()) {
+						BurpExtender.mainPanel.getConvertPanel().analyzePostRequestAsync(message);
+					}
+				}
+			});
+			authAnalyzerMenu.add(convertPostToGetItem);
 		}
 		if (selection != null && selection[0] != selection[1]) {
 			if (iContext == IContextMenuInvocation.CONTEXT_MESSAGE_EDITOR_REQUEST

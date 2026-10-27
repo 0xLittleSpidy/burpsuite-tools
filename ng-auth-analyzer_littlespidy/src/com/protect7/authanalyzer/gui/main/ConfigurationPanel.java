@@ -73,6 +73,8 @@ public class ConfigurationPanel extends JPanel {
 	private final JButton pauseButton = new JButton();
 	//private final JLabel pendingRequestsLabel = new JLabel("Pending Requests Queue: 0");
 	private final JToggleButton dropOriginalButton = new JToggleButton(DROP_REQUEST_TEXT);
+	private final HintCheckBox testConvertPostToGet = new HintCheckBox("Test Convert POST to GET", true,
+			"Automatically converts intercepted POST requests to GET and evaluates responses for authorization/CSRF bypasses.");
 	private final JPanel filterPanel;
 	private final LinkedHashMap<String, SessionPanel> sessionPanelMap = new LinkedHashMap<>();
 	private final String PAUSE_TEXT = "Pause";
@@ -227,8 +229,10 @@ public class ConfigurationPanel extends JPanel {
 		c1.gridwidth = 2;
 		startStopButtonPanel.add(dropOriginalButton, c1);
 		c1.gridy = 3;
-		startStopButtonPanel.add(new JLabel(" "), c1);
+		startStopButtonPanel.add(testConvertPostToGet, c1);
 		c1.gridy = 4;
+		startStopButtonPanel.add(new JLabel(" "), c1);
+		c1.gridy = 5;
 		startStopButtonPanel.add(settingsButton, c1);
 		
 		GridBagConstraints c = new GridBagConstraints();
@@ -617,8 +621,12 @@ public class ConfigurationPanel extends JPanel {
 	public void loadSetup(String jsonString) {
 		sessionPanelMap.clear();
 		sessionTabbedPane.removeAll();
+		JsonObject rootObject = JsonParser.parseString(jsonString).getAsJsonObject();
+		if (rootObject.get("testConvertPostToGet") != null) {
+			testConvertPostToGet.setSelected(rootObject.get("testConvertPostToGet").getAsBoolean());
+		}
 		// Load Sessions
-		JsonArray storedSessionsArray = JsonParser.parseString(jsonString).getAsJsonObject().get("sessions")
+		JsonArray storedSessionsArray = rootObject.get("sessions")
 				.getAsJsonArray();
 		for (JsonElement sessionEl : storedSessionsArray) {
 			JsonObject sessionObject = sessionEl.getAsJsonObject();
@@ -777,5 +785,17 @@ public class ConfigurationPanel extends JPanel {
 			}
 		}
 		return false;
+	}
+
+	public boolean isConvertPostToGetActive() {
+		return CurrentConfig.getCurrentConfig().isRunning() && testConvertPostToGet.isSelected();
+	}
+
+	public void setConvertPostToGetActive(boolean active) {
+		testConvertPostToGet.setSelected(active);
+	}
+
+	public boolean isTestConvertPostToGetSelected() {
+		return testConvertPostToGet.isSelected();
 	}
 }

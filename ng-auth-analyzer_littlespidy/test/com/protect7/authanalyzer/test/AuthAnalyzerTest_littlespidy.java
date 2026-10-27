@@ -325,4 +325,120 @@ public class AuthAnalyzerTest_littlespidy {
 		session.setTestCors(true);
 		assertTrue(session.isTestCors());
 	}
+
+	@Test
+	public void testConvertEngineExtractUrlEncodedParams() {
+		String body = "user=admin&action=update&id=42";
+		String query = com.protect7.authanalyzer.convert.ConvertEngine_littlespidy.extractBodyParametersAsQueryString(
+				body, "application/x-www-form-urlencoded");
+		assertEquals(body, query);
+	}
+
+	@Test
+	public void testConvertEngineExtractJsonParams() {
+		String body = "{\"role\":\"admin\",\"userId\":\"99\"}";
+		String query = com.protect7.authanalyzer.convert.ConvertEngine_littlespidy.extractBodyParametersAsQueryString(
+				body, "application/json");
+		assertTrue(query.contains("role=admin"));
+		assertTrue(query.contains("userId=99"));
+	}
+
+	@Test
+	public void testConversionTableModelOperations() {
+		com.protect7.authanalyzer.convert.ConversionTableModel_littlespidy model =
+				new com.protect7.authanalyzer.convert.ConversionTableModel_littlespidy();
+		assertEquals(0, model.getRowCount());
+
+		com.protect7.authanalyzer.convert.ConversionResult_littlespidy r1 =
+				new com.protect7.authanalyzer.convert.ConversionResult_littlespidy(
+						1, "GET", "api.target.com", "/api/role?role=admin",
+						403, 200, 45, 150, "application/json",
+						"Auth Bypass Detected (POST 403 -> GET 200)", "High", "Evidence test",
+						null, null);
+
+		model.addResult(r1);
+		assertEquals(1, model.getRowCount());
+		assertEquals(1, model.getValueAt(0, 0));
+		assertEquals("GET", model.getValueAt(0, 1));
+		assertEquals("api.target.com", model.getValueAt(0, 2));
+		assertEquals(403, model.getValueAt(0, 4));
+		assertEquals(200, model.getValueAt(0, 5));
+		assertEquals("High", model.getValueAt(0, 10));
+
+		model.clear();
+		assertEquals(0, model.getRowCount());
+	}
+
+	@Test
+	public void testPostCandidatesTableModelOperations() {
+		com.protect7.authanalyzer.convert.PostCandidatesTableModel_littlespidy model =
+				new com.protect7.authanalyzer.convert.PostCandidatesTableModel_littlespidy();
+		assertEquals(0, model.getRowCount());
+
+		com.protect7.authanalyzer.convert.PostCandidate_littlespidy c1 =
+				new com.protect7.authanalyzer.convert.PostCandidate_littlespidy(
+						1, "POST", "api.target.com", "/api/role", "https://api.target.com/api/role",
+						"application/json", 1, List.of("role"), 403, 45, "Bearer", null);
+
+		model.addCandidate(c1);
+		assertEquals(1, model.getRowCount());
+		assertEquals(true, model.getValueAt(0, 0));
+		assertEquals("POST", model.getValueAt(0, 2));
+		assertEquals("api.target.com", model.getValueAt(0, 3));
+		assertEquals(1, model.getSelectedCandidates().size());
+
+		model.selectAll(false);
+		assertEquals(0, model.getSelectedCandidates().size());
+
+		model.selectAll(true);
+		assertEquals(1, model.getSelectedCandidates().size());
+
+		model.clear();
+		assertEquals(0, model.getRowCount());
+	}
+
+	@Test
+	public void testConvertPostToGetPanelInitialization() {
+		com.protect7.authanalyzer.gui.convert.ConvertPostToGetPanel_littlespidy panel =
+				new com.protect7.authanalyzer.gui.convert.ConvertPostToGetPanel_littlespidy(null);
+		assertNotNull(panel.getSubTabbedPane());
+		assertEquals(2, panel.getSubTabbedPane().getTabCount());
+		assertEquals("Live Conversions", panel.getSubTabbedPane().getTitleAt(0));
+		assertEquals("POST Traffic Discovery", panel.getSubTabbedPane().getTitleAt(1));
+		assertNotNull(panel.getConversionTableModel());
+		assertNotNull(panel.getDiscoveryTableModel());
+	}
+
+	@Test
+	public void testConvertResultsSessionStateDTORoundtrip() {
+		SessionStateDTO_littlespidy dto = new SessionStateDTO_littlespidy();
+		dto.version = Globals.VERSION;
+
+		SessionStateDTO_littlespidy.ConvertResultEntryDTO cr = new SessionStateDTO_littlespidy.ConvertResultEntryDTO();
+		cr.id = 1;
+		cr.method = "GET";
+		cr.host = "api.target.com";
+		cr.path = "/api/v1/update?admin=1";
+		cr.postStatus = 403;
+		cr.getStatus = 200;
+		cr.postLength = 40;
+		cr.getLength = 160;
+		cr.contentType = "application/json";
+		cr.signal = "Auth Bypass Detected (POST 403 -> GET 200)";
+		cr.severity = "High";
+		cr.evidence = "Test evidence";
+
+		dto.convertResults.add(cr);
+
+		Gson gson = new Gson();
+		String json = gson.toJson(dto);
+		assertNotNull(json);
+
+		SessionStateDTO_littlespidy deserialized = gson.fromJson(json, SessionStateDTO_littlespidy.class);
+		assertEquals(1, deserialized.convertResults.size());
+		assertEquals("api.target.com", deserialized.convertResults.get(0).host);
+		assertEquals(403, deserialized.convertResults.get(0).postStatus);
+		assertEquals(200, deserialized.convertResults.get(0).getStatus);
+		assertEquals("High", deserialized.convertResults.get(0).severity);
+	}
 }

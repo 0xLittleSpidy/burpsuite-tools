@@ -188,6 +188,42 @@ public class PersistenceManager_littlespidy {
 					}
 				}
 
+				// Convert POST to GET results
+				if (mainPanel.getConvertPanel() != null && mainPanel.getConvertPanel().getConversionTableModel() != null) {
+					for (com.protect7.authanalyzer.convert.ConversionResult_littlespidy cr : mainPanel.getConvertPanel().getConversionTableModel().getAllResults()) {
+						SessionStateDTO_littlespidy.ConvertResultEntryDTO crDto = new SessionStateDTO_littlespidy.ConvertResultEntryDTO();
+						crDto.id = cr.getId();
+						crDto.method = cr.getMethod();
+						crDto.host = cr.getHost();
+						crDto.path = cr.getPath();
+						crDto.postStatus = cr.getPostStatus();
+						crDto.getStatus = cr.getGetStatus();
+						crDto.postLength = cr.getPostLength();
+						crDto.getLength = cr.getGetLength();
+						crDto.contentType = cr.getContentType();
+						crDto.signal = cr.getSignal();
+						crDto.severity = cr.getSeverity();
+						crDto.evidence = cr.getEvidence();
+						if (cr.getOriginalRequestResponse() != null) {
+							if (cr.getOriginalRequestResponse().getRequest() != null) {
+								crDto.originalRequestBase64 = Base64.getEncoder().encodeToString(cr.getOriginalRequestResponse().getRequest());
+							}
+							if (cr.getOriginalRequestResponse().getResponse() != null) {
+								crDto.originalResponseBase64 = Base64.getEncoder().encodeToString(cr.getOriginalRequestResponse().getResponse());
+							}
+						}
+						if (cr.getConvertedRequestResponse() != null) {
+							if (cr.getConvertedRequestResponse().getRequest() != null) {
+								crDto.convertedRequestBase64 = Base64.getEncoder().encodeToString(cr.getConvertedRequestResponse().getRequest());
+							}
+							if (cr.getConvertedRequestResponse().getResponse() != null) {
+								crDto.convertedResponseBase64 = Base64.getEncoder().encodeToString(cr.getConvertedRequestResponse().getResponse());
+							}
+						}
+						dto.convertResults.add(crDto);
+					}
+				}
+
 				String json = gson.toJson(dto);
 				File tmpFile = new File(activeSessionFile.getAbsolutePath() + ".tmp");
 				Files.writeString(tmpFile.toPath(), json, StandardCharsets.UTF_8);
@@ -360,6 +396,31 @@ public class PersistenceManager_littlespidy {
 					mainPanel.getImportPanel().setImportedData(impOrigs, impSessions);
 				}
 
+				// 4. Restore Convert POST to GET results
+				if (mainPanel.getConvertPanel() != null && dto.convertResults != null) {
+					mainPanel.getConvertPanel().clearLiveConversions();
+					List<com.protect7.authanalyzer.convert.ConversionResult_littlespidy> restoredResults = new ArrayList<>();
+					for (SessionStateDTO_littlespidy.ConvertResultEntryDTO crDto : dto.convertResults) {
+						byte[] origReq = decodeBase64Safe(crDto.originalRequestBase64);
+						byte[] origResp = decodeBase64Safe(crDto.originalResponseBase64);
+						CustomHttpService_littlespidy origService = new CustomHttpService_littlespidy(crDto.host, 443, "https");
+						CustomHttpRequestResponse_littlespidy origReqResp = new CustomHttpRequestResponse_littlespidy(origReq, origResp, origService);
+
+						byte[] convReq = decodeBase64Safe(crDto.convertedRequestBase64);
+						byte[] convResp = decodeBase64Safe(crDto.convertedResponseBase64);
+						CustomHttpService_littlespidy convService = new CustomHttpService_littlespidy(crDto.host, 443, "https");
+						CustomHttpRequestResponse_littlespidy convReqResp = new CustomHttpRequestResponse_littlespidy(convReq, convResp, convService);
+
+						com.protect7.authanalyzer.convert.ConversionResult_littlespidy res = new com.protect7.authanalyzer.convert.ConversionResult_littlespidy(
+								crDto.id, crDto.method, crDto.host, crDto.path,
+								crDto.postStatus, crDto.getStatus, crDto.postLength, crDto.getLength,
+								crDto.contentType, crDto.signal, crDto.severity, crDto.evidence,
+								origReqResp, convReqResp);
+						restoredResults.add(res);
+					}
+					mainPanel.getConvertPanel().getConversionTableModel().addResults(restoredResults);
+				}
+
 				this.activeSessionFile = file;
 				updateStatusLabel();
 				JOptionPane.showMessageDialog(mainPanel, "Session loaded successfully from:\n" + file.getAbsolutePath());
@@ -426,6 +487,10 @@ public class PersistenceManager_littlespidy {
 		}
 		if (mainPanel.getImportPanel() != null) {
 			mainPanel.getImportPanel().clearTable();
+		}
+		if (mainPanel.getConvertPanel() != null) {
+			mainPanel.getConvertPanel().clearLiveConversions();
+			mainPanel.getConvertPanel().clearDiscovery();
 		}
 		updateStatusLabel();
 		JOptionPane.showMessageDialog(mainPanel, "Session offboarded. Workspace restored to clean state.");

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ng-auth-analyzer_littlespidy - Convert POST to GET UI Preview</title>
+    <style>
+        :root {
+            --bg-color: #2b2b2b;
+            --surface-color: #3c3f41;
+            --header-bg: #323232;
+            --border-color: #555555;
+            --text-color: #bbbbbb;
+            --text-highlight: #ffffff;
+            --accent-orange: #ff7f27;
+            --tab-active-bg: #4e5254;
+            --tab-active-border: #ff7f27;
+            --btn-bg: #4c5052;
+            --btn-border: #5e6468;
+            --btn-hover: #5c6164;
+            --row-even: #313335;
+            --row-odd: #2b2b2b;
+            --row-hover: #3d444a;
+            --row-selected: #1e3a5f;
+            --badge-high-bg: rgba(255, 60, 60, 0.25);
+            --badge-high-border: #ff3c3c;
+            --badge-high-text: #ff6b6b;
+            --badge-med-bg: rgba(255, 160, 30, 0.25);
+            --badge-med-border: #ffa01e;
+            --badge-med-text: #ffb84d;
+            --badge-low-bg: rgba(255, 220, 0, 0.2);
+            --badge-low-border: #ffdc00;
+            --badge-low-text: #ffe066;
+            --badge-info-bg: rgba(100, 149, 237, 0.2);
+            --badge-info-border: #6495ed;
+            --badge-info-text: #8ab4f8;
+            --code-font: "JetBrains Mono", Consolas, "Courier New", monospace;
+        }
+
+        .light-theme {
+            --bg-color: #f2f2f2;
+            --surface-color: #ffffff;
+            --header-bg: #e6e6e6;
+            --border-color: #c0c0c0;
+            --text-color: #333333;
+            --text-highlight: #000000;
+            --accent-orange: #e06000;
+            --tab-active-bg: #ffffff;
+            --tab-active-border: #e06000;
+            --btn-bg: #e1e1e1;
+            --btn-border: #b0b0b0;
+            --btn-hover: #d0d0d0;
+            --row-even: #ffffff;
+            --row-odd: #f8f8f8;
+            --row-hover: #e8f0fe;
+            --row-selected: #cce0ff;
+            --badge-high-bg: #ffebee;
+            --badge-high-border: #d32f2f;
+            --badge-high-text: #b71c1c;
+            --badge-med-bg: #fff3e0;
+            --badge-med-border: #f57c00;
+            --badge-med-text: #e65100;
+            --badge-low-bg: #fffde7;
+            --badge-low-border: #fbc02d;
+            --badge-low-text: #f57f17;
+            --badge-info-bg: #e3f2fd;
+            --badge-info-border: #1976d2;
+            --badge-info-text: #0d47a1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Burp-style Suite Tabs Bar */
+        .suite-tabs-bar {
+            background-color: var(--header-bg);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            height: 34px;
+        }
+
+        .suite-title {
+            font-weight: bold;
+            color: var(--accent-orange);
+            font-size: 13px;
+            margin-right: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .suite-tab {
+            padding: 8px 14px;
+            color: var(--text-color);
+            cursor: pointer;
+            border-top: 2px solid transparent;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        .suite-tab:hover {
+            color: var(--text-highlight);
+        }
+
+        .suite-tab.active {
+            color: var(--text-highlight);
+            background-color: var(--surface-color);
+            border-top: 2px solid var(--accent-orange);
+            font-weight: bold;
+        }
+
+        .theme-toggle-btn {
+            margin-left: auto;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--text-color);
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* Top Persistence Toolbar */
+        .session-toolbar {
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn {
+            background-color: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--text-color);
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn:hover {
+            background-color: var(--btn-hover);
+            color: var(--text-highlight);
+        }
+
+        .btn-primary {
+            background-color: #2c5d88;
+            border-color: #3b7cb6;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: #3b7cb6;
+        }
+
+        .btn-danger {
+            background-color: #6a2b2b;
+            border-color: #8c3a3a;
+            color: #ffffff;
+        }
+
+        .session-status {
+            margin-left: auto;
+            font-family: var(--code-font);
+            font-size: 11px;
+            color: #46b856;
+        }
+
+        /* Sub-tab Navigation (Live Conversions vs POST Traffic Discovery) */
+        .subtabs-bar {
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 4px 8px 0 8px;
+            gap: 2px;
+        }
+
+        .subtab {
+            padding: 6px 14px;
+            color: var(--text-color);
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            user-select: none;
+            background-color: transparent;
+        }
+
+        .subtab.active {
+            background-color: var(--bg-color);
+            border-color: var(--border-color);
+            color: var(--accent-orange);
+            font-weight: bold;
+        }
+
+        /* Filter Controls Bar */
+        .filters-bar {
+            padding: 6px 10px;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 8px;
+            border-radius: 3px;
+            min-width: 200px;
+            font-size: 11px;
+        }
+
+        .search-input:focus {
+            outline: 1px solid var(--accent-orange);
+            color: var(--text-highlight);
+        }
+
+        .select-filter {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .badge-high {
+            background-color: var(--badge-high-bg);
+            border: 1px solid var(--badge-high-border);
+            color: var(--badge-high-text);
+        }
+
+        .badge-medium {
+            background-color: var(--badge-med-bg);
+            border: 1px solid var(--badge-med-border);
+            color: var(--badge-med-text);
+        }
+
+        .badge-low {
+            background-color: var(--badge-low-bg);
+            border: 1px solid var(--badge-low-border);
+            color: var(--badge-low-text);
+        }
+
+        .badge-info {
+            background-color: var(--badge-info-bg);
+            border: 1px solid var(--badge-info-border);
+            color: var(--badge-info-text);
+        }
+
+        /* Main Workspace Split */
+        .main-workspace {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th {
+            background-color: var(--header-bg);
+            color: var(--text-highlight);
+            text-align: left;
+            padding: 6px 8px;
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 4px 8px;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid rgba(128, 128, 128, 0.2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--row-even);
+        }
+
+        tr:nth-child(odd) {
+            background-color: var(--row-odd);
+        }
+
+        tr:hover {
+            background-color: var(--row-hover);
+            cursor: pointer;
+        }
+
+        tr.selected {
+            background-color: var(--row-selected) !important;
+            color: #ffffff;
+        }
+
+        /* Bottom HTTP Message Split Viewer */
+        .viewer-container {
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--surface-color);
+        }
+
+        .viewer-header {
+            padding: 4px 8px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-family: var(--code-font);
+            font-size: 11px;
+            color: var(--text-highlight);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .viewer-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .viewer-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .viewer-column:last-child {
+            border-right: none;
+        }
+
+        .viewer-tabs {
+            background-color: var(--header-bg);
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .viewer-tab {
+            padding: 4px 10px;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 11px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .viewer-tab.active {
+            color: var(--text-highlight);
+            background-color: var(--surface-color);
+            border-bottom: 2px solid var(--accent-orange);
+            font-weight: bold;
+        }
+
+        .code-view {
+            flex: 1;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: var(--code-font);
+            font-size: 11px;
+            padding: 8px;
+            overflow: auto;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
+        .light-theme .code-view {
+            background-color: #fafafa;
+            color: #1e1e1e;
+        }
+
+        .highlight-param {
+            background-color: #7a5800;
+            color: #ffffff;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .light-theme .highlight-param {
+            background-color: #ffe082;
+            color: #000000;
+        }
+
+        /* Evidence Alert Box */
+        .evidence-box {
+            background-color: rgba(255, 60, 60, 0.1);
+            border-left: 3px solid #ff3c3c;
+            padding: 6px 10px;
+            margin: 4px 8px;
+            font-size: 11px;
+            color: var(--text-highlight);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Suite Tabs Header -->
+    <div class="suite-tabs-bar">
+        <span class="suite-title">ng-auth-analyzer_littlespidy</span>
+        <div class="suite-tab" onclick="switchSuiteTab('Configuration')">Configuration</div>
+        <div class="suite-tab" onclick="switchSuiteTab('Auth History')">Auth History</div>
+        <div class="suite-tab" onclick="switchSuiteTab('Auth Import')">Auth Import</div>
+        <div class="suite-tab" onclick="switchSuiteTab('CORS History')">CORS History</div>
+        <div class="suite-tab" onclick="switchSuiteTab('CORS Import')">CORS Import</div>
+        <div class="suite-tab active" onclick="switchSuiteTab('Convert POST to GET')">Convert POST to GET</div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+
+    <!-- Session Persistence Toolbar -->
+    <div class="session-toolbar">
+        <button class="btn btn-primary" onclick="alert('Start Analyzer triggered!')">Start Analyzer</button>
+        <button class="btn" onclick="alert('Pause Analyzer')">Pause</button>
+        <button class="btn" onclick="alert('New session dialog')">New Session</button>
+        <button class="btn" onclick="alert('Open session file')">Open Session</button>
+        <button class="btn" onclick="alert('Save session')">Save Session</button>
+        <button class="btn" onclick="alert('Offboard session')">Offboard</button>
+        <span class="session-status">Session: target_pentest_2026.json (Active)</span>
+    </div>
+
+    <!-- Convert Sub-Tabs (Live Conversions vs POST Traffic Discovery) -->
+    <div class="subtabs-bar">
+        <div class="subtab active" id="subtab-live" onclick="showSubTab('live')">Live Conversions (4)</div>
+        <div class="subtab" id="subtab-discovery" onclick="showSubTab('discovery')">POST Traffic Discovery (12)</div>
+    </div>
+
+    <!-- LIVE CONVERSIONS VIEW -->
+    <div id="view-live" class="main-workspace">
+        <div class="filters-bar">
+            <span style="font-weight: bold; color: var(--text-highlight);">Filters:</span>
+            <input type="text" class="search-input" id="search-input" placeholder="Search URL, Path, Signal..." oninput="filterRows()">
+            <select class="select-filter" id="severity-filter" onchange="filterRows()">
+                <option value="All">Severity: All</option>
+                <option value="High">High (Bypass)</option>
+                <option value="Medium">Medium (CSRF Potential)</option>
+                <option value="Low">Low</option>
+                <option value="Info">Info</option>
+            </select>
+            <select class="select-filter" id="status-filter" onchange="filterRows()">
+                <option value="All">GET Status: All</option>
+                <option value="200">200 OK</option>
+                <option value="403">403 Forbidden</option>
+                <option value="405">405 Method Not Allowed</option>
+                <option value="500">500 Server Error</option>
+            </select>
+            <div style="margin-left: auto; display: flex; gap: 6px;">
+                <button class="btn" onclick="clearLiveTable()">Clear Results</button>
+                <button class="btn" onclick="exportData()">Export TSV</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="conversions-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">#</th>
+                        <th style="width: 60px;">Method</th>
+                        <th>Host</th>
+                        <th>Path</th>
+                        <th style="width: 80px;">POST Status</th>
+                        <th style="width: 80px;">GET Status</th>
+                        <th style="width: 70px;">POST Len</th>
+                        <th style="width: 70px;">GET Len</th>
+                        <th>Content-Type</th>
+                        <th>Signal</th>
+                        <th style="width: 80px;">Severity</th>
+                    </tr>
+                </thead>
+                <tbody id="conversions-tbody">
+                    <tr class="selected" onclick="selectRow(1)">
+                        <td>1</td>
+                        <td>GET</td>
+                        <td>api.example.com</td>
+                        <td>/api/v1/user/role?role=admin&user_id=4819</td>
+                        <td>403</td>
+                        <td>200</td>
+                        <td>45</td>
+                        <td>152</td>
+                        <td>application/json</td>
+                        <td>Auth Bypass Detected (POST 403 -> GET 200)</td>
+                        <td><span class="status-badge badge-high">High</span></td>
+                    </tr>
+                    <tr onclick="selectRow(2)">
+                        <td>2</td>
+                        <td>GET</td>
+                        <td>app.example.com</td>
+                        <td>/account/update_email?email=attacker@evil.com&confirm=1</td>
+                        <td>200</td>
+                        <td>200</td>
+                        <td>1240</td>
+                        <td>1240</td>
+                        <td>text/html</td>
+                        <td>Method Permitted / CSRF Potential (200 OK)</td>
+                        <td><span class="status-badge badge-medium">Medium</span></td>
+                    </tr>
+                    <tr onclick="selectRow(3)">
+                        <td>3</td>
+                        <td>GET</td>
+                        <td>payment.example.com</td>
+                        <td>/checkout/process?orderId=9081&token=xyz987</td>
+                        <td>200</td>
+                        <td>500</td>
+                        <td>340</td>
+                        <td>89</td>
+                        <td>application/json</td>
+                        <td>Server Error on GET (HTTP 500)</td>
+                        <td><span class="status-badge badge-low">Low</span></td>
+                    </tr>
+                    <tr onclick="selectRow(4)">
+                        <td>4</td>
+                        <td>GET</td>
+                        <td>auth.example.com</td>
+                        <td>/oauth/token?grant_type=password&client_id=web</td>
+                        <td>200</td>
+                        <td>405</td>
+                        <td>512</td>
+                        <td>28</td>
+                        <td>text/plain</td>
+                        <td>405 Method Not Allowed</td>
+                        <td><span class="status-badge badge-info">Info</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Evidence Alert -->
+        <div class="evidence-box" id="evidence-banner">
+            <strong>Signal Detail:</strong> Original POST returned HTTP 403 Forbidden (Blocked). Converted GET returned HTTP 200 OK with role change confirmation! Probable HTTP method confusion and authorization bypass.
+        </div>
+
+        <!-- Synchronized Bottom Quad Viewer -->
+        <div class="viewer-container">
+            <div class="viewer-header">
+                <span id="viewer-status-text">#1 | GET api.example.com/api/v1/user/role?role=admin&user_id=4819 | High Severity Bypass</span>
+                <div>
+                    <button class="btn" onclick="alert('Sent Converted GET to Repeater!')">Send Converted GET to Repeater</button>
+                    <button class="btn" onclick="alert('Sent Original POST to Repeater!')">Send Original POST to Repeater</button>
+                </div>
+            </div>
+            <div class="viewer-body">
+                <!-- Original POST Column -->
+                <div class="viewer-column">
+                    <div class="viewer-tabs">
+                        <div class="viewer-tab active" id="tab-orig-req" onclick="showOrigTab('req')">Original POST Request</div>
+                        <div class="viewer-tab" id="tab-orig-resp" onclick="showOrigTab('resp')">Original POST Response (403)</div>
+                    </div>
+                    <div class="code-view" id="orig-content">POST /api/v1/user/role HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOi...
+Content-Type: application/json
+Content-Length: 35
+
+{"role":"admin","user_id":"4819"}</div>
+                </div>
+
+                <!-- Converted GET Column -->
+                <div class="viewer-column">
+                    <div class="viewer-tabs">
+                        <div class="viewer-tab" id="tab-conv-req" onclick="showConvTab('req')">Converted GET Request</div>
+                        <div class="viewer-tab active" id="tab-conv-resp" onclick="showConvTab('resp')">Converted GET Response (200)</div>
+                    </div>
+                    <div class="code-view" id="conv-content">HTTP/1.1 200 OK
+Date: Tue, 27 Oct 2026 14:35:00 GMT
+Content-Type: application/json
+Content-Length: 152
+Connection: keep-alive
+
+{
+  "success": true,
+  "message": "User role updated successfully to admin",
+  "user_id": 4819,
+  "role": "admin"
+}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DISCOVERY VIEW -->
+    <div id="view-discovery" class="main-workspace" style="display: none;">
+        <div class="filters-bar">
+            <button class="btn btn-primary" onclick="alert('Loading POST traffic from Proxy History...')">Load from Proxy History</button>
+            <button class="btn" onclick="alert('Converting selected targets...')">Convert Selected (Attack)</button>
+            <span style="margin-left: 10px; color: var(--text-color);">Total Discovered POST Endpoints: 12 (Deduplicated)</span>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox" checked></th>
+                        <th style="width: 40px;">#</th>
+                        <th style="width: 60px;">Method</th>
+                        <th>Host</th>
+                        <th>Path</th>
+                        <th>Content-Type</th>
+                        <th style="width: 60px;">Params</th>
+                        <th>Param Names</th>
+                        <th style="width: 70px;">Status</th>
+                        <th style="width: 70px;">Length</th>
+                        <th>Auth</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>1</td>
+                        <td>POST</td>
+                        <td>api.example.com</td>
+                        <td>/api/v1/user/role</td>
+                        <td>application/json</td>
+                        <td>2</td>
+                        <td>role, user_id</td>
+                        <td>403</td>
+                        <td>45</td>
+                        <td>Bearer</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>2</td>
+                        <td>POST</td>
+                        <td>app.example.com</td>
+                        <td>/account/update_email</td>
+                        <td>application/x-www-form-urlencoded</td>
+                        <td>2</td>
+                        <td>email, confirm</td>
+                        <td>200</td>
+                        <td>1240</td>
+                        <td>Cookie</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>3</td>
+                        <td>POST</td>
+                        <td>payment.example.com</td>
+                        <td>/checkout/process</td>
+                        <td>application/json</td>
+                        <td>2</td>
+                        <td>orderId, token</td>
+                        <td>200</td>
+                        <td>340</td>
+                        <td>Cookie</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
+
+        function switchSuiteTab(tabName) {
+            alert("Switched to suite tab: " + tabName);
+        }
+
+        function showSubTab(tab) {
+            document.getElementById('subtab-live').classList.toggle('active', tab === 'live');
+            document.getElementById('subtab-discovery').classList.toggle('active', tab === 'discovery');
+            document.getElementById('view-live').style.display = (tab === 'live') ? 'flex' : 'none';
+            document.getElementById('view-discovery').style.display = (tab === 'discovery') ? 'flex' : 'none';
+        }
+
+        const sampleRows = {
+            1: {
+                title: "#1 | GET api.example.com/api/v1/user/role?role=admin&user_id=4819 | High Severity Bypass",
+                evidence: "Original POST returned HTTP 403 Forbidden (Blocked). Converted GET returned HTTP 200 OK with role change confirmation! Probable HTTP method confusion and authorization bypass.",
+                origReq: "POST /api/v1/user/role HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer eyJhbGciOi...\nContent-Type: application/json\nContent-Length: 35\n\n{\"role\":\"admin\",\"user_id\":\"4819\"}",
+                origResp: "HTTP/1.1 403 Forbidden\nContent-Type: application/json\nContent-Length: 45\n\n{\"error\":\"Administrative privilege required\"}",
+                convReq: "GET /api/v1/user/role?role=admin&user_id=4819 HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer eyJhbGciOi...\n\n",
+                convResp: "HTTP/1.1 200 OK\nDate: Tue, 27 Oct 2026 14:35:00 GMT\nContent-Type: application/json\nContent-Length: 152\n\n{\n  \"success\": true,\n  \"message\": \"User role updated successfully to admin\",\n  \"user_id\": 4819,\n  \"role\": \"admin\"\n}"
+            },
+            2: {
+                title: "#2 | GET app.example.com/account/update_email?email=attacker@evil.com&confirm=1 | Medium Severity",
+                evidence: "Backend accepted the converted GET method and returned 200 OK with identical response length. Potential CSRF vulnerability on email update endpoint without CSRF protection on GET.",
+                origReq: "POST /account/update_email HTTP/1.1\nHost: app.example.com\nCookie: session=xyz123\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 37\n\nemail=attacker@evil.com&confirm=1",
+                origResp: "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1240\n\n<html>Email updated</html>",
+                convReq: "GET /account/update_email?email=attacker@evil.com&confirm=1 HTTP/1.1\nHost: app.example.com\nCookie: session=xyz123\n\n",
+                convResp: "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1240\n\n<html>Email updated</html>"
+            },
+            3: {
+                title: "#3 | GET payment.example.com/checkout/process?orderId=9081&token=xyz987 | Low Severity",
+                evidence: "Converted GET triggered an internal server error (HTTP 500). Possible unhandled null pointer or query parsing exception in backend framework.",
+                origReq: "POST /checkout/process HTTP/1.1\nHost: payment.example.com\nCookie: session=abc999\nContent-Type: application/json\nContent-Length: 33\n\n{\"orderId\":9081,\"token\":\"xyz987\"}",
+                origResp: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 340\n\n{\"status\":\"processed\"}",
+                convReq: "GET /checkout/process?orderId=9081&token=xyz987 HTTP/1.1\nHost: payment.example.com\nCookie: session=abc999\n\n",
+                convResp: "HTTP/1.1 500 Internal Server Error\nContent-Type: application/json\nContent-Length: 89\n\n{\"error\":\"Unexpected request method GET for checkout transaction\"}"
+            },
+            4: {
+                title: "#4 | GET auth.example.com/oauth/token?grant_type=password&client_id=web | Info",
+                evidence: "Server explicitly returned 405 Method Not Allowed. GET method is properly rejected by endpoint routing.",
+                origReq: "POST /oauth/token HTTP/1.1\nHost: auth.example.com\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 42\n\ngrant_type=password&client_id=web",
+                origResp: "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 512\n\naccess_token=...",
+                convReq: "GET /oauth/token?grant_type=password&client_id=web HTTP/1.1\nHost: auth.example.com\n\n",
+                convResp: "HTTP/1.1 405 Method Not Allowed\nAllow: POST\nContent-Length: 28\n\nMethod Not Allowed"
+            }
+        };
+
+        let currentRowId = 1;
+        let origMode = 'req';
+        let convMode = 'resp';
+
+        function selectRow(id) {
+            currentRowId = id;
+            const rows = document.querySelectorAll('#conversions-tbody tr');
+            rows.forEach((r, idx) => {
+                r.classList.toggle('selected', (idx + 1) === id);
+            });
+
+            const data = sampleRows[id];
+            if (!data) return;
+
+            document.getElementById('viewer-status-text').textContent = data.title;
+            document.getElementById('evidence-banner').innerHTML = "<strong>Signal Detail:</strong> " + data.evidence;
+
+            updateEditorText();
+        }
+
+        function updateEditorText() {
+            const data = sampleRows[currentRowId];
+            if (!data) return;
+
+            document.getElementById('orig-content').textContent = (origMode === 'req') ? data.origReq : data.origResp;
+            document.getElementById('conv-content').textContent = (convMode === 'req') ? data.convReq : data.convResp;
+        }
+
+        function showOrigTab(mode) {
+            origMode = mode;
+            document.getElementById('tab-orig-req').classList.toggle('active', mode === 'req');
+            document.getElementById('tab-orig-resp').classList.toggle('active', mode === 'resp');
+            updateEditorText();
+        }
+
+        function showConvTab(mode) {
+            convMode = mode;
+            document.getElementById('tab-conv-req').classList.toggle('active', mode === 'req');
+            document.getElementById('tab-conv-resp').classList.toggle('active', mode === 'resp');
+            updateEditorText();
+        }
+
+        function filterRows() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const sev = document.getElementById('severity-filter').value;
+            const status = document.getElementById('status-filter').value;
+
+            const rows = document.querySelectorAll('#conversions-tbody tr');
+            rows.forEach(r => {
+                const text = r.textContent.toLowerCase();
+                const matchesQuery = text.includes(query);
+                const matchesSev = (sev === 'All' || text.includes(sev.toLowerCase()));
+                const matchesStatus = (status === 'All' || r.children[5].textContent.trim() === status);
+
+                r.style.display = (matchesQuery && matchesSev && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        function clearLiveTable() {
+            document.getElementById('conversions-tbody').innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 20px; color: var(--text-color);">No conversion results. Start Analyzer or send requests from Proxy.</td></tr>';
+            document.getElementById('viewer-status-text').textContent = "No results available.";
+            document.getElementById('orig-content').textContent = "";
+            document.getElementById('conv-content').textContent = "";
+            document.getElementById('evidence-banner').textContent = "Table cleared.";
+        }
+
+        function exportData() {
+            alert("Exported 4 conversion rows to TSV format.");
+        }
+    </script>
+</body>
+</html>
