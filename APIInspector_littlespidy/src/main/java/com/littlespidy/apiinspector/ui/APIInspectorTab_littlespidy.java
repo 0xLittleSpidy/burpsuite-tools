@@ -131,6 +131,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
         if (authTestingTab != null) {
             authTestingTab.setProfiles(java.util.Collections.emptyList());
             authTestingTab.setResults(java.util.Collections.emptyList());
+            authTestingTab.clearAllRunners();
         }
         if (docStrategyTab != null) {
             docStrategyTab.restoreEntries(java.util.Collections.emptyList());

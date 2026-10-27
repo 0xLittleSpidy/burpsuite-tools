@@ -13,6 +13,8 @@ import com.littlespidy.apiinspector.model.IntruderStrategyEntry_littlespidy.Gene
 import com.littlespidy.apiinspector.model.IntruderStrategyEntry_littlespidy.ReferenceRequestEntry;
 import com.littlespidy.apiinspector.persistence.SessionStateDTO_littlespidy.*;
 import com.littlespidy.apiinspector.ui.APIInspectorTab_littlespidy;
+import com.littlespidy.apiinspector.ui.AuthTestingTab_littlespidy;
+import com.littlespidy.apiinspector.ui.AuthTestingTab_littlespidy.AuthTestRun_littlespidy;
 import com.littlespidy.apiinspector.ui.RequestSessionPanel_littlespidy;
 import com.littlespidy.apiinspector.ui.ResAPIVersionFinderTab_littlespidy;
 
@@ -247,7 +249,7 @@ public class APIInspectorPersistenceManager_littlespidy {
             return;
         }
         if (tab == null) return;
-        saveSyncInternal(tab, null, null, null, null, null, null);
+        saveSyncInternal(tab, null, null, null, null, null, null, null, null, 1);
     }
 
     public void saveSync(APIInspectorTab_littlespidy rootTab) {
@@ -258,7 +260,10 @@ public class APIInspectorPersistenceManager_littlespidy {
                 rootTab.getImportTab() != null ? rootTab.getImportTab().getAllCollections() : null,
                 rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getAllProfiles() : null,
                 rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getAllResults() : null,
-                rootTab.getHiddenApiStorageTab() != null ? rootTab.getHiddenApiStorageTab().getAllEndpoints() : null);
+                rootTab.getHiddenApiStorageTab() != null ? rootTab.getHiddenApiStorageTab().getAllEndpoints() : null,
+                rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getSavedRuns() : null,
+                rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getSelectedRunnerId() : null,
+                rootTab.getAuthTestingTab() != null ? rootTab.getAuthTestingTab().getRunnerCounter() : 1);
     }
 
     private void saveSyncInternal(
@@ -268,7 +273,10 @@ public class APIInspectorPersistenceManager_littlespidy {
             List<ImportedCollection_littlespidy> collections,
             List<AuthProfile_littlespidy> profiles,
             List<AuthTestResult_littlespidy> testResults,
-            List<HiddenEndpoint_littlespidy> hiddenEndpoints) {
+            List<HiddenEndpoint_littlespidy> hiddenEndpoints,
+            List<AuthTestRun_littlespidy> authTestRuns,
+            String selectedRunnerId,
+            int runnerCounter) {
 
         synchronized (saveLock) {
             try {
@@ -320,6 +328,14 @@ public class APIInspectorPersistenceManager_littlespidy {
                         root.authTestResults.add(serializeAuthTestResult(r));
                     }
                 }
+
+                if (authTestRuns != null) {
+                    for (AuthTestRun_littlespidy r : authTestRuns) {
+                        root.authTestRuns.add(serializeAuthTestRun(r));
+                    }
+                }
+                root.selectedRunnerId = selectedRunnerId;
+                root.runnerCounter = runnerCounter;
 
                 if (hiddenEndpoints != null) {
                     for (HiddenEndpoint_littlespidy h : hiddenEndpoints) {
@@ -469,7 +485,9 @@ public class APIInspectorPersistenceManager_littlespidy {
         if (rootTab == null) return false;
         if (rootTab.getVersionFinderTab() != null && !rootTab.getVersionFinderTab().getAllSessionPanels().isEmpty()) return true;
         if (rootTab.getImportTab() != null && !rootTab.getImportTab().getAllCollections().isEmpty()) return true;
-        if (rootTab.getAuthTestingTab() != null && !rootTab.getAuthTestingTab().getAllProfiles().isEmpty()) return true;
+        if (rootTab.getAuthTestingTab() != null && (!rootTab.getAuthTestingTab().getAllProfiles().isEmpty()
+                || !rootTab.getAuthTestingTab().getSavedRuns().isEmpty()
+                || !rootTab.getAuthTestingTab().getAllResults().isEmpty())) return true;
         if (rootTab.getDocStrategyTab() != null && !rootTab.getDocStrategyTab().getAllEntries().isEmpty()) return true;
         if (rootTab.getEndpointDiscoveryTab() != null && !rootTab.getEndpointDiscoveryTab().getAllEntries().isEmpty()) return true;
         if (rootTab.getHiddenApiStorageTab() != null && !rootTab.getHiddenApiStorageTab().getAllEndpoints().isEmpty()) return true;
@@ -768,14 +786,23 @@ public class APIInspectorPersistenceManager_littlespidy {
             rootTab.getAuthTestingTab().setProfiles(profList);
         }
 
-        // 6. Restore Authentication Test Results
-        if (root.authTestResults != null && !root.authTestResults.isEmpty()) {
-            List<AuthTestResult_littlespidy> resList = new ArrayList<>();
-            for (AuthTestResultDTO rDto : root.authTestResults) {
-                AuthTestResult_littlespidy res = deserializeAuthTestResult(rDto);
-                if (res != null) resList.add(res);
+        // 6. Restore Authentication Test Results and Runners
+        if (rootTab.getAuthTestingTab() != null) {
+            if (root.authTestRuns != null && !root.authTestRuns.isEmpty()) {
+                List<AuthTestRun_littlespidy> restoredRuns = new ArrayList<>();
+                for (AuthTestRunDTO runDto : root.authTestRuns) {
+                    AuthTestRun_littlespidy run = deserializeAuthTestRun(runDto);
+                    if (run != null) restoredRuns.add(run);
+                }
+                rootTab.getAuthTestingTab().setSavedRuns(restoredRuns, root.selectedRunnerId, root.runnerCounter);
+            } else if (root.authTestResults != null && !root.authTestResults.isEmpty()) {
+                List<AuthTestResult_littlespidy> resList = new ArrayList<>();
+                for (AuthTestResultDTO rDto : root.authTestResults) {
+                    AuthTestResult_littlespidy res = deserializeAuthTestResult(rDto);
+                    if (res != null) resList.add(res);
+                }
+                rootTab.getAuthTestingTab().setResults(resList);
             }
-            rootTab.getAuthTestingTab().setResults(resList);
         }
 
         // 7. Restore Session Store
@@ -1072,6 +1099,8 @@ public class APIInspectorPersistenceManager_littlespidy {
         dto.customHeaderName = p.getCustomHeaderName();
         dto.customHeaderValue = p.getCustomHeaderValue();
         dto.testUnauthenticatedComparison = p.isTestUnauthenticatedComparison();
+        dto.unauthenticated = p.isUnauthenticated();
+        dto.rawHeaders = p.getRawHeaders();
         return dto;
     }
 
@@ -1097,7 +1126,44 @@ public class APIInspectorPersistenceManager_littlespidy {
         p.setCustomHeaderName(dto.customHeaderName);
         p.setCustomHeaderValue(dto.customHeaderValue);
         p.setTestUnauthenticatedComparison(dto.testUnauthenticatedComparison);
+        p.setUnauthenticated(dto.unauthenticated);
+        if (dto.rawHeaders != null) {
+            p.setRawHeaders(dto.rawHeaders);
+        }
         return p;
+    }
+
+    public static AuthTestRunDTO serializeAuthTestRun(AuthTestRun_littlespidy run) {
+        if (run == null) return null;
+        AuthTestRunDTO dto = new AuthTestRunDTO();
+        dto.id = run.getId();
+        dto.name = run.getName();
+        dto.timestamp = run.getTimestamp();
+        if (run.getResults() != null) {
+            for (AuthTestResult_littlespidy r : run.getResults()) {
+                dto.results.add(serializeAuthTestResult(r));
+            }
+        }
+        return dto;
+    }
+
+    public static AuthTestRun_littlespidy deserializeAuthTestRun(AuthTestRunDTO dto) {
+        if (dto == null) return null;
+        List<AuthTestResult_littlespidy> resList = new ArrayList<>();
+        if (dto.results != null) {
+            for (AuthTestResultDTO rDto : dto.results) {
+                AuthTestResult_littlespidy r = deserializeAuthTestResult(rDto);
+                if (r != null) resList.add(r);
+            }
+        }
+        return new AuthTestRun_littlespidy(
+                dto.id,
+                dto.name,
+                dto.timestamp,
+                resList,
+                java.util.Collections.emptyList(),
+                java.util.Collections.emptyList()
+        );
     }
 
     public static AuthTestResultDTO serializeAuthTestResult(AuthTestResult_littlespidy r) {

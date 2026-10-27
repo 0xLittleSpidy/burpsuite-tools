@@ -18,6 +18,9 @@ public class SessionStateDTO_littlespidy {
         public List<ImportedCollectionDTO> importedCollections = new ArrayList<>();
         public List<AuthProfileDTO> authProfiles = new ArrayList<>();
         public List<AuthTestResultDTO> authTestResults = new ArrayList<>();
+        public List<AuthTestRunDTO> authTestRuns = new ArrayList<>();
+        public String selectedRunnerId;
+        public int runnerCounter = 1;
         public List<HiddenEndpointDTO> hiddenEndpoints = new ArrayList<>();
         public SessionStoreDTO sessionStore;
         public java.util.Map<String, CachedResponseDTO> viewerResponses = new java.util.LinkedHashMap<>();
@@ -139,6 +142,15 @@ public class SessionStateDTO_littlespidy {
         public String customHeaderName;
         public String customHeaderValue;
         public boolean testUnauthenticatedComparison;
+        public boolean unauthenticated;
+        public String rawHeaders;
+    }
+
+    public static class AuthTestRunDTO {
+        public String id;
+        public String name;
+        public long timestamp;
+        public List<AuthTestResultDTO> results = new ArrayList<>();
     }
 
     public static class AuthTestResultDTO {

@@ -694,26 +694,16 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             savedRuns.remove(idx);
             if (!savedRuns.isEmpty()) {
                 int nextIdx = Math.max(0, idx - 1);
-                currentRun = savedRuns.get(nextIdx);
-                results.clear();
-                results.addAll(currentRun.getResults());
-                endpointRows.clear();
-                endpointRows.addAll(currentRun.getEndpointRows());
-                displayedProfiles.clear();
-                displayedProfiles.addAll(currentRun.getDisplayedProfiles());
+                loadRun(savedRuns.get(nextIdx));
             } else {
-                currentRun = null;
-                results.clear();
-                endpointRows.clear();
-                displayedProfiles.clear();
+                loadRun(null);
             }
             updateRunnerCombo();
-            rebuildModel();
-            clearInspector();
-            if (statusFilterDropDown != null) {
-                statusFilterDropDown.updateOptions(results);
+            if (currentRun != null) {
+                int newIdx = savedRuns.indexOf(currentRun);
+                if (newIdx >= 0) runnerCombo.setSelectedIndex(newIdx);
             }
-            applyAllFilters();
+            clearInspector();
             notifyStateChanged();
         }
     }
@@ -723,23 +713,38 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         int idx = runnerCombo.getSelectedIndex();
         if (idx >= 0 && idx < savedRuns.size()) {
             AuthTestRun_littlespidy run = savedRuns.get(idx);
-            currentRun = run;
-            results.clear();
+            loadRun(run);
+            notifyStateChanged();
+        }
+    }
+
+    private void loadRun(AuthTestRun_littlespidy run) {
+        currentRun = run;
+        results.clear();
+        endpointRows.clear();
+        displayedProfiles.clear();
+        if (run != null) {
             results.addAll(run.getResults());
-            endpointRows.clear();
-            endpointRows.addAll(run.getEndpointRows());
-            displayedProfiles.clear();
-            displayedProfiles.addAll(run.getDisplayedProfiles());
-            resultsTableModel.fireTableStructureChanged();
-            if (statusFilterDropDown != null) {
-                statusFilterDropDown.updateOptions(results);
-            }
-            applyAllFilters();
-            if (!endpointRows.isEmpty()) {
-                resultsTable.setRowSelectionInterval(0, 0);
+            if (run.getEndpointRows().isEmpty() && !results.isEmpty()) {
+                endpointRows.addAll(buildEndpointRows(results));
             } else {
-                clearInspector();
+                endpointRows.addAll(run.getEndpointRows());
             }
+            if (run.getDisplayedProfiles().isEmpty()) {
+                displayedProfiles.addAll(buildDisplayedProfiles(results, profiles, activeProfileIds));
+            } else {
+                displayedProfiles.addAll(run.getDisplayedProfiles());
+            }
+        }
+        resultsTableModel.fireTableStructureChanged();
+        if (statusFilterDropDown != null) {
+            statusFilterDropDown.updateOptions(results);
+        }
+        applyAllFilters();
+        if (!endpointRows.isEmpty()) {
+            resultsTable.setRowSelectionInterval(0, 0);
+        } else {
+            clearInspector();
         }
     }
 
@@ -847,6 +852,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             if (runnerNameField != null) {
                 runnerNameField.setText("Runner " + runnerCounter);
             }
+            notifyStateChanged();
         });
     }
 
@@ -1081,12 +1087,96 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         return results;
     }
 
+    public List<AuthTestRun_littlespidy> getSavedRuns() {
+        return Collections.unmodifiableList(new ArrayList<>(savedRuns));
+    }
+
+    public String getSelectedRunnerId() {
+        return currentRun != null ? currentRun.getId() : null;
+    }
+
+    public int getRunnerCounter() {
+        return runnerCounter;
+    }
+
+    public void clearAllRunners() {
+        savedRuns.clear();
+        currentRun = null;
+        runnerCounter = 1;
+        if (runnerNameField != null) {
+            runnerNameField.setText("Runner 1");
+        }
+        loadRun(null);
+        updateRunnerCombo();
+    }
+
+    public void setSavedRuns(List<AuthTestRun_littlespidy> runs, String selectedRunnerId, int counter) {
+        savedRuns.clear();
+        if (runs != null && !runs.isEmpty()) {
+            for (AuthTestRun_littlespidy r : runs) {
+                List<EndpointResultRow_littlespidy> epRows = r.getEndpointRows();
+                List<ProfileColumnDef_littlespidy> dispProfiles = r.getDisplayedProfiles();
+                if (epRows.isEmpty() && !r.getResults().isEmpty()) {
+                    epRows = buildEndpointRows(r.getResults());
+                }
+                if (dispProfiles.isEmpty()) {
+                    dispProfiles = buildDisplayedProfiles(r.getResults(), profiles, activeProfileIds);
+                }
+                AuthTestRun_littlespidy fullRun = new AuthTestRun_littlespidy(
+                        r.getId(), r.getName(), r.getTimestamp(), r.getResults(), epRows, dispProfiles);
+                savedRuns.add(fullRun);
+            }
+        }
+
+        if (counter > 0) {
+            this.runnerCounter = counter;
+        } else {
+            this.runnerCounter = Math.max(1, savedRuns.size() + 1);
+        }
+        if (runnerNameField != null) {
+            runnerNameField.setText("Runner " + this.runnerCounter);
+        }
+
+        AuthTestRun_littlespidy toSelect = null;
+        if (selectedRunnerId != null && !selectedRunnerId.isBlank()) {
+            for (AuthTestRun_littlespidy r : savedRuns) {
+                if (selectedRunnerId.equals(r.getId())) {
+                    toSelect = r;
+                    break;
+                }
+            }
+        }
+        if (toSelect == null && !savedRuns.isEmpty()) {
+            toSelect = savedRuns.get(savedRuns.size() - 1);
+        }
+
+        updateRunnerCombo();
+
+        if (toSelect != null) {
+            int selIdx = savedRuns.indexOf(toSelect);
+            if (selIdx >= 0 && runnerCombo != null) {
+                updatingRunnerCombo = true;
+                runnerCombo.setSelectedIndex(selIdx);
+                updatingRunnerCombo = false;
+            }
+            loadRun(toSelect);
+        } else {
+            loadRun(null);
+        }
+    }
+
     public void setResults(List<AuthTestResult_littlespidy> list) {
         results.clear();
         if (list != null) {
             results.addAll(list);
         }
         rebuildModel();
+        if (savedRuns.isEmpty() && !results.isEmpty()) {
+            AuthTestRun_littlespidy run = new AuthTestRun_littlespidy("Runner 1", results, endpointRows, displayedProfiles);
+            savedRuns.add(run);
+            currentRun = run;
+            updateRunnerCombo();
+        }
         if (statusFilterDropDown != null) {
             statusFilterDropDown.updateOptions(results);
         }
@@ -1206,45 +1296,73 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
     private void rebuildDisplayedProfiles() {
         displayedProfiles.clear();
-        Set<String> addedIds = new HashSet<>();
-
-        // 1. Defined profiles strictly in their configured order
-        for (AuthProfile_littlespidy p : profiles) {
-            if (activeProfileIds.contains(p.getId()) || hasResultsForProfile(p.getId())) {
-                displayedProfiles.add(new ProfileColumnDef_littlespidy(p.getId(), p.getName()));
-                addedIds.add(p.getId());
-            }
-        }
-
-        // 2. Extra profiles present in results (excluding unauthenticated)
-        for (AuthTestResult_littlespidy r : results) {
-            String pid = resolveProfileKey(r);
-            if (!"unauthenticated".equalsIgnoreCase(pid) && !addedIds.contains(pid)) {
-                String displayName = (r.getProfileName() != null && !r.getProfileName().isBlank())
-                        ? r.getProfileName() : pid;
-                displayedProfiles.add(new ProfileColumnDef_littlespidy(pid, displayName));
-                addedIds.add(pid);
-            }
-        }
-
-        // 3. Unauthenticated column strictly placed after profiles if requested or present in results
-        boolean hasUnauthResults = false;
-        for (AuthTestResult_littlespidy r : results) {
-            if ("unauthenticated".equalsIgnoreCase(resolveProfileKey(r))) {
-                hasUnauthResults = true;
-                break;
-            }
-        }
-        if (hasUnauthResults) {
-            displayedProfiles.add(new ProfileColumnDef_littlespidy("unauthenticated", "Unauth"));
-        }
+        displayedProfiles.addAll(buildDisplayedProfiles(results, profiles, activeProfileIds));
     }
 
     private void rebuildEndpointRows() {
         endpointRows.clear();
+        endpointRows.addAll(buildEndpointRows(results));
+    }
+
+    public static List<ProfileColumnDef_littlespidy> buildDisplayedProfiles(
+            List<AuthTestResult_littlespidy> runResults,
+            List<AuthProfile_littlespidy> currentProfiles,
+            Set<String> activeIds) {
+        List<ProfileColumnDef_littlespidy> list = new ArrayList<>();
+        Set<String> addedIds = new HashSet<>();
+
+        // 1. Defined profiles strictly in their configured order
+        if (currentProfiles != null) {
+            for (AuthProfile_littlespidy p : currentProfiles) {
+                boolean hasRes = false;
+                if (runResults != null) {
+                    for (AuthTestResult_littlespidy r : runResults) {
+                        if (p.getId().equals(resolveProfileKey(r))) {
+                            hasRes = true;
+                            break;
+                        }
+                    }
+                }
+                if ((activeIds != null && activeIds.contains(p.getId())) || hasRes) {
+                    list.add(new ProfileColumnDef_littlespidy(p.getId(), p.getName()));
+                    addedIds.add(p.getId());
+                }
+            }
+        }
+
+        // 2. Extra profiles present in results (excluding unauthenticated)
+        if (runResults != null) {
+            for (AuthTestResult_littlespidy r : runResults) {
+                String pid = resolveProfileKey(r);
+                if (!"unauthenticated".equalsIgnoreCase(pid) && !addedIds.contains(pid)) {
+                    String displayName = (r.getProfileName() != null && !r.getProfileName().isBlank())
+                            ? r.getProfileName() : pid;
+                    list.add(new ProfileColumnDef_littlespidy(pid, displayName));
+                    addedIds.add(pid);
+                }
+            }
+
+            // 3. Unauthenticated column strictly placed after profiles if present in results
+            boolean hasUnauthResults = false;
+            for (AuthTestResult_littlespidy r : runResults) {
+                if ("unauthenticated".equalsIgnoreCase(resolveProfileKey(r))) {
+                    hasUnauthResults = true;
+                    break;
+                }
+            }
+            if (hasUnauthResults) {
+                list.add(new ProfileColumnDef_littlespidy("unauthenticated", "Unauth"));
+            }
+        }
+        return list;
+    }
+
+    public static List<EndpointResultRow_littlespidy> buildEndpointRows(List<AuthTestResult_littlespidy> runResults) {
+        List<EndpointResultRow_littlespidy> list = new ArrayList<>();
+        if (runResults == null) return list;
         Map<String, EndpointResultRow_littlespidy> rowMap = new LinkedHashMap<>();
 
-        for (AuthTestResult_littlespidy r : results) {
+        for (AuthTestResult_littlespidy r : runResults) {
             String key = (r.getCollectionId() != null ? r.getCollectionId() : "") + "::"
                     + (r.getMethod() != null ? r.getMethod().toUpperCase() : "") + "::"
                     + (r.getPath() != null ? r.getPath() : "");
@@ -1255,10 +1373,11 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             row.getProfileResults().put(resolveProfileKey(r), r);
         }
 
-        endpointRows.addAll(rowMap.values());
+        list.addAll(rowMap.values());
+        return list;
     }
 
-    private String resolveProfileKey(AuthTestResult_littlespidy r) {
+    public static String resolveProfileKey(AuthTestResult_littlespidy r) {
         if (r == null) return "";
         if (r.getProfileId() != null && !r.getProfileId().isBlank()) {
             return r.getProfileId();
@@ -1547,9 +1666,18 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                                        List<AuthTestResult_littlespidy> results,
                                        List<EndpointResultRow_littlespidy> endpointRows,
                                        List<ProfileColumnDef_littlespidy> displayedProfiles) {
-            this.id = UUID.randomUUID().toString();
+            this(UUID.randomUUID().toString(), name, System.currentTimeMillis(), results, endpointRows, displayedProfiles);
+        }
+
+        public AuthTestRun_littlespidy(String id,
+                                       String name,
+                                       long timestamp,
+                                       List<AuthTestResult_littlespidy> results,
+                                       List<EndpointResultRow_littlespidy> endpointRows,
+                                       List<ProfileColumnDef_littlespidy> displayedProfiles) {
+            this.id = (id != null && !id.isBlank()) ? id : UUID.randomUUID().toString();
             this.name = name != null ? name : "Run";
-            this.timestamp = System.currentTimeMillis();
+            this.timestamp = timestamp > 0 ? timestamp : System.currentTimeMillis();
             if (results != null) this.results.addAll(results);
             if (endpointRows != null) this.endpointRows.addAll(endpointRows);
             if (displayedProfiles != null) this.displayedProfiles.addAll(displayedProfiles);
