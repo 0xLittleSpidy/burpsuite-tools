@@ -169,6 +169,7 @@ public class SessionStateDTO_littlespidy {
         public int unauthResponseLength;
         public long unauthLatencyMs;
         public String outcome;
+        public String classification;
         public String errorMessage;
         public long timestamp;
         public String authRequestBase64;

@@ -30,6 +30,7 @@ public class AuthTestResult_littlespidy {
 
     // Classification & Evidence
     private AuthTestOutcome_littlespidy outcome;
+    private String classification; // "TRUE_POSITIVE", "FALSE_POSITIVE", or null/empty
     private String errorMessage;
     private long timestamp;
 
@@ -225,5 +226,13 @@ public class AuthTestResult_littlespidy {
 
     public void setUnauthResponseBytes(byte[] unauthResponseBytes) {
         this.unauthResponseBytes = unauthResponseBytes;
+    }
+
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
     }
 }

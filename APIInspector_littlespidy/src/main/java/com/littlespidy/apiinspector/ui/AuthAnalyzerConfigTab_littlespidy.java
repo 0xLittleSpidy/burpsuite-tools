@@ -11,6 +11,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DragSource;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -102,6 +106,11 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
         profileTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         profileTable.getColumnModel().getColumn(0).setMaxWidth(45);
         profileTable.getColumnModel().getColumn(0).setPreferredWidth(45);
+        if (!GraphicsEnvironment.isHeadless()) {
+            profileTable.setDragEnabled(true);
+            profileTable.setDropMode(DropMode.INSERT_ROWS);
+            profileTable.setTransferHandler(new TableRowTransferHandler());
+        }
         profileTable.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -145,11 +154,19 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
         dupProfBtn.addActionListener(e -> onDuplicateProfile());
         JButton delProfBtn = new JButton("Delete");
         delProfBtn.addActionListener(e -> onDeleteProfile());
+        JButton moveUpBtn = new JButton("Move Up");
+        moveUpBtn.setToolTipText("Move selected profile up");
+        moveUpBtn.addActionListener(e -> onMoveProfileUp());
+        JButton moveDownBtn = new JButton("Move Down");
+        moveDownBtn.setToolTipText("Move selected profile down");
+        moveDownBtn.addActionListener(e -> onMoveProfileDown());
 
         profileActions.add(addProfBtn);
         profileActions.add(editProfBtn);
         profileActions.add(dupProfBtn);
         profileActions.add(delProfBtn);
+        profileActions.add(moveUpBtn);
+        profileActions.add(moveDownBtn);
         profilesPanel.add(profileActions, BorderLayout.SOUTH);
 
         // 2. Center Section: Collection & Endpoints Selection Panel
@@ -340,6 +357,120 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
                 authTestingTab.onProfilesUpdated();
             }
             notifyStateChanged();
+        }
+    }
+
+    private void onMoveProfileUp() {
+        int sel = profileTable.getSelectedRow();
+        if (sel <= 0 || sel >= profiles.size()) return;
+        int modelIdx = profileTable.convertRowIndexToModel(sel);
+        Collections.swap(profiles, modelIdx, modelIdx - 1);
+        profileTableModel.fireTableDataChanged();
+        int newSel = profileTable.convertRowIndexToView(modelIdx - 1);
+        profileTable.setRowSelectionInterval(newSel, newSel);
+        if (authTestingTab != null) {
+            authTestingTab.onProfilesUpdated();
+        }
+        notifyStateChanged();
+    }
+
+    private void onMoveProfileDown() {
+        int sel = profileTable.getSelectedRow();
+        if (sel < 0 || sel >= profiles.size() - 1) return;
+        int modelIdx = profileTable.convertRowIndexToModel(sel);
+        Collections.swap(profiles, modelIdx, modelIdx + 1);
+        profileTableModel.fireTableDataChanged();
+        int newSel = profileTable.convertRowIndexToView(modelIdx + 1);
+        profileTable.setRowSelectionInterval(newSel, newSel);
+        if (authTestingTab != null) {
+            authTestingTab.onProfilesUpdated();
+        }
+        notifyStateChanged();
+    }
+
+    private class TableRowTransferHandler extends TransferHandler {
+        private final DataFlavor localObjectFlavor = new DataFlavor(Integer.class, "Integer Row Index");
+        private int sourceRow = -1;
+
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            sourceRow = profileTable.getSelectedRow();
+            return new Transferable() {
+                @Override
+                public DataFlavor[] getTransferDataFlavors() {
+                    return new DataFlavor[]{localObjectFlavor};
+                }
+
+                @Override
+                public boolean isDataFlavorSupported(DataFlavor flavor) {
+                    return localObjectFlavor.equals(flavor);
+                }
+
+                @Override
+                public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+                    if (isDataFlavorSupported(flavor)) {
+                        return sourceRow;
+                    }
+                    throw new UnsupportedFlavorException(flavor);
+                }
+            };
+        }
+
+        @Override
+        public int getSourceActions(JComponent c) {
+            return TransferHandler.MOVE;
+        }
+
+        @Override
+        public boolean canImport(TransferSupport support) {
+            boolean can = support.isDrop() && support.isDataFlavorSupported(localObjectFlavor);
+            profileTable.setCursor(can ? DragSource.DefaultMoveDrop : DragSource.DefaultMoveNoDrop);
+            return can;
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            if (!canImport(support)) return false;
+            JTable.DropLocation dl = (JTable.DropLocation) support.getDropLocation();
+            int dropTargetRow = dl.getRow();
+            int max = profiles.size();
+            if (dropTargetRow < 0 || dropTargetRow > max) {
+                dropTargetRow = max;
+            }
+
+            try {
+                Object data = support.getTransferable().getTransferData(localObjectFlavor);
+                if (!(data instanceof Integer)) return false;
+                int sourceViewRow = (Integer) data;
+                if (sourceViewRow < 0 || sourceViewRow >= profiles.size()) return false;
+                int sourceModelRow = profileTable.convertRowIndexToModel(sourceViewRow);
+
+                AuthProfile_littlespidy moved = profiles.remove(sourceModelRow);
+                int targetIndex = dropTargetRow;
+                if (targetIndex > sourceModelRow) {
+                    targetIndex--;
+                }
+                if (targetIndex < 0) targetIndex = 0;
+                if (targetIndex > profiles.size()) targetIndex = profiles.size();
+                profiles.add(targetIndex, moved);
+
+                profileTableModel.fireTableDataChanged();
+                int newViewRow = profileTable.convertRowIndexToView(targetIndex);
+                profileTable.setRowSelectionInterval(newViewRow, newViewRow);
+
+                if (authTestingTab != null) {
+                    authTestingTab.onProfilesUpdated();
+                }
+                notifyStateChanged();
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        @Override
+        protected void exportDone(JComponent c, Transferable t, int act) {
+            profileTable.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 

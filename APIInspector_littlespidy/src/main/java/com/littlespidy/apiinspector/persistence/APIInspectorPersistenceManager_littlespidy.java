@@ -1187,6 +1187,7 @@ public class APIInspectorPersistenceManager_littlespidy {
         dto.unauthResponseLength = r.getUnauthResponseLength();
         dto.unauthLatencyMs = r.getUnauthLatencyMs();
         dto.outcome = r.getOutcome().name();
+        dto.classification = r.getClassification();
         dto.errorMessage = r.getErrorMessage();
         dto.timestamp = r.getTimestamp();
         if (r.getAuthRequestBytes() != null) {
@@ -1224,6 +1225,7 @@ public class APIInspectorPersistenceManager_littlespidy {
         try {
             if (dto.outcome != null) r.setOutcome(AuthTestOutcome_littlespidy.valueOf(dto.outcome));
         } catch (Exception ignored) {}
+        r.setClassification(dto.classification);
         r.setErrorMessage(dto.errorMessage);
         r.setTimestamp(dto.timestamp);
         if (dto.authRequestBase64 != null) {
