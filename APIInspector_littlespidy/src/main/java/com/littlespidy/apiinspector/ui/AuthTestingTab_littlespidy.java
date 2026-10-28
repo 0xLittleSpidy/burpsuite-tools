@@ -217,19 +217,27 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             @Override
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
                 Component c = super.prepareRenderer(renderer, row, column);
-                if (!isRowSelected(row)) {
-                    int modelRow = convertRowIndexToModel(row);
-                    if (modelRow >= 0 && modelRow < endpointRows.size()) {
-                        String cl = endpointRows.get(modelRow).getClassification();
-                        boolean isOutcomeCol = (column >= 3 && ((column - 3) % 2 == 0));
-                        if (!isOutcomeCol) {
-                            if ("TRUE_POSITIVE".equalsIgnoreCase(cl)) {
-                                c.setBackground(new Color(220, 248, 224));
-                                c.setForeground(new Color(0, 100, 0));
-                            } else if ("FALSE_POSITIVE".equalsIgnoreCase(cl)) {
-                                c.setBackground(new Color(255, 230, 230));
-                                c.setForeground(new Color(160, 0, 0));
-                            }
+                boolean isSelected = isRowSelected(row);
+                int modelRow = convertRowIndexToModel(row);
+                String cl = (modelRow >= 0 && modelRow < endpointRows.size())
+                        ? endpointRows.get(modelRow).getClassification()
+                        : null;
+                boolean isOutcomeCol = (column >= 3 && ((column - 3) % 2 == 0));
+
+                if (isSelected) {
+                    c.setBackground(getSelectionBackground());
+                    c.setForeground(getSelectionForeground());
+                } else {
+                    if (!isOutcomeCol) {
+                        if ("TRUE_POSITIVE".equalsIgnoreCase(cl)) {
+                            c.setBackground(new Color(220, 248, 224));
+                            c.setForeground(new Color(0, 100, 0));
+                        } else if ("FALSE_POSITIVE".equalsIgnoreCase(cl)) {
+                            c.setBackground(new Color(255, 230, 230));
+                            c.setForeground(new Color(160, 0, 0));
+                        } else {
+                            c.setBackground(getBackground());
+                            c.setForeground(getForeground());
                         }
                     }
                 }
@@ -751,6 +759,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 resultsTable.addRowSelectionInterval(vRow, vRow);
             }
         }
+        resultsTable.repaint();
         applyAllFilters();
         notifyStateChanged();
     }
@@ -1399,8 +1408,17 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-            if (!isSelected && value != null) {
-                String str = value.toString();
+            if (isSelected) {
+                c.setBackground(table.getSelectionBackground());
+                c.setForeground(table.getSelectionForeground());
+                c.setFont(c.getFont().deriveFont(Font.PLAIN));
+            } else {
+                String str = value != null ? value.toString() : "";
+                int modelRow = table.convertRowIndexToModel(row);
+                String cl = (modelRow >= 0 && modelRow < endpointRows.size())
+                        ? endpointRows.get(modelRow).getClassification()
+                        : null;
+
                 if ("SAME".equalsIgnoreCase(str)) {
                     c.setBackground(new Color(255, 51, 51, 80)); // Red (Bypass / IDOR)
                     c.setForeground(new Color(180, 0, 0));
@@ -1414,28 +1432,18 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                     c.setForeground(new Color(0, 128, 0));
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                 } else {
-                    int modelRow = table.convertRowIndexToModel(row);
-                    if (modelRow >= 0 && modelRow < endpointRows.size()) {
-                        String cl = endpointRows.get(modelRow).getClassification();
-                        if ("TRUE_POSITIVE".equalsIgnoreCase(cl)) {
-                            c.setBackground(new Color(220, 248, 224));
-                            c.setForeground(new Color(0, 100, 0));
-                        } else if ("FALSE_POSITIVE".equalsIgnoreCase(cl)) {
-                            c.setBackground(new Color(255, 230, 230));
-                            c.setForeground(new Color(160, 0, 0));
-                        } else {
-                            c.setBackground(table.getBackground());
-                            c.setForeground(table.getForeground());
-                        }
+                    if ("TRUE_POSITIVE".equalsIgnoreCase(cl)) {
+                        c.setBackground(new Color(220, 248, 224));
+                        c.setForeground(new Color(0, 100, 0));
+                    } else if ("FALSE_POSITIVE".equalsIgnoreCase(cl)) {
+                        c.setBackground(new Color(255, 230, 230));
+                        c.setForeground(new Color(160, 0, 0));
                     } else {
                         c.setBackground(table.getBackground());
                         c.setForeground(table.getForeground());
                     }
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                 }
-            } else if (isSelected) {
-                c.setBackground(table.getSelectionBackground());
-                c.setForeground(table.getSelectionForeground());
             }
             return c;
         }

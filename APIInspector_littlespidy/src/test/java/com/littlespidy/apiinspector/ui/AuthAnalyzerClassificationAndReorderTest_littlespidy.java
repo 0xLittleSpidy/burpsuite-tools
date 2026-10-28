@@ -89,6 +89,71 @@ public class AuthAnalyzerClassificationAndReorderTest_littlespidy {
         assertNull(r1.getClassification());
         assertNull(r2.getClassification());
         assertNull(epRows.get(0).getClassification());
+
+        // Verify renderer restores default table background and foreground
+        table.clearSelection();
+        Component cCleared = table.prepareRenderer(table.getCellRenderer(0, 0), 0, 0);
+        assertEquals(table.getBackground(), cCleared.getBackground());
+        assertEquals(table.getForeground(), cCleared.getForeground());
+    }
+
+    @Test
+    @DisplayName("Verify no color bleed across adjacent rows when hovering/repainting")
+    public void testNoColorBleedAcrossAdjacentRowsOnCursorHover() {
+        AuthTestingTab_littlespidy tab = new AuthTestingTab_littlespidy(null);
+
+        // Row 1: Users endpoint
+        AuthTestResult_littlespidy r1 = new AuthTestResult_littlespidy();
+        r1.setCollectionId("col-1");
+        r1.setCollectionName("Users API");
+        r1.setMethod("GET");
+        r1.setPath("/api/v1/users");
+        r1.setProfileId("admin-prof");
+        r1.setProfileName("Admin");
+        r1.setAuthStatusCode(200);
+
+        // Row 2: Health endpoint (unclassified)
+        AuthTestResult_littlespidy r2 = new AuthTestResult_littlespidy();
+        r2.setCollectionId("col-1");
+        r2.setCollectionName("Users API");
+        r2.setMethod("GET");
+        r2.setPath("/api/v1/health");
+        r2.setProfileId("admin-prof");
+        r2.setProfileName("Admin");
+        r2.setAuthStatusCode(200);
+
+        tab.setResults(List.of(r1, r2));
+        JTable table = getResultsTable(tab);
+        assertNotNull(table);
+        assertEquals(2, table.getRowCount());
+
+        // Mark only Row 0 as TRUE_POSITIVE
+        table.setRowSelectionInterval(0, 0);
+        tab.setMarkOnSelectedRows("TRUE_POSITIVE");
+        table.clearSelection();
+
+        // Render row 0 (TP) -> must be green
+        Component c0 = table.prepareRenderer(table.getCellRenderer(0, 0), 0, 0);
+        assertEquals(new Color(220, 248, 224), c0.getBackground());
+
+        // Simulate cursor moving to row 1 (Unclassified) -> must NOT bleed green
+        Component c1 = table.prepareRenderer(table.getCellRenderer(1, 0), 1, 0);
+        assertEquals(table.getBackground(), c1.getBackground());
+        assertEquals(table.getForeground(), c1.getForeground());
+
+        // Mark Row 0 as FALSE_POSITIVE
+        table.setRowSelectionInterval(0, 0);
+        tab.setMarkOnSelectedRows("FALSE_POSITIVE");
+        table.clearSelection();
+
+        // Render row 0 (FP) -> must be red
+        Component c0Fp = table.prepareRenderer(table.getCellRenderer(0, 0), 0, 0);
+        assertEquals(new Color(255, 230, 230), c0Fp.getBackground());
+
+        // Simulate cursor moving to row 1 (Unclassified) -> must NOT bleed red
+        Component c1AfterFp = table.prepareRenderer(table.getCellRenderer(1, 0), 1, 0);
+        assertEquals(table.getBackground(), c1AfterFp.getBackground());
+        assertEquals(table.getForeground(), c1AfterFp.getForeground());
     }
 
     @Test
