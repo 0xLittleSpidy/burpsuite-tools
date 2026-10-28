@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ng-auth-analyzer_littlespidy - Burp Suite Extension UI Mockup</title>
+  <style>
+    :root {
+      --bg-color: #2b2b2b;
+      --card-bg: #3c3f41;
+      --panel-border: #4a4d50;
+      --text-color: #bbbbbb;
+      --text-bright: #ffffff;
+      --text-muted: #888888;
+      --accent-color: #ff6633;
+      --accent-hover: #e05522;
+      --input-bg: #2d2d2d;
+      --input-border: #555555;
+      --table-header-bg: #313335;
+      --table-row-even: #3c3f41;
+      --table-row-odd: #353739;
+      --table-row-hover: #484b4d;
+      --table-row-selected: #214283;
+      --border-radius: 4px;
+      --tag-bg: #4e5254;
+      --badge-danger: #c7254e;
+      --badge-warning: #f89406;
+      --badge-info: #3a87ad;
+      --badge-success: #468847;
+    }
+
+    body.light-theme {
+      --bg-color: #f5f5f5;
+      --card-bg: #ffffff;
+      --panel-border: #d0d0d0;
+      --text-color: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --accent-color: #e25522;
+      --accent-hover: #c44315;
+      --input-bg: #ffffff;
+      --input-border: #cccccc;
+      --table-header-bg: #e8e8e8;
+      --table-row-even: #ffffff;
+      --table-row-odd: #f9f9f9;
+      --table-row-hover: #eeeeee;
+      --table-row-selected: #b5d5ff;
+      --tag-bg: #e0e0e0;
+      --badge-danger: #d9534f;
+      --badge-warning: #f0ad4e;
+      --badge-info: #5bc0de;
+      --badge-success: #5cb85c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-size: 13px;
+      line-height: 1.4;
+      user-select: none;
+    }
+
+    /* Top Suite Bar */
+    .suite-header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 6px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .suite-title {
+      font-weight: 700;
+      color: var(--accent-color);
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    .suite-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons & Inputs */
+    button, .btn {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
+      padding: 4px 10px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    button:hover, .btn:hover {
+      background-color: var(--table-row-hover);
+      border-color: var(--accent-color);
+      color: var(--text-bright);
+    }
+    button.btn-primary {
+      background-color: var(--accent-color);
+      border-color: var(--accent-hover);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    button.btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+    button.btn-sm {
+      padding: 2px 7px;
+      font-size: 11px;
+    }
+    input[type="text"], textarea {
+      background-color: var(--input-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--input-border);
+      padding: 4px 8px;
+      border-radius: var(--border-radius);
+      font-size: 12px;
+      font-family: inherit;
+    }
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      background-color: var(--table-header-bg);
+      border-bottom: 1px solid var(--panel-border);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-color);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      border-radius: 0;
+    }
+    .tab-btn:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+    .tab-btn.active {
+      color: var(--accent-color);
+      border-bottom-color: var(--accent-color);
+      background-color: var(--card-bg);
+    }
+
+    .tab-content {
+      display: none;
+      height: calc(100vh - 82px);
+      padding: 8px;
+      overflow: hidden;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Sub Tabs */
+    .sub-tab-bar {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--panel-border);
+      margin-bottom: 8px;
+      padding-bottom: 2px;
+    }
+    .sub-tab-btn {
+      padding: 4px 12px;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      border: 1px solid var(--panel-border);
+      border-bottom: none;
+      background-color: var(--table-row-odd);
+      font-size: 11px;
+    }
+    .sub-tab-btn.active {
+      background-color: var(--card-bg);
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    /* Layout for Config tab */
+    .config-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr 340px;
+      gap: 12px;
+      height: 100%;
+      overflow-y: auto;
+    }
+    .panel-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .panel-box-title {
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Filters Layout */
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 6px 8px;
+      background-color: var(--table-row-odd);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+    }
+    .filter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .filter-label-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .filter-values-preview {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-left: 20px;
+    }
+
+    /* Tables */
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      background-color: var(--card-bg);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th {
+      background-color: var(--table-header-bg);
+      color: var(--text-bright);
+      padding: 6px 8px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--panel-border);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--panel-border);
+      color: var(--text-color);
+    }
+    tr:nth-child(even) {
+      background-color: var(--table-row-even);
+    }
+    tr:nth-child(odd) {
+      background-color: var(--table-row-odd);
+    }
+    tr:hover {
+      background-color: var(--table-row-hover);
+    }
+    tr.selected {
+      background-color: var(--table-row-selected) !important;
+      color: #ffffff;
+    }
+    tr.selected td {
+      color: #ffffff;
+    }
+
+    /* Badges */
+    .badge {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffffff;
+      display: inline-block;
+    }
+    .badge-high { background-color: var(--badge-danger); }
+    .badge-medium { background-color: var(--badge-warning); }
+    .badge-low { background-color: var(--badge-info); }
+    .badge-safe { background-color: var(--badge-success); }
+
+    /* Viewer Panes */
+    .viewer-split-h {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      height: 240px;
+      margin-top: 8px;
+    }
+    .viewer-box {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      background-color: var(--card-bg);
+      overflow: hidden;
+    }
+    .viewer-box-header {
+      background-color: var(--table-header-bg);
+      padding: 4px 8px;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-bright);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .viewer-code {
+      flex: 1;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      overflow: auto;
+      white-space: pre-wrap;
+      color: var(--text-bright);
+      background-color: var(--input-bg);
+    }
+
+    /* Modal Dialog */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-dialog {
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      width: 850px;
+      max-width: 95vw;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--table-header-bg);
+    }
+    .modal-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+    .modal-body {
+      padding: 12px 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .modal-footer {
+      padding: 10px 16px;
+      border-top: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background-color: var(--table-header-bg);
+    }
+
+    /* Draggable Session Profiles */
+    .session-tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--panel-border);
+      margin-bottom: 12px;
+      padding-bottom: 2px;
+    }
+    .session-tab {
+      padding: 4px 10px;
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      background-color: var(--table-row-odd);
+      cursor: grab;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .session-tab.active {
+      background-color: var(--card-bg);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+    .session-tab.dragging {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Suite Header -->
+  <div class="suite-header">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="suite-title">ng-auth-analyzer_littlespidy</span>
+      <span style="font-size: 11px; color: var(--text-muted);">Montoya API v1.1.14 | Session: [Default Assessment]</span>
+    </div>
+    <div class="suite-actions">
+      <button class="btn-sm" onclick="toggleTheme()" id="themeBtn">Switch to Light Theme</button>
+      <span style="font-size: 11px; color: var(--text-muted);">No top-level menu (Moved to config tab)</span>
+    </div>
+  </div>
+
+  <!-- Main Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('configTab', this)">config</button>
+    <button class="tab-btn" onclick="switchTab('authAnalyzerTab', this)">Auth Analyzer</button>
+    <button class="tab-btn" onclick="switchTab('authImportTab', this)">Auth Import</button>
+    <button class="tab-btn" onclick="switchTab('corsTab', this)">CORS</button>
+    <button class="tab-btn" onclick="switchTab('corsImportTab', this)">CORS Import</button>
+    <button class="tab-btn" onclick="switchTab('convertTab', this)">Convert POST to GET</button>
+    <button class="tab-btn" onclick="switchTab('convertImportTab', this)">Convert Import</button>
+  </div>
+
+  <!-- TAB 1: config -->
+  <div id="configTab" class="tab-content active">
+    <div class="config-layout">
+      
+      <!-- Left Panel: Controls & Analyzer Toggles -->
+      <div class="panel-box">
+        <div class="panel-box-title">Analyzer Controls</div>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-primary" style="flex: 1;">Start Analyzer</button>
+          <button style="flex: 1;" disabled>Pause</button>
+        </div>
+        <button style="width: 100%;">Drop Original Request</button>
+
+        <div class="panel-box-title" style="margin-top: 8px;">Active Analyzers</div>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="chkAuthAnalyzer" checked>
+          <span><strong>Auth Analyzer</strong></span>
+        </label>
+        
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="chkCors" checked>
+            <span><strong>CORS</strong></span>
+          </label>
+          <button class="btn-sm" onclick="openCorsTechniquesModal()">CORS Techniques</button>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); padding-left: 22px;">
+          Tests 29 PortSwigger bypasses on original requests
+        </div>
+
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="chkConvertPostToGet" checked>
+          <span><strong>Convert POST to GET</strong></span>
+        </label>
+        <div style="font-size: 11px; color: var(--text-muted); padding-left: 22px;">
+          Discovers POST endpoints and verifies verb manipulation
+        </div>
+
+        <div class="panel-box-title" style="margin-top: 8px;">Setup & Settings</div>
+        <button onclick="alert('Export Setup dialog opened')" style="width: 100%;">Export Setup</button>
+        <button onclick="alert('Import Setup dialog opened')" style="width: 100%;">Import Setup</button>
+        <button onclick="alert('Settings dialog opened')" style="width: 100%;">Settings</button>
+      </div>
+
+      <!-- Center Panel: Sessions (Draggable Tabs) -->
+      <div class="panel-box" style="display: flex; flex-direction: column;">
+        <div class="panel-box-title">Session Profiles (Drag tabs to reorder columns)</div>
+        
+        <div class="session-tabs" id="sessionTabsContainer">
+          <div class="session-tab active" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" oncontextmenu="handleSessionContextMenu(event, 'user1')">
+            <span>user1</span>
+          </div>
+          <div class="session-tab" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" oncontextmenu="handleSessionContextMenu(event, 'user2')">
+            <span>user2</span>
+          </div>
+          <div class="session-tab" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" oncontextmenu="handleSessionContextMenu(event, 'admin')">
+            <span>admin</span>
+          </div>
+          <button class="btn-sm" title="Add New Session">+</button>
+        </div>
+
+        <!-- Session Detail Form -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 4px;">Header(s) to Replace (Hover tooltip removed)</label>
+            <textarea style="width: 100%; height: 80px; font-family: monospace;" placeholder="Cookie: Session=d3c2b484-5fed-11eb-ae93-0242ac130002;
+Authorization: Bearer eyJhbGciOi..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 20px;">
+            <label style="display: flex; align-items: center; gap: 6px;">
+              <input type="checkbox"> Remove Header(s)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px;">
+              <input type="checkbox"> Restrict to Scope
+            </label>
+          </div>
+
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 4px;">Parameter Extraction / Match and Replace</label>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-sm">New Parameter</button>
+              <button class="btn-sm">Match and Replace</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Redesigned Filters with Edit Buttons -->
+      <div class="panel-box" style="overflow-y: auto;">
+        <div class="panel-box-title">Filters (Directly editable & visible)</div>
+
+        <!-- Non-input filters -->
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" checked> Only In Scope
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" checked> Only Proxy Traffic
+        </label>
+
+        <!-- Configurable filters with Edit button & preview -->
+        <div class="filter-item">
+          <div class="filter-header">
+            <label class="filter-label-group">
+              <input type="checkbox" checked> Exclude Filetypes
+            </label>
+            <button class="btn-sm" onclick="editFilter('Exclude Filetypes', 'jpg, png, gif, css, js, woff, ico')">Edit</button>
+          </div>
+          <div class="filter-values-preview">Values: jpg, png, gif, css, js, woff, ico</div>
+        </div>
+
+        <div class="filter-item">
+          <div class="filter-header">
+            <label class="filter-label-group">
+              <input type="checkbox" checked> Exclude HTTP Methods
+            </label>
+            <button class="btn-sm" onclick="editFilter('Exclude HTTP Methods', 'OPTIONS, TRACE')">Edit</button>
+          </div>
+          <div class="filter-values-preview">Values: OPTIONS, TRACE</div>
+        </div>
+
+        <div class="filter-item">
+          <div class="filter-header">
+            <label class="filter-label-group">
+              <input type="checkbox" checked> Exclude Status Codes
+            </label>
+            <button class="btn-sm" onclick="editFilter('Exclude Status Codes', '204, 304')">Edit</button>
+          </div>
+          <div class="filter-values-preview">Values: 204, 304</div>
+        </div>
+
+        <div class="filter-item">
+          <div class="filter-header">
+            <label class="filter-label-group">
+              <input type="checkbox" checked> Exclude Exact Path
+            </label>
+            <button class="btn-sm" onclick="editFilter('Exclude Exact Path', '/api/v1/logout, /healthz')">Edit</button>
+          </div>
+          <div class="filter-values-preview">Values: /api/v1/logout, /healthz</div>
+        </div>
+
+        <div class="filter-item">
+          <div class="filter-header">
+            <label class="filter-label-group">
+              <input type="checkbox" checked> Exclude Partial Path
+            </label>
+            <button class="btn-sm" onclick="editFilter('Exclude Partial Path', '/static/, /assets/, /docs')">Edit</button>
+          </div>
+          <div class="filter-values-preview">Values: /static/, /assets/, /docs</div>
+        </div>
+
+        <div class="filter-item">
+          <div class="filter-header">
+            <label class="filter-label-group">
+              <input type="checkbox" checked> Exclude Complete URL
+            </label>
+            <button class="btn-sm" onclick="editFilter('Exclude Complete URL', 'https://example.com/api/ping')">Edit</button>
+          </div>
+          <div class="filter-values-preview">Values: https://example.com/api/ping</div>
+        </div>
+
+        <div class="filter-item">
+          <div class="filter-header">
+            <label class="filter-label-group">
+              <input type="checkbox"> Exclude Queries / Params
+            </label>
+            <button class="btn-sm" onclick="editFilter('Exclude Queries / Params', 'utm_source, cachebust')">Edit</button>
+          </div>
+          <div class="filter-values-preview">Values: utm_source, cachebust</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB 2: Auth Analyzer -->
+  <div id="authAnalyzerTab" class="tab-content">
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Toolbar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="text" placeholder="Filter requests..." style="width: 220px;">
+          <label style="display: flex; align-items: center; gap: 4px; font-weight: 600;">
+            <input type="checkbox" checked> Hide Filtered Paths (Retroactive)
+          </label>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-sm">Clear Table</button>
+          <button class="btn-sm">Export Table Data</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Method</th>
+              <th>Host</th>
+              <th>Path</th>
+              <th>Orig Status</th>
+              <!-- Dynamically ordered by session profiles -->
+              <th>user1 Status</th>
+              <th>user1 Len</th>
+              <th>user1 State</th>
+              <th>user2 Status</th>
+              <th>user2 Len</th>
+              <th>user2 State</th>
+              <th>admin Status</th>
+              <th>admin Len</th>
+              <th>admin State</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td>1</td>
+              <td>GET</td>
+              <td>api.example.com</td>
+              <td>/user/profile</td>
+              <td>200</td>
+              <td>200</td>
+              <td>1420</td>
+              <td><span class="badge badge-high">Bypassed!</span></td>
+              <td>403</td>
+              <td>120</td>
+              <td><span class="badge badge-safe">Enforced</span></td>
+              <td>200</td>
+              <td>1420</td>
+              <td><span class="badge badge-safe">Enforced</span></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>GET</td>
+              <td>api.example.com</td>
+              <td>/admin/settings</td>
+              <td>200</td>
+              <td>403</td>
+              <td>98</td>
+              <td><span class="badge badge-safe">Enforced</span></td>
+              <td>403</td>
+              <td>98</td>
+              <td><span class="badge badge-safe">Enforced</span></td>
+              <td>200</td>
+              <td>3540</td>
+              <td><span class="badge badge-safe">Enforced</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom Side-by-Side User Columns Viewer (Without "Compare View" label) -->
+      <div style="border: 1px solid var(--panel-border); margin-top: 8px; border-radius: var(--border-radius); background: var(--card-bg);">
+        <div style="display: flex; justify-content: flex-end; padding: 4px 8px; border-bottom: 1px solid var(--panel-border);">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span style="font-size: 11px;">View:</span>
+            <button class="btn-sm btn-primary">Request</button>
+            <button class="btn-sm">Response</button>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; padding: 8px; height: 180px;">
+          <div class="viewer-box">
+            <div class="viewer-box-header">Original Request</div>
+            <div class="viewer-code">GET /user/profile HTTP/1.1
+Host: api.example.com
+Cookie: Session=victim_123</div>
+          </div>
+          <div class="viewer-box">
+            <div class="viewer-box-header">user1 Request</div>
+            <div class="viewer-code">GET /user/profile HTTP/1.1
+Host: api.example.com
+Cookie: Session=user1_token</div>
+          </div>
+          <div class="viewer-box">
+            <div class="viewer-box-header">user2 Request</div>
+            <div class="viewer-code">GET /user/profile HTTP/1.1
+Host: api.example.com
+Cookie: Session=user2_token</div>
+          </div>
+          <div class="viewer-box">
+            <div class="viewer-box-header">admin Request</div>
+            <div class="viewer-code">GET /user/profile HTTP/1.1
+Host: api.example.com
+Cookie: Session=admin_token</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Auth Import -->
+  <div id="authImportTab" class="tab-content">
+    <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+      <button class="btn-sm btn-primary">Upload XML Data</button>
+      <button class="btn-sm">Clear Table</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Method</th><th>Host</th><th>Path</th><th>Original Status</th><th>Imported Sessions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>GET</td><td>api.example.com</td><td>/user/profile</td><td>200</td><td>user1, user2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 4: CORS -->
+  <div id="corsTab" class="tab-content">
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Toolbar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <div style="display: flex; gap: 8px;">
+          <input type="text" placeholder="Search Origin, Host, Path..." style="width: 240px;">
+          <button class="btn-sm">Search</button>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-sm">Test Selected</button>
+          <button class="btn-sm">Clear Table</button>
+          <button class="btn-sm">Export Table Data</button>
+        </div>
+      </div>
+
+      <!-- CORS Results Table -->
+      <div class="table-container" style="flex: 1;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Method</th>
+              <th>Host</th>
+              <th>Path</th>
+              <th>Tested Origin</th>
+              <th>Status</th>
+              <th>Length</th>
+              <th>ACAO</th>
+              <th>ACAC</th>
+              <th>Severity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td>1</td>
+              <td>GET</td>
+              <td>api.example.com</td>
+              <td>/api/user/details</td>
+              <td>https://example.com._.evil.com</td>
+              <td>200</td>
+              <td>1240</td>
+              <td>https://example.com._.evil.com</td>
+              <td>true</td>
+              <td><span class="badge badge-high">High</span></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>GET</td>
+              <td>api.example.com</td>
+              <td>/api/user/details</td>
+              <td>null</td>
+              <td>200</td>
+              <td>1240</td>
+              <td>null</td>
+              <td>true</td>
+              <td><span class="badge badge-high">High</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Parallel Request and Response Viewers of Equal Size -->
+      <div class="viewer-split-h">
+        <div class="viewer-box">
+          <div class="viewer-box-header">Request (Tested with Attacker Origin)</div>
+          <div class="viewer-code">GET /api/user/details HTTP/1.1
+Host: api.example.com
+Origin: https://example.com._.evil.com
+User-Agent: Mozilla/5.0
+Cookie: Session=original_session_token</div>
+        </div>
+        <div class="viewer-box">
+          <div class="viewer-box-header">Response (Reflecting CORS Headers)</div>
+          <div class="viewer-code">HTTP/1.1 200 OK
+Access-Control-Allow-Origin: https://example.com._.evil.com
+Access-Control-Allow-Credentials: true
+Content-Type: application/json
+
+{"id": 42, "email": "user@example.com", "balance": 9500}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: CORS Import -->
+  <div id="corsImportTab" class="tab-content">
+    <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+      <button class="btn-sm btn-primary">Upload CSV / XML Data</button>
+      <button class="btn-sm">Clear Results</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Method</th><th>Host</th><th>Path</th><th>Tested Origin</th><th>ACAO</th><th>ACAC</th><th>Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>GET</td><td>api.example.com</td><td>/api/data</td><td>https://evil.com</td><td>https://evil.com</td><td>true</td><td><span class="badge badge-high">High</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 6: Convert POST to GET -->
+  <div id="convertTab" class="tab-content">
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Toolbar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <div style="display: flex; gap: 8px;">
+          <input type="text" placeholder="Search URL, Signal, Path..." style="width: 240px;">
+          <button class="btn-sm">Search</button>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-sm">Clear Results</button>
+          <button class="btn-sm">Export TSV</button>
+          <button class="btn-sm">Export XML</button>
+        </div>
+      </div>
+
+      <!-- Table without Content-Type and Severity -->
+      <div class="table-container" style="flex: 1;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Method</th>
+              <th>Host</th>
+              <th>Path</th>
+              <th>POST Status</th>
+              <th>GET Status</th>
+              <th>POST Len</th>
+              <th>GET Len</th>
+              <th>Signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td>1</td>
+              <td>POST</td>
+              <td>api.example.com</td>
+              <td>/user/transfer</td>
+              <td>200</td>
+              <td>200</td>
+              <td>540</td>
+              <td>540</td>
+              <td><span class="badge badge-high">Identical Response / Potential Bypass</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Side-by-side comparison like Auth History -->
+      <div style="border: 1px solid var(--panel-border); margin-top: 8px; border-radius: var(--border-radius); background: var(--card-bg);">
+        <div style="display: flex; justify-content: flex-end; padding: 4px 8px; border-bottom: 1px solid var(--panel-border);">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span style="font-size: 11px;">View:</span>
+            <button class="btn-sm btn-primary">Request</button>
+            <button class="btn-sm">Response</button>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; height: 180px;">
+          <div class="viewer-box">
+            <div class="viewer-box-header">Original POST Request</div>
+            <div class="viewer-code">POST /user/transfer HTTP/1.1
+Host: api.example.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 29
+
+amount=100&recipient=attacker</div>
+          </div>
+          <div class="viewer-box">
+            <div class="viewer-box-header">Converted GET Request</div>
+            <div class="viewer-code">GET /user/transfer?amount=100&recipient=attacker HTTP/1.1
+Host: api.example.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 7: Convert Import -->
+  <div id="convertImportTab" class="tab-content">
+    <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+      <button class="btn-sm btn-primary">Upload XML Data</button>
+      <button class="btn-sm">Clear Results</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Method</th><th>Host</th><th>Path</th><th>POST Status</th><th>GET Status</th><th>POST Len</th><th>GET Len</th><th>Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>POST</td><td>api.example.com</td><td>/user/transfer</td><td>200</td><td>200</td><td>540</td><td>540</td><td><span class="badge badge-high">Identical Response</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL: 29 PortSwigger CORS Techniques Dialog -->
+  <div class="modal-overlay" id="corsTechniquesModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <span class="modal-title">PortSwigger 29 CORS Bypass Techniques</span>
+        <button class="btn-sm" onclick="closeCorsTechniquesModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--table-row-odd); padding: 8px 12px; border: 1px solid var(--panel-border); border-radius: var(--border-radius);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="font-weight: 600;">CORS Attacker URL:</label>
+            <input type="text" value="evil.com" style="width: 200px;">
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-sm" onclick="toggleAllCors(true)">Select All</button>
+            <button class="btn-sm" onclick="toggleAllCors(false)">Deselect All</button>
+          </div>
+        </div>
+
+        <div style="border: 1px solid var(--panel-border); border-radius: var(--border-radius); overflow-y: auto; max-height: 400px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 30px;">Active</th>
+                <th>Technique Name</th>
+                <th>Origin Vector Pattern</th>
+                <th>Context / Browser</th>
+              </tr>
+            </thead>
+            <tbody id="corsTechniquesTableBody">
+              <!-- Dynamically rendered 29 PortSwigger techniques -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm btn-primary" onclick="closeCorsTechniquesModal()">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      document.getElementById('themeBtn').innerText = isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme';
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function editFilter(name, currentVal) {
+      const newVal = prompt("Enter comma-separated values for " + name + ":", currentVal);
+      if (newVal !== null) {
+        alert("Updated " + name + " to: " + newVal);
+      }
+    }
+
+    // Modal logic
+    function openCorsTechniquesModal() {
+      document.getElementById('corsTechniquesModal').classList.add('active');
+      renderCorsTechniques();
+    }
+    function closeCorsTechniquesModal() {
+      document.getElementById('corsTechniquesModal').classList.remove('active');
+    }
+
+    const portSwigger29Techniques = [
+      { name: "Dot-Underscore-Dot Subdomain", pattern: "<allowed>._.<attacker>", note: "Underscore subdomain bypass" },
+      { name: "Dot-Hyphen-Dot Subdomain", pattern: "<allowed>.-.<attacker>", note: "Hyphen subdomain bypass" },
+      { name: "Safari Comma Subdomain", pattern: "<allowed>.,.<attacker>", note: "Safari allows comma in subdomain" },
+      { name: "Safari Semicolon Subdomain", pattern: "<allowed>.;.<attacker>", note: "Safari allows semicolon in subdomain" },
+      { name: "Safari Exclamation Subdomain", pattern: "<allowed>.!.<attacker>", note: "Safari allows exclamation mark" },
+      { name: "Safari Single Quote Subdomain", pattern: "<allowed>.'.<attacker>", note: "Safari allows single quote in subdomain" },
+      { name: "Safari Open Parenthesis", pattern: "<allowed>.(.<attacker>", note: "Safari allows (" },
+      { name: "Safari Close Parenthesis", pattern: "<allowed>.).<attacker>", note: "Safari allows )" },
+      { name: "Safari Open Brace", pattern: "<allowed>.{.<attacker>", note: "Safari allows {" },
+      { name: "Safari Close Brace", pattern: "<allowed>.}.<attacker>", note: "Safari allows }" },
+      { name: "Safari Asterisk Subdomain", pattern: "<allowed>.*.<attacker>", note: "Safari allows *" },
+      { name: "Safari Ampersand Subdomain", pattern: "<allowed>.&.<attacker>", note: "Safari allows &" },
+      { name: "Safari Backtick Subdomain", pattern: "<allowed>.`.<attacker>", note: "Safari allows `" },
+      { name: "Firefox & Safari Plus Subdomain", pattern: "<allowed>.+.<attacker>", note: "Firefox and Safari allow +" },
+      { name: "Prefix Match / Attacker Subdomain", pattern: "<allowed>.<attacker>", note: "Regex prefix match bypass" },
+      { name: "Safari Equals Subdomain", pattern: "<allowed>.=.<attacker>", note: "Safari allows =" },
+      { name: "Safari Tilde Subdomain", pattern: "<allowed>.~.<attacker>", note: "Safari allows ~" },
+      { name: "Firefox & Safari Dollar Subdomain", pattern: "<allowed>.$.<attacker>", note: "Firefox and Safari allow $" },
+      { name: "Suffix Match (Domain Registration)", pattern: "<allowed><attacker>", note: "Regex suffix match bypass" },
+      { name: "Trust Arbitrary Subdomain", pattern: "<attacker>.<allowed>", note: "Insecure wildcard subdomain trust" },
+      { name: "Domain Ends With", pattern: "anything<allowed>", note: "Unanchored regex match" },
+      { name: "Localhost Regex Edge Case", pattern: "localhost.<attacker>", note: "Localhost regex misconfiguration" },
+      { name: "Trusted Null Origin", pattern: "null", note: "Sandboxed iframe / data URI exploitation" },
+      { name: "Unencrypted Ends With", pattern: "http://s<allowed>/", note: "Insecure scheme + domain ends with" },
+      { name: "IPv6 Localhost Loopback", pattern: "[::]", note: "IPv6 unspecified address" },
+      { name: "IPv6 Loopback", pattern: "[::1]", note: "Standard IPv6 loopback" },
+      { name: "IPv4-Mapped IPv6 Loopback", pattern: "[::ffff:7f00:1]", note: "IPv4-mapped 127.0.0.1 loopback" },
+      { name: "Fully-Expanded IPv6 Loopback", pattern: "[0000:0000:0000:0000:0000:0000:0000:0000]", note: "Fully-expanded IPv6 format" },
+      { name: "Local / Localhost Bypass", pattern: "<allowed>.localhost / 127.0.0.1", note: "Local domain and loopback bypass" }
+    ];
+
+    function renderCorsTechniques() {
+      const tbody = document.getElementById('corsTechniquesTableBody');
+      if (tbody.children.length === 0) {
+        portSwigger29Techniques.forEach((t, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><input type="checkbox" checked class="cors-tech-chk"></td>
+            <td><strong>${t.name}</strong></td>
+            <td><code>${t.pattern}</code></td>
+            <td style="color: var(--text-muted);">${t.note}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    function toggleAllCors(state) {
+      document.querySelectorAll('.cors-tech-chk').forEach(c => c.checked = state);
+    }
+
+    // Drag-and-drop tab reordering
+    let draggedItem = null;
+    function handleDragStart(e) {
+      draggedItem = e.target.closest('.session-tab');
+      draggedItem.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      const targetTab = e.target.closest('.session-tab');
+      if (targetTab && draggedItem && targetTab !== draggedItem) {
+        const container = document.getElementById('sessionTabsContainer');
+        const tabs = Array.from(container.querySelectorAll('.session-tab'));
+        const draggedIndex = tabs.indexOf(draggedItem);
+        const targetIndex = tabs.indexOf(targetTab);
+        if (draggedIndex < targetIndex) {
+          targetTab.after(draggedItem);
+        } else {
+          targetTab.before(draggedItem);
+        }
+      }
+      if (draggedItem) {
+        draggedItem.classList.remove('dragging');
+        draggedItem = null;
+      }
+    }
+
+    function handleSessionContextMenu(e, name) {
+      e.preventDefault();
+      const action = prompt("Session: " + name + "\nOptions: 1) Move Left, 2) Move Right, 3) Rename, 4) Clone, 5) Delete", "1");
+      if (action) alert("Session action applied: " + action);
+    }
+  </script>
+</body>
+</html>

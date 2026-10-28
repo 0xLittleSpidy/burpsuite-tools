@@ -39,8 +39,16 @@ public class DataStorageProvider {
 		}
 		sessionsObject.add("filters", filterArray);
 		if (BurpExtender.mainPanel != null && BurpExtender.mainPanel.getConfigurationPanel() != null) {
-			sessionsObject.addProperty("testConvertPostToGet",
-					BurpExtender.mainPanel.getConfigurationPanel().isTestConvertPostToGetSelected());
+			com.protect7.authanalyzer.gui.main.ConfigurationPanel cp = BurpExtender.mainPanel.getConfigurationPanel();
+			sessionsObject.addProperty("testAuthAnalyzer", cp.isAuthAnalyzerActive());
+			sessionsObject.addProperty("testCors", cp.isCorsTestingSelected());
+			sessionsObject.addProperty("testConvertPostToGet", cp.isTestConvertPostToGetSelected());
+			sessionsObject.addProperty("corsAttackerUrl", cp.getCorsAttackerUrl());
+			JsonArray techArr = new JsonArray();
+			for (String tId : cp.getCorsEnabledTechniqueIds()) {
+				techArr.add(tId);
+			}
+			sessionsObject.add("corsTechniques", techArr);
 		}
 		return sessionsObject.toString();
 	}

@@ -1,9 +1,15 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.protect7.authanalyzer.gui.main;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,10 +17,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -38,6 +49,8 @@ import com.protect7.authanalyzer.entities.Session;
 import com.protect7.authanalyzer.entities.Token;
 import com.protect7.authanalyzer.entities.TokenBuilder;
 import com.protect7.authanalyzer.entities.TokenLocation;
+import com.protect7.authanalyzer.filter.CompleteUrlFilter_littlespidy;
+import com.protect7.authanalyzer.filter.ExactPathFilter_littlespidy;
 import com.protect7.authanalyzer.filter.FileTypeFilter;
 import com.protect7.authanalyzer.filter.InScopeFilter;
 import com.protect7.authanalyzer.filter.MethodFilter;
@@ -46,6 +59,7 @@ import com.protect7.authanalyzer.filter.PathFilter;
 import com.protect7.authanalyzer.filter.QueryFilter;
 import com.protect7.authanalyzer.filter.RequestFilter;
 import com.protect7.authanalyzer.filter.StatusCodeFilter;
+import com.protect7.authanalyzer.gui.cors.CorsTechniquesDialog_littlespidy;
 import com.protect7.authanalyzer.gui.dialog.SettingsDialog;
 import com.protect7.authanalyzer.gui.entity.SessionPanel;
 import com.protect7.authanalyzer.gui.entity.TokenPanel;
@@ -71,10 +85,23 @@ public class ConfigurationPanel extends JPanel {
 	private final String STOP_DROP_REQUEST_TEXT = "Stop Drop Requests";
 	private final JButton startStopButton = new JButton();
 	private final JButton pauseButton = new JButton();
-	//private final JLabel pendingRequestsLabel = new JLabel("Pending Requests Queue: 0");
 	private final JToggleButton dropOriginalButton = new JToggleButton(DROP_REQUEST_TEXT);
-	private final HintCheckBox testConvertPostToGet = new HintCheckBox("Test Convert POST to GET", true,
+
+	// Three Analyzer toggles
+	private final HintCheckBox testAuthAnalyzer = new HintCheckBox("Auth Analyzer", true,
+			"Analyzes authentication and authorization bypasses across defined session profiles.");
+	private final HintCheckBox testCors = new HintCheckBox("CORS", true,
+			"Analyzes Cross-Origin Resource Sharing (CORS) misconfigurations using PortSwigger techniques.");
+	private final JButton corsTechniquesButton = new JButton("CORS Techniques");
+	private String corsAttackerUrl = "evil.com";
+	private final Set<String> corsEnabledTechniqueIds = new HashSet<String>();
+
+	private final HintCheckBox testConvertPostToGet = new HintCheckBox("Convert POST to GET", true,
 			"Automatically converts intercepted POST requests to GET and evaluates responses for authorization/CSRF bypasses.");
+
+	private final JButton exportSetupButton = new JButton("Export Setup");
+	private final JButton importSetupButton = new JButton("Import Setup");
+
 	private final JPanel filterPanel;
 	private final LinkedHashMap<String, SessionPanel> sessionPanelMap = new LinkedHashMap<>();
 	private final String PAUSE_TEXT = "Pause";
@@ -83,8 +110,15 @@ public class ConfigurationPanel extends JPanel {
 	boolean sessionListChanged = true;
 	private final MainPanel mainPanel;
 
+	// Enhanced Path Filters
+	private ExactPathFilter_littlespidy exactPathFilter;
+	private PathFilter pathFilter;
+	private CompleteUrlFilter_littlespidy completeUrlFilter;
+	private final Map<RequestFilter, JLabel> filterValueLabelMap = new HashMap<RequestFilter, JLabel>();
+
 	public ConfigurationPanel(MainPanel mainPanel) {
-		this.mainPanel = mainPanel;	
+		this.mainPanel = mainPanel;
+
 		sessionTabbedPane.addNewSessionListener(new NewSessionListener() {
 			@Override
 			public void newSession() {
@@ -94,9 +128,8 @@ public class ConfigurationPanel extends JPanel {
 				}
 			}
 		});
-		
+
 		sessionTabbedPane.addCloneSessionListener(new CloneSessionListener() {
-			
 			@Override
 			public void cloneSession() {
 				String newSessionName = JOptionPane.showInputDialog(sessionTabbedPane, "Enter Name of New Session");
@@ -107,12 +140,11 @@ public class ConfigurationPanel extends JPanel {
 				}
 			}
 		});
-		
+
 		sessionTabbedPane.addRenameSessionListener(new RenameSessionListener() {
 			@Override
 			public void renameSession(String currentName) {
-				String sessionName = JOptionPane.showInputDialog(sessionTabbedPane, "Rename Current Session:",
-						currentName);
+				String sessionName = JOptionPane.showInputDialog(sessionTabbedPane, "Rename Current Session:", currentName);
 				if (sessionName != null && isSessionNameValid(sessionName)) {
 					if (doModify()) {
 						sessionTabbedPane.setTitleAt(getTabbedPaneIndexForTitle(currentName), sessionName);
@@ -123,8 +155,8 @@ public class ConfigurationPanel extends JPanel {
 				}
 			}
 		});
-		
-		sessionTabbedPane.addDeleteSessionListener(new DeleteSessionListener() {		
+
+		sessionTabbedPane.addDeleteSessionListener(new DeleteSessionListener() {
 			@Override
 			public void deleteSession(String title) {
 				if (doModify()) {
@@ -135,62 +167,60 @@ public class ConfigurationPanel extends JPanel {
 			}
 		});
 
+		sessionTabbedPane.addTabOrderChangedListener(this::onSessionTabOrderChanged);
+
+		// Redesigned Filters Panel
 		filterPanel = new JPanel();
 		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
 
 		HintCheckBox onlyInScopeButton = new HintCheckBox("Only In Scope");
 		onlyInScopeButton.setSelected(true);
-		addFilter(new InScopeFilter(filterPanel.getComponentCount(), "Only In Scope requests are analyzed"),
-				onlyInScopeButton, "");
+		addFilter(new InScopeFilter(filterPanel.getComponentCount(), "Only In Scope requests are analyzed"), onlyInScopeButton);
 		filterPanel.add(onlyInScopeButton);
 
 		HintCheckBox onlyProxyButton = new HintCheckBox("Only Proxy Traffic");
 		onlyProxyButton.setSelected(true);
-		addFilter(
-				new OnlyProxyFilter(filterPanel.getComponentCount(),
-						"Analyze only proxy traffic. Unselect to analyze repeater and proxy traffic"),
-				onlyProxyButton, "");
+		addFilter(new OnlyProxyFilter(filterPanel.getComponentCount(), "Analyze only proxy traffic. Unselect to analyze repeater and proxy traffic"), onlyProxyButton);
 		filterPanel.add(onlyProxyButton);
 
 		HintCheckBox fileTypeFilterButton = new HintCheckBox("Exclude Filetypes");
 		fileTypeFilterButton.setSelected(true);
-		addFilter(new FileTypeFilter(filterPanel.getComponentCount(), "Excludes every specified filetype"),
-				fileTypeFilterButton, "Enter filetypes to filter. Comma separated.\r\neg: jpg, png, js");
-		filterPanel.add(fileTypeFilterButton);
+		FileTypeFilter fileTypeFilter = new FileTypeFilter(filterPanel.getComponentCount(), "Excludes every specified filetype");
+		filterPanel.add(createConfigurableFilterRow(fileTypeFilter, fileTypeFilterButton, "Enter filetypes to filter (comma separated)", "jpg, png, js, css, woff, ico"));
 
 		HintCheckBox methodFilterButton = new HintCheckBox("Exclude HTTP Methods");
 		methodFilterButton.setSelected(true);
-		addFilter(new MethodFilter(filterPanel.getComponentCount(), "Excludes every specified http method"),
-				methodFilterButton, "Enter HTTP methods to filter. Comma separated.\r\neg: OPTIONS, TRACE");
-		filterPanel.add(methodFilterButton);
+		MethodFilter methodFilter = new MethodFilter(filterPanel.getComponentCount(), "Excludes every specified http method");
+		filterPanel.add(createConfigurableFilterRow(methodFilter, methodFilterButton, "Enter HTTP methods to filter (comma separated)", "OPTIONS, TRACE"));
 
 		HintCheckBox statusCodeFilterButton = new HintCheckBox("Exclude Status Codes");
 		statusCodeFilterButton.setSelected(true);
-		addFilter(new StatusCodeFilter(filterPanel.getComponentCount(), "Excludes every specified status code"),
-				statusCodeFilterButton, "Enter status codes to filter. Comma separated.\r\neg: 204, 304");
-		filterPanel.add(statusCodeFilterButton);
+		StatusCodeFilter statusCodeFilter = new StatusCodeFilter(filterPanel.getComponentCount(), "Excludes every specified status code");
+		filterPanel.add(createConfigurableFilterRow(statusCodeFilter, statusCodeFilterButton, "Enter status codes to filter (comma separated)", "204, 304"));
 
-		HintCheckBox pathFilterButton = new HintCheckBox("Exclude Paths");
+		HintCheckBox exactPathFilterButton = new HintCheckBox("Exclude Exact Path");
+		exactPathFilterButton.setSelected(false);
+		exactPathFilter = new ExactPathFilter_littlespidy(filterPanel.getComponentCount(), "Excludes exact path matches");
+		filterPanel.add(createConfigurableFilterRow(exactPathFilter, exactPathFilterButton, "Enter exact paths to exclude (comma separated)", "/api/v1/logout, /healthz"));
+
+		HintCheckBox pathFilterButton = new HintCheckBox("Exclude Partial Path");
 		pathFilterButton.setSelected(false);
-		addFilter(
-				new PathFilter(filterPanel.getComponentCount(),
-						"Excludes every path that contains one of the specified string literals"),
-				pathFilterButton,
-				"Enter String literals for paths to be excluded. Comma separated.\r\neg: log, libraries");
-		filterPanel.add(pathFilterButton);
+		pathFilter = new PathFilter(filterPanel.getComponentCount(), "Excludes every path that contains one of the specified string literals");
+		filterPanel.add(createConfigurableFilterRow(pathFilter, pathFilterButton, "Enter partial path string literals (comma separated)", "/static/, /assets/, log"));
+
+		HintCheckBox completeUrlFilterButton = new HintCheckBox("Exclude Complete URL");
+		completeUrlFilterButton.setSelected(false);
+		completeUrlFilter = new CompleteUrlFilter_littlespidy(filterPanel.getComponentCount(), "Excludes complete URL matches");
+		filterPanel.add(createConfigurableFilterRow(completeUrlFilter, completeUrlFilterButton, "Enter complete URLs to exclude (comma separated)", "https://example.com/api/v1/ping"));
 
 		HintCheckBox queryFilterButton = new HintCheckBox("Exclude Queries / Params");
 		queryFilterButton.setSelected(false);
-		addFilter(
-				new QueryFilter(filterPanel.getComponentCount(),
-						"Excludes every GET query that contains one of the specified string literals"),
-				queryFilterButton,
-				"Enter string literals for queries to be excluded. Comma separated.\r\neg: log, core");
-		filterPanel.add(queryFilterButton);
+		QueryFilter queryFilter = new QueryFilter(filterPanel.getComponentCount(), "Excludes every GET query that contains one of the specified string literals");
+		filterPanel.add(createConfigurableFilterRow(queryFilter, queryFilterButton, "Enter string literals for queries to be excluded (comma separated)", "utm_source, cachebust"));
+
 		startStopButton.putClientProperty("html.disable", null);
 		startStopButton.setText(ANALYZER_STOPPED_TEXT);
 		startStopButton.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -198,7 +228,6 @@ public class ConfigurationPanel extends JPanel {
 				} catch (Exception ex) {
 					ex.printStackTrace(new PrintWriter(BurpExtender.callbacks.getStdout()));
 				}
-
 			}
 		});
 
@@ -208,7 +237,18 @@ public class ConfigurationPanel extends JPanel {
 
 		dropOriginalButton.addActionListener(e -> dropOriginalButtonPressed());
 		dropOriginalButton.setEnabled(false);
-		
+
+		corsTechniquesButton.addActionListener(e -> {
+			CorsTechniquesDialog_littlespidy dlg = new CorsTechniquesDialog_littlespidy(this, corsAttackerUrl, corsEnabledTechniqueIds);
+			dlg.setVisible(true);
+			corsAttackerUrl = dlg.getAttackerUrl();
+			corsEnabledTechniqueIds.clear();
+			corsEnabledTechniqueIds.addAll(dlg.getEnabledTechniqueIds());
+		});
+
+		exportSetupButton.addActionListener(e -> saveSetup());
+		importSetupButton.addActionListener(e -> loadSetup());
+
 		JButton settingsButton = new JButton("Settings");
 		settingsButton.addActionListener(e -> new SettingsDialog(this));
 
@@ -218,7 +258,7 @@ public class ConfigurationPanel extends JPanel {
 		GridBagConstraints c1 = new GridBagConstraints();
 		c1.fill = GridBagConstraints.BOTH;
 		c1.gridx = 0;
-		c1.insets = new Insets(10, 0, 0, 5);
+		c1.insets = new Insets(6, 0, 0, 5);
 		c1.gridy = 1;
 		c1.gridwidth = 1;
 		startStopButtonPanel.add(startStopButton, c1);
@@ -228,47 +268,154 @@ public class ConfigurationPanel extends JPanel {
 		c1.gridx = 0;
 		c1.gridwidth = 2;
 		startStopButtonPanel.add(dropOriginalButton, c1);
+
+		// Analyzer Section
 		c1.gridy = 3;
-		startStopButtonPanel.add(testConvertPostToGet, c1);
+		startStopButtonPanel.add(testAuthAnalyzer, c1);
+
 		c1.gridy = 4;
-		startStopButtonPanel.add(new JLabel(" "), c1);
+		JPanel corsRow = new JPanel(new BorderLayout(4, 0));
+		corsRow.add(testCors, BorderLayout.WEST);
+		corsRow.add(corsTechniquesButton, BorderLayout.EAST);
+		startStopButtonPanel.add(corsRow, c1);
+
 		c1.gridy = 5;
+		startStopButtonPanel.add(testConvertPostToGet, c1);
+
+		// Setup Export / Import
+		c1.gridy = 6;
+		JPanel setupButtonsPanel = new JPanel(new GridLayout(1, 2, 4, 0));
+		setupButtonsPanel.add(exportSetupButton);
+		setupButtonsPanel.add(importSetupButton);
+		startStopButtonPanel.add(setupButtonsPanel, c1);
+
+		c1.gridy = 7;
 		startStopButtonPanel.add(settingsButton, c1);
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.PAGE_START;
-		c.insets = new Insets(10, 20, 20, 20);
+		c.insets = new Insets(10, 15, 20, 15);
 
 		add(startStopButtonPanel, c);
 		c.gridx = 1;
-		c.insets = new Insets(5, 20, 20, 20);
-		sessionTabbedPane.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Sessions"), new EmptyBorder(3, 3, 3, 3)));
+		c.insets = new Insets(5, 15, 20, 15);
+		sessionTabbedPane.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Sessions (Drag tabs to reorder columns)"), new EmptyBorder(3, 3, 3, 3)));
 		add(sessionTabbedPane, c);
-		c.insets = new Insets(5, 20, 20, 25);
+		c.insets = new Insets(5, 15, 20, 20);
 		c.gridx = 2;
 		filterPanel.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Filters"), new EmptyBorder(3, 3, 3, 3)));
 		add(filterPanel, c);
-		
+	}
+
+	private void addFilter(RequestFilter filter, HintCheckBox onOffButton) {
+		config.addRequestFilter(filter);
+		filter.registerOnOffButton(onOffButton);
+	}
+
+	private JPanel createConfigurableFilterRow(RequestFilter filter, HintCheckBox onOffButton, String inputDialogTitle, String defaultExample) {
+		JPanel row = new JPanel(new BorderLayout(4, 2));
+		row.setBorder(BorderFactory.createEmptyBorder(2, 2, 4, 2));
+
+		JPanel top = new JPanel(new BorderLayout(4, 0));
+		top.add(onOffButton, BorderLayout.WEST);
+
+		JButton editBtn = new JButton("Edit");
+		editBtn.setMargin(new Insets(1, 6, 1, 6));
+
+		JLabel valueLabel = new JLabel("Values: " + GenericHelper.getArrayAsString(filter.getFilterStringLiterals()));
+		valueLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+		valueLabel.setForeground(Color.GRAY);
+		valueLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+		filterValueLabelMap.put(filter, valueLabel);
+
+		editBtn.addActionListener(e -> {
+			String current = GenericHelper.getArrayAsString(filter.getFilterStringLiterals());
+			String[] inputArray = getInputArray(onOffButton, inputDialogTitle + "\r\neg: " + defaultExample, current);
+			if (inputArray != null) {
+				filter.setFilterStringLiterals(inputArray);
+				valueLabel.setText("Values: " + GenericHelper.getArrayAsString(filter.getFilterStringLiterals()));
+				valueLabel.setToolTipText(valueLabel.getText());
+				if (mainPanel != null && mainPanel.getCenterPanel() != null && mainPanel.getCenterPanel().getTableModel() != null) {
+					mainPanel.getCenterPanel().getTableModel().fireTableDataChanged();
+				}
+			}
+		});
+
+		top.add(editBtn, BorderLayout.EAST);
+		row.add(top, BorderLayout.NORTH);
+		row.add(valueLabel, BorderLayout.SOUTH);
+
+		config.addRequestFilter(filter);
+		filter.registerOnOffButton(onOffButton);
+		return row;
+	}
+
+	private void onSessionTabOrderChanged() {
+		LinkedHashMap<String, SessionPanel> reorderedMap = new LinkedHashMap<String, SessionPanel>();
+		for (int i = 0; i < sessionTabbedPane.getTabCount() - 1; i++) {
+			String title = sessionTabbedPane.getTitleAt(i);
+			SessionPanel sp = sessionPanelMap.get(title);
+			if (sp != null) {
+				reorderedMap.put(title, sp);
+			}
+		}
+		sessionPanelMap.clear();
+		sessionPanelMap.putAll(reorderedMap);
+		sessionListChanged = true;
+		createSessionObjects(false);
+		if (mainPanel != null && mainPanel.getCenterPanel() != null) {
+			mainPanel.getCenterPanel().initCenterPanel();
+		}
+	}
+
+	public boolean isPathOrUrlFiltered(String host, String path) {
+		if (path == null) return false;
+		String pLower = path.trim().toLowerCase();
+		String fullUrl = (host != null ? host.toLowerCase() : "") + pLower;
+
+		if (exactPathFilter != null && exactPathFilter.isSelected()) {
+			for (String lit : exactPathFilter.getFilterStringLiterals()) {
+				if (!lit.trim().isEmpty() && pLower.equals(lit.trim().toLowerCase())) {
+					return true;
+				}
+			}
+		}
+		if (pathFilter != null && pathFilter.isSelected()) {
+			for (String lit : pathFilter.getFilterStringLiterals()) {
+				if (!lit.trim().isEmpty() && pLower.contains(lit.trim().toLowerCase())) {
+					return true;
+				}
+			}
+		}
+		if (completeUrlFilter != null && completeUrlFilter.isSelected()) {
+			for (String lit : completeUrlFilter.getFilterStringLiterals()) {
+				String l = lit.trim().toLowerCase();
+				if (!l.isEmpty() && (fullUrl.contains(l) || ("https://" + fullUrl).startsWith(l) || ("http://" + fullUrl).startsWith(l))) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public void loadAutoStoredData() {
 		try {
 			String storedData = DataStorageProvider.loadSetup();
-			if(storedData != null) {
+			if (storedData != null) {
 				loadSetup(storedData);
 				mainPanel.updateDividerLocation();
 			}
 		} catch (Exception e) {
 			BurpExtender.callbacks.printOutput("Can not restore saved Data. Error Message: " + e.getMessage());
 		}
-		if(sessionTabbedPane.getTabCount() == 1) {
+		if (sessionTabbedPane.getTabCount() == 1) {
 			createSession("user1");
 		}
 		sessionTabbedPane.setSelectedIndex(0);
 	}
-	
+
 	public void saveSetup() {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setSelectedFile(new File("Auth_Analyzer_Setup.json"));
@@ -300,12 +447,12 @@ public class ConfigurationPanel extends JPanel {
 	}
 
 	public void loadSetup() {
-		if(doModify()) {
+		if (doModify()) {
 			JFileChooser chooser = new JFileChooser();
 			int status = chooser.showOpenDialog(this);
 			if (status == JFileChooser.APPROVE_OPTION) {
 				File selectedFile = chooser.getSelectedFile();
-				if(selectedFile != null) {
+				if (selectedFile != null) {
 					Scanner scanner;
 					String jsonString = "";
 					try {
@@ -347,73 +494,27 @@ public class ConfigurationPanel extends JPanel {
 		}
 	}
 
-	private boolean isSessionNameValid(String sessionName) {
-		if (sessionName != null && !sessionName.equals("") && !sessionPanelMap.containsKey(sessionName)
-				&& !sessionName.equals("Original")) {
-			return true;
-		} else {
-			JOptionPane.showMessageDialog(this, "The entered Session Name is invalid", "Session Name Invalid",
-					JOptionPane.WARNING_MESSAGE);
+	private boolean isSessionNameValid(String name) {
+		if (name.equals("")) {
+			JOptionPane.showMessageDialog(sessionTabbedPane, "Session name can not be empty");
 			return false;
 		}
-	}
-
-	private SessionPanel createSession(String sessionName) {
-		if (doModify()) {
-			SessionPanel sessionPanel = new SessionPanel(sessionName, mainPanel);
-			sessionTabbedPane.add(sessionName, sessionPanel);
-			sessionTabbedPane.setSelectedIndex(sessionTabbedPane.getTabCount() - 2);
-			sessionPanelMap.put(sessionName, sessionPanel);
-			return sessionPanel;
-		} else {
-			return null;
-		}
-	}
-
-	private boolean doCloneSession(String newSessionName, SessionPanel sessionPanelToClone) {
-		if (doModify()) {
-			SessionPanel sessionPanel = new SessionPanel(newSessionName, mainPanel);
-			sessionPanel.setHeadersToReplaceText(sessionPanelToClone.getHeadersToReplaceText());
-			sessionPanel.setHeadersToRemoveText(sessionPanelToClone.getHeadersToRemoveText());
-			sessionPanel.setRemoveHeaders(sessionPanelToClone.isRemoveHeaders());
-			sessionPanel.setFilterRequestsWithSameHeader(sessionPanelToClone.isFilterRequestsWithSameHeader());
-			sessionPanel.setRestrictToScope(sessionPanelToClone.isRestrictToScope());
-			sessionPanel.setRestrictToScopeText(sessionPanelToClone.getRestrictToScopeText());
-			sessionPanel.setTestCors(sessionPanelToClone.isTestCors());
-			sessionPanel.setAttackerUrl(sessionPanelToClone.getAttackerUrl());
-			sessionPanel.setMatchAndReplaceList(sessionPanelToClone.getMatchAndReplaceList());
-			for (TokenPanel tokenPanel : sessionPanelToClone.getTokenPanelList()) {
-				TokenPanel newTokenPanel = sessionPanel.addToken(tokenPanel.getTokenName());
-				newTokenPanel.setTokenLocationSet(tokenPanel.getTokenLocationSet());
-				newTokenPanel.setAutoExtractLocationSet(tokenPanel.getAutoExtractLocationSet());
-				newTokenPanel.setFromToExtractLocationSet(tokenPanel.getFromToExtractLocationSet());
-				newTokenPanel.setIsRemoveToken(tokenPanel.isRemoveToken());
-				newTokenPanel.setAddTokenIfNotExists(tokenPanel.isAddTokenIfNotExists());
-				newTokenPanel.setCaseSensitiveTokenName(tokenPanel.isCaseSensitiveTokenName());
-				if (tokenPanel.isAutoExtract()) {
-					newTokenPanel.setAutoExtractFieldName(tokenPanel.getAutoExtractFieldName());
-				}
-				if (tokenPanel.isStaticValue()) {
-					newTokenPanel.setStaticTokenValue(tokenPanel.getStaticTokenValue());
-				}
-				if (tokenPanel.isFromToString()) {
-					newTokenPanel.setFromToString(tokenPanel.getGrepFromString(), tokenPanel.getGrepToString());
-				}
-				if (tokenPanel.isPromptForInput()) {
-					newTokenPanel.setPromptForInput();
-				}
-			}
-			sessionTabbedPane.add(newSessionName, sessionPanel);
-			sessionTabbedPane.setSelectedIndex(sessionTabbedPane.getTabCount() - 2);
-			sessionPanelMap.put(newSessionName, sessionPanel);
-			return true;
-		} else {
+		if (sessionPanelMap.containsKey(name)) {
+			JOptionPane.showMessageDialog(sessionTabbedPane, "Session name already exists");
 			return false;
 		}
+		return true;
 	}
 
-	// Creates a new session if session name not already exists and set header to
-	// replace text
+	public SessionPanel createSession(String sessionName) {
+		SessionPanel sessionPanel = new SessionPanel(sessionName, mainPanel);
+		sessionPanelMap.put(sessionName, sessionPanel);
+		sessionTabbedPane.addTab(sessionName, sessionPanel);
+		setSelectedSession(sessionName);
+		sessionListChanged = true;
+		return sessionPanel;
+	}
+
 	public SessionPanel createSession(String sessionName, String headerToReplace) {
 		if (!sessionPanelMap.containsKey(sessionName)) {
 			SessionPanel sessionPanel = createSession(sessionName);
@@ -425,22 +526,48 @@ public class ConfigurationPanel extends JPanel {
 		return null;
 	}
 
-	private boolean doModify() {
-		if (config.getTableModel().getRowCount() > 0 && !sessionListChanged) {
-			int selection = JOptionPane.showConfirmDialog(this,
-					"You are going to modify your session setup." + "\nTable data will be lost.",
-					"Change Session Setup", JOptionPane.OK_CANCEL_OPTION);
-			if (selection == JOptionPane.YES_OPTION) {
-				sessionListChanged = true;
-				mainPanel.getCenterPanel().clearTable();
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			sessionListChanged = true;
-			return true;
+	private void doCloneSession(String newSessionName, SessionPanel sessionToClone) {
+		SessionPanel sessionPanel = new SessionPanel(newSessionName, mainPanel);
+		sessionPanel.setHeadersToReplaceText(sessionToClone.getHeadersToReplaceText());
+		sessionPanel.setRemoveHeaders(sessionToClone.isRemoveHeaders());
+		sessionPanel.setHeadersToRemoveText(sessionToClone.getHeadersToRemoveText());
+		sessionPanel.setFilterRequestsWithSameHeader(sessionToClone.isFilterRequestsWithSameHeader());
+		sessionPanel.setRestrictToScope(sessionToClone.isRestrictToScope());
+		sessionPanel.setRestrictToScopeText(sessionToClone.getRestrictToScopeText());
+
+		ArrayList<MatchAndReplace> matchAndReplaceList = new ArrayList<MatchAndReplace>();
+		for (MatchAndReplace matchAndReplace : sessionToClone.getMatchAndReplaceList()) {
+			matchAndReplaceList.add(new MatchAndReplace(matchAndReplace.getMatch(), matchAndReplace.getReplace()));
 		}
+		sessionPanel.setMatchAndReplaceList(matchAndReplaceList);
+
+		for (TokenPanel tokenPanelToClone : sessionToClone.getTokenPanelList()) {
+			TokenPanel newTokenPanel = sessionPanel.addToken(tokenPanelToClone.getTokenName());
+			newTokenPanel.setTokenLocationSet(tokenPanelToClone.getTokenLocationSet());
+			newTokenPanel.setAutoExtractLocationSet(tokenPanelToClone.getAutoExtractLocationSet());
+			newTokenPanel.setFromToExtractLocationSet(tokenPanelToClone.getFromToExtractLocationSet());
+			newTokenPanel.setIsRemoveToken(tokenPanelToClone.isRemoveToken());
+			newTokenPanel.setAddTokenIfNotExists(tokenPanelToClone.isAddTokenIfNotExists());
+			newTokenPanel.setCaseSensitiveTokenName(tokenPanelToClone.isCaseSensitiveTokenName());
+			if (tokenPanelToClone.isAutoExtract()) {
+				newTokenPanel.setAutoExtractFieldName(tokenPanelToClone.getAutoExtractFieldName());
+			}
+			if (tokenPanelToClone.isStaticValue()) {
+				newTokenPanel.setStaticTokenValue(tokenPanelToClone.getStaticTokenValue());
+			}
+			if (tokenPanelToClone.isFromToString()) {
+				newTokenPanel.setFromToString(tokenPanelToClone.getGrepFromString(), tokenPanelToClone.getGrepToString());
+			}
+			if (tokenPanelToClone.isPromptForInput()) {
+				newTokenPanel.setPromptForInput();
+			}
+			newTokenPanel.setAliases(tokenPanelToClone.getAliases());
+			newTokenPanel.setUrlEncoded(tokenPanelToClone.isUrlEncoded());
+		}
+		sessionPanelMap.put(newSessionName, sessionPanel);
+		sessionTabbedPane.addTab(newSessionName, sessionPanel);
+		setSelectedSession(newSessionName);
+		sessionListChanged = true;
 	}
 
 	public SessionPanel getSessionPanelByName(String name) {
@@ -448,14 +575,11 @@ public class ConfigurationPanel extends JPanel {
 	}
 
 	public void setSelectedSession(String sessionName) {
-		int index = getTabbedPaneIndexForTitle(sessionName);
-		if(index != -1) {
-			sessionTabbedPane.setSelectedIndex(index);
-		}
+		sessionTabbedPane.setSelectedIndex(getTabbedPaneIndexForTitle(sessionName));
 	}
-	
-	private int getTabbedPaneIndexForTitle(String title) {
-		for (int i = 0; i < sessionTabbedPane.getTabCount()-1; i++) {
+
+	public int getTabbedPaneIndexForTitle(String title) {
+		for (int i = 0; i < sessionTabbedPane.getTabCount(); i++) {
 			if (sessionTabbedPane.getTitleAt(i).equals(title)) {
 				return i;
 			}
@@ -465,27 +589,10 @@ public class ConfigurationPanel extends JPanel {
 
 	public ArrayList<String> getSessionNames() {
 		ArrayList<String> sessionNames = new ArrayList<String>();
-		for (int i = 0; i < sessionTabbedPane.getTabCount()-1; i++) {
+		for (int i = 0; i < sessionTabbedPane.getTabCount() - 1; i++) {
 			sessionNames.add(sessionTabbedPane.getTitleAt(i));
 		}
 		return sessionNames;
-	}
-
-	private void addFilter(RequestFilter filter, HintCheckBox onOffButton, String inputDialogText) {
-		config.addRequestFilter(filter);
-		filter.registerOnOffButton(onOffButton);
-		onOffButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (onOffButton.isSelected() && filter.hasStringLiterals()) {
-					String[] inputArray = getInputArray(onOffButton, inputDialogText,
-							GenericHelper.getArrayAsString(filter.getFilterStringLiterals()));
-					if (inputArray != null) {
-						filter.setFilterStringLiterals(inputArray);
-					}
-				}
-			}
-		});
 	}
 
 	public void startStopButtonPressed() {
@@ -504,7 +611,6 @@ public class ConfigurationPanel extends JPanel {
 				config.setRunning(false);
 				startStopButton.setText(ANALYZER_STOPPED_TEXT);
 			} else {
-				// Validate all defined Tokens first
 				boolean success = true;
 				for (String session : sessionPanelMap.keySet()) {
 					SessionPanel sessionPanel = sessionPanelMap.get(session);
@@ -516,18 +622,17 @@ public class ConfigurationPanel extends JPanel {
 				}
 				if (success) {
 					createSessionObjects(true);
-					// Auto Store
 					try {
 						DataStorageProvider.saveSetup();
 					} catch (Exception e) {
 						BurpExtender.callbacks.printOutput("Can not store setup. Error Message: " + e.getMessage());
 					}
-					
+
 					for (RequestFilter filter : config.getRequestFilterList()) {
 						filter.resetFilteredAmount();
 					}
 
-					if(sessionListChanged) {
+					if (sessionListChanged) {
 						mainPanel.getCenterPanel().initCenterPanel();
 					}
 					sessionTabbedPane.setModifEnabled(false);
@@ -541,13 +646,13 @@ public class ConfigurationPanel extends JPanel {
 			mainPanel.updateDividerLocation();
 		}
 	}
-	
+
 	public void createSessionObjects(boolean setRunning) {
-		if(sessionPanelMap.size() != config.getSessions().size()) {
+		if (sessionPanelMap.size() != config.getSessions().size()) {
 			sessionListChanged = true;
 		}
 		for (String session : sessionPanelMap.keySet()) {
-			if(config.getSessionByName(session) == null) {
+			if (config.getSessionByName(session) == null) {
 				sessionListChanged = true;
 				break;
 			}
@@ -555,8 +660,10 @@ public class ConfigurationPanel extends JPanel {
 		if (sessionListChanged) {
 			config.clearSessionList();
 		}
-		for (String session : sessionPanelMap.keySet()) {
+		for (int i = 0; i < sessionTabbedPane.getTabCount() - 1; i++) {
+			String session = sessionTabbedPane.getTitleAt(i);
 			SessionPanel sessionPanel = sessionPanelMap.get(session);
+			if (sessionPanel == null) continue;
 			ArrayList<Token> tokenList = new ArrayList<Token>();
 			for (TokenPanel tokenPanel : sessionPanel.getTokenPanelList()) {
 				Token token = new TokenBuilder()
@@ -584,8 +691,8 @@ public class ConfigurationPanel extends JPanel {
 			if (sessionListChanged) {
 				newSession = new Session(session, sessionPanel.getHeadersToReplaceText(), sessionPanel.isRemoveHeaders(),
 						sessionPanel.getHeadersToRemoveText(), sessionPanel.isFilterRequestsWithSameHeader(), sessionPanel.isRestrictToScope(),
-						sessionPanel.getScopeUrl(), sessionPanel.isTestCors(), tokenList, sessionPanel.getMatchAndReplaceList(), sessionPanel.getStatusPanel());
-				newSession.setAttackerUrl(sessionPanel.getAttackerUrl());
+						sessionPanel.getScopeUrl(), false, tokenList, sessionPanel.getMatchAndReplaceList(), sessionPanel.getStatusPanel());
+				newSession.setAttackerUrl(corsAttackerUrl);
 				config.addSession(newSession);
 			} else {
 				newSession = config.getSessionByName(session);
@@ -595,23 +702,12 @@ public class ConfigurationPanel extends JPanel {
 				newSession.setFilterRequestsWithSameHeader(sessionPanel.isFilterRequestsWithSameHeader());
 				newSession.setRestrictToScope(sessionPanel.isRestrictToScope());
 				newSession.setScopeUrl(sessionPanel.getScopeUrl());
-				newSession.setTestCors(sessionPanel.isTestCors());
-				newSession.setAttackerUrl(sessionPanel.getAttackerUrl());
+				newSession.setTestCors(false);
+				newSession.setAttackerUrl(corsAttackerUrl);
 				newSession.setMatchAndReplaceList(sessionPanel.getMatchAndReplaceList());
-				for (Token newToken : tokenList) {
-					for (Token oldToken : newSession.getTokens()) {
-						if (newToken.getName().equals(oldToken.getName())) {
-							if(newToken.isAutoExtract() && oldToken.isAutoExtract() ||
-								newToken.isFromToString() && oldToken.isFromToString()) {
-									newToken.setValue(oldToken.getValue());
-									newToken.setRequestResponse(oldToken.getRequestResponse());
-								}
-						}
-					}
-				}
 				newSession.setTokens(tokenList);
 			}
-			if(setRunning) {
+			if (setRunning) {
 				sessionPanel.setRunning();
 				sessionPanel.getStatusPanel().init(newSession);
 			}
@@ -622,23 +718,37 @@ public class ConfigurationPanel extends JPanel {
 		sessionPanelMap.clear();
 		sessionTabbedPane.removeAll();
 		JsonObject rootObject = JsonParser.parseString(jsonString).getAsJsonObject();
+		if (rootObject.get("testAuthAnalyzer") != null) {
+			testAuthAnalyzer.setSelected(rootObject.get("testAuthAnalyzer").getAsBoolean());
+		}
+		if (rootObject.get("testCors") != null) {
+			testCors.setSelected(rootObject.get("testCors").getAsBoolean());
+		}
 		if (rootObject.get("testConvertPostToGet") != null) {
 			testConvertPostToGet.setSelected(rootObject.get("testConvertPostToGet").getAsBoolean());
 		}
+		if (rootObject.get("corsAttackerUrl") != null) {
+			corsAttackerUrl = rootObject.get("corsAttackerUrl").getAsString();
+		}
+		if (rootObject.get("corsTechniques") != null) {
+			corsEnabledTechniqueIds.clear();
+			for (JsonElement el : rootObject.get("corsTechniques").getAsJsonArray()) {
+				corsEnabledTechniqueIds.add(el.getAsString());
+			}
+		}
+
 		// Load Sessions
-		JsonArray storedSessionsArray = rootObject.get("sessions")
-				.getAsJsonArray();
+		JsonArray storedSessionsArray = rootObject.get("sessions").getAsJsonArray();
 		for (JsonElement sessionEl : storedSessionsArray) {
 			JsonObject sessionObject = sessionEl.getAsJsonObject();
 			String sessionName = sessionObject.get("name").getAsString();
 			SessionPanel sessionPanel = new SessionPanel(sessionName, mainPanel);
 			sessionPanel.setHeadersToReplaceText(sessionObject.get("headersToReplace").getAsString());
-			sessionPanel
-					.setFilterRequestsWithSameHeader(sessionObject.get("filterRequestsWithSameHeader").getAsBoolean());
-			if(sessionObject.get("removeHeaders") != null) {
+			sessionPanel.setFilterRequestsWithSameHeader(sessionObject.get("filterRequestsWithSameHeader").getAsBoolean());
+			if (sessionObject.get("removeHeaders") != null) {
 				sessionPanel.setRemoveHeaders(sessionObject.get("removeHeaders").getAsBoolean());
 			}
-			if(sessionObject.get("headersToRemove") != null) {
+			if (sessionObject.get("headersToRemove") != null) {
 				sessionPanel.setHeadersToRemoveText(sessionObject.get("headersToRemove").getAsString());
 			}
 			if (sessionObject.get("restrictToScope") != null) {
@@ -647,19 +757,13 @@ public class ConfigurationPanel extends JPanel {
 			if (sessionObject.get("scopeUrl") != null) {
 				sessionPanel.setRestrictToScopeText(sessionObject.get("scopeUrl").getAsString());
 			}
-			if (sessionObject.get("testCors") != null) {
-				sessionPanel.setTestCors(sessionObject.get("testCors").getAsBoolean());
-			}
-			if (sessionObject.get("attackerUrl") != null) {
-				sessionPanel.setAttackerUrl(sessionObject.get("attackerUrl").getAsString());
-			}
-			if(sessionObject.get("matchAndReplaceList") != null) {
+			if (sessionObject.get("matchAndReplaceList") != null) {
 				JsonArray matchAndReplaceArray = sessionObject.get("matchAndReplaceList").getAsJsonArray();
 				ArrayList<MatchAndReplace> matchAndReplaceList = new ArrayList<MatchAndReplace>();
 				for (JsonElement matchAndReplaceElement : matchAndReplaceArray) {
 					JsonObject matchAndReplaceObject = matchAndReplaceElement.getAsJsonObject();
-					if(matchAndReplaceObject.get("match") != null && matchAndReplaceObject.get("replace") != null) {
-						matchAndReplaceList.add(new MatchAndReplace(matchAndReplaceObject.get("match").getAsString(), 
+					if (matchAndReplaceObject.get("match") != null && matchAndReplaceObject.get("replace") != null) {
+						matchAndReplaceList.add(new MatchAndReplace(matchAndReplaceObject.get("match").getAsString(),
 								matchAndReplaceObject.get("replace").getAsString()));
 					}
 				}
@@ -668,65 +772,82 @@ public class ConfigurationPanel extends JPanel {
 			JsonArray tokenArray = sessionObject.get("tokens").getAsJsonArray();
 			for (JsonElement tokenElement : tokenArray) {
 				JsonObject tokenObject = tokenElement.getAsJsonObject();
-				// create new token panel for each token
 				TokenPanel tokenPanel = sessionPanel.addToken(tokenObject.get("name").getAsString());
-				if(tokenObject.get("tokenLocationSet") != null) {
-					Type type = new TypeToken<EnumSet<TokenLocation>>(){}.getType();
-					EnumSet<TokenLocation> tokenLocationSet =  new Gson().fromJson(tokenObject.get("tokenLocationSet"), type);
-					tokenPanel.setTokenLocationSet(tokenLocationSet);
+				if (tokenObject.get("tokenLocation") != null) {
+					Type tokenLocationType = new TypeToken<EnumSet<TokenLocation>>() {}.getType();
+					tokenPanel.setTokenLocationSet(new Gson().fromJson(tokenObject.get("tokenLocation"), tokenLocationType));
 				}
-				if(tokenObject.get("autoExtractLocationSet") != null) {
-					Type type = new TypeToken<EnumSet<AutoExtractLocation>>(){}.getType();
-					EnumSet<AutoExtractLocation> autoExtractLocationSet =  new Gson().fromJson(tokenObject.get("autoExtractLocationSet"), type);
-					tokenPanel.setAutoExtractLocationSet(autoExtractLocationSet);
+				if (tokenObject.get("autoExtractLocation") != null) {
+					Type autoExtractLocationType = new TypeToken<EnumSet<AutoExtractLocation>>() {}.getType();
+					tokenPanel.setAutoExtractLocationSet(new Gson().fromJson(tokenObject.get("autoExtractLocation"), autoExtractLocationType));
 				}
-				if(tokenObject.get("fromToExtractLocationSet") != null) {
-					Type type = new TypeToken<EnumSet<FromToExtractLocation>>(){}.getType();
-					EnumSet<FromToExtractLocation> fromToExtractLocationSet =  new Gson().fromJson(tokenObject.get("fromToExtractLocationSet"), type);
-					tokenPanel.setFromToExtractLocationSet(fromToExtractLocationSet);
+				if (tokenObject.get("fromToExtractLocation") != null) {
+					Type fromToExtractLocationType = new TypeToken<EnumSet<FromToExtractLocation>>() {}.getType();
+					tokenPanel.setFromToExtractLocationSet(new Gson().fromJson(tokenObject.get("fromToExtractLocation"), fromToExtractLocationType));
 				}
-				if(tokenObject.get("addIfNotExists") != null) {
-					tokenPanel.setAddTokenIfNotExists(tokenObject.get("addIfNotExists").getAsBoolean());
+				if (tokenObject.get("remove") != null) {
+					tokenPanel.setIsRemoveToken(tokenObject.get("remove").getAsBoolean());
 				}
-				if(tokenObject.get("urlEncoded") != null) {
-					tokenPanel.setUrlEncoded(tokenObject.get("urlEncoded").getAsBoolean());
-				}
-				if(tokenObject.get("caseSensitiveTokenName") != null) {
+				if (tokenObject.get("caseSensitiveTokenName") != null) {
 					tokenPanel.setCaseSensitiveTokenName(tokenObject.get("caseSensitiveTokenName").getAsBoolean());
 				}
-				tokenPanel.setIsRemoveToken(tokenObject.get("remove").getAsBoolean());
-				tokenPanel.setTokenValueComboBox(tokenObject.get("autoExtract").getAsBoolean(),
-						tokenObject.get("staticValue").getAsBoolean(), tokenObject.get("fromToString").getAsBoolean(),
-						tokenObject.get("promptForInput").getAsBoolean());
-				if (tokenObject.get("extractName") != null) {
-					tokenPanel.setGenericTextFieldText(tokenObject.get("extractName").getAsString());
-				} else if (tokenObject.get("grepFromString") != null && tokenObject.get("grepToString") != null) {
-					tokenPanel.setGenericTextFieldText("from [" + tokenObject.get("grepFromString").getAsString()
-							+ "] to [" + tokenObject.get("grepToString").getAsString() + "]");
-				} else if (tokenObject.get("value") != null) {
-					tokenPanel.setGenericTextFieldText(tokenObject.get("value").getAsString());
+				if (tokenObject.get("addTokenIfNotExists") != null) {
+					tokenPanel.setAddTokenIfNotExists(tokenObject.get("addTokenIfNotExists").getAsBoolean());
+				}
+				if (tokenObject.get("urlEncoded") != null) {
+					tokenPanel.setUrlEncoded(tokenObject.get("urlEncoded").getAsBoolean());
+				}
+				if (tokenObject.get("aliases") != null) {
+					tokenPanel.setAliases(tokenObject.get("aliases").getAsString());
+				}
+				if (tokenObject.get("autoExtract") != null && tokenObject.get("autoExtract").getAsBoolean()) {
+					if (tokenObject.get("extractName") != null) {
+						tokenPanel.setAutoExtractFieldName(tokenObject.get("extractName").getAsString());
+					}
+				}
+				if (tokenObject.get("staticValue") != null && tokenObject.get("staticValue").getAsBoolean()) {
+					if (tokenObject.get("value") != null) {
+						tokenPanel.setStaticTokenValue(tokenObject.get("value").getAsString());
+					}
+				}
+				if (tokenObject.get("fromToString") != null && tokenObject.get("fromToString").getAsBoolean()) {
+					String grepFrom = tokenObject.get("grepFromString") != null ? tokenObject.get("grepFromString").getAsString() : "";
+					String grepTo = tokenObject.get("grepToString") != null ? tokenObject.get("grepToString").getAsString() : "";
+					tokenPanel.setFromToString(grepFrom, grepTo);
+				}
+				if (tokenObject.get("promptForInput") != null && tokenObject.get("promptForInput").getAsBoolean()) {
+					tokenPanel.setPromptForInput();
 				}
 			}
-			sessionTabbedPane.add(sessionPanel.getSessionName(), sessionPanel);
-			sessionPanelMap.put(sessionPanel.getSessionName(), sessionPanel);
-			sessionTabbedPane.setModifEnabled(true);
+			sessionPanelMap.put(sessionName, sessionPanel);
+			sessionTabbedPane.addTab(sessionName, sessionPanel);
 		}
-	
+
 		// Load Filters
-		JsonArray storedFiltersArray = JsonParser.parseString(jsonString).getAsJsonObject().get("filters")
-				.getAsJsonArray();
-		for (JsonElement filterEl : storedFiltersArray) {
+		JsonArray storedFilterArray = rootObject.get("filters").getAsJsonArray();
+		for (JsonElement filterEl : storedFilterArray) {
 			JsonObject filterObject = filterEl.getAsJsonObject();
-			RequestFilter requestFilter = config.getRequestFilterAt(filterObject.get("filterIndex").getAsInt());
-			requestFilter.setIsSelected(filterObject.get("isSelected").getAsBoolean());
-			if (filterObject.get("stringLiterals") != null) {
-				JsonArray tokenArray = filterObject.get("stringLiterals").getAsJsonArray();
-				String[] stringLiterals = new String[tokenArray.size()];
-				for (int i = 0; i < tokenArray.size(); i++) {
-					stringLiterals[i] = tokenArray.get(i).getAsString();
+			int idx = filterObject.get("filterIndex").getAsInt();
+			if (idx < config.getRequestFilterList().size()) {
+				RequestFilter requestFilter = config.getRequestFilterAt(idx);
+				requestFilter.setIsSelected(filterObject.get("isSelected").getAsBoolean());
+				if (filterObject.get("stringLiterals") != null) {
+					JsonArray tokenArray = filterObject.get("stringLiterals").getAsJsonArray();
+					String[] stringLiterals = new String[tokenArray.size()];
+					for (int i = 0; i < tokenArray.size(); i++) {
+						stringLiterals[i] = tokenArray.get(i).getAsString();
+					}
+					requestFilter.setFilterStringLiterals(stringLiterals);
 				}
-				requestFilter.setFilterStringLiterals(stringLiterals);
 			}
+		}
+		updateFilterValueLabels();
+	}
+
+	public void updateFilterValueLabels() {
+		for (Map.Entry<RequestFilter, JLabel> entry : filterValueLabelMap.entrySet()) {
+			entry.getValue().setText("Values: " + GenericHelper.getArrayAsString(entry.getKey().getFilterStringLiterals()));
+			entry.getValue().setToolTipText(entry.getValue().getText());
 		}
 	}
 
@@ -743,7 +864,7 @@ public class ConfigurationPanel extends JPanel {
 			pauseButton.setToolTipText("Currently Running");
 		}
 	}
-	
+
 	public boolean isPaused() {
 		return pauseButton.getText().equals(PLAY_TEXT);
 	}
@@ -761,30 +882,32 @@ public class ConfigurationPanel extends JPanel {
 		return inputs;
 	}
 
+	public String getCorsAttackerUrl() {
+		return (corsAttackerUrl != null && !corsAttackerUrl.trim().isEmpty()) ? corsAttackerUrl.trim() : "evil.com";
+	}
+
+	public void setCorsAttackerUrl(String url) {
+		this.corsAttackerUrl = url;
+	}
+
+	public Set<String> getCorsEnabledTechniqueIds() {
+		return new HashSet<String>(corsEnabledTechniqueIds);
+	}
+
 	public String getAttackerUrl() {
-		for (SessionPanel sp : sessionPanelMap.values()) {
-			if (sp.isTestCors() && sp.getAttackerUrl() != null && !sp.getAttackerUrl().trim().isEmpty()) {
-				return sp.getAttackerUrl().trim();
-			}
-		}
-		if (!sessionPanelMap.isEmpty()) {
-			String url = sessionPanelMap.values().iterator().next().getAttackerUrl();
-			if (url != null && !url.trim().isEmpty()) {
-				return url.trim();
-			}
-		}
-		return "evil.com";
+		return getCorsAttackerUrl();
+	}
+
+	public boolean isAuthAnalyzerActive() {
+		return CurrentConfig.getCurrentConfig().isRunning() && testAuthAnalyzer.isSelected();
 	}
 
 	public boolean isCorsTestingActive() {
-		if (CurrentConfig.getCurrentConfig().isRunning()) {
-			for (SessionPanel sp : sessionPanelMap.values()) {
-				if (sp.isTestCors()) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return CurrentConfig.getCurrentConfig().isRunning() && testCors.isSelected();
+	}
+
+	public boolean isCorsTestingSelected() {
+		return testCors.isSelected();
 	}
 
 	public boolean isConvertPostToGetActive() {
@@ -797,5 +920,13 @@ public class ConfigurationPanel extends JPanel {
 
 	public boolean isTestConvertPostToGetSelected() {
 		return testConvertPostToGet.isSelected();
+	}
+
+	public boolean doModify() {
+		if (!sessionTabbedPane.canModify()) {
+			JOptionPane.showMessageDialog(this, "Can not modify session setup while Analyzer is running");
+			return false;
+		}
+		return true;
 	}
 }

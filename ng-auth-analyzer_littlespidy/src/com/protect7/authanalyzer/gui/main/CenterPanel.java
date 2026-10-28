@@ -95,6 +95,7 @@ public class CenterPanel extends JPanel {
 	private final JCheckBox searchInResponse = new JCheckBox("Search in Response", false);
 	private final JCheckBox negativeSearch = new JCheckBox("Negative Search", false);
 	private final JButton searchButton = new JButton("Search");
+	private final JCheckBox hideFilteredPathsCheckBox = new JCheckBox("Hide Filtered Paths", true);
 	private int selectedId = -1;
 
 	protected final JPanel columnsContainer;
@@ -146,9 +147,16 @@ public class CenterPanel extends JPanel {
 		settingsButton.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("settings.png")));
 		settingsButton.addActionListener(e -> showTableSettingsDialog(tableControlPanel));
 
+		hideFilteredPathsCheckBox.addActionListener(e -> {
+			if (tableModel != null) {
+				tableModel.fireTableDataChanged();
+			}
+		});
+
 		JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
 		searchPanel.add(filterText);
 		searchPanel.add(searchButton);
+		searchPanel.add(hideFilteredPathsCheckBox);
 		searchPanel.add(filterButton);
 		searchPanel.add(settingsButton);
 		tableControlPanel.add(searchPanel, BorderLayout.CENTER);
@@ -173,8 +181,6 @@ public class CenterPanel extends JPanel {
 
 		// Multi-Column Compare Viewer
 		JPanel messageViewHeaderPanel = new JPanel(new BorderLayout());
-		JLabel compareTitleLabel = new JLabel("Compare View (Side-by-Side User Columns)");
-		compareTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
 
 		JPanel rightSwitchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
 		JLabel switchLabel = new JLabel("View:");
@@ -188,7 +194,6 @@ public class CenterPanel extends JPanel {
 		rightSwitchPanel.add(requestToggleButton);
 		rightSwitchPanel.add(responseToggleButton);
 
-		messageViewHeaderPanel.add(compareTitleLabel, BorderLayout.WEST);
 		messageViewHeaderPanel.add(rightSwitchPanel, BorderLayout.EAST);
 
 		columnsContainer = new JPanel(new GridLayout(1, 0, 8, 0)) {
@@ -700,6 +705,17 @@ public class CenterPanel extends JPanel {
 
 	public MainPanel getMainPanel() {
 		return mainPanel;
+	}
+
+	public boolean isHideFilteredPaths() {
+		return hideFilteredPathsCheckBox.isSelected();
+	}
+
+	public boolean isPathOrUrlFiltered(String host, String path) {
+		if (mainPanel != null && mainPanel.getConfigurationPanel() != null) {
+			return mainPanel.getConfigurationPanel().isPathOrUrlFiltered(host, path);
+		}
+		return false;
 	}
 
 	public static class CustomIMessageEditorController implements IMessageEditorController {

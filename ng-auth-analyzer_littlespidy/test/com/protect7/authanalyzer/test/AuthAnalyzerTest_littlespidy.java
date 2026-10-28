@@ -281,19 +281,19 @@ public class AuthAnalyzerTest_littlespidy {
 	@Test
 	public void testCorsTestVectorsGeneration() {
 		List<CorsEngine_littlespidy.TestVector> vectors = CorsEngine_littlespidy.generateTestVectors("example.com", "evil.com");
-		assertTrue(vectors.size() >= 8);
+		assertEquals(29, vectors.size());
 
-		boolean hasArbitrary = false;
-		boolean hasNull = false;
-		boolean hasTrustHttp = false;
+		boolean hasDotUnderscore = false;
+		boolean hasNullOrigin = false;
+		boolean hasTrustSubdomain = false;
 		for (CorsEngine_littlespidy.TestVector v : vectors) {
-			if (v.origin.equals("https://evil.com")) hasArbitrary = true;
-			if (v.origin.equals("null")) hasNull = true;
-			if (v.origin.equals("http://example.com")) hasTrustHttp = true;
+			if ("dot_underscore_dot".equals(v.id)) hasDotUnderscore = true;
+			if ("trusted_null".equals(v.id)) hasNullOrigin = true;
+			if ("trust_subdomain".equals(v.id)) hasTrustSubdomain = true;
 		}
-		assertTrue(hasArbitrary, "Should have arbitrary reflection vector");
-		assertTrue(hasNull, "Should have null origin vector");
-		assertTrue(hasTrustHttp, "Should have trust HTTP vector");
+		assertTrue(hasDotUnderscore, "Should have dot underscore dot vector");
+		assertTrue(hasNullOrigin, "Should have trusted null origin vector");
+		assertTrue(hasTrustSubdomain, "Should have trust subdomain vector");
 	}
 
 	@Test
@@ -301,19 +301,17 @@ public class AuthAnalyzerTest_littlespidy {
 		CorsHistoryPanel_littlespidy historyPanel = new CorsHistoryPanel_littlespidy(null);
 		assertNotNull(historyPanel.getTable().getModel());
 		assertEquals(0, historyPanel.getTableModel().getRowCount());
-		assertNotNull(historyPanel.getViewerTabbedPane());
-		assertEquals(2, historyPanel.getViewerTabbedPane().getTabCount());
-		assertEquals("Request", historyPanel.getViewerTabbedPane().getTitleAt(0));
-		assertEquals("Response", historyPanel.getViewerTabbedPane().getTitleAt(1));
+		assertNotNull(historyPanel.getViewerSplitPane());
+		assertNotNull(historyPanel.getViewerSplitPane().getLeftComponent());
+		assertNotNull(historyPanel.getViewerSplitPane().getRightComponent());
 		assertEquals("evil.com", historyPanel.getAttackerUrl());
 
 		CorsImportPanel_littlespidy importPanel = new CorsImportPanel_littlespidy(null);
 		assertNotNull(importPanel.getTable().getModel());
 		assertEquals(0, importPanel.getTableModel().getRowCount());
-		assertNotNull(importPanel.getViewerTabbedPane());
-		assertEquals(2, importPanel.getViewerTabbedPane().getTabCount());
-		assertEquals("Request", importPanel.getViewerTabbedPane().getTitleAt(0));
-		assertEquals("Response", importPanel.getViewerTabbedPane().getTitleAt(1));
+		assertNotNull(importPanel.getViewerSplitPane());
+		assertNotNull(importPanel.getViewerSplitPane().getLeftComponent());
+		assertNotNull(importPanel.getViewerSplitPane().getRightComponent());
 	}
 
 	@Test
@@ -358,15 +356,95 @@ public class AuthAnalyzerTest_littlespidy {
 
 		model.addResult(r1);
 		assertEquals(1, model.getRowCount());
+		assertEquals(9, model.getColumnCount());
 		assertEquals(1, model.getValueAt(0, 0));
 		assertEquals("GET", model.getValueAt(0, 1));
 		assertEquals("api.target.com", model.getValueAt(0, 2));
 		assertEquals(403, model.getValueAt(0, 4));
 		assertEquals(200, model.getValueAt(0, 5));
-		assertEquals("High", model.getValueAt(0, 10));
+		assertEquals("Auth Bypass Detected (POST 403 -> GET 200)", model.getValueAt(0, 8));
 
 		model.clear();
 		assertEquals(0, model.getRowCount());
+	}
+
+	@Test
+	public void testPortSwigger29CorsTechniquesGeneration() {
+		List<CorsEngine_littlespidy.TestVector> vectors =
+				CorsEngine_littlespidy.generateTestVectors("target.com", "attacker.com");
+		assertEquals(29, vectors.size());
+
+		// Verify key PortSwigger vectors are present
+		boolean hasDotUnderscore = false;
+		boolean hasSafariComma = false;
+		boolean hasSafariSemicolon = false;
+		boolean hasNullOrigin = false;
+		boolean hasIpv6 = false;
+		for (CorsEngine_littlespidy.TestVector v : vectors) {
+			if ("dot_underscore_dot".equals(v.id)) hasDotUnderscore = true;
+			if ("safari_comma".equals(v.id)) hasSafariComma = true;
+			if ("safari_semicolon".equals(v.id)) hasSafariSemicolon = true;
+			if ("trusted_null".equals(v.id)) hasNullOrigin = true;
+			if ("ipv6_loopback".equals(v.id)) hasIpv6 = true;
+		}
+		assertTrue(hasDotUnderscore);
+		assertTrue(hasSafariComma);
+		assertTrue(hasSafariSemicolon);
+		assertTrue(hasNullOrigin);
+		assertTrue(hasIpv6);
+	}
+
+	@Test
+	public void testExactPathFilter() {
+		com.protect7.authanalyzer.filter.ExactPathFilter_littlespidy filter =
+				new com.protect7.authanalyzer.filter.ExactPathFilter_littlespidy(0, "Exact match");
+		filter.registerOnOffButton(new com.protect7.authanalyzer.gui.util.HintCheckBox("Exact match"));
+		filter.setFilterStringLiterals(new String[] { "/api/v1/logout", "/healthz" });
+		filter.setIsSelected(true);
+
+		assertTrue(filter.hasStringLiterals());
+		assertTrue(filter.isSelected());
+		assertEquals(2, filter.getFilterStringLiterals().length);
+	}
+
+	@Test
+	public void testCompleteUrlFilter() {
+		com.protect7.authanalyzer.filter.CompleteUrlFilter_littlespidy filter =
+				new com.protect7.authanalyzer.filter.CompleteUrlFilter_littlespidy(0, "Complete URL match");
+		filter.registerOnOffButton(new com.protect7.authanalyzer.gui.util.HintCheckBox("Complete URL match"));
+		filter.setFilterStringLiterals(new String[] { "https://example.com/api/ping" });
+		filter.setIsSelected(true);
+
+		assertTrue(filter.hasStringLiterals());
+		assertTrue(filter.isSelected());
+		assertEquals("https://example.com/api/ping", filter.getFilterStringLiterals()[0]);
+	}
+
+	@Test
+	public void testConvertXMLHelperRoundtrip() throws Exception {
+		List<com.protect7.authanalyzer.convert.ConversionResult_littlespidy> list = new ArrayList<>();
+		com.protect7.authanalyzer.convert.ConversionResult_littlespidy res =
+				new com.protect7.authanalyzer.convert.ConversionResult_littlespidy(
+						1, "POST", "api.target.com", "/api/data",
+						200, 200, 100, 100, "application/json", "Identical Response", "High", "evidence",
+						null, null);
+		list.add(res);
+
+		File tempXml = File.createTempFile("convert_test_", ".xml");
+		tempXml.deleteOnExit();
+
+		boolean ok = com.protect7.authanalyzer.util.ConvertXMLHelper_littlespidy.exportToXML(tempXml, list);
+		assertTrue(ok);
+		assertTrue(tempXml.length() > 0);
+
+		List<com.protect7.authanalyzer.convert.ConversionResult_littlespidy> imported =
+				com.protect7.authanalyzer.util.ConvertXMLHelper_littlespidy.importFromXML(tempXml);
+		assertEquals(1, imported.size());
+		assertEquals(1, imported.get(0).getId());
+		assertEquals("POST", imported.get(0).getMethod());
+		assertEquals("api.target.com", imported.get(0).getHost());
+		assertEquals("/api/data", imported.get(0).getPath());
+		assertEquals("Identical Response", imported.get(0).getSignal());
 	}
 
 	@Test

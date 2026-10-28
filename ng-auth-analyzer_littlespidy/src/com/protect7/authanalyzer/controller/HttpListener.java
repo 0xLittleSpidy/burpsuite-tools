@@ -18,7 +18,9 @@ public class HttpListener implements IHttpListener, IProxyListener {
 
 	@Override
 	public void processHttpMessage(int toolFlag, boolean messageIsRequest, IHttpRequestResponse messageInfo) {
-		if(config.isRunning() && (!messageIsRequest || (messageIsRequest && config.isDropOriginal() && toolFlag == IBurpExtenderCallbacks.TOOL_PROXY))) {		
+		boolean authActive = BurpExtender.mainPanel == null || BurpExtender.mainPanel.getConfigurationPanel() == null ||
+				BurpExtender.mainPanel.getConfigurationPanel().isAuthAnalyzerActive();
+		if(config.isRunning() && authActive && (!messageIsRequest || (messageIsRequest && config.isDropOriginal() && toolFlag == IBurpExtenderCallbacks.TOOL_PROXY))) {		
 			if(!isFiltered(toolFlag, messageInfo)) {
 				config.performAuthAnalyzerRequest(messageInfo);
 			}

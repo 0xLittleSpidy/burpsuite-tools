@@ -94,6 +94,14 @@ public abstract class RequestFilter {
 		return "";
 	}
 
+	public HintCheckBox getOnOffButton() {
+		return onOffButton;
+	}
+
+	public boolean isSelected() {
+		return onOffButton != null && onOffButton.isSelected();
+	}
+
 	public int getFilterIndex() {
 		return filterIndex;
 	}

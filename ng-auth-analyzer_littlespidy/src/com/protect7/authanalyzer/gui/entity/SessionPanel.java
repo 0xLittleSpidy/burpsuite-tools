@@ -76,9 +76,6 @@ public class SessionPanel extends JPanel {
 		headersToReplaceText.setPlaceholder("Cookie: Session=d3c2b484-5fed-11eb-ae93-0242ac130002;"); 
 		c.gridy++;
 		sessionPanel.add(headersToReplaceText, c);
-		headersToReplaceText.setToolTipText(
-				"<html>eg:<br>Cookie: session=06q7c9fj33rhb72f6qb60f52s6<br>AnyHeader: key=value</html>");
-		headersToReplaceText.putClientProperty("html.disable", null);
 		removeHeaders = new HintCheckBox("Remove Header(s)", false, "The defined Headers will be removed");
 		c.gridwidth = 1;
 		c.insets = new Insets(5, 0, 0, 20);
@@ -92,12 +89,8 @@ public class SessionPanel extends JPanel {
 		c.gridx = 2;
 		sessionPanel.add(restrictToScope, c);
 		
-		testCors = new HintCheckBox("Test CORS", false, 
-				"<html>Analyzes Cross-Origin Resource Sharing (CORS) misconfigurations using 9 Origin test vectors.<br>" +
-				"Tests for arbitrary origin reflection, null origin trust, subdomain bypasses,<br>" +
-				"prefix/suffix matching, and Access-Control-Allow-Credentials: true handling.</html>");
-		c.gridx = 3;
-		sessionPanel.add(testCors, c);
+		testCors = new HintCheckBox("Test CORS");
+		// Note: CORS testing is managed globally at the Analyzer level.
 		
 		c.gridwidth = 4;
 		c.gridx = 0;
@@ -181,14 +174,8 @@ public class SessionPanel extends JPanel {
 			restrictToScopeLabel.setVisible(false);
 			restrictToScopeText.setVisible(false);
 		}
-		if(testCors.isSelected()) {
-			attackerUrlLabel.setVisible(true);
-			attackerUrlText.setVisible(true);
-		}
-		else {
-			attackerUrlLabel.setVisible(false);
-			attackerUrlText.setVisible(false);
-		}
+		attackerUrlLabel.setVisible(false);
+		attackerUrlText.setVisible(false);
 		revalidate();
 		mainPanel.updateDividerLocation();
 	}

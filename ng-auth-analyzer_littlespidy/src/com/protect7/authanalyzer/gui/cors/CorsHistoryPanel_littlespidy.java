@@ -68,7 +68,7 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 	protected final JButton exportDataButton = new JButton("Export Table Data");
 	protected final JPanel topActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 
-	private final JTabbedPane viewerTabbedPane = new javax.swing.JTabbedPane();
+	private final JSplitPane viewerSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 	private IMessageEditor requestEditor;
 	private IMessageEditor responseEditor;
 	private final JLabel viewerInfoLabel = new JLabel("Select a CORS test result above to view details");
@@ -160,7 +160,7 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		messageViewPanel.add(viewerInfoLabel, BorderLayout.NORTH);
 
 		initMessageEditors();
-		messageViewPanel.add(viewerTabbedPane, BorderLayout.CENTER);
+		messageViewPanel.add(viewerSplitPane, BorderLayout.CENTER);
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableContainer, messageViewPanel);
 		splitPane.setDividerSize(6);
@@ -185,6 +185,16 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 	}
 
 	private void initMessageEditors() {
+		JPanel requestPanel = new JPanel(new BorderLayout());
+		JLabel reqLabel = new JLabel("Request");
+		reqLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+		requestPanel.add(reqLabel, BorderLayout.NORTH);
+
+		JPanel responsePanel = new JPanel(new BorderLayout());
+		JLabel respLabel = new JLabel("Response");
+		respLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+		responsePanel.add(respLabel, BorderLayout.NORTH);
+
 		if (BurpExtender.callbacks != null) {
 			IMessageEditorController controller = new IMessageEditorController() {
 				@Override
@@ -205,12 +215,17 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 			};
 			requestEditor = BurpExtender.callbacks.createMessageEditor(controller, false);
 			responseEditor = BurpExtender.callbacks.createMessageEditor(controller, false);
-			viewerTabbedPane.addTab("Request", requestEditor.getComponent());
-			viewerTabbedPane.addTab("Response", responseEditor.getComponent());
+			requestPanel.add(requestEditor.getComponent(), BorderLayout.CENTER);
+			responsePanel.add(responseEditor.getComponent(), BorderLayout.CENTER);
 		} else {
-			viewerTabbedPane.addTab("Request", new JLabel("Request Viewer", JLabel.CENTER));
-			viewerTabbedPane.addTab("Response", new JLabel("Response Viewer", JLabel.CENTER));
+			requestPanel.add(new JLabel("Request Viewer", JLabel.CENTER), BorderLayout.CENTER);
+			responsePanel.add(new JLabel("Response Viewer", JLabel.CENTER), BorderLayout.CENTER);
 		}
+
+		viewerSplitPane.setLeftComponent(requestPanel);
+		viewerSplitPane.setRightComponent(responsePanel);
+		viewerSplitPane.setResizeWeight(0.5d);
+		viewerSplitPane.setDividerLocation(0.5d);
 	}
 
 	private CorsTestResult_littlespidy getSelectedResult() {
@@ -255,8 +270,9 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		if (messageInfo == null) return;
 		new Thread(() -> {
 			String attacker = getAttackerUrl();
+			Set<String> enabledIds = getEnabledTechniqueIds();
 			List<CorsTestResult_littlespidy> testResults = CorsEngine_littlespidy.executeCorsTests(
-					messageInfo, attacker, BurpExtender.callbacks, nextResultId);
+					messageInfo, attacker, enabledIds, BurpExtender.callbacks, nextResultId);
 			nextResultId += testResults.size();
 
 			Set<String> domains = new HashSet<String>();
@@ -310,13 +326,20 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 
 	public String getAttackerUrl() {
 		if (mainPanel != null && mainPanel.getConfigurationPanel() != null) {
-			return mainPanel.getConfigurationPanel().getAttackerUrl();
+			return mainPanel.getConfigurationPanel().getCorsAttackerUrl();
 		}
 		return "evil.com";
 	}
 
-	public JTabbedPane getViewerTabbedPane() {
-		return viewerTabbedPane;
+	public Set<String> getEnabledTechniqueIds() {
+		if (mainPanel != null && mainPanel.getConfigurationPanel() != null) {
+			return mainPanel.getConfigurationPanel().getCorsEnabledTechniqueIds();
+		}
+		return null;
+	}
+
+	public JSplitPane getViewerSplitPane() {
+		return viewerSplitPane;
 	}
 
 	public IMessageEditor getRequestEditor() {

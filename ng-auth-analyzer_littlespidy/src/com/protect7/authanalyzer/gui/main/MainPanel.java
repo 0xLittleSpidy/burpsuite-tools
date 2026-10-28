@@ -8,6 +8,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import burp.BurpExtender;
 import com.protect7.authanalyzer.controller.ContextMenuController;
+import com.protect7.authanalyzer.gui.convert.ConvertImportPanel_littlespidy;
 import com.protect7.authanalyzer.gui.convert.ConvertPostToGetPanel_littlespidy;
 import com.protect7.authanalyzer.gui.cors.CorsHistoryPanel_littlespidy;
 import com.protect7.authanalyzer.gui.cors.CorsImportPanel_littlespidy;
@@ -22,6 +23,7 @@ public class MainPanel extends JPanel {
 	private final CorsHistoryPanel_littlespidy corsHistoryPanel;
 	private final CorsImportPanel_littlespidy corsImportPanel;
 	private final ConvertPostToGetPanel_littlespidy convertPanel;
+	private final ConvertImportPanel_littlespidy convertImportPanel;
 	private final JTabbedPane rootTabbedPane;
 	private final PersistenceManager_littlespidy persistenceManager;
 
@@ -38,17 +40,19 @@ public class MainPanel extends JPanel {
 		corsHistoryPanel = new CorsHistoryPanel_littlespidy(this);
 		corsImportPanel = new CorsImportPanel_littlespidy(this);
 		convertPanel = new ConvertPostToGetPanel_littlespidy(this);
+		convertImportPanel = new ConvertImportPanel_littlespidy(this);
 
 		rootTabbedPane = new JTabbedPane();
 		JScrollPane scrollPane = new JScrollPane(configurationPanel);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 
-		rootTabbedPane.addTab("Configuration", scrollPane);
-		rootTabbedPane.addTab("Auth History", historyPanel);
+		rootTabbedPane.addTab("config", scrollPane);
+		rootTabbedPane.addTab("Auth Analyzer", historyPanel);
 		rootTabbedPane.addTab("Auth Import", importPanel);
-		rootTabbedPane.addTab("CORS History", corsHistoryPanel);
+		rootTabbedPane.addTab("CORS", corsHistoryPanel);
 		rootTabbedPane.addTab("CORS Import", corsImportPanel);
 		rootTabbedPane.addTab("Convert POST to GET", convertPanel);
+		rootTabbedPane.addTab("Convert Import", convertImportPanel);
 
 		add(persistenceManager.createToolbar(), BorderLayout.NORTH);
 		add(rootTabbedPane, BorderLayout.CENTER);
@@ -88,6 +92,10 @@ public class MainPanel extends JPanel {
 
 	public ConvertPostToGetPanel_littlespidy getConvertPanel() {
 		return convertPanel;
+	}
+
+	public ConvertImportPanel_littlespidy getConvertImportPanel() {
+		return convertImportPanel;
 	}
 
 	public ConfigurationPanel getConfigurationPanel() {

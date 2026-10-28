@@ -22,7 +22,7 @@ public class ConversionTableModel_littlespidy extends AbstractTableModel {
 
 	private static final String[] COLUMN_NAMES = {
 			"ID", "Method", "Host", "Path", "POST Status", "GET Status",
-			"POST Len", "GET Len", "Content-Type", "Signal", "Severity"
+			"POST Len", "GET Len", "Signal"
 	};
 
 	public synchronized void addResult(ConversionResult_littlespidy result) {
@@ -110,9 +110,7 @@ public class ConversionTableModel_littlespidy extends AbstractTableModel {
 			case 5: return res.getGetStatus();
 			case 6: return res.getPostLength();
 			case 7: return res.getGetLength();
-			case 8: return res.getContentType();
-			case 9: return res.getSignal();
-			case 10: return res.getSeverity();
+			case 8: return res.getSignal();
 			default: return null;
 		}
 	}

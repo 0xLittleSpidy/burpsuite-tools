@@ -70,6 +70,13 @@ public class CustomRowSorter extends TableRowSorter<RequestTableModel> {
 						return false;
 					}
 				}
+				if (centerPanel != null && centerPanel.isHideFilteredPaths()) {
+					String host = entry.getStringValue(2);
+					String path = entry.getStringValue(3);
+					if (centerPanel.isPathOrUrlFiltered(host, path)) {
+						return false;
+					}
+				}
 				if(filterText.getText() != null && !filterText.getText().equals("")) {
 					centerPanel.toggleSearchButtonText();
 					boolean doShow = false;
