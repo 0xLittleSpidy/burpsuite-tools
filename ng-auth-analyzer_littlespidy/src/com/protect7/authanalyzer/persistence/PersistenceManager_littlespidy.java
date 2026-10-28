@@ -31,6 +31,7 @@ import burp.IHttpRequestResponse;
 import burp.api.montoya.MontoyaApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.protect7.authanalyzer.cors.CorsTestResult_littlespidy;
 import com.protect7.authanalyzer.entities.AnalyzerRequestResponse;
 import com.protect7.authanalyzer.entities.CustomHttpRequestResponse_littlespidy;
 import com.protect7.authanalyzer.entities.CustomHttpService_littlespidy;
@@ -224,6 +225,33 @@ public class PersistenceManager_littlespidy {
 					}
 				}
 
+				// CORS results
+				if (mainPanel.getCorsHistoryPanel() != null && mainPanel.getCorsHistoryPanel().getTableModel() != null) {
+					for (CorsTestResult_littlespidy cr : mainPanel.getCorsHistoryPanel().getTableModel().getAllResults()) {
+						SessionStateDTO_littlespidy.CorsResultEntryDTO crDto = new SessionStateDTO_littlespidy.CorsResultEntryDTO();
+						crDto.id = cr.getId();
+						crDto.method = cr.getMethod();
+						crDto.host = cr.getHost();
+						crDto.path = cr.getPath();
+						crDto.testedOrigin = cr.getTestedOrigin();
+						crDto.testTypeDescription = cr.getTestTypeDescription();
+						crDto.reflectedAcao = cr.getReflectedAcao();
+						crDto.acacPresent = cr.isAcacPresent();
+						crDto.statusCode = cr.getStatusCode();
+						crDto.length = cr.getLength();
+						crDto.severity = cr.getSeverity() != null ? cr.getSeverity().getName() : "";
+						if (cr.getRequestResponse() != null) {
+							if (cr.getRequestResponse().getRequest() != null) {
+								crDto.requestBase64 = Base64.getEncoder().encodeToString(cr.getRequestResponse().getRequest());
+							}
+							if (cr.getRequestResponse().getResponse() != null) {
+								crDto.responseBase64 = Base64.getEncoder().encodeToString(cr.getRequestResponse().getResponse());
+							}
+						}
+						dto.corsResults.add(crDto);
+					}
+				}
+
 				String json = gson.toJson(dto);
 				File tmpFile = new File(activeSessionFile.getAbsolutePath() + ".tmp");
 				Files.writeString(tmpFile.toPath(), json, StandardCharsets.UTF_8);
@@ -353,6 +381,7 @@ public class PersistenceManager_littlespidy {
 				if (dto.configSetupJson != null && !dto.configSetupJson.isBlank()) {
 					try {
 						mainPanel.getConfigurationPanel().loadSetup(dto.configSetupJson);
+						mainPanel.getConfigurationPanel().createSessionObjects(false);
 					} catch (Exception ex) {
 						if (callbacks != null) callbacks.printError("Error loading config setup: " + ex.getMessage());
 					}
@@ -373,6 +402,7 @@ public class PersistenceManager_littlespidy {
 							}
 						}
 					}
+					mainPanel.getHistoryPanel().updateTableFilterInfo();
 				}
 
 				// 3. Restore imported history
@@ -419,6 +449,34 @@ public class PersistenceManager_littlespidy {
 						restoredResults.add(res);
 					}
 					mainPanel.getConvertPanel().getConversionTableModel().addResults(restoredResults);
+				}
+
+				// 5. Restore CORS results
+				if (mainPanel.getCorsHistoryPanel() != null && dto.corsResults != null) {
+					mainPanel.getCorsHistoryPanel().clearTable();
+					List<CorsTestResult_littlespidy> restoredResults = new ArrayList<CorsTestResult_littlespidy>();
+					for (SessionStateDTO_littlespidy.CorsResultEntryDTO crDto : dto.corsResults) {
+						byte[] req = decodeBase64Safe(crDto.requestBase64);
+						byte[] resp = decodeBase64Safe(crDto.responseBase64);
+						CustomHttpService_littlespidy service = new CustomHttpService_littlespidy(crDto.host, 443, "https");
+						CustomHttpRequestResponse_littlespidy reqResp = new CustomHttpRequestResponse_littlespidy(req, resp, service);
+
+						CorsTestResult_littlespidy.CorsSeverity sev = CorsTestResult_littlespidy.CorsSeverity.LOW;
+						if (crDto.severity != null) {
+							for (CorsTestResult_littlespidy.CorsSeverity s : CorsTestResult_littlespidy.CorsSeverity.values()) {
+								if (s.getName().equalsIgnoreCase(crDto.severity)) {
+									sev = s;
+									break;
+								}
+							}
+						}
+						CorsTestResult_littlespidy res = new CorsTestResult_littlespidy(
+								crDto.id, crDto.method, crDto.host, crDto.path,
+								crDto.testedOrigin, crDto.testTypeDescription, crDto.reflectedAcao,
+								crDto.acacPresent, crDto.statusCode, crDto.length, sev, reqResp);
+						restoredResults.add(res);
+					}
+					mainPanel.getCorsHistoryPanel().getTableModel().addResults(restoredResults);
 				}
 
 				this.activeSessionFile = file;
@@ -490,6 +548,9 @@ public class PersistenceManager_littlespidy {
 		}
 		if (mainPanel.getConvertPanel() != null) {
 			mainPanel.getConvertPanel().clearLiveConversions();
+		}
+		if (mainPanel.getCorsHistoryPanel() != null) {
+			mainPanel.getCorsHistoryPanel().clearTable();
 		}
 		updateStatusLabel();
 		JOptionPane.showMessageDialog(mainPanel, "Session offboarded. Workspace restored to clean state.");

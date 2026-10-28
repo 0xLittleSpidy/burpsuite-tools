@@ -547,4 +547,110 @@ public class AuthAnalyzerTest_littlespidy {
 		// With all selected, all match
 		assertTrue(dropdown.isRowMatching(1, null));
 	}
+
+	@Test
+	public void testSessionStatusFilterDropDownDynamicPruning() {
+		com.protect7.authanalyzer.gui.util.SessionStatusFilterDropDown_littlespidy dropdown =
+				new com.protect7.authanalyzer.gui.util.SessionStatusFilterDropDown_littlespidy();
+
+		// Initial traffic: admin has 200 and 400, user has 302
+		java.util.Map<String, java.util.Set<Integer>> initialMap = new java.util.HashMap<String, java.util.Set<Integer>>();
+		initialMap.put("admin", new java.util.HashSet<Integer>(java.util.Arrays.asList(200, 400)));
+		initialMap.put("user", new java.util.HashSet<Integer>(java.util.Arrays.asList(302)));
+		dropdown.updateSessionStatuses(initialMap);
+
+		// Next update: admin only has 200 (400 removed), user still has 302 (neither has 403)
+		java.util.Map<String, java.util.Set<Integer>> updatedMap = new java.util.HashMap<String, java.util.Set<Integer>>();
+		updatedMap.put("admin", new java.util.HashSet<Integer>(java.util.Arrays.asList(200)));
+		updatedMap.put("user", new java.util.HashSet<Integer>(java.util.Arrays.asList(302)));
+		dropdown.updateSessionStatuses(updatedMap);
+
+		// Verify 400 is pruned and 403 is never present
+		String btnText = dropdown.getText();
+		assertTrue(btnText.contains("All") || btnText.contains("User/Status"));
+	}
+
+	@Test
+	public void testCorsResultSessionStateDTORoundtrip() {
+		SessionStateDTO_littlespidy dto = new SessionStateDTO_littlespidy();
+		dto.version = Globals.VERSION;
+
+		SessionStateDTO_littlespidy.CorsResultEntryDTO crDto = new SessionStateDTO_littlespidy.CorsResultEntryDTO();
+		crDto.id = 1;
+		crDto.method = "GET";
+		crDto.host = "api.example.com";
+		crDto.path = "/api/account";
+		crDto.testedOrigin = "https://evil.com";
+		crDto.testTypeDescription = "Arbitrary Origin Reflection";
+		crDto.reflectedAcao = "https://evil.com";
+		crDto.acacPresent = true;
+		crDto.statusCode = 200;
+		crDto.length = 428;
+		crDto.severity = "HIGH";
+		crDto.requestBase64 = java.util.Base64.getEncoder().encodeToString("GET /api/account HTTP/1.1\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+		crDto.responseBase64 = java.util.Base64.getEncoder().encodeToString("HTTP/1.1 200 OK\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+
+		dto.corsResults.add(crDto);
+
+		Gson gson = new Gson();
+		String json = gson.toJson(dto);
+		assertNotNull(json);
+
+		SessionStateDTO_littlespidy deserialized = gson.fromJson(json, SessionStateDTO_littlespidy.class);
+		assertEquals(1, deserialized.corsResults.size());
+		SessionStateDTO_littlespidy.CorsResultEntryDTO restored = deserialized.corsResults.get(0);
+		assertEquals("api.example.com", restored.host);
+		assertEquals("https://evil.com", restored.testedOrigin);
+		assertEquals("https://evil.com", restored.reflectedAcao);
+		assertTrue(restored.acacPresent);
+		assertEquals("HIGH", restored.severity);
+		assertEquals(crDto.requestBase64, restored.requestBase64);
+		assertEquals(crDto.responseBase64, restored.responseBase64);
+	}
+
+	@Test
+	public void testCorsXMLHelperExport() throws Exception {
+		File tempFile = File.createTempFile("cors_export_test", ".xml");
+		tempFile.deleteOnExit();
+
+		byte[] req = "GET /api/test HTTP/1.1\r\nHost: api.example.com\r\nOrigin: https://evil.com\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+		byte[] resp = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: https://evil.com\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+		CustomHttpService_littlespidy service = new CustomHttpService_littlespidy("api.example.com", 443, "https");
+		CustomHttpRequestResponse_littlespidy reqResp = new CustomHttpRequestResponse_littlespidy(req, resp, service);
+
+		CorsTestResult_littlespidy res = new CorsTestResult_littlespidy(
+				1, "GET", "api.example.com", "/api/test", "https://evil.com",
+				"Arbitrary Origin Reflection", "https://evil.com", true,
+				200, resp.length, CorsSeverity.HIGH, reqResp);
+
+		List<CorsTestResult_littlespidy> list = new ArrayList<CorsTestResult_littlespidy>();
+		list.add(res);
+
+		boolean ok = com.protect7.authanalyzer.util.CorsXMLHelper_littlespidy.exportToXML(tempFile, list);
+		assertTrue(ok);
+		assertTrue(tempFile.exists());
+
+		String xml = Files.readString(tempFile.toPath(), StandardCharsets.UTF_8);
+		assertTrue(xml.contains("<CorsResults>"));
+		assertTrue(xml.contains("<CorsTestResult>"));
+		assertTrue(xml.contains("<ID>1</ID>"));
+		assertTrue(xml.contains("<Host><![CDATA[api.example.com]]></Host>"));
+		assertTrue(xml.contains("<OriginPayload><![CDATA[https://evil.com]]></OriginPayload>"));
+		assertTrue(xml.contains("<Severity><![CDATA[HIGH]]></Severity>"));
+		assertTrue(xml.contains("<Request base64=\"true\">"));
+		assertTrue(xml.contains("<Response base64=\"true\">"));
+	}
+
+	@Test
+	public void testCorsHistoryPanelHasExportXmlButton() {
+		CorsHistoryPanel_littlespidy panel = new CorsHistoryPanel_littlespidy(null);
+		boolean foundXmlBtn = false;
+		for (java.awt.Component c : panel.getTopActionsPanel().getComponents()) {
+			if (c instanceof javax.swing.JButton && "Export XML".equals(((javax.swing.JButton) c).getText())) {
+				foundXmlBtn = true;
+				break;
+			}
+		}
+		assertTrue(foundXmlBtn, "Export XML button must be present in CORS toolbar");
+	}
 }

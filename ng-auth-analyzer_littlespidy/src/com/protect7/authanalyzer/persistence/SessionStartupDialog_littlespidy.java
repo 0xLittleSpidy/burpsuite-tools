@@ -40,7 +40,7 @@ public class SessionStartupDialog_littlespidy {
 	}
 
 	public static StartupResult promptUser(MontoyaApi api, IBurpExtenderCallbacks callbacks, Component parent) {
-		if (GraphicsEnvironment.isHeadless() || Boolean.getBoolean("java.awt.headless")) {
+		if (GraphicsEnvironment.isHeadless() || Boolean.getBoolean("java.awt.headless") || parent == null) {
 			return new StartupResult(StartupAction.TEMPORARY, null);
 		}
 

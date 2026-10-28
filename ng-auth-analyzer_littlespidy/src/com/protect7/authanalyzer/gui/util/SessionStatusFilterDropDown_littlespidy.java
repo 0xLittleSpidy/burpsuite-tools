@@ -80,39 +80,91 @@ public class SessionStatusFilterDropDown_littlespidy extends JButton {
 
 	public synchronized void updateSessionStatuses(Map<String, Set<Integer>> newMap) {
 		if (newMap == null || newMap.isEmpty()) {
+			clear();
 			return;
 		}
-		boolean changed = false;
+
+		// Calculate all valid target keys
+		Set<String> targetKeys = new HashSet<String>();
 		for (Map.Entry<String, Set<Integer>> entry : newMap.entrySet()) {
 			String sessionName = entry.getKey();
 			if (sessionName == null || sessionName.trim().isEmpty() || "original".equalsIgnoreCase(sessionName.trim())) {
 				continue;
 			}
-			Set<Integer> observedSet = sessionObservedMap.computeIfAbsent(sessionName, k -> new HashSet<Integer>());
+			for (Integer code : entry.getValue()) {
+				if (code != null && code > 0) {
+					targetKeys.add(buildKey(sessionName, code));
+				}
+			}
+		}
+
+		if (targetKeys.isEmpty()) {
+			clear();
+			return;
+		}
+
+		boolean changed = false;
+
+		// 1. Remove obsolete keys that are no longer present in targetKeys
+		List<String> keysToRemove = new ArrayList<String>();
+		for (String existingKey : statusCheckBoxMap.keySet()) {
+			if (!targetKeys.contains(existingKey)) {
+				keysToRemove.add(existingKey);
+			}
+		}
+		for (String key : keysToRemove) {
+			JCheckBox cb = statusCheckBoxMap.remove(key);
+			if (cb != null) {
+				itemsPanel.remove(cb);
+				changed = true;
+			}
+		}
+
+		// 2. Add new keys
+		for (Map.Entry<String, Set<Integer>> entry : newMap.entrySet()) {
+			String sessionName = entry.getKey();
+			if (sessionName == null || sessionName.trim().isEmpty() || "original".equalsIgnoreCase(sessionName.trim())) {
+				continue;
+			}
 			for (Integer code : entry.getValue()) {
 				if (code == null || code <= 0) {
 					continue;
 				}
-				if (!observedSet.contains(code)) {
-					observedSet.add(code);
-					String key = buildKey(sessionName, code);
-					if (!statusCheckBoxMap.containsKey(key)) {
-						JCheckBox cb = new JCheckBox(key, selectAllCheckBox.isSelected());
-						cb.addActionListener(e -> {
-							if (updatingProgrammatically) {
-								return;
-							}
-							syncSelectAllState();
-							updateButtonLabel();
-							notifyListeners();
-						});
-						statusCheckBoxMap.put(key, cb);
-						itemsPanel.add(cb);
-						changed = true;
-					}
+				String key = buildKey(sessionName, code);
+				if (!statusCheckBoxMap.containsKey(key)) {
+					JCheckBox cb = new JCheckBox(key, selectAllCheckBox.isSelected());
+					cb.addActionListener(e -> {
+						if (updatingProgrammatically) {
+							return;
+						}
+						syncSelectAllState();
+						updateButtonLabel();
+						notifyListeners();
+					});
+					statusCheckBoxMap.put(key, cb);
+					itemsPanel.add(cb);
+					changed = true;
 				}
 			}
 		}
+
+		// 3. Rebuild sessionObservedMap to exactly mirror newMap
+		sessionObservedMap.clear();
+		for (Map.Entry<String, Set<Integer>> entry : newMap.entrySet()) {
+			String sName = entry.getKey();
+			if (sName != null && !sName.trim().isEmpty() && !"original".equalsIgnoreCase(sName.trim())) {
+				Set<Integer> validCodes = new HashSet<Integer>();
+				for (Integer c : entry.getValue()) {
+					if (c != null && c > 0) {
+						validCodes.add(c);
+					}
+				}
+				if (!validCodes.isEmpty()) {
+					sessionObservedMap.put(sName, validCodes);
+				}
+			}
+		}
+
 		if (changed) {
 			itemsPanel.revalidate();
 			itemsPanel.repaint();

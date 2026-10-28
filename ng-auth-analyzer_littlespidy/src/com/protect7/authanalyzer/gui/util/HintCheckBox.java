@@ -25,7 +25,7 @@ public class HintCheckBox extends JPanel {
 	
 	private static final long serialVersionUID = -1192483759892519805L;
 	private final JCheckBox checkBox;
-	private final JDialog dialog = new JDialog();
+	private final JDialog dialog = GraphicsEnvironment.isHeadless() ? null : new JDialog();
 	private final JLabel textLabel = new JLabel();
 	
 	public HintCheckBox(String text) {
@@ -52,40 +52,44 @@ public class HintCheckBox extends JPanel {
 		ImageIcon hintIcon = new ImageIcon(HintCheckBox.class.getClassLoader().getResource("info_icon.png"));
 		JLabel iconLabel = new JLabel(hintIcon);
 		add(iconLabel);
-		dialog.setUndecorated(true); 
-		setHint(hint);
-		textLabel.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.LIGHT_GRAY, 1, true), new EmptyBorder(3, 3, 3, 3)));
-		dialog.add(textLabel);
-		iconLabel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				dialog.repaint();
-				dialog.pack();
-				int xPos = (int)iconLabel.getLocationOnScreen().getX() + iconLabel.getWidth();
-				int yPos = (int)iconLabel.getLocationOnScreen().getY() + iconLabel.getHeight();
-				dialog.setLocation(new Point(xPos, yPos));
-				dialog.setVisible(true);
-				// Correct dialog location if it is shown out of screen
-				GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-				int leftDisplayBorder = Stream.
-						of(devices).
-						map(GraphicsDevice::getDefaultConfiguration).
-						map(GraphicsConfiguration::getBounds).
-						mapToInt(bounds -> bounds.x + bounds.width).
-						max().
-						orElse(0);
-				int rightPoint = (int)dialog.getLocationOnScreen().getX()+dialog.getWidth();
-				while (rightPoint > leftDisplayBorder) {
-					rightPoint = rightPoint - 10;
-					xPos = xPos - 10;
+		if (dialog != null) {
+			dialog.setUndecorated(true); 
+			setHint(hint);
+			textLabel.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.LIGHT_GRAY, 1, true), new EmptyBorder(3, 3, 3, 3)));
+			dialog.add(textLabel);
+			iconLabel.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					dialog.repaint();
+					dialog.pack();
+					int xPos = (int)iconLabel.getLocationOnScreen().getX() + iconLabel.getWidth();
+					int yPos = (int)iconLabel.getLocationOnScreen().getY() + iconLabel.getHeight();
+					dialog.setLocation(new Point(xPos, yPos));
+					dialog.setVisible(true);
+					// Correct dialog location if it is shown out of screen
+					GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+					int leftDisplayBorder = Stream.
+							of(devices).
+							map(GraphicsDevice::getDefaultConfiguration).
+							map(GraphicsConfiguration::getBounds).
+							mapToInt(bounds -> bounds.x + bounds.width).
+							max().
+							orElse(0);
+					int rightPoint = (int)dialog.getLocationOnScreen().getX()+dialog.getWidth();
+					while (rightPoint > leftDisplayBorder) {
+						rightPoint = rightPoint - 10;
+						xPos = xPos - 10;
+					}
+					dialog.setLocation(new Point(xPos, yPos));
 				}
-				dialog.setLocation(new Point(xPos, yPos));
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				dialog.setVisible(false);
-			}
-		});
+				@Override
+				public void mouseExited(MouseEvent e) {
+					dialog.setVisible(false);
+				}
+			});
+		} else {
+			setHint(hint);
+		}
 	}
 	
 	public void setHint(String hint) {

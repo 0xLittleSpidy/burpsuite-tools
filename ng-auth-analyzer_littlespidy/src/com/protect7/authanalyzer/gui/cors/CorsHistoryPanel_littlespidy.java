@@ -68,6 +68,7 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 	protected final JButton testSelectedButton = new JButton("Test Selected");
 	protected final JButton clearTableButton = new JButton("Clear Table");
 	protected final JButton exportDataButton = new JButton("Export Table Data");
+	protected final JButton exportXmlButton = new JButton("Export XML");
 	protected final JPanel topActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 
 	private final JSplitPane viewerSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -186,10 +187,12 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		testSelectedButton.addActionListener(e -> testSelectedRow());
 		clearTableButton.addActionListener(e -> clearTable());
 		exportDataButton.addActionListener(e -> exportData());
+		exportXmlButton.addActionListener(e -> exportXmlData());
 
 		topActionsPanel.add(testSelectedButton);
 		topActionsPanel.add(clearTableButton);
 		topActionsPanel.add(exportDataButton);
+		topActionsPanel.add(exportXmlButton);
 	}
 
 	private void initMessageEditors() {
@@ -336,6 +339,26 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		}
 	}
 
+	public void exportXmlData() {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle("Export CORS Results (XML)");
+		chooser.setFileFilter(new FileNameExtensionFilter("XML Files (*.xml)", "xml"));
+		if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+			File f = chooser.getSelectedFile();
+			if (!f.getName().toLowerCase(Locale.ROOT).endsWith(".xml")) {
+				f = new File(f.getAbsolutePath() + ".xml");
+			}
+			boolean ok = com.protect7.authanalyzer.util.CorsXMLHelper_littlespidy.exportToXML(f, tableModel.getAllResults());
+			if (ok) {
+				JOptionPane.showMessageDialog(this, "Exported " + tableModel.getRowCount() + " rows to " + f.getName(),
+						"Export Successful", JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				JOptionPane.showMessageDialog(this, "Failed to export CORS results to XML.",
+						"Export Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
 	public String getAttackerUrl() {
 		if (mainPanel != null && mainPanel.getConfigurationPanel() != null) {
 			return mainPanel.getConfigurationPanel().getCorsAttackerUrl();
@@ -380,5 +403,13 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 
 	public AcaoFilterDropDown_littlespidy getAcaoFilterDropDown() {
 		return acaoFilterDropDown;
+	}
+
+	public JPanel getTopActionsPanel() {
+		return topActionsPanel;
+	}
+
+	public JButton getExportXmlButton() {
+		return exportXmlButton;
 	}
 }

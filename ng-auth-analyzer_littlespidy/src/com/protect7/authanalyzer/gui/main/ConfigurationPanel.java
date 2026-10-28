@@ -177,19 +177,29 @@ public class ConfigurationPanel extends JPanel {
 
 		sessionTabbedPane.addTabOrderChangedListener(this::onSessionTabOrderChanged);
 
-		// Redesigned Filters Panel
+		// Redesigned Filters Panel (Full-Width Bottom Panel)
 		filterPanel = new JPanel();
-		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
+		filterPanel.setLayout(new GridLayout(3, 3, 10, 8));
 
 		HintCheckBox onlyInScopeButton = new HintCheckBox("Only In Scope");
 		onlyInScopeButton.setSelected(true);
 		addFilter(new InScopeFilter(filterPanel.getComponentCount(), "Only In Scope requests are analyzed"), onlyInScopeButton);
-		filterPanel.add(onlyInScopeButton);
+		JPanel inScopeCard = new JPanel(new BorderLayout(4, 2));
+		inScopeCard.setBorder(BorderFactory.createEmptyBorder(2, 2, 4, 2));
+		inScopeCard.add(onlyInScopeButton, BorderLayout.NORTH);
+		JLabel inScopeDesc = new JLabel("<html><span style='color:gray; font-size:10px;'>Analyze only traffic within target scope.</span></html>");
+		inScopeCard.add(inScopeDesc, BorderLayout.CENTER);
+		filterPanel.add(inScopeCard);
 
 		HintCheckBox onlyProxyButton = new HintCheckBox("Only Proxy Traffic");
 		onlyProxyButton.setSelected(true);
 		addFilter(new OnlyProxyFilter(filterPanel.getComponentCount(), "Analyze only proxy traffic. Unselect to analyze repeater and proxy traffic"), onlyProxyButton);
-		filterPanel.add(onlyProxyButton);
+		JPanel proxyCard = new JPanel(new BorderLayout(4, 2));
+		proxyCard.setBorder(BorderFactory.createEmptyBorder(2, 2, 4, 2));
+		proxyCard.add(onlyProxyButton, BorderLayout.NORTH);
+		JLabel proxyDesc = new JLabel("<html><span style='color:gray; font-size:10px;'>Analyze only traffic passing through Burp Proxy.</span></html>");
+		proxyCard.add(proxyDesc, BorderLayout.CENTER);
+		filterPanel.add(proxyCard);
 
 		HintCheckBox fileTypeFilterButton = new HintCheckBox("Exclude Filetypes");
 		fileTypeFilterButton.setSelected(true);
@@ -297,18 +307,36 @@ public class ConfigurationPanel extends JPanel {
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
-		c.anchor = GridBagConstraints.PAGE_START;
-		c.insets = new Insets(10, 15, 20, 15);
-
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.NONE;
+		c.weightx = 0.0;
+		c.weighty = 0.0;
+		c.insets = new Insets(10, 15, 10, 10);
 		add(startStopButtonPanel, c);
+
 		c.gridx = 1;
-		c.insets = new Insets(5, 15, 20, 15);
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.weighty = 0.55;
+		c.insets = new Insets(5, 10, 10, 15);
 		sessionTabbedPane.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Sessions (Drag tabs to reorder columns)"), new EmptyBorder(3, 3, 3, 3)));
 		add(sessionTabbedPane, c);
-		c.insets = new Insets(5, 15, 20, 20);
-		c.gridx = 2;
-		filterPanel.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Filters"), new EmptyBorder(3, 3, 3, 3)));
-		add(filterPanel, c);
+
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.weighty = 0.45;
+		c.insets = new Insets(5, 15, 15, 15);
+		JScrollPane filterScrollPane = new JScrollPane(filterPanel,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		filterScrollPane.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Filters"), new EmptyBorder(3, 3, 3, 3)));
+		add(filterScrollPane, c);
 	}
 
 	private void addFilter(RequestFilter filter, HintCheckBox onOffButton) {
@@ -753,12 +781,18 @@ public class ConfigurationPanel extends JPanel {
 		JsonObject rootObject = JsonParser.parseString(jsonString).getAsJsonObject();
 		if (rootObject.get("testAuthAnalyzer") != null) {
 			testAuthAnalyzer.setSelected(rootObject.get("testAuthAnalyzer").getAsBoolean());
+		} else {
+			testAuthAnalyzer.setSelected(true);
 		}
 		if (rootObject.get("testCors") != null) {
 			testCors.setSelected(rootObject.get("testCors").getAsBoolean());
+		} else {
+			testCors.setSelected(true);
 		}
 		if (rootObject.get("testConvertPostToGet") != null) {
 			testConvertPostToGet.setSelected(rootObject.get("testConvertPostToGet").getAsBoolean());
+		} else {
+			testConvertPostToGet.setSelected(true);
 		}
 		if (rootObject.get("corsAttackerUrl") != null) {
 			corsAttackerUrl = rootObject.get("corsAttackerUrl").getAsString();
@@ -875,6 +909,7 @@ public class ConfigurationPanel extends JPanel {
 			}
 		}
 		updateFilterValueLabels();
+		createSessionObjects(false);
 	}
 
 	public void updateFilterValueLabels() {

@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ng-auth-analyzer_littlespidy - Burp Suite Extension UI Mockup v3</title>
+  <style>
+    :root {
+      --bg-color: #2b2b2b;
+      --card-bg: #3c3f41;
+      --panel-border: #4a4d50;
+      --text-color: #bbbbbb;
+      --text-bright: #ffffff;
+      --text-muted: #888888;
+      --accent-color: #ff6633;
+      --accent-hover: #e05522;
+      --input-bg: #2d2d2d;
+      --input-border: #555555;
+      --table-header-bg: #313335;
+      --table-row-even: #3c3f41;
+      --table-row-odd: #353739;
+      --table-row-hover: #484b4d;
+      --table-row-selected: #214283;
+      --border-radius: 4px;
+      --tag-bg: #4e5254;
+      --badge-danger: #c7254e;
+      --badge-warning: #f89406;
+      --badge-info: #3a87ad;
+      --badge-success: #468847;
+    }
+
+    body.light-theme {
+      --bg-color: #f5f5f5;
+      --card-bg: #ffffff;
+      --panel-border: #d0d0d0;
+      --text-color: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --accent-color: #e25522;
+      --accent-hover: #c44315;
+      --input-bg: #ffffff;
+      --input-border: #cccccc;
+      --table-header-bg: #e8e8e8;
+      --table-row-even: #ffffff;
+      --table-row-odd: #f9f9f9;
+      --table-row-hover: #eeeeee;
+      --table-row-selected: #b5d5ff;
+      --tag-bg: #e0e0e0;
+      --badge-danger: #d9534f;
+      --badge-warning: #f0ad4e;
+      --badge-info: #5bc0de;
+      --badge-success: #5cb85c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-size: 13px;
+      line-height: 1.4;
+      user-select: none;
+    }
+
+    /* Top Suite Bar */
+    .suite-header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 6px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .suite-title {
+      font-weight: 700;
+      color: var(--accent-color);
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    .suite-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons & Inputs */
+    button, .btn {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
+      padding: 4px 10px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    button:hover, .btn:hover {
+      background-color: var(--input-border);
+      color: var(--text-bright);
+    }
+    button.btn-primary {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    button.btn-primary:hover {
+      background-color: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+    button.btn-success {
+      background-color: #2e7d32;
+      border-color: #2e7d32;
+      color: #ffffff;
+    }
+    button.btn-success:hover {
+      background-color: #1b5e20;
+    }
+
+    /* Session Management Bar */
+    .session-bar {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 6px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .session-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .session-status {
+      font-family: monospace;
+      font-size: 12px;
+      color: #5cb85c;
+      font-weight: 600;
+    }
+
+    /* Main Tab Navigation */
+    .nav-tabs {
+      display: flex;
+      background-color: var(--bg-color);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 4px 10px 0 10px;
+      gap: 4px;
+    }
+    .nav-tab {
+      padding: 6px 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .nav-tab:hover {
+      color: var(--text-bright);
+    }
+    .nav-tab.active {
+      background-color: var(--card-bg);
+      border-color: var(--panel-border);
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--card-bg);
+      margin-bottom: -1px;
+    }
+
+    /* Tab Content Areas */
+    .tab-content {
+      display: none;
+      padding: 12px;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* CONFIG TAB STYLES */
+    .config-top-half {
+      display: flex;
+      gap: 12px;
+      min-height: 280px;
+    }
+    .config-controls-box {
+      width: 280px;
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .config-sessions-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    .config-bottom-half {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .filter-card {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--border-radius);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .filter-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .filter-items-list {
+      max-height: 70px;
+      overflow-y: auto;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-muted);
+      border-top: 1px solid var(--panel-border);
+      padding-top: 4px;
+    }
+
+    /* TOOLBAR */
+    .toolbar-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 6px 10px;
+      gap: 8px;
+    }
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* TABLE */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      overflow: auto;
+      flex: 1;
+      max-height: 240px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+    th {
+      background: var(--table-header-bg);
+      color: var(--text-bright);
+      padding: 6px 10px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--panel-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    td {
+      padding: 5px 10px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+    tr:nth-child(even) { background-color: var(--table-row-even); }
+    tr:nth-child(odd) { background-color: var(--table-row-odd); }
+    tr:hover { background-color: var(--table-row-hover); cursor: pointer; }
+    tr.selected { background-color: var(--table-row-selected) !important; color: #ffffff; }
+
+    /* VIEWERS */
+    .viewers-container {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      min-height: 220px;
+    }
+    .viewer-panel {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      display: flex;
+      flex-direction: column;
+    }
+    .viewer-header {
+      background: var(--table-header-bg);
+      padding: 4px 10px;
+      font-weight: 600;
+      font-size: 11px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+    }
+    .viewer-body {
+      flex: 1;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      white-space: pre;
+      overflow: auto;
+      background: var(--input-bg);
+      color: var(--text-color);
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .badge-high { background-color: var(--badge-danger); }
+    .badge-medium { background-color: var(--badge-warning); }
+    .badge-low { background-color: var(--badge-info); }
+    .badge-same { background-color: #d9534f; }
+    .badge-diff { background-color: #5cb85c; }
+    .badge-similar { background-color: #f0ad4e; }
+
+    /* DROPDOWN MENU */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: var(--card-bg);
+      min-width: 220px;
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+      z-index: 100;
+      padding: 6px;
+    }
+    .dropdown.show .dropdown-content {
+      display: block;
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background-color: var(--table-row-hover);
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      width: 700px;
+      max-width: 90vw;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      padding: 10px 14px;
+      background: var(--table-header-bg);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
+    .modal-body {
+      padding: 14px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      background: var(--input-bg);
+    }
+    .modal-footer {
+      padding: 8px 14px;
+      border-top: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Suite Header -->
+  <div class="suite-header">
+    <div class="suite-title">ng-auth-analyzer_littlespidy [Burp Suite Extension v1.1.14]</div>
+    <div class="suite-actions">
+      <button onclick="toggleTheme()">Toggle Dark/Light Theme</button>
+      <span style="font-size: 11px; color: var(--text-muted);">Montoya API Standard | ASCII Only</span>
+    </div>
+  </div>
+
+  <!-- Session Management Bar -->
+  <div class="session-bar">
+    <div class="session-actions">
+      <button class="btn" onclick="alert('Creating new session and binding to file...')">New Session</button>
+      <button class="btn" onclick="alert('Opening existing session JSON...')">Open Session</button>
+      <button class="btn btn-primary" onclick="alert('Saved state to active session file!')">Save Session</button>
+      <button class="btn" onclick="alert('Save session as new file...')">Save As...</button>
+      <button class="btn" onclick="alert('Session offboarded. Clean state restored.')">Offboard Session</button>
+    </div>
+    <div class="session-status" id="sessionStatusIndicator">
+      Session: project_audit_2026.json (/home/user/audit)
+    </div>
+  </div>
+
+  <!-- Suite Tabs -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('configTab', this)">Configuration</div>
+    <div class="nav-tab" onclick="switchTab('authTab', this)">Auth Analyzer</div>
+    <div class="nav-tab" onclick="switchTab('corsTab', this)">CORS</div>
+    <div class="nav-tab" onclick="switchTab('convertTab', this)">Convert POST to GET</div>
+  </div>
+
+  <!-- 1. CONFIGURATION TAB -->
+  <div id="configTab" class="tab-content active">
+    <!-- Top Half: Controls and Sessions side-by-side -->
+    <div class="config-top-half">
+      <!-- Left: Analyzer Controls and Module Toggles -->
+      <div class="config-controls-box">
+        <div class="section-title">Analyzer Controls</div>
+        <button class="btn btn-primary" style="padding: 8px;">Start Analyzer</button>
+        <button class="btn" disabled>Drop Original</button>
+
+        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
+            <input type="checkbox" id="chkAuthAnalyzer" checked> Auth Analyzer (Checked by default)
+          </label>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
+              <input type="checkbox" id="chkCors" checked> CORS (Checked by default)
+            </label>
+            <button class="btn" style="font-size: 11px;" onclick="alert('CORS Techniques Configuration Dialog')">Techniques</button>
+          </div>
+          <label style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
+            <input type="checkbox" id="chkConvert" checked> Convert POST to GET (Checked by default)
+          </label>
+        </div>
+
+        <div style="margin-top: auto; display: flex; gap: 6px;">
+          <button class="btn" style="flex: 1;" onclick="alert('Setup exported')">Export Setup</button>
+          <button class="btn" style="flex: 1;" onclick="alert('Setup imported')">Import Setup</button>
+          <button class="btn" onclick="alert('Global Settings')">Settings</button>
+        </div>
+      </div>
+
+      <!-- Right: Sessions Panel -->
+      <div class="config-sessions-box">
+        <div class="section-title">Session Profiles (user1, user2)</div>
+        <div style="display: flex; gap: 6px; border-bottom: 1px solid var(--panel-border); padding-bottom: 6px; margin-bottom: 8px;">
+          <button class="btn btn-primary" style="font-size: 11px;">user1 [Active]</button>
+          <button class="btn" style="font-size: 11px;">user2 [Active]</button>
+          <button class="btn" style="font-size: 11px;">+ New Session</button>
+        </div>
+        <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div><strong>Headers to Replace:</strong></div>
+          <textarea style="width: 100%; height: 50px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); padding: 4px; font-family: monospace;">Cookie: session=USER1_TOKEN_ABC123&#10;Authorization: Bearer USER1_JWT</textarea>
+          <label><input type="checkbox" checked> Filter requests having same header</label>
+          <label><input type="checkbox"> Restrict analysis to scope</label>
+          <div style="color: var(--text-muted); font-size: 11px;">Token Extraction rules: Extract CSRF from JSON body response and update Authorization header dynamically.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Half: Filters Panel occupying full width -->
+    <div class="config-bottom-half">
+      <div class="section-title">Traffic Filters (Full-Width Bottom Panel)</div>
+      <div class="filters-grid">
+        <div class="filter-card">
+          <div class="filter-card-header">
+            <label><input type="checkbox" checked> File Type Filter</label>
+            <span style="font-size: 11px; color: var(--text-muted);">(12 items)</span>
+          </div>
+          <div class="filter-items-list">.js, .css, .png, .jpg, .svg, .woff, .ico...</div>
+          <button class="btn" style="font-size: 11px; margin-top: auto;">Edit Types</button>
+        </div>
+
+        <div class="filter-card">
+          <div class="filter-card-header">
+            <label><input type="checkbox" checked> Method Filter</label>
+            <span style="font-size: 11px; color: var(--text-muted);">(1 item)</span>
+          </div>
+          <div class="filter-items-list">OPTIONS</div>
+          <button class="btn" style="font-size: 11px; margin-top: auto;">Edit Methods</button>
+        </div>
+
+        <div class="filter-card">
+          <div class="filter-card-header">
+            <label><input type="checkbox"> Path Filter</label>
+            <span style="font-size: 11px; color: var(--text-muted);">(0 items)</span>
+          </div>
+          <div class="filter-items-list">No path patterns configured</div>
+          <button class="btn" style="font-size: 11px; margin-top: auto;">Edit Paths</button>
+        </div>
+
+        <div class="filter-card">
+          <div class="filter-card-header">
+            <label><input type="checkbox"> Complete URL Filter</label>
+            <span style="font-size: 11px; color: var(--text-muted);">(0 items)</span>
+          </div>
+          <div class="filter-items-list">No URL patterns configured</div>
+          <button class="btn" style="font-size: 11px; margin-top: auto;">Edit URLs</button>
+        </div>
+
+        <div class="filter-card">
+          <div class="filter-card-header">
+            <label><input type="checkbox" checked> Only In-Scope</label>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted);">Inspect only URLs within Burp target scope.</div>
+        </div>
+
+        <div class="filter-card">
+          <div class="filter-card-header">
+            <label><input type="checkbox" checked> Only Proxy Traffic</label>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted);">Process requests passing through Burp Proxy listener.</div>
+        </div>
+
+        <div class="filter-card">
+          <div class="filter-card-header">
+            <label><input type="checkbox"> Query Filter</label>
+            <span style="font-size: 11px; color: var(--text-muted);">(0 items)</span>
+          </div>
+          <div class="filter-items-list">Filter query parameters</div>
+          <button class="btn" style="font-size: 11px; margin-top: auto;">Edit Queries</button>
+        </div>
+
+        <div class="filter-card" style="background: transparent; border-style: dashed; justify-content: center; align-items: center; color: var(--text-muted);">
+          <span>Ample room for additional filters</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. AUTH ANALYZER TAB -->
+  <div id="authTab" class="tab-content">
+    <div class="toolbar-actions">
+      <div class="toolbar-left">
+        <input type="text" placeholder="Filter requests..." style="background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); padding: 4px 8px; border-radius: 4px; font-size: 12px; width: 180px;">
+        <button class="btn">Method: All</button>
+        <button class="btn">Domain: All</button>
+
+        <!-- Dynamic User/Status Dropdown -->
+        <div class="dropdown" id="userStatusDropdown">
+          <button class="btn btn-primary" onclick="toggleDropdown('userStatusDropdown')">User/Status: (3/3 active) [Dynamic]</button>
+          <div class="dropdown-content">
+            <div class="dropdown-item" style="border-bottom: 1px solid var(--panel-border); font-weight: bold;">
+              <input type="checkbox" checked id="statusSelectAll" onchange="toggleSelectAllStatuses(this)">
+              <label for="statusSelectAll">Select All</label>
+            </div>
+            <!-- Only active statuses present in columns (200, 302 for user1; 302 for user2; NO 403!) -->
+            <div class="dropdown-item">
+              <input type="checkbox" checked class="status-cb" id="st1" onchange="updateStatusCount()">
+              <label for="st1">user1 - 200</label>
+            </div>
+            <div class="dropdown-item">
+              <input type="checkbox" checked class="status-cb" id="st2" onchange="updateStatusCount()">
+              <label for="st2">user1 - 302</label>
+            </div>
+            <div class="dropdown-item">
+              <input type="checkbox" checked class="status-cb" id="st3" onchange="updateStatusCount()">
+              <label for="st3">user2 - 302</label>
+            </div>
+            <div style="padding: 4px 6px; font-size: 10px; color: var(--text-muted); border-top: 1px solid var(--panel-border);">
+              Pruned obsolete status codes (e.g. 403) automatically!
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <span style="font-size: 12px; color: var(--text-muted);">Showing 3 of 3 Requests</span>
+        <button class="btn" onclick="alert('Export Table Data Dialog')">Export Table Data</button>
+        <button class="btn" onclick="alert('Table Cleared')">Clear</button>
+      </div>
+    </div>
+
+    <!-- Live Auth Analyzer Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Method</th>
+            <th>Host</th>
+            <th>Path</th>
+            <th>Original Status</th>
+            <th>user1 Status</th>
+            <th>user2 Status</th>
+            <th>Original Length</th>
+            <th>user1 Length</th>
+            <th>user2 Length</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected" onclick="selectAuthRow(this, 1)">
+            <td>1</td>
+            <td>GET</td>
+            <td>api.example.com</td>
+            <td>/v1/profile</td>
+            <td>200</td>
+            <td><span class="badge badge-same">200 (SAME)</span></td>
+            <td><span class="badge badge-diff">302 (DIFF)</span></td>
+            <td>1420</td>
+            <td>1420</td>
+            <td>380</td>
+          </tr>
+          <tr onclick="selectAuthRow(this, 2)">
+            <td>2</td>
+            <td>POST</td>
+            <td>api.example.com</td>
+            <td>/v1/profile/update</td>
+            <td>200</td>
+            <td><span class="badge badge-same">200 (SAME)</span></td>
+            <td><span class="badge badge-diff">302 (DIFF)</span></td>
+            <td>512</td>
+            <td>512</td>
+            <td>128</td>
+          </tr>
+          <tr onclick="selectAuthRow(this, 3)">
+            <td>3</td>
+            <td>GET</td>
+            <td>api.example.com</td>
+            <td>/v1/admin/dashboard</td>
+            <td>200</td>
+            <td><span class="badge badge-diff">302 (DIFF)</span></td>
+            <td><span class="badge badge-diff">302 (DIFF)</span></td>
+            <td>8490</td>
+            <td>410</td>
+            <td>410</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Multi-Column Side-by-Side Viewers (Restored via Session Management) -->
+    <div class="viewers-container">
+      <div class="viewer-panel">
+        <div class="viewer-header">
+          <span>Original [200 | 1420 B]</span>
+          <span>Request / Response</span>
+        </div>
+        <div class="viewer-body">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 1420
+
+{
+  "user_id": 1001,
+  "role": "admin",
+  "email": "admin@example.com"
+}</div>
+      </div>
+
+      <div class="viewer-panel">
+        <div class="viewer-header">
+          <span>user1 [SAME | 200 | 1420 B | Diff: 0]</span>
+          <span>Replaced Authorization Header</span>
+        </div>
+        <div class="viewer-body">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 1420
+
+{
+  "user_id": 1001,
+  "role": "admin",
+  "email": "admin@example.com"
+}</div>
+      </div>
+
+      <div class="viewer-panel">
+        <div class="viewer-header">
+          <span>user2 [DIFFERENT | 302 | 380 B | Diff: 1040]</span>
+          <span>Replaced Authorization Header</span>
+        </div>
+        <div class="viewer-body">HTTP/1.1 302 Found
+Location: /login
+Content-Length: 380
+
+Redirecting to authentication portal...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CORS TAB -->
+  <div id="corsTab" class="tab-content">
+    <div class="toolbar-actions">
+      <div class="toolbar-left">
+        <button class="btn">Method: All</button>
+        <button class="btn">Origin: All</button>
+        <button class="btn">Severity: All</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn" onclick="alert('Exporting CSV...')">Export Table Data</button>
+        <!-- NEW Export XML Button -->
+        <button class="btn btn-primary" onclick="showCorsXmlPreview()">Export XML</button>
+        <button class="btn" onclick="alert('CORS table cleared')">Clear</button>
+      </div>
+    </div>
+
+    <!-- CORS Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Method</th>
+            <th>Host</th>
+            <th>Path</th>
+            <th>Origin Tested</th>
+            <th>Test Technique</th>
+            <th>Status</th>
+            <th>ACAO Header</th>
+            <th>ACAC</th>
+            <th>Severity</th>
+            <th>Evidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected" onclick="selectCorsRow(this, 1)">
+            <td>1</td>
+            <td>GET</td>
+            <td>api.example.com</td>
+            <td>/api/user/info</td>
+            <td>https://evil.com</td>
+            <td>Arbitrary Origin Reflection</td>
+            <td>200</td>
+            <td>https://evil.com</td>
+            <td>true</td>
+            <td><span class="badge badge-high">HIGH</span></td>
+            <td>Arbitrary origin reflected with credentials enabled</td>
+          </tr>
+          <tr onclick="selectCorsRow(this, 2)">
+            <td>2</td>
+            <td>GET</td>
+            <td>api.example.com</td>
+            <td>/api/public/stats</td>
+            <td>null</td>
+            <td>Null Origin Trust</td>
+            <td>200</td>
+            <td>null</td>
+            <td>false</td>
+            <td><span class="badge badge-low">LOW</span></td>
+            <td>Null origin accepted for unauthenticated endpoint</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CORS Request / Response Viewers (Restored via Session Management) -->
+    <div class="viewers-container">
+      <div class="viewer-panel">
+        <div class="viewer-header">
+          <span>CORS Request (with Origin: https://evil.com)</span>
+          <span>CustomHttpRequestResponse_littlespidy</span>
+        </div>
+        <div class="viewer-body">GET /api/user/info HTTP/1.1
+Host: api.example.com
+Origin: https://evil.com
+Cookie: session=USER_SESSION_VALID
+Accept: application/json</div>
+      </div>
+
+      <div class="viewer-panel">
+        <div class="viewer-header">
+          <span>CORS Response (Vulnerable ACAO: https://evil.com)</span>
+          <span>Stored & Restored</span>
+        </div>
+        <div class="viewer-body">HTTP/1.1 200 OK
+Date: Wed, 28 Oct 2026 12:45:00 GMT
+Access-Control-Allow-Origin: https://evil.com
+Access-Control-Allow-Credentials: true
+Content-Type: application/json
+Content-Length: 428
+
+{
+  "account_id": "ACC-9921",
+  "secret_api_key": "live_sk_991827401928374",
+  "email": "victim@example.com"
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. CONVERT POST TO GET TAB -->
+  <div id="convertTab" class="tab-content">
+    <div class="toolbar-actions">
+      <div class="toolbar-left">
+        <span style="font-weight: 600;">Convert POST to GET Live Monitor</span>
+      </div>
+      <div class="toolbar-right">
+        <!-- Note: Export XML removed as requested! Only Export TSV remains. -->
+        <button class="btn" onclick="alert('Exporting TSV...')">Export TSV</button>
+        <button class="btn" onclick="alert('Live conversions cleared')">Clear</button>
+      </div>
+    </div>
+
+    <!-- Convert Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Method</th>
+            <th>Host</th>
+            <th>Path</th>
+            <th>POST Status</th>
+            <th>GET Status</th>
+            <th>POST Len</th>
+            <th>GET Len</th>
+            <th>Signal</th>
+            <th>Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected">
+            <td>1</td>
+            <td>POST</td>
+            <td>app.example.com</td>
+            <td>/api/user/settings</td>
+            <td>200</td>
+            <td>200</td>
+            <td>412</td>
+            <td>412</td>
+            <td>Identical Response</td>
+            <td><span class="badge badge-medium">MEDIUM</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="viewers-container">
+      <div class="viewer-panel">
+        <div class="viewer-header">Original POST Request / Response</div>
+        <div class="viewer-body">POST /api/user/settings HTTP/1.1
+Host: app.example.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 26
+
+theme=dark&newsletter=true</div>
+      </div>
+      <div class="viewer-panel">
+        <div class="viewer-header">Converted GET Request / Response</div>
+        <div class="viewer-body">GET /api/user/settings?theme=dark&newsletter=true HTTP/1.1
+Host: app.example.com
+
+HTTP/1.1 200 OK
+{"status":"saved"}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for CORS Export XML Format Preview -->
+  <div id="corsXmlModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>CORS XML Export Preview (Comprehensive Schema)</span>
+        <button class="btn" onclick="closeCorsXmlPreview()">Close</button>
+      </div>
+      <div class="modal-body">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;CorsResults&gt;
+  &lt;CorsTestResult&gt;
+    &lt;ID&gt;1&lt;/ID&gt;
+    &lt;Method&gt;&lt;![CDATA[GET]]&gt;&lt;/Method&gt;
+    &lt;Host&gt;&lt;![CDATA[api.example.com]]&gt;&lt;/Host&gt;
+    &lt;Path&gt;&lt;![CDATA[/api/user/info]]&gt;&lt;/Path&gt;
+    &lt;OriginPayload&gt;&lt;![CDATA[https://evil.com]]&gt;&lt;/OriginPayload&gt;
+    &lt;TestType&gt;&lt;![CDATA[Arbitrary Origin Reflection]]&gt;&lt;/TestType&gt;
+    &lt;StatusCode&gt;200&lt;/StatusCode&gt;
+    &lt;ACAO&gt;&lt;![CDATA[https://evil.com]]&gt;&lt;/ACAO&gt;
+    &lt;ACAC&gt;&lt;![CDATA[true]]&gt;&lt;/ACAC&gt;
+    &lt;Severity&gt;&lt;![CDATA[HIGH]]&gt;&lt;/Severity&gt;
+    &lt;Evidence&gt;&lt;![CDATA[Arbitrary origin reflected with credentials enabled]]&gt;&lt;/Evidence&gt;
+    &lt;Request base64="true"&gt;&lt;![CDATA[R0VUIC9hcGkvdXNlci9pbmZvIEhUVFAvMS4xDQpIb3N0OiBhcGkuZXhhbXBsZS5jb20NCk9yaWdpbjogaHR0cHM6Ly9ldmlsLmNvbQ0KQ29va2llOiBzZXNzaW9uPVVTRVJfU0VTU0lPTl9WQUxJRA0KQWNjZXB0OiBhcHBsaWNhdGlvbi9qc29uDQoNCg==]]&gt;&lt;/Request&gt;
+    &lt;Response base64="true"&gt;&lt;![CDATA[SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBXZWQsIDI4IE9jdCAyMDI2IDEyOjQ1OjAwIEdNVA0KQWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiBodHRwczovL2V2aWwuY29tDQpBY2Nlc3MtQ29udHJvbC1BbGxvdy1DcmVkZW50aWFsczogdHJ1ZQ0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uDQoNCg==]]&gt;&lt;/Response&gt;
+  &lt;/CorsTestResult&gt;
+&lt;/CorsResults&gt;</div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="alert('File saved successfully!'); closeCorsXmlPreview();">Save XML to Disk</button>
+        <button class="btn" onclick="closeCorsXmlPreview()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(nt => nt.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    // Dropdown Toggle
+    function toggleDropdown(id) {
+      document.getElementById(id).classList.toggle('show');
+    }
+
+    window.onclick = function(event) {
+      if (!event.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+      }
+    };
+
+    function toggleSelectAllStatuses(master) {
+      document.querySelectorAll('.status-cb').forEach(cb => cb.checked = master.checked);
+      updateStatusCount();
+    }
+
+    function updateStatusCount() {
+      const cbs = document.querySelectorAll('.status-cb');
+      let checked = 0;
+      cbs.forEach(cb => { if(cb.checked) checked++; });
+      document.getElementById('statusSelectAll').checked = (checked === cbs.length);
+      const btn = document.querySelector('#userStatusDropdown button');
+      btn.textContent = 'User/Status: (' + checked + '/' + cbs.length + ' active) [Dynamic]';
+    }
+
+    // Modal
+    function showCorsXmlPreview() {
+      document.getElementById('corsXmlModal').classList.add('active');
+    }
+    function closeCorsXmlPreview() {
+      document.getElementById('corsXmlModal').classList.remove('active');
+    }
+
+    function selectAuthRow(row, id) {
+      document.querySelectorAll('#authTab tbody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+    }
+
+    function selectCorsRow(row, id) {
+      document.querySelectorAll('#corsTab tbody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+    }
+  </script>
+</body>
+</html>

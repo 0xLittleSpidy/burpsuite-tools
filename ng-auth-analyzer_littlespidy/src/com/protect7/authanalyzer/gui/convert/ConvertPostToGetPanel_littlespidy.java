@@ -60,7 +60,6 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 	private final JButton liveSearchButton = new JButton("Search");
 	private final JButton liveClearButton = new JButton("Clear Results");
 	private final JButton liveExportButton = new JButton("Export TSV");
-	private final JButton liveExportXmlButton = new JButton("Export XML");
 
 	private final JLabel liveViewerInfoLabel = new JLabel("Select a conversion result above to view details");
 	private final JToggleButton requestToggleButton = new JToggleButton("Request", true);
@@ -101,10 +100,8 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 		liveClearButton.addActionListener(e -> clearLiveConversions());
 		liveExportButton.addActionListener(e -> exportLiveConversions());
-		liveExportXmlButton.addActionListener(e -> exportXmlConversions());
 		rightActions.add(liveClearButton);
 		rightActions.add(liveExportButton);
-		rightActions.add(liveExportXmlButton);
 		topToolbar.add(rightActions, BorderLayout.EAST);
 
 		add(topToolbar, BorderLayout.NORTH);
