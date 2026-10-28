@@ -215,12 +215,6 @@ public class CorsEngine_littlespidy {
 		}
 
 		int currentId = startId;
-		// Evaluate original request
-		if (messageInfo.getResponse() != null) {
-			CorsTestResult_littlespidy origResult = evaluateResponse(currentId++, method, host, path,
-					"None (Original)", "Original Request / Response", messageInfo, callbacks);
-			results.add(origResult);
-		}
 
 		List<TestVector> vectors = generateTestVectors(host, attackerUrl);
 		for (TestVector vector : vectors) {

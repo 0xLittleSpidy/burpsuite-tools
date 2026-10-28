@@ -37,12 +37,25 @@ public class CustomRowSorter extends TableRowSorter<RequestTableModel> {
 			JCheckBox searchInPath, JCheckBox searchInRequest, JCheckBox searchInResponse, JCheckBox negativeSearch,
 			MethodFilterDropDown_littlespidy methodFilterDropDown,
 			DomainFilterDropDown_littlespidy domainFilterDropDown) {
+		this(centerPanel, tableModel, showOnlyMarked, showDuplicates, showBypassed, showPotentialBypassed, showNotBypassed, showNA, filterText,
+				searchInPath, searchInRequest, searchInResponse, negativeSearch, methodFilterDropDown, domainFilterDropDown, null);
+	}
+
+	public CustomRowSorter(CenterPanel centerPanel, RequestTableModel tableModel, JCheckBox showOnlyMarked, JCheckBox showDuplicates, JCheckBox showBypassed, 
+			JCheckBox showPotentialBypassed, JCheckBox showNotBypassed, JCheckBox showNA, PlaceholderTextField filterText,
+			JCheckBox searchInPath, JCheckBox searchInRequest, JCheckBox searchInResponse, JCheckBox negativeSearch,
+			MethodFilterDropDown_littlespidy methodFilterDropDown,
+			DomainFilterDropDown_littlespidy domainFilterDropDown,
+			SessionStatusFilterDropDown_littlespidy sessionStatusFilterDropDown) {
 		super(tableModel);
 		if (methodFilterDropDown != null) {
 			methodFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
 		}
 		if (domainFilterDropDown != null) {
 			domainFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
+		}
+		if (sessionStatusFilterDropDown != null) {
+			sessionStatusFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
 		}
 		showOnlyMarked.addActionListener(e -> tableModel.fireTableDataChanged());
 		showDuplicates.addActionListener(e -> tableModel.fireTableDataChanged());
@@ -69,6 +82,17 @@ public class CustomRowSorter extends TableRowSorter<RequestTableModel> {
 					if (!domainFilterDropDown.isDomainSelected(host)) {
 						return false;
 					}
+				}
+				if (sessionStatusFilterDropDown != null) {
+					try {
+						int id = Integer.parseInt(entry.getStringValue(0));
+						List<Session> sessions = (tableModel instanceof ImportRequestTableModel_littlespidy) ?
+								((ImportRequestTableModel_littlespidy) tableModel).getSessions() :
+								CurrentConfig.getCurrentConfig().getSessions();
+						if (!sessionStatusFilterDropDown.isRowMatching(id, sessions)) {
+							return false;
+						}
+					} catch (Exception ignored) {}
 				}
 				if (centerPanel != null && centerPanel.isHideFilteredPaths()) {
 					String host = entry.getStringValue(2);

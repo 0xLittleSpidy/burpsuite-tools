@@ -21,9 +21,6 @@ import burp.IResponseInfo;
 public class GenericHelper {
 	
 	public static void repeatRequests(IHttpRequestResponse[] messages, ConfigurationPanel configurationPanel) {
-		if(configurationPanel.isPaused()) {
-			configurationPanel.pauseButtonPressed();
-		}
 		if(!CurrentConfig.getCurrentConfig().isRunning()) {
 			configurationPanel.startStopButtonPressed();
 		}

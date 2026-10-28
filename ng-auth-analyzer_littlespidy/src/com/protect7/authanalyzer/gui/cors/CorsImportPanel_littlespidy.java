@@ -53,19 +53,25 @@ public class CorsImportPanel_littlespidy extends CorsHistoryPanel_littlespidy {
 		try {
 			List<CorsTestResult_littlespidy> imported = new ArrayList<CorsTestResult_littlespidy>();
 			Set<String> domains = new HashSet<String>();
+			Set<String> acaoValues = new HashSet<String>();
 
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 				String line;
 				boolean first = true;
+				boolean hasMethodCol = false;
 				while ((line = reader.readLine()) != null) {
 					if (first) {
 						first = false;
-						if (line.toLowerCase().contains("id,method")) {
+						String lower = line.toLowerCase();
+						if (lower.contains("id,") || lower.contains("host")) {
+							if (lower.contains("method")) {
+								hasMethodCol = true;
+							}
 							continue;
 						}
 					}
 					String[] parts = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-					if (parts.length >= 10) {
+					if (hasMethodCol && parts.length >= 10) {
 						int id = Integer.parseInt(parts[0].trim().replace("\"", ""));
 						String method = parts[1].trim().replace("\"", "");
 						String host = parts[2].trim().replace("\"", "");
@@ -91,12 +97,36 @@ public class CorsImportPanel_littlespidy extends CorsHistoryPanel_littlespidy {
 								testVector, reflectedAcao, acac, status, length, severity, msg);
 						imported.add(r);
 						domains.add(host);
+						acaoValues.add(reflectedAcao);
+					} else if (parts.length >= 9) {
+						int id = Integer.parseInt(parts[0].trim().replace("\"", ""));
+						String method = "GET";
+						String host = parts[1].trim().replace("\"", "");
+						String path = parts[2].trim().replace("\"", "");
+						String testVector = parts[3].trim().replace("\"", "");
+						String testedOrigin = parts[4].trim().replace("\"", "");
+						String reflectedAcao = parts[5].trim().replace("\"", "");
+						boolean acac = Boolean.parseBoolean(parts[6].trim().replace("\"", ""));
+						int status = Integer.parseInt(parts[7].trim().replace("\"", ""));
+						int length = Integer.parseInt(parts[8].trim().replace("\"", ""));
+						CorsSeverity severity = CorsSeverity.SECURE;
+						CustomHttpService_littlespidy svc = new CustomHttpService_littlespidy(host, 443, "https");
+						CustomHttpRequestResponse_littlespidy msg = new CustomHttpRequestResponse_littlespidy(
+								(method + " " + path + " HTTP/1.1\r\nHost: " + host + "\r\nOrigin: " + testedOrigin + "\r\n\r\n").getBytes(StandardCharsets.UTF_8),
+								("HTTP/1.1 " + status + " OK\r\nAccess-Control-Allow-Origin: " + reflectedAcao + "\r\n\r\n").getBytes(StandardCharsets.UTF_8),
+								svc);
+						CorsTestResult_littlespidy r = new CorsTestResult_littlespidy(id, method, host, path, testedOrigin,
+								testVector, reflectedAcao, acac, status, length, severity, msg);
+						imported.add(r);
+						domains.add(host);
+						acaoValues.add(reflectedAcao);
 					}
 				}
 			}
 
 			tableModel.addResults(imported);
 			domainFilterDropDown.updateDomains(domains);
+			acaoFilterDropDown.updateAcaoValues(acaoValues);
 
 			JOptionPane.showMessageDialog(this, "Successfully imported " + imported.size() + " CORS records.",
 					"Import Successful", JOptionPane.INFORMATION_MESSAGE);

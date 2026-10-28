@@ -356,13 +356,15 @@ public class AuthAnalyzerTest_littlespidy {
 
 		model.addResult(r1);
 		assertEquals(1, model.getRowCount());
-		assertEquals(9, model.getColumnCount());
+		assertEquals(8, model.getColumnCount());
 		assertEquals(1, model.getValueAt(0, 0));
-		assertEquals("GET", model.getValueAt(0, 1));
-		assertEquals("api.target.com", model.getValueAt(0, 2));
-		assertEquals(403, model.getValueAt(0, 4));
-		assertEquals(200, model.getValueAt(0, 5));
-		assertEquals("Auth Bypass Detected (POST 403 -> GET 200)", model.getValueAt(0, 8));
+		assertEquals("api.target.com", model.getValueAt(0, 1));
+		assertEquals("/api/role?role=admin", model.getValueAt(0, 2));
+		assertEquals(403, model.getValueAt(0, 3));
+		assertEquals(200, model.getValueAt(0, 4));
+		assertEquals(45, model.getValueAt(0, 5));
+		assertEquals(150, model.getValueAt(0, 6));
+		assertEquals("Auth Bypass Detected (POST 403 -> GET 200)", model.getValueAt(0, 7));
 
 		model.clear();
 		assertEquals(0, model.getRowCount());
@@ -487,5 +489,62 @@ public class AuthAnalyzerTest_littlespidy {
 		assertEquals(403, deserialized.convertResults.get(0).postStatus);
 		assertEquals(200, deserialized.convertResults.get(0).getStatus);
 		assertEquals("High", deserialized.convertResults.get(0).severity);
+	}
+
+	@Test
+	public void testCorsTableModelOperations() {
+		com.protect7.authanalyzer.cors.CorsTableModel_littlespidy model =
+				new com.protect7.authanalyzer.cors.CorsTableModel_littlespidy();
+		assertEquals(0, model.getRowCount());
+		assertEquals(9, model.getColumnCount());
+
+		com.protect7.authanalyzer.cors.CorsTestResult_littlespidy res =
+				new com.protect7.authanalyzer.cors.CorsTestResult_littlespidy(
+						1, "POST", "example.com", "/api/data", "https://evil.com",
+						"Arbitrary Origin Reflection", "https://evil.com", true,
+						200, 1024, com.protect7.authanalyzer.cors.CorsTestResult_littlespidy.CorsSeverity.HIGH, null);
+
+		model.addResult(res);
+		assertEquals(1, model.getRowCount());
+		assertEquals(1, model.getValueAt(0, 0));
+		assertEquals("example.com", model.getValueAt(0, 1));
+		assertEquals("/api/data", model.getValueAt(0, 2));
+		assertEquals("Arbitrary Origin Reflection", model.getValueAt(0, 3));
+		assertEquals("https://evil.com", model.getValueAt(0, 4));
+		assertEquals("https://evil.com", model.getValueAt(0, 5));
+		assertEquals(true, model.getValueAt(0, 6));
+		assertEquals(200, model.getValueAt(0, 7));
+		assertEquals(1024, model.getValueAt(0, 8));
+
+		model.clear();
+		assertEquals(0, model.getRowCount());
+	}
+
+	@Test
+	public void testAcaoFilterDropDown() {
+		com.protect7.authanalyzer.gui.util.AcaoFilterDropDown_littlespidy dropdown =
+				new com.protect7.authanalyzer.gui.util.AcaoFilterDropDown_littlespidy();
+		assertTrue(dropdown.isAcaoSelected("*"));
+		assertTrue(dropdown.isAcaoSelected(""));
+
+		dropdown.updateAcaoValues(java.util.Arrays.asList("https://evil.com", "null", ""));
+		assertTrue(dropdown.isAcaoSelected("https://evil.com"));
+		assertTrue(dropdown.isAcaoSelected("null"));
+		assertTrue(dropdown.isAcaoSelected(null));
+		assertTrue(dropdown.isAcaoSelected(""));
+	}
+
+	@Test
+	public void testSessionStatusFilterDropDown() {
+		com.protect7.authanalyzer.gui.util.SessionStatusFilterDropDown_littlespidy dropdown =
+				new com.protect7.authanalyzer.gui.util.SessionStatusFilterDropDown_littlespidy();
+
+		java.util.Map<String, java.util.Set<Integer>> map = new java.util.HashMap<String, java.util.Set<Integer>>();
+		map.put("admin", new java.util.HashSet<Integer>(java.util.Arrays.asList(200, 400)));
+		map.put("user", new java.util.HashSet<Integer>(java.util.Arrays.asList(201, 403)));
+		dropdown.updateSessionStatuses(map);
+
+		// With all selected, all match
+		assertTrue(dropdown.isRowMatching(1, null));
 	}
 }

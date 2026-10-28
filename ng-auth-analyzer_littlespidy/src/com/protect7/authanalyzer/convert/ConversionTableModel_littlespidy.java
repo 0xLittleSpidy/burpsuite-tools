@@ -21,7 +21,7 @@ public class ConversionTableModel_littlespidy extends AbstractTableModel {
 	private final List<ConversionResult_littlespidy> results = new ArrayList<ConversionResult_littlespidy>();
 
 	private static final String[] COLUMN_NAMES = {
-			"ID", "Method", "Host", "Path", "POST Status", "GET Status",
+			"ID", "Host", "Path", "POST Status", "GET Status",
 			"POST Len", "GET Len", "Signal"
 	};
 
@@ -87,10 +87,10 @@ public class ConversionTableModel_littlespidy extends AbstractTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
 			case 0:
+			case 3:
 			case 4:
 			case 5:
 			case 6:
-			case 7:
 				return Integer.class;
 			default:
 				return String.class;
@@ -103,14 +103,13 @@ public class ConversionTableModel_littlespidy extends AbstractTableModel {
 		if (res == null) return null;
 		switch (columnIndex) {
 			case 0: return res.getId();
-			case 1: return res.getMethod();
-			case 2: return res.getHost();
-			case 3: return res.getPath();
-			case 4: return res.getPostStatus();
-			case 5: return res.getGetStatus();
-			case 6: return res.getPostLength();
-			case 7: return res.getGetLength();
-			case 8: return res.getSignal();
+			case 1: return res.getHost();
+			case 2: return res.getPath();
+			case 3: return res.getPostStatus();
+			case 4: return res.getGetStatus();
+			case 5: return res.getPostLength();
+			case 6: return res.getGetLength();
+			case 7: return res.getSignal();
 			default: return null;
 		}
 	}

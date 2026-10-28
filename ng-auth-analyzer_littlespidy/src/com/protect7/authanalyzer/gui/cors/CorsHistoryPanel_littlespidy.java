@@ -46,6 +46,7 @@ import com.protect7.authanalyzer.cors.CorsEngine_littlespidy;
 import com.protect7.authanalyzer.cors.CorsTableModel_littlespidy;
 import com.protect7.authanalyzer.cors.CorsTestResult_littlespidy;
 import com.protect7.authanalyzer.gui.main.MainPanel;
+import com.protect7.authanalyzer.gui.util.AcaoFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.DomainFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.MethodFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.PlaceholderTextField;
@@ -60,6 +61,7 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 
 	protected final MethodFilterDropDown_littlespidy methodFilterDropDown = new MethodFilterDropDown_littlespidy();
 	protected final DomainFilterDropDown_littlespidy domainFilterDropDown = new DomainFilterDropDown_littlespidy();
+	protected final AcaoFilterDropDown_littlespidy acaoFilterDropDown = new AcaoFilterDropDown_littlespidy();
 	protected final PlaceholderTextField filterText = new PlaceholderTextField(16);
 	protected final JButton searchButton = new JButton("Search");
 
@@ -91,6 +93,7 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		JPanel leftFilters = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		leftFilters.add(methodFilterDropDown);
 		leftFilters.add(domainFilterDropDown);
+		leftFilters.add(acaoFilterDropDown);
 		controlsRow.add(leftFilters, BorderLayout.WEST);
 
 		JPanel centerSearch = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
@@ -110,7 +113,6 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 		table.setDefaultRenderer(String.class, new CorsTableModel_littlespidy.CorsCellRenderer());
 		table.setDefaultRenderer(Integer.class, new CorsTableModel_littlespidy.CorsCellRenderer());
 		table.setDefaultRenderer(Boolean.class, new CorsTableModel_littlespidy.CorsCellRenderer());
-		table.setDefaultRenderer(CorsTestResult_littlespidy.CorsSeverity.class, new CorsTableModel_littlespidy.CorsCellRenderer());
 
 		sorter = new TableRowSorter<CorsTableModel_littlespidy>(tableModel);
 		sorter.setMaxSortKeys(1);
@@ -118,27 +120,33 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 
 		methodFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
 		domainFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
+		acaoFilterDropDown.addFilterChangeListener(() -> tableModel.fireTableDataChanged());
 
 		sorter.setRowFilter(new RowFilter<CorsTableModel_littlespidy, Integer>() {
 			@Override
 			public boolean include(Entry<? extends CorsTableModel_littlespidy, ? extends Integer> entry) {
-				String method = entry.getStringValue(1);
-				if (!methodFilterDropDown.isMethodSelected(method)) {
+				CorsTestResult_littlespidy res = entry.getModel().getResult(entry.getIdentifier());
+				if (res == null) {
 					return false;
 				}
-				String host = entry.getStringValue(2);
-				if (!domainFilterDropDown.isDomainSelected(host)) {
+				if (!methodFilterDropDown.isMethodSelected(res.getMethod())) {
+					return false;
+				}
+				if (!domainFilterDropDown.isDomainSelected(res.getHost())) {
+					return false;
+				}
+				if (!acaoFilterDropDown.isAcaoSelected(res.getReflectedAcao())) {
 					return false;
 				}
 				String query = filterText.getText();
 				if (query != null && !query.trim().isEmpty()) {
 					String q = query.trim().toLowerCase(Locale.ROOT);
-					boolean matches = entry.getStringValue(1).toLowerCase(Locale.ROOT).contains(q) ||
-							entry.getStringValue(2).toLowerCase(Locale.ROOT).contains(q) ||
-							entry.getStringValue(3).toLowerCase(Locale.ROOT).contains(q) ||
-							entry.getStringValue(4).toLowerCase(Locale.ROOT).contains(q) ||
-							entry.getStringValue(5).toLowerCase(Locale.ROOT).contains(q) ||
-							entry.getStringValue(6).toLowerCase(Locale.ROOT).contains(q);
+					boolean matches = (res.getMethod() != null && res.getMethod().toLowerCase(Locale.ROOT).contains(q)) ||
+							(res.getHost() != null && res.getHost().toLowerCase(Locale.ROOT).contains(q)) ||
+							(res.getPath() != null && res.getPath().toLowerCase(Locale.ROOT).contains(q)) ||
+							(res.getTestTypeDescription() != null && res.getTestTypeDescription().toLowerCase(Locale.ROOT).contains(q)) ||
+							(res.getTestedOrigin() != null && res.getTestedOrigin().toLowerCase(Locale.ROOT).contains(q)) ||
+							(res.getReflectedAcao() != null && res.getReflectedAcao().toLowerCase(Locale.ROOT).contains(q));
 					if (!matches) {
 						return false;
 					}
@@ -276,13 +284,16 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 			nextResultId += testResults.size();
 
 			Set<String> domains = new HashSet<String>();
+			Set<String> acaoValues = new HashSet<String>();
 			for (CorsTestResult_littlespidy r : testResults) {
 				domains.add(r.getHost());
+				acaoValues.add(r.getReflectedAcao());
 			}
 
 			SwingUtilities.invokeLater(() -> {
 				tableModel.addResults(testResults);
 				domainFilterDropDown.updateDomains(domains);
+				acaoFilterDropDown.updateAcaoValues(acaoValues);
 			});
 		}).start();
 	}
@@ -290,6 +301,7 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 	public void clearTable() {
 		tableModel.clear();
 		domainFilterDropDown.clear();
+		acaoFilterDropDown.clear();
 		viewerInfoLabel.setText("Select a CORS test result above to view details");
 		if (requestEditor != null) {
 			requestEditor.setMessage(new byte[0], true);
@@ -307,13 +319,13 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 				f = new File(f.getAbsolutePath() + ".csv");
 			}
 			try (PrintWriter pw = new PrintWriter(f, StandardCharsets.UTF_8)) {
-				pw.println("ID,Method,Host,Path,TestVector,TestedOrigin,ReflectedACAO,ACAC,StatusCode,Length,Severity");
+				pw.println("ID,Host,Path,TestVector,TestedOrigin,ReflectedACAO,ACAC,StatusCode,Length");
 				for (CorsTestResult_littlespidy r : tableModel.getAllResults()) {
-					pw.printf("%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%b,%d,%d,\"%s\"%n",
-							r.getId(), r.getMethod(), r.getHost(), r.getPath(),
+					pw.printf("%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%b,%d,%d%n",
+							r.getId(), r.getHost(), r.getPath(),
 							r.getTestTypeDescription(), r.getTestedOrigin(),
 							r.getReflectedAcao(), r.isAcacPresent(),
-							r.getStatusCode(), r.getLength(), r.getSeverity().getName());
+							r.getStatusCode(), r.getLength());
 				}
 				JOptionPane.showMessageDialog(this, "Exported " + tableModel.getRowCount() + " rows to " + f.getName(),
 						"Export Successful", JOptionPane.INFORMATION_MESSAGE);
@@ -364,5 +376,9 @@ public class CorsHistoryPanel_littlespidy extends JPanel {
 
 	public MethodFilterDropDown_littlespidy getMethodFilterDropDown() {
 		return methodFilterDropDown;
+	}
+
+	public AcaoFilterDropDown_littlespidy getAcaoFilterDropDown() {
+		return acaoFilterDropDown;
 	}
 }

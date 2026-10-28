@@ -12,8 +12,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -49,6 +52,7 @@ import com.protect7.authanalyzer.gui.util.MethodFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.gui.util.PlaceholderTextField;
 import com.protect7.authanalyzer.gui.util.RequestTableModel;
 import com.protect7.authanalyzer.gui.util.RequestTableModel.Column;
+import com.protect7.authanalyzer.gui.util.SessionStatusFilterDropDown_littlespidy;
 import com.protect7.authanalyzer.util.BypassConstants;
 import com.protect7.authanalyzer.util.CurrentConfig;
 import com.protect7.authanalyzer.util.GenericHelper;
@@ -74,6 +78,7 @@ public class CenterPanel extends JPanel {
 	protected CustomRowSorter sorter;
 	protected final MethodFilterDropDown_littlespidy methodFilterDropDown = new MethodFilterDropDown_littlespidy();
 	protected final DomainFilterDropDown_littlespidy domainFilterDropDown = new DomainFilterDropDown_littlespidy();
+	protected final SessionStatusFilterDropDown_littlespidy sessionStatusFilterDropDown = new SessionStatusFilterDropDown_littlespidy();
 	protected final JPanel topActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 	protected final JButton clearTableButton;
 	protected final JButton exportDataButton;
@@ -133,6 +138,7 @@ public class CenterPanel extends JPanel {
 		JPanel leftFiltersPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
 		leftFiltersPanel.add(methodFilterDropDown);
 		leftFiltersPanel.add(domainFilterDropDown);
+		leftFiltersPanel.add(sessionStatusFilterDropDown);
 		tableControlPanel.add(leftFiltersPanel, BorderLayout.WEST);
 
 		filterText = new PlaceholderTextField(20);
@@ -376,6 +382,7 @@ public class CenterPanel extends JPanel {
 		tableModel.clearRequestMap();
 		selectedId = -1;
 		domainFilterDropDown.clear();
+		sessionStatusFilterDropDown.clear();
 		columnsContainer.removeAll();
 		columnViews.clear();
 		columnsContainer.revalidate();
@@ -400,7 +407,7 @@ public class CenterPanel extends JPanel {
 		}
 		sorter = new CustomRowSorter(this, tableModel, showOnlyMarked, showDuplicates, showBypassed, 
 				showPotentialBypassed, showNotBypassed, showNA, filterText, searchInPath, searchInRequest, searchInResponse, negativeSearch,
-				methodFilterDropDown, domainFilterDropDown);
+				methodFilterDropDown, domainFilterDropDown, sessionStatusFilterDropDown);
 		sorter.addRowSorterListener(new RowSorterListener() {
 			@Override
 			public void sorterChanged(RowSorterEvent e) {
@@ -451,6 +458,28 @@ public class CenterPanel extends JPanel {
 				}
 			}
 			domainFilterDropDown.updateDomains(hosts);
+
+			List<Session> currentSessions = getSessions();
+			if (currentSessions != null) {
+				Map<String, Set<Integer>> sessionStatusMap = new HashMap<String, Set<Integer>>();
+				for (Session session : currentSessions) {
+					if (session != null && session.getName() != null) {
+						Set<Integer> codes = new HashSet<Integer>();
+						for (OriginalRequestResponse req : tableModel.getOriginalRequestResponseList()) {
+							if (req != null) {
+								AnalyzerRequestResponse arr = session.getRequestResponseMap().get(req.getId());
+								if (arr != null && arr.getStatusCode() > 0) {
+									codes.add(arr.getStatusCode());
+								}
+							}
+						}
+						if (!codes.isEmpty()) {
+							sessionStatusMap.put(session.getName(), codes);
+						}
+					}
+				}
+				sessionStatusFilterDropDown.updateSessionStatuses(sessionStatusMap);
+			}
 		}
 	}
 
@@ -705,6 +734,10 @@ public class CenterPanel extends JPanel {
 
 	public MainPanel getMainPanel() {
 		return mainPanel;
+	}
+
+	public SessionStatusFilterDropDown_littlespidy getSessionStatusFilterDropDown() {
+		return sessionStatusFilterDropDown;
 	}
 
 	public boolean isHideFilteredPaths() {

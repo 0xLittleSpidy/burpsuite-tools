@@ -17,8 +17,8 @@ public class CorsTableModel_littlespidy extends AbstractTableModel {
 	private final List<CorsTestResult_littlespidy> results = new ArrayList<CorsTestResult_littlespidy>();
 
 	private static final String[] COLUMN_NAMES = {
-			"ID", "Method", "Host", "Path", "Test Vector", "Tested Origin",
-			"Reflected ACAO", "ACAC", "Status Code", "Length", "Severity"
+			"ID", "Host", "Path", "Test Vector", "Tested Origin",
+			"Reflected ACAO", "ACAC", "Status Code", "Length"
 	};
 
 	public synchronized void addResult(CorsTestResult_littlespidy result) {
@@ -82,13 +82,11 @@ public class CorsTableModel_littlespidy extends AbstractTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
 			case 0:
-			case 8:
-			case 9:
-				return Integer.class;
 			case 7:
+			case 8:
+				return Integer.class;
+			case 6:
 				return Boolean.class;
-			case 10:
-				return CorsSeverity.class;
 			default:
 				return String.class;
 		}
@@ -100,16 +98,14 @@ public class CorsTableModel_littlespidy extends AbstractTableModel {
 		if (res == null) return null;
 		switch (columnIndex) {
 			case 0: return res.getId();
-			case 1: return res.getMethod();
-			case 2: return res.getHost();
-			case 3: return res.getPath();
-			case 4: return res.getTestTypeDescription();
-			case 5: return res.getTestedOrigin();
-			case 6: return res.getReflectedAcao();
-			case 7: return res.isAcacPresent();
-			case 8: return res.getStatusCode();
-			case 9: return res.getLength();
-			case 10: return res.getSeverity();
+			case 1: return res.getHost();
+			case 2: return res.getPath();
+			case 3: return res.getTestTypeDescription();
+			case 4: return res.getTestedOrigin();
+			case 5: return res.getReflectedAcao();
+			case 6: return res.isAcacPresent();
+			case 7: return res.getStatusCode();
+			case 8: return res.getLength();
 			default: return null;
 		}
 	}

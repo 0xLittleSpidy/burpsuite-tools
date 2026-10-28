@@ -28,11 +28,14 @@ import java.util.Scanner;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -80,11 +83,9 @@ public class ConfigurationPanel extends JPanel {
 	private final CurrentConfig config = CurrentConfig.getCurrentConfig();
 	private final String ANALYZER_STOPPED_TEXT = "<html><span style='color:red; font-weight: bold'>[Stopped]</span> Analyzer Stopped</html>";
 	private final String ANALYZER_STARTED_TEXT = "<html><span style='color:green; font-weight: bold'>[Running]</span> Analyzer Running</html>";
-	private final String ANALYZER_PAUSED_TEXT = "<html><span style='color:orange; font-weight: bold'>[Paused]</span> Analyzer Paused</html>";
 	private final String DROP_REQUEST_TEXT = "Drop Original Requests";
 	private final String STOP_DROP_REQUEST_TEXT = "Stop Drop Requests";
 	private final JButton startStopButton = new JButton();
-	private final JButton pauseButton = new JButton();
 	private final JToggleButton dropOriginalButton = new JToggleButton(DROP_REQUEST_TEXT);
 
 	// Three Analyzer toggles
@@ -104,8 +105,6 @@ public class ConfigurationPanel extends JPanel {
 
 	private final JPanel filterPanel;
 	private final LinkedHashMap<String, SessionPanel> sessionPanelMap = new LinkedHashMap<>();
-	private final String PAUSE_TEXT = "Pause";
-	private final String PLAY_TEXT = "Resume";
 	private final SessionTabbedPane sessionTabbedPane = new SessionTabbedPane();
 	boolean sessionListChanged = true;
 	private final MainPanel mainPanel;
@@ -114,7 +113,16 @@ public class ConfigurationPanel extends JPanel {
 	private ExactPathFilter_littlespidy exactPathFilter;
 	private PathFilter pathFilter;
 	private CompleteUrlFilter_littlespidy completeUrlFilter;
-	private final Map<RequestFilter, JLabel> filterValueLabelMap = new HashMap<RequestFilter, JLabel>();
+
+	private static class FilterItemView {
+		final DefaultListModel<String> listModel;
+		final JLabel countLabel;
+		FilterItemView(DefaultListModel<String> listModel, JLabel countLabel) {
+			this.listModel = listModel;
+			this.countLabel = countLabel;
+		}
+	}
+	private final Map<RequestFilter, FilterItemView> filterViewMap = new HashMap<RequestFilter, FilterItemView>();
 
 	public ConfigurationPanel(MainPanel mainPanel) {
 		this.mainPanel = mainPanel;
@@ -231,10 +239,6 @@ public class ConfigurationPanel extends JPanel {
 			}
 		});
 
-		pauseButton.setText(PAUSE_TEXT);
-		pauseButton.setEnabled(false);
-		pauseButton.addActionListener(e -> pauseButtonPressed());
-
 		dropOriginalButton.addActionListener(e -> dropOriginalButtonPressed());
 		dropOriginalButton.setEnabled(false);
 
@@ -258,12 +262,10 @@ public class ConfigurationPanel extends JPanel {
 		GridBagConstraints c1 = new GridBagConstraints();
 		c1.fill = GridBagConstraints.BOTH;
 		c1.gridx = 0;
-		c1.insets = new Insets(6, 0, 0, 5);
+		c1.insets = new Insets(6, 0, 0, 0);
 		c1.gridy = 1;
-		c1.gridwidth = 1;
+		c1.gridwidth = 2;
 		startStopButtonPanel.add(startStopButton, c1);
-		c1.gridx = 1;
-		startStopButtonPanel.add(pauseButton, c1);
 		c1.gridy = 2;
 		c1.gridx = 0;
 		c1.gridwidth = 2;
@@ -321,31 +323,65 @@ public class ConfigurationPanel extends JPanel {
 		JPanel top = new JPanel(new BorderLayout(4, 0));
 		top.add(onOffButton, BorderLayout.WEST);
 
+		JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+		JLabel countLabel = new JLabel("(" + filter.getFilterStringLiterals().length + " items)");
+		countLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+		countLabel.setForeground(Color.GRAY);
+
+		JButton toggleBtn = new JButton("Collapse");
+		toggleBtn.setMargin(new Insets(1, 6, 1, 6));
+
 		JButton editBtn = new JButton("Edit");
 		editBtn.setMargin(new Insets(1, 6, 1, 6));
 
-		JLabel valueLabel = new JLabel("Values: " + GenericHelper.getArrayAsString(filter.getFilterStringLiterals()));
-		valueLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-		valueLabel.setForeground(Color.GRAY);
-		valueLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
-		filterValueLabelMap.put(filter, valueLabel);
+		rightActions.add(countLabel);
+		rightActions.add(toggleBtn);
+		rightActions.add(editBtn);
+		top.add(rightActions, BorderLayout.EAST);
+
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
+		for (String item : filter.getFilterStringLiterals()) {
+			listModel.addElement(item);
+		}
+		JList<String> valueList = new JList<String>(listModel);
+		valueList.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+		valueList.setVisibleRowCount(4);
+
+		JScrollPane scrollPane = new JScrollPane(valueList,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setPreferredSize(new Dimension(180, 75));
+		scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
+		scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+
+		toggleBtn.addActionListener(e -> {
+			boolean isVis = scrollPane.isVisible();
+			scrollPane.setVisible(!isVis);
+			toggleBtn.setText(isVis ? "Expand" : "Collapse");
+			row.revalidate();
+			row.repaint();
+		});
+
+		filterViewMap.put(filter, new FilterItemView(listModel, countLabel));
 
 		editBtn.addActionListener(e -> {
 			String current = GenericHelper.getArrayAsString(filter.getFilterStringLiterals());
 			String[] inputArray = getInputArray(onOffButton, inputDialogTitle + "\r\neg: " + defaultExample, current);
 			if (inputArray != null) {
 				filter.setFilterStringLiterals(inputArray);
-				valueLabel.setText("Values: " + GenericHelper.getArrayAsString(filter.getFilterStringLiterals()));
-				valueLabel.setToolTipText(valueLabel.getText());
+				listModel.clear();
+				for (String s : filter.getFilterStringLiterals()) {
+					listModel.addElement(s);
+				}
+				countLabel.setText("(" + filter.getFilterStringLiterals().length + " items)");
 				if (mainPanel != null && mainPanel.getCenterPanel() != null && mainPanel.getCenterPanel().getTableModel() != null) {
 					mainPanel.getCenterPanel().getTableModel().fireTableDataChanged();
 				}
 			}
 		});
 
-		top.add(editBtn, BorderLayout.EAST);
 		row.add(top, BorderLayout.NORTH);
-		row.add(valueLabel, BorderLayout.SOUTH);
+		row.add(scrollPane, BorderLayout.CENTER);
 
 		config.addRequestFilter(filter);
 		filter.registerOnOffButton(onOffButton);
@@ -599,13 +635,11 @@ public class ConfigurationPanel extends JPanel {
 		if (sessionPanelMap.size() == 0) {
 			JOptionPane.showMessageDialog(this, "No Session Created");
 		} else {
-			if (config.isRunning() || pauseButton.getText().equals(PLAY_TEXT)) {
+			if (config.isRunning()) {
 				for (String session : sessionPanelMap.keySet()) {
 					sessionPanelMap.get(session).setStopped();
 				}
 				sessionTabbedPane.setModifEnabled(true);
-				pauseButton.setText(PAUSE_TEXT);
-				pauseButton.setEnabled(false);
 				dropOriginalButton.setEnabled(false);
 				setDropOriginalRequest(false);
 				config.setRunning(false);
@@ -636,7 +670,6 @@ public class ConfigurationPanel extends JPanel {
 						mainPanel.getCenterPanel().initCenterPanel();
 					}
 					sessionTabbedPane.setModifEnabled(false);
-					pauseButton.setEnabled(true);
 					dropOriginalButton.setEnabled(true);
 					config.setRunning(true);
 					startStopButton.setText(ANALYZER_STARTED_TEXT);
@@ -845,28 +878,18 @@ public class ConfigurationPanel extends JPanel {
 	}
 
 	public void updateFilterValueLabels() {
-		for (Map.Entry<RequestFilter, JLabel> entry : filterValueLabelMap.entrySet()) {
-			entry.getValue().setText("Values: " + GenericHelper.getArrayAsString(entry.getKey().getFilterStringLiterals()));
-			entry.getValue().setToolTipText(entry.getValue().getText());
+		for (Map.Entry<RequestFilter, FilterItemView> entry : filterViewMap.entrySet()) {
+			entry.getValue().listModel.clear();
+			String[] lits = entry.getKey().getFilterStringLiterals();
+			if (lits != null) {
+				for (String s : lits) {
+					entry.getValue().listModel.addElement(s);
+				}
+				entry.getValue().countLabel.setText("(" + lits.length + " items)");
+			} else {
+				entry.getValue().countLabel.setText("(0 items)");
+			}
 		}
-	}
-
-	public void pauseButtonPressed() {
-		if (config.isRunning()) {
-			config.setRunning(false);
-			pauseButton.setText(PLAY_TEXT);
-			startStopButton.setText(ANALYZER_PAUSED_TEXT);
-			pauseButton.setToolTipText("Currently Paused");
-		} else {
-			config.setRunning(true);
-			pauseButton.setText(PAUSE_TEXT);
-			startStopButton.setText(ANALYZER_STARTED_TEXT);
-			pauseButton.setToolTipText("Currently Running");
-		}
-	}
-
-	public boolean isPaused() {
-		return pauseButton.getText().equals(PLAY_TEXT);
 	}
 
 	private String[] getInputArray(Component parentFrame, String message, String value) {

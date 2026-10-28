@@ -118,16 +118,19 @@ public class ConvertImportPanel_littlespidy extends JPanel {
 		sorter.setRowFilter(new RowFilter<ConversionTableModel_littlespidy, Integer>() {
 			@Override
 			public boolean include(Entry<? extends ConversionTableModel_littlespidy, ? extends Integer> entry) {
-				String host = entry.getStringValue(2);
-				if (!domainFilterDropDown.isDomainSelected(host)) {
+				ConversionResult_littlespidy res = entry.getModel().getResult(entry.getIdentifier());
+				if (res == null) {
+					return false;
+				}
+				if (!domainFilterDropDown.isDomainSelected(res.getHost())) {
 					return false;
 				}
 				String query = searchText.getText();
 				if (query != null && !query.trim().isEmpty()) {
 					String q = query.trim().toLowerCase(Locale.ROOT);
-					boolean matches = entry.getStringValue(2).toLowerCase(Locale.ROOT).contains(q) ||
-							entry.getStringValue(3).toLowerCase(Locale.ROOT).contains(q) ||
-							entry.getStringValue(8).toLowerCase(Locale.ROOT).contains(q);
+					boolean matches = (res.getHost() != null && res.getHost().toLowerCase(Locale.ROOT).contains(q)) ||
+							(res.getPath() != null && res.getPath().toLowerCase(Locale.ROOT).contains(q)) ||
+							(res.getSignal() != null && res.getSignal().toLowerCase(Locale.ROOT).contains(q));
 					if (!matches) {
 						return false;
 					}
@@ -354,9 +357,9 @@ public class ConvertImportPanel_littlespidy extends JPanel {
 				f = new File(f.getAbsolutePath() + ".tsv");
 			}
 			try (PrintWriter pw = new PrintWriter(f, StandardCharsets.UTF_8)) {
-				pw.println("ID\tMethod\tHost\tPath\tPOST Status\tGET Status\tPOST Len\tGET Len\tSignal");
+				pw.println("ID\tHost\tPath\tPOST Status\tGET Status\tPOST Len\tGET Len\tSignal");
 				for (ConversionResult_littlespidy r : tableModel.getAllResults()) {
-					pw.println(r.getId() + "\t" + r.getMethod() + "\t" + r.getHost() + "\t" + r.getPath() + "\t" +
+					pw.println(r.getId() + "\t" + r.getHost() + "\t" + r.getPath() + "\t" +
 							r.getPostStatus() + "\t" + r.getGetStatus() + "\t" + r.getPostLength() + "\t" +
 							r.getGetLength() + "\t" + r.getSignal());
 				}

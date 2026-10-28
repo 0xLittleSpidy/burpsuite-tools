@@ -437,6 +437,61 @@
     .session-tab.dragging {
       opacity: 0.5;
     }
+
+    /* Bounded Vertical Scrollbox for Filters */
+    .filter-vertical-scrollbox {
+      max-height: 80px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: 1px solid var(--panel-border);
+      background-color: var(--input-bg);
+      padding: 4px 6px;
+      border-radius: var(--border-radius);
+      font-family: monospace;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .filter-vertical-item {
+      padding: 2px 0;
+      color: var(--text-bright);
+      border-bottom: 1px dotted rgba(128,128,128,0.2);
+    }
+    .filter-vertical-item:last-child {
+      border-bottom: none;
+    }
+    .dropdown-container {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      padding: 6px;
+      z-index: 50;
+      min-width: 200px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .dropdown-menu.active {
+      display: block;
+    }
+    .dropdown-menu label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .dropdown-menu label:hover {
+      background: var(--table-row-odd);
+    }
   </style>
 </head>
 <body>
@@ -472,8 +527,7 @@
       <div class="panel-box">
         <div class="panel-box-title">Analyzer Controls</div>
         <div style="display: flex; gap: 6px;">
-          <button class="btn-primary" style="flex: 1;">Start Analyzer</button>
-          <button style="flex: 1;" disabled>Pause</button>
+          <button class="btn-primary" style="width: 100%;">Start Analyzer</button>
         </div>
         <button style="width: 100%;">Drop Original Request</button>
 
@@ -564,15 +618,27 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
           <input type="checkbox" checked> Only Proxy Traffic
         </label>
 
-        <!-- Configurable filters with Edit button & preview -->
+        <!-- Configurable filters with Edit button & bounded vertical scrollbox -->
         <div class="filter-item">
           <div class="filter-header">
             <label class="filter-label-group">
               <input type="checkbox" checked> Exclude Filetypes
             </label>
-            <button class="btn-sm" onclick="editFilter('Exclude Filetypes', 'jpg, png, gif, css, js, woff, ico')">Edit</button>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span class="badge" id="countFiletypes">(7 items)</span>
+              <button class="btn-sm" onclick="toggleFilterBox('boxFiletypes', this)">Collapse</button>
+              <button class="btn-sm" onclick="editFilter('Exclude Filetypes', 'jpg, png, gif, css, js, woff, ico')">Edit</button>
+            </div>
           </div>
-          <div class="filter-values-preview">Values: jpg, png, gif, css, js, woff, ico</div>
+          <div id="boxFiletypes" class="filter-vertical-scrollbox">
+            <div class="filter-vertical-item">jpg</div>
+            <div class="filter-vertical-item">png</div>
+            <div class="filter-vertical-item">gif</div>
+            <div class="filter-vertical-item">css</div>
+            <div class="filter-vertical-item">js</div>
+            <div class="filter-vertical-item">woff</div>
+            <div class="filter-vertical-item">ico</div>
+          </div>
         </div>
 
         <div class="filter-item">
@@ -580,9 +646,16 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
             <label class="filter-label-group">
               <input type="checkbox" checked> Exclude HTTP Methods
             </label>
-            <button class="btn-sm" onclick="editFilter('Exclude HTTP Methods', 'OPTIONS, TRACE')">Edit</button>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span class="badge" id="countMethods">(2 items)</span>
+              <button class="btn-sm" onclick="toggleFilterBox('boxMethods', this)">Collapse</button>
+              <button class="btn-sm" onclick="editFilter('Exclude HTTP Methods', 'OPTIONS, TRACE')">Edit</button>
+            </div>
           </div>
-          <div class="filter-values-preview">Values: OPTIONS, TRACE</div>
+          <div id="boxMethods" class="filter-vertical-scrollbox">
+            <div class="filter-vertical-item">OPTIONS</div>
+            <div class="filter-vertical-item">TRACE</div>
+          </div>
         </div>
 
         <div class="filter-item">
@@ -590,9 +663,16 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
             <label class="filter-label-group">
               <input type="checkbox" checked> Exclude Status Codes
             </label>
-            <button class="btn-sm" onclick="editFilter('Exclude Status Codes', '204, 304')">Edit</button>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span class="badge" id="countStatusCodes">(2 items)</span>
+              <button class="btn-sm" onclick="toggleFilterBox('boxStatusCodes', this)">Collapse</button>
+              <button class="btn-sm" onclick="editFilter('Exclude Status Codes', '204, 304')">Edit</button>
+            </div>
           </div>
-          <div class="filter-values-preview">Values: 204, 304</div>
+          <div id="boxStatusCodes" class="filter-vertical-scrollbox">
+            <div class="filter-vertical-item">204</div>
+            <div class="filter-vertical-item">304</div>
+          </div>
         </div>
 
         <div class="filter-item">
@@ -600,9 +680,16 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
             <label class="filter-label-group">
               <input type="checkbox" checked> Exclude Exact Path
             </label>
-            <button class="btn-sm" onclick="editFilter('Exclude Exact Path', '/api/v1/logout, /healthz')">Edit</button>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span class="badge" id="countExactPath">(2 items)</span>
+              <button class="btn-sm" onclick="toggleFilterBox('boxExactPath', this)">Collapse</button>
+              <button class="btn-sm" onclick="editFilter('Exclude Exact Path', '/api/v1/logout, /healthz')">Edit</button>
+            </div>
           </div>
-          <div class="filter-values-preview">Values: /api/v1/logout, /healthz</div>
+          <div id="boxExactPath" class="filter-vertical-scrollbox">
+            <div class="filter-vertical-item">/api/v1/logout</div>
+            <div class="filter-vertical-item">/healthz</div>
+          </div>
         </div>
 
         <div class="filter-item">
@@ -610,9 +697,17 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
             <label class="filter-label-group">
               <input type="checkbox" checked> Exclude Partial Path
             </label>
-            <button class="btn-sm" onclick="editFilter('Exclude Partial Path', '/static/, /assets/, /docs')">Edit</button>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span class="badge" id="countPartialPath">(3 items)</span>
+              <button class="btn-sm" onclick="toggleFilterBox('boxPartialPath', this)">Collapse</button>
+              <button class="btn-sm" onclick="editFilter('Exclude Partial Path', '/static/, /assets/, /docs')">Edit</button>
+            </div>
           </div>
-          <div class="filter-values-preview">Values: /static/, /assets/, /docs</div>
+          <div id="boxPartialPath" class="filter-vertical-scrollbox">
+            <div class="filter-vertical-item">/static/</div>
+            <div class="filter-vertical-item">/assets/</div>
+            <div class="filter-vertical-item">/docs</div>
+          </div>
         </div>
 
         <div class="filter-item">
@@ -620,9 +715,15 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
             <label class="filter-label-group">
               <input type="checkbox" checked> Exclude Complete URL
             </label>
-            <button class="btn-sm" onclick="editFilter('Exclude Complete URL', 'https://example.com/api/ping')">Edit</button>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span class="badge" id="countCompleteUrl">(1 items)</span>
+              <button class="btn-sm" onclick="toggleFilterBox('boxCompleteUrl', this)">Collapse</button>
+              <button class="btn-sm" onclick="editFilter('Exclude Complete URL', 'https://example.com/api/ping')">Edit</button>
+            </div>
           </div>
-          <div class="filter-values-preview">Values: https://example.com/api/ping</div>
+          <div id="boxCompleteUrl" class="filter-vertical-scrollbox">
+            <div class="filter-vertical-item">https://example.com/api/ping</div>
+          </div>
         </div>
 
         <div class="filter-item">
@@ -630,9 +731,16 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
             <label class="filter-label-group">
               <input type="checkbox"> Exclude Queries / Params
             </label>
-            <button class="btn-sm" onclick="editFilter('Exclude Queries / Params', 'utm_source, cachebust')">Edit</button>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span class="badge" id="countQueries">(2 items)</span>
+              <button class="btn-sm" onclick="toggleFilterBox('boxQueries', this)">Collapse</button>
+              <button class="btn-sm" onclick="editFilter('Exclude Queries / Params', 'utm_source, cachebust')">Edit</button>
+            </div>
           </div>
-          <div class="filter-values-preview">Values: utm_source, cachebust</div>
+          <div id="boxQueries" class="filter-vertical-scrollbox">
+            <div class="filter-vertical-item">utm_source</div>
+            <div class="filter-vertical-item">cachebust</div>
+          </div>
         </div>
 
       </div>
@@ -646,7 +754,22 @@ Authorization: Bearer eyJhbGciOi..."></textarea>
       <!-- Toolbar -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
         <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" placeholder="Filter requests..." style="width: 220px;">
+          <button class="btn-sm">Methods: All</button>
+          <button class="btn-sm">Domains: All</button>
+          <div class="dropdown-container">
+            <button class="btn-sm" onclick="toggleDropdown('userStatusDropdown')">User/Status: All &#9662;</button>
+            <div id="userStatusDropdown" class="dropdown-menu">
+              <label><input type="checkbox" checked onchange="toggleSelectAllStatus(this)"> <strong>Select All</strong></label>
+              <hr style="margin: 4px 0; border: none; border-top: 1px solid var(--panel-border);">
+              <label><input type="checkbox" checked class="status-chk"> admin - 200</label>
+              <label><input type="checkbox" checked class="status-chk"> admin - 400</label>
+              <label><input type="checkbox" checked class="status-chk"> user1 - 200</label>
+              <label><input type="checkbox" checked class="status-chk"> user1 - 403</label>
+              <label><input type="checkbox" checked class="status-chk"> user2 - 200</label>
+              <label><input type="checkbox" checked class="status-chk"> user2 - 401</label>
+            </div>
+          </div>
+          <input type="text" placeholder="Filter requests..." style="width: 180px;">
           <label style="display: flex; align-items: center; gap: 4px; font-weight: 600;">
             <input type="checkbox" checked> Hide Filtered Paths (Retroactive)
           </label>
@@ -780,8 +903,22 @@ Cookie: Session=admin_token</div>
     <div style="display: flex; flex-direction: column; height: 100%;">
       <!-- Toolbar -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-        <div style="display: flex; gap: 8px;">
-          <input type="text" placeholder="Search Origin, Host, Path..." style="width: 240px;">
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button class="btn-sm">Methods: All</button>
+          <button class="btn-sm">Domains: All</button>
+          <div class="dropdown-container">
+            <button class="btn-sm" onclick="toggleDropdown('acaoDropdown')">Reflected ACAO: All &#9662;</button>
+            <div id="acaoDropdown" class="dropdown-menu">
+              <label><input type="checkbox" checked onchange="toggleSelectAllAcao(this)"> <strong>Select All</strong></label>
+              <hr style="margin: 4px 0; border: none; border-top: 1px solid var(--panel-border);">
+              <label><input type="checkbox" checked class="acao-chk"> (None)</label>
+              <label><input type="checkbox" checked class="acao-chk"> *</label>
+              <label><input type="checkbox" checked class="acao-chk"> null</label>
+              <label><input type="checkbox" checked class="acao-chk"> https://evil.com</label>
+              <label><input type="checkbox" checked class="acao-chk"> https://example.com._.evil.com</label>
+            </div>
+          </div>
+          <input type="text" placeholder="Search Origin, Host, Path..." style="width: 180px;">
           <button class="btn-sm">Search</button>
         </div>
         <div style="display: flex; gap: 6px;">
@@ -797,41 +934,38 @@ Cookie: Session=admin_token</div>
           <thead>
             <tr>
               <th>ID</th>
-              <th>Method</th>
               <th>Host</th>
               <th>Path</th>
+              <th>Test Vector</th>
               <th>Tested Origin</th>
-              <th>Status</th>
-              <th>Length</th>
-              <th>ACAO</th>
+              <th>Reflected ACAO</th>
               <th>ACAC</th>
-              <th>Severity</th>
+              <th>Status Code</th>
+              <th>Length</th>
             </tr>
           </thead>
           <tbody>
             <tr class="selected">
               <td>1</td>
-              <td>GET</td>
               <td>api.example.com</td>
               <td>/api/user/details</td>
+              <td>Dot-Underscore Subdomain</td>
               <td>https://example.com._.evil.com</td>
-              <td>200</td>
-              <td>1240</td>
               <td>https://example.com._.evil.com</td>
               <td>true</td>
-              <td><span class="badge badge-high">High</span></td>
+              <td>200</td>
+              <td>1240</td>
             </tr>
             <tr>
               <td>2</td>
-              <td>GET</td>
               <td>api.example.com</td>
               <td>/api/user/details</td>
+              <td>Trusted Null Origin</td>
               <td>null</td>
-              <td>200</td>
-              <td>1240</td>
               <td>null</td>
               <td>true</td>
-              <td><span class="badge badge-high">High</span></td>
+              <td>200</td>
+              <td>1240</td>
             </tr>
           </tbody>
         </table>
@@ -870,11 +1004,11 @@ Content-Type: application/json
       <table>
         <thead>
           <tr>
-            <th>ID</th><th>Method</th><th>Host</th><th>Path</th><th>Tested Origin</th><th>ACAO</th><th>ACAC</th><th>Severity</th>
+            <th>ID</th><th>Host</th><th>Path</th><th>Test Vector</th><th>Tested Origin</th><th>Reflected ACAO</th><th>ACAC</th><th>Status Code</th><th>Length</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>1</td><td>GET</td><td>api.example.com</td><td>/api/data</td><td>https://evil.com</td><td>https://evil.com</td><td>true</td><td><span class="badge badge-high">High</span></td></tr>
+          <tr><td>1</td><td>api.example.com</td><td>/api/data</td><td>Arbitrary Origin Reflection</td><td>https://evil.com</td><td>https://evil.com</td><td>true</td><td>200</td><td>1024</td></tr>
         </tbody>
       </table>
     </div>
@@ -886,6 +1020,7 @@ Content-Type: application/json
       <!-- Toolbar -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
         <div style="display: flex; gap: 8px;">
+          <button class="btn-sm">Domains: All</button>
           <input type="text" placeholder="Search URL, Signal, Path..." style="width: 240px;">
           <button class="btn-sm">Search</button>
         </div>
@@ -896,13 +1031,12 @@ Content-Type: application/json
         </div>
       </div>
 
-      <!-- Table without Content-Type and Severity -->
+      <!-- Table without Method column -->
       <div class="table-container" style="flex: 1;">
         <table>
           <thead>
             <tr>
               <th>ID</th>
-              <th>Method</th>
               <th>Host</th>
               <th>Path</th>
               <th>POST Status</th>
@@ -915,7 +1049,6 @@ Content-Type: application/json
           <tbody>
             <tr class="selected">
               <td>1</td>
-              <td>POST</td>
               <td>api.example.com</td>
               <td>/user/transfer</td>
               <td>200</td>
@@ -967,11 +1100,11 @@ Host: api.example.com</div>
       <table>
         <thead>
           <tr>
-            <th>ID</th><th>Method</th><th>Host</th><th>Path</th><th>POST Status</th><th>GET Status</th><th>POST Len</th><th>GET Len</th><th>Signal</th>
+            <th>ID</th><th>Host</th><th>Path</th><th>POST Status</th><th>GET Status</th><th>POST Len</th><th>GET Len</th><th>Signal</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>1</td><td>POST</td><td>api.example.com</td><td>/user/transfer</td><td>200</td><td>200</td><td>540</td><td>540</td><td><span class="badge badge-high">Identical Response</span></td></tr>
+          <tr><td>1</td><td>api.example.com</td><td>/user/transfer</td><td>200</td><td>200</td><td>540</td><td>540</td><td><span class="badge badge-high">Identical Response</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -1038,6 +1171,40 @@ Host: api.example.com</div>
         alert("Updated " + name + " to: " + newVal);
       }
     }
+
+    function toggleFilterBox(boxId, btn) {
+      const box = document.getElementById(boxId);
+      if (!box) return;
+      if (box.style.display === 'none') {
+        box.style.display = 'block';
+        btn.innerText = 'Collapse';
+      } else {
+        box.style.display = 'none';
+        btn.innerText = 'Expand';
+      }
+    }
+
+    function toggleDropdown(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.toggle('active');
+      }
+    }
+
+    function toggleSelectAllStatus(master) {
+      document.querySelectorAll('.status-chk').forEach(c => c.checked = master.checked);
+    }
+
+    function toggleSelectAllAcao(master) {
+      document.querySelectorAll('.acao-chk').forEach(c => c.checked = master.checked);
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown-container')) {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('active'));
+      }
+    });
 
     // Modal logic
     function openCorsTechniquesModal() {
