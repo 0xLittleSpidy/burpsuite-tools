@@ -1043,22 +1043,30 @@ email='%5C%22%3E%3C%3B%7C%5C%5C%5D%5B%7D%7B%60%24</div>
         <div class="modal-card" style="flex:1; display:flex; flex-direction:column; min-height:220px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <div style="display:flex; align-items:center; gap:8px;">
-              <div class="card-title" style="margin-bottom:0;">Configured Payloads (31 Available)</div>
+              <div class="card-title" style="margin-bottom:0;">Big List of Naughty Strings (480+ Probes)</div>
               <select id="modalCategoryFilter" onchange="filterModalPayloads()" style="font-size:11px; padding:2px 6px;">
-                <option value="all">All Categories</option>
-                <option value="Boundary">Boundary & Types</option>
+                <option value="all">All BLNS Categories</option>
                 <option value="SQL Injection">SQL Injection</option>
-                <option value="XSS">XSS & Reflection</option>
-                <option value="Path Traversal">Path Traversal / LFI</option>
+                <option value="Script Injection">Script Injection (XSS)</option>
+                <option value="File Inclusion">File Inclusion (LFI / Path Traversal)</option>
                 <option value="Command Injection">Command Injection</option>
-                <option value="SSTI">SSTI</option>
+                <option value="Server Code Injection">Server Code Injection (SSTI)</option>
+                <option value="XML Parser">XML Parser (XXE)</option>
+                <option value="Unwanted Interpolation">Unwanted Interpolation (%s, %n)</option>
+                <option value="Reserved Strings">Reserved Strings (null, undef, None)</option>
+                <option value="Numeric Strings">Numeric Strings & Overflow</option>
+                <option value="MSDOS Filenames">MSDOS / Windows Special Names (CON, PRN)</option>
+                <option value="Special Characters">Special Characters & Quotation Marks</option>
+                <option value="Terminal Escape">Terminal Escape Codes</option>
+                <option value="LLM Injection">LLM Prompt Injection</option>
               </select>
             </div>
             <div style="display:flex; gap:6px;">
               <button onclick="selectAllPayloads(true)">Select All</button>
               <button onclick="selectAllPayloads(false)">Deselect All</button>
-              <button onclick="resetDefaultPayloads()">Reset Defaults</button>
-              <button class="primary" onclick="showToast('Add Payload Dialog Opened')">Add Payload</button>
+              <button onclick="resetDefaultPayloads()">Default Essential Set</button>
+              <button class="primary" onclick="enableAllBlns()">Enable All BLNS (480+)</button>
+              <button onclick="showToast('Add Custom Payload Dialog Opened')">Add Custom</button>
             </div>
           </div>
 
@@ -1376,7 +1384,11 @@ email='%5C%22%3E%3C%3B%7C%5C%5C%5D%5B%7D%7B%60%24</div>
     }
     function resetDefaultPayloads() {
       selectAllPayloads(true);
-      showToast('Payloads reset to default');
+      showToast('Loaded Default Essential Set (35 probes)');
+    }
+    function enableAllBlns() {
+      selectAllPayloads(true);
+      showToast('Enabled Full Big List of Naughty Strings (480+ probes)');
     }
 
     // Modal Category Filter
