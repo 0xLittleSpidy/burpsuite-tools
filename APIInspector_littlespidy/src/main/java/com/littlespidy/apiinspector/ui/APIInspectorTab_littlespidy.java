@@ -94,6 +94,13 @@ public class APIInspectorTab_littlespidy extends JPanel {
             authTestingTab.refreshCollectionsCombo();
         });
 
+        // Automatically sync selected collection to Auth Analyzer Config
+        this.importTab.addCollectionSelectionListener(col -> {
+            if (configTab != null) {
+                configTab.selectCollection(col);
+            }
+        });
+
         // Sync fresh collections whenever the user selects a tab
         this.rootTabbedPane.addChangeListener(e -> {
             Component selected = rootTabbedPane.getSelectedComponent();

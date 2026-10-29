@@ -168,6 +168,18 @@ public class MethodFilterDropDown_littlespidy extends JButton {
         notifyListeners();
     }
 
+    public synchronized void setMethodSelected(String method, boolean selected) {
+        if (method == null) return;
+        String upper = method.trim().toUpperCase(Locale.ROOT);
+        JCheckBox cb = methodCheckBoxMap.get(upper);
+        if (cb != null) {
+            cb.setSelected(selected);
+            syncSelectAllState();
+            updateButtonLabel();
+            notifyListeners();
+        }
+    }
+
     public void addFilterChangeListener(Runnable listener) {
         if (listener != null) {
             listeners.add(listener);

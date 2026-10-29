@@ -646,19 +646,17 @@ public class UIEnhancementsTest_littlespidy {
             assertFalse(name.toLowerCase().contains("time"), "Time column must be removed");
         }
 
-        // Verify column structure: 3 base + 2 for Admin + 2 for Auditor = 7 columns (Outcome + Status Code for each profile)
-        assertEquals(7, resultsTable.getColumnCount());
+        // Verify column structure: 3 base + 1 for Admin + 1 for Auditor = 5 columns (Profile Name as header displaying Status Code)
+        assertEquals(5, resultsTable.getColumnCount());
         assertEquals("Collection", resultsTable.getColumnName(0));
         assertEquals("Method", resultsTable.getColumnName(1));
         assertEquals("Path", resultsTable.getColumnName(2));
         assertEquals("Admin", resultsTable.getColumnName(3));
-        assertEquals("Admin - Status Code", resultsTable.getColumnName(4));
-        assertEquals("Auditor", resultsTable.getColumnName(5));
-        assertEquals("Auditor - Status Code", resultsTable.getColumnName(6));
+        assertEquals("Auditor", resultsTable.getColumnName(4));
     }
 
     @Test
-    @DisplayName("Verify IDOR cross-comparison outcome calculation: SAME, SIMILAR, DIFFERENT, and N/A")
+    @DisplayName("Verify IDOR cross-comparison outcome calculation and profile status code table columns")
     public void testCrossComparisonIDOROutcomes() throws Exception {
         AuthTestingTab_littlespidy authTab = new AuthTestingTab_littlespidy(mockApi);
 
@@ -697,11 +695,9 @@ public class UIEnhancementsTest_littlespidy {
         JTable resultsTable = (JTable) resultsTableField.get(authTab);
 
         assertEquals(1, resultsTable.getRowCount());
-        // Value for User A outcome and User B outcome should be SAME, status codes should be 200
-        assertEquals("SAME", resultsTable.getValueAt(0, 3));
+        // Outcome columns removed; status codes are displayed directly under profile headers
+        assertEquals("200", resultsTable.getValueAt(0, 3));
         assertEquals("200", resultsTable.getValueAt(0, 4));
-        assertEquals("SAME", resultsTable.getValueAt(0, 5));
-        assertEquals("200", resultsTable.getValueAt(0, 6));
 
         // Case 2: User B is forbidden (403) -> DIFFERENT (Access Enforced)
         AuthTestResult_littlespidy resB2 = new AuthTestResult_littlespidy();
@@ -715,14 +711,12 @@ public class UIEnhancementsTest_littlespidy {
         resB2.setAuthResponseLength(9);
 
         authTab.setResults(List.of(resA1, resB2));
-        assertEquals("DIFFERENT", resultsTable.getValueAt(0, 3));
-        assertEquals("200", resultsTable.getValueAt(0, 4));
-        assertEquals("DIFFERENT", resultsTable.getValueAt(0, 5));
-        assertEquals("403", resultsTable.getValueAt(0, 6));
+        assertEquals("200", resultsTable.getValueAt(0, 3));
+        assertEquals("403", resultsTable.getValueAt(0, 4));
 
-        // Case 3: User B has similar length within 5% -> SIMILAR (Potential Bypass)
+        // Case 3: User B has similar length within 5%
         byte[] bodySimilar = new byte[100];
-        byte[] bodyTarget = new byte[102]; // diff 2 <= 5 (5% of 102)
+        byte[] bodyTarget = new byte[102];
         java.util.Arrays.fill(bodySimilar, (byte) 'x');
         java.util.Arrays.fill(bodyTarget, (byte) 'y');
 
@@ -747,10 +741,8 @@ public class UIEnhancementsTest_littlespidy {
         resB3.setAuthResponseLength(100);
 
         authTab.setResults(List.of(resA3, resB3));
-        assertEquals("SIMILAR", resultsTable.getValueAt(0, 3));
+        assertEquals("200", resultsTable.getValueAt(0, 3));
         assertEquals("200", resultsTable.getValueAt(0, 4));
-        assertEquals("SIMILAR", resultsTable.getValueAt(0, 5));
-        assertEquals("200", resultsTable.getValueAt(0, 6));
     }
 
     @Test
@@ -1032,6 +1024,104 @@ public class UIEnhancementsTest_littlespidy {
         attackTab.clearAllRunners();
         assertEquals(1, configTab.getRunnerCounter());
         assertEquals(1, attackTab.getRunnerCounter());
+    }
+
+    @Test
+    @DisplayName("Verify outcome filter removal and HTTP method filter in AuthTestingTab")
+    public void testAuthTestingTabMethodFilterAndOutcomeRemoval() throws Exception {
+        AuthTestingTab_littlespidy authTab = new AuthTestingTab_littlespidy(mockApi);
+
+        // Verify outcomeFilterCombo field is removed
+        assertThrows(NoSuchFieldException.class, () -> {
+            AuthTestingTab_littlespidy.class.getDeclaredField("outcomeFilterCombo");
+        });
+
+        // Verify methodFilterDropDown exists and is wired
+        assertNotNull(authTab.getMethodFilterDropDown());
+
+        AuthProfile_littlespidy prof = new AuthProfile_littlespidy("Admin", AuthType_littlespidy.BEARER_TOKEN);
+        prof.setId("p1");
+        authTab.setProfiles(List.of(prof));
+
+        AuthTestResult_littlespidy rGet = new AuthTestResult_littlespidy();
+        rGet.setCollectionId("c1");
+        rGet.setMethod("GET");
+        rGet.setPath("/api/v1/users");
+        rGet.setProfileId("p1");
+        rGet.setAuthStatusCode(200);
+
+        AuthTestResult_littlespidy rPost = new AuthTestResult_littlespidy();
+        rPost.setCollectionId("c1");
+        rPost.setMethod("POST");
+        rPost.setPath("/api/v1/users");
+        rPost.setProfileId("p1");
+        rPost.setAuthStatusCode(201);
+
+        authTab.setResults(List.of(rGet, rPost));
+
+        Field resultsTableField = AuthTestingTab_littlespidy.class.getDeclaredField("resultsTable");
+        resultsTableField.setAccessible(true);
+        JTable resultsTable = (JTable) resultsTableField.get(authTab);
+
+        assertEquals(2, resultsTable.getRowCount());
+
+        // Deselect POST in method filter
+        authTab.getMethodFilterDropDown().setMethodSelected("POST", false);
+        authTab.applyAllFilters();
+
+        assertEquals(1, resultsTable.getRowCount());
+        assertEquals("GET", resultsTable.getValueAt(0, 1));
+
+        // Re-select POST
+        authTab.getMethodFilterDropDown().setMethodSelected("POST", true);
+        authTab.applyAllFilters();
+        assertEquals(2, resultsTable.getRowCount());
+    }
+
+    @Test
+    @DisplayName("Verify collection selection sync and Attack execution targeting selected collection")
+    public void testCollectionSelectionSyncAndAttackScope() {
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        APIImportTab_littlespidy importTab = rootTab.getImportTab();
+        AuthAnalyzerConfigTab_littlespidy configTab = rootTab.getConfigTab().getAuthAnalyzerConfigTab();
+
+        DiscoveredEndpoint_littlespidy ep1 = new DiscoveredEndpoint_littlespidy("GET", "/api/v1/orders", "Orders");
+        ImportedCollection_littlespidy col1 = new ImportedCollection_littlespidy("Order API", "OpenAPI", "File", "/path1");
+        col1.setEndpoints(List.of(ep1));
+
+        DiscoveredEndpoint_littlespidy ep2 = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/users", "Users");
+        ImportedCollection_littlespidy col2 = new ImportedCollection_littlespidy("User API", "OpenAPI", "File", "/path2");
+        col2.setEndpoints(List.of(ep2));
+
+        importTab.setCollections(List.of(col1, col2));
+        configTab.refreshCollectionsCombo();
+
+        // Select col1
+        configTab.selectCollection(col1);
+        assertEquals(1, configTab.getEndpointSelectionModel().getRowCount());
+        assertEquals("/api/v1/orders", configTab.getEndpointSelectionModel().getItems().get(0).endpoint.getPath());
+
+        // Select col2
+        configTab.selectCollection(col2);
+        assertEquals(1, configTab.getEndpointSelectionModel().getRowCount());
+        assertEquals("/api/v1/users", configTab.getEndpointSelectionModel().getItems().get(0).endpoint.getPath());
+    }
+
+    @Test
+    @DisplayName("Verify AuthProfileDialog vertical layout and tall headers text area")
+    public void testAuthProfileDialogVerticalLayout() throws Exception {
+        if (!GraphicsEnvironment.isHeadless()) {
+            AuthProfileDialog_littlespidy dialog = new AuthProfileDialog_littlespidy(null, "Test Profile", null);
+            assertNotNull(dialog);
+
+            Field headersAreaField = AuthProfileDialog_littlespidy.class.getDeclaredField("headersArea");
+            headersAreaField.setAccessible(true);
+            JTextArea area = (JTextArea) headersAreaField.get(dialog);
+
+            assertNotNull(area);
+            assertEquals(12, area.getRows(), "Headers text area must have 12 rows for vertical orientation");
+            assertTrue(area.getLineWrap(), "Headers text area must enable line wrap");
+        }
     }
 
     private static List<Component> getAllComponents(Container c) {

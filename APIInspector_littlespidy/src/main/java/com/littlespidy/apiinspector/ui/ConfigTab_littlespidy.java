@@ -2,6 +2,7 @@
 package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
+import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,6 +74,12 @@ public class ConfigTab_littlespidy extends JPanel {
         this.corsConfigPanel.refreshCollectionsCombo();
         this.inputValidationConfigPanel.refreshCollectionsCombo();
         syncAuthProfilesToSubPanels();
+    }
+
+    public void selectCollection(ImportedCollection_littlespidy col) {
+        if (this.authAnalyzerConfigTab != null) {
+            this.authAnalyzerConfigTab.selectCollection(col);
+        }
     }
 
     public AuthAnalyzerConfigTab_littlespidy getAuthAnalyzerConfigTab() {

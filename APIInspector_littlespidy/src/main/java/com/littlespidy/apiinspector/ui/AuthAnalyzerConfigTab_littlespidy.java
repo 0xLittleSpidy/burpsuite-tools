@@ -224,58 +224,54 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
         splitPane.setContinuousLayout(true);
         mainPanel.add(splitPane, BorderLayout.CENTER);
 
-        // 3. Bottom Section: Execution Controls Panel
-        JPanel execControlsPanel = new JPanel(new GridBagLayout());
+        // 3. Bottom Section: Execution Controls Panel (Single Line Controls)
+        JPanel execControlsPanel = new JPanel();
+        execControlsPanel.setLayout(new BoxLayout(execControlsPanel, BoxLayout.Y_AXIS));
         execControlsPanel.setBorder(new TitledBorder("Execution Controls"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 4, 3, 4);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        execControlsPanel.add(new JLabel("Threads:"), gbc);
+        JPanel singleLineControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 3));
+        singleLineControls.add(new JLabel("Threads:"));
         threadSpinner = new JSpinner(new SpinnerNumberModel(4, 1, 20, 1));
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 0.5;
-        execControlsPanel.add(threadSpinner, gbc);
+        threadSpinner.setPreferredSize(new Dimension(55, 24));
+        singleLineControls.add(threadSpinner);
 
-        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0;
-        execControlsPanel.add(new JLabel("Delay (ms):"), gbc);
+        singleLineControls.add(new JLabel("Delay (ms):"));
         delaySpinner = new JSpinner(new SpinnerNumberModel(50, 0, 5000, 25));
-        gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 0.5;
-        execControlsPanel.add(delaySpinner, gbc);
+        delaySpinner.setPreferredSize(new Dimension(65, 24));
+        singleLineControls.add(delaySpinner);
 
-        JPanel runBtnBox = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 2));
-        runBtnBox.add(new JLabel("Runner:"));
+        singleLineControls.add(new JLabel("Runner:"));
         runnerNameField = new JTextField("Runner " + runnerCounter, 12);
-        runBtnBox.add(runnerNameField);
+        runnerNameField.setPreferredSize(new Dimension(130, 24));
+        singleLineControls.add(runnerNameField);
 
         attackBtn = new JButton("Attack");
         attackBtn.setFont(attackBtn.getFont().deriveFont(Font.BOLD));
         attackBtn.addActionListener(e -> onAttackAll());
-        runBtnBox.add(attackBtn);
+        singleLineControls.add(attackBtn);
 
         testSelectedBtn = new JButton("Test Selected");
         testSelectedBtn.addActionListener(e -> onAttackSelected());
-        runBtnBox.add(testSelectedBtn);
+        singleLineControls.add(testSelectedBtn);
 
         cancelBtn = new JButton("Cancel");
         cancelBtn.setEnabled(false);
         cancelBtn.addActionListener(e -> onCancelAttack());
-        runBtnBox.add(cancelBtn);
+        singleLineControls.add(cancelBtn);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 4; gbc.weightx = 1.0;
-        execControlsPanel.add(runBtnBox, gbc);
+        execControlsPanel.add(singleLineControls);
 
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
         progressBar.setVisible(false);
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4;
-        execControlsPanel.add(progressBar, gbc);
+        progressBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        execControlsPanel.add(progressBar);
 
         progressStatusLabel = new JLabel("Ready");
         progressStatusLabel.setFont(progressStatusLabel.getFont().deriveFont(Font.PLAIN, 11f));
         progressStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 4;
-        execControlsPanel.add(progressStatusLabel, gbc);
+        progressStatusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        execControlsPanel.add(progressStatusLabel);
 
         mainPanel.add(execControlsPanel, BorderLayout.SOUTH);
         add(mainPanel, BorderLayout.CENTER);
@@ -478,6 +474,14 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
     // --- Collection & Endpoints Selection Actions ---
 
     public void refreshCollectionsCombo() {
+        ImportedCollection_littlespidy prevSelected = null;
+        CollectionComboItem sel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
+        if (sel != null && sel.collection != null) {
+            prevSelected = sel.collection;
+        } else if (importTabRef != null && importTabRef.getSelectedCollection() != null) {
+            prevSelected = importTabRef.getSelectedCollection();
+        }
+
         collectionSelectorCombo.removeAllItems();
         if (importTabRef != null) {
             List<ImportedCollection_littlespidy> allCols = importTabRef.getAllCollections();
@@ -486,7 +490,40 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
                 collectionSelectorCombo.addItem(new CollectionComboItem(c, c.getName() + " (" + c.getEndpointCount() + ")"));
             }
         }
-        onCollectionSelectionChanged();
+        if (prevSelected != null) {
+            selectCollection(prevSelected);
+        } else {
+            onCollectionSelectionChanged();
+        }
+    }
+
+    public void selectCollection(ImportedCollection_littlespidy col) {
+        if (collectionSelectorCombo == null) {
+            return;
+        }
+        if (col == null) {
+            if (collectionSelectorCombo.getItemCount() > 0) {
+                collectionSelectorCombo.setSelectedIndex(0);
+            }
+            return;
+        }
+        for (int i = 0; i < collectionSelectorCombo.getItemCount(); i++) {
+            CollectionComboItem item = collectionSelectorCombo.getItemAt(i);
+            if (item != null && item.collection != null) {
+                boolean matches = false;
+                if (item.collection == col) {
+                    matches = true;
+                } else if (item.collection.getId() != null && col.getId() != null && item.collection.getId().equals(col.getId())) {
+                    matches = true;
+                } else if (item.collection.getName() != null && col.getName() != null && item.collection.getName().equals(col.getName())) {
+                    matches = true;
+                }
+                if (matches) {
+                    collectionSelectorCombo.setSelectedIndex(i);
+                    return;
+                }
+            }
+        }
     }
 
     private void onCollectionSelectionChanged() {
@@ -515,6 +552,12 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
     // --- Attack Execution Actions ---
 
     private void onAttackAll() {
+        if (importTabRef != null && importTabRef.getSelectedCollection() != null) {
+            CollectionComboItem currentSel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
+            if (currentSel == null || currentSel.collection == null) {
+                selectCollection(importTabRef.getSelectedCollection());
+            }
+        }
         endpointSelectionModel.selectAll(true);
         launchAttackForItems(endpointSelectionModel.getItems());
     }

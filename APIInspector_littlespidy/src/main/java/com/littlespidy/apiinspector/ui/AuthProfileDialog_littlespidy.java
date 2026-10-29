@@ -40,6 +40,7 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         initComponents();
         populateFields();
         pack();
+        setMinimumSize(new Dimension(480, 480));
         setResizable(true);
         setLocationRelativeTo(parent);
     }
@@ -48,57 +49,70 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         JPanel contentPane = new JPanel(new BorderLayout(10, 10));
         contentPane.setBorder(new EmptyBorder(12, 12, 12, 12));
 
-        // Form Panel
-        JPanel formPanel = new JPanel(new GridBagLayout());
+        // Form Panel - Clean vertical orientation
+        JPanel formPanel = new JPanel();
+        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBorder(new TitledBorder("Profile Configuration"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 6, 4, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Profile Name
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
-        formPanel.add(new JLabel("Profile Name:"), gbc);
-        nameField = new JTextField(24);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
-        formPanel.add(nameField, gbc);
+        // 1. Profile Name (Vertical block)
+        JPanel nameBlock = new JPanel(new BorderLayout(4, 4));
+        nameBlock.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel nameLabel = new JLabel("Profile Name:");
+        nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD));
+        nameBlock.add(nameLabel, BorderLayout.NORTH);
+        nameField = new JTextField(28);
+        nameBlock.add(nameField, BorderLayout.CENTER);
+        formPanel.add(nameBlock);
 
-        // Profile Type: Auth vs Unauth Radio buttons
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
-        formPanel.add(new JLabel("Profile Type:"), gbc);
+        formPanel.add(Box.createVerticalStrut(10));
 
-        JPanel typePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        // 2. Profile Type (Vertical block)
+        JPanel typeBlock = new JPanel(new BorderLayout(4, 4));
+        typeBlock.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel typeLabel = new JLabel("Profile Type:");
+        typeLabel.setFont(typeLabel.getFont().deriveFont(Font.BOLD));
+        typeBlock.add(typeLabel, BorderLayout.NORTH);
+
+        JPanel typeRadioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 2));
         authRadio = new JRadioButton("Authenticated (auth)", true);
         unauthRadio = new JRadioButton("Unauthenticated (unauth)", false);
         ButtonGroup group = new ButtonGroup();
         group.add(authRadio);
         group.add(unauthRadio);
-        typePanel.add(authRadio);
-        typePanel.add(unauthRadio);
+        typeRadioPanel.add(authRadio);
+        typeRadioPanel.add(unauthRadio);
+        typeBlock.add(typeRadioPanel, BorderLayout.CENTER);
+        formPanel.add(typeBlock);
 
         authRadio.addActionListener(e -> updateHeadersMode(false));
         unauthRadio.addActionListener(e -> updateHeadersMode(true));
 
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        formPanel.add(typePanel, gbc);
+        formPanel.add(Box.createVerticalStrut(10));
 
-        // Headers Section
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        // 3. Headers Section (Vertical tall text area)
+        JPanel headersBlock = new JPanel(new BorderLayout(4, 4));
+        headersBlock.setAlignmentX(Component.LEFT_ALIGNMENT);
         headersLabel = new JLabel("Session Headers (Complete Headers):");
         headersLabel.setFont(headersLabel.getFont().deriveFont(Font.BOLD));
-        formPanel.add(headersLabel, gbc);
+        headersBlock.add(headersLabel, BorderLayout.NORTH);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
         headersHelpLabel = new JLabel("Enter complete headers (e.g. 'Authorization: Bearer <token>', 'Cookie: session=<id>'), one per line.");
         headersHelpLabel.setFont(headersHelpLabel.getFont().deriveFont(Font.PLAIN, 11f));
         headersHelpLabel.setForeground(Color.GRAY);
-        formPanel.add(headersHelpLabel, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.weighty = 1.0; gbc.fill = GridBagConstraints.BOTH;
-        headersArea = new JTextArea(8, 30);
+        JPanel headersContainer = new JPanel(new BorderLayout(4, 4));
+        headersContainer.add(headersHelpLabel, BorderLayout.NORTH);
+
+        headersArea = new JTextArea(12, 34);
         headersArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        headersArea.setLineWrap(true);
+        headersArea.setWrapStyleWord(true);
         JScrollPane headersScroll = new JScrollPane(headersArea);
-        headersScroll.setPreferredSize(new Dimension(380, 160));
-        formPanel.add(headersScroll, gbc);
+        headersScroll.setPreferredSize(new Dimension(440, 220));
+        headersContainer.add(headersScroll, BorderLayout.CENTER);
+
+        headersBlock.add(headersContainer, BorderLayout.CENTER);
+        formPanel.add(headersBlock);
 
         contentPane.add(formPanel, BorderLayout.CENTER);
 

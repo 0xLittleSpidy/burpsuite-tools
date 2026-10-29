@@ -52,7 +52,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     private ResultsTableModel resultsTableModel;
     private JTable resultsTable;
     private TableRowSorter<ResultsTableModel> resultsSorter;
-    private JComboBox<String> outcomeFilterCombo;
+    private MethodFilterDropDown_littlespidy methodFilterDropDown;
     private ProfileStatusFilterDropDown_littlespidy statusFilterDropDown;
     private ClassificationFilterDropDown_littlespidy classificationFilterDropDown;
     private JButton deleteRunnerBtn;
@@ -60,7 +60,6 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     // Per-profile columns and endpoint-based result rows matching ng-auth-analyzer_littlespidy
     private final List<EndpointResultRow_littlespidy> endpointRows = new ArrayList<>();
     private final List<ProfileColumnDef_littlespidy> displayedProfiles = new ArrayList<>();
-    private final OutcomeCellRenderer outcomeCellRenderer = new OutcomeCellRenderer();
 
     // Runner History Management
     private final List<AuthTestRun_littlespidy> savedRuns = new ArrayList<>();
@@ -161,16 +160,9 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         deleteRunnerBtn.addActionListener(e -> onDeleteCurrentRunner());
         leftFilter.add(deleteRunnerBtn);
 
-        leftFilter.add(new JLabel("Outcome:"));
-        outcomeFilterCombo = new JComboBox<>(new String[]{
-                "All Outcomes",
-                "Status SAME (Bypassed)",
-                "Status SIMILAR (Potential Bypass)",
-                "Status DIFFERENT (Enforced)",
-                "Status N/A"
-        });
-        outcomeFilterCombo.addActionListener(e -> applyAllFilters());
-        leftFilter.add(outcomeFilterCombo);
+        methodFilterDropDown = new MethodFilterDropDown_littlespidy();
+        methodFilterDropDown.addFilterChangeListener(this::applyAllFilters);
+        leftFilter.add(methodFilterDropDown);
 
         statusFilterDropDown = new ProfileStatusFilterDropDown_littlespidy();
         statusFilterDropDown.addFilterChangeListener(this::applyAllFilters);
@@ -202,17 +194,6 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         resultsTableModel = new ResultsTableModel();
         resultsTable = new JTable(resultsTableModel) {
             private static final long serialVersionUID = 1L;
-            @Override
-            public TableCellRenderer getCellRenderer(int row, int column) {
-                // Profile outcome columns are even offsets starting from index 3
-                if (column >= 3) {
-                    int rel = column - 3;
-                    if ((rel % 2) == 0) {
-                        return outcomeCellRenderer;
-                    }
-                }
-                return super.getCellRenderer(row, column);
-            }
 
             @Override
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -222,23 +203,20 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 String cl = (modelRow >= 0 && modelRow < endpointRows.size())
                         ? endpointRows.get(modelRow).getClassification()
                         : null;
-                boolean isOutcomeCol = (column >= 3 && ((column - 3) % 2 == 0));
 
                 if (isSelected) {
                     c.setBackground(getSelectionBackground());
                     c.setForeground(getSelectionForeground());
                 } else {
-                    if (!isOutcomeCol) {
-                        if ("TRUE_POSITIVE".equalsIgnoreCase(cl)) {
-                            c.setBackground(new Color(220, 248, 224));
-                            c.setForeground(new Color(0, 100, 0));
-                        } else if ("FALSE_POSITIVE".equalsIgnoreCase(cl)) {
-                            c.setBackground(new Color(255, 230, 230));
-                            c.setForeground(new Color(160, 0, 0));
-                        } else {
-                            c.setBackground(getBackground());
-                            c.setForeground(getForeground());
-                        }
+                    if ("TRUE_POSITIVE".equalsIgnoreCase(cl)) {
+                        c.setBackground(new Color(220, 248, 224));
+                        c.setForeground(new Color(0, 100, 0));
+                    } else if ("FALSE_POSITIVE".equalsIgnoreCase(cl)) {
+                        c.setBackground(new Color(255, 230, 230));
+                        c.setForeground(new Color(160, 0, 0));
+                    } else {
+                        c.setBackground(getBackground());
+                        c.setForeground(getForeground());
                     }
                 }
                 return c;
@@ -498,6 +476,11 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             }
         }
         resultsTableModel.fireTableStructureChanged();
+        for (AuthTestResult_littlespidy r : results) {
+            if (methodFilterDropDown != null && r.getMethod() != null) {
+                methodFilterDropDown.registerMethod(r.getMethod());
+            }
+        }
         if (statusFilterDropDown != null) {
             statusFilterDropDown.updateOptions(results);
         }
@@ -575,6 +558,9 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
             if (configTab != null) {
                 configTab.updateProgress(completedCount, totalCount, "");
+            }
+            if (methodFilterDropDown != null && result.getMethod() != null) {
+                methodFilterDropDown.registerMethod(result.getMethod());
             }
             if (statusFilterDropDown != null) {
                 statusFilterDropDown.updateOptions(results);
@@ -655,16 +641,15 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
             int code = r.getAuthStatusCode();
             int len = r.getAuthResponseLength();
-            String compOutcome = computeComparativeOutcome(def.getId(), selectedEndpointRow);
-            String info = (code > 0 ? code : "-") + " | " + (len >= 0 ? len + " B" : "-") + " | " + compOutcome;
+            String info = (code > 0 ? ("Status: " + code) : "Status: -") + " | " + (len >= 0 ? len + " B" : "-");
 
             Color colHeaderBg = null;
-            if ("SAME".equalsIgnoreCase(compOutcome)) {
-                colHeaderBg = new Color(255, 51, 51, 90);
-            } else if ("SIMILAR".equalsIgnoreCase(compOutcome)) {
-                colHeaderBg = new Color(255, 153, 0, 90);
-            } else if ("DIFFERENT".equalsIgnoreCase(compOutcome)) {
-                colHeaderBg = new Color(0, 255, 51, 90);
+            if (code >= 200 && code < 300) {
+                colHeaderBg = new Color(0, 255, 51, 60);
+            } else if (code >= 400 && code < 500) {
+                colHeaderBg = new Color(255, 153, 0, 60);
+            } else if (code >= 500) {
+                colHeaderBg = new Color(255, 51, 51, 60);
             } else {
                 colHeaderBg = new Color(225, 238, 255);
             }
@@ -690,8 +675,6 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
     public void applyAllFilters() {
         if (resultsSorter == null) return;
-        String sel = outcomeFilterCombo != null ? (String) outcomeFilterCombo.getSelectedItem() : "All Outcomes";
-        boolean hasOutcomeFilter = sel != null && !"All Outcomes".equals(sel);
 
         RowFilter<ResultsTableModel, Integer> filter = new RowFilter<>() {
             @Override
@@ -702,19 +685,9 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                 }
                 EndpointResultRow_littlespidy epRow = endpointRows.get(rowIdx);
 
-                // 1. Outcome filter
-                if (hasOutcomeFilter) {
-                    boolean outcomeMatch = false;
-                    for (ProfileColumnDef_littlespidy def : displayedProfiles) {
-                        String outcome = computeComparativeOutcome(def.getId(), epRow);
-                        if (sel.contains("SAME") && "SAME".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
-                        if (sel.contains("SIMILAR") && "SIMILAR".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
-                        if (sel.contains("DIFFERENT") && "DIFFERENT".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
-                        if (sel.contains("N/A") && "N/A".equalsIgnoreCase(outcome)) { outcomeMatch = true; break; }
-                    }
-                    if (!outcomeMatch) {
-                        return false;
-                    }
+                // 1. Dynamic HTTP Method filter
+                if (methodFilterDropDown != null && !methodFilterDropDown.isMethodSelected(epRow.getMethod())) {
+                    return false;
                 }
 
                 // 2. Profile - Status Code filter
@@ -1002,6 +975,11 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         results.clear();
         if (list != null) {
             results.addAll(list);
+            for (AuthTestResult_littlespidy r : list) {
+                if (methodFilterDropDown != null && r.getMethod() != null) {
+                    methodFilterDropDown.registerMethod(r.getMethod());
+                }
+            }
         }
         rebuildModel();
         if (savedRuns.isEmpty() && !results.isEmpty()) {
@@ -1014,6 +992,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             statusFilterDropDown.updateOptions(results);
         }
         applyAllFilters();
+    }
+
+    public MethodFilterDropDown_littlespidy getMethodFilterDropDown() {
+        return methodFilterDropDown;
     }
 
     // --- Table Models & Renderers ---
@@ -1358,19 +1340,16 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         private final String[] baseColumns = {"Collection", "Method", "Path"};
 
         @Override public int getRowCount() { return endpointRows.size(); }
-        @Override public int getColumnCount() { return baseColumns.length + (displayedProfiles.size() * 2); }
+        @Override public int getColumnCount() { return baseColumns.length + displayedProfiles.size(); }
 
         @Override
         public String getColumnName(int col) {
             if (col < baseColumns.length) {
                 return baseColumns[col];
             }
-            int rel = col - baseColumns.length;
-            int profileIdx = rel / 2;
-            boolean isStatusCodeCol = (rel % 2) != 0;
+            int profileIdx = col - baseColumns.length;
             if (profileIdx < displayedProfiles.size()) {
-                String profName = displayedProfiles.get(profileIdx).getDisplayName();
-                return isStatusCodeCol ? (profName + " - Status Code") : profName;
+                return displayedProfiles.get(profileIdx).getDisplayName();
             }
             return "";
         }
@@ -1385,67 +1364,16 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
             if (col == 1) return epRow.getMethod();
             if (col == 2) return epRow.getPath();
 
-            int rel = col - baseColumns.length;
-            int profileIdx = rel / 2;
-            boolean isStatusCodeCol = (rel % 2) != 0;
+            int profileIdx = col - baseColumns.length;
             if (profileIdx < displayedProfiles.size()) {
                 ProfileColumnDef_littlespidy def = displayedProfiles.get(profileIdx);
-                if (!isStatusCodeCol) {
-                    return computeComparativeOutcome(def.getId(), epRow);
-                } else {
-                    AuthTestResult_littlespidy res = epRow.getProfileResults().get(def.getId());
-                    if (res != null && res.getAuthStatusCode() > 0) {
-                        return String.valueOf(res.getAuthStatusCode());
-                    }
-                    return "-";
+                AuthTestResult_littlespidy res = epRow.getProfileResults().get(def.getId());
+                if (res != null && res.getAuthStatusCode() > 0) {
+                    return String.valueOf(res.getAuthStatusCode());
                 }
+                return "-";
             }
-            return isStatusCodeCol ? "-" : "N/A";
-        }
-    }
-
-    private class OutcomeCellRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-            if (isSelected) {
-                c.setBackground(table.getSelectionBackground());
-                c.setForeground(table.getSelectionForeground());
-                c.setFont(c.getFont().deriveFont(Font.PLAIN));
-            } else {
-                String str = value != null ? value.toString() : "";
-                int modelRow = table.convertRowIndexToModel(row);
-                String cl = (modelRow >= 0 && modelRow < endpointRows.size())
-                        ? endpointRows.get(modelRow).getClassification()
-                        : null;
-
-                if ("SAME".equalsIgnoreCase(str)) {
-                    c.setBackground(new Color(255, 51, 51, 80)); // Red (Bypass / IDOR)
-                    c.setForeground(new Color(180, 0, 0));
-                    c.setFont(c.getFont().deriveFont(Font.BOLD));
-                } else if ("SIMILAR".equalsIgnoreCase(str)) {
-                    c.setBackground(new Color(255, 153, 0, 80)); // Orange (Potential Bypass)
-                    c.setForeground(new Color(204, 102, 0));
-                    c.setFont(c.getFont().deriveFont(Font.BOLD));
-                } else if ("DIFFERENT".equalsIgnoreCase(str)) {
-                    c.setBackground(new Color(0, 255, 51, 80)); // Green (Enforced)
-                    c.setForeground(new Color(0, 128, 0));
-                    c.setFont(c.getFont().deriveFont(Font.PLAIN));
-                } else {
-                    if ("TRUE_POSITIVE".equalsIgnoreCase(cl)) {
-                        c.setBackground(new Color(220, 248, 224));
-                        c.setForeground(new Color(0, 100, 0));
-                    } else if ("FALSE_POSITIVE".equalsIgnoreCase(cl)) {
-                        c.setBackground(new Color(255, 230, 230));
-                        c.setForeground(new Color(160, 0, 0));
-                    } else {
-                        c.setBackground(table.getBackground());
-                        c.setForeground(table.getForeground());
-                    }
-                    c.setFont(c.getFont().deriveFont(Font.PLAIN));
-                }
-            }
-            return c;
+            return "-";
         }
     }
 

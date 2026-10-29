@@ -60,6 +60,17 @@ public class APIImportTab_littlespidy extends JPanel {
 
     private final List<Runnable> stateChangedListeners = new ArrayList<>();
 
+    public interface CollectionSelectionListener {
+        void onCollectionSelected(ImportedCollection_littlespidy collection);
+    }
+    private final List<CollectionSelectionListener> collectionSelectionListeners = new ArrayList<>();
+
+    public void addCollectionSelectionListener(CollectionSelectionListener listener) {
+        if (listener != null) {
+            this.collectionSelectionListeners.add(listener);
+        }
+    }
+
     public interface SendToVersionFinderCallback {
         void onSendToVersionFinder(ImportedCollection_littlespidy collection, DiscoveredEndpoint_littlespidy endpoint);
     }
@@ -547,6 +558,11 @@ public class APIImportTab_littlespidy extends JPanel {
             baseUrlField.setText("");
             updateEndpointSummary(Collections.emptyList());
             updateGroupedView();
+            for (CollectionSelectionListener l : new ArrayList<>(collectionSelectionListeners)) {
+                try {
+                    l.onCollectionSelected(null);
+                } catch (Exception ignored) {}
+            }
             return;
         }
         int modelRow = collectionTable.convertRowIndexToModel(row);
@@ -562,6 +578,12 @@ public class APIImportTab_littlespidy extends JPanel {
 
         updateEndpointSummary(col.getEndpoints());
         filterEndpoints();
+
+        for (CollectionSelectionListener l : new ArrayList<>(collectionSelectionListeners)) {
+            try {
+                l.onCollectionSelected(col);
+            } catch (Exception ignored) {}
+        }
     }
 
     private void updateEndpointSummary(List<DiscoveredEndpoint_littlespidy> endpoints) {

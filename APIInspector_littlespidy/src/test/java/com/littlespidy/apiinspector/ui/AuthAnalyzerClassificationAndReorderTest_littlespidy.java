@@ -237,11 +237,9 @@ public class AuthAnalyzerClassificationAndReorderTest_littlespidy {
         // Results table should have Alpha, then Beta
         JTable resultsTable = getResultsTable(testingTab);
         assertNotNull(resultsTable);
-        // Column 3 is first profile outcome column
+        assertEquals(5, resultsTable.getColumnCount());
         assertEquals("Alpha", resultsTable.getColumnName(3));
-        assertEquals("Alpha - Status Code", resultsTable.getColumnName(4));
-        assertEquals("Beta", resultsTable.getColumnName(5));
-        assertEquals("Beta - Status Code", resultsTable.getColumnName(6));
+        assertEquals("Beta", resultsTable.getColumnName(4));
 
         // Reorder using swap in profiles list
         List<AuthProfile_littlespidy> reordered = new ArrayList<>(List.of(p2, p1));
@@ -251,10 +249,9 @@ public class AuthAnalyzerClassificationAndReorderTest_littlespidy {
         assertEquals("Beta", configTab.getAllProfiles().get(0).getName());
         assertEquals("Alpha", configTab.getAllProfiles().get(1).getName());
 
+        assertEquals(5, resultsTable.getColumnCount());
         assertEquals("Beta", resultsTable.getColumnName(3));
-        assertEquals("Beta - Status Code", resultsTable.getColumnName(4));
-        assertEquals("Alpha", resultsTable.getColumnName(5));
-        assertEquals("Alpha - Status Code", resultsTable.getColumnName(6));
+        assertEquals("Alpha", resultsTable.getColumnName(4));
     }
 
     @Test
