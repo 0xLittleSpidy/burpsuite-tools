@@ -1,0 +1,1194 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Inspector - Input Validation Integration UI Preview - littlespidy</title>
+  <style>
+    :root {
+      --bg-primary: #2b2b2b;
+      --bg-secondary: #3c3f41;
+      --bg-tertiary: #1e1e1e;
+      --text-primary: #bbbbbb;
+      --text-highlight: #ffffff;
+      --text-muted: #888888;
+      --border-color: #555555;
+      --accent: #ff6633;
+      --accent-hover: #e65522;
+      --btn-bg: #4c5052;
+      --btn-hover: #5c6164;
+      --table-stripe: #313335;
+      --table-select: #2d5a88;
+      --badge-high: #c75450;
+      --badge-med: #e59866;
+      --badge-low: #499c54;
+      --badge-info: #6897bb;
+      --code-bg: #1e1e1e;
+    }
+
+    body.light-theme {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #fafafa;
+      --text-primary: #333333;
+      --text-highlight: #000000;
+      --text-muted: #666666;
+      --border-color: #d0d0d0;
+      --accent: #e05510;
+      --accent-hover: #c9490b;
+      --btn-bg: #e4e4e4;
+      --btn-hover: #d5d5d5;
+      --table-stripe: #f9f9f9;
+      --table-select: #b3d7ff;
+      --badge-high: #d32f2f;
+      --badge-med: #f57c00;
+      --badge-low: #388e3c;
+      --badge-info: #1976d2;
+      --code-bg: #f8f8f8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 8px;
+    }
+
+    .title-area h1 {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--accent);
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .title-area span {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button, select, input {
+      background-color: var(--btn-bg);
+      color: var(--text-highlight);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    button:hover {
+      background-color: var(--btn-hover);
+    }
+
+    button.primary-btn {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent-hover);
+      font-weight: bold;
+    }
+
+    button.primary-btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    /* Suite Tab Bar */
+    .suite-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: var(--bg-secondary);
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .suite-tab {
+      padding: 7px 12px;
+      cursor: pointer;
+      border-right: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-weight: 500;
+      background: transparent;
+      user-select: none;
+    }
+
+    .suite-tab:hover {
+      color: var(--text-highlight);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .suite-tab.active {
+      color: var(--text-highlight);
+      background-color: var(--bg-primary);
+      border-bottom: 2px solid var(--accent);
+      font-weight: bold;
+    }
+
+    .suite-tab.new-feature-badge::after {
+      content: " [NEW]";
+      color: var(--accent);
+      font-size: 9px;
+      font-weight: bold;
+    }
+
+    /* Content Views */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Config View Styles */
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .panel-box {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 8px;
+    }
+
+    .panel-box h3 {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--text-highlight);
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .analyzer-toggles-box {
+      grid-column: 1 / -1;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    .analyzer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .analyzer-row:last-child {
+      border-bottom: none;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: bold;
+      color: var(--text-highlight);
+      cursor: pointer;
+    }
+
+    .analyzer-desc {
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-left: 20px;
+      margin-top: 2px;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-tertiary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--bg-secondary);
+      color: var(--text-highlight);
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--table-stripe);
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    tr.selected {
+      background-color: var(--table-select) !important;
+      color: #ffffff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .badge-high { background-color: var(--badge-high); }
+    .badge-med { background-color: var(--badge-med); }
+    .badge-low { background-color: var(--badge-low); }
+    .badge-info { background-color: var(--badge-info); }
+
+    /* Control Bar */
+    .control-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      margin-bottom: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Side-by-side Request/Response Viewer */
+    .viewer-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+      height: 280px;
+    }
+
+    .viewer-box {
+      border: 1px solid var(--border-color);
+      background-color: var(--code-bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .viewer-header {
+      background-color: var(--bg-secondary);
+      padding: 4px 8px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: bold;
+    }
+
+    .viewer-content {
+      padding: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      overflow: auto;
+      flex: 1;
+      white-space: pre-wrap;
+      color: var(--text-highlight);
+    }
+
+    /* Modal Dialog */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.65);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      width: 580px;
+      max-width: 90vw;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .modal-body {
+      padding: 12px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
+      color: var(--text-highlight);
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 6px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      margin-bottom: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 3px;
+      display: none;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header>
+    <div class="title-area">
+      <h1>API Inspector (littlespidy)</h1>
+      <span>Burp Suite Montoya Extension - Input Validation Integration</span>
+    </div>
+    <div class="header-actions">
+      <span>Storage: <strong>/home/littlespidy/sessions/project1</strong></span>
+      <button onclick="showToast('Directory switcher dialog opened')">Change Folder</button>
+      <button onclick="toggleTheme()" id="themeBtn">Theme: Light</button>
+    </div>
+  </header>
+
+  <!-- Main Suite Tabs Bar -->
+  <nav class="suite-tabs">
+    <div class="suite-tab" onclick="switchSuiteTab('import')">API Import</div>
+    <div class="suite-tab" onclick="switchSuiteTab('viewer')">Request & Response Viewer</div>
+    <div class="suite-tab" onclick="switchSuiteTab('params')">Parameter Collector</div>
+    <div class="suite-tab active" onclick="switchSuiteTab('config')">Auth Analyzer Config</div>
+    <div class="suite-tab" onclick="switchSuiteTab('auth')">Auth Analyzer</div>
+    <div class="suite-tab new-feature-badge" onclick="switchSuiteTab('iv-single')">Input Validation</div>
+    <div class="suite-tab new-feature-badge" onclick="switchSuiteTab('iv-import')">Input Validation Import</div>
+    <div class="suite-tab" onclick="switchSuiteTab('version')">REST API Version Finder</div>
+    <div class="suite-tab" onclick="switchSuiteTab('doc')">API Documentation Strategy</div>
+    <div class="suite-tab" onclick="switchSuiteTab('discovery')">API Endpoint Discovery Strategy</div>
+    <div class="suite-tab" onclick="switchSuiteTab('hidden')">Hidden API Storage</div>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- TAB 1: AUTH ANALYZER CONFIG TAB -->
+  <!-- ========================================== -->
+  <div id="view-config" class="tab-content active">
+
+    <!-- Analyzers Selection Panel (Modeled after CORS in ng-auth-analyzer) -->
+    <section class="analyzer-toggles-box">
+      <h3>
+        <span>Analyzers Selection (Independent Toggles)</span>
+        <span style="font-size:10px; color:var(--text-muted); font-weight:normal;">Configure active assessment modules for Attack / Test Selected</span>
+      </h3>
+
+      <!-- Auth Analyzer Toggle -->
+      <div class="analyzer-row">
+        <div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="toggleAuthAnalyzer" checked>
+            <span>Auth Analyzer</span>
+          </label>
+          <div class="analyzer-desc">Evaluates authentication and authorization bypasses (BOLA/IDOR) across defined session profiles.</div>
+        </div>
+        <div>
+          <span style="color:var(--text-muted); font-size:11px;">Status: Active</span>
+        </div>
+      </div>
+
+      <!-- Input Validation Toggle & Options Button -->
+      <div class="analyzer-row">
+        <div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="toggleInputValidation" checked>
+            <span>Input Validation</span>
+          </label>
+          <div class="analyzer-desc">Automated parameter fuzzing for boundary limits, SQL errors, stack traces, and unencoded reflection.</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button onclick="openOptionsModal()" style="font-weight:bold;">Input Validation Options</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top & Center Split: Profiles & Endpoints -->
+    <div class="config-grid">
+      <!-- Profiles Panel -->
+      <div class="panel-box">
+        <h3>
+          <span>Authentication Profiles</span>
+          <div>
+            <button onclick="showToast('New Profile dialog opened')">New Profile</button>
+            <button onclick="showToast('Edit Profile dialog opened')">Edit Profile</button>
+            <button onclick="showToast('Duplicate Profile')">Duplicate</button>
+            <button onclick="showToast('Delete Profile')">Delete</button>
+          </div>
+        </h3>
+        <div class="table-container" style="height: 140px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Test</th>
+                <th>Profile Name</th>
+                <th>Type</th>
+                <th>Headers / Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected">
+                <td><input type="checkbox" checked></td>
+                <td><strong>Admin Profile</strong></td>
+                <td>Bearer Token</td>
+                <td>Authorization: Bearer eyJhbGciOi...</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked></td>
+                <td><strong>Standard User</strong></td>
+                <td>Cookie Session</td>
+                <td>Cookie: sessionid=usr_8829104...</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked></td>
+                <td><strong>Low Privilege</strong></td>
+                <td>API Key</td>
+                <td>X-API-KEY: test_key_9948123...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Endpoints Selection Panel -->
+      <div class="panel-box">
+        <h3>
+          <span>Endpoints to Test</span>
+          <div class="control-group">
+            <label style="color:var(--text-muted); font-size:11px;">Collection:</label>
+            <select style="width:160px;">
+              <option>Banking API v1 (34 endpoints)</option>
+              <option>Petstore API v2 (18 endpoints)</option>
+            </select>
+            <button onclick="showToast('Refreshed collection endpoints')">Refresh</button>
+          </div>
+        </h3>
+        <div class="table-container" style="height: 140px;">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" checked></th>
+                <th>Method</th>
+                <th>Endpoint Path</th>
+                <th>Params</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected">
+                <td><input type="checkbox" checked></td>
+                <td><span class="badge" style="background:#499c54;">GET</span></td>
+                <td>/api/v1/accounts/{accountId}/balance</td>
+                <td>1 path, 2 query</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked></td>
+                <td><span class="badge" style="background:#ff6633;">POST</span></td>
+                <td>/api/v1/transfers/send</td>
+                <td>3 body (JSON)</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked></td>
+                <td><span class="badge" style="background:#6897bb;">PUT</span></td>
+                <td>/api/v1/users/profile</td>
+                <td>4 body (JSON)</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" checked></td>
+                <td><span class="badge" style="background:#c75450;">DELETE</span></td>
+                <td>/api/v1/beneficiaries/{id}</td>
+                <td>1 path</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Execution Controls Panel -->
+    <div class="panel-box">
+      <h3><span>Execution Controls</span></h3>
+      <div class="control-bar" style="margin-bottom:0; border:none; background:transparent;">
+        <div class="control-group">
+          <label>Threads:</label>
+          <input type="number" value="4" style="width:50px;">
+          <label style="margin-left:8px;">Delay (ms):</label>
+          <input type="number" value="50" style="width:60px;">
+          <label style="margin-left:8px;">Runner Name:</label>
+          <input type="text" value="Runner 1" style="width:100px;">
+        </div>
+        <div class="control-group">
+          <button class="primary-btn" onclick="executeConfigAttack()">Attack</button>
+          <button onclick="executeConfigAttack(true)">Test Selected</button>
+          <button disabled>Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 2: INPUT VALIDATION (SINGLE / AD-HOC) -->
+  <!-- ========================================== -->
+  <div id="view-iv-single" class="tab-content">
+    <div class="control-bar">
+      <div class="control-group">
+        <label>Target:</label>
+        <select style="width:70px;">
+          <option>POST</option>
+          <option>GET</option>
+          <option>PUT</option>
+        </select>
+        <input type="text" value="https://api.internal.bank/api/v1/transfers/send" style="width:340px;">
+        <label>Params Detected: <strong>3</strong> (amount, recipientId, note)</label>
+      </div>
+      <div class="control-group">
+        <button class="primary-btn" onclick="showToast('Ad-hoc Fuzzing Started')">Start Fuzzing</button>
+        <button onclick="showToast('Paused')">Pause</button>
+        <button onclick="showToast('Cleared results')">Clear</button>
+        <button onclick="exportCSV('single')">Export CSV</button>
+        <button onclick="exportXML('single')">Export XML</button>
+      </div>
+    </div>
+
+    <div class="control-bar" style="background-color: var(--bg-tertiary);">
+      <div class="control-group">
+        <label>Filter Anomaly:</label>
+        <select id="ivSingleAnomalyFilter" onchange="filterTable('ivSingleTable', this.value, 8)">
+          <option value="">All Anomalies</option>
+          <option value="5xx Server Error">5xx Server Error</option>
+          <option value="Error Signature">Error Signature</option>
+          <option value="Payload Reflection">Payload Reflection</option>
+          <option value="Size Shift">Size Shift</option>
+        </select>
+        <label style="margin-left:8px;">Severity:</label>
+        <select id="ivSingleSevFilter" onchange="filterTable('ivSingleTable', this.value, 9)">
+          <option value="">All Severities</option>
+          <option value="HIGH">HIGH</option>
+          <option value="MED">MED</option>
+          <option value="LOW">LOW</option>
+          <option value="INFO">INFO</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span>Showing 6 of 6 findings</span>
+      </div>
+    </div>
+
+    <!-- Findings Table -->
+    <div class="table-container" style="height: 180px;">
+      <table id="ivSingleTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Method</th>
+            <th>Target URL</th>
+            <th>Param</th>
+            <th>Type</th>
+            <th>Payload Injected</th>
+            <th>Status</th>
+            <th>Length</th>
+            <th>Anomaly Type</th>
+            <th>Severity</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected" onclick="selectRow(this, 'single', 0)">
+            <td>1</td>
+            <td>POST</td>
+            <td>https://api.internal.bank/api/v1/transfers/send</td>
+            <td>amount</td>
+            <td>JSON</td>
+            <td>-1</td>
+            <td>500</td>
+            <td>1,420</td>
+            <td>5xx Server Error</td>
+            <td><span class="badge badge-high">HIGH</span></td>
+            <td>12:35:01</td>
+          </tr>
+          <tr onclick="selectRow(this, 'single', 1)">
+            <td>2</td>
+            <td>POST</td>
+            <td>https://api.internal.bank/api/v1/transfers/send</td>
+            <td>recipientId</td>
+            <td>JSON</td>
+            <td>'\"&gt;&lt;;|\\\][}{`$</td>
+            <td>500</td>
+            <td>3,892</td>
+            <td>Error Signature</td>
+            <td><span class="badge badge-high">HIGH</span></td>
+            <td>12:35:02</td>
+          </tr>
+          <tr onclick="selectRow(this, 'single', 2)">
+            <td>3</td>
+            <td>POST</td>
+            <td>https://api.internal.bank/api/v1/transfers/send</td>
+            <td>note</td>
+            <td>JSON</td>
+            <td>'\"&gt;&lt;script&gt;</td>
+            <td>200</td>
+            <td>1,120</td>
+            <td>Payload Reflection</td>
+            <td><span class="badge badge-med">MED</span></td>
+            <td>12:35:03</td>
+          </tr>
+          <tr onclick="selectRow(this, 'single', 3)">
+            <td>4</td>
+            <td>POST</td>
+            <td>https://api.internal.bank/api/v1/transfers/send</td>
+            <td>amount</td>
+            <td>JSON</td>
+            <td>99999999999999999999</td>
+            <td>400</td>
+            <td>4,520</td>
+            <td>Size Shift</td>
+            <td><span class="badge badge-low">LOW</span></td>
+            <td>12:35:04</td>
+          </tr>
+          <tr onclick="selectRow(this, 'single', 4)">
+            <td>5</td>
+            <td>POST</td>
+            <td>https://api.internal.bank/api/v1/transfers/send</td>
+            <td>recipientId</td>
+            <td>JSON</td>
+            <td>%00</td>
+            <td>200</td>
+            <td>612</td>
+            <td>Baseline Match</td>
+            <td><span class="badge badge-info">INFO</span></td>
+            <td>12:35:05</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Side-by-side Request/Response Viewer -->
+    <div class="viewer-split">
+      <div class="viewer-box">
+        <div class="viewer-header">
+          <span>Fuzzed Request (Param: amount | Injected: -1)</span>
+          <span>HTTP/1.1</span>
+        </div>
+        <div class="viewer-content" id="singleReqContent">POST /api/v1/transfers/send HTTP/1.1
+Host: api.internal.bank
+Authorization: Bearer eyJhbGciOi...
+Content-Type: application/json
+Content-Length: 64
+
+{
+  "recipientId": "usr_9912",
+  "amount": -1,
+  "note": "Payment"
+}</div>
+      </div>
+      <div class="viewer-box">
+        <div class="viewer-header">
+          <span>Response (Anomaly: 5xx Server Error)</span>
+          <span style="color:var(--badge-high); font-weight:bold;">500 Internal Server Error</span>
+        </div>
+        <div class="viewer-content" id="singleResContent">HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+Content-Length: 1420
+
+{
+  "timestamp": "2026-10-29T07:05:01.120Z",
+  "status": 500,
+  "error": "Internal Server Error",
+  "message": "java.lang.IllegalArgumentException: Negative transfer amounts are prohibited in AccountLedger.debit()",
+  "trace": "com.bank.service.TransferService.execute(TransferService.java:184)\n\tat com.bank.controller.TransferController.send(TransferController.java:55)"
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 3: INPUT VALIDATION IMPORT (BATCH) -->
+  <!-- ========================================== -->
+  <div id="view-iv-import" class="tab-content">
+    <div class="control-bar">
+      <div class="control-group">
+        <label>Target Collection:</label>
+        <select style="width:240px;" onchange="showToast('Switched batch collection to ' + this.value)">
+          <option>Banking API v1 (34 endpoints - Batch Runner 1)</option>
+          <option>Petstore API v2 (18 endpoints - Batch Runner 2)</option>
+        </select>
+        <span style="color:var(--text-muted); font-size:11px;">Endpoints Tested: 34 | Fuzz Requests: 204</span>
+      </div>
+      <div class="control-group">
+        <button class="primary-btn" onclick="showToast('Re-running batch fuzz attack')">Re-run Batch</button>
+        <button onclick="exportCSV('import')">Export CSV</button>
+        <button onclick="exportXML('import')">Export XML</button>
+      </div>
+    </div>
+
+    <div class="control-bar" style="background-color: var(--bg-tertiary);">
+      <div class="control-group">
+        <label>Filter Anomaly:</label>
+        <select id="ivImportAnomalyFilter" onchange="filterTable('ivImportTable', this.value, 8)">
+          <option value="">All Anomalies</option>
+          <option value="5xx Server Error">5xx Server Error</option>
+          <option value="Error Signature">Error Signature</option>
+          <option value="Payload Reflection">Payload Reflection</option>
+        </select>
+        <label style="margin-left:8px;">Severity:</label>
+        <select id="ivImportSevFilter" onchange="filterTable('ivImportTable', this.value, 9)">
+          <option value="">All Severities</option>
+          <option value="HIGH">HIGH</option>
+          <option value="MED">MED</option>
+          <option value="LOW">LOW</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span>Showing 4 batch vulnerabilities detected</span>
+      </div>
+    </div>
+
+    <!-- Batch Findings Table -->
+    <div class="table-container" style="height: 180px;">
+      <table id="ivImportTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Method</th>
+            <th>Target URL / Endpoint</th>
+            <th>Param</th>
+            <th>Type</th>
+            <th>Payload Injected</th>
+            <th>Status</th>
+            <th>Length</th>
+            <th>Anomaly Type</th>
+            <th>Severity</th>
+            <th>Disclosed Evidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected" onclick="selectRow(this, 'import', 0)">
+            <td>1</td>
+            <td><span class="badge" style="background:#ff6633;">POST</span></td>
+            <td>/api/v1/transfers/send</td>
+            <td>amount</td>
+            <td>JSON</td>
+            <td>-1</td>
+            <td>500</td>
+            <td>1,420</td>
+            <td>5xx Server Error</td>
+            <td><span class="badge badge-high">HIGH</span></td>
+            <td>IllegalArgumentException: Negative transfer amounts</td>
+          </tr>
+          <tr onclick="selectRow(this, 'import', 1)">
+            <td>2</td>
+            <td><span class="badge" style="background:#499c54;">GET</span></td>
+            <td>/api/v1/accounts/{accountId}/balance</td>
+            <td>accountId</td>
+            <td>Path</td>
+            <td>' OR 1=1--</td>
+            <td>500</td>
+            <td>2,340</td>
+            <td>Error Signature</td>
+            <td><span class="badge badge-high">HIGH</span></td>
+            <td>SQLSTATE[42000]: Syntax error or access violation</td>
+          </tr>
+          <tr onclick="selectRow(this, 'import', 2)">
+            <td>3</td>
+            <td><span class="badge" style="background:#6897bb;">PUT</span></td>
+            <td>/api/v1/users/profile</td>
+            <td>bio</td>
+            <td>JSON</td>
+            <td>'\"&gt;&lt;script&gt;</td>
+            <td>200</td>
+            <td>1,840</td>
+            <td>Payload Reflection</td>
+            <td><span class="badge badge-med">MED</span></td>
+            <td>Unencoded reflection in response JSON body</td>
+          </tr>
+          <tr onclick="selectRow(this, 'import', 3)">
+            <td>4</td>
+            <td><span class="badge" style="background:#c75450;">DELETE</span></td>
+            <td>/api/v1/beneficiaries/{id}</td>
+            <td>id</td>
+            <td>Path</td>
+            <td>99999999999999999999</td>
+            <td>500</td>
+            <td>1,120</td>
+            <td>5xx Server Error</td>
+            <td><span class="badge badge-high">HIGH</span></td>
+            <td>java.lang.NumberFormatException: For input string</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Side-by-side Request/Response Viewer -->
+    <div class="viewer-split">
+      <div class="viewer-box">
+        <div class="viewer-header">
+          <span>Batch Request (/api/v1/accounts/{accountId}/balance)</span>
+          <span>HTTP/1.1</span>
+        </div>
+        <div class="viewer-content" id="importReqContent">GET /api/v1/accounts/'%20OR%201=1--/balance HTTP/1.1
+Host: api.internal.bank
+Authorization: Bearer eyJhbGciOi...
+Accept: application/json</div>
+      </div>
+      <div class="viewer-box">
+        <div class="viewer-header">
+          <span>Response (SQL Error Signature Disclosed)</span>
+          <span style="color:var(--badge-high); font-weight:bold;">500 Internal Server Error</span>
+        </div>
+        <div class="viewer-content" id="importResContent">HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+Content-Length: 2340
+
+{
+  "error": "Database Query Failed",
+  "detail": "SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax near '--/balance' at line 1"
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other Placeholder Tabs -->
+  <div id="view-import" class="tab-content">
+    <div class="panel-box"><h3><span>API Import</span></h3><p style="padding:10px;">API Collections Management, OpenAPI/Swagger/Postman ingestion.</p></div>
+  </div>
+  <div id="view-viewer" class="tab-content">
+    <div class="panel-box"><h3><span>Request & Response Viewer</span></h3><p style="padding:10px;">Side-by-side Request and Response viewer for imported collections.</p></div>
+  </div>
+  <div id="view-params" class="tab-content">
+    <div class="panel-box"><h3><span>Parameter Collector</span></h3><p style="padding:10px;">Query & Path Parameter inventory with one-click clipboard copying.</p></div>
+  </div>
+  <div id="view-auth" class="tab-content">
+    <div class="panel-box"><h3><span>Auth Analyzer</span></h3><p style="padding:10px;">Multi-profile authorization bypass matrix results table.</p></div>
+  </div>
+  <div id="view-version" class="tab-content">
+    <div class="panel-box"><h3><span>REST API Version Finder</span></h3><p style="padding:10px;">Dynamic version probing and representations auditor.</p></div>
+  </div>
+  <div id="view-doc" class="tab-content">
+    <div class="panel-box"><h3><span>API Documentation Strategy</span></h3><p style="padding:10px;">Right-to-left segment trimming Intruder dispatch tracking.</p></div>
+  </div>
+  <div id="view-discovery" class="tab-content">
+    <div class="panel-box"><h3><span>API Endpoint Discovery Strategy</span></h3><p style="padding:10px;">Prefix and path segment variation discovery.</p></div>
+  </div>
+  <div id="view-hidden" class="tab-content">
+    <div class="panel-box"><h3><span>Hidden API Storage</span></h3><p style="padding:10px;">Persistent inventory of discovered internal endpoints.</p></div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: INPUT VALIDATION OPTIONS DIALOG     -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="optionsModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Input Validation Fuzzing Options</h2>
+        <button onclick="closeOptionsModal()">X</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Target Parameter Locations:</label>
+          <div class="checkbox-grid">
+            <label class="checkbox-label"><input type="checkbox" checked> URL Query Parameters</label>
+            <label class="checkbox-label"><input type="checkbox" checked> Body (Form) Parameters</label>
+            <label class="checkbox-label"><input type="checkbox"> Cookie Parameters</label>
+            <label class="checkbox-label"><input type="checkbox" checked> JSON Body Parameters</label>
+            <label class="checkbox-label"><input type="checkbox" checked> XML Elements</label>
+            <label class="checkbox-label"><input type="checkbox" checked> Multipart Form Data</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Anomaly Detection Rules:</label>
+          <div class="checkbox-grid">
+            <label class="checkbox-label"><input type="checkbox" checked> Flag 5xx Server Errors</label>
+            <label class="checkbox-label"><input type="checkbox" checked> Flag 30+ Error Signatures (SQL, PHP, Java, etc.)</label>
+            <label class="checkbox-label"><input type="checkbox" checked> Flag Unencoded Payload Reflection</label>
+            <label class="checkbox-label"><input type="checkbox" checked> Flag Size Shifts >= 300%</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Active Payload Templates (6 configured):</label>
+          <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); padding:6px; font-family:monospace; font-size:11px;">
+            1. Empty string ("")<br>
+            2. Special characters ('\"&gt;&lt;;|\\\][}{`$)<br>
+            3. Long string (200 chars - "AAAA...")<br>
+            4. Negative integer (-1)<br>
+            5. Large integer (99999999999999999999)<br>
+            6. Null byte (%00)
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="primary-btn" onclick="saveOptions()">Save Configuration</button>
+        <button onclick="closeOptionsModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">Action performed</div>
+
+  <script>
+    // Suite Tab Switching
+    function switchSuiteTab(tabId) {
+      document.querySelectorAll('.suite-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      const map = {
+        'import': 'view-import',
+        'viewer': 'view-viewer',
+        'params': 'view-params',
+        'config': 'view-config',
+        'auth': 'view-auth',
+        'iv-single': 'view-iv-single',
+        'iv-import': 'view-iv-import',
+        'version': 'view-version',
+        'doc': 'view-doc',
+        'discovery': 'view-discovery',
+        'hidden': 'view-hidden'
+      };
+
+      const targetView = document.getElementById(map[tabId]);
+      if (targetView) {
+        targetView.classList.add('active');
+      }
+
+      event.currentTarget.classList.add('active');
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-theme');
+      document.getElementById('themeBtn').textContent = isLight ? 'Theme: Dark' : 'Theme: Light';
+    }
+
+    // Modal Controls
+    function openOptionsModal() {
+      document.getElementById('optionsModal').classList.add('open');
+    }
+
+    function closeOptionsModal() {
+      document.getElementById('optionsModal').classList.remove('open');
+    }
+
+    function saveOptions() {
+      closeOptionsModal();
+      showToast('Input Validation fuzzing options saved successfully');
+    }
+
+    // Config Attack Execution
+    function executeConfigAttack(selectedOnly) {
+      const authEnabled = document.getElementById('toggleAuthAnalyzer').checked;
+      const ivEnabled = document.getElementById('toggleInputValidation').checked;
+
+      if (!authEnabled && !ivEnabled) {
+        alert('Please enable at least one Analyzer (Auth Analyzer or Input Validation) in the Analyzers Selection panel.');
+        return;
+      }
+
+      let msg = selectedOnly ? 'Attacking selected endpoints: ' : 'Attacking all endpoints: ';
+      let targets = [];
+      if (authEnabled) targets.push('Auth Analyzer');
+      if (ivEnabled) targets.push('Input Validation Import');
+
+      msg += targets.join(' and ');
+      showToast(msg);
+
+      if (ivEnabled && !authEnabled) {
+        // Automatically switch to Input Validation Import tab
+        document.querySelectorAll('.suite-tab').forEach(t => {
+          if (t.textContent.includes('Input Validation Import')) t.click();
+        });
+      } else if (authEnabled) {
+        document.querySelectorAll('.suite-tab').forEach(t => {
+          if (t.textContent.trim() === 'Auth Analyzer') t.click();
+        });
+      }
+    }
+
+    // Row selection and viewer update
+    function selectRow(tr, type, idx) {
+      const table = tr.closest('table');
+      table.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+      tr.classList.add('selected');
+
+      if (type === 'single') {
+        const reqEl = document.getElementById('singleReqContent');
+        const resEl = document.getElementById('singleResContent');
+        if (idx === 0) {
+          reqEl.textContent = 'POST /api/v1/transfers/send HTTP/1.1\nHost: api.internal.bank\nContent-Type: application/json\n\n{\n  "recipientId": "usr_9912",\n  "amount": -1,\n  "note": "Payment"\n}';
+          resEl.textContent = 'HTTP/1.1 500 Internal Server Error\nContent-Type: application/json\n\n{\n  "status": 500,\n  "error": "Internal Server Error",\n  "message": "java.lang.IllegalArgumentException: Negative transfer amounts are prohibited"\n}';
+        } else if (idx === 1) {
+          reqEl.textContent = 'POST /api/v1/transfers/send HTTP/1.1\nHost: api.internal.bank\nContent-Type: application/json\n\n{\n  "recipientId": "\'\\"><;|\\\\][}{`$",\n  "amount": 100,\n  "note": "Payment"\n}';
+          resEl.textContent = 'HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\n\n<h1>Database Error</h1><p>SQLSTATE[42000]: Syntax error in query Near \'\\"><;|\\\\][}{`$</p>';
+        } else {
+          reqEl.textContent = 'POST /api/v1/transfers/send HTTP/1.1\nHost: api.internal.bank\nContent-Type: application/json\n\n{\n  "recipientId": "usr_9912",\n  "amount": 100,\n  "note": "\'\\"><script>"\n}';
+          resEl.textContent = 'HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  "status": "success",\n  "transferId": "tx_8819",\n  "note": "\'\\"><script>"\n}';
+        }
+      } else {
+        const reqEl = document.getElementById('importReqContent');
+        const resEl = document.getElementById('importResContent');
+        if (idx === 1) {
+          reqEl.textContent = 'GET /api/v1/accounts/\' OR 1=1--/balance HTTP/1.1\nHost: api.internal.bank\nAuthorization: Bearer eyJhbGciOi...';
+          resEl.textContent = 'HTTP/1.1 500 Internal Server Error\nContent-Type: application/json\n\n{\n  "error": "SQLSTATE[42000]: Syntax error or access violation"\n}';
+        } else {
+          reqEl.textContent = 'POST /api/v1/transfers/send HTTP/1.1\nHost: api.internal.bank\nContent-Type: application/json\n\n{\n  "recipientId": "usr_9912",\n  "amount": -1\n}';
+          resEl.textContent = 'HTTP/1.1 500 Internal Server Error\nContent-Type: application/json\n\n{\n  "error": "IllegalArgumentException: Negative transfer amounts"\n}';
+        }
+      }
+    }
+
+    // Filter Table
+    function filterTable(tableId, query, colIndex) {
+      const table = document.getElementById(tableId);
+      const rows = table.querySelectorAll('tbody tr');
+      query = query.toUpperCase();
+      rows.forEach(r => {
+        const cell = r.children[colIndex];
+        if (!cell) return;
+        const text = cell.textContent.toUpperCase();
+        r.style.display = (!query || text.includes(query)) ? '' : 'none';
+      });
+    }
+
+    // CSV & XML Exporters
+    function exportCSV(type) {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "#,Method,Target URL,Parameter,Type,Payload,Status,Length,Anomaly,Severity,Time\n"
+        + '1,POST,https://api.internal.bank/api/v1/transfers/send,amount,JSON,-1,500,1420,5xx Server Error,HIGH,12:35:01\n'
+        + '2,POST,https://api.internal.bank/api/v1/transfers/send,recipientId,JSON,\'\\"\\><;|\\\\][}{`$,500,3892,Error Signature,HIGH,12:35:02\n';
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `input_validation_results_${type}_littlespidy.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported CSV file successfully');
+    }
+
+    function exportXML(type) {
+      const xmlContent = "data:text/xml;charset=utf-8," 
+        + '<?xml version="1.0" encoding="UTF-8"?>\n'
+        + '<InputValidationReport author="littlespidy">\n'
+        + '  <Finding id="1" severity="HIGH">\n'
+        + '    <Method>POST</Method>\n'
+        + '    <Url>https://api.internal.bank/api/v1/transfers/send</Url>\n'
+        + '    <Parameter name="amount" type="JSON"/>\n'
+        + '    <Payload>-1</Payload>\n'
+        + '    <StatusCode>500</StatusCode>\n'
+        + '    <AnomalyType>5xx Server Error</AnomalyType>\n'
+        + '  </Finding>\n'
+        + '</InputValidationReport>';
+      const encodedUri = encodeURI(xmlContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `input_validation_results_${type}_littlespidy.xml`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported XML file successfully');
+    }
+
+    // Toast Helper
+    function showToast(text) {
+      const t = document.getElementById('toast');
+      t.textContent = text;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2500);
+    }
+  </script>
+</body>
+</html>
