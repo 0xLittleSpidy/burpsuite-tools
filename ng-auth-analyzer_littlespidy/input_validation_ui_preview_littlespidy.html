@@ -1042,7 +1042,18 @@ email='%5C%22%3E%3C%3B%7C%5C%5C%5D%5B%7D%7B%60%24</div>
         <!-- Row 3: Payloads Table with Actions -->
         <div class="modal-card" style="flex:1; display:flex; flex-direction:column; min-height:220px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <div class="card-title" style="margin-bottom:0;">Configured Payloads (Shown Like CORS Techniques)</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="card-title" style="margin-bottom:0;">Configured Payloads (31 Available)</div>
+              <select id="modalCategoryFilter" onchange="filterModalPayloads()" style="font-size:11px; padding:2px 6px;">
+                <option value="all">All Categories</option>
+                <option value="Boundary">Boundary & Types</option>
+                <option value="SQL Injection">SQL Injection</option>
+                <option value="XSS">XSS & Reflection</option>
+                <option value="Path Traversal">Path Traversal / LFI</option>
+                <option value="Command Injection">Command Injection</option>
+                <option value="SSTI">SSTI</option>
+              </select>
+            </div>
             <div style="display:flex; gap:6px;">
               <button onclick="selectAllPayloads(true)">Select All</button>
               <button onclick="selectAllPayloads(false)">Deselect All</button>
@@ -1051,52 +1062,245 @@ email='%5C%22%3E%3C%3B%7C%5C%5C%5D%5B%7D%7B%60%24</div>
             </div>
           </div>
 
-          <div style="flex:1; overflow-y:auto; border:1px solid var(--panel-border); border-radius:var(--border-radius);">
+          <div style="flex:1; overflow-y:auto; border:1px solid var(--panel-border); border-radius:var(--border-radius); max-height:260px;">
             <table id="payloadsTable">
               <thead>
                 <tr>
-                  <th style="width:40px; text-align:center;">Active</th>
-                  <th style="width:160px;">Payload Name</th>
+                  <th style="width:35px; text-align:center;">Active</th>
+                  <th style="width:110px;">Category</th>
+                  <th style="width:150px;">Payload Name</th>
                   <th>Payload Value</th>
                   <th style="width:230px;">Description / Intended Detection</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                <!-- Boundary -->
+                <tr data-cat="Boundary">
                   <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-gray">Boundary</span></td>
                   <td><strong>Empty string</strong></td>
                   <td><code>""</code></td>
                   <td>Missing/empty field validation failures</td>
                 </tr>
-                <tr>
+                <tr data-cat="Boundary">
                   <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
-                  <td><strong>Special characters</strong></td>
-                  <td><code>'\"&gt;&lt;;|\\][}{`$</code></td>
-                  <td>SQL, command injection, XSS parsing exceptions</td>
-                </tr>
-                <tr>
-                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
-                  <td><strong>Long string (200 chars)</strong></td>
-                  <td><code>A... (x200)</code></td>
-                  <td>Buffer overflow or length restriction validation</td>
-                </tr>
-                <tr>
-                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-gray">Boundary</span></td>
                   <td><strong>Negative integer</strong></td>
                   <td><code>-1</code></td>
                   <td>Negative bounds or logic handling flaws</td>
                 </tr>
-                <tr>
+                <tr data-cat="Boundary">
                   <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-gray">Boundary</span></td>
+                  <td><strong>Zero</strong></td>
+                  <td><code>0</code></td>
+                  <td>Division by zero or falsey evaluation bypass</td>
+                </tr>
+                <tr data-cat="Boundary">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-gray">Boundary</span></td>
                   <td><strong>Large integer</strong></td>
                   <td><code>99999999999999999999</code></td>
                   <td>Integer overflow / BigInt parsing exceptions</td>
                 </tr>
-                <tr>
+                <tr data-cat="Boundary">
                   <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-gray">Boundary</span></td>
+                  <td><strong>Long string (200 chars)</strong></td>
+                  <td><code>A... (x200)</code></td>
+                  <td>Buffer overflow or length restriction validation</td>
+                </tr>
+                <tr data-cat="Boundary">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-gray">Boundary</span></td>
                   <td><strong>Null byte</strong></td>
                   <td><code>%00</code></td>
                   <td>Null byte truncation & sanitize filter bypass</td>
+                </tr>
+
+                <!-- SQL Injection -->
+                <tr data-cat="SQL Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">SQL Injection</span></td>
+                  <td><strong>Special characters</strong></td>
+                  <td><code>'\"&gt;&lt;;|\\][}{`$</code></td>
+                  <td>Triggers syntax, quote, or parser errors across databases</td>
+                </tr>
+                <tr data-cat="SQL Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">SQL Injection</span></td>
+                  <td><strong>SQL Single Quote & Comment</strong></td>
+                  <td><code>' OR '1'='1' -- -</code></td>
+                  <td>Classic SQL boolean authentication / WHERE clause bypass</td>
+                </tr>
+                <tr data-cat="SQL Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">SQL Injection</span></td>
+                  <td><strong>SQL Double Quote</strong></td>
+                  <td><code>\" OR \"1\"=\"1</code></td>
+                  <td>Double-quote encapsulated query breakout</td>
+                </tr>
+                <tr data-cat="SQL Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">SQL Injection</span></td>
+                  <td><strong>SQL Union Null</strong></td>
+                  <td><code>' UNION SELECT null, null -- -</code></td>
+                  <td>Column count discovery and union error injection</td>
+                </tr>
+                <tr data-cat="SQL Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">SQL Injection</span></td>
+                  <td><strong>SQL Error Convert</strong></td>
+                  <td><code>1' AND 1=CONVERT(int, @@version) --</code></td>
+                  <td>Verbose database disclosure in MSSQL / Sybase</td>
+                </tr>
+                <tr data-cat="SQL Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">SQL Injection</span></td>
+                  <td><strong>SQL Sleep Delay</strong></td>
+                  <td><code>'; WAITFOR DELAY '0:0:5'--</code></td>
+                  <td>Time-based blind execution probe</td>
+                </tr>
+
+                <!-- XSS -->
+                <tr data-cat="XSS">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-reflected">XSS</span></td>
+                  <td><strong>Script Tag Alert</strong></td>
+                  <td><code>&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+                  <td>Classic unencoded reflection in HTML response body</td>
+                </tr>
+                <tr data-cat="XSS">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-reflected">XSS</span></td>
+                  <td><strong>Image OnError</strong></td>
+                  <td><code>\"&gt;&lt;img src=x onerror=alert(1)&gt;</code></td>
+                  <td>Attribute breakout and image error handler execution</td>
+                </tr>
+                <tr data-cat="XSS">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-reflected">XSS</span></td>
+                  <td><strong>SVG OnLoad</strong></td>
+                  <td><code>'\"&gt;&lt;svg/onload=alert(1)&gt;</code></td>
+                  <td>Combined quote breakout with inline SVG vector</td>
+                </tr>
+                <tr data-cat="XSS">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-reflected">XSS</span></td>
+                  <td><strong>Javascript URI</strong></td>
+                  <td><code>javascript:alert(1)</code></td>
+                  <td>Anchor tag / redirect URI scheme execution</td>
+                </tr>
+
+                <!-- Path Traversal -->
+                <tr data-cat="Path Traversal">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-anomaly">Path Traversal</span></td>
+                  <td><strong>Dot-Dot-Slash Linux</strong></td>
+                  <td><code>../../../../etc/passwd</code></td>
+                  <td>Linux sensitive file retrieval (root:x:0:0)</td>
+                </tr>
+                <tr data-cat="Path Traversal">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-anomaly">Path Traversal</span></td>
+                  <td><strong>Dot-Dot-Backslash Windows</strong></td>
+                  <td><code>..\..\..\..\windows\win.ini</code></td>
+                  <td>Windows INI file disclosure ([extensions])</td>
+                </tr>
+                <tr data-cat="Path Traversal">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-anomaly">Path Traversal</span></td>
+                  <td><strong>Nested Slash Traversal</strong></td>
+                  <td><code>....//....//....//etc/passwd</code></td>
+                  <td>Nested traversal filter stripping bypass</td>
+                </tr>
+                <tr data-cat="Path Traversal">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-anomaly">Path Traversal</span></td>
+                  <td><strong>URL Encoded Traversal</strong></td>
+                  <td><code>%2e%2e%2f%2e%2e%2fetc%2fpasswd</code></td>
+                  <td>Web server decode normalization bypass</td>
+                </tr>
+                <tr data-cat="Path Traversal">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-anomaly">Path Traversal</span></td>
+                  <td><strong>Null Byte Extension Bypass</strong></td>
+                  <td><code>/etc/passwd%00.png</code></td>
+                  <td>File extension check bypass via null byte truncation</td>
+                </tr>
+
+                <!-- Command Injection -->
+                <tr data-cat="Command Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">Command Injection</span></td>
+                  <td><strong>Semicolon ID</strong></td>
+                  <td><code>; id</code></td>
+                  <td>Unix command concatenation (uid=, gid=)</td>
+                </tr>
+                <tr data-cat="Command Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">Command Injection</span></td>
+                  <td><strong>Pipe ID</strong></td>
+                  <td><code>| id</code></td>
+                  <td>Unix pipeline command execution</td>
+                </tr>
+                <tr data-cat="Command Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">Command Injection</span></td>
+                  <td><strong>Backtick ID</strong></td>
+                  <td><code>`id`</code></td>
+                  <td>Inline subshell command evaluation</td>
+                </tr>
+                <tr data-cat="Command Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">Command Injection</span></td>
+                  <td><strong>Shell Substitution ID</strong></td>
+                  <td><code>$(id)</code></td>
+                  <td>Modern POSIX command substitution</td>
+                </tr>
+                <tr data-cat="Command Injection">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-error">Command Injection</span></td>
+                  <td><strong>Windows WhoAmI</strong></td>
+                  <td><code>&amp; whoami</code></td>
+                  <td>Windows CMD / PowerShell command concatenation</td>
+                </tr>
+
+                <!-- SSTI -->
+                <tr data-cat="SSTI">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-warning">SSTI</span></td>
+                  <td><strong>Jinja2 / Twig Multiplier</strong></td>
+                  <td><code>{{7*7}}</code></td>
+                  <td>Python/PHP template expression (evaluates to 49)</td>
+                </tr>
+                <tr data-cat="SSTI">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-warning">SSTI</span></td>
+                  <td><strong>Spring / JSP EL</strong></td>
+                  <td><code>${7*7}</code></td>
+                  <td>Java Expression Language (evaluates to 49)</td>
+                </tr>
+                <tr data-cat="SSTI">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-warning">SSTI</span></td>
+                  <td><strong>ERB Ruby Template</strong></td>
+                  <td><code>&lt;%= 7*7 %&gt;</code></td>
+                  <td>Ruby on Rails ERB expression evaluation</td>
+                </tr>
+                <tr data-cat="SSTI">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-warning">SSTI</span></td>
+                  <td><strong>Freemarker Template</strong></td>
+                  <td><code>#{7*7}</code></td>
+                  <td>Apache FreeMarker expression evaluation</td>
+                </tr>
+                <tr data-cat="SSTI">
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><span class="badge badge-warning">SSTI</span></td>
+                  <td><strong>Velocity Expression</strong></td>
+                  <td><code>*{7*7}</code></td>
+                  <td>Apache Velocity expression evaluation</td>
                 </tr>
               </tbody>
             </table>
@@ -1173,6 +1377,20 @@ email='%5C%22%3E%3C%3B%7C%5C%5C%5D%5B%7D%7B%60%24</div>
     function resetDefaultPayloads() {
       selectAllPayloads(true);
       showToast('Payloads reset to default');
+    }
+
+    // Modal Category Filter
+    function filterModalPayloads() {
+      const cat = document.getElementById('modalCategoryFilter').value;
+      const rows = document.querySelectorAll('#payloadsTable tbody tr');
+      rows.forEach(r => {
+        const rowCat = r.getAttribute('data-cat');
+        if (cat === 'all' || rowCat === cat) {
+          r.style.display = '';
+        } else {
+          r.style.display = 'none';
+        }
+      });
     }
 
     // Dynamic Filter
