@@ -558,66 +558,181 @@
           <button class="primary-btn" onclick="launchInputValidationRunnerFromConfig()">Attack All Selected Categories</button>
         </div>
 
+        <div class="control-row" style="background-color: var(--bg-tertiary); padding: 4px 8px;">
+          <div class="form-group">
+            <label>Category Filter:</label>
+            <select id="fuzzCategoryFilter" onchange="filterFuzzTechniques(this.value)">
+              <option value="all">All Categories (16 sets)</option>
+              <option value="standard">Standard OWASP Categories</option>
+              <option value="blns">Big List of Naughty Strings (BLNS)</option>
+            </select>
+          </div>
+          <button onclick="toggleAllFuzzCheckboxes(true)">Select All</button>
+          <button onclick="toggleAllFuzzCheckboxes(false)">Deselect All</button>
+          <button onclick="alert('Loaded custom wordlist: big-list-of-naughty-strings.txt (505 payloads).')">Load Custom Wordlist...</button>
+          <span style="color: var(--text-muted); margin-left: 8px;">Bundled Wordlist: big-list-of-naughty-strings.txt (505 strings across 10 BLNS groups)</span>
+        </div>
+
         <div class="table-container">
           <table>
             <thead>
               <tr>
-                <th style="width: 35px;"><input type="checkbox" checked></th>
-                <th style="width: 60px;">ID</th>
-                <th style="width: 180px;">Vulnerability Category</th>
-                <th style="width: 250px;">Payload Mutation Sample</th>
+                <th style="width: 35px;"><input type="checkbox" checked onchange="toggleAllFuzzCheckboxes(this.checked)"></th>
+                <th style="width: 90px;">ID</th>
+                <th style="width: 200px;">Vulnerability Category</th>
+                <th style="width: 70px;">Count</th>
+                <th style="width: 240px;">Payload Mutation Sample</th>
                 <th>Detection Signatures / Oracle Matching</th>
                 <th style="width: 90px; text-align: center;">Action</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td><input type="checkbox" checked></td>
-                <td>VAL-01</td>
+            <tbody id="fuzzTechniquesTableBody">
+              <!-- Standard Categories -->
+              <tr class="fuzz-cat-standard">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>sqli</td>
                 <td>SQL Injection (SQLi)</td>
+                <td><span class="badge badge-med">5</span></td>
                 <td>' OR '1'='1' -- -</td>
                 <td>SQL syntax error, database dialect disclosure, boolean differential</td>
                 <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('SQL Injection')">Attack</button></td>
               </tr>
-              <tr>
-                <td><input type="checkbox" checked></td>
-                <td>VAL-02</td>
+              <tr class="fuzz-cat-standard">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>xss</td>
                 <td>Cross-Site Scripting (XSS)</td>
+                <td><span class="badge badge-med">5</span></td>
                 <td>&lt;script&gt;alert(1)&lt;/script&gt;</td>
                 <td>Unencoded reflection in HTML/JSON response bodies</td>
                 <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('XSS')">Attack</button></td>
               </tr>
-              <tr>
-                <td><input type="checkbox" checked></td>
-                <td>VAL-03</td>
+              <tr class="fuzz-cat-standard">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>path_traversal</td>
                 <td>Path Traversal / LFI</td>
+                <td><span class="badge badge-med">5</span></td>
                 <td>../../../../etc/passwd</td>
                 <td>root:x:0:0 disclosure, win.ini disclosure, path truncation</td>
                 <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('Path Traversal')">Attack</button></td>
               </tr>
-              <tr>
-                <td><input type="checkbox" checked></td>
-                <td>VAL-04</td>
+              <tr class="fuzz-cat-standard">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>command_injection</td>
                 <td>OS Command Injection</td>
+                <td><span class="badge badge-med">5</span></td>
                 <td>; id; uname -a</td>
                 <td>uid=0(root) gid=0(root), Linux version, command output</td>
                 <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('Command Injection')">Attack</button></td>
               </tr>
-              <tr>
-                <td><input type="checkbox" checked></td>
-                <td>VAL-05</td>
+              <tr class="fuzz-cat-standard">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>ssti</td>
                 <td>Server-Side Template (SSTI)</td>
+                <td><span class="badge badge-med">5</span></td>
                 <td>{{7*7}} ${7*7} &lt;%= 7*7 %&gt;</td>
                 <td>Evaluation of expression resulting in '49'</td>
                 <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('SSTI')">Attack</button></td>
               </tr>
-              <tr>
-                <td><input type="checkbox" checked></td>
-                <td>VAL-06</td>
-                <td>Boundary & Integer Overflow</td>
+              <tr class="fuzz-cat-standard">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>boundary_overflow</td>
+                <td>Boundary & Overflow</td>
+                <td><span class="badge badge-med">6</span></td>
                 <td>99999999999999999999, -1, NaN</td>
                 <td>Type conversion exceptions, 500 status code, stack trace disclosures</td>
                 <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('Boundary & Overflow')">Attack</button></td>
+              </tr>
+
+              <!-- BLNS Categories -->
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_reserved</td>
+                <td>BLNS: Reserved Identifiers</td>
+                <td><span class="badge badge-info">17</span></td>
+                <td>undefined, null, None, true, False</td>
+                <td>NullPointerException, undefined, TypeError, ReferenceError, NoneType</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Reserved Identifiers')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_numeric</td>
+                <td>BLNS: Numeric Boundaries</td>
+                <td><span class="badge badge-info">71</span></td>
+                <td>0, -1, 1/0, NaN, Infinity, 0xffffffff</td>
+                <td>NumberFormatException, ArithmeticException, divided by zero, Overflow</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Numeric Boundaries')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_special</td>
+                <td>BLNS: Special Characters</td>
+                <td><span class="badge badge-info">31</span></td>
+                <td>!@#$%^&*()`~, quotes, C0/C1 codes</td>
+                <td>syntax error, parse error, unterminated string, unexpected token</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Special Characters')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_unicode</td>
+                <td>BLNS: Unicode & Encoding</td>
+                <td><span class="badge badge-info">45</span></td>
+                <td>Two-byte, zalgo, RTL override, surrogate</td>
+                <td>CharacterCodingException, MalformedInputException, UnicodeDecodeError</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Unicode & Encoding')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_script</td>
+                <td>BLNS: Script Injection & Polyglots</td>
+                <td><span class="badge badge-high">236</span></td>
+                <td>&lt;script&gt;..., &lt;svg/onload=..., javascript:</td>
+                <td>&lt;script&gt;, &lt;svg, alert(, onload=, onerror= unencoded reflection</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Script Injection')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_sqli</td>
+                <td>BLNS: SQL & Code Injection</td>
+                <td><span class="badge badge-info">21</span></td>
+                <td>SLEEP(1) /*' or 1=1 or ''='</td>
+                <td>syntax error, sql error, mysql_, pg_query, ora-, SQLSTATE</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: SQL & Code Injection')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_interpolation</td>
+                <td>BLNS: Format Strings & Interpolation</td>
+                <td><span class="badge badge-info">9</span></td>
+                <td>%s%p%x%d, ${7*7}, {{7*7}}</td>
+                <td>MissingFormatArgumentException, UnknownFormatConversionException</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Format Strings')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_file_traversal</td>
+                <td>BLNS: File Inclusion & Traversal</td>
+                <td><span class="badge badge-info">6</span></td>
+                <td>file:///etc/passwd, /dev/null, ..%2f..</td>
+                <td>root:x:0:0, boot.ini, win.ini, FileNotFoundException</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: File Inclusion')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_msdos</td>
+                <td>BLNS: MSDOS / Windows Special Filenames</td>
+                <td><span class="badge badge-info">15</span></td>
+                <td>CON, PRN, AUX, NUL, COM1, LPT1</td>
+                <td>invalid filename, reserved device, IOException</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: MSDOS Filenames')">Attack</button></td>
+              </tr>
+              <tr class="fuzz-cat-blns">
+                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
+                <td>blns_terminal_prompt</td>
+                <td>BLNS: Terminal & Prompt Injection</td>
+                <td><span class="badge badge-info">8</span></td>
+                <td>\033[2J\033[H, Ignore all previous instructions</td>
+                <td>escape code, prompt, override</td>
+                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Terminal & Prompt')">Attack</button></td>
               </tr>
             </tbody>
           </table>
@@ -1018,6 +1133,30 @@ Connection: close
     function toggleSelectAllCors(master) {
       document.querySelectorAll('.cors-tech-cb').forEach(cb => {
         cb.checked = master.checked;
+      });
+    }
+
+    // Toggle All Fuzz Checkboxes
+    function toggleAllFuzzCheckboxes(checked) {
+      document.querySelectorAll('.fuzz-tech-cb').forEach(cb => {
+        const row = cb.closest('tr');
+        if (row && row.style.display !== 'none') {
+          cb.checked = checked;
+        }
+      });
+    }
+
+    // Filter Fuzz Techniques in preview
+    function filterFuzzTechniques(category) {
+      const rows = document.querySelectorAll('#fuzzTechniquesTableBody tr');
+      rows.forEach(r => {
+        if (category === 'all') {
+          r.style.display = '';
+        } else if (category === 'standard') {
+          r.style.display = r.classList.contains('fuzz-cat-standard') ? '' : 'none';
+        } else if (category === 'blns') {
+          r.style.display = r.classList.contains('fuzz-cat-blns') ? '' : 'none';
+        }
       });
     }
 

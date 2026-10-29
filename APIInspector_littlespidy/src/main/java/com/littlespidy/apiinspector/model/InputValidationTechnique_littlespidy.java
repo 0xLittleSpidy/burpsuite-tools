@@ -62,8 +62,17 @@ public class InputValidationTechnique_littlespidy {
         this.enabled = enabled;
     }
 
+    public int getPayloadCount() {
+        return samplePayloads.size();
+    }
+
+    public boolean isBlns() {
+        return id != null && id.startsWith("blns_");
+    }
+
     /**
-     * Default list of input validation vulnerability categories and payloads.
+     * Default list of input validation vulnerability categories and payloads,
+     * including core OWASP attacks and the Big List of Naughty Strings (BLNS).
      */
     public static List<InputValidationTechnique_littlespidy> getDefaultTechniques() {
         List<InputValidationTechnique_littlespidy> list = new ArrayList<>();
@@ -153,6 +162,12 @@ public class InputValidationTechnique_littlespidy {
                         "ClassCastException", "TypeError", "ValueError", "stack trace", "traceback"
                 )
         ));
+
+        // Add Big List of Naughty Strings (BLNS) categories
+        try {
+            list.addAll(NaughtyStringsParser_littlespidy.loadDefaultBlnsTechniques());
+        } catch (Exception ignored) {
+        }
 
         return list;
     }

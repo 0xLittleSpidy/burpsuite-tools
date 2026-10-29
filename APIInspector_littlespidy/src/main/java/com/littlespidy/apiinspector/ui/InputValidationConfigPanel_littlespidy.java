@@ -5,12 +5,14 @@ import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.HttpService;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import com.littlespidy.apiinspector.model.InputValidationTechnique_littlespidy;
+import com.littlespidy.apiinspector.model.NaughtyStringsParser_littlespidy;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 /**
  * Configuration sub-panel for Input Validation fuzzing.
  * Contains target endpoint input, concurrency & delay settings,
+ * category filtering (Standard, BLNS, Custom), a custom wordlist loader button,
  * a table of vulnerability categories with individual row attack buttons,
  * and a batch "Attack All Selected Categories" execution button.
  */
@@ -27,7 +30,8 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     private InputValidationTab_littlespidy inputValidationTab;
     private APIInspectorTab_littlespidy rootTab;
 
-    private final List<InputValidationTechnique_littlespidy> techniques = new ArrayList<>();
+    private final List<InputValidationTechnique_littlespidy> allTechniques = new ArrayList<>();
+    private final List<InputValidationTechnique_littlespidy> displayedTechniques = new ArrayList<>();
     private final FuzzTechniquesTableModel tableModel = new FuzzTechniquesTableModel();
     private final JTable techniquesTable = new JTable(tableModel);
 
@@ -37,12 +41,17 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     private final JTextField runnerNameField = new JTextField("Input Validation Runner 1", 14);
     private final JButton attackAllBtn = new JButton("Attack All Selected Categories");
 
+    private final JComboBox<String> filterCombo = new JComboBox<>(new String[]{
+            "All Categories", "Standard OWASP", "Naughty Strings (BLNS)", "Custom Wordlists"
+    });
+
     private int runnerCount = 1;
 
     public InputValidationConfigPanel_littlespidy(MontoyaApi api) {
         super(new BorderLayout(6, 6));
         this.api = api;
-        this.techniques.addAll(InputValidationTechnique_littlespidy.getDefaultTechniques());
+        this.allTechniques.addAll(InputValidationTechnique_littlespidy.getDefaultTechniques());
+        this.displayedTechniques.addAll(this.allTechniques);
 
         setBorder(new EmptyBorder(6, 6, 6, 6));
         initComponents();
@@ -83,57 +92,143 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     }
 
     public List<InputValidationTechnique_littlespidy> getTechniques() {
-        return new ArrayList<>(techniques);
+        return new ArrayList<>(allTechniques);
     }
 
     public void setTechniques(List<InputValidationTechnique_littlespidy> newTechniques) {
-        techniques.clear();
+        allTechniques.clear();
         if (newTechniques != null) {
-            techniques.addAll(newTechniques);
+            allTechniques.addAll(newTechniques);
         } else {
-            techniques.addAll(InputValidationTechnique_littlespidy.getDefaultTechniques());
+            allTechniques.addAll(InputValidationTechnique_littlespidy.getDefaultTechniques());
         }
+        applyFilter();
+    }
+
+    private void applyFilter() {
+        String selected = (String) filterCombo.getSelectedItem();
+        displayedTechniques.clear();
+
+        if ("Standard OWASP".equals(selected)) {
+            for (InputValidationTechnique_littlespidy t : allTechniques) {
+                if (!t.isBlns() && !t.getId().startsWith("custom_")) {
+                    displayedTechniques.add(t);
+                }
+            }
+        } else if ("Naughty Strings (BLNS)".equals(selected)) {
+            for (InputValidationTechnique_littlespidy t : allTechniques) {
+                if (t.isBlns()) {
+                    displayedTechniques.add(t);
+                }
+            }
+        } else if ("Custom Wordlists".equals(selected)) {
+            for (InputValidationTechnique_littlespidy t : allTechniques) {
+                if (t.getId().startsWith("custom_")) {
+                    displayedTechniques.add(t);
+                }
+            }
+        } else {
+            displayedTechniques.addAll(allTechniques);
+        }
+
         tableModel.fireTableDataChanged();
     }
 
     private void initComponents() {
-        // Control Bar
-        JPanel controlBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        controlBar.setBorder(BorderFactory.createTitledBorder("Input Validation Parameters"));
+        // Control Container with two rows
+        JPanel topContainer = new JPanel();
+        topContainer.setLayout(new BoxLayout(topContainer, BoxLayout.Y_AXIS));
 
-        controlBar.add(new JLabel("Target Endpoint:"));
-        controlBar.add(targetEndpointField);
+        // Row 1: Target parameters and Execution
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        row1.setBorder(BorderFactory.createTitledBorder("Input Validation Parameters"));
 
-        controlBar.add(new JLabel("Threads:"));
-        controlBar.add(threadSpinner);
+        row1.add(new JLabel("Target Endpoint:"));
+        row1.add(targetEndpointField);
 
-        controlBar.add(new JLabel("Delay (ms):"));
-        controlBar.add(delaySpinner);
+        row1.add(new JLabel("Threads:"));
+        row1.add(threadSpinner);
 
-        controlBar.add(new JLabel("Runner Name:"));
-        controlBar.add(runnerNameField);
+        row1.add(new JLabel("Delay (ms):"));
+        row1.add(delaySpinner);
+
+        row1.add(new JLabel("Runner Name:"));
+        row1.add(runnerNameField);
 
         attackAllBtn.setFont(attackAllBtn.getFont().deriveFont(Font.BOLD));
         attackAllBtn.addActionListener(e -> launchBatchAttack());
-        controlBar.add(attackAllBtn);
+        row1.add(attackAllBtn);
+        topContainer.add(row1);
 
-        add(controlBar, BorderLayout.NORTH);
+        // Row 2: Category Filter and Wordlist Management
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        row2.add(new JLabel("Category Filter:"));
+        filterCombo.addActionListener(e -> applyFilter());
+        row2.add(filterCombo);
+
+        JButton selectAllBtn = new JButton("Select All");
+        selectAllBtn.addActionListener(e -> {
+            for (InputValidationTechnique_littlespidy t : displayedTechniques) {
+                t.setEnabled(true);
+            }
+            tableModel.fireTableDataChanged();
+        });
+        row2.add(selectAllBtn);
+
+        JButton deselectAllBtn = new JButton("Deselect All");
+        deselectAllBtn.addActionListener(e -> {
+            for (InputValidationTechnique_littlespidy t : displayedTechniques) {
+                t.setEnabled(false);
+            }
+            tableModel.fireTableDataChanged();
+        });
+        row2.add(deselectAllBtn);
+
+        JButton loadCustomBtn = new JButton("Load Custom Wordlist...");
+        loadCustomBtn.addActionListener(e -> loadCustomWordlist());
+        row2.add(loadCustomBtn);
+
+        topContainer.add(row2);
+        add(topContainer, BorderLayout.NORTH);
 
         // Techniques Table
         techniquesTable.setFillsViewportHeight(true);
         techniquesTable.setRowHeight(24);
         techniquesTable.getColumnModel().getColumn(0).setMaxWidth(60);
-        techniquesTable.getColumnModel().getColumn(1).setMaxWidth(70);
-        techniquesTable.getColumnModel().getColumn(2).setPreferredWidth(180);
-        techniquesTable.getColumnModel().getColumn(3).setPreferredWidth(260);
-        techniquesTable.getColumnModel().getColumn(4).setPreferredWidth(300);
-        techniquesTable.getColumnModel().getColumn(5).setMaxWidth(100);
+        techniquesTable.getColumnModel().getColumn(1).setMaxWidth(130);
+        techniquesTable.getColumnModel().getColumn(2).setPreferredWidth(210);
+        techniquesTable.getColumnModel().getColumn(3).setMaxWidth(80);
+        techniquesTable.getColumnModel().getColumn(4).setPreferredWidth(250);
+        techniquesTable.getColumnModel().getColumn(5).setPreferredWidth(250);
+        techniquesTable.getColumnModel().getColumn(6).setMaxWidth(100);
 
         // Setup Button Column Renderer & Editor
-        techniquesTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
-        techniquesTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox(), this::launchSingleTechniqueAttack));
+        techniquesTable.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
+        techniquesTable.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor(new JCheckBox(), this::launchSingleTechniqueAttack));
 
         add(new JScrollPane(techniquesTable), BorderLayout.CENTER);
+    }
+
+    private void loadCustomWordlist() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Wordlist File (.txt)");
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File f = chooser.getSelectedFile();
+            try {
+                InputValidationTechnique_littlespidy customTech = NaughtyStringsParser_littlespidy.parseCustomFile(f);
+                allTechniques.add(customTech);
+                applyFilter();
+                JOptionPane.showMessageDialog(this,
+                        "Successfully loaded wordlist: " + f.getName() + " (" + customTech.getPayloadCount() + " payloads).",
+                        "Wordlist Loaded",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to load wordlist: " + ex.getMessage(),
+                        "Load Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private HttpRequest buildTargetRequest() {
@@ -167,7 +262,7 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
 
         inputValidationTab.executeAttack(
                 targetReq,
-                techniques,
+                allTechniques,
                 getThreadCount(),
                 getDelayMs(),
                 runnerName
@@ -177,9 +272,9 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     }
 
     private void launchSingleTechniqueAttack(int rowIndex) {
-        if (inputValidationTab == null || rootTab == null || rowIndex < 0 || rowIndex >= techniques.size()) return;
+        if (inputValidationTab == null || rootTab == null || rowIndex < 0 || rowIndex >= displayedTechniques.size()) return;
 
-        InputValidationTechnique_littlespidy tech = techniques.get(rowIndex);
+        InputValidationTechnique_littlespidy tech = displayedTechniques.get(rowIndex);
         HttpRequest targetReq = buildTargetRequest();
         String runnerName = "Fuzz - " + tech.getCategory();
 
@@ -196,11 +291,11 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     }
 
     private class FuzzTechniquesTableModel extends AbstractTableModel {
-        private final String[] columns = {"Enable", "ID", "Vulnerability Category", "Payload Samples", "Description / Match Signatures", "Action"};
+        private final String[] columns = {"Enable", "ID", "Vulnerability Category", "Count", "Payload Samples", "Description / Match Signatures", "Action"};
 
         @Override
         public int getRowCount() {
-            return techniques.size();
+            return displayedTechniques.size();
         }
 
         @Override
@@ -216,33 +311,44 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         @Override
         public Class<?> getColumnClass(int columnIndex) {
             if (columnIndex == 0) return Boolean.class;
+            if (columnIndex == 3) return Integer.class;
             return String.class;
         }
 
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return columnIndex == 0 || columnIndex == 5;
+            return columnIndex == 0 || columnIndex == 6;
         }
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (rowIndex < 0 || rowIndex >= techniques.size()) return "";
-            InputValidationTechnique_littlespidy t = techniques.get(rowIndex);
+            if (rowIndex < 0 || rowIndex >= displayedTechniques.size()) return "";
+            InputValidationTechnique_littlespidy t = displayedTechniques.get(rowIndex);
             switch (columnIndex) {
                 case 0: return t.isEnabled();
                 case 1: return t.getId();
                 case 2: return t.getCategory();
-                case 3: return String.join(", ", t.getSamplePayloads());
-                case 4: return t.getDescription();
-                case 5: return "Attack";
+                case 3: return t.getPayloadCount();
+                case 4: return getSamplePreview(t);
+                case 5: return t.getDescription();
+                case 6: return "Attack";
                 default: return "";
             }
         }
 
+        private String getSamplePreview(InputValidationTechnique_littlespidy t) {
+            List<String> samples = t.getSamplePayloads();
+            if (samples.isEmpty()) return "";
+            if (samples.size() <= 3) {
+                return String.join(", ", samples);
+            }
+            return samples.get(0) + ", " + samples.get(1) + ", " + samples.get(2) + " (+" + (samples.size() - 3) + " more)";
+        }
+
         @Override
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            if (rowIndex >= 0 && rowIndex < techniques.size() && columnIndex == 0) {
-                techniques.get(rowIndex).setEnabled((Boolean) aValue);
+            if (rowIndex >= 0 && rowIndex < displayedTechniques.size() && columnIndex == 0) {
+                displayedTechniques.get(rowIndex).setEnabled((Boolean) aValue);
                 fireTableCellUpdated(rowIndex, columnIndex);
             }
         }
