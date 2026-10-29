@@ -225,7 +225,7 @@ public class UIEnhancementsTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify main tabs exact order: API Import, Request & Response Viewer, Parameter Collector, Authentication Testing, REST API Version Finder")
+    @DisplayName("Verify main tabs exact order: API Import, Request & Response Viewer, Parameter Collector, Config, Auth Analyzer, CORS, Input Validation, REST API Version Finder, API Documentation Strategy, API Endpoint Discovery Strategy, Hidden API Storage")
     public void testMainTabsExactOrder() throws Exception {
         APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
         Field rootTabbedPaneField = APIInspectorTab_littlespidy.class.getDeclaredField("rootTabbedPane");
@@ -235,12 +235,14 @@ public class UIEnhancementsTest_littlespidy {
         assertEquals("API Import", tabbedPane.getTitleAt(0));
         assertEquals("Request & Response Viewer", tabbedPane.getTitleAt(1));
         assertEquals("Parameter Collector", tabbedPane.getTitleAt(2));
-        assertEquals("Auth Analyzer Config", tabbedPane.getTitleAt(3));
+        assertEquals("Config", tabbedPane.getTitleAt(3));
         assertEquals("Auth Analyzer", tabbedPane.getTitleAt(4));
-        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(5));
-        assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(6));
-        assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(7));
-        assertEquals("Hidden API Storage", tabbedPane.getTitleAt(8));
+        assertEquals("CORS", tabbedPane.getTitleAt(5));
+        assertEquals("Input Validation", tabbedPane.getTitleAt(6));
+        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(7));
+        assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(8));
+        assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(9));
+        assertEquals("Hidden API Storage", tabbedPane.getTitleAt(10));
     }
 
     @Test
@@ -614,9 +616,11 @@ public class UIEnhancementsTest_littlespidy {
 
         assertTrue(subItemNames.contains("Send to ResAPI Version Finder"));
         assertTrue(subItemNames.contains("Send to Hidden API Storage"));
+        assertTrue(subItemNames.contains("Send to CORS Tester"));
+        assertTrue(subItemNames.contains("Send to Input Validation Fuzzer"));
         assertTrue(subItemNames.contains("API Documentation Intruder Strategy"));
         assertTrue(subItemNames.contains("API Endpoint Discovery Intruder Strategy"));
-        assertEquals(4, subItemNames.size(), "Must contain exactly four submenu items");
+        assertEquals(6, subItemNames.size(), "Must contain exactly six submenu items");
     }
 
     @Test
@@ -1004,8 +1008,8 @@ public class UIEnhancementsTest_littlespidy {
         rootTabbedPaneField.setAccessible(true);
         JTabbedPane tabbedPane = (JTabbedPane) rootTabbedPaneField.get(rootTab);
 
-        assertEquals(configTab, tabbedPane.getComponentAt(3), "Tab 3 must be config tab");
-        assertEquals("Auth Analyzer Config", tabbedPane.getTitleAt(3));
+        assertEquals(rootTab.getConfigTab(), tabbedPane.getComponentAt(3), "Tab 3 must be config tab");
+        assertEquals("Config", tabbedPane.getTitleAt(3));
         assertEquals(attackTab, tabbedPane.getComponentAt(4), "Tab 4 must be attack tab");
         assertEquals("Auth Analyzer", tabbedPane.getTitleAt(4));
 

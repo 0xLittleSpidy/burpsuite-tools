@@ -25,6 +25,10 @@ public class SessionStateDTO_littlespidy {
         public SessionStoreDTO sessionStore;
         public java.util.Map<String, CachedResponseDTO> viewerResponses = new java.util.LinkedHashMap<>();
         public String selectedEndpointKey;
+        public CorsConfigDTO corsConfig;
+        public List<CorsRunDTO> corsRuns = new ArrayList<>();
+        public InputValidationConfigDTO inputValidationConfig;
+        public List<InputValidationRunDTO> inputValidationRuns = new ArrayList<>();
     }
 
     public static class SessionTabDTO {
@@ -207,5 +211,67 @@ public class SessionStateDTO_littlespidy {
         public List<String> headers = new ArrayList<>();
         public String body;
         public String rawResponseBase64;
+    }
+
+    public static class CorsConfigDTO {
+        public String targetUrl;
+        public String attackerDomain;
+        public int threads = 4;
+        public int delayMs = 50;
+        public List<String> enabledTechniqueIds = new ArrayList<>();
+    }
+
+    public static class CorsRunDTO {
+        public String id;
+        public String name;
+        public long timestamp;
+        public List<CorsTestResultDTO> results = new ArrayList<>();
+    }
+
+    public static class CorsTestResultDTO {
+        public int id;
+        public String method;
+        public String host;
+        public String path;
+        public String testedOrigin;
+        public String description;
+        public String reflectedAcao;
+        public boolean acacPresent;
+        public int statusCode;
+        public int responseLength;
+        public String severity;
+        public long timestamp;
+        public String requestBase64;
+        public String responseBase64;
+    }
+
+    public static class InputValidationConfigDTO {
+        public String targetEndpoint;
+        public int threads = 5;
+        public int delayMs = 50;
+        public List<String> enabledCategoryIds = new ArrayList<>();
+    }
+
+    public static class InputValidationRunDTO {
+        public String id;
+        public String name;
+        public long timestamp;
+        public List<InputValidationTestResultDTO> results = new ArrayList<>();
+    }
+
+    public static class InputValidationTestResultDTO {
+        public int id;
+        public String method;
+        public String targetUrl;
+        public String parameterName;
+        public String category;
+        public String payload;
+        public int statusCode;
+        public int responseLength;
+        public String detectionIndicator;
+        public String severity;
+        public long timestamp;
+        public String requestBase64;
+        public String responseBase64;
     }
 }

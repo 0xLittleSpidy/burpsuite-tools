@@ -141,6 +141,15 @@ public class TestMockHelper_littlespidy {
                     if ("body".equals(name)) return mockByteArray;
                     if ("toByteArray".equals(name)) return mockByteArray;
                     if ("bodyToString".equals(name)) return body;
+                    if ("headers".equals(name)) {
+                        java.util.List<burp.api.montoya.http.message.HttpHeader> list = new java.util.ArrayList<>();
+                        if (headers != null) {
+                            for (Map.Entry<String, String> e : headers.entrySet()) {
+                                list.add(createMockHeader(e.getKey(), e.getValue()));
+                            }
+                        }
+                        return list;
+                    }
                     if ("headerValue".equals(name) && args.length == 1) {
                         String target = (String) args[0];
                         if (headers != null) {

@@ -87,7 +87,33 @@ public class APIInspectorContextMenu_littlespidy implements ContextMenuItemsProv
 
         apiInspectorMenu.addSeparator();
 
-        // Action 3: API Documentation Intruder Strategy
+        // Action 3: Send to CORS Tester
+        JMenuItem corsItem = new JMenuItem("Send to CORS Tester");
+        corsItem.addActionListener(e -> {
+            for (HttpRequestResponse target : targets) {
+                if (target.request() != null) {
+                    rootTab.getCorsTab().sendToCors(target.request(), target.hasResponse() ? target.response() : null);
+                }
+            }
+            rootTab.selectTab(rootTab.getCorsTab());
+        });
+        apiInspectorMenu.add(corsItem);
+
+        // Action 4: Send to Input Validation Fuzzer
+        JMenuItem fuzzItem = new JMenuItem("Send to Input Validation Fuzzer");
+        fuzzItem.addActionListener(e -> {
+            for (HttpRequestResponse target : targets) {
+                if (target.request() != null) {
+                    rootTab.getInputValidationTab().sendToInputValidation(target.request(), target.hasResponse() ? target.response() : null);
+                }
+            }
+            rootTab.selectTab(rootTab.getInputValidationTab());
+        });
+        apiInspectorMenu.add(fuzzItem);
+
+        apiInspectorMenu.addSeparator();
+
+        // Action 5: API Documentation Intruder Strategy
         JMenuItem docStrategyItem = new JMenuItem("API Documentation Intruder Strategy");
         docStrategyItem.setToolTipText("Progressively remove trailing path segments and send authenticated/unauthenticated variants to Intruder");
         docStrategyItem.addActionListener(e -> {
