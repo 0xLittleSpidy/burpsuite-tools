@@ -65,6 +65,16 @@ public class ContextMenuController implements IContextMenuFactory {
 				}
 			});
 			authAnalyzerMenu.add(convertPostToGetItem);
+
+			JMenuItem inputValidationItem = new JMenuItem("Send to Input Validation");
+			inputValidationItem.addActionListener(e -> {
+				if (BurpExtender.mainPanel != null && BurpExtender.mainPanel.getInputValidationPanel() != null) {
+					for (IHttpRequestResponse message : invocation.getSelectedMessages()) {
+						BurpExtender.mainPanel.getInputValidationPanel().analyzeRequestAsync(message);
+					}
+				}
+			});
+			authAnalyzerMenu.add(inputValidationItem);
 		}
 		if (selection != null && selection[0] != selection[1]) {
 			if (iContext == IContextMenuInvocation.CONTEXT_MESSAGE_EDITOR_REQUEST

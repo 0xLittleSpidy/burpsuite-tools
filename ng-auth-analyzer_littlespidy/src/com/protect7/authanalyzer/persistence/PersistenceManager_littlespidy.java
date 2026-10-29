@@ -32,6 +32,7 @@ import burp.api.montoya.MontoyaApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.protect7.authanalyzer.cors.CorsTestResult_littlespidy;
+import com.protect7.authanalyzer.inputvalidation.InputValidationTestResult_littlespidy;
 import com.protect7.authanalyzer.entities.AnalyzerRequestResponse;
 import com.protect7.authanalyzer.entities.CustomHttpRequestResponse_littlespidy;
 import com.protect7.authanalyzer.entities.CustomHttpService_littlespidy;
@@ -249,6 +250,45 @@ public class PersistenceManager_littlespidy {
 							}
 						}
 						dto.corsResults.add(crDto);
+					}
+				}
+
+				if (mainPanel.getInputValidationPanel() != null && mainPanel.getInputValidationPanel().getTableModel() != null) {
+					for (InputValidationTestResult_littlespidy iv : mainPanel.getInputValidationPanel().getTableModel().getAllResults()) {
+						SessionStateDTO_littlespidy.InputValidationResultEntryDTO ivDto = new SessionStateDTO_littlespidy.InputValidationResultEntryDTO();
+						ivDto.id = iv.getId();
+						ivDto.category = iv.getCategory();
+						ivDto.method = iv.getMethod();
+						ivDto.host = iv.getHost();
+						ivDto.path = iv.getPath();
+						ivDto.parameterName = iv.getParameterName();
+						ivDto.parameterType = iv.getParameterType();
+						ivDto.payloadName = iv.getPayloadName();
+						ivDto.payloadValue = iv.getPayloadValue();
+						ivDto.baseStatusCode = iv.getBaseStatusCode();
+						ivDto.statusCode = iv.getStatusCode();
+						ivDto.baseLength = iv.getBaseLength();
+						ivDto.length = iv.getLength();
+						ivDto.sizeDiffPercent = iv.getSizeDiffPercent();
+						ivDto.anomalyType = iv.getAnomalyType();
+						ivDto.evidence = iv.getEvidence();
+						if (iv.getFuzzedRequestResponse() != null) {
+							if (iv.getFuzzedRequestResponse().getRequest() != null) {
+								ivDto.fuzzedRequestBase64 = Base64.getEncoder().encodeToString(iv.getFuzzedRequestResponse().getRequest());
+							}
+							if (iv.getFuzzedRequestResponse().getResponse() != null) {
+								ivDto.fuzzedResponseBase64 = Base64.getEncoder().encodeToString(iv.getFuzzedRequestResponse().getResponse());
+							}
+						}
+						if (iv.getBaseRequestResponse() != null) {
+							if (iv.getBaseRequestResponse().getRequest() != null) {
+								ivDto.baseRequestBase64 = Base64.getEncoder().encodeToString(iv.getBaseRequestResponse().getRequest());
+							}
+							if (iv.getBaseRequestResponse().getResponse() != null) {
+								ivDto.baseResponseBase64 = Base64.getEncoder().encodeToString(iv.getBaseRequestResponse().getResponse());
+							}
+						}
+						dto.inputValidationResults.add(ivDto);
 					}
 				}
 
@@ -479,6 +519,29 @@ public class PersistenceManager_littlespidy {
 					mainPanel.getCorsHistoryPanel().getTableModel().addResults(restoredResults);
 				}
 
+				// 6. Restore Input Validation results
+				if (mainPanel.getInputValidationPanel() != null && dto.inputValidationResults != null) {
+					mainPanel.getInputValidationPanel().clearTable();
+					List<InputValidationTestResult_littlespidy> restoredResults = new ArrayList<>();
+					for (SessionStateDTO_littlespidy.InputValidationResultEntryDTO ivDto : dto.inputValidationResults) {
+						byte[] fuzzedReq = decodeBase64Safe(ivDto.fuzzedRequestBase64);
+						byte[] fuzzedResp = decodeBase64Safe(ivDto.fuzzedResponseBase64);
+						byte[] baseReq = decodeBase64Safe(ivDto.baseRequestBase64);
+						byte[] baseResp = decodeBase64Safe(ivDto.baseResponseBase64);
+						CustomHttpService_littlespidy service = new CustomHttpService_littlespidy(ivDto.host, 443, "https");
+						CustomHttpRequestResponse_littlespidy fuzzedReqResp = new CustomHttpRequestResponse_littlespidy(fuzzedReq, fuzzedResp, service);
+						CustomHttpRequestResponse_littlespidy baseReqResp = new CustomHttpRequestResponse_littlespidy(baseReq, baseResp, service);
+
+						InputValidationTestResult_littlespidy res = new InputValidationTestResult_littlespidy(
+								ivDto.id, ivDto.category, ivDto.method, ivDto.host, ivDto.path,
+								ivDto.parameterName, ivDto.parameterType, ivDto.payloadName, ivDto.payloadValue,
+								ivDto.baseStatusCode, ivDto.statusCode, ivDto.baseLength, ivDto.length,
+								ivDto.sizeDiffPercent, ivDto.anomalyType, ivDto.evidence, fuzzedReqResp, baseReqResp);
+						restoredResults.add(res);
+					}
+					mainPanel.getInputValidationPanel().getTableModel().addResults(restoredResults);
+				}
+
 				this.activeSessionFile = file;
 				updateStatusLabel();
 				JOptionPane.showMessageDialog(mainPanel, "Session loaded successfully from:\n" + file.getAbsolutePath());
@@ -551,6 +614,9 @@ public class PersistenceManager_littlespidy {
 		}
 		if (mainPanel.getCorsHistoryPanel() != null) {
 			mainPanel.getCorsHistoryPanel().clearTable();
+		}
+		if (mainPanel.getInputValidationPanel() != null) {
+			mainPanel.getInputValidationPanel().clearTable();
 		}
 		updateStatusLabel();
 		JOptionPane.showMessageDialog(mainPanel, "Session offboarded. Workspace restored to clean state.");

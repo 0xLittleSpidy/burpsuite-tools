@@ -43,6 +43,7 @@ public class DataStorageProvider {
 			sessionsObject.addProperty("testAuthAnalyzer", cp.isAuthAnalyzerActive());
 			sessionsObject.addProperty("testCors", cp.isCorsTestingSelected());
 			sessionsObject.addProperty("testConvertPostToGet", cp.isTestConvertPostToGetSelected());
+			sessionsObject.addProperty("testInputValidation", cp.isInputValidationEnabled());
 			sessionsObject.addProperty("corsAttackerUrl", cp.getCorsAttackerUrl());
 			JsonArray techArr = new JsonArray();
 			for (String tId : cp.getCorsEnabledTechniqueIds()) {

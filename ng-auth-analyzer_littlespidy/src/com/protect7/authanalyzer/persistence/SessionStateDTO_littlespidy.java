@@ -17,6 +17,30 @@ public class SessionStateDTO_littlespidy {
 	public List<MessageEntryDTO> importedMessages = new ArrayList<MessageEntryDTO>();
 	public List<ConvertResultEntryDTO> convertResults = new ArrayList<ConvertResultEntryDTO>();
 	public List<CorsResultEntryDTO> corsResults = new ArrayList<CorsResultEntryDTO>();
+	public List<InputValidationResultEntryDTO> inputValidationResults = new ArrayList<InputValidationResultEntryDTO>();
+
+	public static class InputValidationResultEntryDTO {
+		public int id;
+		public String category;
+		public String method;
+		public String host;
+		public String path;
+		public String parameterName;
+		public String parameterType;
+		public String payloadName;
+		public String payloadValue;
+		public int baseStatusCode;
+		public int statusCode;
+		public int baseLength;
+		public int length;
+		public int sizeDiffPercent;
+		public String anomalyType;
+		public String evidence;
+		public String fuzzedRequestBase64;
+		public String fuzzedResponseBase64;
+		public String baseRequestBase64;
+		public String baseResponseBase64;
+	}
 
 	public static class CorsResultEntryDTO {
 		public int id;

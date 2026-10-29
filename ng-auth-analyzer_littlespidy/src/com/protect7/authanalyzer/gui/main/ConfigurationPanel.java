@@ -63,6 +63,8 @@ import com.protect7.authanalyzer.filter.QueryFilter;
 import com.protect7.authanalyzer.filter.RequestFilter;
 import com.protect7.authanalyzer.filter.StatusCodeFilter;
 import com.protect7.authanalyzer.gui.cors.CorsTechniquesDialog_littlespidy;
+import com.protect7.authanalyzer.gui.inputvalidation.InputValidationPayloadsDialog_littlespidy;
+import com.protect7.authanalyzer.inputvalidation.InputValidationConfig_littlespidy;
 import com.protect7.authanalyzer.gui.dialog.SettingsDialog;
 import com.protect7.authanalyzer.gui.entity.SessionPanel;
 import com.protect7.authanalyzer.gui.entity.TokenPanel;
@@ -99,6 +101,11 @@ public class ConfigurationPanel extends JPanel {
 
 	private final HintCheckBox testConvertPostToGet = new HintCheckBox("Convert POST to GET", true,
 			"Automatically converts intercepted POST requests to GET and evaluates responses for authorization/CSRF bypasses.");
+
+	private final HintCheckBox testInputValidation = new HintCheckBox("Input Validation", true,
+			"Automatically fuzzes parameters using Big List of Naughty Strings to detect boundary flaws, SQL errors, XSS reflection, and status shifts.");
+	private final JButton inputValidationPayloadsButton = new JButton("Input Validation Payloads");
+	private final InputValidationConfig_littlespidy inputValidationConfig = new InputValidationConfig_littlespidy();
 
 	private final JButton exportSetupButton = new JButton("Export Setup");
 	private final JButton importSetupButton = new JButton("Import Setup");
@@ -260,6 +267,11 @@ public class ConfigurationPanel extends JPanel {
 			corsEnabledTechniqueIds.addAll(dlg.getEnabledTechniqueIds());
 		});
 
+		inputValidationPayloadsButton.addActionListener(e -> {
+			InputValidationPayloadsDialog_littlespidy dlg = new InputValidationPayloadsDialog_littlespidy(this, inputValidationConfig);
+			dlg.setVisible(true);
+		});
+
 		exportSetupButton.addActionListener(e -> saveSetup());
 		importSetupButton.addActionListener(e -> loadSetup());
 
@@ -294,14 +306,20 @@ public class ConfigurationPanel extends JPanel {
 		c1.gridy = 5;
 		startStopButtonPanel.add(testConvertPostToGet, c1);
 
-		// Setup Export / Import
 		c1.gridy = 6;
+		JPanel ivRow = new JPanel(new BorderLayout(4, 0));
+		ivRow.add(testInputValidation, BorderLayout.WEST);
+		ivRow.add(inputValidationPayloadsButton, BorderLayout.EAST);
+		startStopButtonPanel.add(ivRow, c1);
+
+		// Setup Export / Import
+		c1.gridy = 7;
 		JPanel setupButtonsPanel = new JPanel(new GridLayout(1, 2, 4, 0));
 		setupButtonsPanel.add(exportSetupButton);
 		setupButtonsPanel.add(importSetupButton);
 		startStopButtonPanel.add(setupButtonsPanel, c1);
 
-		c1.gridy = 7;
+		c1.gridy = 8;
 		startStopButtonPanel.add(settingsButton, c1);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -794,6 +812,11 @@ public class ConfigurationPanel extends JPanel {
 		} else {
 			testConvertPostToGet.setSelected(true);
 		}
+		if (rootObject.get("testInputValidation") != null) {
+			testInputValidation.setSelected(rootObject.get("testInputValidation").getAsBoolean());
+		} else {
+			testInputValidation.setSelected(true);
+		}
 		if (rootObject.get("corsAttackerUrl") != null) {
 			corsAttackerUrl = rootObject.get("corsAttackerUrl").getAsString();
 		}
@@ -978,6 +1001,22 @@ public class ConfigurationPanel extends JPanel {
 
 	public boolean isTestConvertPostToGetSelected() {
 		return testConvertPostToGet.isSelected();
+	}
+
+	public boolean isInputValidationRunning() {
+		return CurrentConfig.getCurrentConfig().isRunning() && testInputValidation.isSelected();
+	}
+
+	public boolean isInputValidationEnabled() {
+		return testInputValidation.isSelected();
+	}
+
+	public void setInputValidationEnabled(boolean enabled) {
+		testInputValidation.setSelected(enabled);
+	}
+
+	public InputValidationConfig_littlespidy getInputValidationConfig() {
+		return inputValidationConfig;
 	}
 
 	public boolean doModify() {

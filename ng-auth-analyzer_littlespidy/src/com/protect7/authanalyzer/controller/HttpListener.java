@@ -42,6 +42,15 @@ public class HttpListener implements IHttpListener, IProxyListener {
 					}
 				}
 			}
+			if (BurpExtender.mainPanel != null && BurpExtender.mainPanel.getConfigurationPanel() != null &&
+					BurpExtender.mainPanel.getConfigurationPanel().isInputValidationRunning()) {
+				if (!isFiltered(toolFlag, messageInfo) && BurpExtender.mainPanel.getInputValidationPanel() != null) {
+					IRequestInfo reqInfo = BurpExtender.callbacks.getHelpers().analyzeRequest(messageInfo);
+					if (reqInfo.getParameters() != null && !reqInfo.getParameters().isEmpty()) {
+						BurpExtender.mainPanel.getInputValidationPanel().analyzeRequestAsync(messageInfo);
+					}
+				}
+			}
 		}
 	}
 

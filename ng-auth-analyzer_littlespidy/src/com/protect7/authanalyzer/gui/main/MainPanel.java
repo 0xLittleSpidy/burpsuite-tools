@@ -12,6 +12,8 @@ import com.protect7.authanalyzer.gui.convert.ConvertImportPanel_littlespidy;
 import com.protect7.authanalyzer.gui.convert.ConvertPostToGetPanel_littlespidy;
 import com.protect7.authanalyzer.gui.cors.CorsHistoryPanel_littlespidy;
 import com.protect7.authanalyzer.gui.cors.CorsImportPanel_littlespidy;
+import com.protect7.authanalyzer.gui.inputvalidation.InputValidationHistoryPanel_littlespidy;
+import com.protect7.authanalyzer.gui.inputvalidation.InputValidationImportPanel_littlespidy;
 import com.protect7.authanalyzer.persistence.PersistenceManager_littlespidy;
 
 public class MainPanel extends JPanel {
@@ -24,6 +26,8 @@ public class MainPanel extends JPanel {
 	private final CorsImportPanel_littlespidy corsImportPanel;
 	private final ConvertPostToGetPanel_littlespidy convertPanel;
 	private final ConvertImportPanel_littlespidy convertImportPanel;
+	private final InputValidationHistoryPanel_littlespidy inputValidationPanel;
+	private final InputValidationImportPanel_littlespidy inputValidationImportPanel;
 	private final JTabbedPane rootTabbedPane;
 	private final PersistenceManager_littlespidy persistenceManager;
 
@@ -41,6 +45,8 @@ public class MainPanel extends JPanel {
 		corsImportPanel = new CorsImportPanel_littlespidy(this);
 		convertPanel = new ConvertPostToGetPanel_littlespidy(this);
 		convertImportPanel = new ConvertImportPanel_littlespidy(this);
+		inputValidationPanel = new InputValidationHistoryPanel_littlespidy(this);
+		inputValidationImportPanel = new InputValidationImportPanel_littlespidy(this);
 
 		rootTabbedPane = new JTabbedPane();
 		JScrollPane scrollPane = new JScrollPane(configurationPanel);
@@ -53,6 +59,8 @@ public class MainPanel extends JPanel {
 		rootTabbedPane.addTab("CORS Import", corsImportPanel);
 		rootTabbedPane.addTab("Convert POST to GET", convertPanel);
 		rootTabbedPane.addTab("Convert Import", convertImportPanel);
+		rootTabbedPane.addTab("Input Validation", inputValidationPanel);
+		rootTabbedPane.addTab("Input Validation Import", inputValidationImportPanel);
 
 		add(persistenceManager.createToolbar(), BorderLayout.NORTH);
 		add(rootTabbedPane, BorderLayout.CENTER);
@@ -96,6 +104,14 @@ public class MainPanel extends JPanel {
 
 	public ConvertImportPanel_littlespidy getConvertImportPanel() {
 		return convertImportPanel;
+	}
+
+	public InputValidationHistoryPanel_littlespidy getInputValidationPanel() {
+		return inputValidationPanel;
+	}
+
+	public InputValidationImportPanel_littlespidy getInputValidationImportPanel() {
+		return inputValidationImportPanel;
 	}
 
 	public ConfigurationPanel getConfigurationPanel() {
