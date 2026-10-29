@@ -1,0 +1,483 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORS and Input Validation Collection Scoped Attack Preview - littlespidy</title>
+  <style>
+    :root {
+      --bg-primary: #2b2b2b;
+      --bg-secondary: #3c3f41;
+      --bg-tertiary: #1e1e1e;
+      --text-primary: #bbbbbb;
+      --text-highlight: #ffffff;
+      --text-muted: #888888;
+      --border-color: #555555;
+      --accent: #ff6633;
+      --accent-hover: #e65522;
+      --btn-bg: #4c5052;
+      --btn-hover: #5c6164;
+      --table-stripe: #313335;
+      --table-select: #2d5a88;
+    }
+
+    body.light-theme {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #fafafa;
+      --text-primary: #333333;
+      --text-highlight: #000000;
+      --text-muted: #666666;
+      --border-color: #d0d0d0;
+      --accent: #e05510;
+      --accent-hover: #c9490b;
+      --btn-bg: #e4e4e4;
+      --btn-hover: #d5d5d5;
+      --table-stripe: #f9f9f9;
+      --table-select: #b3d7ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 10px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .title-area h1 {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--accent);
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .title-area span {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    button, select, input {
+      background-color: var(--btn-bg);
+      color: var(--text-highlight);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    button:hover { background-color: var(--btn-hover); }
+
+    button.primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: 1px solid var(--accent-hover);
+      font-weight: bold;
+    }
+
+    .tabs-nav {
+      display: flex;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 12px;
+      background-color: var(--bg-secondary);
+      border-radius: 4px 4px 0 0;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background-color: var(--bg-primary);
+      color: var(--accent);
+      font-weight: bold;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: -2px;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .titled-box {
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 3px;
+      background-color: var(--bg-secondary);
+    }
+
+    .titled-box legend {
+      color: var(--text-highlight);
+      font-weight: bold;
+      padding: 0 6px;
+      font-size: 11px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 5px 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--bg-tertiary);
+      color: var(--text-highlight);
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) { background-color: var(--table-stripe); }
+    tr.selected { background-color: var(--table-select); color: #ffffff; }
+
+    .flex-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .badge-get { background: #28a745; }
+    .badge-post { background: #ffc107; color: #000; }
+    .badge-delete { background: #dc3545; }
+
+    .sync-banner {
+      background: rgba(255, 102, 51, 0.15);
+      border: 1px solid var(--accent);
+      padding: 8px 12px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      color: var(--accent);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-area">
+      <h1>API Inspector - Scoped Attack Execution (CORS & Input Validation)</h1>
+      <span>UI Preview littlespidy</span>
+    </div>
+    <div class="header-actions">
+      <button id="themeToggleBtn" onclick="toggleTheme()">Switch to Light Theme</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" id="importNav" onclick="showTab('tabImport')">1. API Import</button>
+    <button class="tab-btn" id="corsNav" onclick="showTab('tabCors')">2. Config: CORS Testing</button>
+    <button class="tab-btn" id="ivNav" onclick="showTab('tabIV')">3. Config: Input Validation</button>
+    <button class="tab-btn" id="authNav" onclick="showTab('tabAuth')">4. Config: Auth Analyzer</button>
+  </div>
+
+  <div id="syncBanner" class="sync-banner">
+    Currently Selected Collection: "Order Service API" (2 endpoints) - Synchronized across all 3 testing engines!
+  </div>
+
+  <!-- TAB 1: API IMPORT -->
+  <div id="tabImport" class="tab-content active">
+    <fieldset class="titled-box">
+      <legend>Imported API Collections (Master Table)</legend>
+      <p style="margin-bottom: 6px; color: var(--text-muted);">
+        Click a collection row below to dynamically scope CORS, Input Validation, and Auth Analyzer attacks:
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Collection Name</th>
+            <th>Format</th>
+            <th>Endpoints</th>
+            <th>Target Base URL</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="rowCol1" class="selected" onclick="chooseCollection('col1', 'Order Service API', 2)">
+            <td><strong>Order Service API</strong></td>
+            <td>OpenAPI 3.0</td>
+            <td>2</td>
+            <td>https://api.example.com</td>
+            <td>READY</td>
+          </tr>
+          <tr id="rowCol2" onclick="chooseCollection('col2', 'User Management API', 2)">
+            <td><strong>User Management API</strong></td>
+            <td>Swagger 2.0</td>
+            <td>2</td>
+            <td>https://api.example.com</td>
+            <td>READY</td>
+          </tr>
+          <tr id="rowColAll" onclick="chooseCollection('all', '[All Imported Collections]', 4)">
+            <td><strong>[All Imported Collections]</strong></td>
+            <td>-</td>
+            <td>4</td>
+            <td>-</td>
+            <td>READY</td>
+          </tr>
+        </tbody>
+      </table>
+    </fieldset>
+  </div>
+
+  <!-- TAB 2: CONFIG - CORS TESTING -->
+  <div id="tabCors" class="tab-content">
+    <fieldset class="titled-box">
+      <legend>Endpoints to Test (CORS Testing Engine)</legend>
+      <div class="flex-row" style="margin-bottom: 6px;">
+        <label><strong>Collection:</strong></label>
+        <select id="corsColSelect" onchange="onManualSelect('corsColSelect')" style="min-width: 280px;">
+          <option value="col1">Order Service API (2 endpoints) [SYNCED]</option>
+          <option value="col2">User Management API (2 endpoints)</option>
+          <option value="all">[All Imported Collections] (4 endpoints)</option>
+        </select>
+        <button onclick="alert('Refreshed')">Refresh</button>
+        <div style="margin-left: auto;">
+          <button onclick="alert('All selected')">Select All</button>
+          <button onclick="alert('All deselected')">Deselect All</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center;">Sel</th>
+            <th style="width: 75px;">Method</th>
+            <th style="width: 250px;">Path</th>
+            <th>Target Base URL</th>
+          </tr>
+        </thead>
+        <tbody id="corsEndpointsBody">
+          <!-- Filled dynamically -->
+        </tbody>
+      </table>
+    </fieldset>
+
+    <fieldset class="titled-box">
+      <legend>Execution Controls (CORS)</legend>
+      <div class="flex-row">
+        <label>Threads: <input type="number" value="4" style="width: 50px;"></label>
+        <label>Delay (ms): <input type="number" value="50" style="width: 60px;"></label>
+        <label>Runner Name: <input type="text" value="CORS Runner 1" style="width: 140px;"></label>
+        <button class="primary" onclick="alert('Running CORS attack ONLY on selected endpoints for active collection!')">
+          Attack Selected Endpoints (Batch CORS)
+        </button>
+        <button onclick="alert('Attack All Endpoints will ONLY test endpoints in selected collection!')">
+          Attack All Endpoints
+        </button>
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- TAB 3: CONFIG - INPUT VALIDATION -->
+  <div id="tabIV" class="tab-content">
+    <fieldset class="titled-box">
+      <legend>Endpoints to Test (Input Validation / BLNS Fuzzer)</legend>
+      <div class="flex-row" style="margin-bottom: 6px;">
+        <label><strong>Collection:</strong></label>
+        <select id="ivColSelect" onchange="onManualSelect('ivColSelect')" style="min-width: 280px;">
+          <option value="col1">Order Service API (2 endpoints) [SYNCED]</option>
+          <option value="col2">User Management API (2 endpoints)</option>
+          <option value="all">[All Imported Collections] (4 endpoints)</option>
+        </select>
+        <button onclick="alert('Refreshed')">Refresh</button>
+        <div style="margin-left: auto;">
+          <button onclick="alert('All selected')">Select All</button>
+          <button onclick="alert('All deselected')">Deselect All</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center;">Sel</th>
+            <th style="width: 75px;">Method</th>
+            <th style="width: 250px;">Path</th>
+            <th>Target Base URL</th>
+          </tr>
+        </thead>
+        <tbody id="ivEndpointsBody">
+          <!-- Filled dynamically -->
+        </tbody>
+      </table>
+    </fieldset>
+
+    <fieldset class="titled-box">
+      <legend>Execution Controls (Input Validation)</legend>
+      <div class="flex-row">
+        <label>Threads: <input type="number" value="5" style="width: 50px;"></label>
+        <label>Delay (ms): <input type="number" value="50" style="width: 60px;"></label>
+        <label>Runner Name: <input type="text" value="Input Validation Runner 1" style="width: 160px;"></label>
+        <button class="primary" onclick="alert('Running Fuzzing attack ONLY on selected endpoints for active collection!')">
+          Attack Selected Endpoints (Batch Fuzz)
+        </button>
+        <button onclick="alert('Attack All Endpoints will ONLY fuzz endpoints in selected collection!')">
+          Attack All Endpoints
+        </button>
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- TAB 4: CONFIG - AUTH ANALYZER -->
+  <div id="tabAuth" class="tab-content">
+    <fieldset class="titled-box">
+      <legend>Endpoints to Test (Auth Analyzer)</legend>
+      <div class="flex-row" style="margin-bottom: 6px;">
+        <label><strong>Collection:</strong></label>
+        <select id="authColSelect" onchange="onManualSelect('authColSelect')" style="min-width: 280px;">
+          <option value="col1">Order Service API (2 endpoints) [SYNCED]</option>
+          <option value="col2">User Management API (2 endpoints)</option>
+          <option value="all">[All Imported Collections] (4 endpoints)</option>
+        </select>
+        <button onclick="alert('Refreshed')">Refresh</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center;">Sel</th>
+            <th style="width: 75px;">Method</th>
+            <th style="width: 250px;">Path</th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody id="authEndpointsBody">
+          <!-- Filled dynamically -->
+        </tbody>
+      </table>
+    </fieldset>
+
+    <fieldset class="titled-box">
+      <legend>Execution Controls (Auth Analyzer - Single Line)</legend>
+      <div class="flex-row">
+        <label>Threads: <input type="number" value="4" style="width: 45px;"></label>
+        <label>Delay (ms): <input type="number" value="50" style="width: 55px;"></label>
+        <label>Runner: <input type="text" value="Runner 1" style="width: 120px;"></label>
+        <button class="primary" onclick="alert('Attack executing strictly on selected collection endpoints!')">Attack</button>
+        <button onclick="alert('Testing selected')">Test Selected</button>
+        <button disabled>Cancel</button>
+      </div>
+    </fieldset>
+  </div>
+
+  <script>
+    let currentSelection = 'col1';
+
+    const endpointsData = {
+      col1: [
+        { method: 'GET', path: '/api/v1/orders', base: 'https://api.example.com', desc: 'Retrieve order list' },
+        { method: 'POST', path: '/api/v1/orders/checkout', base: 'https://api.example.com', desc: 'Submit checkout' }
+      ],
+      col2: [
+        { method: 'GET', path: '/api/v1/admin/users', base: 'https://api.example.com', desc: 'List user accounts' },
+        { method: 'DELETE', path: '/api/v1/admin/users/12', base: 'https://api.example.com', desc: 'Delete user account' }
+      ],
+      all: [
+        { method: 'GET', path: '/api/v1/orders', base: 'https://api.example.com', desc: 'Retrieve order list' },
+        { method: 'POST', path: '/api/v1/orders/checkout', base: 'https://api.example.com', desc: 'Submit checkout' },
+        { method: 'GET', path: '/api/v1/admin/users', base: 'https://api.example.com', desc: 'List user accounts' },
+        { method: 'DELETE', path: '/api/v1/admin/users/12', base: 'https://api.example.com', desc: 'Delete user account' }
+      ]
+    };
+
+    function renderTables(key) {
+      const data = endpointsData[key] || [];
+      const makeRows = () => data.map(item => `
+        <tr>
+          <td style="text-align: center;"><input type="checkbox" checked></td>
+          <td><span class="badge ${item.method === 'GET' ? 'badge-get' : (item.method === 'POST' ? 'badge-post' : 'badge-delete')}">${item.method}</span></td>
+          <td><code>${item.path}</code></td>
+          <td>${item.base || item.desc}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('corsEndpointsBody').innerHTML = makeRows();
+      document.getElementById('ivEndpointsBody').innerHTML = makeRows();
+      document.getElementById('authEndpointsBody').innerHTML = makeRows();
+    }
+
+    function chooseCollection(id, name, count) {
+      currentSelection = id;
+      document.querySelectorAll('#tabImport tbody tr').forEach(r => r.classList.remove('selected'));
+      if (id === 'col1') document.getElementById('rowCol1').classList.add('selected');
+      if (id === 'col2') document.getElementById('rowCol2').classList.add('selected');
+      if (id === 'all') document.getElementById('rowColAll').classList.add('selected');
+
+      document.getElementById('syncBanner').textContent =
+        'Currently Selected Collection: "' + name + '" (' + count + ' endpoints) - Synchronized across all 3 testing engines!';
+
+      document.getElementById('corsColSelect').value = id;
+      document.getElementById('ivColSelect').value = id;
+      document.getElementById('authColSelect').value = id;
+
+      renderTables(id);
+    }
+
+    function onManualSelect(selectId) {
+      const val = document.getElementById(selectId).value;
+      chooseCollection(val, val === 'col1' ? 'Order Service API' : (val === 'col2' ? 'User Management API' : '[All Imported Collections]'), val === 'all' ? 4 : 2);
+    }
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+
+      if (tabId === 'tabImport') document.getElementById('importNav').classList.add('active');
+      else if (tabId === 'tabCors') document.getElementById('corsNav').classList.add('active');
+      else if (tabId === 'tabIV') document.getElementById('ivNav').classList.add('active');
+      else if (tabId === 'tabAuth') document.getElementById('authNav').classList.add('active');
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById('themeToggleBtn');
+      if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        btn.textContent = 'Switch to Light Theme';
+      } else {
+        body.classList.add('light-theme');
+        btn.textContent = 'Switch to Dark Theme';
+      }
+    }
+
+    // Initialize
+    renderTables('col1');
+  </script>
+</body>
+</html>

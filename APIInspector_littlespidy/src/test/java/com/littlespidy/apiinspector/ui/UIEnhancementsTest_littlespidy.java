@@ -1108,6 +1108,46 @@ public class UIEnhancementsTest_littlespidy {
     }
 
     @Test
+    @DisplayName("Verify collection selection sync and Attack scope for CORS and Input Validation")
+    public void testCorsAndInputValidationCollectionSelectionSyncAndAttackScope() {
+        APIInspectorTab_littlespidy rootTab = new APIInspectorTab_littlespidy(mockApi);
+        APIImportTab_littlespidy importTab = rootTab.getImportTab();
+        ConfigTab_littlespidy configTab = rootTab.getConfigTab();
+        CorsConfigPanel_littlespidy corsConfig = configTab.getCorsConfigPanel();
+        InputValidationConfigPanel_littlespidy ivConfig = configTab.getInputValidationConfigPanel();
+
+        DiscoveredEndpoint_littlespidy ep1 = new DiscoveredEndpoint_littlespidy("GET", "/api/v1/orders", "Orders");
+        ImportedCollection_littlespidy col1 = new ImportedCollection_littlespidy("Order API", "OpenAPI", "File", "/path1");
+        col1.setEndpoints(List.of(ep1));
+
+        DiscoveredEndpoint_littlespidy ep2 = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/users", "Users");
+        ImportedCollection_littlespidy col2 = new ImportedCollection_littlespidy("User API", "OpenAPI", "File", "/path2");
+        col2.setEndpoints(List.of(ep2));
+
+        importTab.setCollections(List.of(col1, col2));
+        configTab.refreshCollectionsCombo();
+
+        // Select col1
+        configTab.selectCollection(col1);
+        assertEquals(1, corsConfig.getEndpointSelectionModel().getRowCount());
+        assertEquals("/api/v1/orders", corsConfig.getEndpointSelectionModel().getAllItems().get(0).endpoint.getPath());
+        assertEquals(1, ivConfig.getEndpointSelectionModel().getRowCount());
+        assertEquals("/api/v1/orders", ivConfig.getEndpointSelectionModel().getAllItems().get(0).endpoint.getPath());
+
+        // Select col2
+        configTab.selectCollection(col2);
+        assertEquals(1, corsConfig.getEndpointSelectionModel().getRowCount());
+        assertEquals("/api/v1/users", corsConfig.getEndpointSelectionModel().getAllItems().get(0).endpoint.getPath());
+        assertEquals(1, ivConfig.getEndpointSelectionModel().getRowCount());
+        assertEquals("/api/v1/users", ivConfig.getEndpointSelectionModel().getAllItems().get(0).endpoint.getPath());
+
+        // Reset to all
+        configTab.selectCollection(null);
+        assertEquals(2, corsConfig.getEndpointSelectionModel().getRowCount());
+        assertEquals(2, ivConfig.getEndpointSelectionModel().getRowCount());
+    }
+
+    @Test
     @DisplayName("Verify AuthProfileDialog vertical layout and tall headers text area")
     public void testAuthProfileDialogVerticalLayout() throws Exception {
         if (!GraphicsEnvironment.isHeadless()) {

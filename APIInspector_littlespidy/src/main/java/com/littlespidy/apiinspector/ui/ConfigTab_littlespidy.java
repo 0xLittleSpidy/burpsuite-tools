@@ -80,6 +80,12 @@ public class ConfigTab_littlespidy extends JPanel {
         if (this.authAnalyzerConfigTab != null) {
             this.authAnalyzerConfigTab.selectCollection(col);
         }
+        if (this.corsConfigPanel != null) {
+            this.corsConfigPanel.selectCollection(col);
+        }
+        if (this.inputValidationConfigPanel != null) {
+            this.inputValidationConfigPanel.selectCollection(col);
+        }
     }
 
     public AuthAnalyzerConfigTab_littlespidy getAuthAnalyzerConfigTab() {

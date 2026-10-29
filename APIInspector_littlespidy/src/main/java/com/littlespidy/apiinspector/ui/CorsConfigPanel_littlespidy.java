@@ -304,6 +304,12 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         execControlsPanel.add(attackSelectedBtn);
 
         attackAllEndpointsBtn.addActionListener(e -> {
+            if (importTabRef != null && importTabRef.getSelectedCollection() != null) {
+                CollectionComboItem currentSel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
+                if (currentSel == null || currentSel.collection == null) {
+                    selectCollection(importTabRef.getSelectedCollection());
+                }
+            }
             endpointSelectionModel.selectAll(true);
             launchAttackForSelectedEndpoints();
         });
@@ -312,8 +318,20 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         add(execControlsPanel, BorderLayout.SOUTH);
     }
 
+    public EndpointSelectionTableModel_littlespidy getEndpointSelectionModel() {
+        return endpointSelectionModel;
+    }
+
     public void refreshCollectionsCombo() {
         if (collectionSelectorCombo == null) return;
+        ImportedCollection_littlespidy prevSelected = null;
+        CollectionComboItem sel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
+        if (sel != null && sel.collection != null) {
+            prevSelected = sel.collection;
+        } else if (importTabRef != null && importTabRef.getSelectedCollection() != null) {
+            prevSelected = importTabRef.getSelectedCollection();
+        }
+
         collectionSelectorCombo.removeAllItems();
         if (importTabRef != null) {
             List<ImportedCollection_littlespidy> allCols = importTabRef.getAllCollections();
@@ -324,7 +342,40 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         } else {
             collectionSelectorCombo.addItem(new CollectionComboItem(null, "[No Collections Loaded]"));
         }
-        onCollectionSelectionChanged();
+        if (prevSelected != null) {
+            selectCollection(prevSelected);
+        } else {
+            onCollectionSelectionChanged();
+        }
+    }
+
+    public void selectCollection(ImportedCollection_littlespidy col) {
+        if (collectionSelectorCombo == null) {
+            return;
+        }
+        if (col == null) {
+            if (collectionSelectorCombo.getItemCount() > 0) {
+                collectionSelectorCombo.setSelectedIndex(0);
+            }
+            return;
+        }
+        for (int i = 0; i < collectionSelectorCombo.getItemCount(); i++) {
+            CollectionComboItem item = collectionSelectorCombo.getItemAt(i);
+            if (item != null && item.collection != null) {
+                boolean matches = false;
+                if (item.collection == col) {
+                    matches = true;
+                } else if (item.collection.getId() != null && col.getId() != null && item.collection.getId().equals(col.getId())) {
+                    matches = true;
+                } else if (item.collection.getName() != null && col.getName() != null && item.collection.getName().equals(col.getName())) {
+                    matches = true;
+                }
+                if (matches) {
+                    collectionSelectorCombo.setSelectedIndex(i);
+                    return;
+                }
+            }
+        }
     }
 
     private void onCollectionSelectionChanged() {
