@@ -41,7 +41,19 @@ public class ConfigTab_littlespidy extends JPanel {
             this.inputValidationConfigPanel.setInputValidationTab(inputValidationTab);
         }
 
+        // Synchronize available Auth Profiles from Auth Analyzer to CORS and Input Validation
+        this.authAnalyzerConfigTab.addStateChangedListener(this::syncAuthProfilesToSubPanels);
+        syncAuthProfilesToSubPanels();
+
         initComponents();
+    }
+
+    public void syncAuthProfilesToSubPanels() {
+        if (authAnalyzerConfigTab != null) {
+            java.util.List<com.littlespidy.apiinspector.model.AuthProfile_littlespidy> profiles = authAnalyzerConfigTab.getAllProfiles();
+            corsConfigPanel.updateAvailableProfiles(profiles);
+            inputValidationConfigPanel.updateAvailableProfiles(profiles);
+        }
     }
 
     public void setRootTab(APIInspectorTab_littlespidy rootTab) {
@@ -60,6 +72,7 @@ public class ConfigTab_littlespidy extends JPanel {
         this.authAnalyzerConfigTab.refreshCollectionsCombo();
         this.corsConfigPanel.refreshCollectionsCombo();
         this.inputValidationConfigPanel.refreshCollectionsCombo();
+        syncAuthProfilesToSubPanels();
     }
 
     public AuthAnalyzerConfigTab_littlespidy getAuthAnalyzerConfigTab() {

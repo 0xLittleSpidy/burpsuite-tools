@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,80 +145,23 @@ public class NaughtyStringsParser_littlespidy {
         ));
 
         techniques.add(new InputValidationTechnique_littlespidy(
-                "blns_script", "BLNS: Script Injection & Polyglots",
-                "Tests comprehensive benign XSS vectors, SVG handlers, and unencoded script reflections",
-                scriptInjection,
-                Arrays.asList("<script>", "<svg", "alert(", "onload=", "onerror=")
-        ));
-
-        techniques.add(new InputValidationTechnique_littlespidy(
-                "blns_sqli", "BLNS: SQL & Server Code Injection",
-                "Tests SQL syntax delimiters, database dialect queries, and command execution strings",
-                sqlAndCode,
-                Arrays.asList("syntax error", "sql error", "mysql_", "pg_query", "ora-", "SQLSTATE", "sqlite3")
-        ));
-
-        techniques.add(new InputValidationTechnique_littlespidy(
-                "blns_interpolation", "BLNS: Format Strings & Interpolation",
+                "blns_interpolation", "BLNS: Format Strings & Unwanted Interpolation",
                 "Tests printf format string specifiers and accidental shell evaluation (%s, %x, %n)",
                 unwantedInterpolation,
-                Arrays.asList("MissingFormatArgumentException", "UnknownFormatConversionException", "%s", "format error")
+                Collections.emptyList()
         ));
-
-        techniques.add(new InputValidationTechnique_littlespidy(
-                "blns_file_traversal", "BLNS: File Inclusion & Traversal",
-                "Tests directory path traversal sequences, XML entities, and file disclosures",
-                fileTraversal,
-                Arrays.asList("root:x:0:0", "boot.ini", "win.ini", "FileNotFoundException", "AccessDeniedException")
-        ));
-
-        techniques.add(new InputValidationTechnique_littlespidy(
-                "blns_msdos", "BLNS: MSDOS / Windows Special Filenames",
-                "Tests Windows reserved device filenames (CON, PRN, AUX, NUL, COM1, LPT1)",
-                msdosNames,
-                Arrays.asList("invalid filename", "reserved device", "IOException", "PathTooLongException")
-        ));
-
-        if (!terminalPrompt.isEmpty()) {
-            techniques.add(new InputValidationTechnique_littlespidy(
-                    "blns_terminal_prompt", "BLNS: Terminal & Prompt Injection",
-                    "Tests ANSI terminal escape sequences, layer 8 vulnerabilities, and LLM prompt overrides",
-                    terminalPrompt,
-                    Arrays.asList("escape code", "prompt", "override")
-            ));
-        }
 
         return techniques;
     }
 
     /**
-     * Loads all individual payloads across Standard OWASP and BLNS wordlists.
+     * Loads all individual payloads across the refined input validation wordlists.
      * Each payload is represented as an individual InputValidationPayloadItem_littlespidy row.
      */
     public static List<InputValidationPayloadItem_littlespidy> loadAllIndividualPayloads() {
         List<InputValidationPayloadItem_littlespidy> items = new ArrayList<>();
 
-        // 1. Standard OWASP individual payloads
-        for (InputValidationTechnique_littlespidy t : InputValidationTechnique_littlespidy.getDefaultTechniques()) {
-            if (!t.isBlns()) {
-                List<String> payloads = t.getSamplePayloads();
-                for (int i = 0; i < payloads.size(); i++) {
-                    String id = t.getId() + "_" + String.format("%02d", i + 1);
-                    items.add(new InputValidationPayloadItem_littlespidy(
-                            id,
-                            t.getCategory(),
-                            payloads.get(i),
-                            t.getErrorSignatures(),
-                            t.getDescription(),
-                            true,
-                            false,
-                            false
-                    ));
-                }
-            }
-        }
-
-        // 2. Big List of Naughty Strings individual payloads
+        // Load Big List of Naughty Strings individual payloads for retained categories
         List<InputValidationTechnique_littlespidy> blnsTechniques = loadDefaultBlnsTechniques();
         for (InputValidationTechnique_littlespidy t : blnsTechniques) {
             List<String> payloads = t.getSamplePayloads();
@@ -227,7 +171,7 @@ public class NaughtyStringsParser_littlespidy {
                         id,
                         t.getCategory(),
                         payloads.get(i),
-                        t.getErrorSignatures(),
+                        Collections.emptyList(),
                         t.getDescription(),
                         true,
                         true,
@@ -250,7 +194,6 @@ public class NaughtyStringsParser_littlespidy {
         List<InputValidationPayloadItem_littlespidy> items = new ArrayList<>();
         String name = file.getName();
         String prefix = "custom_" + name.toLowerCase().replaceAll("[^a-z0-9_]", "_");
-        List<String> defaultSigs = Arrays.asList("error", "exception", "failed", "syntax", "warning");
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
@@ -263,7 +206,7 @@ public class NaughtyStringsParser_littlespidy {
                             id,
                             "Custom: " + name,
                             trimmed,
-                            defaultSigs,
+                            Collections.emptyList(),
                             "Custom wordlist payload from " + name,
                             true,
                             false,

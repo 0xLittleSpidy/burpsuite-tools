@@ -6,6 +6,7 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import com.littlespidy.apiinspector.engine.CorsEngine_littlespidy;
 import com.littlespidy.apiinspector.engine.CorsProgressListener_littlespidy;
+import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy;
 import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
@@ -96,6 +97,8 @@ public class CorsTab_littlespidy extends JPanel {
             List<? extends EndpointSelectionItem_littlespidy> endpoints,
             String targetBaseUrl,
             String attackerDomain,
+            AuthProfile_littlespidy profile,
+            String customAuthHeader,
             List<CorsTechnique_littlespidy> techniques,
             int threads,
             int delayMs,
@@ -107,6 +110,60 @@ public class CorsTab_littlespidy extends JPanel {
                 endpoints,
                 targetBaseUrl,
                 attackerDomain,
+                profile,
+                customAuthHeader,
+                techniques,
+                threads,
+                delayMs,
+                new CorsProgressListener_littlespidy() {
+                    @Override
+                    public void onCorsTestCompleted(CorsTestResult_littlespidy result) {
+                        runner.addResult(result);
+                    }
+
+                    @Override
+                    public void onStatusUpdate(String statusMessage, int current, int total) {
+                        runner.updateStatusText("Status: " + statusMessage);
+                    }
+
+                    @Override
+                    public void onAllTestsCompleted() {
+                        runner.updateStatusText("Status: Completed all CORS tests");
+                    }
+                }
+        );
+    }
+
+    public void executeAttack(
+            List<? extends EndpointSelectionItem_littlespidy> endpoints,
+            String targetBaseUrl,
+            String attackerDomain,
+            List<CorsTechnique_littlespidy> techniques,
+            int threads,
+            int delayMs,
+            String runnerName) {
+        executeAttack(endpoints, targetBaseUrl, attackerDomain, null, null, techniques, threads, delayMs, runnerName);
+    }
+
+    public void executeAttack(
+            HttpRequest targetRequest,
+            String targetBaseUrl,
+            String attackerDomain,
+            AuthProfile_littlespidy profile,
+            String customAuthHeader,
+            List<CorsTechnique_littlespidy> techniques,
+            int threads,
+            int delayMs,
+            String runnerName) {
+
+        CorsRunnerPanel_littlespidy runner = createNewRunner(runnerName);
+
+        corsEngine.executeTestsAsync(
+                targetRequest,
+                targetBaseUrl,
+                attackerDomain,
+                profile,
+                customAuthHeader,
                 techniques,
                 threads,
                 delayMs,
@@ -137,33 +194,7 @@ public class CorsTab_littlespidy extends JPanel {
             int threads,
             int delayMs,
             String runnerName) {
-
-        CorsRunnerPanel_littlespidy runner = createNewRunner(runnerName);
-
-        corsEngine.executeTestsAsync(
-                targetRequest,
-                targetBaseUrl,
-                attackerDomain,
-                techniques,
-                threads,
-                delayMs,
-                new CorsProgressListener_littlespidy() {
-                    @Override
-                    public void onCorsTestCompleted(CorsTestResult_littlespidy result) {
-                        runner.addResult(result);
-                    }
-
-                    @Override
-                    public void onStatusUpdate(String statusMessage, int current, int total) {
-                        runner.updateStatusText("Status: " + statusMessage);
-                    }
-
-                    @Override
-                    public void onAllTestsCompleted() {
-                        runner.updateStatusText("Status: Completed all CORS tests");
-                    }
-                }
-        );
+        executeAttack(targetRequest, targetBaseUrl, attackerDomain, null, null, techniques, threads, delayMs, runnerName);
     }
 
     public void sendToCors(HttpRequest request, HttpResponse response) {

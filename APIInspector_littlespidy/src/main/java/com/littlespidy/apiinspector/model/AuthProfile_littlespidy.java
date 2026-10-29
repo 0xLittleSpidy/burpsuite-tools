@@ -220,6 +220,29 @@ public class AuthProfile_littlespidy {
         return "Basic " + Base64.getEncoder().encodeToString(creds.getBytes(StandardCharsets.UTF_8));
     }
 
+    public String getFormattedHeaderString() {
+        if (unauthenticated) {
+            return "";
+        }
+        if (rawHeaders != null && !rawHeaders.isBlank()) {
+            return rawHeaders.trim();
+        }
+        switch (getAuthType()) {
+            case BEARER_TOKEN:
+                return bearerToken != null && !bearerToken.isBlank() ? "Authorization: Bearer " + bearerToken : "";
+            case API_KEY:
+                return apiKeyName != null && !apiKeyName.isBlank() && apiKeyValue != null ? apiKeyName + ": " + apiKeyValue : "";
+            case BASIC_AUTH:
+                return "Authorization: " + getBasicAuthHeaderValue();
+            case COOKIE:
+                return cookieName != null && !cookieName.isBlank() && cookieValue != null ? "Cookie: " + cookieName + "=" + cookieValue : "";
+            case CUSTOM_HEADER:
+                return customHeaderName != null && !customHeaderName.isBlank() && customHeaderValue != null ? customHeaderName + ": " + customHeaderValue : "";
+            default:
+                return "";
+        }
+    }
+
     public String getMaskedSummary() {
         if (unauthenticated) {
             if (rawHeaders != null && !rawHeaders.isBlank()) {

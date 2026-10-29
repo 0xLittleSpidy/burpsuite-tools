@@ -116,7 +116,10 @@ public class ClassificationFilterDropDown_littlespidy extends JButton {
         if (row == null) {
             return false;
         }
-        String classification = row.getClassification();
+        return matchesClassification(row.getClassification());
+    }
+
+    public boolean matchesClassification(String classification) {
         if ("TRUE_POSITIVE".equalsIgnoreCase(classification)) {
             return tpCheckBox.isSelected();
         } else if ("FALSE_POSITIVE".equalsIgnoreCase(classification)) {

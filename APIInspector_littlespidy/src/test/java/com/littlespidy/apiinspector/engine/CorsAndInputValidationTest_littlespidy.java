@@ -110,7 +110,7 @@ public class CorsAndInputValidationTest_littlespidy {
 
         HttpRequest req = com.littlespidy.apiinspector.TestMockHelper_littlespidy.createMockRequest("GET", "https://example.com/search?q=test", "/search?q=test", java.util.Collections.emptyMap(), "");
 
-        // SQL Injection response with database error signature
+        // SQL Injection response with database error triggering 500 status
         HttpResponse sqlResp = com.littlespidy.apiinspector.TestMockHelper_littlespidy.createMockResponse(
                 500, java.util.Collections.emptyMap(),
                 "org.postgresql.util.PSQLException: ERROR: syntax error at or near 'UNION'"
@@ -118,11 +118,11 @@ public class CorsAndInputValidationTest_littlespidy {
         HttpRequestResponse sqlPair = com.littlespidy.apiinspector.TestMockHelper_littlespidy.createMockHttpRequestResponse(req, sqlResp);
 
         InputValidationTestResult_littlespidy sqlResult = InputValidationEngine_littlespidy.evaluateFuzzResponse(
-                1, "GET", "https://example.com/search?q=test", "q", "SQL Injection",
+                1, "GET", "https://example.com/search?q=test", "q", "BLNS: Reserved Identifiers",
                 "' UNION SELECT null--", List.of("syntax error", "psqlexception"), sqlPair
         );
         assertEquals(ValidationSeverity.HIGH, sqlResult.getSeverity());
-        assertTrue(sqlResult.getDetectionIndicator().contains("syntax error"));
+        assertTrue(sqlResult.getDetectionIndicator().contains("500"));
 
         // XSS response with unencoded reflection
         HttpResponse xssResp = com.littlespidy.apiinspector.TestMockHelper_littlespidy.createMockResponse(
@@ -131,10 +131,10 @@ public class CorsAndInputValidationTest_littlespidy {
         );
         HttpRequestResponse xssPair = com.littlespidy.apiinspector.TestMockHelper_littlespidy.createMockHttpRequestResponse(req, xssResp);
         InputValidationTestResult_littlespidy xssResult = InputValidationEngine_littlespidy.evaluateFuzzResponse(
-                2, "GET", "https://example.com/search?q=test", "q", "Cross-Site Scripting (XSS)",
+                2, "GET", "https://example.com/search?q=test", "q", "BLNS: Special Characters & Quotation Quirks",
                 "<script>alert(1)</script>", List.of("not_matched"), xssPair
         );
-        assertEquals(ValidationSeverity.HIGH, xssResult.getSeverity());
+        assertEquals(ValidationSeverity.MEDIUM, xssResult.getSeverity());
         assertTrue(xssResult.getDetectionIndicator().contains("reflected"));
     }
 
@@ -175,7 +175,7 @@ public class CorsAndInputValidationTest_littlespidy {
         assertEquals("evil.com", configTab.getCorsConfigPanel().getAttackerDomain());
         assertTrue(configTab.getCorsConfigPanel().getTechniques().size() >= 29);
 
-        assertTrue(configTab.getInputValidationConfigPanel().getTechniques().size() >= 6);
+        assertEquals(5, configTab.getInputValidationConfigPanel().getTechniques().size());
     }
 
     @Test
@@ -241,6 +241,39 @@ public class CorsAndInputValidationTest_littlespidy {
         // Input validation panel should have the individual payloads and endpoints available
         InputValidationConfigPanel_littlespidy inputValPanel = configTab.getInputValidationConfigPanel();
         assertNotNull(inputValPanel);
-        assertTrue(inputValPanel.getPayloadItems().size() >= 500);
+        assertTrue(inputValPanel.getPayloadItems().size() >= 180);
+    }
+
+    @Test
+    @DisplayName("Verify ClassificationFilterDropDown and right-click marking on CORS and Input Validation")
+    void testClassificationFilterAndMarking() {
+        ClassificationFilterDropDown_littlespidy filter = new ClassificationFilterDropDown_littlespidy();
+        assertTrue(filter.isTruePositiveSelected());
+        assertTrue(filter.isFalsePositiveSelected());
+        assertTrue(filter.isUnclassifiedSelected());
+
+        // Test unclassified matching
+        assertTrue(filter.matchesClassification(null));
+        assertTrue(filter.matchesClassification("Unclassified"));
+        assertTrue(filter.matchesClassification("TRUE_POSITIVE"));
+        assertTrue(filter.matchesClassification("FALSE_POSITIVE"));
+
+        // Verify CorsTestResult classification setter
+        CorsTestResult_littlespidy corsRes = new CorsTestResult_littlespidy(
+                1, "GET", "target", "/api", "https://evil.com", "Test",
+                "https://evil.com", true, 200, 100, CorsSeverity.HIGH, null
+        );
+        assertNull(corsRes.getClassification());
+        corsRes.setClassification("TRUE_POSITIVE");
+        assertEquals("TRUE_POSITIVE", corsRes.getClassification());
+
+        // Verify InputValidationTestResult classification setter
+        InputValidationTestResult_littlespidy valRes = new InputValidationTestResult_littlespidy(
+                1, "POST", "https://api.com", "q", "Reserved", "null", 200, 50, "Normal",
+                ValidationSeverity.INFO, null
+        );
+        assertNull(valRes.getClassification());
+        valRes.setClassification("FALSE_POSITIVE");
+        assertEquals("FALSE_POSITIVE", valRes.getClassification());
     }
 }

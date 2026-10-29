@@ -435,20 +435,17 @@
           <!-- Tier 1: Individual Payloads Table -->
           <div class="tier-panel" style="flex: 1.2;">
             <div class="tier-header">
-              <span>Input Validation Payloads (Showing all individual strings - 520+ payloads)</span>
+              <span>Input Validation Payloads (Boundary, Extremes, Special Characters & Format Strings)</span>
               <div style="display: flex; gap: 6px; align-items: center;">
                 <label>Category Filter:</label>
                 <select id="payloadCategoryFilter" onchange="filterPayloadRows(this.value)">
-                  <option value="all">All Payloads (520+)</option>
-                  <option value="reserved">BLNS: Reserved Identifiers (17)</option>
-                  <option value="numeric">BLNS: Numeric Boundaries (73)</option>
-                  <option value="special">BLNS: Special Characters (20)</option>
-                  <option value="unicode">BLNS: Unicode & Encoding (75)</option>
-                  <option value="script">BLNS: Script Injection (236)</option>
-                  <option value="sqli">BLNS: SQL & Code Injection (21)</option>
-                  <option value="interpolation">BLNS: Format Strings (9)</option>
-                  <option value="msdos">BLNS: MSDOS Filenames (15)</option>
-                  <option value="standard">Standard OWASP Attacks (26)</option>
+                  <option value="all">All Payloads</option>
+                  <option value="reserved">BLNS: Reserved Identifiers</option>
+                  <option value="numeric">BLNS: Numeric Boundaries & Extremes</option>
+                  <option value="special">BLNS: Special Characters & Quotations</option>
+                  <option value="unicode">BLNS: Unicode & Encoding Quirks</option>
+                  <option value="interpolation">BLNS: Format Strings & Unwanted Interpolation</option>
+                  <option value="custom">Custom Wordlists</option>
                 </select>
                 <input type="text" id="payloadSearchInput" placeholder="Live search payloads..." onkeyup="searchPayloadRows(this.value)" style="width: 140px;">
                 <button onclick="togglePayloadCheckboxes(true)">Select All</button>
@@ -461,10 +458,9 @@
                 <thead>
                   <tr>
                     <th style="width: 30px;"><input type="checkbox" checked onchange="togglePayloadCheckboxes(this.checked)"></th>
-                    <th style="width: 70px;">ID</th>
-                    <th style="width: 180px;">Category</th>
-                    <th style="width: 320px;">Payload Value (Sent to Parameters)</th>
-                    <th>Detection Signatures / Oracle Matching</th>
+                    <th style="width: 75px;">ID</th>
+                    <th style="width: 220px;">Category</th>
+                    <th>Payload Value (Sent to Parameters)</th>
                     <th style="width: 90px; text-align: center;">Action</th>
                   </tr>
                 </thead>
@@ -474,7 +470,6 @@
                     <td>PL-001</td>
                     <td>BLNS: Reserved Identifiers</td>
                     <td><code>undefined</code></td>
-                    <td>NullPointerException, undefined, TypeError, ReferenceError</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('undefined')">Attack</button></td>
                   </tr>
                   <tr data-cat="reserved">
@@ -482,7 +477,6 @@
                     <td>PL-002</td>
                     <td>BLNS: Reserved Identifiers</td>
                     <td><code>null</code></td>
-                    <td>NullPointerException, TypeError, null pointer</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('null')">Attack</button></td>
                   </tr>
                   <tr data-cat="reserved">
@@ -490,95 +484,55 @@
                     <td>PL-003</td>
                     <td>BLNS: Reserved Identifiers</td>
                     <td><code>None</code></td>
-                    <td>TypeError, AttributeError, NoneType</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('None')">Attack</button></td>
                   </tr>
                   <tr data-cat="numeric">
                     <td><input type="checkbox" checked class="pl-cb"></td>
                     <td>PL-018</td>
-                    <td>BLNS: Numeric Boundaries</td>
+                    <td>BLNS: Numeric Boundaries & Extremes</td>
                     <td><code>0</code></td>
-                    <td>Zero division, boolean bypass, logic flaw</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('0')">Attack</button></td>
                   </tr>
                   <tr data-cat="numeric">
                     <td><input type="checkbox" checked class="pl-cb"></td>
                     <td>PL-019</td>
-                    <td>BLNS: Numeric Boundaries</td>
+                    <td>BLNS: Numeric Boundaries & Extremes</td>
                     <td><code>-1</code></td>
-                    <td>Negative integer, index underflow, logic exception</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('-1')">Attack</button></td>
                   </tr>
                   <tr data-cat="numeric">
                     <td><input type="checkbox" checked class="pl-cb"></td>
                     <td>PL-020</td>
-                    <td>BLNS: Numeric Boundaries</td>
+                    <td>BLNS: Numeric Boundaries & Extremes</td>
                     <td><code>1/0</code></td>
-                    <td>ArithmeticException, divided by zero</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('1/0')">Attack</button></td>
                   </tr>
                   <tr data-cat="numeric">
                     <td><input type="checkbox" checked class="pl-cb"></td>
                     <td>PL-021</td>
-                    <td>BLNS: Numeric Boundaries</td>
+                    <td>BLNS: Numeric Boundaries & Extremes</td>
                     <td><code>NaN</code></td>
-                    <td>NumberFormatException, NaN parsing error</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('NaN')">Attack</button></td>
                   </tr>
-                  <tr data-cat="numeric">
+                  <tr data-cat="special">
                     <td><input type="checkbox" checked class="pl-cb"></td>
-                    <td>PL-022</td>
-                    <td>BLNS: Numeric Boundaries</td>
-                    <td><code>0xffffffff</code></td>
-                    <td>Integer overflow, 32-bit boundary exception</td>
-                    <td style="text-align: center;"><button onclick="attackSinglePayload('0xffffffff')">Attack</button></td>
+                    <td>PL-095</td>
+                    <td>BLNS: Special Characters & Quotations</td>
+                    <td><code>"',;:\/&?#</code></td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('special')">Attack</button></td>
                   </tr>
-                  <tr data-cat="script">
+                  <tr data-cat="unicode">
                     <td><input type="checkbox" checked class="pl-cb"></td>
-                    <td>PL-115</td>
-                    <td>BLNS: Script Injection</td>
-                    <td><code>&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
-                    <td>Unencoded reflection in HTML/JSON body</td>
-                    <td style="text-align: center;"><button onclick="attackSinglePayload('&lt;script&gt;alert(1)&lt;/script&gt;')">Attack</button></td>
-                  </tr>
-                  <tr data-cat="script">
-                    <td><input type="checkbox" checked class="pl-cb"></td>
-                    <td>PL-116</td>
-                    <td>BLNS: Script Injection</td>
-                    <td><code>"&gt;&lt;img src=x onerror=alert(1)&gt;</code></td>
-                    <td>Attribute breakout and unencoded reflection</td>
-                    <td style="text-align: center;"><button onclick="attackSinglePayload('&quot;&gt;&lt;img src=x onerror=alert(1)&gt;')">Attack</button></td>
-                  </tr>
-                  <tr data-cat="sqli">
-                    <td><input type="checkbox" checked class="pl-cb"></td>
-                    <td>PL-350</td>
-                    <td>BLNS: SQL & Code Injection</td>
-                    <td><code>' OR '1'='1' -- -</code></td>
-                    <td>syntax error, sql error, database dialect disclosure</td>
-                    <td style="text-align: center;"><button onclick="attackSinglePayload('\' OR \'1\'=\'1\' -- -')">Attack</button></td>
-                  </tr>
-                  <tr data-cat="msdos">
-                    <td><input type="checkbox" checked class="pl-cb"></td>
-                    <td>PL-410</td>
-                    <td>BLNS: MSDOS Filenames</td>
-                    <td><code>CON</code></td>
-                    <td>Windows reserved device, invalid filename exception</td>
-                    <td style="text-align: center;"><button onclick="attackSinglePayload('CON')">Attack</button></td>
-                  </tr>
-                  <tr data-cat="msdos">
-                    <td><input type="checkbox" checked class="pl-cb"></td>
-                    <td>PL-411</td>
-                    <td>BLNS: MSDOS Filenames</td>
-                    <td><code>PRN</code></td>
-                    <td>Windows reserved device, invalid filename exception</td>
-                    <td style="text-align: center;"><button onclick="attackSinglePayload('PRN')">Attack</button></td>
+                    <td>PL-130</td>
+                    <td>BLNS: Unicode & Encoding Quirks</td>
+                    <td><code>%E0%A0%80</code></td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('%E0%A0%80')">Attack</button></td>
                   </tr>
                   <tr data-cat="interpolation">
                     <td><input type="checkbox" checked class="pl-cb"></td>
                     <td>PL-480</td>
-                    <td>BLNS: Format Strings</td>
+                    <td>BLNS: Format Strings & Unwanted Interpolation</td>
                     <td><code>%s%p%x%d</code></td>
-                    <td>MissingFormatArgumentException, printf disclosure</td>
                     <td style="text-align: center;"><button onclick="attackSinglePayload('%s%p%x%d')">Attack</button></td>
                   </tr>
                 </tbody>
@@ -657,7 +611,19 @@
           <div class="tier-panel" style="flex-shrink: 0;">
             <div class="control-row">
               <div class="form-group">
-                <label>Concurrency (Threads):</label>
+                <label>Auth Profile / Session:</label>
+                <select id="fuzzAuthProfileSelector" style="width: 200px;">
+                  <option value="none">[Unauthenticated]</option>
+                  <option value="admin" selected>Admin User Profile (Bearer)</option>
+                  <option value="victim">Victim Session (Cookie)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Session / Auth Header:</label>
+                <input type="text" id="fuzzAuthHeaderField" value="Authorization: Bearer token_littlespidy" style="width: 240px;" placeholder="Authorization: Bearer ...">
+              </div>
+              <div class="form-group">
+                <label>Threads:</label>
                 <input type="number" value="5" style="width: 50px;">
               </div>
               <div class="form-group">
@@ -670,7 +636,7 @@
               </div>
               <button class="primary-btn" onclick="launchBatchAttackToRunner('Input Validation')">Attack Selected Endpoints (Batch Fuzz)</button>
               <div style="flex: 1;"></div>
-              <span style="color: var(--text-muted);">Selected: <strong>4 endpoints</strong> | Payloads: <strong>14 active</strong> | Estimated Requests: <strong>56</strong></span>
+              <span style="color: var(--text-muted);">Selected: <strong>4 endpoints</strong> | Payloads: <strong>11 active</strong></span>
             </div>
           </div>
 
@@ -809,7 +775,19 @@
           <div class="tier-panel" style="flex-shrink: 0;">
             <div class="control-row">
               <div class="form-group">
-                <label>Concurrency (Threads):</label>
+                <label>Auth Profile / Session:</label>
+                <select id="corsAuthProfileSelector" style="width: 200px;">
+                  <option value="none">[Unauthenticated]</option>
+                  <option value="admin" selected>Admin User Profile (Bearer)</option>
+                  <option value="victim">Victim Session (Cookie)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Session / Auth Header:</label>
+                <input type="text" id="corsAuthHeaderField" value="Authorization: Bearer token_littlespidy" style="width: 240px;" placeholder="Authorization: Bearer ...">
+              </div>
+              <div class="form-group">
+                <label>Threads:</label>
                 <input type="number" value="4" style="width: 50px;">
               </div>
               <div class="form-group">
@@ -822,7 +800,7 @@
               </div>
               <button class="primary-btn" onclick="launchBatchAttackToRunner('CORS')">Attack Selected Endpoints (Batch CORS)</button>
               <div style="flex: 1;"></div>
-              <span style="color: var(--text-muted);">Selected: <strong>3 endpoints</strong> | Vectors: <strong>5 active</strong> | Estimated Requests: <strong>15</strong></span>
+              <span style="color: var(--text-muted);">Selected: <strong>3 endpoints</strong> | Vectors: <strong>29 active</strong></span>
             </div>
           </div>
 
@@ -888,8 +866,21 @@
             <span>Collection: <strong>Swagger Petstore v3</strong></span>
             <span>Endpoints Tested: <strong>3</strong></span>
             <span>Total Vectors: <strong>15</strong></span>
-            <span>High Severity: <strong style="color: var(--status-high);">1</strong></span>
-            <span>Safe: <strong style="color: var(--status-info);">14</strong></span>
+            <span>High: <strong style="color: var(--status-high);">1</strong></span>
+            <span>Medium: <strong style="color: var(--status-med);">1</strong></span>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center; margin-left: 16px;">
+            <label>Classification:</label>
+            <div style="position: relative; display: inline-block;">
+              <button id="corsClassFilterBtn" onclick="toggleClassificationPopup('corsClassPopup')">Classification: All</button>
+              <div id="corsClassPopup" style="display: none; position: absolute; top: 100%; left: 0; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 6px; z-index: 100; min-width: 150px; box-shadow: 0 4px 8px rgba(0,0,0,0.4);">
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('corsResultsTbody', 'all', this)"> Select All</label></div>
+                <hr style="margin: 4px 0; border: 0; border-top: 1px solid var(--border-color);">
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('corsResultsTbody', 'tp', this)"> True Positive</label></div>
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('corsResultsTbody', 'fp', this)"> False Positive</label></div>
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('corsResultsTbody', 'unclass', this)"> Unclassified</label></div>
+              </div>
+            </div>
           </div>
           <div style="flex: 1;"></div>
           <button onclick="alert('Exported CORS results to CSV.')">Export CSV</button>
@@ -900,19 +891,20 @@
             <table>
               <thead>
                 <tr>
-                  <th style="width: 45px;">ID</th>
-                  <th style="width: 60px;">Method</th>
-                  <th style="width: 220px;">Target Endpoint</th>
-                  <th style="width: 240px;">Tested Origin</th>
-                  <th style="width: 60px;">Status</th>
-                  <th style="width: 220px;">Access-Control-Allow-Origin</th>
-                  <th style="width: 60px;">ACAC</th>
-                  <th style="width: 80px;">Severity</th>
-                  <th>Assessment / Vulnerability Details</th>
+                  <th style="width: 40px;">ID</th>
+                  <th style="width: 55px;">Method</th>
+                  <th style="width: 180px;">Target Endpoint</th>
+                  <th style="width: 200px;">Tested Origin</th>
+                  <th style="width: 50px;">Status</th>
+                  <th style="width: 180px;">ACAO</th>
+                  <th style="width: 50px;">ACAC</th>
+                  <th style="width: 70px;">Severity</th>
+                  <th style="width: 110px;">Classification</th>
+                  <th>Assessment / Details</th>
                 </tr>
               </thead>
               <tbody id="corsResultsTbody">
-                <tr class="selected" onclick="selectCorsRow(this, 1)">
+                <tr class="selected" data-class="tp" onclick="selectCorsRow(this, 1)">
                   <td>1</td>
                   <td>GET</td>
                   <td>/api/v1/user/account</td>
@@ -921,9 +913,10 @@
                   <td>https://evil.com</td>
                   <td>true</td>
                   <td><span class="badge badge-high">High</span></td>
+                  <td><span class="badge badge-high" style="cursor:pointer;" onclick="cycleClassification(this, event)">True Positive</span></td>
                   <td>Arbitrary Origin Reflection with Credentials Allowed</td>
                 </tr>
-                <tr onclick="selectCorsRow(this, 2)">
+                <tr data-class="unclass" onclick="selectCorsRow(this, 2)">
                   <td>2</td>
                   <td>GET</td>
                   <td>/api/v1/user/account</td>
@@ -932,6 +925,7 @@
                   <td>null</td>
                   <td>true</td>
                   <td><span class="badge badge-med">Medium</span></td>
+                  <td><span class="badge badge-low" style="cursor:pointer;" onclick="cycleClassification(this, event)">Unclassified</span></td>
                   <td>Null Origin reflection with Credentials Allowed</td>
                 </tr>
               </tbody>
@@ -993,9 +987,22 @@ Vary: Origin
           <div class="status-summary">
             <span>Collection: <strong>Swagger Petstore v3</strong></span>
             <span>Endpoints Fuzzed: <strong>4</strong></span>
-            <span>Total Requests: <strong>56</strong></span>
-            <span>Issues Detected: <strong style="color: var(--status-high);">2</strong></span>
+            <span>Total Requests: <strong>44</strong></span>
+            <span>Issues: <strong style="color: var(--status-high);">1</strong></span>
             <span>Status: <strong>Completed</strong></span>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center; margin-left: 16px;">
+            <label>Classification:</label>
+            <div style="position: relative; display: inline-block;">
+              <button id="fuzzClassFilterBtn" onclick="toggleClassificationPopup('fuzzClassPopup')">Classification: All</button>
+              <div id="fuzzClassPopup" style="display: none; position: absolute; top: 100%; left: 0; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 6px; z-index: 100; min-width: 150px; box-shadow: 0 4px 8px rgba(0,0,0,0.4);">
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('fuzzResultsTbody', 'all', this)"> Select All</label></div>
+                <hr style="margin: 4px 0; border: 0; border-top: 1px solid var(--border-color);">
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('fuzzResultsTbody', 'tp', this)"> True Positive</label></div>
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('fuzzResultsTbody', 'fp', this)"> False Positive</label></div>
+                <div><label><input type="checkbox" checked onchange="filterResultsByClass('fuzzResultsTbody', 'unclass', this)"> Unclassified</label></div>
+              </div>
+            </div>
           </div>
           <div style="flex: 1;"></div>
           <button onclick="alert('Results exported.')">Export Results</button>
@@ -1006,50 +1013,54 @@ Vary: Origin
             <table>
               <thead>
                 <tr>
-                  <th style="width: 45px;">ID</th>
-                  <th style="width: 60px;">Method</th>
-                  <th style="width: 200px;">Target Endpoint</th>
-                  <th style="width: 90px;">Parameter</th>
-                  <th style="width: 140px;">Category</th>
-                  <th style="width: 200px;">Payload Sent</th>
-                  <th style="width: 60px;">Status</th>
-                  <th style="width: 70px;">Length</th>
-                  <th>Reflection / Detection Indicator</th>
+                  <th style="width: 40px;">ID</th>
+                  <th style="width: 55px;">Method</th>
+                  <th style="width: 180px;">Target Endpoint</th>
+                  <th style="width: 80px;">Parameter</th>
+                  <th style="width: 180px;">Category</th>
+                  <th style="width: 140px;">Payload Sent</th>
+                  <th style="width: 50px;">Status</th>
+                  <th style="width: 60px;">Length</th>
+                  <th style="width: 110px;">Classification</th>
+                  <th>Reflection / Behavior Indicator</th>
                 </tr>
               </thead>
               <tbody id="fuzzResultsTbody">
-                <tr class="selected" onclick="selectFuzzRow(this, 1)">
+                <tr class="selected" data-class="tp" onclick="selectFuzzRow(this, 1)">
                   <td>1</td>
                   <td>GET</td>
                   <td>/api/v1/user/search</td>
                   <td>query</td>
-                  <td>BLNS: SQL & Code Injection</td>
-                  <td>' OR '1'='1' -- -</td>
+                  <td>BLNS: Reserved Identifiers</td>
+                  <td>undefined</td>
                   <td>500</td>
                   <td>1,420</td>
-                  <td><span class="badge badge-high">SQL Syntax Error (PostgreSQL)</span></td>
+                  <td><span class="badge badge-high" style="cursor:pointer;" onclick="cycleClassification(this, event)">True Positive</span></td>
+                  <td><span class="badge badge-high">500 Server Error (NullPointerException)</span></td>
                 </tr>
-                <tr onclick="selectFuzzRow(this, 2)">
+                <tr data-class="unclass" onclick="selectFuzzRow(this, 2)">
                   <td>2</td>
                   <td>GET</td>
                   <td>/api/v1/user/search</td>
                   <td>query</td>
-                  <td>BLNS: Script Injection</td>
-                  <td>&lt;script&gt;alert(1)&lt;/script&gt;</td>
-                  <td>200</td>
-                  <td>890</td>
-                  <td><span class="badge badge-high">Unencoded Script Tag Reflection</span></td>
+                  <td>BLNS: Numeric Boundaries</td>
+                  <td>1/0</td>
+                  <td>400</td>
+                  <td>340</td>
+                  <td><span class="badge badge-low" style="cursor:pointer;" onclick="cycleClassification(this, event)">Unclassified</span></td>
+                  <td><span class="badge badge-info">Handled: 400 Bad Request</span></td>
                 </tr>
-                <tr onclick="selectFuzzRow(this, 3)">
+                <tr data-class="unclass" onclick="selectFuzzRow(this, 3)">
                   <td>3</td>
                   <td>GET</td>
                   <td>/api/v1/user/search</td>
                   <td>query</td>
-                  <td>BLNS: Numeric Boundaries</td>
-                  <td>-1</td>
+                  <td>BLNS: Special Characters</td>
+                  <td>"',;:\/&?#</td>
                   <td>200</td>
-                  <td>340</td>
-                  <td><span class="badge badge-info">Handled Safely</span></td>
+                  <td>850</td>
+                  <td><span class="badge badge-low" style="cursor:pointer;" onclick="cycleClassification(this, event)">Unclassified</span></td>
+                  <td><span class="badge badge-info">Normal response</span></td>
                 </tr>
               </tbody>
             </table>
@@ -1274,6 +1285,68 @@ Connection: close
       tabBtn.innerHTML = '<span>Input Validation Runner ' + fuzzRunnerCount + '</span> <span class="close-btn" onclick="closeFuzzRunnerTab(event, \'' + runnerId + '\', this)">x</span>';
       nav.insertBefore(tabBtn, addBtn);
     }
+    function toggleClassificationPopup(popupId) {
+      const popup = document.getElementById(popupId);
+      if (popup) {
+        popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+      }
+    }
+
+    function filterResultsByClass(tbodyId, type, checkbox) {
+      const tbody = document.getElementById(tbodyId);
+      if (!tbody) return;
+      const popup = checkbox.closest('div[id]');
+      const checkboxes = popup.querySelectorAll('input[type="checkbox"]');
+      const selectAll = checkboxes[0];
+      const tpChecked = checkboxes[1].checked;
+      const fpChecked = checkboxes[2].checked;
+      const unclassChecked = checkboxes[3].checked;
+
+      if (type === 'all') {
+        checkboxes[1].checked = checkbox.checked;
+        checkboxes[2].checked = checkbox.checked;
+        checkboxes[3].checked = checkbox.checked;
+      }
+
+      Array.from(tbody.querySelectorAll('tr')).forEach(row => {
+        const cls = row.getAttribute('data-class') || 'unclass';
+        let show = false;
+        if (cls === 'tp' && checkboxes[1].checked) show = true;
+        if (cls === 'fp' && checkboxes[2].checked) show = true;
+        if (cls === 'unclass' && checkboxes[3].checked) show = true;
+        row.style.display = show ? '' : 'none';
+      });
+    }
+
+    function cycleClassification(badgeElem, event) {
+      event.stopPropagation();
+      const row = badgeElem.closest('tr');
+      const current = row.getAttribute('data-class') || 'unclass';
+      if (current === 'unclass') {
+        row.setAttribute('data-class', 'tp');
+        badgeElem.className = 'badge badge-high';
+        badgeElem.innerText = 'True Positive';
+      } else if (current === 'tp') {
+        row.setAttribute('data-class', 'fp');
+        badgeElem.className = 'badge badge-med';
+        badgeElem.innerText = 'False Positive';
+      } else {
+        row.setAttribute('data-class', 'unclass');
+        badgeElem.className = 'badge badge-low';
+        badgeElem.innerText = 'Unclassified';
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#corsClassFilterBtn') && !e.target.closest('#corsClassPopup')) {
+        const p1 = document.getElementById('corsClassPopup');
+        if (p1) p1.style.display = 'none';
+      }
+      if (!e.target.closest('#fuzzClassFilterBtn') && !e.target.closest('#fuzzClassPopup')) {
+        const p2 = document.getElementById('fuzzClassPopup');
+        if (p2) p2.style.display = 'none';
+      }
+    });
   </script>
 </body>
 </html>

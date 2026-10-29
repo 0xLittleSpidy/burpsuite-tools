@@ -17,12 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class NaughtyStringsTest_littlespidy {
 
     @Test
-    @DisplayName("Verify NaughtyStringsParser loads 500+ payloads across 10 BLNS categories")
+    @DisplayName("Verify NaughtyStringsParser loads payloads across retained BLNS categories")
     void testLoadDefaultBlnsTechniques() {
         List<InputValidationTechnique_littlespidy> blnsTechs = NaughtyStringsParser_littlespidy.loadDefaultBlnsTechniques();
         assertNotNull(blnsTechs, "BLNS techniques list must not be null");
         assertFalse(blnsTechs.isEmpty(), "BLNS techniques list must not be empty");
-        assertTrue(blnsTechs.size() >= 9, "Must contain at least 9 BLNS groups");
+        assertEquals(5, blnsTechs.size(), "Must contain exactly 5 retained pure input validation BLNS groups");
 
         int totalPayloads = 0;
         for (InputValidationTechnique_littlespidy t : blnsTechs) {
@@ -31,7 +31,7 @@ public class NaughtyStringsTest_littlespidy {
             totalPayloads += t.getPayloadCount();
         }
 
-        assertTrue(totalPayloads >= 400, "Must load at least 400 total naughty string payloads, found: " + totalPayloads);
+        assertTrue(totalPayloads >= 180, "Must load at least 180 total retained naughty string payloads, found: " + totalPayloads);
 
         // Verify specific key groups
         InputValidationTechnique_littlespidy reserved = blnsTechs.stream()
@@ -47,10 +47,17 @@ public class NaughtyStringsTest_littlespidy {
         assertTrue(numeric.getSamplePayloads().contains("-1"));
         assertTrue(numeric.getSamplePayloads().contains("NaN"));
 
-        InputValidationTechnique_littlespidy msdos = blnsTechs.stream()
-                .filter(t -> "blns_msdos".equals(t.getId())).findFirst().orElse(null);
-        assertNotNull(msdos);
-        assertTrue(msdos.getSamplePayloads().contains("CON") || msdos.getSamplePayloads().contains("PRN"));
+        InputValidationTechnique_littlespidy special = blnsTechs.stream()
+                .filter(t -> "blns_special".equals(t.getId())).findFirst().orElse(null);
+        assertNotNull(special);
+
+        InputValidationTechnique_littlespidy unicode = blnsTechs.stream()
+                .filter(t -> "blns_unicode".equals(t.getId())).findFirst().orElse(null);
+        assertNotNull(unicode);
+
+        InputValidationTechnique_littlespidy interpolation = blnsTechs.stream()
+                .filter(t -> "blns_interpolation".equals(t.getId())).findFirst().orElse(null);
+        assertNotNull(interpolation);
     }
 
     @Test
@@ -77,13 +84,13 @@ public class NaughtyStringsTest_littlespidy {
     @DisplayName("Verify InputValidationTechnique getDefaultTechniques combines standard and BLNS")
     void testCombinedTechniques() {
         List<InputValidationTechnique_littlespidy> all = InputValidationTechnique_littlespidy.getDefaultTechniques();
-        assertTrue(all.size() >= 15, "Default techniques should combine 6 standard + 9+ BLNS categories");
+        assertTrue(all.size() >= 10, "Default techniques should combine 6 standard + 5 BLNS categories");
 
         long standardCount = all.stream().filter(t -> !t.isBlns()).count();
         long blnsCount = all.stream().filter(t -> t.isBlns()).count();
 
         assertEquals(6, standardCount, "Should have 6 standard OWASP categories");
-        assertTrue(blnsCount >= 9, "Should have at least 9 BLNS categories");
+        assertEquals(5, blnsCount, "Should have 5 BLNS categories");
     }
 
     @Test
@@ -91,27 +98,25 @@ public class NaughtyStringsTest_littlespidy {
     void testConfigPanelFiltering() {
         InputValidationConfigPanel_littlespidy panel = new InputValidationConfigPanel_littlespidy(null);
         List<InputValidationTechnique_littlespidy> techs = panel.getTechniques();
-        assertTrue(techs.size() >= 15, "Panel should have all combined techniques initially");
+        assertEquals(5, techs.size(), "Panel should have 5 pure BLNS techniques initially");
 
-        // Verify individual payloads table contains 500+ individual items
+        // Verify individual payloads table contains 180+ individual items
         List<InputValidationPayloadItem_littlespidy> payloads = panel.getPayloadItems();
         assertNotNull(payloads);
-        assertTrue(payloads.size() >= 500, "Must contain at least 500 individual payloads, found: " + payloads.size());
+        assertTrue(payloads.size() >= 180, "Must contain at least 180 individual payloads, found: " + payloads.size());
     }
 
     @Test
-    @DisplayName("Verify loadAllIndividualPayloads loads 500+ distinct payload rows with signatures")
+    @DisplayName("Verify loadAllIndividualPayloads loads 180+ distinct payload rows with signatures")
     void testLoadAllIndividualPayloads() {
         List<InputValidationPayloadItem_littlespidy> items = NaughtyStringsParser_littlespidy.loadAllIndividualPayloads();
         assertNotNull(items);
-        assertTrue(items.size() >= 500, "Must load 500+ individual payloads, found: " + items.size());
+        assertTrue(items.size() >= 180, "Must load 180+ individual payloads, found: " + items.size());
 
-        // Check that every item has non-empty ID, Category, and detection signatures
+        // Check that every item has non-empty ID, Category
         boolean foundUndefined = false;
         boolean foundNull = false;
         boolean foundZero = false;
-        boolean foundCon = false;
-        boolean foundSqli = false;
 
         for (InputValidationPayloadItem_littlespidy item : items) {
             assertNotNull(item.getId());
@@ -123,15 +128,11 @@ public class NaughtyStringsTest_littlespidy {
             if ("undefined".equals(item.getPayload())) foundUndefined = true;
             if ("null".equals(item.getPayload())) foundNull = true;
             if ("0".equals(item.getPayload())) foundZero = true;
-            if ("CON".equals(item.getPayload())) foundCon = true;
-            if (item.getPayload().contains("' OR '1'='1'")) foundSqli = true;
         }
 
         assertTrue(foundUndefined, "Must contain 'undefined' payload");
         assertTrue(foundNull, "Must contain 'null' payload");
         assertTrue(foundZero, "Must contain '0' payload");
-        assertTrue(foundCon, "Must contain 'CON' payload");
-        assertTrue(foundSqli, "Must contain SQLi payload");
     }
 
     @Test

@@ -39,6 +39,7 @@ public class CorsTestResult_littlespidy {
     private final CorsSeverity severity;
     private final HttpRequestResponse httpRequestResponse;
     private final long timestamp;
+    private String classification; // "TRUE_POSITIVE", "FALSE_POSITIVE", or null/empty
 
     public CorsTestResult_littlespidy(int id, String method, String host, String path,
                                       String testedOrigin, String description, String reflectedAcao,
@@ -105,6 +106,14 @@ public class CorsTestResult_littlespidy {
 
     public HttpRequestResponse getHttpRequestResponse() {
         return httpRequestResponse;
+    }
+
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
     }
 
     public long getTimestamp() {

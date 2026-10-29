@@ -4,6 +4,8 @@ package com.littlespidy.apiinspector.ui;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.HttpService;
 import burp.api.montoya.http.message.requests.HttpRequest;
+import com.littlespidy.apiinspector.model.AuthProfileComboItem_littlespidy;
+import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
 import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
 import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
@@ -30,12 +32,12 @@ import java.util.Locale;
 
 /**
  * Configuration sub-panel for Input Validation fuzzing.
- * Displays all individual attack payloads (OWASP and BLNS) as distinct table rows
- * without aggregating them into count buckets.
+ * Displays all individual attack payloads (boundary, extremes, delimiters, format strings)
+ * as distinct table rows without aggregated counts or detection signature columns.
  * Features a three-tier layout:
  * Tier 1: Individual Payloads table with filtering, search, and row attack buttons.
  * Tier 2: Endpoints to Test panel with API Collection selector, filter, and endpoints checklist.
- * Tier 3: Execution controls, thread/delay spinners, and batch Attack buttons.
+ * Tier 3: Execution controls, Auth Profile / Session header selection, thread/delay spinners, and batch Attack buttons.
  */
 public class InputValidationConfigPanel_littlespidy extends JPanel {
 
@@ -52,18 +54,11 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
 
     private final JComboBox<String> categoryFilterCombo = new JComboBox<>(new String[]{
             "All Payloads",
-            "Standard OWASP",
-            "Naughty Strings (BLNS)",
             "BLNS: Reserved Identifiers",
-            "BLNS: Numeric Boundaries",
-            "BLNS: Special Characters",
-            "BLNS: Unicode & Encoding",
-            "BLNS: Script Injection",
-            "BLNS: SQL & Code Injection",
-            "BLNS: Unwanted Interpolation",
-            "BLNS: File Inclusion & Traversal",
-            "BLNS: MSDOS / Windows Filenames",
-            "BLNS: Terminal & Prompt Injection",
+            "BLNS: Numeric Boundaries & Extremes",
+            "BLNS: Special Characters & Quotations",
+            "BLNS: Unicode & Encoding Quirks",
+            "BLNS: Format Strings & Unwanted Interpolation",
             "Custom Wordlists"
     });
     private final JTextField payloadSearchField = new JTextField(14);
@@ -76,6 +71,8 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     private final JTextField endpointFilterField = new JTextField(14);
 
     // Execution Controls UI
+    private final JComboBox<AuthProfileComboItem_littlespidy> authProfileCombo = new JComboBox<>();
+    private final JTextField sessionHeaderField = new JTextField(22);
     private final JTextField targetEndpointField = new JTextField("https://example.com/api/v1/search?query=test", 24);
     private final JSpinner threadSpinner = new JSpinner(new SpinnerNumberModel(5, 1, 30, 1));
     private final JSpinner delaySpinner = new JSpinner(new SpinnerNumberModel(50, 0, 10000, 10));
@@ -89,7 +86,7 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         super(new BorderLayout(6, 6));
         this.api = api;
 
-        // Load all individual payloads (OWASP + BLNS individual strings)
+        // Load all individual payloads for retained input validation categories
         this.allPayloads.addAll(NaughtyStringsParser_littlespidy.loadAllIndividualPayloads());
         this.displayedPayloads.addAll(this.allPayloads);
 
@@ -151,16 +148,22 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         applyFilter();
     }
 
-    /**
-     * Preserved for backward-compatibility with tests and legacy callers.
-     */
     public List<InputValidationTechnique_littlespidy> getTechniques() {
-        return InputValidationTechnique_littlespidy.getDefaultTechniques();
+        return NaughtyStringsParser_littlespidy.loadDefaultBlnsTechniques();
     }
 
     public void setTechniques(List<InputValidationTechnique_littlespidy> techniques) {
-        // Reload payloads representation
         applyFilter();
+    }
+
+    public void updateAvailableProfiles(List<AuthProfile_littlespidy> profiles) {
+        authProfileCombo.removeAllItems();
+        authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
+        if (profiles != null) {
+            for (AuthProfile_littlespidy p : profiles) {
+                authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(p, p.getName() + " (" + p.getMaskedSummary() + ")"));
+            }
+        }
     }
 
     private void initComponents() {
@@ -213,14 +216,13 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         payloadTable.setFillsViewportHeight(true);
         payloadTable.setRowHeight(24);
         payloadTable.getColumnModel().getColumn(0).setMaxWidth(55);
-        payloadTable.getColumnModel().getColumn(1).setMaxWidth(90);
-        payloadTable.getColumnModel().getColumn(2).setPreferredWidth(170);
-        payloadTable.getColumnModel().getColumn(3).setPreferredWidth(260);
-        payloadTable.getColumnModel().getColumn(4).setPreferredWidth(200);
-        payloadTable.getColumnModel().getColumn(5).setMaxWidth(90);
+        payloadTable.getColumnModel().getColumn(1).setMaxWidth(85);
+        payloadTable.getColumnModel().getColumn(2).setPreferredWidth(220);
+        payloadTable.getColumnModel().getColumn(3).setPreferredWidth(400);
+        payloadTable.getColumnModel().getColumn(4).setMaxWidth(90);
 
-        payloadTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
-        payloadTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox(), this::launchSinglePayloadAttack));
+        payloadTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+        payloadTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox(), this::launchSinglePayloadAttack));
         payloadsPanel.add(new JScrollPane(payloadTable), BorderLayout.CENTER);
 
         // 2. Tier 2 (Middle): Endpoints to Test Panel
@@ -299,8 +301,15 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         JPanel execControlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         execControlsPanel.setBorder(new TitledBorder("Execution Controls"));
 
-        execControlsPanel.add(new JLabel("Target (Fallback):"));
-        execControlsPanel.add(targetEndpointField);
+        execControlsPanel.add(new JLabel("Auth Profile / Session:"));
+        authProfileCombo.setPreferredSize(new Dimension(220, 24));
+        authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
+        authProfileCombo.addActionListener(e -> onAuthProfileSelectionChanged());
+        execControlsPanel.add(authProfileCombo);
+
+        execControlsPanel.add(new JLabel("Auth Header:"));
+        sessionHeaderField.setToolTipText("Enter raw auth header (e.g. Authorization: Bearer <token>)");
+        execControlsPanel.add(sessionHeaderField);
 
         execControlsPanel.add(new JLabel("Threads:"));
         execControlsPanel.add(threadSpinner);
@@ -324,6 +333,17 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         add(execControlsPanel, BorderLayout.SOUTH);
     }
 
+    private void onAuthProfileSelectionChanged() {
+        AuthProfileComboItem_littlespidy sel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
+        if (sel != null && sel.profile != null) {
+            AuthProfile_littlespidy p = sel.profile;
+            String headerStr = p.getFormattedHeaderString();
+            if (headerStr != null && !headerStr.isBlank()) {
+                sessionHeaderField.setText(headerStr);
+            }
+        }
+    }
+
     private void applyFilter() {
         String selectedCategory = (String) categoryFilterCombo.getSelectedItem();
         String search = payloadSearchField.getText().trim().toLowerCase(Locale.ROOT);
@@ -332,11 +352,7 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         for (InputValidationPayloadItem_littlespidy item : allPayloads) {
             // Category check
             boolean categoryMatch = true;
-            if ("Standard OWASP".equals(selectedCategory)) {
-                categoryMatch = !item.isBlns() && !item.isCustom();
-            } else if ("Naughty Strings (BLNS)".equals(selectedCategory)) {
-                categoryMatch = item.isBlns();
-            } else if ("Custom Wordlists".equals(selectedCategory)) {
+            if ("Custom Wordlists".equals(selectedCategory)) {
                 categoryMatch = item.isCustom();
             } else if (selectedCategory != null && !"All Payloads".equals(selectedCategory)) {
                 categoryMatch = item.getCategory().toLowerCase(Locale.ROOT).contains(selectedCategory.toLowerCase(Locale.ROOT));
@@ -431,27 +447,18 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         }
     }
 
-    private HttpRequest buildTargetRequest() {
-        String targetUrl = targetEndpointField.getText().trim();
-        if (targetUrl.isEmpty()) {
-            targetUrl = "https://example.com/api/v1/search?query=test";
-        }
-        if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
-            targetUrl = "https://" + targetUrl;
-        }
-
-        HttpRequest request = HttpRequest.httpRequestFromUrl(targetUrl);
-        if (request == null) {
-            HttpService service = HttpService.httpService("localhost", 443, true);
-            request = HttpRequest.httpRequest(service, "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-        }
-        return request;
-    }
-
     private void launchAttackForSelectedEndpoints() {
         if (inputValidationTab == null || rootTab == null) return;
 
         List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
+        if (selectedEndpoints.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "No endpoints selected. Please select at least one endpoint from the collection to test.",
+                    "Selection Required",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         List<InputValidationPayloadItem_littlespidy> activePayloads = new ArrayList<>();
         for (InputValidationPayloadItem_littlespidy p : allPayloads) {
             if (p.isEnabled()) {
@@ -460,7 +467,10 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         }
 
         if (activePayloads.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No payloads enabled. Check at least one payload to run attacks.", "Configuration Required", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "No payloads enabled. Check at least one payload to run attacks.",
+                    "Configuration Required",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -469,28 +479,23 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
             runnerName = "Input Validation Runner " + (++runnerCount);
         }
 
+        AuthProfileComboItem_littlespidy authSel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
+        AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
+        String customAuthHeader = sessionHeaderField.getText().trim();
+
         // Switch to Input Validation tab
         rootTab.selectTab(inputValidationTab);
 
-        if (!selectedEndpoints.isEmpty()) {
-            inputValidationTab.executeAttack(
-                    selectedEndpoints,
-                    getTargetEndpoint(),
-                    activePayloads,
-                    getThreadCount(),
-                    getDelayMs(),
-                    runnerName
-            );
-        } else {
-            HttpRequest targetReq = buildTargetRequest();
-            inputValidationTab.executeAttackForPayloads(
-                    targetReq,
-                    activePayloads,
-                    getThreadCount(),
-                    getDelayMs(),
-                    runnerName
-            );
-        }
+        inputValidationTab.executeAttack(
+                selectedEndpoints,
+                getTargetEndpoint(),
+                profile,
+                customAuthHeader,
+                activePayloads,
+                getThreadCount(),
+                getDelayMs(),
+                runnerName
+        );
 
         runnerNameField.setText("Input Validation Runner " + (++runnerCount));
     }
@@ -498,36 +503,39 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     private void launchSinglePayloadAttack(int rowIndex) {
         if (inputValidationTab == null || rootTab == null || rowIndex < 0 || rowIndex >= displayedPayloads.size()) return;
 
-        InputValidationPayloadItem_littlespidy payloadItem = displayedPayloads.get(rowIndex);
         List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
+        if (selectedEndpoints.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "No endpoints selected. Please select at least one endpoint from the collection to test.",
+                    "Selection Required",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        InputValidationPayloadItem_littlespidy payloadItem = displayedPayloads.get(rowIndex);
         String runnerName = "Fuzz - " + payloadItem.getId();
+
+        AuthProfileComboItem_littlespidy authSel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
+        AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
+        String customAuthHeader = sessionHeaderField.getText().trim();
 
         // Switch to Input Validation tab
         rootTab.selectTab(inputValidationTab);
 
-        if (!selectedEndpoints.isEmpty()) {
-            inputValidationTab.executeAttack(
-                    selectedEndpoints,
-                    getTargetEndpoint(),
-                    Collections.singletonList(payloadItem),
-                    1,
-                    getDelayMs(),
-                    runnerName
-            );
-        } else {
-            HttpRequest targetReq = buildTargetRequest();
-            inputValidationTab.executeAttackForPayloads(
-                    targetReq,
-                    Collections.singletonList(payloadItem),
-                    1,
-                    getDelayMs(),
-                    runnerName
-            );
-        }
+        inputValidationTab.executeAttack(
+                selectedEndpoints,
+                getTargetEndpoint(),
+                profile,
+                customAuthHeader,
+                Collections.singletonList(payloadItem),
+                1,
+                getDelayMs(),
+                runnerName
+        );
     }
 
     private class PayloadTableModel extends AbstractTableModel {
-        private final String[] columns = {"Enable", "ID", "Category", "Payload Value", "Detection Signatures", "Action"};
+        private final String[] columns = {"Enable", "ID", "Category", "Payload Value", "Action"};
 
         @Override
         public int getRowCount() {
@@ -552,7 +560,7 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
 
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return columnIndex == 0 || columnIndex == 5;
+            return columnIndex == 0 || columnIndex == 4;
         }
 
         @Override
@@ -564,8 +572,7 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
                 case 1: return item.getId();
                 case 2: return item.getCategory();
                 case 3: return item.getPayload();
-                case 4: return item.getDetectionSignaturesSummary();
-                case 5: return "Attack";
+                case 4: return "Attack";
                 default: return "";
             }
         }

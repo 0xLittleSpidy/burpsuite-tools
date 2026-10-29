@@ -37,6 +37,7 @@ public class InputValidationTestResult_littlespidy {
     private final ValidationSeverity severity;
     private final HttpRequestResponse httpRequestResponse;
     private final long timestamp;
+    private String classification; // "TRUE_POSITIVE", "FALSE_POSITIVE", or null/empty
 
     public InputValidationTestResult_littlespidy(
             int id, String method, String targetUrl, String parameterName,
@@ -99,6 +100,14 @@ public class InputValidationTestResult_littlespidy {
 
     public HttpRequestResponse getHttpRequestResponse() {
         return httpRequestResponse;
+    }
+
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
     }
 
     public long getTimestamp() {

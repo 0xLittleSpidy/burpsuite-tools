@@ -6,6 +6,7 @@ import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
+import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy.CorsSeverity;
@@ -45,12 +46,14 @@ public class CorsEngine_littlespidy {
     }
 
     /**
-     * Executes CORS tests asynchronously across the given techniques.
+     * Executes CORS tests asynchronously across the given techniques with an optional Auth Profile or custom session header.
      */
     public void executeTestsAsync(
             HttpRequest baseRequest,
             String targetBaseUrl,
             String attackerDomain,
+            AuthProfile_littlespidy profile,
+            String customAuthHeader,
             List<CorsTechnique_littlespidy> techniques,
             int threadCount,
             int delayMs,
@@ -90,6 +93,10 @@ public class CorsEngine_littlespidy {
 
                             String testedOrigin = tech.resolveOrigin(targetBaseUrl, attackerDomain);
                             HttpRequest modifiedRequest = createRequestWithOrigin(baseRequest, testedOrigin);
+                            if (customAuthHeader != null && !customAuthHeader.isBlank() && customAuthHeader.contains(":")) {
+                                String[] parts = customAuthHeader.split(":", 2);
+                                modifiedRequest = modifiedRequest.withAddedHeader(parts[0].trim(), parts[1].trim());
+                            }
 
                             HttpRequestResponse responsePair = null;
                             if (api != null && api.http() != null) {
@@ -98,9 +105,9 @@ public class CorsEngine_littlespidy {
 
                             int currentId = idCounter.getAndIncrement();
                             CorsTestResult_littlespidy result = evaluateResponse(
-                                    currentId, method, host, path, testedOrigin,
-                                    tech.getName() + " - " + tech.getDescription(),
-                                    modifiedRequest, responsePair
+                                     currentId, method, host, path, testedOrigin,
+                                     tech.getName() + " - " + tech.getDescription(),
+                                     modifiedRequest, responsePair
                             );
 
                             int done = completedCount.incrementAndGet();
@@ -142,12 +149,42 @@ public class CorsEngine_littlespidy {
     }
 
     /**
+     * Executes CORS tests asynchronously across the given techniques without auth.
+     */
+    public void executeTestsAsync(
+            HttpRequest baseRequest,
+            String targetBaseUrl,
+            String attackerDomain,
+            List<CorsTechnique_littlespidy> techniques,
+            int threadCount,
+            int delayMs,
+            CorsProgressListener_littlespidy listener) {
+        executeTestsAsync(baseRequest, targetBaseUrl, attackerDomain, null, null, techniques, threadCount, delayMs, listener);
+    }
+
+    /**
      * Executes CORS tests across multiple collection endpoints asynchronously.
      */
     public void executeEndpointsTestsAsync(
             List<? extends EndpointSelectionItem_littlespidy> endpointItems,
             String defaultTargetBaseUrl,
             String attackerDomain,
+            List<CorsTechnique_littlespidy> techniques,
+            int threadCount,
+            int delayMs,
+            CorsProgressListener_littlespidy listener) {
+        executeEndpointsTestsAsync(endpointItems, defaultTargetBaseUrl, attackerDomain, null, null, techniques, threadCount, delayMs, listener);
+    }
+
+    /**
+     * Executes CORS tests across multiple collection endpoints asynchronously with an Auth Profile or custom session header.
+     */
+    public void executeEndpointsTestsAsync(
+            List<? extends EndpointSelectionItem_littlespidy> endpointItems,
+            String defaultTargetBaseUrl,
+            String attackerDomain,
+            AuthProfile_littlespidy profile,
+            String customAuthHeader,
             List<CorsTechnique_littlespidy> techniques,
             int threadCount,
             int delayMs,
@@ -196,9 +233,14 @@ public class CorsEngine_littlespidy {
 
                     HttpRequest baseRequest;
                     try {
-                        baseRequest = AuthTestEngine_littlespidy.buildRequest(baseUrl, item.endpoint, null, false);
+                        baseRequest = AuthTestEngine_littlespidy.buildRequest(baseUrl, item.endpoint, profile, profile != null);
                     } catch (Exception ex) {
                         baseRequest = HttpRequest.httpRequestFromUrl(baseUrl + item.endpoint.getPath());
+                    }
+
+                    if (customAuthHeader != null && !customAuthHeader.isBlank() && customAuthHeader.contains(":")) {
+                        String[] parts = customAuthHeader.split(":", 2);
+                        baseRequest = baseRequest.withAddedHeader(parts[0].trim(), parts[1].trim());
                     }
 
                     if (baseRequest == null) {

@@ -6,6 +6,7 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import com.littlespidy.apiinspector.engine.InputValidationEngine_littlespidy;
 import com.littlespidy.apiinspector.engine.InputValidationProgressListener_littlespidy;
+import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationPayloadItem_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTechnique_littlespidy;
@@ -96,6 +97,8 @@ public class InputValidationTab_littlespidy extends JPanel {
     public void executeAttack(
             List<? extends EndpointSelectionItem_littlespidy> endpoints,
             String defaultBaseUrl,
+            AuthProfile_littlespidy profile,
+            String customAuthHeader,
             List<InputValidationPayloadItem_littlespidy> payloads,
             int threads,
             int delayMs,
@@ -106,6 +109,8 @@ public class InputValidationTab_littlespidy extends JPanel {
         fuzzEngine.executeEndpointsFuzzAsync(
                 endpoints,
                 defaultBaseUrl,
+                profile,
+                customAuthHeader,
                 payloads,
                 threads,
                 delayMs,
@@ -126,6 +131,16 @@ public class InputValidationTab_littlespidy extends JPanel {
                     }
                 }
         );
+    }
+
+    public void executeAttack(
+            List<? extends EndpointSelectionItem_littlespidy> endpoints,
+            String defaultBaseUrl,
+            List<InputValidationPayloadItem_littlespidy> payloads,
+            int threads,
+            int delayMs,
+            String runnerName) {
+        executeAttack(endpoints, defaultBaseUrl, null, null, payloads, threads, delayMs, runnerName);
     }
 
     public void executeAttackForPayloads(

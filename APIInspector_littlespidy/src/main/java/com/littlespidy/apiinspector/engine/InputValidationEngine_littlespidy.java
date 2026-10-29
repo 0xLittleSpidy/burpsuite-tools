@@ -7,6 +7,7 @@ import burp.api.montoya.http.message.params.HttpParameter;
 import burp.api.montoya.http.message.params.ParsedHttpParameter;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
+import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationPayloadItem_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTechnique_littlespidy;
@@ -227,6 +228,21 @@ public class InputValidationEngine_littlespidy {
             int threadCount,
             int delayMs,
             InputValidationProgressListener_littlespidy listener) {
+        executeEndpointsFuzzAsync(endpointItems, defaultTargetBaseUrl, null, null, payloadItems, threadCount, delayMs, listener);
+    }
+
+    /**
+     * Executes individual payloads fuzzing across multiple collection endpoints with an Auth Profile or custom session header.
+     */
+    public void executeEndpointsFuzzAsync(
+            List<? extends EndpointSelectionItem_littlespidy> endpointItems,
+            String defaultTargetBaseUrl,
+            AuthProfile_littlespidy profile,
+            String customAuthHeader,
+            List<InputValidationPayloadItem_littlespidy> payloadItems,
+            int threadCount,
+            int delayMs,
+            InputValidationProgressListener_littlespidy listener) {
 
         cancelled.set(false);
         int threads = Math.max(1, threadCount);
@@ -269,9 +285,14 @@ public class InputValidationEngine_littlespidy {
 
                     HttpRequest baseReq;
                     try {
-                        baseReq = AuthTestEngine_littlespidy.buildRequest(baseUrl, epItem.endpoint, null, false);
+                        baseReq = AuthTestEngine_littlespidy.buildRequest(baseUrl, epItem.endpoint, profile, profile != null);
                     } catch (Exception ex) {
                         baseReq = HttpRequest.httpRequestFromUrl(baseUrl + epItem.endpoint.getPath());
+                    }
+
+                    if (customAuthHeader != null && !customAuthHeader.isBlank() && customAuthHeader.contains(":")) {
+                        String[] parts = customAuthHeader.split(":", 2);
+                        baseReq = baseReq.withAddedHeader(parts[0].trim(), parts[1].trim());
                     }
 
                     if (baseReq == null) continue;
@@ -465,36 +486,26 @@ public class InputValidationEngine_littlespidy {
         int statusCode = response.statusCode();
         int length = response.body().length();
         String body = response.bodyToString();
-        String lowerBody = body != null ? body.toLowerCase(Locale.ROOT) : "";
 
-        String detectionIndicator = "Normal response";
-        ValidationSeverity severity = ValidationSeverity.INFO;
+        String detectionIndicator;
+        ValidationSeverity severity;
 
-        // Check for specific error signatures
-        boolean signatureMatched = false;
-        if (errorSignatures != null) {
-            for (String sig : errorSignatures) {
-                if (!sig.isBlank() && lowerBody.contains(sig.toLowerCase(Locale.ROOT))) {
-                    detectionIndicator = "Matched signature: " + sig;
-                    severity = ValidationSeverity.HIGH;
-                    signatureMatched = true;
-                    break;
-                }
-            }
-        }
-
-        if (!signatureMatched) {
-            // Check for payload reflection in body
-            if (payload.length() > 3 && body != null && body.contains(payload)) {
-                detectionIndicator = "Payload reflected unencoded";
-                severity = category.toLowerCase(Locale.ROOT).contains("xss") ? ValidationSeverity.HIGH : ValidationSeverity.MEDIUM;
-            } else if (statusCode >= 500) {
-                detectionIndicator = "Server error " + statusCode + " triggered";
-                severity = ValidationSeverity.MEDIUM;
-            } else if (statusCode == 400 || statusCode == 422) {
-                detectionIndicator = "Rejected with status " + statusCode;
-                severity = ValidationSeverity.LOW;
-            }
+        // Evaluate behavior based on response status and body reflection (signature matching removed)
+        if (statusCode >= 500) {
+            detectionIndicator = "Server error " + statusCode + " triggered";
+            severity = ValidationSeverity.HIGH;
+        } else if (payload.length() > 2 && body != null && body.contains(payload)) {
+            detectionIndicator = "Payload reflected in response body";
+            severity = ValidationSeverity.MEDIUM;
+        } else if (statusCode == 400 || statusCode == 422) {
+            detectionIndicator = "Handled: status " + statusCode;
+            severity = ValidationSeverity.LOW;
+        } else if (statusCode >= 200 && statusCode < 300) {
+            detectionIndicator = "Normal response " + statusCode + " (" + length + " bytes)";
+            severity = ValidationSeverity.INFO;
+        } else {
+            detectionIndicator = "Status " + statusCode + " (" + length + " bytes)";
+            severity = ValidationSeverity.INFO;
         }
 
         return new InputValidationTestResult_littlespidy(

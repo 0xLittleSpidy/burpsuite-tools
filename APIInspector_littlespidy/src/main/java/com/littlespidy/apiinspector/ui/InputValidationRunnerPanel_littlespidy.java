@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Runner session panel for Input Validation testing and fuzzing.
- * Top: Results table.
+ * Runner session panel for Input Validation fuzzing.
+ * Top: Results table with Classification filter and right-click marking.
  * Bottom: 50/50 parallel side-by-side Montoya Request and Response editors with equal size.
  */
 public class InputValidationRunnerPanel_littlespidy extends JPanel {
@@ -28,10 +28,12 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
     private final MontoyaApi api;
     private final String runnerId;
     private final String runnerName;
-    private final List<InputValidationTestResult_littlespidy> results = new ArrayList<>();
+    private final List<InputValidationTestResult_littlespidy> allResults = new ArrayList<>();
+    private final List<InputValidationTestResult_littlespidy> displayedResults = new ArrayList<>();
     private final FuzzResultsTableModel tableModel = new FuzzResultsTableModel();
     private final JTable resultsTable = new JTable(tableModel);
 
+    private ClassificationFilterDropDown_littlespidy classificationFilterDropDown;
     private HttpRequestEditor requestEditor;
     private HttpResponseEditor responseEditor;
     private JSplitPane parallelViewerSplitPane;
@@ -57,15 +59,15 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
     }
 
     public List<InputValidationTestResult_littlespidy> getResults() {
-        return new ArrayList<>(results);
+        return new ArrayList<>(allResults);
     }
 
     public void addResult(InputValidationTestResult_littlespidy result) {
         SwingUtilities.invokeLater(() -> {
-            results.add(result);
-            tableModel.fireTableRowsInserted(results.size() - 1, results.size() - 1);
+            allResults.add(result);
+            applyClassificationFilter();
             updateSummary();
-            if (results.size() == 1) {
+            if (displayedResults.size() == 1) {
                 resultsTable.setRowSelectionInterval(0, 0);
             }
         });
@@ -73,13 +75,13 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
 
     public void setResults(List<InputValidationTestResult_littlespidy> newResults) {
         SwingUtilities.invokeLater(() -> {
-            results.clear();
+            allResults.clear();
             if (newResults != null) {
-                results.addAll(newResults);
+                allResults.addAll(newResults);
             }
-            tableModel.fireTableDataChanged();
+            applyClassificationFilter();
             updateSummary();
-            if (!results.isEmpty()) {
+            if (!displayedResults.isEmpty()) {
                 resultsTable.setRowSelectionInterval(0, 0);
             } else {
                 clearEditors();
@@ -92,12 +94,12 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
     }
 
     private void updateSummary() {
-        int total = results.size();
+        int total = allResults.size();
         int high = 0;
         int med = 0;
         int low = 0;
         int info = 0;
-        for (InputValidationTestResult_littlespidy r : results) {
+        for (InputValidationTestResult_littlespidy r : allResults) {
             if (r.getSeverity() == ValidationSeverity.HIGH) high++;
             else if (r.getSeverity() == ValidationSeverity.MEDIUM) med++;
             else if (r.getSeverity() == ValidationSeverity.LOW) low++;
@@ -107,38 +109,79 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
                 total, high, med, low, info));
     }
 
+    private void applyClassificationFilter() {
+        displayedResults.clear();
+        for (InputValidationTestResult_littlespidy r : allResults) {
+            if (classificationFilterDropDown == null || classificationFilterDropDown.matchesClassification(r.getClassification())) {
+                displayedResults.add(r);
+            }
+        }
+        tableModel.fireTableDataChanged();
+    }
+
+    public void setMarkOnSelectedRows(String classification) {
+        int[] selectedRows = resultsTable.getSelectedRows();
+        if (selectedRows.length == 0) return;
+
+        for (int viewRow : selectedRows) {
+            int modelRow = resultsTable.convertRowIndexToModel(viewRow);
+            if (modelRow >= 0 && modelRow < displayedResults.size()) {
+                displayedResults.get(modelRow).setClassification(classification);
+            }
+        }
+        applyClassificationFilter();
+    }
+
     private void initComponents() {
         // Top Toolbar
         JPanel topBar = new JPanel(new BorderLayout(6, 6));
         topBar.add(statusSummaryLabel, BorderLayout.WEST);
 
-        JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        JPanel filterAndActionBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        classificationFilterDropDown = new ClassificationFilterDropDown_littlespidy();
+        classificationFilterDropDown.addFilterChangeListener(this::applyClassificationFilter);
+        filterAndActionBox.add(classificationFilterDropDown);
+
         JButton exportCsvBtn = new JButton("Export CSV");
         exportCsvBtn.addActionListener(e -> exportToCsv());
         JButton clearBtn = new JButton("Clear");
         clearBtn.addActionListener(e -> {
-            results.clear();
+            allResults.clear();
+            displayedResults.clear();
             tableModel.fireTableDataChanged();
             updateSummary();
             clearEditors();
         });
-        btnBar.add(exportCsvBtn);
-        btnBar.add(clearBtn);
-        topBar.add(btnBar, BorderLayout.EAST);
+        filterAndActionBox.add(exportCsvBtn);
+        filterAndActionBox.add(clearBtn);
+        topBar.add(filterAndActionBox, BorderLayout.EAST);
 
         add(topBar, BorderLayout.NORTH);
 
         // Results Table setup
-        resultsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         resultsTable.setFillsViewportHeight(true);
         resultsTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = resultsTable.getSelectedRow();
-                if (row >= 0 && row < results.size()) {
-                    displayResultDetails(results.get(row));
+                if (row >= 0 && row < displayedResults.size()) {
+                    displayResultDetails(displayedResults.get(row));
                 }
             }
         });
+
+        // Context Menu for Classification Marking
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem tpItem = new JMenuItem("Mark as True Positive");
+        tpItem.addActionListener(e -> setMarkOnSelectedRows("TRUE_POSITIVE"));
+        JMenuItem fpItem = new JMenuItem("Mark as False Positive");
+        fpItem.addActionListener(e -> setMarkOnSelectedRows("FALSE_POSITIVE"));
+        JMenuItem unclassItem = new JMenuItem("Clear Classification");
+        unclassItem.addActionListener(e -> setMarkOnSelectedRows(null));
+        popupMenu.add(tpItem);
+        popupMenu.add(fpItem);
+        popupMenu.add(unclassItem);
+        resultsTable.setComponentPopupMenu(popupMenu);
 
         resultsTable.setDefaultRenderer(Object.class, new FuzzCellRenderer());
 
@@ -205,19 +248,21 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
 
     private void exportToCsv() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setSelectedFile(new File(runnerName.replaceAll("[^a-zA-Z0-9_-]", "_") + "_validation_results.csv"));
+        chooser.setSelectedFile(new File(runnerName.replaceAll("[^a-zA-Z0-9_-]", "_") + "_input_validation_results.csv"));
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             File f = chooser.getSelectedFile();
             try (FileWriter fw = new FileWriter(f)) {
-                fw.write("ID,Method,TargetURL,Parameter,Category,Payload,Status,Length,Severity,Indicator\n");
-                for (InputValidationTestResult_littlespidy r : results) {
-                    fw.write(String.format("\"%d\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%d\",\"%d\",\"%s\",\"%s\"\n",
+                fw.write("ID,Method,TargetUrl,Parameter,Category,Payload,Status,Length,Severity,Classification,Indicator\n");
+                for (InputValidationTestResult_littlespidy r : allResults) {
+                    fw.write(String.format("\"%d\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%d\",\"%d\",\"%s\",\"%s\",\"%s\"\n",
                             r.getId(), r.getMethod(), r.getTargetUrl(), r.getParameterName(),
                             r.getCategory(), r.getPayload().replace("\"", "\"\""),
                             r.getStatusCode(), r.getResponseLength(),
-                            r.getSeverity().getLabel(), r.getDetectionIndicator().replace("\"", "\"\"")));
+                            r.getSeverity().getLabel(),
+                            r.getClassification() != null ? r.getClassification() : "Unclassified",
+                            r.getDetectionIndicator().replace("\"", "\"\"")));
                 }
-                JOptionPane.showMessageDialog(this, "Exported " + results.size() + " Input Validation records.", "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Exported " + allResults.size() + " input validation records.", "Export Successful", JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -225,11 +270,11 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
     }
 
     private class FuzzResultsTableModel extends AbstractTableModel {
-        private final String[] columns = {"ID", "Method", "Target URL", "Parameter", "Category", "Payload", "Status", "Length", "Severity", "Detection Indicator"};
+        private final String[] columns = {"ID", "Method", "Target Endpoint", "Parameter", "Category", "Payload", "Status", "Length", "Classification", "Behavior / Status"};
 
         @Override
         public int getRowCount() {
-            return results.size();
+            return displayedResults.size();
         }
 
         @Override
@@ -244,8 +289,8 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (rowIndex < 0 || rowIndex >= results.size()) return "";
-            InputValidationTestResult_littlespidy r = results.get(rowIndex);
+            if (rowIndex < 0 || rowIndex >= displayedResults.size()) return "";
+            InputValidationTestResult_littlespidy r = displayedResults.get(rowIndex);
             switch (columnIndex) {
                 case 0: return r.getId();
                 case 1: return r.getMethod();
@@ -255,7 +300,11 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
                 case 5: return r.getPayload();
                 case 6: return r.getStatusCode();
                 case 7: return r.getResponseLength();
-                case 8: return r.getSeverity().getLabel();
+                case 8:
+                    String c = r.getClassification();
+                    if ("TRUE_POSITIVE".equalsIgnoreCase(c)) return "True Positive";
+                    if ("FALSE_POSITIVE".equalsIgnoreCase(c)) return "False Positive";
+                    return "Unclassified";
                 case 9: return r.getDetectionIndicator();
                 default: return "";
             }
@@ -268,14 +317,24 @@ public class InputValidationRunnerPanel_littlespidy extends JPanel {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             if (!isSelected && column == 8) {
                 String val = String.valueOf(value);
-                if ("High".equalsIgnoreCase(val)) {
+                if ("True Positive".equalsIgnoreCase(val)) {
                     c.setForeground(new Color(220, 50, 50));
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
-                } else if ("Medium".equalsIgnoreCase(val)) {
-                    c.setForeground(new Color(230, 140, 20));
+                } else if ("False Positive".equalsIgnoreCase(val)) {
+                    c.setForeground(new Color(130, 130, 130));
+                } else {
+                    c.setForeground(table.getForeground());
+                }
+            } else if (!isSelected && column == 6) {
+                int status = 0;
+                try { status = Integer.parseInt(String.valueOf(value)); } catch (Exception ignored) {}
+                if (status >= 500) {
+                    c.setForeground(new Color(220, 50, 50));
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
-                } else if ("Low".equalsIgnoreCase(val)) {
+                } else if (status >= 400) {
                     c.setForeground(new Color(60, 160, 220));
+                } else if (status >= 200 && status < 300) {
+                    c.setForeground(new Color(40, 150, 40));
                 } else {
                     c.setForeground(table.getForeground());
                 }

@@ -4,6 +4,8 @@ package com.littlespidy.apiinspector.ui;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.HttpService;
 import burp.api.montoya.http.message.requests.HttpRequest;
+import com.littlespidy.apiinspector.model.AuthProfileComboItem_littlespidy;
+import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
 import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
@@ -50,6 +52,8 @@ public class CorsConfigPanel_littlespidy extends JPanel {
     private final JTextField endpointFilterField = new JTextField(16);
 
     // Execution Controls UI
+    private final JComboBox<AuthProfileComboItem_littlespidy> authProfileCombo = new JComboBox<>();
+    private final JTextField sessionHeaderField = new JTextField(22);
     private final JTextField targetUrlField = new JTextField("https://example.com", 20);
     private final JTextField attackerDomainField = new JTextField("evil.com", 12);
     private final JSpinner threadSpinner = new JSpinner(new SpinnerNumberModel(4, 1, 30, 1));
@@ -80,6 +84,27 @@ public class CorsConfigPanel_littlespidy extends JPanel {
     public void setImportTabRef(APIImportTab_littlespidy importTabRef) {
         this.importTabRef = importTabRef;
         refreshCollectionsCombo();
+    }
+
+    public void updateAvailableProfiles(List<AuthProfile_littlespidy> profiles) {
+        authProfileCombo.removeAllItems();
+        authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
+        if (profiles != null) {
+            for (AuthProfile_littlespidy p : profiles) {
+                authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(p, p.getName() + " (" + p.getMaskedSummary() + ")"));
+            }
+        }
+    }
+
+    private void onAuthProfileSelectionChanged() {
+        AuthProfileComboItem_littlespidy sel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
+        if (sel != null && sel.profile != null) {
+            AuthProfile_littlespidy p = sel.profile;
+            String headerStr = p.getFormattedHeaderString();
+            if (headerStr != null && !headerStr.isBlank()) {
+                sessionHeaderField.setText(headerStr);
+            }
+        }
     }
 
     public String getTargetUrl() {
@@ -255,6 +280,16 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         JPanel execControlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         execControlsPanel.setBorder(new TitledBorder("Execution Controls"));
 
+        execControlsPanel.add(new JLabel("Auth Profile / Session:"));
+        authProfileCombo.setPreferredSize(new Dimension(220, 24));
+        authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
+        authProfileCombo.addActionListener(e -> onAuthProfileSelectionChanged());
+        execControlsPanel.add(authProfileCombo);
+
+        execControlsPanel.add(new JLabel("Auth Header:"));
+        sessionHeaderField.setToolTipText("Enter raw auth header (e.g. Authorization: Bearer <token>)");
+        execControlsPanel.add(sessionHeaderField);
+
         execControlsPanel.add(new JLabel("Threads:"));
         execControlsPanel.add(threadSpinner);
 
@@ -342,6 +377,10 @@ public class CorsConfigPanel_littlespidy extends JPanel {
             runnerName = "CORS Runner " + (++runnerCount);
         }
 
+        AuthProfileComboItem_littlespidy authSel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
+        AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
+        String customAuthHeader = sessionHeaderField.getText().trim();
+
         // Switch to CORS tab
         rootTab.selectTab(corsTab);
 
@@ -350,6 +389,8 @@ public class CorsConfigPanel_littlespidy extends JPanel {
                     selectedEndpoints,
                     getTargetUrl(),
                     getAttackerDomain(),
+                    profile,
+                    customAuthHeader,
                     techniques,
                     getThreadCount(),
                     getDelayMs(),
@@ -362,6 +403,8 @@ public class CorsConfigPanel_littlespidy extends JPanel {
                     targetReq,
                     getTargetUrl(),
                     getAttackerDomain(),
+                    profile,
+                    customAuthHeader,
                     techniques,
                     getThreadCount(),
                     getDelayMs(),
@@ -379,6 +422,10 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
         String runnerName = "CORS - " + tech.getName();
 
+        AuthProfileComboItem_littlespidy authSel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
+        AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
+        String customAuthHeader = sessionHeaderField.getText().trim();
+
         // Switch to CORS tab
         rootTab.selectTab(corsTab);
 
@@ -387,6 +434,8 @@ public class CorsConfigPanel_littlespidy extends JPanel {
                     selectedEndpoints,
                     getTargetUrl(),
                     getAttackerDomain(),
+                    profile,
+                    customAuthHeader,
                     Collections.singletonList(tech),
                     1,
                     getDelayMs(),
@@ -398,6 +447,8 @@ public class CorsConfigPanel_littlespidy extends JPanel {
                     targetReq,
                     getTargetUrl(),
                     getAttackerDomain(),
+                    profile,
+                    customAuthHeader,
                     Collections.singletonList(tech),
                     1,
                     getDelayMs(),
