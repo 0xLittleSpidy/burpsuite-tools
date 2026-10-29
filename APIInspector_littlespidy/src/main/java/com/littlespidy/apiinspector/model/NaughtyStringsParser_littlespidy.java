@@ -190,6 +190,92 @@ public class NaughtyStringsParser_littlespidy {
         return techniques;
     }
 
+    /**
+     * Loads all individual payloads across Standard OWASP and BLNS wordlists.
+     * Each payload is represented as an individual InputValidationPayloadItem_littlespidy row.
+     */
+    public static List<InputValidationPayloadItem_littlespidy> loadAllIndividualPayloads() {
+        List<InputValidationPayloadItem_littlespidy> items = new ArrayList<>();
+
+        // 1. Standard OWASP individual payloads
+        for (InputValidationTechnique_littlespidy t : InputValidationTechnique_littlespidy.getDefaultTechniques()) {
+            if (!t.isBlns()) {
+                List<String> payloads = t.getSamplePayloads();
+                for (int i = 0; i < payloads.size(); i++) {
+                    String id = t.getId() + "_" + String.format("%02d", i + 1);
+                    items.add(new InputValidationPayloadItem_littlespidy(
+                            id,
+                            t.getCategory(),
+                            payloads.get(i),
+                            t.getErrorSignatures(),
+                            t.getDescription(),
+                            true,
+                            false,
+                            false
+                    ));
+                }
+            }
+        }
+
+        // 2. Big List of Naughty Strings individual payloads
+        List<InputValidationTechnique_littlespidy> blnsTechniques = loadDefaultBlnsTechniques();
+        for (InputValidationTechnique_littlespidy t : blnsTechniques) {
+            List<String> payloads = t.getSamplePayloads();
+            for (int i = 0; i < payloads.size(); i++) {
+                String id = t.getId() + "_" + String.format("%03d", i + 1);
+                items.add(new InputValidationPayloadItem_littlespidy(
+                        id,
+                        t.getCategory(),
+                        payloads.get(i),
+                        t.getErrorSignatures(),
+                        t.getDescription(),
+                        true,
+                        true,
+                        false
+                ));
+            }
+        }
+
+        return items;
+    }
+
+    /**
+     * Parses a custom wordlist file into individual payload items.
+     */
+    public static List<InputValidationPayloadItem_littlespidy> parseCustomFileToPayloads(File file) throws Exception {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("File does not exist");
+        }
+
+        List<InputValidationPayloadItem_littlespidy> items = new ArrayList<>();
+        String name = file.getName();
+        String prefix = "custom_" + name.toLowerCase().replaceAll("[^a-z0-9_]", "_");
+        List<String> defaultSigs = Arrays.asList("error", "exception", "failed", "syntax", "warning");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String line;
+            int counter = 1;
+            while ((line = reader.readLine()) != null) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty() && !trimmed.startsWith("#")) {
+                    String id = prefix + "_" + String.format("%03d", counter++);
+                    items.add(new InputValidationPayloadItem_littlespidy(
+                            id,
+                            "Custom: " + name,
+                            trimmed,
+                            defaultSigs,
+                            "Custom wordlist payload from " + name,
+                            true,
+                            false,
+                            true
+                    ));
+                }
+            }
+        }
+
+        return items;
+    }
+
     public static InputValidationTechnique_littlespidy parseCustomFile(File file) throws Exception {
         if (file == null || !file.exists()) {
             throw new IllegalArgumentException("File does not exist");

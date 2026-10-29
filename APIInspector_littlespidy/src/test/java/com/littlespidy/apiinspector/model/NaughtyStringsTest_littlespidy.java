@@ -92,5 +92,67 @@ public class NaughtyStringsTest_littlespidy {
         InputValidationConfigPanel_littlespidy panel = new InputValidationConfigPanel_littlespidy(null);
         List<InputValidationTechnique_littlespidy> techs = panel.getTechniques();
         assertTrue(techs.size() >= 15, "Panel should have all combined techniques initially");
+
+        // Verify individual payloads table contains 500+ individual items
+        List<InputValidationPayloadItem_littlespidy> payloads = panel.getPayloadItems();
+        assertNotNull(payloads);
+        assertTrue(payloads.size() >= 500, "Must contain at least 500 individual payloads, found: " + payloads.size());
+    }
+
+    @Test
+    @DisplayName("Verify loadAllIndividualPayloads loads 500+ distinct payload rows with signatures")
+    void testLoadAllIndividualPayloads() {
+        List<InputValidationPayloadItem_littlespidy> items = NaughtyStringsParser_littlespidy.loadAllIndividualPayloads();
+        assertNotNull(items);
+        assertTrue(items.size() >= 500, "Must load 500+ individual payloads, found: " + items.size());
+
+        // Check that every item has non-empty ID, Category, and detection signatures
+        boolean foundUndefined = false;
+        boolean foundNull = false;
+        boolean foundZero = false;
+        boolean foundCon = false;
+        boolean foundSqli = false;
+
+        for (InputValidationPayloadItem_littlespidy item : items) {
+            assertNotNull(item.getId());
+            assertFalse(item.getId().isBlank());
+            assertNotNull(item.getCategory());
+            assertFalse(item.getCategory().isBlank());
+            assertTrue(item.isEnabled());
+
+            if ("undefined".equals(item.getPayload())) foundUndefined = true;
+            if ("null".equals(item.getPayload())) foundNull = true;
+            if ("0".equals(item.getPayload())) foundZero = true;
+            if ("CON".equals(item.getPayload())) foundCon = true;
+            if (item.getPayload().contains("' OR '1'='1'")) foundSqli = true;
+        }
+
+        assertTrue(foundUndefined, "Must contain 'undefined' payload");
+        assertTrue(foundNull, "Must contain 'null' payload");
+        assertTrue(foundZero, "Must contain '0' payload");
+        assertTrue(foundCon, "Must contain 'CON' payload");
+        assertTrue(foundSqli, "Must contain SQLi payload");
+    }
+
+    @Test
+    @DisplayName("Verify parseCustomFileToPayloads creates individual payload items")
+    void testParseCustomFileToPayloads() throws Exception {
+        File tempWordlist = File.createTempFile("test_individual_wordlist_", ".txt");
+        tempWordlist.deleteOnExit();
+
+        try (FileWriter fw = new FileWriter(tempWordlist)) {
+            fw.write("# Comment line\n");
+            fw.write("custom_payload_alpha\n");
+            fw.write("custom_payload_beta\n");
+            fw.write("custom_payload_gamma\n");
+        }
+
+        List<InputValidationPayloadItem_littlespidy> items = NaughtyStringsParser_littlespidy.parseCustomFileToPayloads(tempWordlist);
+        assertNotNull(items);
+        assertEquals(3, items.size());
+        assertEquals("custom_payload_alpha", items.get(0).getPayload());
+        assertEquals("custom_payload_beta", items.get(1).getPayload());
+        assertEquals("custom_payload_gamma", items.get(2).getPayload());
+        assertTrue(items.get(0).isCustom());
     }
 }

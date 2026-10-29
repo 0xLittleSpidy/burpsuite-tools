@@ -52,10 +52,14 @@ public class ConfigTab_littlespidy extends JPanel {
 
     public void setImportTabRef(APIImportTab_littlespidy importTabRef) {
         this.authAnalyzerConfigTab.setImportTabRef(importTabRef);
+        this.corsConfigPanel.setImportTabRef(importTabRef);
+        this.inputValidationConfigPanel.setImportTabRef(importTabRef);
     }
 
     public void refreshCollectionsCombo() {
         this.authAnalyzerConfigTab.refreshCollectionsCombo();
+        this.corsConfigPanel.refreshCollectionsCombo();
+        this.inputValidationConfigPanel.refreshCollectionsCombo();
     }
 
     public AuthAnalyzerConfigTab_littlespidy getAuthAnalyzerConfigTab() {

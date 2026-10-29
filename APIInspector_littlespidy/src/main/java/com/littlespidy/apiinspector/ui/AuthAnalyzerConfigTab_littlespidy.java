@@ -4,6 +4,7 @@ package com.littlespidy.apiinspector.ui;
 import burp.api.montoya.MontoyaApi;
 import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
+import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
 import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
 
 import javax.swing.*;
@@ -710,15 +711,9 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
         }
     }
 
-    public static class EndpointSelectionItem {
-        public final ImportedCollection_littlespidy collection;
-        public final DiscoveredEndpoint_littlespidy endpoint;
-        public boolean selected;
-
+    public static class EndpointSelectionItem extends EndpointSelectionItem_littlespidy {
         public EndpointSelectionItem(ImportedCollection_littlespidy collection, DiscoveredEndpoint_littlespidy endpoint, boolean selected) {
-            this.collection = collection;
-            this.endpoint = endpoint;
-            this.selected = selected;
+            super(collection, endpoint, selected);
         }
     }
 

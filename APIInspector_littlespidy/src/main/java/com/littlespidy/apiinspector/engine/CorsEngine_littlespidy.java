@@ -9,6 +9,7 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy.CorsSeverity;
+import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +136,141 @@ public class CorsEngine_littlespidy {
                 }
             }
         }, "CORS-Engine-Runner_littlespidy");
+
+        runner.setDaemon(true);
+        runner.start();
+    }
+
+    /**
+     * Executes CORS tests across multiple collection endpoints asynchronously.
+     */
+    public void executeEndpointsTestsAsync(
+            List<? extends EndpointSelectionItem_littlespidy> endpointItems,
+            String defaultTargetBaseUrl,
+            String attackerDomain,
+            List<CorsTechnique_littlespidy> techniques,
+            int threadCount,
+            int delayMs,
+            CorsProgressListener_littlespidy listener) {
+
+        cancelled.set(false);
+        int threads = Math.max(1, threadCount);
+        this.threadPool = Executors.newFixedThreadPool(threads);
+
+        Thread runner = new Thread(() -> {
+            try {
+                List<CorsTechnique_littlespidy> activeTechniques = new ArrayList<>();
+                for (CorsTechnique_littlespidy t : techniques) {
+                    if (t.isEnabled()) {
+                        activeTechniques.add(t);
+                    }
+                }
+
+                List<EndpointSelectionItem_littlespidy> activeEndpoints = new ArrayList<>();
+                if (endpointItems != null) {
+                    for (EndpointSelectionItem_littlespidy item : endpointItems) {
+                        if (item.selected) {
+                            activeEndpoints.add(item);
+                        }
+                    }
+                }
+
+                if (activeEndpoints.isEmpty() || activeTechniques.isEmpty()) {
+                    if (listener != null) {
+                        listener.onStatusUpdate("Completed (0 endpoints or techniques selected)", 0, 0);
+                        listener.onAllTestsCompleted();
+                    }
+                    return;
+                }
+
+                int total = activeEndpoints.size() * activeTechniques.size();
+                AtomicInteger completedCount = new AtomicInteger(0);
+                AtomicInteger idCounter = new AtomicInteger(1);
+
+                for (EndpointSelectionItem_littlespidy item : activeEndpoints) {
+                    if (cancelled.get()) break;
+
+                    String baseUrl = (item.collection != null && item.collection.getTargetBaseUrl() != null && !item.collection.getTargetBaseUrl().isBlank())
+                            ? item.collection.getTargetBaseUrl()
+                            : (defaultTargetBaseUrl != null && !defaultTargetBaseUrl.isBlank() ? defaultTargetBaseUrl : "https://localhost");
+
+                    HttpRequest baseRequest;
+                    try {
+                        baseRequest = AuthTestEngine_littlespidy.buildRequest(baseUrl, item.endpoint, null, false);
+                    } catch (Exception ex) {
+                        baseRequest = HttpRequest.httpRequestFromUrl(baseUrl + item.endpoint.getPath());
+                    }
+
+                    if (baseRequest == null) {
+                        completedCount.addAndGet(activeTechniques.size());
+                        continue;
+                    }
+
+                    String method = baseRequest.method();
+                    String path = baseRequest.path();
+                    String host = baseRequest.httpService() != null ? baseRequest.httpService().host() : "target";
+
+                    for (CorsTechnique_littlespidy tech : activeTechniques) {
+                        if (cancelled.get()) break;
+
+                        final HttpRequest finalBaseRequest = baseRequest;
+                        threadPool.submit(() -> {
+                            if (cancelled.get()) return;
+
+                            try {
+                                if (delayMs > 0) {
+                                    Thread.sleep(delayMs);
+                                }
+
+                                String testedOrigin = tech.resolveOrigin(baseUrl, attackerDomain);
+                                HttpRequest modifiedRequest = createRequestWithOrigin(finalBaseRequest, testedOrigin);
+
+                                HttpRequestResponse responsePair = null;
+                                if (api != null && api.http() != null) {
+                                    responsePair = api.http().sendRequest(modifiedRequest);
+                                }
+
+                                int currentId = idCounter.getAndIncrement();
+                                CorsTestResult_littlespidy result = evaluateResponse(
+                                        currentId, method, host, path, testedOrigin,
+                                        tech.getName() + " - " + tech.getDescription(),
+                                        modifiedRequest, responsePair
+                                );
+
+                                int done = completedCount.incrementAndGet();
+                                if (listener != null) {
+                                    listener.onCorsTestCompleted(result);
+                                    listener.onStatusUpdate("Executed " + done + "/" + total + " CORS tests", done, total);
+                                }
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                            } catch (Exception ex) {
+                                int done = completedCount.incrementAndGet();
+                                if (listener != null) {
+                                    listener.onStatusUpdate("Error on CORS test: " + ex.getMessage(), done, total);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                threadPool.shutdown();
+                try {
+                    threadPool.awaitTermination(30, TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                if (listener != null) {
+                    listener.onAllTestsCompleted();
+                }
+            } catch (Exception e) {
+                if (listener != null) {
+                    listener.onStatusUpdate("Test run finished with error: " + e.getMessage(), 0, 0);
+                    listener.onAllTestsCompleted();
+                }
+            }
+        }, "CORS-Endpoints-Runner_littlespidy");
 
         runner.setDaemon(true);
         runner.start();

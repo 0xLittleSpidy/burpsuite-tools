@@ -5,38 +5,58 @@ import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.HttpService;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
+import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
+import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
+import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
+import com.littlespidy.apiinspector.ui.AuthAnalyzerConfigTab_littlespidy.CollectionComboItem;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Configuration sub-panel for CORS testing.
- * Contains target & attacker origin inputs, concurrency & delay settings,
- * a table of 29 PortSwigger techniques with individual row attack buttons,
- * and a batch "Attack All Selected Techniques" execution button.
+ * Features a three-tier layout:
+ * Tier 1: PortSwigger 29 CORS bypass techniques table with individual attack buttons.
+ * Tier 2: Endpoints to Test panel with API Collection selector, filter, and endpoints checklist.
+ * Tier 3: Execution controls, thread/delay spinners, and batch Attack buttons.
  */
 public class CorsConfigPanel_littlespidy extends JPanel {
 
     private final MontoyaApi api;
     private CorsTab_littlespidy corsTab;
     private APIInspectorTab_littlespidy rootTab;
+    private APIImportTab_littlespidy importTabRef;
 
+    // Techniques Table UI
     private final List<CorsTechnique_littlespidy> techniques = new ArrayList<>();
     private final CorsTechniquesTableModel tableModel = new CorsTechniquesTableModel();
     private final JTable techniquesTable = new JTable(tableModel);
 
+    // Endpoints Selection UI
+    private JComboBox<CollectionComboItem> collectionSelectorCombo;
+    private final EndpointSelectionTableModel_littlespidy endpointSelectionModel = new EndpointSelectionTableModel_littlespidy();
+    private final JTable endpointSelectionTable = new JTable(endpointSelectionModel);
+    private final JTextField endpointFilterField = new JTextField(16);
+
+    // Execution Controls UI
     private final JTextField targetUrlField = new JTextField("https://example.com", 20);
     private final JTextField attackerDomainField = new JTextField("evil.com", 12);
     private final JSpinner threadSpinner = new JSpinner(new SpinnerNumberModel(4, 1, 30, 1));
     private final JSpinner delaySpinner = new JSpinner(new SpinnerNumberModel(50, 0, 10000, 10));
     private final JTextField runnerNameField = new JTextField("CORS Runner 1", 12);
-    private final JButton attackAllBtn = new JButton("Attack All Selected Techniques");
+    private final JButton attackSelectedBtn = new JButton("Attack Selected Endpoints (Batch CORS)");
+    private final JButton attackAllEndpointsBtn = new JButton("Attack All Endpoints");
 
     private int runnerCount = 1;
 
@@ -55,6 +75,11 @@ public class CorsConfigPanel_littlespidy extends JPanel {
 
     public void setRootTab(APIInspectorTab_littlespidy rootTab) {
         this.rootTab = rootTab;
+    }
+
+    public void setImportTabRef(APIImportTab_littlespidy importTabRef) {
+        this.importTabRef = importTabRef;
+        refreshCollectionsCombo();
     }
 
     public String getTargetUrl() {
@@ -110,34 +135,37 @@ public class CorsConfigPanel_littlespidy extends JPanel {
     }
 
     private void initComponents() {
-        // Control Bar
-        JPanel controlBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        controlBar.setBorder(BorderFactory.createTitledBorder("CORS Testing Parameters"));
+        JPanel centerContainer = new JPanel(new BorderLayout(4, 4));
 
-        controlBar.add(new JLabel("Target URL:"));
-        controlBar.add(targetUrlField);
+        // 1. Tier 1 (Top): CORS Bypass Techniques Panel
+        JPanel techniquesPanel = new JPanel(new BorderLayout(4, 4));
+        techniquesPanel.setBorder(new TitledBorder("CORS Bypass Techniques (PortSwigger)"));
+
+        JPanel techToolBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        JButton selectAllTechBtn = new JButton("Select All");
+        selectAllTechBtn.addActionListener(e -> {
+            for (CorsTechnique_littlespidy t : techniques) {
+                t.setEnabled(true);
+            }
+            tableModel.fireTableDataChanged();
+        });
+        JButton deselectAllTechBtn = new JButton("Deselect All");
+        deselectAllTechBtn.addActionListener(e -> {
+            for (CorsTechnique_littlespidy t : techniques) {
+                t.setEnabled(false);
+            }
+            tableModel.fireTableDataChanged();
+        });
+        techToolBar.add(selectAllTechBtn);
+        techToolBar.add(deselectAllTechBtn);
+        techToolBar.add(new JLabel("Target:"));
+        techToolBar.add(targetUrlField);
         targetUrlField.addActionListener(e -> tableModel.fireTableDataChanged());
-
-        controlBar.add(new JLabel("Attacker Domain:"));
-        controlBar.add(attackerDomainField);
+        techToolBar.add(new JLabel("Attacker Domain:"));
+        techToolBar.add(attackerDomainField);
         attackerDomainField.addActionListener(e -> tableModel.fireTableDataChanged());
+        techniquesPanel.add(techToolBar, BorderLayout.NORTH);
 
-        controlBar.add(new JLabel("Threads:"));
-        controlBar.add(threadSpinner);
-
-        controlBar.add(new JLabel("Delay (ms):"));
-        controlBar.add(delaySpinner);
-
-        controlBar.add(new JLabel("Runner Name:"));
-        controlBar.add(runnerNameField);
-
-        attackAllBtn.setFont(attackAllBtn.getFont().deriveFont(Font.BOLD));
-        attackAllBtn.addActionListener(e -> launchBatchAttack());
-        controlBar.add(attackAllBtn);
-
-        add(controlBar, BorderLayout.NORTH);
-
-        // Techniques Table
         techniquesTable.setFillsViewportHeight(true);
         techniquesTable.setRowHeight(24);
         techniquesTable.getColumnModel().getColumn(0).setMaxWidth(60);
@@ -147,11 +175,145 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         techniquesTable.getColumnModel().getColumn(4).setPreferredWidth(300);
         techniquesTable.getColumnModel().getColumn(5).setMaxWidth(100);
 
-        // Setup Button Column Renderer & Editor
         techniquesTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
         techniquesTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox(), this::launchSingleTechniqueAttack));
+        techniquesPanel.add(new JScrollPane(techniquesTable), BorderLayout.CENTER);
 
-        add(new JScrollPane(techniquesTable), BorderLayout.CENTER);
+        // 2. Tier 2 (Middle): Endpoints to Test Panel
+        JPanel endpointsPanel = new JPanel(new BorderLayout(4, 4));
+        endpointsPanel.setBorder(new TitledBorder("Endpoints to Test (Imported API Collections)"));
+
+        JPanel colSelectBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        colSelectBar.add(new JLabel("Collection:"));
+        collectionSelectorCombo = new JComboBox<>();
+        collectionSelectorCombo.setPreferredSize(new Dimension(280, 24));
+        collectionSelectorCombo.addActionListener(e -> onCollectionSelectionChanged());
+        colSelectBar.add(collectionSelectorCombo);
+
+        JButton reloadColsBtn = new JButton("Refresh");
+        reloadColsBtn.setToolTipText("Reload collections from API Import tab");
+        reloadColsBtn.addActionListener(e -> refreshCollectionsCombo());
+        colSelectBar.add(reloadColsBtn);
+
+        colSelectBar.add(new JLabel("Filter:"));
+        endpointFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { endpointSelectionModel.applyFilter(endpointFilterField.getText()); }
+            @Override public void removeUpdate(DocumentEvent e) { endpointSelectionModel.applyFilter(endpointFilterField.getText()); }
+            @Override public void changedUpdate(DocumentEvent e) { endpointSelectionModel.applyFilter(endpointFilterField.getText()); }
+        });
+        colSelectBar.add(endpointFilterField);
+
+        JButton selectAllEpBtn = new JButton("Select All");
+        selectAllEpBtn.addActionListener(e -> endpointSelectionModel.selectAll(true));
+        JButton deselectAllEpBtn = new JButton("Deselect All");
+        deselectAllEpBtn.addActionListener(e -> endpointSelectionModel.selectAll(false));
+        colSelectBar.add(selectAllEpBtn);
+        colSelectBar.add(deselectAllEpBtn);
+        endpointsPanel.add(colSelectBar, BorderLayout.NORTH);
+
+        endpointSelectionTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        endpointSelectionTable.getColumnModel().getColumn(0).setMaxWidth(40);
+        endpointSelectionTable.getColumnModel().getColumn(1).setMaxWidth(75);
+        endpointSelectionTable.getColumnModel().getColumn(2).setPreferredWidth(220);
+        endpointSelectionTable.getColumnModel().getColumn(3).setPreferredWidth(250);
+        endpointSelectionTable.getColumnModel().getColumn(4).setMaxWidth(90);
+
+        endpointSelectionTable.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    int[] rows = endpointSelectionTable.getSelectedRows();
+                    if (rows.length > 0) {
+                        int firstModelRow = endpointSelectionTable.convertRowIndexToModel(rows[0]);
+                        List<EndpointSelectionItem_littlespidy> items = endpointSelectionModel.getDisplayedItems();
+                        if (firstModelRow >= 0 && firstModelRow < items.size()) {
+                            boolean newState = !items.get(firstModelRow).selected;
+                            for (int r : rows) {
+                                int modelRow = endpointSelectionTable.convertRowIndexToModel(r);
+                                if (modelRow >= 0 && modelRow < items.size()) {
+                                    items.get(modelRow).selected = newState;
+                                }
+                            }
+                            endpointSelectionModel.fireTableDataChanged();
+                            e.consume();
+                        }
+                    }
+                }
+            }
+        });
+        endpointsPanel.add(new JScrollPane(endpointSelectionTable), BorderLayout.CENTER);
+
+        // Split Techniques (top) and Endpoints (middle)
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, techniquesPanel, endpointsPanel);
+        splitPane.setResizeWeight(0.5);
+        splitPane.setContinuousLayout(true);
+        centerContainer.add(splitPane, BorderLayout.CENTER);
+
+        add(centerContainer, BorderLayout.CENTER);
+
+        // 3. Tier 3 (Bottom): Execution Controls Panel
+        JPanel execControlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        execControlsPanel.setBorder(new TitledBorder("Execution Controls"));
+
+        execControlsPanel.add(new JLabel("Threads:"));
+        execControlsPanel.add(threadSpinner);
+
+        execControlsPanel.add(new JLabel("Delay (ms):"));
+        execControlsPanel.add(delaySpinner);
+
+        execControlsPanel.add(new JLabel("Runner Name:"));
+        execControlsPanel.add(runnerNameField);
+
+        attackSelectedBtn.setFont(attackSelectedBtn.getFont().deriveFont(Font.BOLD));
+        attackSelectedBtn.addActionListener(e -> launchAttackForSelectedEndpoints());
+        execControlsPanel.add(attackSelectedBtn);
+
+        attackAllEndpointsBtn.addActionListener(e -> {
+            endpointSelectionModel.selectAll(true);
+            launchAttackForSelectedEndpoints();
+        });
+        execControlsPanel.add(attackAllEndpointsBtn);
+
+        add(execControlsPanel, BorderLayout.SOUTH);
+    }
+
+    public void refreshCollectionsCombo() {
+        if (collectionSelectorCombo == null) return;
+        collectionSelectorCombo.removeAllItems();
+        if (importTabRef != null) {
+            List<ImportedCollection_littlespidy> allCols = importTabRef.getAllCollections();
+            collectionSelectorCombo.addItem(new CollectionComboItem(null, "[All Imported Collections]"));
+            for (ImportedCollection_littlespidy c : allCols) {
+                collectionSelectorCombo.addItem(new CollectionComboItem(c, c.getName() + " (" + c.getEndpointCount() + ")"));
+            }
+        } else {
+            collectionSelectorCombo.addItem(new CollectionComboItem(null, "[No Collections Loaded]"));
+        }
+        onCollectionSelectionChanged();
+    }
+
+    private void onCollectionSelectionChanged() {
+        CollectionComboItem sel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
+        if (sel == null || sel.collection == null) {
+            if (importTabRef != null) {
+                List<EndpointSelectionItem_littlespidy> all = new ArrayList<>();
+                for (ImportedCollection_littlespidy c : importTabRef.getAllCollections()) {
+                    for (DiscoveredEndpoint_littlespidy ep : c.getEndpoints()) {
+                        all.add(new EndpointSelectionItem_littlespidy(c, ep, true));
+                    }
+                }
+                endpointSelectionModel.setItems(all);
+            } else {
+                endpointSelectionModel.setItems(Collections.emptyList());
+            }
+        } else {
+            List<EndpointSelectionItem_littlespidy> items = new ArrayList<>();
+            for (DiscoveredEndpoint_littlespidy ep : sel.collection.getEndpoints()) {
+                items.add(new EndpointSelectionItem_littlespidy(sel.collection, ep, true));
+            }
+            endpointSelectionModel.setItems(items);
+        }
+        endpointSelectionModel.applyFilter(endpointFilterField.getText());
     }
 
     private HttpRequest buildTargetRequest() {
@@ -171,10 +333,10 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         return request;
     }
 
-    private void launchBatchAttack() {
+    private void launchAttackForSelectedEndpoints() {
         if (corsTab == null || rootTab == null) return;
 
-        HttpRequest targetReq = buildTargetRequest();
+        List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
         String runnerName = runnerNameField.getText().trim();
         if (runnerName.isEmpty()) {
             runnerName = "CORS Runner " + (++runnerCount);
@@ -183,15 +345,29 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         // Switch to CORS tab
         rootTab.selectTab(corsTab);
 
-        corsTab.executeAttack(
-                targetReq,
-                getTargetUrl(),
-                getAttackerDomain(),
-                techniques,
-                getThreadCount(),
-                getDelayMs(),
-                runnerName
-        );
+        if (!selectedEndpoints.isEmpty()) {
+            corsTab.executeAttack(
+                    selectedEndpoints,
+                    getTargetUrl(),
+                    getAttackerDomain(),
+                    techniques,
+                    getThreadCount(),
+                    getDelayMs(),
+                    runnerName
+            );
+        } else {
+            // Fallback to single target URL
+            HttpRequest targetReq = buildTargetRequest();
+            corsTab.executeAttack(
+                    targetReq,
+                    getTargetUrl(),
+                    getAttackerDomain(),
+                    techniques,
+                    getThreadCount(),
+                    getDelayMs(),
+                    runnerName
+            );
+        }
 
         runnerNameField.setText("CORS Runner " + (++runnerCount));
     }
@@ -200,21 +376,34 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         if (corsTab == null || rootTab == null || rowIndex < 0 || rowIndex >= techniques.size()) return;
 
         CorsTechnique_littlespidy tech = techniques.get(rowIndex);
-        HttpRequest targetReq = buildTargetRequest();
+        List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
         String runnerName = "CORS - " + tech.getName();
 
         // Switch to CORS tab
         rootTab.selectTab(corsTab);
 
-        corsTab.executeAttack(
-                targetReq,
-                getTargetUrl(),
-                getAttackerDomain(),
-                Collections.singletonList(tech),
-                1,
-                getDelayMs(),
-                runnerName
-        );
+        if (!selectedEndpoints.isEmpty()) {
+            corsTab.executeAttack(
+                    selectedEndpoints,
+                    getTargetUrl(),
+                    getAttackerDomain(),
+                    Collections.singletonList(tech),
+                    1,
+                    getDelayMs(),
+                    runnerName
+            );
+        } else {
+            HttpRequest targetReq = buildTargetRequest();
+            corsTab.executeAttack(
+                    targetReq,
+                    getTargetUrl(),
+                    getAttackerDomain(),
+                    Collections.singletonList(tech),
+                    1,
+                    getDelayMs(),
+                    runnerName
+            );
+        }
     }
 
     private class CorsTechniquesTableModel extends AbstractTableModel {
@@ -263,8 +452,10 @@ public class CorsConfigPanel_littlespidy extends JPanel {
 
         @Override
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            if (rowIndex >= 0 && rowIndex < techniques.size() && columnIndex == 0) {
-                techniques.get(rowIndex).setEnabled((Boolean) aValue);
+            if (rowIndex < 0 || rowIndex >= techniques.size()) return;
+            CorsTechnique_littlespidy t = techniques.get(rowIndex);
+            if (columnIndex == 0 && aValue instanceof Boolean) {
+                t.setEnabled((Boolean) aValue);
                 fireTableCellUpdated(rowIndex, columnIndex);
             }
         }
@@ -273,35 +464,42 @@ public class CorsConfigPanel_littlespidy extends JPanel {
     private static class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
-            setText("Attack");
+            setMargin(new Insets(1, 4, 1, 4));
+            setFont(getFont().deriveFont(Font.PLAIN, 11f));
         }
+
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
             setText(value != null ? value.toString() : "Attack");
             return this;
         }
     }
 
     private static class ButtonEditor extends DefaultCellEditor {
-        private final JButton button = new JButton();
-        private final java.util.function.Consumer<Integer> onAction;
-        private int currentRow = -1;
+        private final JButton button;
+        private final java.util.function.Consumer<Integer> action;
+        private int currentRow;
 
-        public ButtonEditor(JCheckBox checkBox, java.util.function.Consumer<Integer> onAction) {
+        public ButtonEditor(JCheckBox checkBox, java.util.function.Consumer<Integer> action) {
             super(checkBox);
-            this.onAction = onAction;
-            button.setOpaque(true);
-            button.addActionListener(e -> {
+            this.action = action;
+            this.button = new JButton();
+            this.button.setOpaque(true);
+            this.button.setMargin(new Insets(1, 4, 1, 4));
+            this.button.setFont(this.button.getFont().deriveFont(Font.PLAIN, 11f));
+            this.button.addActionListener(e -> {
                 fireEditingStopped();
-                if (onAction != null && currentRow != -1) {
-                    onAction.accept(currentRow);
+                if (action != null) {
+                    action.accept(currentRow);
                 }
             });
         }
 
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            currentRow = row;
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                                                     boolean isSelected, int row, int column) {
+            this.currentRow = row;
             button.setText(value != null ? value.toString() : "Attack");
             return button;
         }

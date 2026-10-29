@@ -9,6 +9,10 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy.CorsSeverity;
+import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
+import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
+import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
+import com.littlespidy.apiinspector.model.InputValidationPayloadItem_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTestResult_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTestResult_littlespidy.ValidationSeverity;
@@ -172,5 +176,71 @@ public class CorsAndInputValidationTest_littlespidy {
         assertTrue(configTab.getCorsConfigPanel().getTechniques().size() >= 29);
 
         assertTrue(configTab.getInputValidationConfigPanel().getTechniques().size() >= 6);
+    }
+
+    @Test
+    @DisplayName("Verify EndpointSelectionTableModel selection, filtering, and toggle")
+    void testEndpointSelectionTableModel() {
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy("Test Collection", "OpenAPI 3.0", "FILE", "test.json");
+        col.setTargetBaseUrl("https://api.example.com");
+        DiscoveredEndpoint_littlespidy ep1 = new DiscoveredEndpoint_littlespidy("GET", "/api/v1/users", "List users");
+        DiscoveredEndpoint_littlespidy ep2 = new DiscoveredEndpoint_littlespidy("POST", "/api/v1/login", "User login");
+        col.getEndpoints().add(ep1);
+        col.getEndpoints().add(ep2);
+
+        EndpointSelectionItem_littlespidy item1 = new EndpointSelectionItem_littlespidy(col, ep1, true);
+        EndpointSelectionItem_littlespidy item2 = new EndpointSelectionItem_littlespidy(col, ep2, false);
+
+        EndpointSelectionTableModel_littlespidy model = new EndpointSelectionTableModel_littlespidy();
+        model.setItems(List.of(item1, item2));
+
+        assertEquals(2, model.getRowCount());
+        assertEquals(5, model.getColumnCount());
+        assertEquals(true, model.getValueAt(0, 0));
+        assertEquals("GET", model.getValueAt(0, 1));
+        assertEquals("/api/v1/users", model.getValueAt(0, 2));
+
+        assertEquals(1, model.getSelectedItems().size());
+
+        // Toggle selection
+        model.setValueAt(false, 0, 0);
+        assertEquals(false, model.getValueAt(0, 0));
+        assertEquals(0, model.getSelectedItems().size());
+
+        // Select all
+        model.selectAll(true);
+        assertEquals(2, model.getSelectedItems().size());
+
+        // Filter
+        model.applyFilter("login");
+        assertEquals(1, model.getRowCount());
+        assertEquals("/api/v1/login", model.getValueAt(0, 2));
+
+        model.applyFilter("");
+        assertEquals(2, model.getRowCount());
+    }
+
+    @Test
+    @DisplayName("Verify CorsConfigPanel and InputValidationConfigPanel collection sync via ConfigTab")
+    void testConfigPanelsCollectionSync() {
+        APIImportTab_littlespidy importTab = new APIImportTab_littlespidy(null);
+        ImportedCollection_littlespidy col = new ImportedCollection_littlespidy("Sync API", "OpenAPI 3.0", "FILE", "sync.json");
+        col.setTargetBaseUrl("https://sync.api.local");
+        col.getEndpoints().add(new DiscoveredEndpoint_littlespidy("GET", "/sync/data", "Get sync data"));
+        col.getEndpoints().add(new DiscoveredEndpoint_littlespidy("POST", "/sync/submit", "Submit sync data"));
+        importTab.getAllCollections().add(col);
+
+        ConfigTab_littlespidy configTab = new ConfigTab_littlespidy(null, null, null, null);
+        configTab.setImportTabRef(importTab);
+        configTab.refreshCollectionsCombo();
+
+        // Cors panel should have the endpoints available
+        CorsConfigPanel_littlespidy corsPanel = configTab.getCorsConfigPanel();
+        assertNotNull(corsPanel);
+
+        // Input validation panel should have the individual payloads and endpoints available
+        InputValidationConfigPanel_littlespidy inputValPanel = configTab.getInputValidationConfigPanel();
+        assertNotNull(inputValPanel);
+        assertTrue(inputValPanel.getPayloadItems().size() >= 500);
     }
 }

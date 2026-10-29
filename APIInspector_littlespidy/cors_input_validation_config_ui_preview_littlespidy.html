@@ -132,7 +132,7 @@
       flex-shrink: 0;
     }
 
-    .session-bar .session-label {
+    .session-label {
       font-weight: bold;
       color: var(--text-highlight);
     }
@@ -185,7 +185,6 @@
       display: flex;
     }
 
-    /* Sub Tabs (Used in Config, CORS runners, Input Validation runners) */
     .sub-tabs-nav {
       display: flex;
       gap: 2px;
@@ -239,8 +238,7 @@
       display: flex;
     }
 
-    /* Split Pane Layouts */
-    .split-vertical {
+    .three-tier-container {
       display: flex;
       flex-direction: column;
       flex: 1;
@@ -248,12 +246,31 @@
       gap: 6px;
     }
 
+    .tier-panel {
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 2px;
+    }
+
+    .tier-header {
+      padding: 4px 8px;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
     .table-container {
       flex: 1;
       overflow: auto;
-      border: 1px solid var(--border-color);
       background-color: var(--bg-secondary);
-      min-height: 150px;
+      min-height: 100px;
     }
 
     .parallel-viewers-container {
@@ -295,7 +312,6 @@
       color: var(--text-highlight);
     }
 
-    /* Data Tables */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -305,7 +321,7 @@
     th {
       background-color: var(--bg-tertiary);
       color: var(--text-highlight);
-      padding: 5px 8px;
+      padding: 4px 8px;
       position: sticky;
       top: 0;
       border-bottom: 1px solid var(--border-color);
@@ -314,7 +330,7 @@
     }
 
     td {
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-bottom: 1px solid var(--border-color);
     }
 
@@ -346,17 +362,13 @@
     .badge-low { background-color: var(--status-low); }
     .badge-info { background-color: var(--status-info); }
 
-    /* Forms and Controls */
     .control-row {
       display: flex;
-      gap: 12px;
+      gap: 8px;
       align-items: center;
-      margin-bottom: 6px;
-      flex-wrap: wrap;
+      padding: 4px 8px;
       background-color: var(--bg-secondary);
-      padding: 6px 8px;
-      border: 1px solid var(--border-color);
-      border-radius: 2px;
+      flex-wrap: wrap;
       flex-shrink: 0;
     }
 
@@ -370,18 +382,6 @@
       font-weight: 500;
       color: var(--text-primary);
     }
-
-    .status-summary {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .status-summary strong {
-      color: var(--text-highlight);
-    }
   </style>
 </head>
 <body>
@@ -389,7 +389,7 @@
   <header>
     <div class="title-area">
       <h1>API Inspector</h1>
-      <span>Montoya API Edition with Unified Config, CORS Analysis, and Input Validation Fuzzing [littlespidy]</span>
+      <span>Montoya API Edition with API Collections Support and Individual Payloads Fuzzer [littlespidy]</span>
     </div>
     <div class="header-actions">
       <button id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
@@ -423,319 +423,409 @@
     <!-- ==================== TAB: CONFIG ==================== -->
     <div id="configTab" class="main-tab-panel active">
       <div class="sub-tabs-nav">
-        <button class="sub-tab-btn active" onclick="switchConfigSubTab('configCors', this)">CORS Config & Techniques</button>
-        <button class="sub-tab-btn" onclick="switchConfigSubTab('configInputVal', this)">Input Validation Config & Attacks</button>
+        <button class="sub-tab-btn active" onclick="switchConfigSubTab('configInputVal', this)">Input Validation Config & Individual Payloads</button>
+        <button class="sub-tab-btn" onclick="switchConfigSubTab('configCors', this)">CORS Config & Techniques</button>
         <button class="sub-tab-btn" onclick="switchConfigSubTab('configAuth', this)">Auth Analyzer Config</button>
       </div>
 
-      <!-- Config Sub-Tab: CORS -->
-      <div id="configCors" class="sub-tab-panel active">
-        <div class="control-row">
-          <div class="form-group">
-            <label>Target Domain / URL:</label>
-            <input type="text" id="corsTargetUrl" value="https://api.internal.corp" style="width: 220px;">
-          </div>
-          <div class="form-group">
-            <label>Attacker Domain:</label>
-            <input type="text" id="corsAttackerDomain" value="evil.com" style="width: 150px;">
-          </div>
-          <div class="form-group">
-            <label>Threads:</label>
-            <input type="number" value="4" style="width: 50px;">
-          </div>
-          <div class="form-group">
-            <label>Delay (ms):</label>
-            <input type="number" value="50" style="width: 60px;">
-          </div>
-          <div class="form-group">
-            <label>Runner Name:</label>
-            <input type="text" id="corsRunnerNameInput" value="CORS Runner 1" style="width: 130px;">
-          </div>
-          <button class="primary-btn" onclick="launchCorsRunnerFromConfig()">Attack All Selected Techniques</button>
-        </div>
+      <!-- Config Sub-Tab: Input Validation (3-Tier Layout) -->
+      <div id="configInputVal" class="sub-tab-panel active">
+        <div class="three-tier-container">
 
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 35px;"><input type="checkbox" checked onchange="toggleSelectAllCors(this)"></th>
-                <th style="width: 60px;">ID</th>
-                <th style="width: 200px;">Technique Name</th>
-                <th style="width: 260px;">Origin Header Injected</th>
-                <th>Vulnerability Description / Browser Specifics</th>
-                <th style="width: 90px; text-align: center;">Action</th>
-              </tr>
-            </thead>
-            <tbody id="corsTechniquesTableBody">
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-01</td>
-                <td>Arbitrary Attacker Origin</td>
-                <td>https://evil.com</td>
-                <td>Reflects any untrusted origin with Access-Control-Allow-Credentials: true</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('Arbitrary Attacker Origin')">Attack</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-02</td>
-                <td>Null Origin Allowed</td>
-                <td>null</td>
-                <td>Null origin accepted via iframe sandboxing or local scheme exploit</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('Null Origin Allowed')">Attack</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-03</td>
-                <td>Dot-Underscore-Dot Subdomain</td>
-                <td>https://api.internal.corp._.evil.com</td>
-                <td>PortSwigger technique bypassing naive domain prefix regex matching</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('Dot-Underscore-Dot Subdomain')">Attack</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-04</td>
-                <td>Prefix Match Domain Suffix</td>
-                <td>https://api.internal.corpevil.com</td>
-                <td>Weak regex missing boundary delimiter or end of line anchor</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('Prefix Match Domain Suffix')">Attack</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-05</td>
-                <td>Safari Comma Subdomain</td>
-                <td>https://api.internal.corp.,.evil.com</td>
-                <td>Safari browser parser quirk allowing comma characters in hostnames</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('Safari Comma Subdomain')">Attack</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-06</td>
-                <td>Safari Semicolon Subdomain</td>
-                <td>https://api.internal.corp.;.evil.com</td>
-                <td>Safari browser parser quirk allowing semicolon in hostname subdomains</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('Safari Semicolon Subdomain')">Attack</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-07</td>
-                <td>Chrome Backquote Suffix</td>
-                <td>https://api.internal.corp`.evil.com</td>
-                <td>Special delimiter bypass in Chromium origin verification engine</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('Chrome Backquote Suffix')">Attack</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" checked class="cors-tech-cb"></td>
-                <td>TECH-08</td>
-                <td>HTTP Insecure Origin Downgrade</td>
-                <td>http://api.internal.corp</td>
-                <td>TLS downgrade sniffing via man-in-the-middle or cleartext origin</td>
-                <td style="text-align: center;"><button onclick="launchSingleCorsTechnique('HTTP Insecure Origin Downgrade')">Attack</button></td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Tier 1: Individual Payloads Table -->
+          <div class="tier-panel" style="flex: 1.2;">
+            <div class="tier-header">
+              <span>Input Validation Payloads (Showing all individual strings - 520+ payloads)</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <label>Category Filter:</label>
+                <select id="payloadCategoryFilter" onchange="filterPayloadRows(this.value)">
+                  <option value="all">All Payloads (520+)</option>
+                  <option value="reserved">BLNS: Reserved Identifiers (17)</option>
+                  <option value="numeric">BLNS: Numeric Boundaries (73)</option>
+                  <option value="special">BLNS: Special Characters (20)</option>
+                  <option value="unicode">BLNS: Unicode & Encoding (75)</option>
+                  <option value="script">BLNS: Script Injection (236)</option>
+                  <option value="sqli">BLNS: SQL & Code Injection (21)</option>
+                  <option value="interpolation">BLNS: Format Strings (9)</option>
+                  <option value="msdos">BLNS: MSDOS Filenames (15)</option>
+                  <option value="standard">Standard OWASP Attacks (26)</option>
+                </select>
+                <input type="text" id="payloadSearchInput" placeholder="Live search payloads..." onkeyup="searchPayloadRows(this.value)" style="width: 140px;">
+                <button onclick="togglePayloadCheckboxes(true)">Select All</button>
+                <button onclick="togglePayloadCheckboxes(false)">Deselect All</button>
+                <button onclick="alert('Custom wordlist loaded.')">Load Wordlist...</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table id="payloadsTable">
+                <thead>
+                  <tr>
+                    <th style="width: 30px;"><input type="checkbox" checked onchange="togglePayloadCheckboxes(this.checked)"></th>
+                    <th style="width: 70px;">ID</th>
+                    <th style="width: 180px;">Category</th>
+                    <th style="width: 320px;">Payload Value (Sent to Parameters)</th>
+                    <th>Detection Signatures / Oracle Matching</th>
+                    <th style="width: 90px; text-align: center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="payloadsTableBody">
+                  <tr data-cat="reserved">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-001</td>
+                    <td>BLNS: Reserved Identifiers</td>
+                    <td><code>undefined</code></td>
+                    <td>NullPointerException, undefined, TypeError, ReferenceError</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('undefined')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="reserved">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-002</td>
+                    <td>BLNS: Reserved Identifiers</td>
+                    <td><code>null</code></td>
+                    <td>NullPointerException, TypeError, null pointer</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('null')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="reserved">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-003</td>
+                    <td>BLNS: Reserved Identifiers</td>
+                    <td><code>None</code></td>
+                    <td>TypeError, AttributeError, NoneType</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('None')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="numeric">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-018</td>
+                    <td>BLNS: Numeric Boundaries</td>
+                    <td><code>0</code></td>
+                    <td>Zero division, boolean bypass, logic flaw</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('0')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="numeric">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-019</td>
+                    <td>BLNS: Numeric Boundaries</td>
+                    <td><code>-1</code></td>
+                    <td>Negative integer, index underflow, logic exception</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('-1')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="numeric">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-020</td>
+                    <td>BLNS: Numeric Boundaries</td>
+                    <td><code>1/0</code></td>
+                    <td>ArithmeticException, divided by zero</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('1/0')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="numeric">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-021</td>
+                    <td>BLNS: Numeric Boundaries</td>
+                    <td><code>NaN</code></td>
+                    <td>NumberFormatException, NaN parsing error</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('NaN')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="numeric">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-022</td>
+                    <td>BLNS: Numeric Boundaries</td>
+                    <td><code>0xffffffff</code></td>
+                    <td>Integer overflow, 32-bit boundary exception</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('0xffffffff')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="script">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-115</td>
+                    <td>BLNS: Script Injection</td>
+                    <td><code>&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+                    <td>Unencoded reflection in HTML/JSON body</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('&lt;script&gt;alert(1)&lt;/script&gt;')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="script">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-116</td>
+                    <td>BLNS: Script Injection</td>
+                    <td><code>"&gt;&lt;img src=x onerror=alert(1)&gt;</code></td>
+                    <td>Attribute breakout and unencoded reflection</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('&quot;&gt;&lt;img src=x onerror=alert(1)&gt;')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="sqli">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-350</td>
+                    <td>BLNS: SQL & Code Injection</td>
+                    <td><code>' OR '1'='1' -- -</code></td>
+                    <td>syntax error, sql error, database dialect disclosure</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('\' OR \'1\'=\'1\' -- -')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="msdos">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-410</td>
+                    <td>BLNS: MSDOS Filenames</td>
+                    <td><code>CON</code></td>
+                    <td>Windows reserved device, invalid filename exception</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('CON')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="msdos">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-411</td>
+                    <td>BLNS: MSDOS Filenames</td>
+                    <td><code>PRN</code></td>
+                    <td>Windows reserved device, invalid filename exception</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('PRN')">Attack</button></td>
+                  </tr>
+                  <tr data-cat="interpolation">
+                    <td><input type="checkbox" checked class="pl-cb"></td>
+                    <td>PL-480</td>
+                    <td>BLNS: Format Strings</td>
+                    <td><code>%s%p%x%d</code></td>
+                    <td>MissingFormatArgumentException, printf disclosure</td>
+                    <td style="text-align: center;"><button onclick="attackSinglePayload('%s%p%x%d')">Attack</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tier 2: Endpoints to Test (API Collection Selection - Same as Auth Analyzer) -->
+          <div class="tier-panel" style="flex: 1;">
+            <div class="tier-header">
+              <span>Endpoints to Test (Imported API Collections)</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <label>Collection:</label>
+                <select id="fuzzCollectionSelector" onchange="alert('Loaded endpoints from ' + this.value)" style="width: 250px;">
+                  <option value="all">[All Imported Collections] (8 endpoints)</option>
+                  <option value="petstore">Swagger Petstore v3 (5 endpoints)</option>
+                  <option value="internal">Internal Core API v1 (3 endpoints)</option>
+                </select>
+                <button onclick="alert('Collections refreshed from API Import tab.')">Refresh</button>
+                <input type="text" placeholder="Filter endpoints..." style="width: 140px;">
+                <button onclick="toggleEndpointCheckboxes('fuzzEpTable', true)">Select All</button>
+                <button onclick="toggleEndpointCheckboxes('fuzzEpTable', false)">Deselect All</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table id="fuzzEpTable">
+                <thead>
+                  <tr>
+                    <th style="width: 35px;"><input type="checkbox" checked onchange="toggleEndpointCheckboxes('fuzzEpTable', this.checked)"></th>
+                    <th style="width: 70px;">Method</th>
+                    <th style="width: 260px;">Path / Endpoint</th>
+                    <th>Summary / Description</th>
+                    <th style="width: 100px;">Parameters</th>
+                    <th style="width: 80px;">Auth</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><input type="checkbox" checked class="ep-cb"></td>
+                    <td><strong>GET</strong></td>
+                    <td>/api/v1/user/search</td>
+                    <td>Search registered system users by keyword</td>
+                    <td>query (query), limit (query)</td>
+                    <td><span class="badge badge-info">Bearer</span></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="ep-cb"></td>
+                    <td><strong>POST</strong></td>
+                    <td>/api/v1/user/profile</td>
+                    <td>Update user account profile information</td>
+                    <td>username (body), email (body)</td>
+                    <td><span class="badge badge-info">Bearer</span></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="ep-cb"></td>
+                    <td><strong>GET</strong></td>
+                    <td>/api/v1/order/{orderId}</td>
+                    <td>Retrieve customer purchase order details</td>
+                    <td>orderId (path)</td>
+                    <td><span class="badge badge-info">API Key</span></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="ep-cb"></td>
+                    <td><strong>DELETE</strong></td>
+                    <td>/api/v1/cart/item</td>
+                    <td>Remove line item from shopping cart</td>
+                    <td>itemId (query)</td>
+                    <td><span class="badge badge-info">Cookie</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tier 3: Execution & Runner Controls -->
+          <div class="tier-panel" style="flex-shrink: 0;">
+            <div class="control-row">
+              <div class="form-group">
+                <label>Concurrency (Threads):</label>
+                <input type="number" value="5" style="width: 50px;">
+              </div>
+              <div class="form-group">
+                <label>Delay (ms):</label>
+                <input type="number" value="50" style="width: 60px;">
+              </div>
+              <div class="form-group">
+                <label>Runner Name:</label>
+                <input type="text" id="fuzzBatchRunnerName" value="Input Validation Runner 1" style="width: 160px;">
+              </div>
+              <button class="primary-btn" onclick="launchBatchAttackToRunner('Input Validation')">Attack Selected Endpoints (Batch Fuzz)</button>
+              <div style="flex: 1;"></div>
+              <span style="color: var(--text-muted);">Selected: <strong>4 endpoints</strong> | Payloads: <strong>14 active</strong> | Estimated Requests: <strong>56</strong></span>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Config Sub-Tab: Input Validation -->
-      <div id="configInputVal" class="sub-tab-panel">
-        <div class="control-row">
-          <div class="form-group">
-            <label>Target API Endpoint:</label>
-            <input type="text" value="https://api.internal.corp/v1/user/search?query=test" style="width: 290px;">
-          </div>
-          <div class="form-group">
-            <label>Concurrency:</label>
-            <input type="number" value="5" style="width: 50px;">
-          </div>
-          <div class="form-group">
-            <label>Delay (ms):</label>
-            <input type="number" value="100" style="width: 60px;">
-          </div>
-          <div class="form-group">
-            <label>Runner Name:</label>
-            <input type="text" id="fuzzRunnerNameInput" value="Input Validation Runner 1" style="width: 160px;">
-          </div>
-          <button class="primary-btn" onclick="launchInputValidationRunnerFromConfig()">Attack All Selected Categories</button>
-        </div>
+      <!-- Config Sub-Tab: CORS (3-Tier Layout) -->
+      <div id="configCors" class="sub-tab-panel">
+        <div class="three-tier-container">
 
-        <div class="control-row" style="background-color: var(--bg-tertiary); padding: 4px 8px;">
-          <div class="form-group">
-            <label>Category Filter:</label>
-            <select id="fuzzCategoryFilter" onchange="filterFuzzTechniques(this.value)">
-              <option value="all">All Categories (16 sets)</option>
-              <option value="standard">Standard OWASP Categories</option>
-              <option value="blns">Big List of Naughty Strings (BLNS)</option>
-            </select>
+          <!-- Tier 1: 29 PortSwigger CORS Techniques Table -->
+          <div class="tier-panel" style="flex: 1.2;">
+            <div class="tier-header">
+              <span>CORS Techniques (29 PortSwigger Bypass Vectors)</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <label>Attacker Domain:</label>
+                <input type="text" value="evil.com" style="width: 120px;">
+                <button onclick="toggleCorsCheckboxes(true)">Select All</button>
+                <button onclick="toggleCorsCheckboxes(false)">Deselect All</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 30px;"><input type="checkbox" checked onchange="toggleCorsCheckboxes(this.checked)"></th>
+                    <th style="width: 70px;">ID</th>
+                    <th style="width: 210px;">Technique Name</th>
+                    <th style="width: 250px;">Origin Header Injected</th>
+                    <th>Vulnerability Description / Browser Specifics</th>
+                    <th style="width: 90px; text-align: center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="corsTechTableBody">
+                  <tr>
+                    <td><input type="checkbox" checked class="cors-cb"></td>
+                    <td>TECH-01</td>
+                    <td>Arbitrary Attacker Origin</td>
+                    <td>https://evil.com</td>
+                    <td>Reflects any untrusted origin with ACAC: true</td>
+                    <td style="text-align: center;"><button onclick="attackSingleCorsTech('Arbitrary Attacker Origin')">Attack</button></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="cors-cb"></td>
+                    <td>TECH-02</td>
+                    <td>Trusted Null Origin</td>
+                    <td>null</td>
+                    <td>Null origin accepted via iframe sandboxing or local scheme exploit</td>
+                    <td style="text-align: center;"><button onclick="attackSingleCorsTech('Trusted Null Origin')">Attack</button></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="cors-cb"></td>
+                    <td>TECH-03</td>
+                    <td>Dot-Underscore-Dot Subdomain</td>
+                    <td>https://target.corp._.evil.com</td>
+                    <td>PortSwigger technique bypassing naive domain regex matching</td>
+                    <td style="text-align: center;"><button onclick="attackSingleCorsTech('Dot-Underscore-Dot Subdomain')">Attack</button></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="cors-cb"></td>
+                    <td>TECH-04</td>
+                    <td>Safari Comma Subdomain</td>
+                    <td>https://target.corp.,.evil.com</td>
+                    <td>Safari browser parser quirk allowing comma in hostname subdomains</td>
+                    <td style="text-align: center;"><button onclick="attackSingleCorsTech('Safari Comma Subdomain')">Attack</button></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="cors-cb"></td>
+                    <td>TECH-05</td>
+                    <td>Prefix Match / Attacker Subdomain</td>
+                    <td>https://target.corp.evil.com</td>
+                    <td>Regex prefix match without dot anchor</td>
+                    <td style="text-align: center;"><button onclick="attackSingleCorsTech('Prefix Match Subdomain')">Attack</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <button onclick="toggleAllFuzzCheckboxes(true)">Select All</button>
-          <button onclick="toggleAllFuzzCheckboxes(false)">Deselect All</button>
-          <button onclick="alert('Loaded custom wordlist: big-list-of-naughty-strings.txt (505 payloads).')">Load Custom Wordlist...</button>
-          <span style="color: var(--text-muted); margin-left: 8px;">Bundled Wordlist: big-list-of-naughty-strings.txt (505 strings across 10 BLNS groups)</span>
-        </div>
 
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 35px;"><input type="checkbox" checked onchange="toggleAllFuzzCheckboxes(this.checked)"></th>
-                <th style="width: 90px;">ID</th>
-                <th style="width: 200px;">Vulnerability Category</th>
-                <th style="width: 70px;">Count</th>
-                <th style="width: 240px;">Payload Mutation Sample</th>
-                <th>Detection Signatures / Oracle Matching</th>
-                <th style="width: 90px; text-align: center;">Action</th>
-              </tr>
-            </thead>
-            <tbody id="fuzzTechniquesTableBody">
-              <!-- Standard Categories -->
-              <tr class="fuzz-cat-standard">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>sqli</td>
-                <td>SQL Injection (SQLi)</td>
-                <td><span class="badge badge-med">5</span></td>
-                <td>' OR '1'='1' -- -</td>
-                <td>SQL syntax error, database dialect disclosure, boolean differential</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('SQL Injection')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-standard">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>xss</td>
-                <td>Cross-Site Scripting (XSS)</td>
-                <td><span class="badge badge-med">5</span></td>
-                <td>&lt;script&gt;alert(1)&lt;/script&gt;</td>
-                <td>Unencoded reflection in HTML/JSON response bodies</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('XSS')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-standard">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>path_traversal</td>
-                <td>Path Traversal / LFI</td>
-                <td><span class="badge badge-med">5</span></td>
-                <td>../../../../etc/passwd</td>
-                <td>root:x:0:0 disclosure, win.ini disclosure, path truncation</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('Path Traversal')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-standard">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>command_injection</td>
-                <td>OS Command Injection</td>
-                <td><span class="badge badge-med">5</span></td>
-                <td>; id; uname -a</td>
-                <td>uid=0(root) gid=0(root), Linux version, command output</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('Command Injection')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-standard">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>ssti</td>
-                <td>Server-Side Template (SSTI)</td>
-                <td><span class="badge badge-med">5</span></td>
-                <td>{{7*7}} ${7*7} &lt;%= 7*7 %&gt;</td>
-                <td>Evaluation of expression resulting in '49'</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('SSTI')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-standard">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>boundary_overflow</td>
-                <td>Boundary & Overflow</td>
-                <td><span class="badge badge-med">6</span></td>
-                <td>99999999999999999999, -1, NaN</td>
-                <td>Type conversion exceptions, 500 status code, stack trace disclosures</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('Boundary & Overflow')">Attack</button></td>
-              </tr>
+          <!-- Tier 2: Endpoints to Test (API Collection Selection - Same as Auth Analyzer) -->
+          <div class="tier-panel" style="flex: 1;">
+            <div class="tier-header">
+              <span>Endpoints to Test (Imported API Collections)</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <label>Collection:</label>
+                <select id="corsCollectionSelector" onchange="alert('Loaded endpoints from ' + this.value)" style="width: 250px;">
+                  <option value="all">[All Imported Collections] (8 endpoints)</option>
+                  <option value="petstore">Swagger Petstore v3 (5 endpoints)</option>
+                  <option value="internal">Internal Core API v1 (3 endpoints)</option>
+                </select>
+                <button onclick="alert('Collections refreshed from API Import tab.')">Refresh</button>
+                <input type="text" placeholder="Filter endpoints..." style="width: 140px;">
+                <button onclick="toggleEndpointCheckboxes('corsEpTable', true)">Select All</button>
+                <button onclick="toggleEndpointCheckboxes('corsEpTable', false)">Deselect All</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table id="corsEpTable">
+                <thead>
+                  <tr>
+                    <th style="width: 35px;"><input type="checkbox" checked onchange="toggleEndpointCheckboxes('corsEpTable', this.checked)"></th>
+                    <th style="width: 70px;">Method</th>
+                    <th style="width: 260px;">Path / Endpoint</th>
+                    <th>Summary / Description</th>
+                    <th style="width: 80px;">Auth</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><input type="checkbox" checked class="ep-cb"></td>
+                    <td><strong>GET</strong></td>
+                    <td>/api/v1/user/account</td>
+                    <td>Retrieve sensitive user account details</td>
+                    <td><span class="badge badge-info">Bearer</span></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="ep-cb"></td>
+                    <td><strong>GET</strong></td>
+                    <td>/api/v1/user/profile</td>
+                    <td>User profile data</td>
+                    <td><span class="badge badge-info">Bearer</span></td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" checked class="ep-cb"></td>
+                    <td><strong>POST</strong></td>
+                    <td>/api/v1/orders</td>
+                    <td>Submit customer order</td>
+                    <td><span class="badge badge-info">API Key</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-              <!-- BLNS Categories -->
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_reserved</td>
-                <td>BLNS: Reserved Identifiers</td>
-                <td><span class="badge badge-info">17</span></td>
-                <td>undefined, null, None, true, False</td>
-                <td>NullPointerException, undefined, TypeError, ReferenceError, NoneType</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Reserved Identifiers')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_numeric</td>
-                <td>BLNS: Numeric Boundaries</td>
-                <td><span class="badge badge-info">71</span></td>
-                <td>0, -1, 1/0, NaN, Infinity, 0xffffffff</td>
-                <td>NumberFormatException, ArithmeticException, divided by zero, Overflow</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Numeric Boundaries')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_special</td>
-                <td>BLNS: Special Characters</td>
-                <td><span class="badge badge-info">31</span></td>
-                <td>!@#$%^&*()`~, quotes, C0/C1 codes</td>
-                <td>syntax error, parse error, unterminated string, unexpected token</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Special Characters')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_unicode</td>
-                <td>BLNS: Unicode & Encoding</td>
-                <td><span class="badge badge-info">45</span></td>
-                <td>Two-byte, zalgo, RTL override, surrogate</td>
-                <td>CharacterCodingException, MalformedInputException, UnicodeDecodeError</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Unicode & Encoding')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_script</td>
-                <td>BLNS: Script Injection & Polyglots</td>
-                <td><span class="badge badge-high">236</span></td>
-                <td>&lt;script&gt;..., &lt;svg/onload=..., javascript:</td>
-                <td>&lt;script&gt;, &lt;svg, alert(, onload=, onerror= unencoded reflection</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Script Injection')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_sqli</td>
-                <td>BLNS: SQL & Code Injection</td>
-                <td><span class="badge badge-info">21</span></td>
-                <td>SLEEP(1) /*' or 1=1 or ''='</td>
-                <td>syntax error, sql error, mysql_, pg_query, ora-, SQLSTATE</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: SQL & Code Injection')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_interpolation</td>
-                <td>BLNS: Format Strings & Interpolation</td>
-                <td><span class="badge badge-info">9</span></td>
-                <td>%s%p%x%d, ${7*7}, {{7*7}}</td>
-                <td>MissingFormatArgumentException, UnknownFormatConversionException</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Format Strings')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_file_traversal</td>
-                <td>BLNS: File Inclusion & Traversal</td>
-                <td><span class="badge badge-info">6</span></td>
-                <td>file:///etc/passwd, /dev/null, ..%2f..</td>
-                <td>root:x:0:0, boot.ini, win.ini, FileNotFoundException</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: File Inclusion')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_msdos</td>
-                <td>BLNS: MSDOS / Windows Special Filenames</td>
-                <td><span class="badge badge-info">15</span></td>
-                <td>CON, PRN, AUX, NUL, COM1, LPT1</td>
-                <td>invalid filename, reserved device, IOException</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: MSDOS Filenames')">Attack</button></td>
-              </tr>
-              <tr class="fuzz-cat-blns">
-                <td><input type="checkbox" checked class="fuzz-tech-cb"></td>
-                <td>blns_terminal_prompt</td>
-                <td>BLNS: Terminal & Prompt Injection</td>
-                <td><span class="badge badge-info">8</span></td>
-                <td>\033[2J\033[H, Ignore all previous instructions</td>
-                <td>escape code, prompt, override</td>
-                <td style="text-align: center;"><button onclick="launchSingleFuzzCategory('BLNS: Terminal & Prompt')">Attack</button></td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Tier 3: Execution Controls -->
+          <div class="tier-panel" style="flex-shrink: 0;">
+            <div class="control-row">
+              <div class="form-group">
+                <label>Concurrency (Threads):</label>
+                <input type="number" value="4" style="width: 50px;">
+              </div>
+              <div class="form-group">
+                <label>Delay (ms):</label>
+                <input type="number" value="50" style="width: 60px;">
+              </div>
+              <div class="form-group">
+                <label>Runner Name:</label>
+                <input type="text" id="corsBatchRunnerName" value="CORS Runner 1" style="width: 160px;">
+              </div>
+              <button class="primary-btn" onclick="launchBatchAttackToRunner('CORS')">Attack Selected Endpoints (Batch CORS)</button>
+              <div style="flex: 1;"></div>
+              <span style="color: var(--text-muted);">Selected: <strong>3 endpoints</strong> | Vectors: <strong>5 active</strong> | Estimated Requests: <strong>15</strong></span>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -784,7 +874,6 @@
 
     <!-- ==================== TAB: CORS ==================== -->
     <div id="corsTab" class="main-tab-panel">
-      <!-- Closable Runner Sub-Tabs -->
       <div class="sub-tabs-nav" id="corsRunnersNav">
         <button class="sub-tab-btn active" onclick="switchCorsRunnerTab('corsRunner1', this)">
           <span>CORS Runner 1</span>
@@ -796,19 +885,17 @@
       <div id="corsRunner1" class="sub-tab-panel active" style="padding: 4px;">
         <div class="control-row" style="margin-bottom: 4px; padding: 4px 8px;">
           <div class="status-summary">
-            <span>Target: <strong>https://api.internal.corp</strong></span>
-            <span>Total Vectors Tested: <strong>29</strong></span>
+            <span>Collection: <strong>Swagger Petstore v3</strong></span>
+            <span>Endpoints Tested: <strong>3</strong></span>
+            <span>Total Vectors: <strong>15</strong></span>
             <span>High Severity: <strong style="color: var(--status-high);">1</strong></span>
-            <span>Medium Severity: <strong style="color: var(--status-med);">1</strong></span>
-            <span>Safe: <strong style="color: var(--status-info);">27</strong></span>
+            <span>Safe: <strong style="color: var(--status-info);">14</strong></span>
           </div>
           <div style="flex: 1;"></div>
           <button onclick="alert('Exported CORS results to CSV.')">Export CSV</button>
-          <button onclick="alert('Exported CORS results to XML.')">Export XML</button>
         </div>
 
-        <div class="split-vertical">
-          <!-- Top Table -->
+        <div class="split-vertical" style="display:flex; flex-direction:column; flex:1; gap:6px;">
           <div class="table-container">
             <table>
               <thead>
@@ -847,35 +934,11 @@
                   <td><span class="badge badge-med">Medium</span></td>
                   <td>Null Origin reflection with Credentials Allowed</td>
                 </tr>
-                <tr onclick="selectCorsRow(this, 3)">
-                  <td>3</td>
-                  <td>GET</td>
-                  <td>/api/v1/user/account</td>
-                  <td>https://api.internal.corp._.evil.com</td>
-                  <td>200</td>
-                  <td>(None)</td>
-                  <td>false</td>
-                  <td><span class="badge badge-info">Info</span></td>
-                  <td>Origin not reflected; request blocked safely</td>
-                </tr>
-                <tr onclick="selectCorsRow(this, 4)">
-                  <td>4</td>
-                  <td>GET</td>
-                  <td>/api/v1/user/account</td>
-                  <td>https://api.internal.corp.,.evil.com</td>
-                  <td>200</td>
-                  <td>(None)</td>
-                  <td>false</td>
-                  <td><span class="badge badge-info">Info</span></td>
-                  <td>Origin rejected; no CORS headers present</td>
-                </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- Bottom Parallel Viewers (Equal Size 50/50 Split) -->
           <div class="parallel-viewers-container">
-            <!-- Request Pane -->
             <div class="viewer-box">
               <div class="viewer-header">
                 <span>Request Viewer (Tested Origin Injected)</span>
@@ -890,7 +953,6 @@ Cookie: session_token=secret_auth_token_value_littlespidy
 Connection: close</div>
             </div>
 
-            <!-- Response Pane -->
             <div class="viewer-box">
               <div class="viewer-header">
                 <span>Response Viewer (CORS Headers Verified)</span>
@@ -918,7 +980,6 @@ Vary: Origin
 
     <!-- ==================== TAB: INPUT VALIDATION ==================== -->
     <div id="fuzzTab" class="main-tab-panel">
-      <!-- Closable Runner Sub-Tabs -->
       <div class="sub-tabs-nav" id="fuzzRunnersNav">
         <button class="sub-tab-btn active" onclick="switchFuzzRunnerTab('fuzzRunner1', this)">
           <span>Input Validation Runner 1</span>
@@ -930,26 +991,24 @@ Vary: Origin
       <div id="fuzzRunner1" class="sub-tab-panel active" style="padding: 4px;">
         <div class="control-row" style="margin-bottom: 4px; padding: 4px 8px;">
           <div class="status-summary">
-            <span>Target: <strong>https://api.internal.corp/v1/user/search</strong></span>
-            <span>Total Payloads Sent: <strong>48</strong></span>
+            <span>Collection: <strong>Swagger Petstore v3</strong></span>
+            <span>Endpoints Fuzzed: <strong>4</strong></span>
+            <span>Total Requests: <strong>56</strong></span>
             <span>Issues Detected: <strong style="color: var(--status-high);">2</strong></span>
             <span>Status: <strong>Completed</strong></span>
           </div>
           <div style="flex: 1;"></div>
-          <button onclick="alert('Fuzzing paused.')">Pause</button>
-          <button onclick="alert('Fuzzing resumed.')">Resume</button>
           <button onclick="alert('Results exported.')">Export Results</button>
         </div>
 
-        <div class="split-vertical">
-          <!-- Top Table -->
+        <div class="split-vertical" style="display:flex; flex-direction:column; flex:1; gap:6px;">
           <div class="table-container">
             <table>
               <thead>
                 <tr>
                   <th style="width: 45px;">ID</th>
                   <th style="width: 60px;">Method</th>
-                  <th style="width: 220px;">Target Endpoint</th>
+                  <th style="width: 200px;">Target Endpoint</th>
                   <th style="width: 90px;">Parameter</th>
                   <th style="width: 140px;">Category</th>
                   <th style="width: 200px;">Payload Sent</th>
@@ -962,10 +1021,10 @@ Vary: Origin
                 <tr class="selected" onclick="selectFuzzRow(this, 1)">
                   <td>1</td>
                   <td>GET</td>
-                  <td>/v1/user/search</td>
+                  <td>/api/v1/user/search</td>
                   <td>query</td>
-                  <td>SQL Injection</td>
-                  <td>' UNION SELECT null, @@version -- -</td>
+                  <td>BLNS: SQL & Code Injection</td>
+                  <td>' OR '1'='1' -- -</td>
                   <td>500</td>
                   <td>1,420</td>
                   <td><span class="badge badge-high">SQL Syntax Error (PostgreSQL)</span></td>
@@ -973,49 +1032,36 @@ Vary: Origin
                 <tr onclick="selectFuzzRow(this, 2)">
                   <td>2</td>
                   <td>GET</td>
-                  <td>/v1/user/search</td>
+                  <td>/api/v1/user/search</td>
                   <td>query</td>
-                  <td>XSS</td>
-                  <td>&lt;b&gt;audit_probe&lt;/b&gt;</td>
+                  <td>BLNS: Script Injection</td>
+                  <td>&lt;script&gt;alert(1)&lt;/script&gt;</td>
                   <td>200</td>
                   <td>890</td>
-                  <td><span class="badge badge-med">Unencoded HTML Tag Reflection</span></td>
+                  <td><span class="badge badge-high">Unencoded Script Tag Reflection</span></td>
                 </tr>
                 <tr onclick="selectFuzzRow(this, 3)">
                   <td>3</td>
                   <td>GET</td>
-                  <td>/v1/user/search</td>
+                  <td>/api/v1/user/search</td>
                   <td>query</td>
-                  <td>Path Traversal</td>
-                  <td>../../../../etc/passwd</td>
-                  <td>400</td>
-                  <td>210</td>
-                  <td><span class="badge badge-info">Validation Rejected (400 Bad Request)</span></td>
-                </tr>
-                <tr onclick="selectFuzzRow(this, 4)">
-                  <td>4</td>
-                  <td>GET</td>
-                  <td>/v1/user/search</td>
-                  <td>query</td>
-                  <td>Command Injection</td>
-                  <td>; id</td>
-                  <td>400</td>
-                  <td>210</td>
-                  <td><span class="badge badge-info">Sanitized by Input Guard</span></td>
+                  <td>BLNS: Numeric Boundaries</td>
+                  <td>-1</td>
+                  <td>200</td>
+                  <td>340</td>
+                  <td><span class="badge badge-info">Handled Safely</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- Bottom Parallel Viewers (Equal Size 50/50 Split) -->
           <div class="parallel-viewers-container">
-            <!-- Request Pane -->
             <div class="viewer-box">
               <div class="viewer-header">
-                <span>Request Viewer (Injected Parameter Payload)</span>
+                <span>Request Viewer (Injected Fuzz Payload)</span>
                 <span style="font-weight: normal; color: var(--text-muted); font-size: 11px;">Length: 310 bytes</span>
               </div>
-              <div class="viewer-content" id="fuzzRequestViewer">GET /v1/user/search?query=%27%20UNION%20SELECT%20null%2C%20%40%40version%20--%20- HTTP/1.1
+              <div class="viewer-content" id="fuzzRequestViewer">GET /api/v1/user/search?query=%27%20OR%20%271%27%3D%271%27%20--%20- HTTP/1.1
 Host: api.internal.corp
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
 Accept: application/json
@@ -1023,10 +1069,9 @@ Authorization: Bearer token_littlespidy
 Connection: close</div>
             </div>
 
-            <!-- Response Pane -->
             <div class="viewer-box">
               <div class="viewer-header">
-                <span>Response Viewer (Error & Evidence Diff)</span>
+                <span>Response Viewer (Evidence & Differences)</span>
                 <span style="font-weight: normal; color: var(--text-muted); font-size: 11px;">Status: 500 Internal Server Error</span>
               </div>
               <div class="viewer-content" id="fuzzResponseViewer">HTTP/1.1 500 Internal Server Error
@@ -1036,7 +1081,7 @@ Connection: close
 
 {
   "error": "DatabaseException",
-  "message": "org.postgresql.util.PSQLException: ERROR: each UNION query must have the same number of columns\n  Position: 42",
+  "message": "org.postgresql.util.PSQLException: ERROR: syntax error at or near 'OR'",
   "timestamp": "2026-10-29T12:20:00Z"
 }</div>
             </div>
@@ -1047,50 +1092,33 @@ Connection: close
 
     <!-- Placeholder panels for remaining tabs -->
     <div id="importTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        API Import Tab (Swagger, OpenAPI v3, Postman collections)
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">API Import Tab</div>
     </div>
     <div id="viewerTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        Request & Response Viewer Tab
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">Request & Response Viewer Tab</div>
     </div>
     <div id="paramTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        Parameter Collector Tab
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">Parameter Collector Tab</div>
     </div>
     <div id="authTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        Auth Analyzer Runner Tab
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">Auth Analyzer Runner Tab</div>
     </div>
     <div id="versionTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        REST API Version Finder Tab
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">REST API Version Finder Tab</div>
     </div>
     <div id="docStratTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        API Documentation Strategy Tab
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">API Documentation Strategy Tab</div>
     </div>
     <div id="discStratTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        API Endpoint Discovery Strategy Tab
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">API Endpoint Discovery Strategy Tab</div>
     </div>
     <div id="storageTab" class="main-tab-panel">
-      <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-        Hidden API Storage Tab
-      </div>
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">Hidden API Storage Tab</div>
     </div>
 
   </div>
 
   <script>
-    // Theme toggle
     function toggleTheme() {
       const body = document.body;
       const btn = document.getElementById('themeToggleBtn');
@@ -1103,42 +1131,24 @@ Connection: close
       }
     }
 
-    // Switch main tabs
     function switchMainTab(tabId, btn) {
       document.querySelectorAll('.main-tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       const target = document.getElementById(tabId);
-      if (target) {
-        target.classList.add('active');
-      }
-      if (btn) {
-        btn.classList.add('active');
-      }
+      if (target) target.classList.add('active');
+      if (btn) btn.classList.add('active');
     }
 
-    // Switch Config Sub-tabs
     function switchConfigSubTab(subTabId, btn) {
       document.querySelectorAll('#configTab .sub-tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('#configTab .sub-tab-btn').forEach(b => b.classList.remove('active'));
       const target = document.getElementById(subTabId);
-      if (target) {
-        target.classList.add('active');
-      }
-      if (btn) {
-        btn.classList.add('active');
-      }
+      if (target) target.classList.add('active');
+      if (btn) btn.classList.add('active');
     }
 
-    // Toggle Select All CORS techniques
-    function toggleSelectAllCors(master) {
-      document.querySelectorAll('.cors-tech-cb').forEach(cb => {
-        cb.checked = master.checked;
-      });
-    }
-
-    // Toggle All Fuzz Checkboxes
-    function toggleAllFuzzCheckboxes(checked) {
-      document.querySelectorAll('.fuzz-tech-cb').forEach(cb => {
+    function togglePayloadCheckboxes(checked) {
+      document.querySelectorAll('.pl-cb').forEach(cb => {
         const row = cb.closest('tr');
         if (row && row.style.display !== 'none') {
           cb.checked = checked;
@@ -1146,103 +1156,74 @@ Connection: close
       });
     }
 
-    // Filter Fuzz Techniques in preview
-    function filterFuzzTechniques(category) {
-      const rows = document.querySelectorAll('#fuzzTechniquesTableBody tr');
+    function filterPayloadRows(cat) {
+      const rows = document.querySelectorAll('#payloadsTableBody tr');
       rows.forEach(r => {
-        if (category === 'all') {
+        if (cat === 'all') {
           r.style.display = '';
-        } else if (category === 'standard') {
-          r.style.display = r.classList.contains('fuzz-cat-standard') ? '' : 'none';
-        } else if (category === 'blns') {
-          r.style.display = r.classList.contains('fuzz-cat-blns') ? '' : 'none';
+        } else {
+          r.style.display = r.getAttribute('data-cat') === cat ? '' : 'none';
         }
       });
     }
 
-    // Launch CORS Runner from Config Tab
-    function launchCorsRunnerFromConfig() {
-      const runnerName = document.getElementById('corsRunnerNameInput').value || 'CORS Runner';
-      // Switch to CORS tab
-      const corsTabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText === 'CORS');
-      switchMainTab('corsTab', corsTabBtn);
-      alert('Attack launched for ' + runnerName + '. Switched to CORS tab.');
+    function searchPayloadRows(query) {
+      const q = query.toLowerCase();
+      const rows = document.querySelectorAll('#payloadsTableBody tr');
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        r.style.display = text.includes(q) ? '' : 'none';
+      });
     }
 
-    function launchSingleCorsTechnique(techName) {
-      const corsTabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText === 'CORS');
-      switchMainTab('corsTab', corsTabBtn);
-      alert('Attack launched for technique: ' + techName + '. Results streaming to CORS tab.');
+    function toggleEndpointCheckboxes(tableId, checked) {
+      document.querySelectorAll('#' + tableId + ' .ep-cb').forEach(cb => cb.checked = checked);
     }
 
-    // Launch Input Validation Runner from Config Tab
-    function launchInputValidationRunnerFromConfig() {
-      const runnerName = document.getElementById('fuzzRunnerNameInput').value || 'Input Validation Runner';
+    function toggleCorsCheckboxes(checked) {
+      document.querySelectorAll('.cors-cb').forEach(cb => cb.checked = checked);
+    }
+
+    function attackSinglePayload(payloadVal) {
       const fuzzTabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText === 'Input Validation');
       switchMainTab('fuzzTab', fuzzTabBtn);
-      alert('Attack launched for ' + runnerName + '. Switched to Input Validation tab.');
+      alert('Attacking all selected endpoints using payload: ' + payloadVal);
     }
 
-    function launchSingleFuzzCategory(catName) {
-      const fuzzTabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText === 'Input Validation');
-      switchMainTab('fuzzTab', fuzzTabBtn);
-      alert('Attack launched for category: ' + catName + '. Results streaming to Input Validation tab.');
+    function attackSingleCorsTech(techName) {
+      const corsTabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText === 'CORS');
+      switchMainTab('corsTab', corsTabBtn);
+      alert('Attacking all selected endpoints using CORS technique: ' + techName);
     }
 
-    // CORS Table selection
+    function launchBatchAttackToRunner(tabName) {
+      const targetTab = tabName === 'CORS' ? 'corsTab' : 'fuzzTab';
+      const tabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText === tabName);
+      switchMainTab(targetTab, tabBtn);
+      alert('Batch attack launched across selected API endpoints. Switched to ' + tabName + ' tab.');
+    }
+
     function selectCorsRow(row, id) {
       document.querySelectorAll('#corsResultsTbody tr').forEach(r => r.classList.remove('selected'));
       row.classList.add('selected');
-      const reqViewer = document.getElementById('corsRequestViewer');
-      const resViewer = document.getElementById('corsResponseViewer');
-      if (id === 1) {
-        reqViewer.innerText = 'GET /api/v1/user/account HTTP/1.1\nHost: api.internal.corp\nUser-Agent: Mozilla/5.0\nOrigin: https://evil.com\nAccept: application/json\nCookie: session_token=secret_auth_token_value_littlespidy\nConnection: close';
-        resViewer.innerText = 'HTTP/1.1 200 OK\nDate: Wed, 29 Oct 2026 06:40:00 GMT\nContent-Type: application/json\nAccess-Control-Allow-Origin: https://evil.com\nAccess-Control-Allow-Credentials: true\nVary: Origin\n\n{\n  "user_id": 10482,\n  "email": "victim_littlespidy@example.com",\n  "credit_card": "4111-XXXX-XXXX-1111",\n  "authenticated": true\n}';
-      } else if (id === 2) {
-        reqViewer.innerText = 'GET /api/v1/user/account HTTP/1.1\nHost: api.internal.corp\nUser-Agent: Mozilla/5.0\nOrigin: null\nAccept: application/json\nCookie: session_token=secret_auth_token_value_littlespidy\nConnection: close';
-        resViewer.innerText = 'HTTP/1.1 200 OK\nDate: Wed, 29 Oct 2026 06:40:02 GMT\nContent-Type: application/json\nAccess-Control-Allow-Origin: null\nAccess-Control-Allow-Credentials: true\nVary: Origin\n\n{\n  "user_id": 10482,\n  "email": "victim_littlespidy@example.com"\n}';
-      } else {
-        reqViewer.innerText = 'GET /api/v1/user/account HTTP/1.1\nHost: api.internal.corp\nOrigin: https://api.internal.corp._.evil.com\nAccept: application/json\nConnection: close';
-        resViewer.innerText = 'HTTP/1.1 200 OK\nDate: Wed, 29 Oct 2026 06:40:05 GMT\nContent-Type: application/json\n\n{\n  "status": "active"\n}';
-      }
     }
 
-    // Input Validation Table selection
     function selectFuzzRow(row, id) {
       document.querySelectorAll('#fuzzResultsTbody tr').forEach(r => r.classList.remove('selected'));
       row.classList.add('selected');
-      const reqViewer = document.getElementById('fuzzRequestViewer');
-      const resViewer = document.getElementById('fuzzResponseViewer');
-      if (id === 1) {
-        reqViewer.innerText = 'GET /v1/user/search?query=%27%20UNION%20SELECT%20null%2C%20%40%40version%20--%20- HTTP/1.1\nHost: api.internal.corp\nAccept: application/json\nAuthorization: Bearer token_littlespidy\nConnection: close';
-        resViewer.innerText = 'HTTP/1.1 500 Internal Server Error\nDate: Wed, 29 Oct 2026 06:41:00 GMT\nContent-Type: application/json\n\n{\n  "error": "DatabaseException",\n  "message": "org.postgresql.util.PSQLException: ERROR: each UNION query must have the same number of columns",\n  "timestamp": "2026-10-29T12:20:00Z"\n}';
-      } else if (id === 2) {
-        reqViewer.innerText = 'GET /v1/user/search?query=%3Cb%3Eaudit_probe%3C%2Fb%3E HTTP/1.1\nHost: api.internal.corp\nAccept: application/json\nConnection: close';
-        resViewer.innerText = 'HTTP/1.1 200 OK\nDate: Wed, 29 Oct 2026 06:41:02 GMT\nContent-Type: text/html\n\n<div>Search results for: <b>audit_probe</b></div>';
-      } else {
-        reqViewer.innerText = 'GET /v1/user/search?query=..%2F..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1\nHost: api.internal.corp\nConnection: close';
-        resViewer.innerText = 'HTTP/1.1 400 Bad Request\nContent-Type: application/json\n\n{"error": "Invalid character sequence"}';
-      }
-    }
-
-    // CORS Runner tab management
-    let corsRunnerCount = 1;
-    function addNewCorsRunnerTab() {
-      corsRunnerCount++;
-      const nav = document.getElementById('corsRunnersNav');
-      const addBtn = nav.lastElementChild;
-      const runnerId = 'corsRunner' + corsRunnerCount;
-      const tabBtn = document.createElement('button');
-      tabBtn.className = 'sub-tab-btn';
-      tabBtn.onclick = function() { switchCorsRunnerTab(runnerId, tabBtn); };
-      tabBtn.innerHTML = '<span>CORS Runner ' + corsRunnerCount + '</span> <span class="close-btn" onclick="closeCorsRunnerTab(event, \'' + runnerId + '\', this)">x</span>';
-      nav.insertBefore(tabBtn, addBtn);
-      alert('Created new tab: CORS Runner ' + corsRunnerCount);
     }
 
     function switchCorsRunnerTab(runnerId, btn) {
       document.querySelectorAll('#corsTab .sub-tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('#corsRunnersNav .sub-tab-btn').forEach(b => b.classList.remove('active'));
+      const target = document.getElementById(runnerId);
+      if (target) target.classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    function switchFuzzRunnerTab(runnerId, btn) {
+      document.querySelectorAll('#fuzzTab .sub-tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('#fuzzRunnersNav .sub-tab-btn').forEach(b => b.classList.remove('active'));
       const target = document.getElementById(runnerId);
       if (target) target.classList.add('active');
       if (btn) btn.classList.add('active');
@@ -1254,12 +1235,33 @@ Connection: close
       tabBtn.remove();
       const target = document.getElementById(runnerId);
       if (target && runnerId !== 'corsRunner1') target.remove();
-      // activate first runner
       const firstBtn = document.querySelector('#corsRunnersNav .sub-tab-btn');
       if (firstBtn) switchCorsRunnerTab('corsRunner1', firstBtn);
     }
 
-    // Input Validation Runner tab management
+    function closeFuzzRunnerTab(e, runnerId, closeBtn) {
+      e.stopPropagation();
+      const tabBtn = closeBtn.parentElement;
+      tabBtn.remove();
+      const target = document.getElementById(runnerId);
+      if (target && runnerId !== 'fuzzRunner1') target.remove();
+      const firstBtn = document.querySelector('#fuzzRunnersNav .sub-tab-btn');
+      if (firstBtn) switchFuzzRunnerTab('fuzzRunner1', firstBtn);
+    }
+
+    let corsRunnerCount = 1;
+    function addNewCorsRunnerTab() {
+      corsRunnerCount++;
+      const nav = document.getElementById('corsRunnersNav');
+      const addBtn = nav.lastElementChild;
+      const runnerId = 'corsRunner' + corsRunnerCount;
+      const tabBtn = document.createElement('button');
+      tabBtn.className = 'sub-tab-btn';
+      tabBtn.onclick = function() { switchCorsRunnerTab(runnerId, tabBtn); };
+      tabBtn.innerHTML = '<span>CORS Runner ' + corsRunnerCount + '</span> <span class="close-btn" onclick="closeCorsRunnerTab(event, \'' + runnerId + '\', this)">x</span>';
+      nav.insertBefore(tabBtn, addBtn);
+    }
+
     let fuzzRunnerCount = 1;
     function addNewFuzzRunnerTab() {
       fuzzRunnerCount++;
@@ -1271,25 +1273,6 @@ Connection: close
       tabBtn.onclick = function() { switchFuzzRunnerTab(runnerId, tabBtn); };
       tabBtn.innerHTML = '<span>Input Validation Runner ' + fuzzRunnerCount + '</span> <span class="close-btn" onclick="closeFuzzRunnerTab(event, \'' + runnerId + '\', this)">x</span>';
       nav.insertBefore(tabBtn, addBtn);
-      alert('Created new tab: Input Validation Runner ' + fuzzRunnerCount);
-    }
-
-    function switchFuzzRunnerTab(runnerId, btn) {
-      document.querySelectorAll('#fuzzTab .sub-tab-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('#fuzzRunnersNav .sub-tab-btn').forEach(b => b.classList.remove('active'));
-      const target = document.getElementById(runnerId);
-      if (target) target.classList.add('active');
-      if (btn) btn.classList.add('active');
-    }
-
-    function closeFuzzRunnerTab(e, runnerId, closeBtn) {
-      e.stopPropagation();
-      const tabBtn = closeBtn.parentElement;
-      tabBtn.remove();
-      const target = document.getElementById(runnerId);
-      if (target && runnerId !== 'fuzzRunner1') target.remove();
-      const firstBtn = document.querySelector('#fuzzRunnersNav .sub-tab-btn');
-      if (firstBtn) switchFuzzRunnerTab('fuzzRunner1', firstBtn);
     }
   </script>
 </body>

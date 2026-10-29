@@ -8,6 +8,7 @@ import com.littlespidy.apiinspector.engine.CorsEngine_littlespidy;
 import com.littlespidy.apiinspector.engine.CorsProgressListener_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTestResult_littlespidy;
+import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
 
 import javax.swing.*;
 import java.awt.*;
@@ -89,6 +90,43 @@ public class CorsTab_littlespidy extends JPanel {
         if (idx != -1) {
             tabbedPane.setTabComponentAt(idx, headerPanel);
         }
+    }
+
+    public void executeAttack(
+            List<? extends EndpointSelectionItem_littlespidy> endpoints,
+            String targetBaseUrl,
+            String attackerDomain,
+            List<CorsTechnique_littlespidy> techniques,
+            int threads,
+            int delayMs,
+            String runnerName) {
+
+        CorsRunnerPanel_littlespidy runner = createNewRunner(runnerName);
+
+        corsEngine.executeEndpointsTestsAsync(
+                endpoints,
+                targetBaseUrl,
+                attackerDomain,
+                techniques,
+                threads,
+                delayMs,
+                new CorsProgressListener_littlespidy() {
+                    @Override
+                    public void onCorsTestCompleted(CorsTestResult_littlespidy result) {
+                        runner.addResult(result);
+                    }
+
+                    @Override
+                    public void onStatusUpdate(String statusMessage, int current, int total) {
+                        runner.updateStatusText("Status: " + statusMessage);
+                    }
+
+                    @Override
+                    public void onAllTestsCompleted() {
+                        runner.updateStatusText("Status: Completed all CORS tests");
+                    }
+                }
+        );
     }
 
     public void executeAttack(

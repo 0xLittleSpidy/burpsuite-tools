@@ -6,6 +6,8 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import com.littlespidy.apiinspector.engine.InputValidationEngine_littlespidy;
 import com.littlespidy.apiinspector.engine.InputValidationProgressListener_littlespidy;
+import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
+import com.littlespidy.apiinspector.model.InputValidationPayloadItem_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTestResult_littlespidy;
 
@@ -89,6 +91,74 @@ public class InputValidationTab_littlespidy extends JPanel {
         if (idx != -1) {
             tabbedPane.setTabComponentAt(idx, headerPanel);
         }
+    }
+
+    public void executeAttack(
+            List<? extends EndpointSelectionItem_littlespidy> endpoints,
+            String defaultBaseUrl,
+            List<InputValidationPayloadItem_littlespidy> payloads,
+            int threads,
+            int delayMs,
+            String runnerName) {
+
+        InputValidationRunnerPanel_littlespidy runner = createNewRunner(runnerName);
+
+        fuzzEngine.executeEndpointsFuzzAsync(
+                endpoints,
+                defaultBaseUrl,
+                payloads,
+                threads,
+                delayMs,
+                new InputValidationProgressListener_littlespidy() {
+                    @Override
+                    public void onFuzzTestCompleted(InputValidationTestResult_littlespidy result) {
+                        runner.addResult(result);
+                    }
+
+                    @Override
+                    public void onStatusUpdate(String statusMessage, int current, int total) {
+                        runner.updateStatusText("Status: " + statusMessage);
+                    }
+
+                    @Override
+                    public void onAllTestsCompleted() {
+                        runner.updateStatusText("Status: Completed all fuzzing tests");
+                    }
+                }
+        );
+    }
+
+    public void executeAttackForPayloads(
+            HttpRequest targetRequest,
+            List<InputValidationPayloadItem_littlespidy> payloads,
+            int threads,
+            int delayMs,
+            String runnerName) {
+
+        InputValidationRunnerPanel_littlespidy runner = createNewRunner(runnerName);
+
+        fuzzEngine.executeIndividualPayloadsAsync(
+                targetRequest,
+                payloads,
+                threads,
+                delayMs,
+                new InputValidationProgressListener_littlespidy() {
+                    @Override
+                    public void onFuzzTestCompleted(InputValidationTestResult_littlespidy result) {
+                        runner.addResult(result);
+                    }
+
+                    @Override
+                    public void onStatusUpdate(String statusMessage, int current, int total) {
+                        runner.updateStatusText("Status: " + statusMessage);
+                    }
+
+                    @Override
+                    public void onAllTestsCompleted() {
+                        runner.updateStatusText("Status: Completed all fuzzing tests");
+                    }
+                }
+        );
     }
 
     public void executeAttack(
