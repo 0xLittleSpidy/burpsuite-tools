@@ -1,0 +1,1249 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ng-auth-analyzer_littlespidy - Input Validation Integration UI Preview</title>
+  <style>
+    :root {
+      --bg-color: #2b2b2b;
+      --card-bg: #3c3f41;
+      --panel-border: #4a4d50;
+      --text-color: #bbbbbb;
+      --text-bright: #ffffff;
+      --text-muted: #888888;
+      --accent-color: #ff6633;
+      --accent-hover: #e05522;
+      --input-bg: #2d2d2d;
+      --input-border: #555555;
+      --table-header-bg: #313335;
+      --table-row-even: #3c3f41;
+      --table-row-odd: #353739;
+      --table-row-hover: #484b4d;
+      --table-row-selected: #214283;
+      --border-radius: 4px;
+      --badge-danger: #c7254e;
+      --badge-warning: #f89406;
+      --badge-info: #3a87ad;
+      --badge-success: #468847;
+      --badge-neutral: #555555;
+    }
+
+    body.light-theme {
+      --bg-color: #f5f5f5;
+      --card-bg: #ffffff;
+      --panel-border: #d0d0d0;
+      --text-color: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --accent-color: #e25522;
+      --accent-hover: #c44315;
+      --input-bg: #ffffff;
+      --input-border: #cccccc;
+      --table-header-bg: #e8e8e8;
+      --table-row-even: #ffffff;
+      --table-row-odd: #f9f9f9;
+      --table-row-hover: #eeeeee;
+      --table-row-selected: #b5d5ff;
+      --badge-danger: #d9534f;
+      --badge-warning: #f0ad4e;
+      --badge-info: #5bc0de;
+      --badge-success: #5cb85c;
+      --badge-neutral: #cccccc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-size: 12px;
+      line-height: 1.4;
+      user-select: none;
+    }
+
+    /* Top Suite Bar */
+    .suite-header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 6px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .suite-title {
+      font-weight: 700;
+      color: var(--accent-color);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+    .suite-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons & Inputs */
+    button, .btn {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
+      padding: 4px 10px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    button:hover, .btn:hover {
+      background-color: var(--table-row-hover);
+      border-color: var(--accent-color);
+      color: var(--text-bright);
+    }
+    button.primary {
+      background-color: var(--accent-color);
+      color: #ffffff;
+      border-color: var(--accent-color);
+      font-weight: 600;
+    }
+    button.primary:hover {
+      background-color: var(--accent-hover);
+    }
+    input[type="text"], input[type="number"], select {
+      background-color: var(--input-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--input-border);
+      padding: 4px 8px;
+      border-radius: var(--border-radius);
+      font-size: 12px;
+      outline: none;
+    }
+    input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: var(--accent-color);
+    }
+
+    /* Persistence Toolbar */
+    .persistence-toolbar {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .badge-running { background: #2e7d32; color: #fff; }
+    .badge-stopped { background: #c62828; color: #fff; }
+
+    /* Nav Tabs */
+    .nav-tabs {
+      display: flex;
+      background-color: var(--table-header-bg);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 0 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .nav-tab {
+      padding: 7px 13px;
+      cursor: pointer;
+      border-top: 2px solid transparent;
+      border-left: 1px solid transparent;
+      border-right: 1px solid transparent;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 12px;
+    }
+    .nav-tab:hover {
+      color: var(--text-bright);
+    }
+    .nav-tab.active {
+      background-color: var(--card-bg);
+      border-top: 2px solid var(--accent-color);
+      border-left: 1px solid var(--panel-border);
+      border-right: 1px solid var(--panel-border);
+      border-bottom: 1px solid var(--card-bg);
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+    .nav-tab.highlight {
+      color: var(--accent-color);
+    }
+
+    /* Tab Content Area */
+    .tab-content {
+      display: none;
+      padding: 10px;
+      height: calc(100vh - 110px);
+      overflow: hidden;
+    }
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Config Layout */
+    .config-container {
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      gap: 12px;
+      height: 100%;
+      overflow: auto;
+    }
+    .config-sidebar {
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .config-main {
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      overflow-y: auto;
+    }
+    .sidebar-section-title {
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 4px;
+      margin-top: 4px;
+    }
+    .analyzer-toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+    }
+    .analyzer-toggle-row label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .desc-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: -2px;
+      margin-left: 20px;
+      line-height: 1.25;
+    }
+
+    /* History & Table Layout */
+    .history-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 8px;
+    }
+    .filter-bar {
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 6px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Split Pane Layout */
+    .split-pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      gap: 8px;
+    }
+    .table-pane {
+      flex: 1;
+      min-height: 160px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      overflow: auto;
+    }
+    .viewer-pane {
+      flex: 1;
+      min-height: 160px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--table-header-bg);
+      color: var(--text-bright);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--panel-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      font-weight: 600;
+    }
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--panel-border);
+      max-width: 250px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    tr:nth-child(even) { background-color: var(--table-row-even); }
+    tr:nth-child(odd) { background-color: var(--table-row-odd); }
+    tr:hover { background-color: var(--table-row-hover); cursor: pointer; }
+    tr.selected { background-color: var(--table-row-selected) !important; color: #ffffff; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-error { background-color: var(--badge-danger); color: #fff; }
+    .badge-reflected { background-color: var(--badge-warning); color: #fff; }
+    .badge-anomaly { background-color: var(--badge-info); color: #fff; }
+    .badge-clean { background-color: var(--badge-success); color: #fff; }
+    .badge-gray { background-color: var(--badge-neutral); color: #fff; }
+
+    /* Viewer Tabs */
+    .viewer-tabs {
+      display: flex;
+      background-color: var(--table-header-bg);
+      border-bottom: 1px solid var(--panel-border);
+    }
+    .viewer-tab {
+      padding: 5px 12px;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-right: 1px solid var(--panel-border);
+    }
+    .viewer-tab.active {
+      background-color: var(--card-bg);
+      color: var(--text-bright);
+      font-weight: 600;
+      border-bottom: 1px solid var(--card-bg);
+    }
+    .viewer-content {
+      flex: 1;
+      padding: 8px;
+      background-color: var(--input-bg);
+      color: var(--text-bright);
+      font-family: "JetBrains Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 11px;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    /* Modal Dialog */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.65);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-dialog {
+      background-color: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      width: 860px;
+      max-width: 95vw;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--accent-color);
+    }
+    .modal-body {
+      padding: 12px 14px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .modal-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .modal-card {
+      background-color: var(--table-header-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 10px;
+    }
+    .card-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--text-bright);
+    }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--accent-color);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      font-weight: 600;
+      z-index: 2000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Suite Header Bar -->
+  <div class="suite-header">
+    <div class="suite-title">ng-auth-analyzer_littlespidy - Burp Suite Extension UI Mockup</div>
+    <div class="suite-actions">
+      <span style="font-size:11px; color:var(--text-muted);">Session: Default_Project.json</span>
+      <button onclick="toggleTheme()" id="themeBtn">Theme: Light</button>
+      <button class="primary" onclick="showToast('Exported Setup Successfully')">Export Setup</button>
+    </div>
+  </div>
+
+  <!-- Persistence Toolbar -->
+  <div class="persistence-toolbar">
+    <span style="font-weight:600;">Status:</span>
+    <span class="status-badge badge-running" id="analyzerStatusBadge">RUNNING</span>
+    <span style="color:var(--text-muted); margin-left:12px;">Active Session: <strong>Production-Auth-Test</strong></span>
+    <div style="margin-left:auto; display:flex; gap:6px;">
+      <button onclick="showToast('Session Saved')">Save Session</button>
+      <button onclick="showToast('New Session Created')">New Session</button>
+      <button onclick="showToast('Session Loaded')">Load Session</button>
+    </div>
+  </div>
+
+  <!-- Suite Nav Tabs -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchSuiteTab('tab-config', this)">config</div>
+    <div class="nav-tab" onclick="switchSuiteTab('tab-auth', this)">Auth Analyzer</div>
+    <div class="nav-tab" onclick="switchSuiteTab('tab-auth-import', this)">Auth Import</div>
+    <div class="nav-tab" onclick="switchSuiteTab('tab-cors', this)">CORS</div>
+    <div class="nav-tab" onclick="switchSuiteTab('tab-cors-import', this)">CORS Import</div>
+    <div class="nav-tab" onclick="switchSuiteTab('tab-convert', this)">Convert POST to GET</div>
+    <div class="nav-tab" onclick="switchSuiteTab('tab-convert-import', this)">Convert Import</div>
+    <div class="nav-tab highlight" onclick="switchSuiteTab('tab-iv', this)">Input Validation</div>
+    <div class="nav-tab highlight" onclick="switchSuiteTab('tab-iv-import', this)">Input Validation Import</div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 1: CONFIGURATION TAB                  -->
+  <!-- ========================================== -->
+  <div id="tab-config" class="tab-content active">
+    <div class="config-container">
+      
+      <!-- Left Sidebar: Controls & Analyzers -->
+      <div class="config-sidebar">
+        <button class="primary" id="btnStartStop" onclick="toggleStartStop()" style="height:32px; font-size:13px;">Analyzer Running</button>
+        <button onclick="showToast('Drop Original Requests Toggled')">Drop Original Requests</button>
+
+        <div class="sidebar-section-title">Analyzers Selection</div>
+
+        <!-- Auth Analyzer -->
+        <div>
+          <div class="analyzer-toggle-row">
+            <label><input type="checkbox" checked id="toggleAuth"> Auth Analyzer</label>
+          </div>
+          <div class="desc-text">Analyzes authentication and authorization bypasses across defined session profiles.</div>
+        </div>
+
+        <!-- CORS -->
+        <div>
+          <div class="analyzer-toggle-row">
+            <label><input type="checkbox" checked id="toggleCors"> CORS</label>
+            <button onclick="openCorsModal()" style="font-size:11px; padding:2px 6px;">CORS Techniques</button>
+          </div>
+          <div class="desc-text">Analyzes Cross-Origin Resource Sharing (CORS) misconfigurations using PortSwigger techniques.</div>
+        </div>
+
+        <!-- Convert POST to GET -->
+        <div>
+          <div class="analyzer-toggle-row">
+            <label><input type="checkbox" checked id="toggleConvert"> Convert POST to GET</label>
+          </div>
+          <div class="desc-text">Automatically converts intercepted POST requests to GET and evaluates responses.</div>
+        </div>
+
+        <!-- Input Validation (New Feature) -->
+        <div style="background: rgba(255, 102, 51, 0.08); padding: 6px; border: 1px dashed var(--accent-color); border-radius: var(--border-radius);">
+          <div class="analyzer-toggle-row">
+            <label style="color:var(--text-bright); font-weight:600;"><input type="checkbox" checked id="toggleInputValidation"> Input Validation</label>
+            <button class="primary" onclick="openIvModal()" style="font-size:11px; padding:2px 8px;">Input Validation Payloads</button>
+          </div>
+          <div class="desc-text" style="color:var(--text-bright);">Automated fuzzing for boundary limits, SQL errors, stack traces, and unencoded reflection across URL, Body, JSON, XML, and Multipart parameters.</div>
+        </div>
+
+        <div class="sidebar-section-title">Setup Export / Import</div>
+        <div style="display:flex; gap:6px;">
+          <button style="flex:1;" onclick="showToast('Setup Exported')">Export Setup</button>
+          <button style="flex:1;" onclick="showToast('Setup Imported')">Import Setup</button>
+        </div>
+        <button onclick="showToast('Global Settings Opened')">Global Settings</button>
+      </div>
+
+      <!-- Main Config Pane: Filters and Sessions -->
+      <div class="config-main">
+        <h3 style="font-size:13px; font-weight:600; margin-bottom:8px; color:var(--text-bright);">Global Request Filters</h3>
+        <p style="color:var(--text-muted); font-size:11px; margin-bottom:12px;">Applies universally across Auth Analyzer, CORS, Convert POST to GET, and Input Validation.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:10px;">
+          <div class="modal-card">
+            <div class="card-title">Scope & Origin Filter</div>
+            <label style="display:block; margin:4px 0;"><input type="checkbox" checked> Only In-Scope items</label>
+            <label style="display:block; margin:4px 0;"><input type="checkbox" checked> Only Proxy traffic</label>
+          </div>
+          <div class="modal-card">
+            <div class="card-title">HTTP Method Filter</div>
+            <label style="display:block; margin:4px 0;"><input type="checkbox" checked> GET</label>
+            <label style="display:block; margin:4px 0;"><input type="checkbox" checked> POST</label>
+            <label style="display:block; margin:4px 0;"><input type="checkbox" checked> PUT / DELETE / PATCH</label>
+          </div>
+          <div class="modal-card">
+            <div class="card-title">Excluded File Types</div>
+            <input type="text" value="js,css,png,jpg,jpeg,gif,svg,woff,woff2,ico" style="width:100%;">
+          </div>
+          <div class="modal-card">
+            <div class="card-title">Excluded Paths (Regex)</div>
+            <input type="text" value=".*logout.*|.*metrics.*" style="width:100%;">
+          </div>
+        </div>
+
+        <h3 style="font-size:13px; font-weight:600; margin-top:16px; margin-bottom:8px; color:var(--text-bright);">Authentication Profiles</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Profile Name</th>
+              <th>Header Replacement</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Administrator (Session 1)</strong></td>
+              <td><code>Authorization: Bearer eyJhbGci...</code></td>
+              <td><span class="badge badge-clean">Active</span></td>
+            </tr>
+            <tr>
+              <td><strong>Victim User (Session 2)</strong></td>
+              <td><code>Cookie: sessionid=sess_victim_991823</code></td>
+              <td><span class="badge badge-clean">Active</span></td>
+            </tr>
+            <tr>
+              <td><strong>Unauthenticated</strong></td>
+              <td><em>(Remove Authorization & Cookie headers)</em></td>
+              <td><span class="badge badge-clean">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 2: AUTH ANALYZER                      -->
+  <!-- ========================================== -->
+  <div id="tab-auth" class="tab-content">
+    <div class="filter-bar">
+      <span>Method: All</span> | <span>Status: All</span> | <span>Filter: None</span>
+      <button style="margin-left:auto;" onclick="showToast('Auth History Cleared')">Clear Table</button>
+    </div>
+    <div style="padding:20px; text-align:center; color:var(--text-muted);">
+      Auth Analyzer History Table (Standard functionality preserved).
+    </div>
+  </div>
+
+  <!-- TAB 3: AUTH IMPORT -->
+  <div id="tab-auth-import" class="tab-content">
+    <div class="filter-bar">
+      <button class="primary" onclick="showToast('Upload Auth XML/CSV Data')">Upload Auth Data</button>
+      <button onclick="showToast('Auth Import Cleared')">Clear Table</button>
+    </div>
+    <div style="padding:20px; text-align:center; color:var(--text-muted);">
+      Auth Analyzer Import Table (Standard functionality preserved).
+    </div>
+  </div>
+
+  <!-- TAB 4: CORS -->
+  <div id="tab-cors" class="tab-content">
+    <div class="filter-bar">
+      <span>CORS Test Results</span>
+      <button style="margin-left:auto;" onclick="showToast('CORS History Cleared')">Clear Table</button>
+    </div>
+    <div style="padding:20px; text-align:center; color:var(--text-muted);">
+      CORS History Table (Standard functionality preserved).
+    </div>
+  </div>
+
+  <!-- TAB 5: CORS IMPORT -->
+  <div id="tab-cors-import" class="tab-content">
+    <div class="filter-bar">
+      <button class="primary" onclick="showToast('Upload CORS CSV Data')">Upload CORS Data</button>
+      <button onclick="showToast('CORS Import Cleared')">Clear Table</button>
+    </div>
+    <div style="padding:20px; text-align:center; color:var(--text-muted);">
+      CORS Import Table (Standard functionality preserved).
+    </div>
+  </div>
+
+  <!-- TAB 6: CONVERT POST TO GET -->
+  <div id="tab-convert" class="tab-content">
+    <div class="filter-bar">
+      <span>Conversion Results</span>
+      <button style="margin-left:auto;" onclick="showToast('Convert History Cleared')">Clear Table</button>
+    </div>
+    <div style="padding:20px; text-align:center; color:var(--text-muted);">
+      Convert POST to GET History Table (Standard functionality preserved).
+    </div>
+  </div>
+
+  <!-- TAB 7: CONVERT IMPORT -->
+  <div id="tab-convert-import" class="tab-content">
+    <div class="filter-bar">
+      <button class="primary" onclick="showToast('Upload Convert CSV Data')">Upload Convert Data</button>
+      <button onclick="showToast('Convert Import Cleared')">Clear Table</button>
+    </div>
+    <div style="padding:20px; text-align:center; color:var(--text-muted);">
+      Convert POST to GET Import Table (Standard functionality preserved).
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 8: INPUT VALIDATION (NEW FEATURE)      -->
+  <!-- ========================================== -->
+  <div id="tab-iv" class="tab-content">
+    <div class="history-container">
+      
+      <!-- Top Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span>Host:</span>
+          <select id="ivHostFilter" onchange="applyIvFilters()">
+            <option value="all">All Hosts</option>
+            <option value="api.target.com">api.target.com</option>
+            <option value="portal.target.com">portal.target.com</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span>Method:</span>
+          <select id="ivMethodFilter" onchange="applyIvFilters()">
+            <option value="all">All</option>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span>Findings:</span>
+          <select id="ivFindingFilter" onchange="applyIvFilters()">
+            <option value="all">All Findings</option>
+            <option value="SQL Error">SQL Error</option>
+            <option value="Reflected">Reflected Input</option>
+            <option value="Status Shift">Status Shift</option>
+            <option value="Clean">Clean</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span>Status:</span>
+          <select id="ivStatusFilter" onchange="applyIvFilters()">
+            <option value="all">All</option>
+            <option value="200">200</option>
+            <option value="400">400</option>
+            <option value="500">500</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span>Search:</span>
+          <input type="text" id="ivSearchText" placeholder="URL or param..." oninput="applyIvFilters()" style="width:140px;">
+        </div>
+
+        <div style="margin-left:auto; display:flex; gap:6px;">
+          <button class="primary" onclick="openIvModal()">Payloads & Config</button>
+          <button onclick="showToast('Exported Input Validation CSV')">Export CSV</button>
+          <button onclick="clearIvTable()">Clear Table</button>
+        </div>
+      </div>
+
+      <!-- Split Pane: Table on top, Viewer on bottom -->
+      <div class="split-pane">
+        
+        <!-- Table Pane -->
+        <div class="table-pane">
+          <table id="ivTable">
+            <thead>
+              <tr>
+                <th style="width:40px;">ID</th>
+                <th style="width:60px;">Method</th>
+                <th style="width:130px;">Host</th>
+                <th>URL Path</th>
+                <th style="width:100px;">Parameter</th>
+                <th style="width:70px;">Type</th>
+                <th style="width:120px;">Fuzz Payload</th>
+                <th style="width:55px;">Status</th>
+                <th style="width:70px;">Length</th>
+                <th style="width:65px;">Diff %</th>
+                <th style="width:140px;">Findings / Anomaly</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected" onclick="selectIvRow(this, 1)">
+                <td>1</td>
+                <td><strong style="color:#499c54;">POST</strong></td>
+                <td>api.target.com</td>
+                <td>/v1/orders/search</td>
+                <td><code>query</code></td>
+                <td>JSON</td>
+                <td><code>'\"&gt;&lt;;|\\][}{`$</code></td>
+                <td><span style="color:#d9534f; font-weight:bold;">500</span></td>
+                <td>1,842</td>
+                <td>+328%</td>
+                <td><span class="badge badge-error">SQL Error (syntax error)</span></td>
+              </tr>
+              <tr onclick="selectIvRow(this, 2)">
+                <td>2</td>
+                <td><strong style="color:#499c54;">POST</strong></td>
+                <td>api.target.com</td>
+                <td>/v1/orders/search</td>
+                <td><code>query</code></td>
+                <td>JSON</td>
+                <td><code>&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+                <td><span style="color:#5cb85c; font-weight:bold;">200</span></td>
+                <td>2,950</td>
+                <td>+14%</td>
+                <td><span class="badge badge-reflected">Reflected Input</span></td>
+              </tr>
+              <tr onclick="selectIvRow(this, 3)">
+                <td>3</td>
+                <td><strong style="color:#3a87ad;">GET</strong></td>
+                <td>portal.target.com</td>
+                <td>/user/profile</td>
+                <td><code>userId</code></td>
+                <td>URL</td>
+                <td><code>-1</code></td>
+                <td><span style="color:#f0ad4e; font-weight:bold;">400</span></td>
+                <td>512</td>
+                <td>-62%</td>
+                <td><span class="badge badge-anomaly">Status Code Shift</span></td>
+              </tr>
+              <tr onclick="selectIvRow(this, 4)">
+                <td>4</td>
+                <td><strong style="color:#3a87ad;">GET</strong></td>
+                <td>portal.target.com</td>
+                <td>/user/profile</td>
+                <td><code>userId</code></td>
+                <td>URL</td>
+                <td><code>AAAAAAAAAAAAAAAAAAAA...</code></td>
+                <td><span style="color:#d9534f; font-weight:bold;">500</span></td>
+                <td>3,410</td>
+                <td>+410%</td>
+                <td><span class="badge badge-error">Stack Trace (IndexOutOfBounds)</span></td>
+              </tr>
+              <tr onclick="selectIvRow(this, 5)">
+                <td>5</td>
+                <td><strong style="color:#499c54;">POST</strong></td>
+                <td>api.target.com</td>
+                <td>/v1/cart/update</td>
+                <td><code>quantity</code></td>
+                <td>Body</td>
+                <td><code>99999999999999999999</code></td>
+                <td><span style="color:#5cb85c; font-weight:bold;">200</span></td>
+                <td>820</td>
+                <td>+2%</td>
+                <td><span class="badge badge-clean">Clean</span></td>
+              </tr>
+              <tr onclick="selectIvRow(this, 6)">
+                <td>6</td>
+                <td><strong style="color:#499c54;">POST</strong></td>
+                <td>api.target.com</td>
+                <td>/v1/cart/update</td>
+                <td><code>quantity</code></td>
+                <td>Body</td>
+                <td><code>%00</code></td>
+                <td><span style="color:#5cb85c; font-weight:bold;">200</span></td>
+                <td>818</td>
+                <td>0%</td>
+                <td><span class="badge badge-clean">Clean</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Viewer Pane -->
+        <div class="viewer-pane">
+          <div class="viewer-tabs">
+            <div class="viewer-tab active" onclick="switchViewerTab('v-mut-req', this)">Fuzzed Request</div>
+            <div class="viewer-tab" onclick="switchViewerTab('v-mut-res', this)">Fuzzed Response</div>
+            <div class="viewer-tab" onclick="switchViewerTab('v-base-req', this)">Base Request</div>
+            <div class="viewer-tab" onclick="switchViewerTab('v-base-res', this)">Base Response</div>
+            <div class="viewer-tab" onclick="switchViewerTab('v-evidence', this)">Findings & Evidence</div>
+          </div>
+
+          <div id="v-mut-req" class="viewer-content">POST /v1/orders/search HTTP/1.1
+Host: api.target.com
+User-Agent: Mozilla/5.0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+Content-Length: 46
+
+{"query": "'\\"><;|\\\\][}{`$", "limit": 20}</div>
+
+          <div id="v-mut-res" class="viewer-content" style="display:none;">HTTP/1.1 500 Internal Server Error
+Date: Thu, 29 Oct 2026 12:50:10 GMT
+Content-Type: application/json
+Content-Length: 1842
+Connection: close
+
+{
+  "timestamp": "2026-10-29T12:50:10.822Z",
+  "status": 500,
+  "error": "Internal Server Error",
+  "message": "org.postgresql.util.PSQLException: ERROR: syntax error at or near \"\\\": unterminated string literal",
+  "path": "/v1/orders/search"
+}</div>
+
+          <div id="v-base-req" class="viewer-content" style="display:none;">POST /v1/orders/search HTTP/1.1
+Host: api.target.com
+User-Agent: Mozilla/5.0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+Content-Length: 32
+
+{"query": "widgets", "limit": 20}</div>
+
+          <div id="v-base-res" class="viewer-content" style="display:none;">HTTP/1.1 200 OK
+Date: Thu, 29 Oct 2026 12:49:58 GMT
+Content-Type: application/json
+Content-Length: 430
+Connection: keep-alive
+
+{
+  "total": 3,
+  "items": [
+    {"id": 101, "name": "Standard Widget", "price": 19.99},
+    {"id": 102, "name": "Deluxe Widget", "price": 49.99},
+    {"id": 103, "name": "Super Widget", "price": 99.99}
+  ]
+}</div>
+
+          <div id="v-evidence" class="viewer-content" style="display:none;">[!] Anomaly Detected: SQL Error
+Target Parameter: query (Type: JSON)
+Fuzz Payload: '\"><;|\\\\][}{`$
+
+Signature Match: "syntax error", "psqlexception"
+Status Shift: 200 OK -> 500 Internal Server Error
+Response Size Delta: +1,412 bytes (+328% increase)
+
+Evidence Line:
+"message": "org.postgresql.util.PSQLException: ERROR: syntax error at or near \"\\\": unterminated string literal"</div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 9: INPUT VALIDATION IMPORT             -->
+  <!-- ========================================== -->
+  <div id="tab-iv-import" class="tab-content">
+    <div class="history-container">
+      <div class="filter-bar">
+        <button class="primary" onclick="showToast('File Open Dialog: Select Input Validation CSV/XML')">Upload Input Validation Data</button>
+        <button onclick="showToast('Imported Records Cleared')">Clear Table</button>
+        <span style="color:var(--text-muted); margin-left:12px;">Imported Records: <strong>3 loaded</strong></span>
+      </div>
+
+      <div class="split-pane">
+        <div class="table-pane">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px;">ID</th>
+                <th style="width:60px;">Method</th>
+                <th style="width:130px;">Host</th>
+                <th>URL Path</th>
+                <th style="width:100px;">Parameter</th>
+                <th style="width:70px;">Type</th>
+                <th style="width:120px;">Fuzz Payload</th>
+                <th style="width:55px;">Status</th>
+                <th style="width:70px;">Length</th>
+                <th style="width:140px;">Findings / Anomaly</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected">
+                <td>1</td>
+                <td><strong style="color:#499c54;">POST</strong></td>
+                <td>auth.corp.local</td>
+                <td>/api/auth/reset</td>
+                <td><code>email</code></td>
+                <td>Body</td>
+                <td><code>'\\\"><;|\\\\][}{`$</code></td>
+                <td><span style="color:#d9534f; font-weight:bold;">500</span></td>
+                <td>1,120</td>
+                <td><span class="badge badge-error">SQL Error (syntax error)</span></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><strong style="color:#3a87ad;">GET</strong></td>
+                <td>auth.corp.local</td>
+                <td>/api/user/info</td>
+                <td><code>id</code></td>
+                <td>URL</td>
+                <td><code>-1</code></td>
+                <td><span style="color:#f0ad4e; font-weight:bold;">400</span></td>
+                <td>480</td>
+                <td><span class="badge badge-anomaly">Status Code Shift</span></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><strong style="color:#3a87ad;">GET</strong></td>
+                <td>auth.corp.local</td>
+                <td>/api/user/info</td>
+                <td><code>name</code></td>
+                <td>URL</td>
+                <td><code>&lt;img src=x onerror=alert(1)&gt;</code></td>
+                <td><span style="color:#5cb85c; font-weight:bold;">200</span></td>
+                <td>2,310</td>
+                <td><span class="badge badge-reflected">Reflected Input</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="viewer-pane">
+          <div class="viewer-tabs">
+            <div class="viewer-tab active">Fuzzed Request</div>
+            <div class="viewer-tab">Fuzzed Response</div>
+          </div>
+          <div class="viewer-content">POST /api/auth/reset HTTP/1.1
+Host: auth.corp.local
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 38
+
+email='%5C%22%3E%3C%3B%7C%5C%5C%5D%5B%7D%7B%60%24</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL DIALOG: INPUT VALIDATION PAYLOADS & CONFIGURATION -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay" id="ivModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <span>Input Validation Payloads & Configuration</span>
+        <button onclick="closeIvModal()" style="padding:2px 8px;">X</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Row 1: Parameter Types & Scope -->
+        <div class="modal-card">
+          <div class="card-title">Target Parameter Types to Fuzz</div>
+          <div style="display:flex; flex-wrap:wrap; gap:16px;">
+            <label><input type="checkbox" checked id="cfgUrl"> URL Query Parameters</label>
+            <label><input type="checkbox" checked id="cfgBody"> Body (URL-Encoded) Parameters</label>
+            <label><input type="checkbox" checked id="cfgJson"> JSON Body Attributes</label>
+            <label><input type="checkbox" checked id="cfgXml"> XML Body Elements</label>
+            <label><input type="checkbox" checked id="cfgMultipart"> Multipart Form Data</label>
+            <label><input type="checkbox" id="cfgCookie"> Cookie Parameters</label>
+          </div>
+        </div>
+
+        <!-- Row 2: Performance & Anomaly Thresholds -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+          <div class="modal-card">
+            <div class="card-title">Max Concurrent Threads</div>
+            <input type="number" id="cfgThreads" value="10" min="1" max="50" style="width:100%;">
+          </div>
+          <div class="modal-card">
+            <div class="card-title">Delay Between Requests (ms)</div>
+            <input type="number" id="cfgDelay" value="0" min="0" max="5000" style="width:100%;">
+          </div>
+          <div class="modal-card">
+            <div class="card-title">Size Difference Anomaly (%)</div>
+            <input type="number" id="cfgSizeDiff" value="300" min="50" max="2000" style="width:100%;">
+          </div>
+        </div>
+
+        <!-- Row 3: Payloads Table with Actions -->
+        <div class="modal-card" style="flex:1; display:flex; flex-direction:column; min-height:220px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <div class="card-title" style="margin-bottom:0;">Configured Payloads (Shown Like CORS Techniques)</div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="selectAllPayloads(true)">Select All</button>
+              <button onclick="selectAllPayloads(false)">Deselect All</button>
+              <button onclick="resetDefaultPayloads()">Reset Defaults</button>
+              <button class="primary" onclick="showToast('Add Payload Dialog Opened')">Add Payload</button>
+            </div>
+          </div>
+
+          <div style="flex:1; overflow-y:auto; border:1px solid var(--panel-border); border-radius:var(--border-radius);">
+            <table id="payloadsTable">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">Active</th>
+                  <th style="width:160px;">Payload Name</th>
+                  <th>Payload Value</th>
+                  <th style="width:230px;">Description / Intended Detection</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><strong>Empty string</strong></td>
+                  <td><code>""</code></td>
+                  <td>Missing/empty field validation failures</td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><strong>Special characters</strong></td>
+                  <td><code>'\"&gt;&lt;;|\\][}{`$</code></td>
+                  <td>SQL, command injection, XSS parsing exceptions</td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><strong>Long string (200 chars)</strong></td>
+                  <td><code>A... (x200)</code></td>
+                  <td>Buffer overflow or length restriction validation</td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><strong>Negative integer</strong></td>
+                  <td><code>-1</code></td>
+                  <td>Negative bounds or logic handling flaws</td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><strong>Large integer</strong></td>
+                  <td><code>99999999999999999999</code></td>
+                  <td>Integer overflow / BigInt parsing exceptions</td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><input type="checkbox" checked class="payload-chk"></td>
+                  <td><strong>Null byte</strong></td>
+                  <td><code>%00</code></td>
+                  <td>Null byte truncation & sanitize filter bypass</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Row 4: Error Signatures -->
+        <div class="modal-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <div class="card-title" style="margin-bottom:0;">Monitored Error Signatures (32 Built-in)</div>
+            <button onclick="showToast('Reset Signatures to Defaults')">Reset Signatures</button>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); line-height:1.4;">
+            <code>syntax error, sql error, mysql_, pg_query, ora-, unclosed quotation, unterminated string, parse error, stack trace, stacktrace, traceback, exception in, fatal error, internal server error, segmentation fault, NullPointerException, IndexOutOfBoundsException, ClassCastException, NumberFormatException, TypeError, ValueError, SyntaxError, ReferenceError, SQLSTATE, sqlite3, microsoft ole db, odbc drivers, javax.servlet, at java., at org.apache, warning:, notice:</code>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button onclick="closeIvModal()">Cancel</button>
+        <button class="primary" onclick="saveIvOptions()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast">Notification Message</div>
+
+  <!-- JavaScript Functionality -->
+  <script>
+    // Suite Tab Switcher
+    function switchSuiteTab(tabId, tabEl) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tabEl.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Viewer Tab Switcher
+    function switchViewerTab(viewerId, tabEl) {
+      document.querySelectorAll('.viewer-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.viewer-content').forEach(c => c.style.display = 'none');
+      tabEl.classList.add('active');
+      document.getElementById(viewerId).style.display = 'block';
+    }
+
+    // Table Row Selection
+    function selectIvRow(rowEl, rowId) {
+      document.querySelectorAll('#ivTable tbody tr').forEach(r => r.classList.remove('selected'));
+      rowEl.classList.add('selected');
+      showToast('Loaded details for Result #' + rowId);
+    }
+
+    // Modal Dialog Controls
+    function openIvModal() {
+      document.getElementById('ivModal').classList.add('active');
+    }
+    function closeIvModal() {
+      document.getElementById('ivModal').classList.remove('active');
+    }
+    function openCorsModal() {
+      showToast('CORS Techniques dialog opened');
+    }
+    function saveIvOptions() {
+      closeIvModal();
+      showToast('Input Validation configuration saved');
+    }
+
+    // Select/Deselect Payloads
+    function selectAllPayloads(enable) {
+      document.querySelectorAll('.payload-chk').forEach(chk => chk.checked = enable);
+    }
+    function resetDefaultPayloads() {
+      selectAllPayloads(true);
+      showToast('Payloads reset to default');
+    }
+
+    // Dynamic Filter
+    function applyIvFilters() {
+      const host = document.getElementById('ivHostFilter').value.toLowerCase();
+      const method = document.getElementById('ivMethodFilter').value.toLowerCase();
+      const finding = document.getElementById('ivFindingFilter').value.toLowerCase();
+      const status = document.getElementById('ivStatusFilter').value.toLowerCase();
+      const search = document.getElementById('ivSearchText').value.toLowerCase();
+
+      const rows = document.querySelectorAll('#ivTable tbody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const matchHost = (host === 'all' || text.includes(host));
+        const matchMethod = (method === 'all' || text.includes(method));
+        const matchFinding = (finding === 'all' || text.includes(finding));
+        const matchStatus = (status === 'all' || text.includes(status));
+        const matchSearch = (!search || text.includes(search));
+
+        if (matchHost && matchMethod && matchFinding && matchStatus && matchSearch) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Clear Table
+    function clearIvTable() {
+      document.querySelector('#ivTable tbody').innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--text-muted); padding:20px;">No results recorded yet.</td></tr>';
+      showToast('Input Validation table cleared');
+    }
+
+    // Start / Stop Toggle
+    let isRunning = true;
+    function toggleStartStop() {
+      isRunning = !isRunning;
+      const btn = document.getElementById('btnStartStop');
+      const badge = document.getElementById('analyzerStatusBadge');
+      if (isRunning) {
+        btn.textContent = 'Analyzer Running';
+        btn.classList.add('primary');
+        badge.textContent = 'RUNNING';
+        badge.className = 'status-badge badge-running';
+        showToast('Analyzer Started');
+      } else {
+        btn.textContent = 'Analyzer Stopped';
+        btn.classList.remove('primary');
+        badge.textContent = 'STOPPED';
+        badge.className = 'status-badge badge-stopped';
+        showToast('Analyzer Stopped');
+      }
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-theme');
+      document.getElementById('themeBtn').textContent = isLight ? 'Theme: Dark' : 'Theme: Light';
+    }
+
+    // Toast
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
