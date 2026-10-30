@@ -8,12 +8,28 @@
     "originTemplate": "https://{attacker}"
   },
   {
-    "id": "trusted_null",
-    "name": "Trusted Null Origin",
-    "description": "CORS vulnerability with trusted null origin",
-    "browserNote": "Sandboxed iframe / data URI",
+    "id": "arbitrary_origin_http_schema",
+    "name": "Arbitrary Attacker Origin HTTP Schema",
+    "description": "Reflects arbitrary untrusted origin HTTP Schema",
+    "browserNote": "Universal bypass test",
     "enabled": true,
-    "originTemplate": "null"
+    "originTemplate": "http://{attacker}"
+  },
+  {
+    "id": "ends_with",
+    "name": "Domain Ends With",
+    "description": "Unanchored regex matching end of string",
+    "browserNote": "Unanchored regex",
+    "enabled": true,
+    "originTemplate": "http://anything{base}"
+  },
+  {
+    "id": "ends_with",
+    "name": "Domain Ends With",
+    "description": "Unanchored regex matching end of string",
+    "browserNote": "Unanchored regex",
+    "enabled": true,
+    "originTemplate": "https://anything{base}"
   },
   {
     "id": "dot_underscore_dot",
@@ -62,6 +78,14 @@
     "browserNote": "Safari browser specific",
     "enabled": true,
     "originTemplate": "https://{base}.'.{attacker}"
+  },
+  {
+    "id": "safari_single_quote",
+    "name": "Safari Single Quote Subdomain",
+    "description": "Safari allows single quote in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.\".{attacker}"
   },
   {
     "id": "safari_open_paren",
@@ -128,14 +152,6 @@
     "originTemplate": "https://{base}.+.{attacker}"
   },
   {
-    "id": "prefix_match",
-    "name": "Prefix Match / Attacker Subdomain",
-    "description": "Regex prefix match without dot anchor",
-    "browserNote": "Common regex error",
-    "enabled": true,
-    "originTemplate": "https://{base}.{attacker}"
-  },
-  {
     "id": "safari_equals",
     "name": "Safari Equals Subdomain",
     "description": "Safari allows equals in subdomain",
@@ -157,7 +173,15 @@
     "description": "Firefox and Safari allow dollar in subdomain",
     "browserNote": "Firefox & Safari browser specific",
     "enabled": true,
-    "originTemplate": "https://{base}.$.+{attacker}"
+    "originTemplate": "https://{base}.$.{attacker}"
+  },
+  {
+    "id": "prefix_match",
+    "name": "Prefix Match / Attacker Subdomain",
+    "description": "Regex prefix match without dot anchor",
+    "browserNote": "Common regex error",
+    "enabled": true,
+    "originTemplate": "https://{base}.{attacker}"
   },
   {
     "id": "suffix_match",
@@ -168,7 +192,31 @@
     "originTemplate": "https://{base}{attacker}"
   },
   {
-    "id": "trust_subdomain",
+    "id": "localhost_edge_http_schema",
+    "name": "Localhost Regex Edge Case",
+    "description": "Localhost regex implementation edge case",
+    "browserNote": "Regex matches localhost without anchor",
+    "enabled": true,
+    "originTemplate": "http://localhost.{attacker}"
+  },
+  {
+    "id": "localhost_edge_https_schema",
+    "name": "Localhost Regex Edge Case",
+    "description": "Localhost regex implementation edge case",
+    "browserNote": "Regex matches localhost without anchor",
+    "enabled": true,
+    "originTemplate": "https://localhost.{attacker}"
+  },
+  {
+    "id": "trust_subdomain_http_schema",
+    "name": "Trust Arbitrary Subdomain",
+    "description": "Insecure wildcard subdomain trust",
+    "browserNote": "Subdomain takeover risk",
+    "enabled": true,
+    "originTemplate": "http://{attacker}.{base}"
+  },
+  {
+    "id": "trust_subdomain_https_schema",
     "name": "Trust Arbitrary Subdomain",
     "description": "Insecure wildcard subdomain trust",
     "browserNote": "Subdomain takeover risk",
@@ -176,20 +224,12 @@
     "originTemplate": "https://{attacker}.{base}"
   },
   {
-    "id": "ends_with",
-    "name": "Domain Ends With",
-    "description": "Unanchored regex matching end of string",
-    "browserNote": "Unanchored regex",
+    "id": "trusted_null",
+    "name": "Trusted Null Origin",
+    "description": "CORS vulnerability with trusted null origin",
+    "browserNote": "Sandboxed iframe / data URI",
     "enabled": true,
-    "originTemplate": "https://anything{base}"
-  },
-  {
-    "id": "localhost_edge",
-    "name": "Localhost Regex Edge Case",
-    "description": "Localhost regex implementation edge case",
-    "browserNote": "Regex matches localhost without anchor",
-    "enabled": true,
-    "originTemplate": "https://localhost.{attacker}"
+    "originTemplate": "null"
   },
   {
     "id": "unencrypted_ends_with",
@@ -200,43 +240,11 @@
     "originTemplate": "http://s{base}"
   },
   {
-    "id": "ipv6_unspecified",
-    "name": "IPv6 Localhost Loopback",
-    "description": "IPv6 unspecified address loopback",
-    "browserNote": "Server trusts loopback origin",
+    "id": "unencrypted_ends_with",
+    "name": "Unencrypted Domain Ends With",
+    "description": "regexp dot subsutition with x",
+    "browserNote": "Insecure HTTP scheme bypass",
     "enabled": true,
-    "originTemplate": "http://[::]"
-  },
-  {
-    "id": "ipv6_loopback",
-    "name": "IPv6 Loopback",
-    "description": "Standard IPv6 loopback",
-    "browserNote": "Server trusts loopback origin",
-    "enabled": true,
-    "originTemplate": "http://[::1]"
-  },
-  {
-    "id": "ipv4_mapped_ipv6",
-    "name": "IPv4-Mapped IPv6 Loopback",
-    "description": "IPv4-mapped 127.0.0.1 loopback",
-    "browserNote": "Server trusts loopback origin",
-    "enabled": true,
-    "originTemplate": "http://[::ffff:7f00:1]"
-  },
-  {
-    "id": "ipv6_expanded",
-    "name": "Fully-Expanded IPv6 Loopback",
-    "description": "Fully-expanded IPv6 loopback",
-    "browserNote": "Server trusts expanded IPv6",
-    "enabled": true,
-    "originTemplate": "http://[0000:0000:0000:0000:0000:0000:0000:0000]"
-  },
-  {
-    "id": "localhost_local",
-    "name": "Localhost Allowed Domain Bypass",
-    "description": "Localhost allowed domain bypass",
-    "browserNote": "Internal domain resolution bypass",
-    "enabled": true,
-    "originTemplate": "http://{base}.localhost"
+    "originTemplate": "https://{base}x{base_after_dot}"
   }
 ]

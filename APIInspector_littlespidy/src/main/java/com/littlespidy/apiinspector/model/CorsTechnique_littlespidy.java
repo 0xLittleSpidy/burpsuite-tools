@@ -80,7 +80,29 @@ public class CorsTechnique_littlespidy {
         String attacker = cleanAttackerUrl(attackerDomain);
 
         if (originTemplate != null && !originTemplate.trim().isEmpty()) {
-            return originTemplate.replace("{base}", base).replace("{attacker}", attacker);
+            int lastDot = base.lastIndexOf('.');
+            String baseBeforeDot = lastDot != -1 ? base.substring(0, lastDot) : base;
+            String baseAfterDot = lastDot != -1 ? base.substring(lastDot + 1) : "";
+
+            String resolved = originTemplate;
+            resolved = resolved.replace("{attacker}", attacker);
+
+            boolean hasAfterDot = resolved.contains("{base_after_dot}") || resolved.contains("{base__after_dot}");
+            boolean hasBeforeDot = resolved.contains("{base_before_dot}") || resolved.contains("{base__before_dot}");
+
+            resolved = resolved.replace("{base_after_dot}", baseAfterDot)
+                    .replace("{base__after_dot}", baseAfterDot)
+                    .replace("{base_before_dot}", baseBeforeDot)
+                    .replace("{base__before_dot}", baseBeforeDot)
+                    .replace("{full_base}", base);
+
+            if (hasAfterDot || hasBeforeDot) {
+                resolved = resolved.replace("{base}", baseBeforeDot);
+            } else {
+                resolved = resolved.replace("{base}", base);
+            }
+
+            return resolved;
         }
 
         switch (id) {
