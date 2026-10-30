@@ -205,7 +205,7 @@ public class NaughtyStringsParser_littlespidy {
                         id,
                         t.getCategory(),
                         payloads.get(i),
-                        Collections.emptyList(),
+                        t.getErrorSignatures(),
                         t.getDescription(),
                         true,
                         true,
@@ -215,6 +215,17 @@ public class NaughtyStringsParser_littlespidy {
         }
 
         return items;
+    }
+
+    public static List<String> getAvailableCategories() {
+        List<String> list = new ArrayList<>();
+        List<InputValidationTechnique_littlespidy> techs = loadDefaultBlnsTechniques();
+        for (InputValidationTechnique_littlespidy t : techs) {
+            if (t.getCategory() != null && !list.contains(t.getCategory())) {
+                list.add(t.getCategory());
+            }
+        }
+        return list;
     }
 
     /**

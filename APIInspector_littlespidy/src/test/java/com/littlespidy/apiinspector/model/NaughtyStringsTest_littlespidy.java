@@ -22,7 +22,7 @@ public class NaughtyStringsTest_littlespidy {
         List<InputValidationTechnique_littlespidy> blnsTechs = NaughtyStringsParser_littlespidy.loadDefaultBlnsTechniques();
         assertNotNull(blnsTechs, "BLNS techniques list must not be null");
         assertFalse(blnsTechs.isEmpty(), "BLNS techniques list must not be empty");
-        assertEquals(5, blnsTechs.size(), "Must contain exactly 5 retained pure input validation BLNS groups");
+        assertEquals(10, blnsTechs.size(), "Must contain 10 structured BLNS groups");
 
         int totalPayloads = 0;
         for (InputValidationTechnique_littlespidy t : blnsTechs) {
@@ -31,7 +31,7 @@ public class NaughtyStringsTest_littlespidy {
             totalPayloads += t.getPayloadCount();
         }
 
-        assertTrue(totalPayloads >= 180, "Must load at least 180 total retained naughty string payloads, found: " + totalPayloads);
+        assertTrue(totalPayloads >= 500, "Must load at least 500 total retained naughty string payloads, found: " + totalPayloads);
 
         // Verify specific key groups
         InputValidationTechnique_littlespidy reserved = blnsTechs.stream()
@@ -58,6 +58,15 @@ public class NaughtyStringsTest_littlespidy {
         InputValidationTechnique_littlespidy interpolation = blnsTechs.stream()
                 .filter(t -> "blns_interpolation".equals(t.getId())).findFirst().orElse(null);
         assertNotNull(interpolation);
+
+        InputValidationTechnique_littlespidy script = blnsTechs.stream()
+                .filter(t -> "blns_script_injection".equals(t.getId())).findFirst().orElse(null);
+        assertNotNull(script);
+        assertTrue(script.getSamplePayloads().size() >= 200);
+
+        InputValidationTechnique_littlespidy sql = blnsTechs.stream()
+                .filter(t -> "blns_sql_injection".equals(t.getId())).findFirst().orElse(null);
+        assertNotNull(sql);
     }
 
     @Test
@@ -81,10 +90,10 @@ public class NaughtyStringsTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify InputValidationTechnique getDefaultTechniques returns the 5 retained BLNS categories from JSON")
+    @DisplayName("Verify InputValidationTechnique getDefaultTechniques returns the 10 BLNS categories from JSON")
     void testCombinedTechniques() {
         List<InputValidationTechnique_littlespidy> all = InputValidationTechnique_littlespidy.getDefaultTechniques();
-        assertEquals(5, all.size(), "Default techniques should contain the 5 retained BLNS categories");
+        assertEquals(10, all.size(), "Default techniques should contain the 10 BLNS categories");
         assertTrue(all.stream().allMatch(InputValidationTechnique_littlespidy::isBlns), "All categories should be BLNS categories");
     }
 
@@ -93,20 +102,20 @@ public class NaughtyStringsTest_littlespidy {
     void testConfigPanelFiltering() {
         InputValidationConfigPanel_littlespidy panel = new InputValidationConfigPanel_littlespidy(null);
         List<InputValidationTechnique_littlespidy> techs = panel.getTechniques();
-        assertEquals(5, techs.size(), "Panel should have 5 pure BLNS techniques initially");
+        assertEquals(10, techs.size(), "Panel should have 10 pure BLNS techniques initially");
 
-        // Verify individual payloads table contains 180+ individual items
+        // Verify individual payloads table contains 500+ individual items
         List<InputValidationPayloadItem_littlespidy> payloads = panel.getPayloadItems();
         assertNotNull(payloads);
-        assertTrue(payloads.size() >= 180, "Must contain at least 180 individual payloads, found: " + payloads.size());
+        assertTrue(payloads.size() >= 500, "Must contain at least 500 individual payloads, found: " + payloads.size());
     }
 
     @Test
-    @DisplayName("Verify loadAllIndividualPayloads loads 180+ distinct payload rows with signatures")
+    @DisplayName("Verify loadAllIndividualPayloads loads 500+ distinct payload rows with signatures")
     void testLoadAllIndividualPayloads() {
         List<InputValidationPayloadItem_littlespidy> items = NaughtyStringsParser_littlespidy.loadAllIndividualPayloads();
         assertNotNull(items);
-        assertTrue(items.size() >= 180, "Must load 180+ individual payloads, found: " + items.size());
+        assertTrue(items.size() >= 500, "Must load 500+ individual payloads, found: " + items.size());
 
         // Check that every item has non-empty ID, Category
         boolean foundUndefined = false;

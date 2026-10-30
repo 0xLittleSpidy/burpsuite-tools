@@ -163,11 +163,9 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         JPanel payloadToolBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 
         categoryFilterCombo.addItem("All Payloads");
-        categoryFilterCombo.addItem("BLNS: Reserved Identifiers");
-        categoryFilterCombo.addItem("BLNS: Numeric Boundaries & Extremes");
-        categoryFilterCombo.addItem("BLNS: Special Characters & Quotations");
-        categoryFilterCombo.addItem("BLNS: Unicode & Encoding Quirks");
-        categoryFilterCombo.addItem("BLNS: Format Strings & Unwanted Interpolation");
+        for (String cat : NaughtyStringsParser_littlespidy.getAvailableCategories()) {
+            categoryFilterCombo.addItem(cat);
+        }
         categoryFilterCombo.addItem("Custom Wordlists");
         categoryFilterCombo.addActionListener(e -> applyFilter());
         payloadToolBar.add(new JLabel("Category:"));
@@ -370,8 +368,16 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         String search = payloadSearchField.getText().trim().toLowerCase(Locale.ROOT);
         displayedPayloads.clear();
         for (InputValidationPayloadItem_littlespidy item : allPayloads) {
-            boolean catMatch = selectedCategory == null || "All Categories".equals(selectedCategory)
-                    || item.getCategory().equalsIgnoreCase(selectedCategory);
+            boolean catMatch = selectedCategory == null
+                    || "All Categories".equals(selectedCategory)
+                    || "All Payloads".equals(selectedCategory);
+            if (!catMatch) {
+                if ("Custom Wordlists".equals(selectedCategory)) {
+                    catMatch = item.isCustom();
+                } else {
+                    catMatch = item.getCategory().equalsIgnoreCase(selectedCategory);
+                }
+            }
             boolean searchMatch = search.isEmpty() || item.getPayload().toLowerCase(Locale.ROOT).contains(search)
                     || item.getId().toLowerCase(Locale.ROOT).contains(search);
             if (catMatch && searchMatch) {

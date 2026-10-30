@@ -191,7 +191,7 @@ public class CorsAndInputValidationTest_littlespidy {
         assertEquals("evil.com", configTab.getCorsConfigPanel().getAttackerDomain());
         assertTrue(configTab.getCorsConfigPanel().getTechniques().size() >= 29);
 
-        assertEquals(5, configTab.getInputValidationConfigPanel().getTechniques().size());
+        assertEquals(10, configTab.getInputValidationConfigPanel().getTechniques().size());
     }
 
     @Test
@@ -315,7 +315,7 @@ public class CorsAndInputValidationTest_littlespidy {
     void testInputValidationCategoriesLoadedFromJson() {
         List<InputValidationTechnique_littlespidy> categories = NaughtyStringsParser_littlespidy.loadCategoriesMetadata();
         assertNotNull(categories, "Categories metadata must not be null");
-        assertEquals(5, categories.size(), "Should contain 5 retained BLNS categories");
+        assertEquals(10, categories.size(), "Should contain 10 BLNS categories");
 
         InputValidationTechnique_littlespidy numeric = categories.stream().filter(c -> "blns_numeric".equals(c.getId())).findFirst().orElse(null);
         assertNotNull(numeric);
