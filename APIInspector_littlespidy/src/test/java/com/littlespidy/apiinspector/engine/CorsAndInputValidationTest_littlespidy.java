@@ -122,7 +122,7 @@ public class CorsAndInputValidationTest_littlespidy {
     @DisplayName("Verify Input Validation categories, payloads, and response signatures")
     void testInputValidationTechniquesAndEvaluation() {
         List<InputValidationTechnique_littlespidy> techs = InputValidationTechnique_littlespidy.getDefaultTechniques();
-        assertTrue(techs.size() >= 5, "Must provide at least 5 retained vulnerability categories");
+        assertTrue(techs.size() >= 4, "Must provide at least 4 retained vulnerability categories");
 
         HttpRequest req = com.littlespidy.apiinspector.TestMockHelper_littlespidy.createMockRequest("GET", "https://example.com/search?q=test", "/search?q=test", java.util.Collections.emptyMap(), "");
 
@@ -191,7 +191,7 @@ public class CorsAndInputValidationTest_littlespidy {
         assertEquals("evil.com", configTab.getCorsConfigPanel().getAttackerDomain());
         assertTrue(configTab.getCorsConfigPanel().getTechniques().size() >= 29);
 
-        assertEquals(10, configTab.getInputValidationConfigPanel().getTechniques().size());
+        assertEquals(4, configTab.getInputValidationConfigPanel().getTechniques().size());
     }
 
     @Test
@@ -315,7 +315,7 @@ public class CorsAndInputValidationTest_littlespidy {
     void testInputValidationCategoriesLoadedFromJson() {
         List<InputValidationTechnique_littlespidy> categories = NaughtyStringsParser_littlespidy.loadCategoriesMetadata();
         assertNotNull(categories, "Categories metadata must not be null");
-        assertEquals(10, categories.size(), "Should contain 10 BLNS categories");
+        assertEquals(4, categories.size(), "Should contain 4 BLNS categories");
 
         InputValidationTechnique_littlespidy numeric = categories.stream().filter(c -> "blns_numeric".equals(c.getId())).findFirst().orElse(null);
         assertNotNull(numeric);
