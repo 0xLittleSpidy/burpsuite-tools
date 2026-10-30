@@ -99,19 +99,27 @@ public class CollectionFilterDropDown_littlespidy extends JButton {
         };
 
         boolean hadAny = !collectionCheckBoxMap.isEmpty();
-        for (ImportedCollection_littlespidy c : collections) {
+        List<ImportedCollection_littlespidy> sortedCollections = new ArrayList<>(collections);
+        sortedCollections.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(
+                a.getName() != null ? a.getName() : "",
+                b.getName() != null ? b.getName() : ""));
+
+        itemsPanel.removeAll();
+        for (ImportedCollection_littlespidy c : sortedCollections) {
             String id = c.getId();
             String label = c.getName() + " (" + c.getEndpointCount() + ")";
+            JCheckBox cb;
             if (!collectionCheckBoxMap.containsKey(id)) {
                 boolean defaultSelected = !hadAny || selectAllCheckBox.isSelected();
-                JCheckBox cb = new JCheckBox(label, defaultSelected);
+                cb = new JCheckBox(label, defaultSelected);
                 cb.setToolTipText(c.getName());
                 cb.addActionListener(itemListener);
                 collectionCheckBoxMap.put(id, cb);
-                itemsPanel.add(cb);
             } else {
-                collectionCheckBoxMap.get(id).setText(label);
+                cb = collectionCheckBoxMap.get(id);
+                cb.setText(label);
             }
+            itemsPanel.add(cb);
         }
 
         itemsPanel.revalidate();

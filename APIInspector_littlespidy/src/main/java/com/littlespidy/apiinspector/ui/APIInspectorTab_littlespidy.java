@@ -28,6 +28,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
     private final AuthTestingTab_littlespidy authTestingTab;
     private final CorsTab_littlespidy corsTab;
     private final InputValidationTab_littlespidy inputValidationTab;
+    private final PostToGetTab_littlespidy postToGetTab;
     private final IntruderStrategyTrackingTab_littlespidy docStrategyTab;
     private final IntruderStrategyTrackingTab_littlespidy endpointDiscoveryTab;
     private final HiddenAPIStorageTab_littlespidy hiddenStorageTab;
@@ -44,10 +45,15 @@ public class APIInspectorTab_littlespidy extends JPanel {
         this.authTestingTab = new AuthTestingTab_littlespidy(api);
         this.corsTab = new CorsTab_littlespidy(api);
         this.inputValidationTab = new InputValidationTab_littlespidy(api);
+        this.postToGetTab = new PostToGetTab_littlespidy(api);
 
-        this.configTab = new ConfigTab_littlespidy(api, this.authTestingTab, this.corsTab, this.inputValidationTab);
+        this.configTab = new ConfigTab_littlespidy(api, this.authTestingTab, this.corsTab, this.inputValidationTab, this.postToGetTab);
         this.configTab.setRootTab(this);
         this.configTab.setImportTabRef(this.importTab);
+
+        this.corsTab.setConfigPanel(this.configTab.getCorsConfigPanel());
+        this.inputValidationTab.setConfigPanel(this.configTab.getInputValidationConfigPanel());
+        this.postToGetTab.setConfigPanel(this.configTab.getPostToGetConfigPanel());
 
         this.docStrategyTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Documentation Intruder Strategy");
         this.endpointDiscoveryTab = new IntruderStrategyTrackingTab_littlespidy(api, "API Endpoint Discovery Intruder Strategy");
@@ -122,6 +128,7 @@ public class APIInspectorTab_littlespidy extends JPanel {
         rootTabbedPane.addTab("Auth Analyzer", authTestingTab);
         rootTabbedPane.addTab("CORS", corsTab);
         rootTabbedPane.addTab("Input Validation", inputValidationTab);
+        rootTabbedPane.addTab("POST to GET", postToGetTab);
         rootTabbedPane.addTab("REST API Version Finder", versionFinderTab);
         rootTabbedPane.addTab("API Documentation Strategy", docStrategyTab);
         rootTabbedPane.addTab("API Endpoint Discovery Strategy", endpointDiscoveryTab);
@@ -164,6 +171,9 @@ public class APIInspectorTab_littlespidy extends JPanel {
         if (inputValidationTab != null) {
             inputValidationTab.clearAllRunners();
         }
+        if (postToGetTab != null) {
+            postToGetTab.clearAllRunners();
+        }
         if (docStrategyTab != null) {
             docStrategyTab.restoreEntries(java.util.Collections.emptyList());
         }
@@ -205,6 +215,10 @@ public class APIInspectorTab_littlespidy extends JPanel {
 
     public InputValidationTab_littlespidy getInputValidationTab() {
         return inputValidationTab;
+    }
+
+    public PostToGetTab_littlespidy getPostToGetTab() {
+        return postToGetTab;
     }
 
     public AuthAnalyzerConfigTab_littlespidy getAuthAnalyzerConfigTab() {

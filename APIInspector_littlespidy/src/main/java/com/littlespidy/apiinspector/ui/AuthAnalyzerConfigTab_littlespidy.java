@@ -2,6 +2,7 @@
 package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
+import com.littlespidy.apiinspector.engine.AuthTestEngine_littlespidy;
 import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
 import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
@@ -51,6 +52,7 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
     // Execution Controls UI
     private JButton attackBtn;
     private JButton testSelectedBtn;
+    private JButton pauseBtn;
     private JButton cancelBtn;
     private JSpinner threadSpinner;
     private JSpinner delaySpinner;
@@ -253,6 +255,11 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
         testSelectedBtn = new JButton("Test Selected");
         testSelectedBtn.addActionListener(e -> onAttackSelected());
         singleLineControls.add(testSelectedBtn);
+
+        pauseBtn = new JButton("Pause");
+        pauseBtn.setEnabled(false);
+        pauseBtn.addActionListener(e -> onTogglePause());
+        singleLineControls.add(pauseBtn);
 
         cancelBtn = new JButton("Cancel");
         cancelBtn.setEnabled(false);
@@ -484,7 +491,10 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
 
         collectionSelectorCombo.removeAllItems();
         if (importTabRef != null) {
-            List<ImportedCollection_littlespidy> allCols = importTabRef.getAllCollections();
+            List<ImportedCollection_littlespidy> allCols = new ArrayList<>(importTabRef.getAllCollections());
+            allCols.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(
+                    a.getName() != null ? a.getName() : "",
+                    b.getName() != null ? b.getName() : ""));
             collectionSelectorCombo.addItem(new CollectionComboItem(null, "[All Imported Collections]"));
             for (ImportedCollection_littlespidy c : allCols) {
                 collectionSelectorCombo.addItem(new CollectionComboItem(c, c.getName() + " (" + c.getEndpointCount() + ")"));
@@ -600,6 +610,21 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
         }
     }
 
+    private void onTogglePause() {
+        if (authTestingTab != null && authTestingTab.getTestEngine() != null) {
+            AuthTestEngine_littlespidy eng = authTestingTab.getTestEngine();
+            if (eng.isPaused()) {
+                eng.resume();
+                pauseBtn.setText("Pause");
+                progressStatusLabel.setText("Resumed test run...");
+            } else {
+                eng.pause();
+                pauseBtn.setText("Resume");
+                progressStatusLabel.setText("Paused test run");
+            }
+        }
+    }
+
     private void onCancelAttack() {
         if (authTestingTab != null) {
             authTestingTab.cancelAttack();
@@ -612,6 +637,10 @@ public class AuthAnalyzerConfigTab_littlespidy extends JPanel {
         attackBtn.setEnabled(!running);
         testSelectedBtn.setEnabled(!running);
         cancelBtn.setEnabled(running);
+        if (pauseBtn != null) {
+            pauseBtn.setEnabled(running);
+            pauseBtn.setText("Pause");
+        }
         progressBar.setVisible(running);
     }
 

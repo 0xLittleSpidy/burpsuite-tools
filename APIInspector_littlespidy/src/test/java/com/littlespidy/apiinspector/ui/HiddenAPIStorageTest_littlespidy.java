@@ -183,8 +183,8 @@ public class HiddenAPIStorageTest_littlespidy {
         assertNotNull(rootTab.getHiddenApiStorageTab(), "Hidden API Storage tab must be instantiated and exposed");
 
         JTabbedPane pane = (JTabbedPane) rootTab.getComponent(1);
-        assertEquals(11, pane.getTabCount(), "Suite tabbed pane must contain 11 tabs");
-        assertEquals("Hidden API Storage", pane.getTitleAt(10));
+        assertEquals(12, pane.getTabCount(), "Suite tabbed pane must contain 12 tabs");
+        assertEquals("Hidden API Storage", pane.getTitleAt(11));
     }
 
     private static JSplitPane findHorizontalSplitPane(Container container) {

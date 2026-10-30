@@ -33,6 +33,9 @@ public class APIInspectorExtension_littlespidy implements BurpExtension {
         rootTab.getHiddenApiStorageTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
         rootTab.getImportTab().addStateChangedListener(() -> persistenceManager.saveAsync(rootTab));
         rootTab.getAuthTestingTab().addStateChangedListener(() -> persistenceManager.saveAsync(rootTab));
+        rootTab.getCorsTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
+        rootTab.getInputValidationTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
+        rootTab.getPostToGetTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
         rootTab.getRequestResponseViewerTab().setOnStateChangedCallback(() -> persistenceManager.saveAsync(rootTab));
 
         // Register Suite Tab

@@ -28,6 +28,7 @@ public class CorsEngine_littlespidy {
 
     private final MontoyaApi api;
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
+    private final AtomicBoolean paused = new AtomicBoolean(false);
     private ExecutorService threadPool;
 
     public CorsEngine_littlespidy(MontoyaApi api) {
@@ -36,9 +37,22 @@ public class CorsEngine_littlespidy {
 
     public void cancel() {
         cancelled.set(true);
+        paused.set(false);
         if (threadPool != null && !threadPool.isShutdown()) {
             threadPool.shutdownNow();
         }
+    }
+
+    public void pause() {
+        paused.set(true);
+    }
+
+    public void resume() {
+        paused.set(false);
+    }
+
+    public boolean isPaused() {
+        return paused.get();
     }
 
     public boolean isCancelled() {
@@ -60,6 +74,7 @@ public class CorsEngine_littlespidy {
             CorsProgressListener_littlespidy listener) {
 
         cancelled.set(false);
+        paused.set(false);
         int threads = Math.max(1, threadCount);
         this.threadPool = Executors.newFixedThreadPool(threads);
 
@@ -84,6 +99,17 @@ public class CorsEngine_littlespidy {
                     if (cancelled.get()) break;
 
                     threadPool.submit(() -> {
+                        if (cancelled.get()) return;
+
+                        while (paused.get() && !cancelled.get()) {
+                            try {
+                                Thread.sleep(200);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                return;
+                            }
+                        }
+
                         if (cancelled.get()) return;
 
                         try {
@@ -191,6 +217,7 @@ public class CorsEngine_littlespidy {
             CorsProgressListener_littlespidy listener) {
 
         cancelled.set(false);
+        paused.set(false);
         int threads = Math.max(1, threadCount);
         this.threadPool = Executors.newFixedThreadPool(threads);
 
@@ -248,6 +275,15 @@ public class CorsEngine_littlespidy {
                         continue;
                     }
 
+                    // Dynamically derive target base URL and domain directly from the request
+                    if (baseRequest.httpService() != null && baseRequest.httpService().host() != null) {
+                        baseUrl = (baseRequest.httpService().secure() ? "https://" : "http://") + baseRequest.httpService().host();
+                        if ((baseRequest.httpService().secure() && baseRequest.httpService().port() != 443) ||
+                                (!baseRequest.httpService().secure() && baseRequest.httpService().port() != 80)) {
+                            baseUrl += ":" + baseRequest.httpService().port();
+                        }
+                    }
+
                     String method = baseRequest.method();
                     String path = baseRequest.path();
                     String host = baseRequest.httpService() != null ? baseRequest.httpService().host() : "target";
@@ -256,7 +292,19 @@ public class CorsEngine_littlespidy {
                         if (cancelled.get()) break;
 
                         final HttpRequest finalBaseRequest = baseRequest;
+                        final String finalBaseUrl = baseUrl;
                         threadPool.submit(() -> {
+                            if (cancelled.get()) return;
+
+                            while (paused.get() && !cancelled.get()) {
+                                try {
+                                    Thread.sleep(200);
+                                } catch (InterruptedException ie) {
+                                    Thread.currentThread().interrupt();
+                                    return;
+                                }
+                            }
+
                             if (cancelled.get()) return;
 
                             try {
@@ -264,7 +312,7 @@ public class CorsEngine_littlespidy {
                                     Thread.sleep(delayMs);
                                 }
 
-                                String testedOrigin = tech.resolveOrigin(baseUrl, attackerDomain);
+                                String testedOrigin = tech.resolveOrigin(finalBaseUrl, attackerDomain);
                                 HttpRequest modifiedRequest = createRequestWithOrigin(finalBaseRequest, testedOrigin);
 
                                 HttpRequestResponse responsePair = null;

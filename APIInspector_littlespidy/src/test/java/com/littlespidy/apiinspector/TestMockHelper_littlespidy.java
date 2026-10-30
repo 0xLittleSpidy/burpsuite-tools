@@ -26,6 +26,26 @@ public class TestMockHelper_littlespidy {
                     if ("method".equals(mName)) return method != null ? method : "GET";
                     if ("url".equals(mName)) return url != null ? url : "https://example.com" + path;
                     if ("path".equals(mName)) return path;
+                    if ("withMethod".equals(mName) && args.length == 1) {
+                        return createMockRequest((String) args[0], url, path, new LinkedHashMap<>(headers), body);
+                    }
+                    if ("withBody".equals(mName) && args.length == 1) {
+                        Object bArg = args[0];
+                        String newBody = bArg != null ? bArg.toString() : "";
+                        return createMockRequest(method, url, path, new LinkedHashMap<>(headers), newBody);
+                    }
+                    if ("body".equals(mName)) {
+                        byte[] bBytes = (body != null ? body : "").getBytes(StandardCharsets.UTF_8);
+                        return (ByteArray) Proxy.newProxyInstance(
+                                ByteArray.class.getClassLoader(),
+                                new Class<?>[]{ByteArray.class},
+                                (p, m, a) -> {
+                                    if ("length".equals(m.getName())) return bBytes.length;
+                                    if ("getBytes".equals(m.getName())) return bBytes;
+                                    return null;
+                                }
+                        );
+                    }
                     if ("withPath".equals(mName) && args.length == 1) {
                         return createMockRequest(method, url, (String) args[0], new LinkedHashMap<>(headers), body);
                     }
@@ -56,7 +76,9 @@ public class TestMockHelper_littlespidy {
                         return list;
                     }
                     if ("withRemovedHeader".equals(mName) && args.length == 1) {
-                        String toRemove = (String) args[0];
+                        String toRemove = args[0] instanceof burp.api.montoya.http.message.HttpHeader
+                                ? ((burp.api.montoya.http.message.HttpHeader) args[0]).name()
+                                : (args[0] != null ? args[0].toString() : "");
                         Map<String, String> next = new LinkedHashMap<>();
                         for (Map.Entry<String, String> e : headers.entrySet()) {
                             if (!e.getKey().equalsIgnoreCase(toRemove)) {

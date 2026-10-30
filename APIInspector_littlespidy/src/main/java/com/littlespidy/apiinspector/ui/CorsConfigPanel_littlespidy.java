@@ -2,8 +2,6 @@
 package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.http.HttpService;
-import burp.api.montoya.http.message.requests.HttpRequest;
 import com.littlespidy.apiinspector.model.AuthProfileComboItem_littlespidy;
 import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.CorsTechnique_littlespidy;
@@ -18,7 +16,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -28,10 +25,11 @@ import java.util.List;
 
 /**
  * Configuration sub-panel for CORS testing.
- * Features a three-tier layout:
- * Tier 1: PortSwigger 29 CORS bypass techniques table with individual attack buttons.
- * Tier 2: Endpoints to Test panel with API Collection selector, filter, and endpoints checklist.
- * Tier 3: Execution controls, thread/delay spinners, and batch Attack buttons.
+ * Features:
+ * Tier 1: CORS bypass techniques table (without Action column).
+ * Tier 2: Endpoints to Test panel with alphabetically sorted API collections.
+ * Tier 3: Execution controls matching Auth Analyzer layout with Threads, Delay,
+ * Runner name, Attack, Test Selected, Pause/Resume, and Cancel buttons.
  */
 public class CorsConfigPanel_littlespidy extends JPanel {
 
@@ -53,14 +51,18 @@ public class CorsConfigPanel_littlespidy extends JPanel {
 
     // Execution Controls UI
     private final JComboBox<AuthProfileComboItem_littlespidy> authProfileCombo = new JComboBox<>();
-    private final JTextField sessionHeaderField = new JTextField(22);
-    private final JTextField targetUrlField = new JTextField("https://example.com", 20);
+    private final JTextField sessionHeaderField = new JTextField(20);
     private final JTextField attackerDomainField = new JTextField("evil.com", 12);
     private final JSpinner threadSpinner = new JSpinner(new SpinnerNumberModel(4, 1, 30, 1));
     private final JSpinner delaySpinner = new JSpinner(new SpinnerNumberModel(50, 0, 10000, 10));
     private final JTextField runnerNameField = new JTextField("CORS Runner 1", 12);
-    private final JButton attackSelectedBtn = new JButton("Attack Selected Endpoints (Batch CORS)");
-    private final JButton attackAllEndpointsBtn = new JButton("Attack All Endpoints");
+
+    private JButton attackAllEndpointsBtn;
+    private JButton attackSelectedBtn;
+    private JButton pauseBtn;
+    private JButton cancelBtn;
+    private JProgressBar progressBar;
+    private JLabel progressStatusLabel;
 
     private int runnerCount = 1;
 
@@ -107,17 +109,6 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         }
     }
 
-    public String getTargetUrl() {
-        return targetUrlField.getText().trim();
-    }
-
-    public void setTargetUrl(String url) {
-        if (url != null && !url.isBlank()) {
-            targetUrlField.setText(url.trim());
-            tableModel.fireTableDataChanged();
-        }
-    }
-
     public String getAttackerDomain() {
         return attackerDomainField.getText().trim();
     }
@@ -159,6 +150,17 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         tableModel.fireTableDataChanged();
     }
 
+    public EndpointSelectionTableModel_littlespidy getEndpointSelectionModel() {
+        return endpointSelectionModel;
+    }
+
+    public String getTargetUrl() {
+        return "";
+    }
+
+    public void setTargetUrl(String url) {
+    }
+
     private void initComponents() {
         JPanel centerContainer = new JPanel(new BorderLayout(4, 4));
 
@@ -183,9 +185,6 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         });
         techToolBar.add(selectAllTechBtn);
         techToolBar.add(deselectAllTechBtn);
-        techToolBar.add(new JLabel("Target:"));
-        techToolBar.add(targetUrlField);
-        targetUrlField.addActionListener(e -> tableModel.fireTableDataChanged());
         techToolBar.add(new JLabel("Attacker Domain:"));
         techToolBar.add(attackerDomainField);
         attackerDomainField.addActionListener(e -> tableModel.fireTableDataChanged());
@@ -195,13 +194,10 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         techniquesTable.setRowHeight(24);
         techniquesTable.getColumnModel().getColumn(0).setMaxWidth(60);
         techniquesTable.getColumnModel().getColumn(1).setMaxWidth(70);
-        techniquesTable.getColumnModel().getColumn(2).setPreferredWidth(180);
+        techniquesTable.getColumnModel().getColumn(2).setPreferredWidth(200);
         techniquesTable.getColumnModel().getColumn(3).setPreferredWidth(260);
-        techniquesTable.getColumnModel().getColumn(4).setPreferredWidth(300);
-        techniquesTable.getColumnModel().getColumn(5).setMaxWidth(100);
+        techniquesTable.getColumnModel().getColumn(4).setPreferredWidth(340);
 
-        techniquesTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
-        techniquesTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox(), this::launchSingleTechniqueAttack));
         techniquesPanel.add(new JScrollPane(techniquesTable), BorderLayout.CENTER);
 
         // 2. Tier 2 (Middle): Endpoints to Test Panel
@@ -276,54 +272,76 @@ public class CorsConfigPanel_littlespidy extends JPanel {
 
         add(centerContainer, BorderLayout.CENTER);
 
-        // 3. Tier 3 (Bottom): Execution Controls Panel
-        JPanel execControlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        // 3. Tier 3 (Bottom): Execution Controls Panel (Matching Auth Analyzer)
+        JPanel execControlsPanel = new JPanel();
+        execControlsPanel.setLayout(new BoxLayout(execControlsPanel, BoxLayout.Y_AXIS));
         execControlsPanel.setBorder(new TitledBorder("Execution Controls"));
 
-        execControlsPanel.add(new JLabel("Auth Profile / Session:"));
-        authProfileCombo.setPreferredSize(new Dimension(220, 24));
+        JPanel singleLineControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 3));
+
+        singleLineControls.add(new JLabel("Auth Profile:"));
+        authProfileCombo.setPreferredSize(new Dimension(180, 24));
         authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
         authProfileCombo.addActionListener(e -> onAuthProfileSelectionChanged());
-        execControlsPanel.add(authProfileCombo);
+        singleLineControls.add(authProfileCombo);
 
-        execControlsPanel.add(new JLabel("Auth Header:"));
+        singleLineControls.add(new JLabel("Auth Header:"));
+        sessionHeaderField.setPreferredSize(new Dimension(140, 24));
         sessionHeaderField.setToolTipText("Enter raw auth header (e.g. Authorization: Bearer <token>)");
-        execControlsPanel.add(sessionHeaderField);
+        singleLineControls.add(sessionHeaderField);
 
-        execControlsPanel.add(new JLabel("Threads:"));
-        execControlsPanel.add(threadSpinner);
+        singleLineControls.add(new JLabel("Threads:"));
+        threadSpinner.setPreferredSize(new Dimension(55, 24));
+        singleLineControls.add(threadSpinner);
 
-        execControlsPanel.add(new JLabel("Delay (ms):"));
-        execControlsPanel.add(delaySpinner);
+        singleLineControls.add(new JLabel("Delay (ms):"));
+        delaySpinner.setPreferredSize(new Dimension(65, 24));
+        singleLineControls.add(delaySpinner);
 
-        execControlsPanel.add(new JLabel("Runner Name:"));
-        execControlsPanel.add(runnerNameField);
+        singleLineControls.add(new JLabel("Runner:"));
+        runnerNameField.setPreferredSize(new Dimension(130, 24));
+        singleLineControls.add(runnerNameField);
 
-        attackSelectedBtn.setFont(attackSelectedBtn.getFont().deriveFont(Font.BOLD));
-        attackSelectedBtn.addActionListener(e -> launchAttackForSelectedEndpoints());
-        execControlsPanel.add(attackSelectedBtn);
-
+        attackAllEndpointsBtn = new JButton("Attack");
+        attackAllEndpointsBtn.setFont(attackAllEndpointsBtn.getFont().deriveFont(Font.BOLD));
         attackAllEndpointsBtn.addActionListener(e -> {
-            if (importTabRef != null && importTabRef.getSelectedCollection() != null) {
-                CollectionComboItem currentSel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
-                if (currentSel == null || currentSel.collection == null) {
-                    selectCollection(importTabRef.getSelectedCollection());
-                }
-            }
             endpointSelectionModel.selectAll(true);
             launchAttackForSelectedEndpoints();
         });
-        execControlsPanel.add(attackAllEndpointsBtn);
+        singleLineControls.add(attackAllEndpointsBtn);
+
+        attackSelectedBtn = new JButton("Test Selected");
+        attackSelectedBtn.addActionListener(e -> launchAttackForSelectedEndpoints());
+        singleLineControls.add(attackSelectedBtn);
+
+        pauseBtn = new JButton("Pause");
+        pauseBtn.setEnabled(false);
+        pauseBtn.addActionListener(e -> onTogglePause());
+        singleLineControls.add(pauseBtn);
+
+        cancelBtn = new JButton("Cancel");
+        cancelBtn.setEnabled(false);
+        cancelBtn.addActionListener(e -> onCancelAttack());
+        singleLineControls.add(cancelBtn);
+
+        execControlsPanel.add(singleLineControls);
+
+        progressBar = new JProgressBar();
+        progressBar.setStringPainted(true);
+        progressBar.setVisible(false);
+        progressBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        execControlsPanel.add(progressBar);
+
+        progressStatusLabel = new JLabel("Ready");
+        progressStatusLabel.setFont(progressStatusLabel.getFont().deriveFont(Font.PLAIN, 11f));
+        progressStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        progressStatusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        execControlsPanel.add(progressStatusLabel);
 
         add(execControlsPanel, BorderLayout.SOUTH);
     }
 
-    public EndpointSelectionTableModel_littlespidy getEndpointSelectionModel() {
-        return endpointSelectionModel;
-    }
-
     public void refreshCollectionsCombo() {
-        if (collectionSelectorCombo == null) return;
         ImportedCollection_littlespidy prevSelected = null;
         CollectionComboItem sel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
         if (sel != null && sel.collection != null) {
@@ -334,13 +352,14 @@ public class CorsConfigPanel_littlespidy extends JPanel {
 
         collectionSelectorCombo.removeAllItems();
         if (importTabRef != null) {
-            List<ImportedCollection_littlespidy> allCols = importTabRef.getAllCollections();
+            List<ImportedCollection_littlespidy> allCols = new ArrayList<>(importTabRef.getAllCollections());
+            allCols.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(
+                    a.getName() != null ? a.getName() : "",
+                    b.getName() != null ? b.getName() : ""));
             collectionSelectorCombo.addItem(new CollectionComboItem(null, "[All Imported Collections]"));
             for (ImportedCollection_littlespidy c : allCols) {
                 collectionSelectorCombo.addItem(new CollectionComboItem(c, c.getName() + " (" + c.getEndpointCount() + ")"));
             }
-        } else {
-            collectionSelectorCombo.addItem(new CollectionComboItem(null, "[No Collections Loaded]"));
         }
         if (prevSelected != null) {
             selectCollection(prevSelected);
@@ -402,27 +421,15 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         endpointSelectionModel.applyFilter(endpointFilterField.getText());
     }
 
-    private HttpRequest buildTargetRequest() {
-        String targetUrl = targetUrlField.getText().trim();
-        if (targetUrl.isEmpty()) {
-            targetUrl = "https://example.com";
-        }
-        if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
-            targetUrl = "https://" + targetUrl;
-        }
-
-        HttpRequest request = HttpRequest.httpRequestFromUrl(targetUrl);
-        if (request == null) {
-            HttpService service = HttpService.httpService("localhost", 443, true);
-            request = HttpRequest.httpRequest(service, "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-        }
-        return request;
-    }
-
     private void launchAttackForSelectedEndpoints() {
         if (corsTab == null || rootTab == null) return;
 
         List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
+        if (selectedEndpoints.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please select at least one endpoint to test.", "No Endpoints Selected", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         String runnerName = runnerNameField.getText().trim();
         if (runnerName.isEmpty()) {
             runnerName = "CORS Runner " + (++runnerCount);
@@ -432,84 +439,75 @@ public class CorsConfigPanel_littlespidy extends JPanel {
         AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
         String customAuthHeader = sessionHeaderField.getText().trim();
 
-        // Switch to CORS tab
+        setExecutionUIState(true);
         rootTab.selectTab(corsTab);
 
-        if (!selectedEndpoints.isEmpty()) {
-            corsTab.executeAttack(
-                    selectedEndpoints,
-                    getTargetUrl(),
-                    getAttackerDomain(),
-                    profile,
-                    customAuthHeader,
-                    techniques,
-                    getThreadCount(),
-                    getDelayMs(),
-                    runnerName
-            );
-        } else {
-            // Fallback to single target URL
-            HttpRequest targetReq = buildTargetRequest();
-            corsTab.executeAttack(
-                    targetReq,
-                    getTargetUrl(),
-                    getAttackerDomain(),
-                    profile,
-                    customAuthHeader,
-                    techniques,
-                    getThreadCount(),
-                    getDelayMs(),
-                    runnerName
-            );
-        }
+        corsTab.executeAttack(
+                selectedEndpoints,
+                null, // target domain is derived dynamically from each HTTP request
+                getAttackerDomain(),
+                profile,
+                customAuthHeader,
+                techniques,
+                getThreadCount(),
+                getDelayMs(),
+                runnerName
+        );
 
         runnerNameField.setText("CORS Runner " + (++runnerCount));
     }
 
-    private void launchSingleTechniqueAttack(int rowIndex) {
-        if (corsTab == null || rootTab == null || rowIndex < 0 || rowIndex >= techniques.size()) return;
+    private void onTogglePause() {
+        if (corsTab != null && corsTab.getCorsEngine() != null) {
+            var eng = corsTab.getCorsEngine();
+            if (eng.isPaused()) {
+                eng.resume();
+                pauseBtn.setText("Pause");
+                progressStatusLabel.setText("Resumed CORS test run...");
+            } else {
+                eng.pause();
+                pauseBtn.setText("Resume");
+                progressStatusLabel.setText("Paused CORS test run");
+            }
+        }
+    }
 
-        CorsTechnique_littlespidy tech = techniques.get(rowIndex);
-        List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
-        String runnerName = "CORS - " + tech.getName();
+    private void onCancelAttack() {
+        if (corsTab != null && corsTab.getCorsEngine() != null) {
+            corsTab.getCorsEngine().cancel();
+        }
+        progressStatusLabel.setText("Cancelling CORS test run...");
+        cancelBtn.setEnabled(false);
+    }
 
-        AuthProfileComboItem_littlespidy authSel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
-        AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
-        String customAuthHeader = sessionHeaderField.getText().trim();
+    public void setExecutionUIState(boolean running) {
+        attackAllEndpointsBtn.setEnabled(!running);
+        attackSelectedBtn.setEnabled(!running);
+        cancelBtn.setEnabled(running);
+        if (pauseBtn != null) {
+            pauseBtn.setEnabled(running);
+            pauseBtn.setText("Pause");
+        }
+        progressBar.setVisible(running);
+    }
 
-        // Switch to CORS tab
-        rootTab.selectTab(corsTab);
+    public void updateProgress(int completedCount, int totalCount, String status) {
+        progressBar.setMaximum(totalCount);
+        progressBar.setValue(completedCount);
+        progressStatusLabel.setText(status);
+    }
 
-        if (!selectedEndpoints.isEmpty()) {
-            corsTab.executeAttack(
-                    selectedEndpoints,
-                    getTargetUrl(),
-                    getAttackerDomain(),
-                    profile,
-                    customAuthHeader,
-                    Collections.singletonList(tech),
-                    1,
-                    getDelayMs(),
-                    runnerName
-            );
+    public void onAttackFinished(boolean cancelled, int totalCompleted) {
+        setExecutionUIState(false);
+        if (cancelled) {
+            progressStatusLabel.setText("CORS test run cancelled. Total completed: " + totalCompleted);
         } else {
-            HttpRequest targetReq = buildTargetRequest();
-            corsTab.executeAttack(
-                    targetReq,
-                    getTargetUrl(),
-                    getAttackerDomain(),
-                    profile,
-                    customAuthHeader,
-                    Collections.singletonList(tech),
-                    1,
-                    getDelayMs(),
-                    runnerName
-            );
+            progressStatusLabel.setText("CORS test run finished. Total completed: " + totalCompleted);
         }
     }
 
     private class CorsTechniquesTableModel extends AbstractTableModel {
-        private final String[] columns = {"Enable", "ID", "Technique Name", "Origin Injected", "Description / Bypass Specifics", "Action"};
+        private final String[] columns = {"Enable", "ID", "Technique Name", "Origin Injected", "Description / Bypass Specifics"};
 
         @Override
         public int getRowCount() {
@@ -534,7 +532,7 @@ public class CorsConfigPanel_littlespidy extends JPanel {
 
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return columnIndex == 0 || columnIndex == 5;
+            return columnIndex == 0;
         }
 
         @Override
@@ -545,9 +543,8 @@ public class CorsConfigPanel_littlespidy extends JPanel {
                 case 0: return t.isEnabled();
                 case 1: return t.getId();
                 case 2: return t.getName();
-                case 3: return t.resolveOrigin(getTargetUrl(), getAttackerDomain());
+                case 3: return t.resolveOrigin("{request_domain}", getAttackerDomain());
                 case 4: return t.getDescription() + " (" + t.getBrowserNote() + ")";
-                case 5: return "Attack";
                 default: return "";
             }
         }
@@ -560,55 +557,6 @@ public class CorsConfigPanel_littlespidy extends JPanel {
                 t.setEnabled((Boolean) aValue);
                 fireTableCellUpdated(rowIndex, columnIndex);
             }
-        }
-    }
-
-    private static class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer() {
-            setOpaque(true);
-            setMargin(new Insets(1, 4, 1, 4));
-            setFont(getFont().deriveFont(Font.PLAIN, 11f));
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-            setText(value != null ? value.toString() : "Attack");
-            return this;
-        }
-    }
-
-    private static class ButtonEditor extends DefaultCellEditor {
-        private final JButton button;
-        private final java.util.function.Consumer<Integer> action;
-        private int currentRow;
-
-        public ButtonEditor(JCheckBox checkBox, java.util.function.Consumer<Integer> action) {
-            super(checkBox);
-            this.action = action;
-            this.button = new JButton();
-            this.button.setOpaque(true);
-            this.button.setMargin(new Insets(1, 4, 1, 4));
-            this.button.setFont(this.button.getFont().deriveFont(Font.PLAIN, 11f));
-            this.button.addActionListener(e -> {
-                fireEditingStopped();
-                if (action != null) {
-                    action.accept(currentRow);
-                }
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                                                     boolean isSelected, int row, int column) {
-            this.currentRow = row;
-            button.setText(value != null ? value.toString() : "Attack");
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            return "Attack";
         }
     }
 }

@@ -27,8 +27,15 @@ public class SessionStateDTO_littlespidy {
         public String selectedEndpointKey;
         public CorsConfigDTO corsConfig;
         public List<CorsRunDTO> corsRuns = new ArrayList<>();
+        public String selectedCorsRunnerId;
+        public int corsRunnerCounter = 1;
         public InputValidationConfigDTO inputValidationConfig;
         public List<InputValidationRunDTO> inputValidationRuns = new ArrayList<>();
+        public String selectedInputValidationRunnerId;
+        public int inputValidationRunnerCounter = 1;
+        public List<PostToGetRunDTO> postToGetRuns = new ArrayList<>();
+        public String selectedPostToGetRunnerId;
+        public int postToGetRunnerCounter = 1;
     }
 
     public static class SessionTabDTO {
@@ -273,5 +280,33 @@ public class SessionStateDTO_littlespidy {
         public long timestamp;
         public String requestBase64;
         public String responseBase64;
+    }
+
+    public static class PostToGetRunDTO {
+        public String id;
+        public String name;
+        public long timestamp;
+        public List<PostToGetTestResultDTO> results = new ArrayList<>();
+    }
+
+    public static class PostToGetTestResultDTO {
+        public int id;
+        public String collectionId;
+        public String collectionName;
+        public String path;
+        public String fullUrl;
+        public String originalMethod;
+        public String mutatedMethod;
+        public String convertedQueryParams;
+        public int originalStatusCode;
+        public int mutatedStatusCode;
+        public int originalResponseLength;
+        public int mutatedResponseLength;
+        public String verdict;
+        public long timestamp;
+        public String originalRequestBase64;
+        public String originalResponseBase64;
+        public String mutatedRequestBase64;
+        public String mutatedResponseBase64;
     }
 }

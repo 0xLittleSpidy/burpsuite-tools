@@ -174,7 +174,7 @@ public class CorsAndInputValidationTest_littlespidy {
         assertNotNull(configTab.getInputValidationConfigPanel());
         assertNotNull(configTab.getAuthAnalyzerConfigTab());
 
-        assertEquals("https://example.com", configTab.getCorsConfigPanel().getTargetUrl());
+        assertNotNull(configTab.getPostToGetConfigPanel());
         assertEquals("evil.com", configTab.getCorsConfigPanel().getAttackerDomain());
         assertTrue(configTab.getCorsConfigPanel().getTechniques().size() >= 29);
 

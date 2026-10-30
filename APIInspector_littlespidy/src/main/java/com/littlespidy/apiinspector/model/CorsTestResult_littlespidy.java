@@ -37,14 +37,25 @@ public class CorsTestResult_littlespidy {
     private final int statusCode;
     private final int responseLength;
     private final CorsSeverity severity;
-    private final HttpRequestResponse httpRequestResponse;
+    private HttpRequestResponse httpRequestResponse;
     private final long timestamp;
     private String classification; // "TRUE_POSITIVE", "FALSE_POSITIVE", or null/empty
+    private byte[] requestBytes;
+    private byte[] responseBytes;
 
     public CorsTestResult_littlespidy(int id, String method, String host, String path,
                                       String testedOrigin, String description, String reflectedAcao,
                                       boolean acacPresent, int statusCode, int responseLength,
                                       CorsSeverity severity, HttpRequestResponse httpRequestResponse) {
+        this(id, method, host, path, testedOrigin, description, reflectedAcao, acacPresent, statusCode,
+                responseLength, severity, httpRequestResponse, System.currentTimeMillis(), null, null);
+    }
+
+    public CorsTestResult_littlespidy(int id, String method, String host, String path,
+                                      String testedOrigin, String description, String reflectedAcao,
+                                      boolean acacPresent, int statusCode, int responseLength,
+                                      CorsSeverity severity, HttpRequestResponse httpRequestResponse,
+                                      long timestamp, byte[] requestBytes, byte[] responseBytes) {
         this.id = id;
         this.method = method != null ? method : "GET";
         this.host = host != null ? host : "";
@@ -57,7 +68,18 @@ public class CorsTestResult_littlespidy {
         this.responseLength = responseLength;
         this.severity = severity != null ? severity : CorsSeverity.SECURE;
         this.httpRequestResponse = httpRequestResponse;
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = timestamp > 0 ? timestamp : System.currentTimeMillis();
+        this.requestBytes = requestBytes;
+        this.responseBytes = responseBytes;
+
+        if (httpRequestResponse != null) {
+            if (this.requestBytes == null && httpRequestResponse.request() != null) {
+                this.requestBytes = httpRequestResponse.request().toByteArray().getBytes();
+            }
+            if (this.responseBytes == null && httpRequestResponse.hasResponse() && httpRequestResponse.response() != null) {
+                this.responseBytes = httpRequestResponse.response().toByteArray().getBytes();
+            }
+        }
     }
 
     public int getId() {
@@ -108,6 +130,10 @@ public class CorsTestResult_littlespidy {
         return httpRequestResponse;
     }
 
+    public void setHttpRequestResponse(HttpRequestResponse reqResp) {
+        this.httpRequestResponse = reqResp;
+    }
+
     public String getClassification() {
         return classification;
     }
@@ -118,5 +144,21 @@ public class CorsTestResult_littlespidy {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public byte[] getRequestBytes() {
+        return requestBytes;
+    }
+
+    public void setRequestBytes(byte[] requestBytes) {
+        this.requestBytes = requestBytes;
+    }
+
+    public byte[] getResponseBytes() {
+        return responseBytes;
+    }
+
+    public void setResponseBytes(byte[] responseBytes) {
+        this.responseBytes = responseBytes;
     }
 }

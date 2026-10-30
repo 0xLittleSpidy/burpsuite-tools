@@ -52,6 +52,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
     private ResultsTableModel resultsTableModel;
     private JTable resultsTable;
     private TableRowSorter<ResultsTableModel> resultsSorter;
+    private CollectionFilterDropDown_littlespidy apiFilterDropDown;
     private MethodFilterDropDown_littlespidy methodFilterDropDown;
     private ProfileStatusFilterDropDown_littlespidy statusFilterDropDown;
     private ClassificationFilterDropDown_littlespidy classificationFilterDropDown;
@@ -88,6 +89,10 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         initComponents();
     }
 
+    public AuthTestEngine_littlespidy getTestEngine() {
+        return testEngine;
+    }
+
     public void setConfigTab(AuthAnalyzerConfigTab_littlespidy configTab) {
         this.configTab = configTab;
         if (configTab != null && !profiles.isEmpty()) {
@@ -107,6 +112,9 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         this.importTabRef = importTabRef;
         if (configTab != null) {
             configTab.setImportTabRef(importTabRef);
+        }
+        if (apiFilterDropDown != null && importTabRef != null) {
+            apiFilterDropDown.updateCollections(importTabRef.getAllCollections());
         }
     }
 
@@ -150,15 +158,26 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
         leftFilter.add(new JLabel("Runner:"));
         runnerCombo = new JComboBox<>();
-        runnerCombo.setPreferredSize(new Dimension(160, 24));
-        runnerCombo.setToolTipText("Select a test runner to inspect its results");
+        runnerCombo.setEditable(true);
+        runnerCombo.setPreferredSize(new Dimension(170, 24));
+        runnerCombo.setToolTipText("Select or rename a test runner");
         runnerCombo.addActionListener(e -> onRunnerSelected());
+
+        Component editorComp = runnerCombo.getEditor().getEditorComponent();
+        if (editorComp instanceof JTextField) {
+            JTextField tf = (JTextField) editorComp;
+            tf.addActionListener(e -> onRenameCurrentRunner(tf.getText()));
+        }
         leftFilter.add(runnerCombo);
 
         deleteRunnerBtn = new JButton("Delete Runner");
         deleteRunnerBtn.setToolTipText("Delete the currently selected runner from history");
         deleteRunnerBtn.addActionListener(e -> onDeleteCurrentRunner());
         leftFilter.add(deleteRunnerBtn);
+
+        apiFilterDropDown = new CollectionFilterDropDown_littlespidy();
+        apiFilterDropDown.addFilterChangeListener(this::applyAllFilters);
+        leftFilter.add(apiFilterDropDown);
 
         methodFilterDropDown = new MethodFilterDropDown_littlespidy();
         methodFilterDropDown.addFilterChangeListener(this::applyAllFilters);
@@ -246,6 +265,25 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         resultsContextMenu.add(clearItem);
 
         resultsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    int row = resultsTable.rowAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        int modelRow = resultsTable.convertRowIndexToModel(row);
+                        if (modelRow >= 0 && modelRow < endpointRows.size()) {
+                            EndpointResultRow_littlespidy epRow = endpointRows.get(modelRow);
+                            DiscoveredEndpoint_littlespidy endpoint = findEndpoint(epRow.getCollectionId(), epRow.getMethod(), epRow.getPath());
+                            if (endpoint != null) {
+                                Window win = SwingUtilities.getWindowAncestor(AuthTestingTab_littlespidy.this);
+                                EndpointDetailsDialog_littlespidy dlg = new EndpointDetailsDialog_littlespidy(win, endpoint);
+                                dlg.setVisible(true);
+                            }
+                        }
+                    }
+                }
+            }
+
             @Override
             public void mousePressed(MouseEvent e) {
                 handlePopup(e);
@@ -690,12 +728,17 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
                     return false;
                 }
 
-                // 2. Profile - Status Code filter
+                // 2. Collection / API filter
+                if (apiFilterDropDown != null && !apiFilterDropDown.isCollectionSelected(epRow.getCollectionId())) {
+                    return false;
+                }
+
+                // 3. Profile - Status Code filter
                 if (statusFilterDropDown != null && !statusFilterDropDown.matches(epRow)) {
                     return false;
                 }
 
-                // 3. Classification filter
+                // 4. Classification filter
                 if (classificationFilterDropDown != null && !classificationFilterDropDown.matches(epRow)) {
                     return false;
                 }
@@ -861,6 +904,52 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
         if (configTab != null) {
             configTab.refreshCollectionsCombo();
         }
+        if (apiFilterDropDown != null && importTabRef != null) {
+            apiFilterDropDown.updateCollections(importTabRef.getAllCollections());
+        }
+    }
+
+    private void onRenameCurrentRunner(String newName) {
+        if (currentRun == null || newName == null) return;
+        String clean = newName.trim();
+        int pIdx = clean.lastIndexOf(" (");
+        if (pIdx > 0 && clean.endsWith(" results)")) {
+            clean = clean.substring(0, pIdx).trim();
+        }
+        if (clean.isEmpty()) return;
+
+        currentRun.setName(clean);
+        currentRunName = clean;
+
+        updatingRunnerCombo = true;
+        try {
+            int sel = runnerCombo.getSelectedIndex();
+            runnerCombo.removeAllItems();
+            for (AuthTestRun_littlespidy r : savedRuns) {
+                runnerCombo.addItem(r.getName() + " (" + r.getResults().size() + " results)");
+            }
+            if (sel >= 0 && sel < runnerCombo.getItemCount()) {
+                runnerCombo.setSelectedIndex(sel);
+            }
+        } finally {
+            updatingRunnerCombo = false;
+        }
+        notifyStateChanged();
+    }
+
+    private DiscoveredEndpoint_littlespidy findEndpoint(String collectionId, String method, String path) {
+        if (importTabRef != null) {
+            for (ImportedCollection_littlespidy col : importTabRef.getAllCollections()) {
+                if (collectionId == null || collectionId.isEmpty() || collectionId.equals(col.getId())) {
+                    for (DiscoveredEndpoint_littlespidy ep : col.getEndpoints()) {
+                        if (ep.getMethod().equalsIgnoreCase(method) && ep.getPath().equalsIgnoreCase(path)) {
+                            return ep;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public void setProfiles(List<AuthProfile_littlespidy> list) {
@@ -1437,7 +1526,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
      */
     public static class AuthTestRun_littlespidy {
         private final String id;
-        private final String name;
+        private String name;
         private final long timestamp;
         private final List<AuthTestResult_littlespidy> results = new ArrayList<>();
         private final List<EndpointResultRow_littlespidy> endpointRows = new ArrayList<>();
@@ -1466,6 +1555,7 @@ public class AuthTestingTab_littlespidy extends JPanel implements AuthTestProgre
 
         public String getId() { return id; }
         public String getName() { return name; }
+        public void setName(String name) { this.name = name != null ? name : "Run"; }
         public long getTimestamp() { return timestamp; }
         public List<AuthTestResult_littlespidy> getResults() { return results; }
         public List<EndpointResultRow_littlespidy> getEndpointRows() { return endpointRows; }

@@ -352,7 +352,6 @@ public class APIInspectorPersistenceManager_littlespidy {
                 if (rootTab != null && rootTab.getConfigTab() != null && rootTab.getConfigTab().getCorsConfigPanel() != null) {
                     CorsConfigPanel_littlespidy corsConfig = rootTab.getConfigTab().getCorsConfigPanel();
                     CorsConfigDTO ccDto = new CorsConfigDTO();
-                    ccDto.targetUrl = corsConfig.getTargetUrl();
                     ccDto.attackerDomain = corsConfig.getAttackerDomain();
                     ccDto.threads = corsConfig.getThreadCount();
                     ccDto.delayMs = corsConfig.getDelayMs();
@@ -362,10 +361,13 @@ public class APIInspectorPersistenceManager_littlespidy {
                     root.corsConfig = ccDto;
                 }
                 if (rootTab != null && rootTab.getCorsTab() != null) {
-                    for (CorsRunnerPanel_littlespidy r : rootTab.getCorsTab().getActiveRunners()) {
+                    root.selectedCorsRunnerId = rootTab.getCorsTab().getSelectedRunnerId();
+                    root.corsRunnerCounter = rootTab.getCorsTab().getRunnerCounter();
+                    for (com.littlespidy.apiinspector.model.CorsRun_littlespidy r : rootTab.getCorsTab().getSavedRuns()) {
                         CorsRunDTO rDto = new CorsRunDTO();
-                        rDto.id = r.getRunnerId();
-                        rDto.name = r.getRunnerName();
+                        rDto.id = r.getId();
+                        rDto.name = r.getName();
+                        rDto.timestamp = r.getTimestamp();
                         for (CorsTestResult_littlespidy res : r.getResults()) {
                             CorsTestResultDTO resDto = new CorsTestResultDTO();
                             resDto.id = res.getId();
@@ -388,6 +390,12 @@ public class APIInspectorPersistenceManager_littlespidy {
                                     resDto.responseBase64 = Base64.getEncoder().encodeToString(res.getHttpRequestResponse().response().toByteArray().getBytes());
                                 }
                             }
+                            if (resDto.requestBase64 == null && res.getRequestBytes() != null && res.getRequestBytes().length > 0) {
+                                resDto.requestBase64 = Base64.getEncoder().encodeToString(res.getRequestBytes());
+                            }
+                            if (resDto.responseBase64 == null && res.getResponseBytes() != null && res.getResponseBytes().length > 0) {
+                                resDto.responseBase64 = Base64.getEncoder().encodeToString(res.getResponseBytes());
+                            }
                             rDto.results.add(resDto);
                         }
                         root.corsRuns.add(rDto);
@@ -407,10 +415,13 @@ public class APIInspectorPersistenceManager_littlespidy {
                     root.inputValidationConfig = fcDto;
                 }
                 if (rootTab != null && rootTab.getInputValidationTab() != null) {
-                    for (InputValidationRunnerPanel_littlespidy r : rootTab.getInputValidationTab().getActiveRunners()) {
+                    root.selectedInputValidationRunnerId = rootTab.getInputValidationTab().getSelectedRunnerId();
+                    root.inputValidationRunnerCounter = rootTab.getInputValidationTab().getRunnerCounter();
+                    for (com.littlespidy.apiinspector.model.InputValidationRun_littlespidy r : rootTab.getInputValidationTab().getSavedRuns()) {
                         InputValidationRunDTO rDto = new InputValidationRunDTO();
-                        rDto.id = r.getRunnerId();
-                        rDto.name = r.getRunnerName();
+                        rDto.id = r.getId();
+                        rDto.name = r.getName();
+                        rDto.timestamp = r.getTimestamp();
                         for (InputValidationTestResult_littlespidy res : r.getResults()) {
                             InputValidationTestResultDTO resDto = new InputValidationTestResultDTO();
                             resDto.id = res.getId();
@@ -432,9 +443,77 @@ public class APIInspectorPersistenceManager_littlespidy {
                                     resDto.responseBase64 = Base64.getEncoder().encodeToString(res.getHttpRequestResponse().response().toByteArray().getBytes());
                                 }
                             }
+                            if (resDto.requestBase64 == null && res.getRequestBytes() != null && res.getRequestBytes().length > 0) {
+                                resDto.requestBase64 = Base64.getEncoder().encodeToString(res.getRequestBytes());
+                            }
+                            if (resDto.responseBase64 == null && res.getResponseBytes() != null && res.getResponseBytes().length > 0) {
+                                resDto.responseBase64 = Base64.getEncoder().encodeToString(res.getResponseBytes());
+                            }
                             rDto.results.add(resDto);
                         }
                         root.inputValidationRuns.add(rDto);
+                    }
+                }
+
+                // Serialize POST to GET active runners
+                if (rootTab != null && rootTab.getPostToGetTab() != null) {
+                    root.selectedPostToGetRunnerId = rootTab.getPostToGetTab().getSelectedRunnerId();
+                    root.postToGetRunnerCounter = rootTab.getPostToGetTab().getRunnerCounter();
+                    for (com.littlespidy.apiinspector.model.PostToGetRun_littlespidy r : rootTab.getPostToGetTab().getSavedRuns()) {
+                        PostToGetRunDTO rDto = new PostToGetRunDTO();
+                        rDto.id = r.getId();
+                        rDto.name = r.getName();
+                        rDto.timestamp = r.getTimestamp();
+                        for (com.littlespidy.apiinspector.model.PostToGetTestResult_littlespidy res : r.getResults()) {
+                            PostToGetTestResultDTO resDto = new PostToGetTestResultDTO();
+                            resDto.id = res.getId();
+                            resDto.collectionId = res.getCollectionId();
+                            resDto.collectionName = res.getCollectionName();
+                            resDto.path = res.getPath();
+                            resDto.fullUrl = res.getFullUrl();
+                            resDto.originalMethod = res.getOriginalMethod();
+                            resDto.mutatedMethod = res.getMutatedMethod();
+                            resDto.convertedQueryParams = res.getConvertedQueryParams();
+                            resDto.originalStatusCode = res.getOriginalStatusCode();
+                            resDto.mutatedStatusCode = res.getMutatedStatusCode();
+                            resDto.originalResponseLength = res.getOriginalResponseLength();
+                            resDto.mutatedResponseLength = res.getMutatedResponseLength();
+                            resDto.verdict = res.getVerdict();
+                            resDto.timestamp = res.getTimestamp();
+
+                            if (res.getOriginalReqResp() != null) {
+                                if (res.getOriginalReqResp().request() != null) {
+                                    resDto.originalRequestBase64 = Base64.getEncoder().encodeToString(res.getOriginalReqResp().request().toByteArray().getBytes());
+                                }
+                                if (res.getOriginalReqResp().hasResponse() && res.getOriginalReqResp().response() != null) {
+                                    resDto.originalResponseBase64 = Base64.getEncoder().encodeToString(res.getOriginalReqResp().response().toByteArray().getBytes());
+                                }
+                            }
+                            if (resDto.originalRequestBase64 == null && res.getOriginalRequestBytes() != null && res.getOriginalRequestBytes().length > 0) {
+                                resDto.originalRequestBase64 = Base64.getEncoder().encodeToString(res.getOriginalRequestBytes());
+                            }
+                            if (resDto.originalResponseBase64 == null && res.getOriginalResponseBytes() != null && res.getOriginalResponseBytes().length > 0) {
+                                resDto.originalResponseBase64 = Base64.getEncoder().encodeToString(res.getOriginalResponseBytes());
+                            }
+
+                            if (res.getMutatedReqResp() != null) {
+                                if (res.getMutatedReqResp().request() != null) {
+                                    resDto.mutatedRequestBase64 = Base64.getEncoder().encodeToString(res.getMutatedReqResp().request().toByteArray().getBytes());
+                                }
+                                if (res.getMutatedReqResp().hasResponse() && res.getMutatedReqResp().response() != null) {
+                                    resDto.mutatedResponseBase64 = Base64.getEncoder().encodeToString(res.getMutatedReqResp().response().toByteArray().getBytes());
+                                }
+                            }
+                            if (resDto.mutatedRequestBase64 == null && res.getMutatedRequestBytes() != null && res.getMutatedRequestBytes().length > 0) {
+                                resDto.mutatedRequestBase64 = Base64.getEncoder().encodeToString(res.getMutatedRequestBytes());
+                            }
+                            if (resDto.mutatedResponseBase64 == null && res.getMutatedResponseBytes() != null && res.getMutatedResponseBytes().length > 0) {
+                                resDto.mutatedResponseBase64 = Base64.getEncoder().encodeToString(res.getMutatedResponseBytes());
+                            }
+
+                            rDto.results.add(resDto);
+                        }
+                        root.postToGetRuns.add(rDto);
                     }
                 }
 
@@ -915,7 +994,6 @@ public class APIInspectorPersistenceManager_littlespidy {
         // 10. Restore CORS Configuration and Runners
         if (rootTab.getConfigTab() != null && rootTab.getConfigTab().getCorsConfigPanel() != null && root.corsConfig != null) {
             CorsConfigPanel_littlespidy cc = rootTab.getConfigTab().getCorsConfigPanel();
-            if (root.corsConfig.targetUrl != null) cc.setTargetUrl(root.corsConfig.targetUrl);
             if (root.corsConfig.attackerDomain != null) cc.setAttackerDomain(root.corsConfig.attackerDomain);
             cc.setThreadCount(root.corsConfig.threads);
             cc.setDelayMs(root.corsConfig.delayMs);
@@ -929,19 +1007,15 @@ public class APIInspectorPersistenceManager_littlespidy {
             }
         }
         if (rootTab.getCorsTab() != null && root.corsRuns != null && !root.corsRuns.isEmpty()) {
-            rootTab.getCorsTab().clearAllRunners();
+            List<com.littlespidy.apiinspector.model.CorsRun_littlespidy> restoredRuns = new ArrayList<>();
             for (CorsRunDTO rDto : root.corsRuns) {
                 List<CorsTestResult_littlespidy> resList = new ArrayList<>();
                 if (rDto.results != null) {
                     for (CorsTestResultDTO tDto : rDto.results) {
-                        HttpRequest req = null;
-                        HttpResponse resp = null;
-                        if (tDto.requestBase64 != null && !tDto.requestBase64.isBlank()) {
-                            req = HttpRequest.httpRequest(ByteArray.byteArray(Base64.getDecoder().decode(tDto.requestBase64)));
-                        }
-                        if (tDto.responseBase64 != null && !tDto.responseBase64.isBlank()) {
-                            resp = HttpResponse.httpResponse(ByteArray.byteArray(Base64.getDecoder().decode(tDto.responseBase64)));
-                        }
+                        byte[] reqBytes = (tDto.requestBase64 != null && !tDto.requestBase64.isBlank()) ? Base64.getDecoder().decode(tDto.requestBase64) : null;
+                        byte[] respBytes = (tDto.responseBase64 != null && !tDto.responseBase64.isBlank()) ? Base64.getDecoder().decode(tDto.responseBase64) : null;
+                        HttpRequest req = (reqBytes != null) ? HttpRequest.httpRequest(ByteArray.byteArray(reqBytes)) : null;
+                        HttpResponse resp = (respBytes != null) ? HttpResponse.httpResponse(ByteArray.byteArray(respBytes)) : null;
                         HttpRequestResponse hrr = (req != null) ? HttpRequestResponse.httpRequestResponse(req, resp) : null;
                         CorsTestResult_littlespidy.CorsSeverity sev = CorsTestResult_littlespidy.CorsSeverity.INFO;
                         try {
@@ -951,43 +1025,27 @@ public class APIInspectorPersistenceManager_littlespidy {
                         resList.add(new CorsTestResult_littlespidy(
                                 tDto.id, tDto.method, tDto.host, tDto.path, tDto.testedOrigin,
                                 tDto.description, tDto.reflectedAcao, tDto.acacPresent,
-                                tDto.statusCode, tDto.responseLength, sev, hrr
+                                tDto.statusCode, tDto.responseLength, sev, hrr,
+                                tDto.timestamp, reqBytes, respBytes
                         ));
                     }
                 }
-                rootTab.getCorsTab().restoreRunner(rDto.id, rDto.name, resList);
+                restoredRuns.add(new com.littlespidy.apiinspector.model.CorsRun_littlespidy(rDto.id, rDto.name, rDto.timestamp, resList));
             }
+            rootTab.getCorsTab().setSavedRuns(restoredRuns, root.selectedCorsRunnerId, root.corsRunnerCounter);
         }
 
         // 11. Restore Input Validation Configuration and Runners
-        if (rootTab.getConfigTab() != null && rootTab.getConfigTab().getInputValidationConfigPanel() != null && root.inputValidationConfig != null) {
-            InputValidationConfigPanel_littlespidy fc = rootTab.getConfigTab().getInputValidationConfigPanel();
-            if (root.inputValidationConfig.targetEndpoint != null) fc.setTargetEndpoint(root.inputValidationConfig.targetEndpoint);
-            fc.setThreadCount(root.inputValidationConfig.threads);
-            fc.setDelayMs(root.inputValidationConfig.delayMs);
-            if (root.inputValidationConfig.enabledCategoryIds != null) {
-                Set<String> set = new HashSet<>(root.inputValidationConfig.enabledCategoryIds);
-                List<InputValidationTechnique_littlespidy> techs = fc.getTechniques();
-                for (InputValidationTechnique_littlespidy t : techs) {
-                    t.setEnabled(set.contains(t.getId()));
-                }
-                fc.setTechniques(techs);
-            }
-        }
         if (rootTab.getInputValidationTab() != null && root.inputValidationRuns != null && !root.inputValidationRuns.isEmpty()) {
-            rootTab.getInputValidationTab().clearAllRunners();
+            List<com.littlespidy.apiinspector.model.InputValidationRun_littlespidy> restoredRuns = new ArrayList<>();
             for (InputValidationRunDTO rDto : root.inputValidationRuns) {
                 List<InputValidationTestResult_littlespidy> resList = new ArrayList<>();
                 if (rDto.results != null) {
                     for (InputValidationTestResultDTO tDto : rDto.results) {
-                        HttpRequest req = null;
-                        HttpResponse resp = null;
-                        if (tDto.requestBase64 != null && !tDto.requestBase64.isBlank()) {
-                            req = HttpRequest.httpRequest(ByteArray.byteArray(Base64.getDecoder().decode(tDto.requestBase64)));
-                        }
-                        if (tDto.responseBase64 != null && !tDto.responseBase64.isBlank()) {
-                            resp = HttpResponse.httpResponse(ByteArray.byteArray(Base64.getDecoder().decode(tDto.responseBase64)));
-                        }
+                        byte[] reqBytes = (tDto.requestBase64 != null && !tDto.requestBase64.isBlank()) ? Base64.getDecoder().decode(tDto.requestBase64) : null;
+                        byte[] respBytes = (tDto.responseBase64 != null && !tDto.responseBase64.isBlank()) ? Base64.getDecoder().decode(tDto.responseBase64) : null;
+                        HttpRequest req = (reqBytes != null) ? HttpRequest.httpRequest(ByteArray.byteArray(reqBytes)) : null;
+                        HttpResponse resp = (respBytes != null) ? HttpResponse.httpResponse(ByteArray.byteArray(respBytes)) : null;
                         HttpRequestResponse hrr = (req != null) ? HttpRequestResponse.httpRequestResponse(req, resp) : null;
                         InputValidationTestResult_littlespidy.ValidationSeverity sev = InputValidationTestResult_littlespidy.ValidationSeverity.INFO;
                         try {
@@ -997,12 +1055,52 @@ public class APIInspectorPersistenceManager_littlespidy {
                         resList.add(new InputValidationTestResult_littlespidy(
                                 tDto.id, tDto.method, tDto.targetUrl, tDto.parameterName,
                                 tDto.category, tDto.payload, tDto.statusCode, tDto.responseLength,
-                                tDto.detectionIndicator, sev, hrr
+                                tDto.detectionIndicator, sev, hrr,
+                                tDto.timestamp, reqBytes, respBytes
                         ));
                     }
                 }
-                rootTab.getInputValidationTab().restoreRunner(rDto.id, rDto.name, resList);
+                restoredRuns.add(new com.littlespidy.apiinspector.model.InputValidationRun_littlespidy(rDto.id, rDto.name, rDto.timestamp, resList));
             }
+            rootTab.getInputValidationTab().setSavedRuns(restoredRuns, root.selectedInputValidationRunnerId, root.inputValidationRunnerCounter);
+        }
+
+        // 12. Restore POST to GET Runners
+        if (rootTab.getPostToGetTab() != null && root.postToGetRuns != null && !root.postToGetRuns.isEmpty()) {
+            List<com.littlespidy.apiinspector.model.PostToGetRun_littlespidy> restoredRuns = new ArrayList<>();
+            for (PostToGetRunDTO rDto : root.postToGetRuns) {
+                List<com.littlespidy.apiinspector.model.PostToGetTestResult_littlespidy> resList = new ArrayList<>();
+                if (rDto.results != null) {
+                    for (PostToGetTestResultDTO tDto : rDto.results) {
+                        byte[] origReqBytes = (tDto.originalRequestBase64 != null && !tDto.originalRequestBase64.isBlank()) ? Base64.getDecoder().decode(tDto.originalRequestBase64) : null;
+                        byte[] origRespBytes = (tDto.originalResponseBase64 != null && !tDto.originalResponseBase64.isBlank()) ? Base64.getDecoder().decode(tDto.originalResponseBase64) : null;
+                        HttpRequest origReq = (origReqBytes != null) ? HttpRequest.httpRequest(ByteArray.byteArray(origReqBytes)) : null;
+                        HttpResponse origResp = (origRespBytes != null) ? HttpResponse.httpResponse(ByteArray.byteArray(origRespBytes)) : null;
+                        HttpRequestResponse origHrr = (origReq != null) ? HttpRequestResponse.httpRequestResponse(origReq, origResp) : null;
+
+                        byte[] mutReqBytes = (tDto.mutatedRequestBase64 != null && !tDto.mutatedRequestBase64.isBlank()) ? Base64.getDecoder().decode(tDto.mutatedRequestBase64) : null;
+                        byte[] mutRespBytes = (tDto.mutatedResponseBase64 != null && !tDto.mutatedResponseBase64.isBlank()) ? Base64.getDecoder().decode(tDto.mutatedResponseBase64) : null;
+                        HttpRequest mutReq = (mutReqBytes != null) ? HttpRequest.httpRequest(ByteArray.byteArray(mutReqBytes)) : null;
+                        HttpResponse mutResp = (mutRespBytes != null) ? HttpResponse.httpResponse(ByteArray.byteArray(mutRespBytes)) : null;
+                        HttpRequestResponse mutHrr = (mutReq != null) ? HttpRequestResponse.httpRequestResponse(mutReq, mutResp) : null;
+
+                        com.littlespidy.apiinspector.model.PostToGetTestResult_littlespidy res = new com.littlespidy.apiinspector.model.PostToGetTestResult_littlespidy(
+                                tDto.id, tDto.collectionId, tDto.collectionName, tDto.path, tDto.fullUrl,
+                                tDto.originalMethod, tDto.mutatedMethod, tDto.convertedQueryParams,
+                                tDto.originalStatusCode, tDto.mutatedStatusCode,
+                                tDto.originalResponseLength, tDto.mutatedResponseLength,
+                                tDto.verdict, origHrr, mutHrr
+                        );
+                        res.setOriginalRequestBytes(origReqBytes);
+                        res.setOriginalResponseBytes(origRespBytes);
+                        res.setMutatedRequestBytes(mutReqBytes);
+                        res.setMutatedResponseBytes(mutRespBytes);
+                        resList.add(res);
+                    }
+                }
+                restoredRuns.add(new com.littlespidy.apiinspector.model.PostToGetRun_littlespidy(rDto.id, rDto.name, rDto.timestamp, resList));
+            }
+            rootTab.getPostToGetTab().setSavedRuns(restoredRuns, root.selectedPostToGetRunnerId, root.postToGetRunnerCounter);
         }
 
         // Resync profile selections across tabs

@@ -239,10 +239,11 @@ public class UIEnhancementsTest_littlespidy {
         assertEquals("Auth Analyzer", tabbedPane.getTitleAt(4));
         assertEquals("CORS", tabbedPane.getTitleAt(5));
         assertEquals("Input Validation", tabbedPane.getTitleAt(6));
-        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(7));
-        assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(8));
-        assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(9));
-        assertEquals("Hidden API Storage", tabbedPane.getTitleAt(10));
+        assertEquals("POST to GET", tabbedPane.getTitleAt(7));
+        assertEquals("REST API Version Finder", tabbedPane.getTitleAt(8));
+        assertEquals("API Documentation Strategy", tabbedPane.getTitleAt(9));
+        assertEquals("API Endpoint Discovery Strategy", tabbedPane.getTitleAt(10));
+        assertEquals("Hidden API Storage", tabbedPane.getTitleAt(11));
     }
 
     @Test
@@ -618,9 +619,10 @@ public class UIEnhancementsTest_littlespidy {
         assertTrue(subItemNames.contains("Send to Hidden API Storage"));
         assertTrue(subItemNames.contains("Send to CORS Tester"));
         assertTrue(subItemNames.contains("Send to Input Validation Fuzzer"));
+        assertTrue(subItemNames.contains("Send to POST to GET Tester"));
         assertTrue(subItemNames.contains("API Documentation Intruder Strategy"));
         assertTrue(subItemNames.contains("API Endpoint Discovery Intruder Strategy"));
-        assertEquals(6, subItemNames.size(), "Must contain exactly six submenu items");
+        assertEquals(7, subItemNames.size(), "Must contain exactly seven submenu items");
     }
 
     @Test

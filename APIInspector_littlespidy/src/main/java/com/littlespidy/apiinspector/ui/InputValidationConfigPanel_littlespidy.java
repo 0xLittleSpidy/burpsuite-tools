@@ -2,16 +2,7 @@
 package com.littlespidy.apiinspector.ui;
 
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.http.HttpService;
-import burp.api.montoya.http.message.requests.HttpRequest;
-import com.littlespidy.apiinspector.model.AuthProfileComboItem_littlespidy;
-import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
-import com.littlespidy.apiinspector.model.DiscoveredEndpoint_littlespidy;
-import com.littlespidy.apiinspector.model.EndpointSelectionItem_littlespidy;
-import com.littlespidy.apiinspector.model.ImportedCollection_littlespidy;
-import com.littlespidy.apiinspector.model.InputValidationPayloadItem_littlespidy;
-import com.littlespidy.apiinspector.model.InputValidationTechnique_littlespidy;
-import com.littlespidy.apiinspector.model.NaughtyStringsParser_littlespidy;
+import com.littlespidy.apiinspector.model.*;
 import com.littlespidy.apiinspector.ui.AuthAnalyzerConfigTab_littlespidy.CollectionComboItem;
 
 import javax.swing.*;
@@ -20,24 +11,20 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Configuration sub-panel for Input Validation fuzzing.
- * Displays all individual attack payloads (boundary, extremes, delimiters, format strings)
- * as distinct table rows without aggregated counts or detection signature columns.
- * Features a three-tier layout:
- * Tier 1: Individual Payloads table with filtering, search, and row attack buttons.
- * Tier 2: Endpoints to Test panel with API Collection selector, filter, and endpoints checklist.
- * Tier 3: Execution controls, Auth Profile / Session header selection, thread/delay spinners, and batch Attack buttons.
+ * Configuration sub-panel for Input Validation testing and fuzzing.
+ * Tier 1: Input Validation payloads table (without Action column).
+ * Tier 2: Endpoints to Test panel with alphabetically sorted API collections.
+ * Tier 3: Execution controls matching Auth Analyzer layout with Threads, Delay,
+ * Runner name, Attack, Test Selected, Pause/Resume, and Cancel buttons.
  */
 public class InputValidationConfigPanel_littlespidy extends JPanel {
 
@@ -46,57 +33,49 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
     private APIInspectorTab_littlespidy rootTab;
     private APIImportTab_littlespidy importTabRef;
 
-    // Payloads UI
+    // Payloads Table UI
     private final List<InputValidationPayloadItem_littlespidy> allPayloads = new ArrayList<>();
     private final List<InputValidationPayloadItem_littlespidy> displayedPayloads = new ArrayList<>();
     private final PayloadTableModel payloadTableModel = new PayloadTableModel();
-    private final JTable payloadTable = new JTable(payloadTableModel);
-
-    private final JComboBox<String> categoryFilterCombo = new JComboBox<>(new String[]{
-            "All Payloads",
-            "BLNS: Reserved Identifiers",
-            "BLNS: Numeric Boundaries & Extremes",
-            "BLNS: Special Characters & Quotations",
-            "BLNS: Unicode & Encoding Quirks",
-            "BLNS: Format Strings & Unwanted Interpolation",
-            "Custom Wordlists"
-    });
-    private final JTextField payloadSearchField = new JTextField(14);
-    private final JLabel payloadCountLabel = new JLabel("0 payloads");
+    private final JTable payloadsTable = new JTable(payloadTableModel);
+    private final JComboBox<String> categoryFilterCombo = new JComboBox<>();
+    private final JTextField payloadSearchField = new JTextField(12);
+    private final JLabel payloadCountLabel = new JLabel("0 payloads (0 enabled)");
 
     // Endpoints Selection UI
     private JComboBox<CollectionComboItem> collectionSelectorCombo;
     private final EndpointSelectionTableModel_littlespidy endpointSelectionModel = new EndpointSelectionTableModel_littlespidy();
     private final JTable endpointSelectionTable = new JTable(endpointSelectionModel);
-    private final JTextField endpointFilterField = new JTextField(14);
+    private final JTextField endpointFilterField = new JTextField(16);
 
     // Execution Controls UI
     private final JComboBox<AuthProfileComboItem_littlespidy> authProfileCombo = new JComboBox<>();
-    private final JTextField sessionHeaderField = new JTextField(22);
-    private final JTextField targetEndpointField = new JTextField("https://example.com/api/v1/search?query=test", 24);
+    private final JTextField sessionHeaderField = new JTextField(18);
     private final JSpinner threadSpinner = new JSpinner(new SpinnerNumberModel(5, 1, 30, 1));
     private final JSpinner delaySpinner = new JSpinner(new SpinnerNumberModel(50, 0, 10000, 10));
     private final JTextField runnerNameField = new JTextField("Input Validation Runner 1", 14);
-    private final JButton attackSelectedBtn = new JButton("Attack Selected Endpoints (Batch Fuzz)");
-    private final JButton attackAllEndpointsBtn = new JButton("Attack All Endpoints");
+
+    private JButton attackAllEndpointsBtn;
+    private JButton attackSelectedBtn;
+    private JButton pauseBtn;
+    private JButton cancelBtn;
+    private JProgressBar progressBar;
+    private JLabel progressStatusLabel;
 
     private int runnerCount = 1;
 
     public InputValidationConfigPanel_littlespidy(MontoyaApi api) {
         super(new BorderLayout(6, 6));
         this.api = api;
-
-        // Load all individual payloads for retained input validation categories
         this.allPayloads.addAll(NaughtyStringsParser_littlespidy.loadAllIndividualPayloads());
-        this.displayedPayloads.addAll(this.allPayloads);
+        this.displayedPayloads.addAll(allPayloads);
 
         setBorder(new EmptyBorder(6, 6, 6, 6));
         initComponents();
-        updatePayloadCountLabel();
     }
 
-    public void setInputValidationTab(InputValidationTab_littlespidy inputValidationTab) {
-        this.inputValidationTab = inputValidationTab;
+    public void setInputValidationTab(InputValidationTab_littlespidy tab) {
+        this.inputValidationTab = tab;
     }
 
     public void setRootTab(APIInspectorTab_littlespidy rootTab) {
@@ -108,13 +87,13 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         refreshCollectionsCombo();
     }
 
-    public String getTargetEndpoint() {
-        return targetEndpointField.getText().trim();
-    }
-
-    public void setTargetEndpoint(String url) {
-        if (url != null && !url.isBlank()) {
-            targetEndpointField.setText(url.trim());
+    public void updateAvailableProfiles(List<AuthProfile_littlespidy> profiles) {
+        authProfileCombo.removeAllItems();
+        authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
+        if (profiles != null) {
+            for (AuthProfile_littlespidy p : profiles) {
+                authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(p, p.getName() + " (" + p.getMaskedSummary() + ")"));
+            }
         }
     }
 
@@ -134,96 +113,104 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         delaySpinner.setValue(Math.max(0, delay));
     }
 
-    public List<InputValidationPayloadItem_littlespidy> getPayloadItems() {
+    public List<InputValidationPayloadItem_littlespidy> getPayloads() {
         return new ArrayList<>(allPayloads);
     }
 
-    public void setPayloadItems(List<InputValidationPayloadItem_littlespidy> newItems) {
+    public List<InputValidationPayloadItem_littlespidy> getPayloadItems() {
+        return getPayloads();
+    }
+
+    public void setPayloads(List<InputValidationPayloadItem_littlespidy> newPayloads) {
         allPayloads.clear();
-        if (newItems != null) {
-            allPayloads.addAll(newItems);
+        if (newPayloads != null) {
+            allPayloads.addAll(newPayloads);
         } else {
             allPayloads.addAll(NaughtyStringsParser_littlespidy.loadAllIndividualPayloads());
         }
         applyFilter();
     }
 
+    public void setPayloadItems(List<InputValidationPayloadItem_littlespidy> items) {
+        setPayloads(items);
+    }
+
+    public EndpointSelectionTableModel_littlespidy getEndpointSelectionModel() {
+        return endpointSelectionModel;
+    }
+
     public List<InputValidationTechnique_littlespidy> getTechniques() {
-        return NaughtyStringsParser_littlespidy.loadDefaultBlnsTechniques();
+        return InputValidationTechnique_littlespidy.getDefaultTechniques();
     }
 
-    public void setTechniques(List<InputValidationTechnique_littlespidy> techniques) {
-        applyFilter();
+    public void setTechniques(List<InputValidationTechnique_littlespidy> techs) {
     }
 
-    public void updateAvailableProfiles(List<AuthProfile_littlespidy> profiles) {
-        authProfileCombo.removeAllItems();
-        authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
-        if (profiles != null) {
-            for (AuthProfile_littlespidy p : profiles) {
-                authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(p, p.getName() + " (" + p.getMaskedSummary() + ")"));
-            }
-        }
+    public String getTargetEndpoint() {
+        return "";
+    }
+
+    public void setTargetEndpoint(String target) {
     }
 
     private void initComponents() {
         JPanel centerContainer = new JPanel(new BorderLayout(4, 4));
 
-        // 1. Tier 1 (Top): Individual Payloads Panel
+        // 1. Tier 1 (Top): Payloads Table Panel
         JPanel payloadsPanel = new JPanel(new BorderLayout(4, 4));
-        payloadsPanel.setBorder(new TitledBorder("Input Validation Individual Attack Payloads"));
+        payloadsPanel.setBorder(new TitledBorder("Input Validation & Fuzzing Payloads"));
 
-        JPanel filterBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        filterBar.add(new JLabel("Category:"));
+        JPanel payloadToolBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+
+        categoryFilterCombo.addItem("All Payloads");
+        categoryFilterCombo.addItem("BLNS: Reserved Identifiers");
+        categoryFilterCombo.addItem("BLNS: Numeric Boundaries & Extremes");
+        categoryFilterCombo.addItem("BLNS: Special Characters & Quotations");
+        categoryFilterCombo.addItem("BLNS: Unicode & Encoding Quirks");
+        categoryFilterCombo.addItem("BLNS: Format Strings & Unwanted Interpolation");
+        categoryFilterCombo.addItem("Custom Wordlists");
         categoryFilterCombo.addActionListener(e -> applyFilter());
-        filterBar.add(categoryFilterCombo);
+        payloadToolBar.add(new JLabel("Category:"));
+        payloadToolBar.add(categoryFilterCombo);
 
-        filterBar.add(new JLabel("Search:"));
         payloadSearchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
             @Override public void removeUpdate(DocumentEvent e) { applyFilter(); }
             @Override public void changedUpdate(DocumentEvent e) { applyFilter(); }
         });
-        filterBar.add(payloadSearchField);
+        payloadToolBar.add(new JLabel("Search:"));
+        payloadToolBar.add(payloadSearchField);
 
         JButton selectAllBtn = new JButton("Select All");
         selectAllBtn.addActionListener(e -> {
-            for (InputValidationPayloadItem_littlespidy p : displayedPayloads) {
-                p.setEnabled(true);
+            for (InputValidationPayloadItem_littlespidy item : displayedPayloads) {
+                item.setEnabled(true);
             }
             payloadTableModel.fireTableDataChanged();
             updatePayloadCountLabel();
         });
-        filterBar.add(selectAllBtn);
-
         JButton deselectAllBtn = new JButton("Deselect All");
         deselectAllBtn.addActionListener(e -> {
-            for (InputValidationPayloadItem_littlespidy p : displayedPayloads) {
-                p.setEnabled(false);
+            for (InputValidationPayloadItem_littlespidy item : displayedPayloads) {
+                item.setEnabled(false);
             }
             payloadTableModel.fireTableDataChanged();
             updatePayloadCountLabel();
         });
-        filterBar.add(deselectAllBtn);
+        payloadToolBar.add(selectAllBtn);
+        payloadToolBar.add(deselectAllBtn);
+        payloadToolBar.add(payloadCountLabel);
 
-        JButton loadCustomBtn = new JButton("Load Custom Wordlist...");
-        loadCustomBtn.addActionListener(e -> loadCustomWordlist());
-        filterBar.add(loadCustomBtn);
+        payloadsPanel.add(payloadToolBar, BorderLayout.NORTH);
 
-        filterBar.add(payloadCountLabel);
-        payloadsPanel.add(filterBar, BorderLayout.NORTH);
+        payloadsTable.setFillsViewportHeight(true);
+        payloadsTable.setRowHeight(24);
+        payloadsTable.getColumnModel().getColumn(0).setMaxWidth(60);
+        payloadsTable.getColumnModel().getColumn(1).setMaxWidth(70);
+        payloadsTable.getColumnModel().getColumn(2).setPreferredWidth(160);
+        payloadsTable.getColumnModel().getColumn(3).setPreferredWidth(450);
 
-        payloadTable.setFillsViewportHeight(true);
-        payloadTable.setRowHeight(24);
-        payloadTable.getColumnModel().getColumn(0).setMaxWidth(55);
-        payloadTable.getColumnModel().getColumn(1).setMaxWidth(85);
-        payloadTable.getColumnModel().getColumn(2).setPreferredWidth(220);
-        payloadTable.getColumnModel().getColumn(3).setPreferredWidth(400);
-        payloadTable.getColumnModel().getColumn(4).setMaxWidth(90);
-
-        payloadTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-        payloadTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox(), this::launchSinglePayloadAttack));
-        payloadsPanel.add(new JScrollPane(payloadTable), BorderLayout.CENTER);
+        payloadsPanel.add(new JScrollPane(payloadsTable), BorderLayout.CENTER);
 
         // 2. Tier 2 (Middle): Endpoints to Test Panel
         JPanel endpointsPanel = new JPanel(new BorderLayout(4, 4));
@@ -297,50 +284,74 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
 
         add(centerContainer, BorderLayout.CENTER);
 
-        // 3. Tier 3 (Bottom): Execution Controls Panel
-        JPanel execControlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        // 3. Tier 3 (Bottom): Execution Controls Panel (Matching Auth Analyzer)
+        JPanel execControlsPanel = new JPanel();
+        execControlsPanel.setLayout(new BoxLayout(execControlsPanel, BoxLayout.Y_AXIS));
         execControlsPanel.setBorder(new TitledBorder("Execution Controls"));
 
-        execControlsPanel.add(new JLabel("Auth Profile / Session:"));
-        authProfileCombo.setPreferredSize(new Dimension(220, 24));
+        JPanel singleLineControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 3));
+
+        singleLineControls.add(new JLabel("Auth Profile:"));
+        authProfileCombo.setPreferredSize(new Dimension(180, 24));
         authProfileCombo.addItem(new AuthProfileComboItem_littlespidy(null, "[No Auth / Unauthenticated]"));
         authProfileCombo.addActionListener(e -> onAuthProfileSelectionChanged());
-        execControlsPanel.add(authProfileCombo);
+        singleLineControls.add(authProfileCombo);
 
-        execControlsPanel.add(new JLabel("Auth Header:"));
+        singleLineControls.add(new JLabel("Auth Header:"));
+        sessionHeaderField.setPreferredSize(new Dimension(140, 24));
         sessionHeaderField.setToolTipText("Enter raw auth header (e.g. Authorization: Bearer <token>)");
-        execControlsPanel.add(sessionHeaderField);
+        singleLineControls.add(sessionHeaderField);
 
-        execControlsPanel.add(new JLabel("Threads:"));
-        execControlsPanel.add(threadSpinner);
+        singleLineControls.add(new JLabel("Threads:"));
+        threadSpinner.setPreferredSize(new Dimension(55, 24));
+        singleLineControls.add(threadSpinner);
 
-        execControlsPanel.add(new JLabel("Delay (ms):"));
-        execControlsPanel.add(delaySpinner);
+        singleLineControls.add(new JLabel("Delay (ms):"));
+        delaySpinner.setPreferredSize(new Dimension(65, 24));
+        singleLineControls.add(delaySpinner);
 
-        execControlsPanel.add(new JLabel("Runner Name:"));
-        execControlsPanel.add(runnerNameField);
+        singleLineControls.add(new JLabel("Runner:"));
+        runnerNameField.setPreferredSize(new Dimension(140, 24));
+        singleLineControls.add(runnerNameField);
 
-        attackSelectedBtn.setFont(attackSelectedBtn.getFont().deriveFont(Font.BOLD));
-        attackSelectedBtn.addActionListener(e -> launchAttackForSelectedEndpoints());
-        execControlsPanel.add(attackSelectedBtn);
-
+        attackAllEndpointsBtn = new JButton("Attack");
+        attackAllEndpointsBtn.setFont(attackAllEndpointsBtn.getFont().deriveFont(Font.BOLD));
         attackAllEndpointsBtn.addActionListener(e -> {
-            if (importTabRef != null && importTabRef.getSelectedCollection() != null) {
-                CollectionComboItem currentSel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
-                if (currentSel == null || currentSel.collection == null) {
-                    selectCollection(importTabRef.getSelectedCollection());
-                }
-            }
             endpointSelectionModel.selectAll(true);
             launchAttackForSelectedEndpoints();
         });
-        execControlsPanel.add(attackAllEndpointsBtn);
+        singleLineControls.add(attackAllEndpointsBtn);
+
+        attackSelectedBtn = new JButton("Test Selected");
+        attackSelectedBtn.addActionListener(e -> launchAttackForSelectedEndpoints());
+        singleLineControls.add(attackSelectedBtn);
+
+        pauseBtn = new JButton("Pause");
+        pauseBtn.setEnabled(false);
+        pauseBtn.addActionListener(e -> onTogglePause());
+        singleLineControls.add(pauseBtn);
+
+        cancelBtn = new JButton("Cancel");
+        cancelBtn.setEnabled(false);
+        cancelBtn.addActionListener(e -> onCancelAttack());
+        singleLineControls.add(cancelBtn);
+
+        execControlsPanel.add(singleLineControls);
+
+        progressBar = new JProgressBar();
+        progressBar.setStringPainted(true);
+        progressBar.setVisible(false);
+        progressBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        execControlsPanel.add(progressBar);
+
+        progressStatusLabel = new JLabel("Ready");
+        progressStatusLabel.setFont(progressStatusLabel.getFont().deriveFont(Font.PLAIN, 11f));
+        progressStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        progressStatusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        execControlsPanel.add(progressStatusLabel);
 
         add(execControlsPanel, BorderLayout.SOUTH);
-    }
-
-    public EndpointSelectionTableModel_littlespidy getEndpointSelectionModel() {
-        return endpointSelectionModel;
+        updatePayloadCountLabel();
     }
 
     private void onAuthProfileSelectionChanged() {
@@ -358,46 +369,29 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         String selectedCategory = (String) categoryFilterCombo.getSelectedItem();
         String search = payloadSearchField.getText().trim().toLowerCase(Locale.ROOT);
         displayedPayloads.clear();
-
         for (InputValidationPayloadItem_littlespidy item : allPayloads) {
-            // Category check
-            boolean categoryMatch = true;
-            if ("Custom Wordlists".equals(selectedCategory)) {
-                categoryMatch = item.isCustom();
-            } else if (selectedCategory != null && !"All Payloads".equals(selectedCategory)) {
-                categoryMatch = item.getCategory().toLowerCase(Locale.ROOT).contains(selectedCategory.toLowerCase(Locale.ROOT));
+            boolean catMatch = selectedCategory == null || "All Categories".equals(selectedCategory)
+                    || item.getCategory().equalsIgnoreCase(selectedCategory);
+            boolean searchMatch = search.isEmpty() || item.getPayload().toLowerCase(Locale.ROOT).contains(search)
+                    || item.getId().toLowerCase(Locale.ROOT).contains(search);
+            if (catMatch && searchMatch) {
+                displayedPayloads.add(item);
             }
-
-            if (!categoryMatch) {
-                continue;
-            }
-
-            // Search query check
-            if (!search.isEmpty()) {
-                String id = item.getId().toLowerCase(Locale.ROOT);
-                String cat = item.getCategory().toLowerCase(Locale.ROOT);
-                String val = item.getPayload().toLowerCase(Locale.ROOT);
-                String desc = item.getDescription().toLowerCase(Locale.ROOT);
-
-                if (!id.contains(search) && !cat.contains(search) && !val.contains(search) && !desc.contains(search)) {
-                    continue;
-                }
-            }
-
-            displayedPayloads.add(item);
         }
-
         payloadTableModel.fireTableDataChanged();
         updatePayloadCountLabel();
     }
 
     private void updatePayloadCountLabel() {
-        long enabledCount = allPayloads.stream().filter(InputValidationPayloadItem_littlespidy::isEnabled).count();
-        payloadCountLabel.setText("Showing " + displayedPayloads.size() + " / " + allPayloads.size() + " payloads (" + enabledCount + " enabled)");
+        int total = allPayloads.size();
+        int enabled = 0;
+        for (InputValidationPayloadItem_littlespidy item : allPayloads) {
+            if (item.isEnabled()) enabled++;
+        }
+        payloadCountLabel.setText(total + " payloads (" + enabled + " enabled)");
     }
 
     public void refreshCollectionsCombo() {
-        if (collectionSelectorCombo == null) return;
         ImportedCollection_littlespidy prevSelected = null;
         CollectionComboItem sel = (CollectionComboItem) collectionSelectorCombo.getSelectedItem();
         if (sel != null && sel.collection != null) {
@@ -408,13 +402,14 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
 
         collectionSelectorCombo.removeAllItems();
         if (importTabRef != null) {
-            List<ImportedCollection_littlespidy> allCols = importTabRef.getAllCollections();
+            List<ImportedCollection_littlespidy> allCols = new ArrayList<>(importTabRef.getAllCollections());
+            allCols.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(
+                    a.getName() != null ? a.getName() : "",
+                    b.getName() != null ? b.getName() : ""));
             collectionSelectorCombo.addItem(new CollectionComboItem(null, "[All Imported Collections]"));
             for (ImportedCollection_littlespidy c : allCols) {
                 collectionSelectorCombo.addItem(new CollectionComboItem(c, c.getName() + " (" + c.getEndpointCount() + ")"));
             }
-        } else {
-            collectionSelectorCombo.addItem(new CollectionComboItem(null, "[No Collections Loaded]"));
         }
         if (prevSelected != null) {
             selectCollection(prevSelected);
@@ -476,52 +471,12 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         endpointSelectionModel.applyFilter(endpointFilterField.getText());
     }
 
-    private void loadCustomWordlist() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Select Wordlist File (.txt)");
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File f = chooser.getSelectedFile();
-            try {
-                List<InputValidationPayloadItem_littlespidy> customItems = NaughtyStringsParser_littlespidy.parseCustomFileToPayloads(f);
-                allPayloads.addAll(customItems);
-                applyFilter();
-                JOptionPane.showMessageDialog(this,
-                        "Successfully loaded wordlist: " + f.getName() + " (" + customItems.size() + " payloads).",
-                        "Wordlist Loaded",
-                        JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Failed to load wordlist: " + ex.getMessage(),
-                        "Load Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
     private void launchAttackForSelectedEndpoints() {
         if (inputValidationTab == null || rootTab == null) return;
 
         List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
         if (selectedEndpoints.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "No endpoints selected. Please select at least one endpoint from the collection to test.",
-                    "Selection Required",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        List<InputValidationPayloadItem_littlespidy> activePayloads = new ArrayList<>();
-        for (InputValidationPayloadItem_littlespidy p : allPayloads) {
-            if (p.isEnabled()) {
-                activePayloads.add(p);
-            }
-        }
-
-        if (activePayloads.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "No payloads enabled. Check at least one payload to run attacks.",
-                    "Configuration Required",
-                    JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select at least one endpoint to test.", "No Endpoints Selected", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -534,12 +489,17 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
         String customAuthHeader = sessionHeaderField.getText().trim();
 
-        // Switch to Input Validation tab
+        List<InputValidationPayloadItem_littlespidy> activePayloads = new ArrayList<>();
+        for (InputValidationPayloadItem_littlespidy p : allPayloads) {
+            if (p.isEnabled()) activePayloads.add(p);
+        }
+
+        setExecutionUIState(true);
         rootTab.selectTab(inputValidationTab);
 
         inputValidationTab.executeAttack(
                 selectedEndpoints,
-                getTargetEndpoint(),
+                null,
                 profile,
                 customAuthHeader,
                 activePayloads,
@@ -551,42 +511,57 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
         runnerNameField.setText("Input Validation Runner " + (++runnerCount));
     }
 
-    private void launchSinglePayloadAttack(int rowIndex) {
-        if (inputValidationTab == null || rootTab == null || rowIndex < 0 || rowIndex >= displayedPayloads.size()) return;
-
-        List<EndpointSelectionItem_littlespidy> selectedEndpoints = endpointSelectionModel.getSelectedItems();
-        if (selectedEndpoints.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "No endpoints selected. Please select at least one endpoint from the collection to test.",
-                    "Selection Required",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
+    private void onTogglePause() {
+        if (inputValidationTab != null && inputValidationTab.getInputValidationEngine() != null) {
+            var eng = inputValidationTab.getInputValidationEngine();
+            if (eng.isPaused()) {
+                eng.resume();
+                pauseBtn.setText("Pause");
+                progressStatusLabel.setText("Resumed Input Validation test run...");
+            } else {
+                eng.pause();
+                pauseBtn.setText("Resume");
+                progressStatusLabel.setText("Paused Input Validation test run");
+            }
         }
+    }
 
-        InputValidationPayloadItem_littlespidy payloadItem = displayedPayloads.get(rowIndex);
-        String runnerName = "Fuzz - " + payloadItem.getId();
+    private void onCancelAttack() {
+        if (inputValidationTab != null && inputValidationTab.getInputValidationEngine() != null) {
+            inputValidationTab.getInputValidationEngine().cancel();
+        }
+        progressStatusLabel.setText("Cancelling Input Validation test run...");
+        cancelBtn.setEnabled(false);
+    }
 
-        AuthProfileComboItem_littlespidy authSel = (AuthProfileComboItem_littlespidy) authProfileCombo.getSelectedItem();
-        AuthProfile_littlespidy profile = authSel != null ? authSel.profile : null;
-        String customAuthHeader = sessionHeaderField.getText().trim();
+    public void setExecutionUIState(boolean running) {
+        attackAllEndpointsBtn.setEnabled(!running);
+        attackSelectedBtn.setEnabled(!running);
+        cancelBtn.setEnabled(running);
+        if (pauseBtn != null) {
+            pauseBtn.setEnabled(running);
+            pauseBtn.setText("Pause");
+        }
+        progressBar.setVisible(running);
+    }
 
-        // Switch to Input Validation tab
-        rootTab.selectTab(inputValidationTab);
+    public void updateProgress(int completedCount, int totalCount, String status) {
+        progressBar.setMaximum(totalCount);
+        progressBar.setValue(completedCount);
+        progressStatusLabel.setText(status);
+    }
 
-        inputValidationTab.executeAttack(
-                selectedEndpoints,
-                getTargetEndpoint(),
-                profile,
-                customAuthHeader,
-                Collections.singletonList(payloadItem),
-                1,
-                getDelayMs(),
-                runnerName
-        );
+    public void onAttackFinished(boolean cancelled, int totalCompleted) {
+        setExecutionUIState(false);
+        if (cancelled) {
+            progressStatusLabel.setText("Input Validation test run cancelled. Total completed: " + totalCompleted);
+        } else {
+            progressStatusLabel.setText("Input Validation test run finished. Total completed: " + totalCompleted);
+        }
     }
 
     private class PayloadTableModel extends AbstractTableModel {
-        private final String[] columns = {"Enable", "ID", "Category", "Payload Value", "Action"};
+        private final String[] columns = {"Enable", "ID", "Category", "Payload Value"};
 
         @Override
         public int getRowCount() {
@@ -611,7 +586,7 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
 
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return columnIndex == 0 || columnIndex == 4;
+            return columnIndex == 0;
         }
 
         @Override
@@ -623,7 +598,6 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
                 case 1: return item.getId();
                 case 2: return item.getCategory();
                 case 3: return item.getPayload();
-                case 4: return "Attack";
                 default: return "";
             }
         }
@@ -637,55 +611,6 @@ public class InputValidationConfigPanel_littlespidy extends JPanel {
                 fireTableCellUpdated(rowIndex, columnIndex);
                 updatePayloadCountLabel();
             }
-        }
-    }
-
-    private static class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer() {
-            setOpaque(true);
-            setMargin(new Insets(1, 4, 1, 4));
-            setFont(getFont().deriveFont(Font.PLAIN, 11f));
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-            setText(value != null ? value.toString() : "Attack");
-            return this;
-        }
-    }
-
-    private static class ButtonEditor extends DefaultCellEditor {
-        private final JButton button;
-        private final java.util.function.Consumer<Integer> action;
-        private int currentRow;
-
-        public ButtonEditor(JCheckBox checkBox, java.util.function.Consumer<Integer> action) {
-            super(checkBox);
-            this.action = action;
-            this.button = new JButton();
-            this.button.setOpaque(true);
-            this.button.setMargin(new Insets(1, 4, 1, 4));
-            this.button.setFont(this.button.getFont().deriveFont(Font.PLAIN, 11f));
-            this.button.addActionListener(e -> {
-                fireEditingStopped();
-                if (action != null) {
-                    action.accept(currentRow);
-                }
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                                                     boolean isSelected, int row, int column) {
-            this.currentRow = row;
-            button.setText(value != null ? value.toString() : "Attack");
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            return "Attack";
         }
     }
 }

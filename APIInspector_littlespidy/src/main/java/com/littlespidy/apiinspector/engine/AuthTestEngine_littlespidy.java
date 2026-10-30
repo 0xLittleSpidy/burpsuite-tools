@@ -25,6 +25,7 @@ public class AuthTestEngine_littlespidy {
     private final Http http;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
+    private final AtomicBoolean paused = new AtomicBoolean(false);
     private ExecutorService executor;
 
     public AuthTestEngine_littlespidy(Http http) {
@@ -38,10 +39,23 @@ public class AuthTestEngine_littlespidy {
     public synchronized void stopTesting() {
         if (running.get()) {
             cancelled.set(true);
+            paused.set(false);
             if (executor != null && !executor.isShutdown()) {
                 executor.shutdownNow();
             }
         }
+    }
+
+    public void pause() {
+        paused.set(true);
+    }
+
+    public void resume() {
+        paused.set(false);
+    }
+
+    public boolean isPaused() {
+        return paused.get();
     }
 
     /**
@@ -71,6 +85,7 @@ public class AuthTestEngine_littlespidy {
 
         running.set(true);
         cancelled.set(false);
+        paused.set(false);
 
         Thread coordinator = new Thread(() -> {
             try {
@@ -87,6 +102,17 @@ public class AuthTestEngine_littlespidy {
                     if (cancelled.get()) break;
 
                     executor.submit(() -> {
+                        if (cancelled.get()) return;
+
+                        while (paused.get() && !cancelled.get()) {
+                            try {
+                                Thread.sleep(200);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                return;
+                            }
+                        }
+
                         if (cancelled.get()) return;
 
                         if (delayMs > 0) {

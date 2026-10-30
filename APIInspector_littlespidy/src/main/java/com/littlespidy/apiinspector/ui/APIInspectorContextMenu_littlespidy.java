@@ -111,6 +111,18 @@ public class APIInspectorContextMenu_littlespidy implements ContextMenuItemsProv
         });
         apiInspectorMenu.add(fuzzItem);
 
+        // Action 5: Send to POST to GET Tester
+        JMenuItem postToGetItem = new JMenuItem("Send to POST to GET Tester");
+        postToGetItem.addActionListener(e -> {
+            for (HttpRequestResponse target : targets) {
+                if (target.request() != null) {
+                    rootTab.getPostToGetTab().sendToPostToGet(target.request(), target.hasResponse() ? target.response() : null);
+                }
+            }
+            rootTab.selectTab(rootTab.getPostToGetTab());
+        });
+        apiInspectorMenu.add(postToGetItem);
+
         apiInspectorMenu.addSeparator();
 
         // Action 5: API Documentation Intruder Strategy

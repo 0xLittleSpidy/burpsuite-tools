@@ -30,6 +30,7 @@ public class InputValidationEngine_littlespidy {
 
     private final MontoyaApi api;
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
+    private final AtomicBoolean paused = new AtomicBoolean(false);
     private ExecutorService threadPool;
 
     public InputValidationEngine_littlespidy(MontoyaApi api) {
@@ -38,9 +39,22 @@ public class InputValidationEngine_littlespidy {
 
     public void cancel() {
         cancelled.set(true);
+        paused.set(false);
         if (threadPool != null && !threadPool.isShutdown()) {
             threadPool.shutdownNow();
         }
+    }
+
+    public void pause() {
+        paused.set(true);
+    }
+
+    public void resume() {
+        paused.set(false);
+    }
+
+    public boolean isPaused() {
+        return paused.get();
     }
 
     public boolean isCancelled() {
@@ -55,6 +69,7 @@ public class InputValidationEngine_littlespidy {
             InputValidationProgressListener_littlespidy listener) {
 
         cancelled.set(false);
+        paused.set(false);
         int threads = Math.max(1, threadCount);
         this.threadPool = Executors.newFixedThreadPool(threads);
 
@@ -147,6 +162,7 @@ public class InputValidationEngine_littlespidy {
             InputValidationProgressListener_littlespidy listener) {
 
         cancelled.set(false);
+        paused.set(false);
         int threads = Math.max(1, threadCount);
         this.threadPool = Executors.newFixedThreadPool(threads);
 
@@ -245,6 +261,7 @@ public class InputValidationEngine_littlespidy {
             InputValidationProgressListener_littlespidy listener) {
 
         cancelled.set(false);
+        paused.set(false);
         int threads = Math.max(1, threadCount);
         this.threadPool = Executors.newFixedThreadPool(threads);
 
@@ -368,6 +385,17 @@ public class InputValidationEngine_littlespidy {
         pool.submit(() -> {
             if (cancelled.get()) return;
 
+            while (paused.get() && !cancelled.get()) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            if (cancelled.get()) return;
+
             try {
                 if (delayMs > 0) {
                     Thread.sleep(delayMs);
@@ -429,6 +457,17 @@ public class InputValidationEngine_littlespidy {
         if (cancelled.get()) return;
 
         pool.submit(() -> {
+            if (cancelled.get()) return;
+
+            while (paused.get() && !cancelled.get()) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
             if (cancelled.get()) return;
 
             try {

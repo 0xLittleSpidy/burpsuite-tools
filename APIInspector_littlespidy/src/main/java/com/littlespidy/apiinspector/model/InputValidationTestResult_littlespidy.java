@@ -35,15 +35,28 @@ public class InputValidationTestResult_littlespidy {
     private final int responseLength;
     private final String detectionIndicator;
     private final ValidationSeverity severity;
-    private final HttpRequestResponse httpRequestResponse;
+    private HttpRequestResponse httpRequestResponse;
     private final long timestamp;
     private String classification; // "TRUE_POSITIVE", "FALSE_POSITIVE", or null/empty
+    private byte[] requestBytes;
+    private byte[] responseBytes;
 
     public InputValidationTestResult_littlespidy(
             int id, String method, String targetUrl, String parameterName,
             String category, String payload, int statusCode, int responseLength,
             String detectionIndicator, ValidationSeverity severity,
             HttpRequestResponse httpRequestResponse) {
+        this(id, method, targetUrl, parameterName, category, payload, statusCode,
+                responseLength, detectionIndicator, severity, httpRequestResponse,
+                System.currentTimeMillis(), null, null);
+    }
+
+    public InputValidationTestResult_littlespidy(
+            int id, String method, String targetUrl, String parameterName,
+            String category, String payload, int statusCode, int responseLength,
+            String detectionIndicator, ValidationSeverity severity,
+            HttpRequestResponse httpRequestResponse,
+            long timestamp, byte[] requestBytes, byte[] responseBytes) {
         this.id = id;
         this.method = method != null ? method : "GET";
         this.targetUrl = targetUrl != null ? targetUrl : "";
@@ -55,7 +68,18 @@ public class InputValidationTestResult_littlespidy {
         this.detectionIndicator = detectionIndicator != null ? detectionIndicator : "";
         this.severity = severity != null ? severity : ValidationSeverity.INFO;
         this.httpRequestResponse = httpRequestResponse;
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = timestamp > 0 ? timestamp : System.currentTimeMillis();
+        this.requestBytes = requestBytes;
+        this.responseBytes = responseBytes;
+
+        if (httpRequestResponse != null) {
+            if (this.requestBytes == null && httpRequestResponse.request() != null) {
+                this.requestBytes = httpRequestResponse.request().toByteArray().getBytes();
+            }
+            if (this.responseBytes == null && httpRequestResponse.hasResponse() && httpRequestResponse.response() != null) {
+                this.responseBytes = httpRequestResponse.response().toByteArray().getBytes();
+            }
+        }
     }
 
     public int getId() {
@@ -102,6 +126,10 @@ public class InputValidationTestResult_littlespidy {
         return httpRequestResponse;
     }
 
+    public void setHttpRequestResponse(HttpRequestResponse reqResp) {
+        this.httpRequestResponse = reqResp;
+    }
+
     public String getClassification() {
         return classification;
     }
@@ -112,5 +140,21 @@ public class InputValidationTestResult_littlespidy {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public byte[] getRequestBytes() {
+        return requestBytes;
+    }
+
+    public void setRequestBytes(byte[] requestBytes) {
+        this.requestBytes = requestBytes;
+    }
+
+    public byte[] getResponseBytes() {
+        return responseBytes;
+    }
+
+    public void setResponseBytes(byte[] responseBytes) {
+        this.responseBytes = responseBytes;
     }
 }
