@@ -28,6 +28,14 @@ public class NaughtyStringsParser_littlespidy {
     private static final String DEFAULT_CATEGORIES_PATH = "/com/littlespidy/apiinspector/payloads/input_validation_categories_littlespidy.json";
 
     public static List<InputValidationTechnique_littlespidy> loadDefaultBlnsTechniques() {
+        List<InputValidationTechnique_littlespidy> loaded = loadCategoriesMetadata();
+        if (loaded != null && !loaded.isEmpty()) {
+            boolean hasPayloads = loaded.stream().anyMatch(t -> t.getSamplePayloads() != null && !t.getSamplePayloads().isEmpty());
+            if (hasPayloads) {
+                return loaded;
+            }
+        }
+
         InputStream is = NaughtyStringsParser_littlespidy.class.getResourceAsStream(DEFAULT_WORDLIST_PATH);
         if (is == null) {
             // Fallback: check file directly relative to working directory or repo root
