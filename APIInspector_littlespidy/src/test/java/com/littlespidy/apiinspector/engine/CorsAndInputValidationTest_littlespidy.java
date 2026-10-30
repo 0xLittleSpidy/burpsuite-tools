@@ -16,6 +16,7 @@ import com.littlespidy.apiinspector.model.InputValidationPayloadItem_littlespidy
 import com.littlespidy.apiinspector.model.InputValidationTechnique_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTestResult_littlespidy;
 import com.littlespidy.apiinspector.model.InputValidationTestResult_littlespidy.ValidationSeverity;
+import com.littlespidy.apiinspector.model.NaughtyStringsParser_littlespidy;
 import com.littlespidy.apiinspector.ui.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,8 @@ public class CorsAndInputValidationTest_littlespidy {
                 .filter(t -> t.getId().equals("dot_underscore_dot"))
                 .findFirst().orElse(null);
         assertNotNull(dotUnderscore);
+        assertNotNull(dotUnderscore.getOriginTemplate(), "Origin template must be populated from JSON");
+        assertEquals("https://{base}._.{attacker}", dotUnderscore.getOriginTemplate());
         assertEquals("https://target.corp._.attacker.com",
                 dotUnderscore.resolveOrigin("https://target.corp", "attacker.com"));
 
@@ -106,7 +109,7 @@ public class CorsAndInputValidationTest_littlespidy {
     @DisplayName("Verify Input Validation categories, payloads, and response signatures")
     void testInputValidationTechniquesAndEvaluation() {
         List<InputValidationTechnique_littlespidy> techs = InputValidationTechnique_littlespidy.getDefaultTechniques();
-        assertTrue(techs.size() >= 6, "Must provide at least 6 core vulnerability categories");
+        assertTrue(techs.size() >= 5, "Must provide at least 5 retained vulnerability categories");
 
         HttpRequest req = com.littlespidy.apiinspector.TestMockHelper_littlespidy.createMockRequest("GET", "https://example.com/search?q=test", "/search?q=test", java.util.Collections.emptyMap(), "");
 
@@ -275,5 +278,37 @@ public class CorsAndInputValidationTest_littlespidy {
         assertNull(valRes.getClassification());
         valRes.setClassification("FALSE_POSITIVE");
         assertEquals("FALSE_POSITIVE", valRes.getClassification());
+    }
+
+    @Test
+    @DisplayName("Verify CORS techniques successfully deserialize from JSON resource file")
+    void testCorsTechniquesLoadedFromJson() {
+        List<CorsTechnique_littlespidy> techs = CorsTechnique_littlespidy.getDefaultTechniques();
+        assertNotNull(techs, "CORS techniques list must not be null");
+        assertEquals(30, techs.size(), "Should load exactly 30 CORS techniques (arbitrary + 29 PortSwigger techniques)");
+
+        // Verify key techniques have their originTemplate property mapped from JSON
+        CorsTechnique_littlespidy trustedNull = techs.stream().filter(t -> "trusted_null".equals(t.getId())).findFirst().orElse(null);
+        assertNotNull(trustedNull);
+        assertEquals("null", trustedNull.getOriginTemplate());
+
+        CorsTechnique_littlespidy subdomainTrust = techs.stream().filter(t -> "trust_subdomain".equals(t.getId())).findFirst().orElse(null);
+        assertNotNull(subdomainTrust);
+        assertEquals("https://{attacker}.{base}", subdomainTrust.getOriginTemplate());
+        assertEquals("https://evil.corp.target.com", subdomainTrust.resolveOrigin("target.com", "evil.corp"));
+    }
+
+    @Test
+    @DisplayName("Verify Input Validation categories deserialize from JSON resource file")
+    void testInputValidationCategoriesLoadedFromJson() {
+        List<InputValidationTechnique_littlespidy> categories = NaughtyStringsParser_littlespidy.loadCategoriesMetadata();
+        assertNotNull(categories, "Categories metadata must not be null");
+        assertEquals(5, categories.size(), "Should contain 5 retained BLNS categories");
+
+        InputValidationTechnique_littlespidy numeric = categories.stream().filter(c -> "blns_numeric".equals(c.getId())).findFirst().orElse(null);
+        assertNotNull(numeric);
+        assertEquals("BLNS: Numeric Boundaries & Extremes", numeric.getCategory());
+        assertFalse(numeric.getErrorSignatures().isEmpty(), "Error signatures must be populated from JSON");
+        assertTrue(numeric.getErrorSignatures().contains("NumberFormatException"));
     }
 }

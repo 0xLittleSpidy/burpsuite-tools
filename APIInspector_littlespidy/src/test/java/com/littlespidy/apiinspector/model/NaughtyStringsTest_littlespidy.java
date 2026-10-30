@@ -81,16 +81,11 @@ public class NaughtyStringsTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify InputValidationTechnique getDefaultTechniques combines standard and BLNS")
+    @DisplayName("Verify InputValidationTechnique getDefaultTechniques returns the 5 retained BLNS categories from JSON")
     void testCombinedTechniques() {
         List<InputValidationTechnique_littlespidy> all = InputValidationTechnique_littlespidy.getDefaultTechniques();
-        assertTrue(all.size() >= 10, "Default techniques should combine 6 standard + 5 BLNS categories");
-
-        long standardCount = all.stream().filter(t -> !t.isBlns()).count();
-        long blnsCount = all.stream().filter(t -> t.isBlns()).count();
-
-        assertEquals(6, standardCount, "Should have 6 standard OWASP categories");
-        assertEquals(5, blnsCount, "Should have 5 BLNS categories");
+        assertEquals(5, all.size(), "Default techniques should contain the 5 retained BLNS categories");
+        assertTrue(all.stream().allMatch(InputValidationTechnique_littlespidy::isBlns), "All categories should be BLNS categories");
     }
 
     @Test

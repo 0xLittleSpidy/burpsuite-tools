@@ -1,0 +1,61 @@
+[
+  {
+    "id": "blns_reserved",
+    "category": "BLNS: Reserved Identifiers",
+    "description": "Tests keywords that may conflict with internal language interpreters (null, undef, None, True)",
+    "enabled": true,
+    "errorSignatures": [
+      "NullPointerException",
+      "undefined",
+      "TypeError",
+      "ReferenceError",
+      "NoneType"
+    ]
+  },
+  {
+    "id": "blns_numeric",
+    "category": "BLNS: Numeric Boundaries & Extremes",
+    "description": "Tests extreme integers, floating point errors, zero division, and NaN overflows",
+    "enabled": true,
+    "errorSignatures": [
+      "NumberFormatException",
+      "ArithmeticException",
+      "divided by zero",
+      "Overflow",
+      "NaN"
+    ]
+  },
+  {
+    "id": "blns_special",
+    "category": "BLNS: Special Characters & Quotation Quirks",
+    "description": "Tests misplaced quotes, delimiters, and C0/C1 non-whitespace control codes",
+    "enabled": true,
+    "errorSignatures": [
+      "syntax error",
+      "parse error",
+      "unterminated string",
+      "unclosed quotation",
+      "unexpected token"
+    ]
+  },
+  {
+    "id": "blns_unicode",
+    "category": "BLNS: Unicode & Encoding Edge-Cases",
+    "description": "Tests two-byte characters, case expansion, right-to-left overrides, and surrogate pairs",
+    "enabled": true,
+    "errorSignatures": [
+      "CharacterCodingException",
+      "MalformedInputException",
+      "UnicodeDecodeError",
+      "utf8",
+      "encoding error"
+    ]
+  },
+  {
+    "id": "blns_interpolation",
+    "category": "BLNS: Format Strings & Unwanted Interpolation",
+    "description": "Tests printf format string specifiers and accidental shell evaluation (%s, %x, %n)",
+    "enabled": true,
+    "errorSignatures": []
+  }
+]

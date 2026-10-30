@@ -1,0 +1,242 @@
+[
+  {
+    "id": "arbitrary_origin",
+    "name": "Arbitrary Attacker Origin",
+    "description": "Reflects arbitrary untrusted origin",
+    "browserNote": "Universal bypass test",
+    "enabled": true,
+    "originTemplate": "https://{attacker}"
+  },
+  {
+    "id": "trusted_null",
+    "name": "Trusted Null Origin",
+    "description": "CORS vulnerability with trusted null origin",
+    "browserNote": "Sandboxed iframe / data URI",
+    "enabled": true,
+    "originTemplate": "null"
+  },
+  {
+    "id": "dot_underscore_dot",
+    "name": "Dot-Underscore-Dot Subdomain",
+    "description": "Underscore subdomain bypass",
+    "browserNote": "Bypasses naive domain regex matching",
+    "enabled": true,
+    "originTemplate": "https://{base}._.{attacker}"
+  },
+  {
+    "id": "dot_hyphen_dot",
+    "name": "Dot-Hyphen-Dot Subdomain",
+    "description": "Hyphen subdomain bypass",
+    "browserNote": "Bypasses subdomain regex",
+    "enabled": true,
+    "originTemplate": "https://{base}.-.{attacker}"
+  },
+  {
+    "id": "safari_comma",
+    "name": "Safari Comma Subdomain",
+    "description": "Safari allows comma in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.,.{attacker}"
+  },
+  {
+    "id": "safari_semicolon",
+    "name": "Safari Semicolon Subdomain",
+    "description": "Safari allows semicolon in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.;.{attacker}"
+  },
+  {
+    "id": "safari_exclamation",
+    "name": "Safari Exclamation Subdomain",
+    "description": "Safari allows exclamation mark in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.!.{attacker}"
+  },
+  {
+    "id": "safari_single_quote",
+    "name": "Safari Single Quote Subdomain",
+    "description": "Safari allows single quote in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.'.{attacker}"
+  },
+  {
+    "id": "safari_open_paren",
+    "name": "Safari Open Parenthesis",
+    "description": "Safari allows open parenthesis in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.(.{attacker}"
+  },
+  {
+    "id": "safari_close_paren",
+    "name": "Safari Close Parenthesis",
+    "description": "Safari allows close parenthesis in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.).{attacker}"
+  },
+  {
+    "id": "safari_open_brace",
+    "name": "Safari Open Brace",
+    "description": "Safari allows open brace in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.{.{attacker}"
+  },
+  {
+    "id": "safari_close_brace",
+    "name": "Safari Close Brace",
+    "description": "Safari allows close brace in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.}.{attacker}"
+  },
+  {
+    "id": "safari_asterisk",
+    "name": "Safari Asterisk Subdomain",
+    "description": "Safari allows asterisk in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.*.{attacker}"
+  },
+  {
+    "id": "safari_ampersand",
+    "name": "Safari Ampersand Subdomain",
+    "description": "Safari allows ampersand in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.&.{attacker}"
+  },
+  {
+    "id": "safari_backtick",
+    "name": "Safari Backtick Subdomain",
+    "description": "Safari allows backtick in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.`.{attacker}"
+  },
+  {
+    "id": "firefox_safari_plus",
+    "name": "Firefox & Safari Plus Subdomain",
+    "description": "Firefox and Safari allow plus in subdomain",
+    "browserNote": "Firefox & Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.+.{attacker}"
+  },
+  {
+    "id": "prefix_match",
+    "name": "Prefix Match / Attacker Subdomain",
+    "description": "Regex prefix match without dot anchor",
+    "browserNote": "Common regex error",
+    "enabled": true,
+    "originTemplate": "https://{base}.{attacker}"
+  },
+  {
+    "id": "safari_equals",
+    "name": "Safari Equals Subdomain",
+    "description": "Safari allows equals in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.=.{attacker}"
+  },
+  {
+    "id": "safari_tilde",
+    "name": "Safari Tilde Subdomain",
+    "description": "Safari allows tilde in subdomain",
+    "browserNote": "Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.~.{attacker}"
+  },
+  {
+    "id": "firefox_safari_dollar",
+    "name": "Firefox & Safari Dollar Subdomain",
+    "description": "Firefox and Safari allow dollar in subdomain",
+    "browserNote": "Firefox & Safari browser specific",
+    "enabled": true,
+    "originTemplate": "https://{base}.$.+{attacker}"
+  },
+  {
+    "id": "suffix_match",
+    "name": "Suffix Match (Domain Registration)",
+    "description": "Attacker registers domain ending with allowed domain",
+    "browserNote": "Regex suffix match without boundary",
+    "enabled": true,
+    "originTemplate": "https://{base}{attacker}"
+  },
+  {
+    "id": "trust_subdomain",
+    "name": "Trust Arbitrary Subdomain",
+    "description": "Insecure wildcard subdomain trust",
+    "browserNote": "Subdomain takeover risk",
+    "enabled": true,
+    "originTemplate": "https://{attacker}.{base}"
+  },
+  {
+    "id": "ends_with",
+    "name": "Domain Ends With",
+    "description": "Unanchored regex matching end of string",
+    "browserNote": "Unanchored regex",
+    "enabled": true,
+    "originTemplate": "https://anything{base}"
+  },
+  {
+    "id": "localhost_edge",
+    "name": "Localhost Regex Edge Case",
+    "description": "Localhost regex implementation edge case",
+    "browserNote": "Regex matches localhost without anchor",
+    "enabled": true,
+    "originTemplate": "https://localhost.{attacker}"
+  },
+  {
+    "id": "unencrypted_ends_with",
+    "name": "Unencrypted Domain Ends With",
+    "description": "Unencrypted domain ends with http://s<allowed>",
+    "browserNote": "Insecure HTTP scheme bypass",
+    "enabled": true,
+    "originTemplate": "http://s{base}"
+  },
+  {
+    "id": "ipv6_unspecified",
+    "name": "IPv6 Localhost Loopback",
+    "description": "IPv6 unspecified address loopback",
+    "browserNote": "Server trusts loopback origin",
+    "enabled": true,
+    "originTemplate": "http://[::]"
+  },
+  {
+    "id": "ipv6_loopback",
+    "name": "IPv6 Loopback",
+    "description": "Standard IPv6 loopback",
+    "browserNote": "Server trusts loopback origin",
+    "enabled": true,
+    "originTemplate": "http://[::1]"
+  },
+  {
+    "id": "ipv4_mapped_ipv6",
+    "name": "IPv4-Mapped IPv6 Loopback",
+    "description": "IPv4-mapped 127.0.0.1 loopback",
+    "browserNote": "Server trusts loopback origin",
+    "enabled": true,
+    "originTemplate": "http://[::ffff:7f00:1]"
+  },
+  {
+    "id": "ipv6_expanded",
+    "name": "Fully-Expanded IPv6 Loopback",
+    "description": "Fully-expanded IPv6 loopback",
+    "browserNote": "Server trusts expanded IPv6",
+    "enabled": true,
+    "originTemplate": "http://[0000:0000:0000:0000:0000:0000:0000:0000]"
+  },
+  {
+    "id": "localhost_local",
+    "name": "Localhost Allowed Domain Bypass",
+    "description": "Localhost allowed domain bypass",
+    "browserNote": "Internal domain resolution bypass",
+    "enabled": true,
+    "originTemplate": "http://{base}.localhost"
+  }
+]
