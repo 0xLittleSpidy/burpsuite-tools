@@ -125,8 +125,12 @@ public class DependenciesPanel_littlespidy extends BaseFindingPanel_littlespidy 
         }
 
         tableModel.updateData(filtered);
-        statsLabel.setText(String.format("Dependencies: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-            allDependencies.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        if (allDependencies.isEmpty()) {
+            statsLabel.setText("Dependencies: 0 (No findings found)");
+        } else {
+            statsLabel.setText(String.format("Dependencies: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
+                allDependencies.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        }
     }
 
     @Override
@@ -198,7 +202,7 @@ public class DependenciesPanel_littlespidy extends BaseFindingPanel_littlespidy 
 
     private static class DependenciesTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Package Name", "Version", "Dependency Type", "Verification Status", "Verification Detail", "Source Location", "Line", "Classification"
+            "#", "Package Name", "Version", "Dependency Type", "Verification Status", "Verification Detail", "Source Location", "Line"
         };
         private final List<DiscoveredDependency> list = new ArrayList<>();
 
@@ -233,7 +237,6 @@ public class DependenciesPanel_littlespidy extends BaseFindingPanel_littlespidy 
                 case 5 -> item.verificationDetail();
                 case 6 -> item.sourceLocation();
                 case 7 -> item.line();
-                case 8 -> item.getClassification();
                 default -> null;
             };
         }

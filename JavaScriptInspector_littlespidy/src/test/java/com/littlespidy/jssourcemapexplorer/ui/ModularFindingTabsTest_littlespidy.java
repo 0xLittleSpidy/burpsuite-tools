@@ -174,6 +174,114 @@ class ModularFindingTabsTest_littlespidy {
         assertEquals("AI Security Analyst", rootTabs.getTitleAt(8));
     }
 
+    @Test
+    @DisplayName("Verify Confidence, Entropy, and Classification columns removed from findings tables")
+    void testColumnsRemovedFromFindingTables() {
+        MontoyaApi api = createMockApi();
+        JsDataStore store = new JsDataStore();
+
+        SecretsPanel_littlespidy secretsPanel = new SecretsPanel_littlespidy(api, store);
+        JTable secTable = secretsPanel.getTable();
+        assertEquals(8, secTable.getColumnCount(), "Secrets table should have 8 columns");
+        for (int i = 0; i < secTable.getColumnCount(); i++) {
+            String colName = secTable.getColumnName(i);
+            assertNotEquals("Confidence", colName);
+            assertNotEquals("Entropy", colName);
+            assertNotEquals("Classification", colName);
+        }
+
+        PathsPanel_littlespidy pathsPanel = new PathsPanel_littlespidy(api, store);
+        JTable pathsTable = pathsPanel.getTable();
+        assertEquals(7, pathsTable.getColumnCount(), "Paths table should have 7 columns");
+        for (int i = 0; i < pathsTable.getColumnCount(); i++) {
+            assertNotEquals("Classification", pathsTable.getColumnName(i));
+        }
+
+        CommentsPanel_littlespidy commentsPanel = new CommentsPanel_littlespidy(api, store);
+        JTable commTable = commentsPanel.getTable();
+        assertEquals(7, commTable.getColumnCount(), "Comments table should have 7 columns");
+        for (int i = 0; i < commTable.getColumnCount(); i++) {
+            assertNotEquals("Classification", commTable.getColumnName(i));
+        }
+
+        SecurityBypassesPanel_littlespidy bypassPanel = new SecurityBypassesPanel_littlespidy(api, store);
+        JTable bypassTable = bypassPanel.getTable();
+        assertEquals(9, bypassTable.getColumnCount(), "Security bypasses table should have 9 columns");
+        for (int i = 0; i < bypassTable.getColumnCount(); i++) {
+            assertNotEquals("Classification", bypassTable.getColumnName(i));
+        }
+
+        CloudUrlsPanel_littlespidy cloudPanel = new CloudUrlsPanel_littlespidy(api, store);
+        JTable cloudTable = cloudPanel.getTable();
+        assertEquals(6, cloudTable.getColumnCount(), "Cloud URLs table should have 6 columns");
+        for (int i = 0; i < cloudTable.getColumnCount(); i++) {
+            assertNotEquals("Classification", cloudTable.getColumnName(i));
+        }
+
+        DependenciesPanel_littlespidy depPanel = new DependenciesPanel_littlespidy(api, store);
+        JTable depTable = depPanel.getTable();
+        assertEquals(8, depTable.getColumnCount(), "Dependencies table should have 8 columns");
+        for (int i = 0; i < depTable.getColumnCount(); i++) {
+            assertNotEquals("Classification", depTable.getColumnName(i));
+        }
+    }
+
+    @Test
+    @DisplayName("Verify status displays No findings found when findings count is 0")
+    void testNoFindingsFoundStatus() {
+        MontoyaApi api = createMockApi();
+        JsDataStore store = new JsDataStore();
+
+        SecretsPanel_littlespidy secretsPanel = new SecretsPanel_littlespidy(api, store);
+        secretsPanel.refreshFromDataStore();
+        assertEquals("Secrets: 0 (No findings found)", secretsPanel.getStatsLabel().getText());
+
+        PathsPanel_littlespidy pathsPanel = new PathsPanel_littlespidy(api, store);
+        pathsPanel.refreshFromDataStore();
+        assertEquals("Paths: 0 (No findings found)", pathsPanel.getStatsLabel().getText());
+
+        CommentsPanel_littlespidy commentsPanel = new CommentsPanel_littlespidy(api, store);
+        commentsPanel.refreshFromDataStore();
+        assertEquals("Comments: 0 (No findings found)", commentsPanel.getStatsLabel().getText());
+    }
+
+    @Test
+    @DisplayName("Verify batch multi-row selection classification applies to all selected rows")
+    void testBatchMultiRowClassification() {
+        MontoyaApi api = createMockApi();
+        JsDataStore store = new JsDataStore();
+
+        DiscoveredSecret sec1 = new DiscoveredSecret("https://target.com/app.js", "JS File", "AWS Key 1", "EXAMPLE_KEY_SAMPLE_1", 3.8, "High", "Regex", 10, "key1");
+        DiscoveredSecret sec2 = new DiscoveredSecret("https://target.com/app.js", "JS File", "AWS Key 2", "EXAMPLE_KEY_SAMPLE_2", 3.8, "High", "Regex", 20, "key2");
+        DiscoveredSecret sec3 = new DiscoveredSecret("https://target.com/app.js", "JS File", "AWS Key 3", "EXAMPLE_KEY_SAMPLE_3", 3.8, "High", "Regex", 30, "key3");
+
+        JsFileEntry entry = new JsFileEntry(1, "https://target.com/app.js", "target.com", "/app.js", 200, 100, true, "1st Party", PassiveMapStatus.NOT_FOUND, null, null, null, null);
+        entry.setJsReconFindings(List.of(sec1, sec2, sec3), List.of());
+        store.addEntry(entry);
+
+        SecretsPanel_littlespidy panel = new SecretsPanel_littlespidy(api, store);
+        panel.refreshFromDataStore();
+
+        JTable table = panel.getTable();
+        assertEquals(3, table.getRowCount());
+
+        // Select rows 0 and 2
+        table.setRowSelectionInterval(0, 0);
+        table.addRowSelectionInterval(2, 2);
+        assertEquals(2, table.getSelectedRowCount());
+
+        // Batch mark as True Positive
+        panel.markSelectedClassification("True Positive");
+
+        // Verify table selection is cleared after marking
+        assertEquals(0, table.getSelectedRowCount());
+
+        // Verify row 0 and row 2 are marked as True Positive, and row 1 remains Not Classified
+        assertEquals("True Positive", panel.getClassificationAt(0));
+        assertEquals("Not Classified", panel.getClassificationAt(1));
+        assertEquals("True Positive", panel.getClassificationAt(2));
+    }
+
     private JSplitPane findHorizontalSplitPane(Container root) {
         for (Component c : root.getComponents()) {
             if (c instanceof JSplitPane sp) {

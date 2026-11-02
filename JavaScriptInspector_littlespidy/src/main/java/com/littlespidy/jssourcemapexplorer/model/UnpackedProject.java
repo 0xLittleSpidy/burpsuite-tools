@@ -93,6 +93,61 @@ public class UnpackedProject {
         return Collections.unmodifiableList(allGraphQLOperations);
     }
 
+    public synchronized boolean updateSecret(DiscoveredSecret oldSec, DiscoveredSecret newSec) {
+        for (int i = 0; i < allSecrets.size(); i++) {
+            DiscoveredSecret s = allSecrets.get(i);
+            if (s == oldSec || (Objects.equals(s.secretValue(), oldSec.secretValue()) && Objects.equals(s.sourceLocation(), oldSec.sourceLocation()))) {
+                allSecrets.set(i, newSec);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateEndpoint(DiscoveredEndpoint oldEp, DiscoveredEndpoint newEp) {
+        for (int i = 0; i < allEndpoints.size(); i++) {
+            DiscoveredEndpoint e = allEndpoints.get(i);
+            if (e == oldEp || (Objects.equals(e.endpoint(), oldEp.endpoint()) && Objects.equals(e.sourceLocation(), oldEp.sourceLocation()))) {
+                allEndpoints.set(i, newEp);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateComment(DiscoveredComment oldComm, DiscoveredComment newComm) {
+        for (int i = 0; i < allComments.size(); i++) {
+            DiscoveredComment c = allComments.get(i);
+            if (c == oldComm || (Objects.equals(c.commentText(), oldComm.commentText()) && Objects.equals(c.sourceLocation(), oldComm.sourceLocation()))) {
+                allComments.set(i, newComm);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateSecurityBypass(DiscoveredSecurityBypass oldBypass, DiscoveredSecurityBypass newBypass) {
+        for (int i = 0; i < allSecurityBypasses.size(); i++) {
+            DiscoveredSecurityBypass b = allSecurityBypasses.get(i);
+            if (b == oldBypass || (Objects.equals(b.method(), oldBypass.method()) && Objects.equals(b.sourceLocation(), oldBypass.sourceLocation()))) {
+                allSecurityBypasses.set(i, newBypass);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateCloudUrl(DiscoveredCloudUrl oldCu, DiscoveredCloudUrl newCu) {
+        for (int i = 0; i < allCloudUrls.size(); i++) {
+            DiscoveredCloudUrl u = allCloudUrls.get(i);
+            if (u == oldCu || (Objects.equals(u.cloudUrl(), oldCu.cloudUrl()) && Objects.equals(u.sourceLocation(), oldCu.sourceLocation()))) {
+                allCloudUrls.set(i, newCu);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public synchronized int getTotalFiles() {
         return filesByPath.size();
     }

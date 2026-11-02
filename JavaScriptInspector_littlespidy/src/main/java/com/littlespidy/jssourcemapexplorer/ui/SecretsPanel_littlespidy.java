@@ -119,8 +119,12 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         }
 
         tableModel.updateData(filtered);
-        statsLabel.setText(String.format("Secrets: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-            allSecrets.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        if (allSecrets.isEmpty()) {
+            statsLabel.setText("Secrets: 0 (No findings found)");
+        } else {
+            statsLabel.setText(String.format("Secrets: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
+                allSecrets.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        }
     }
 
     @Override
@@ -153,20 +157,12 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
     private void syncClassificationToStore(DiscoveredSecret oldSec, DiscoveredSecret newSec) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            List<DiscoveredSecret> jsSecs = entry.getJsSecrets();
-            for (int i = 0; i < jsSecs.size(); i++) {
-                if (jsSecs.get(i) == oldSec || (Objects.equals(jsSecs.get(i).secretValue(), oldSec.secretValue()) && Objects.equals(jsSecs.get(i).sourceLocation(), oldSec.sourceLocation()))) {
-                    jsSecs.set(i, newSec);
-                    return;
-                }
+            if (entry.updateSecret(oldSec, newSec)) {
+                return;
             }
             if (entry.getUnpackedProject() != null) {
-                List<DiscoveredSecret> unpSecs = entry.getUnpackedProject().getAllSecrets();
-                for (int i = 0; i < unpSecs.size(); i++) {
-                    if (unpSecs.get(i) == oldSec || (Objects.equals(unpSecs.get(i).secretValue(), oldSec.secretValue()) && Objects.equals(unpSecs.get(i).sourceLocation(), oldSec.sourceLocation()))) {
-                        unpSecs.set(i, newSec);
-                        return;
-                    }
+                if (entry.getUnpackedProject().updateSecret(oldSec, newSec)) {
+                    return;
                 }
             }
         }
@@ -226,7 +222,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class SecretsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Category", "Secret Value / Match", "Signature", "Severity", "Confidence", "Entropy", "Source Type", "Source Location", "Line", "Classification"
+            "#", "Category", "Secret Value / Match", "Signature", "Severity", "Source Type", "Source Location", "Line"
         };
         private final List<DiscoveredSecret> list = new ArrayList<>();
 
@@ -252,11 +248,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return switch (c) {
-                case 0, 9 -> Integer.class;
-                case 6 -> Double.class;
-                default -> String.class;
-            };
+            return (c == 0 || c == 7) ? Integer.class : String.class;
         }
 
         @Override
@@ -269,12 +261,9 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                 case 2 -> item.secretValue();
                 case 3 -> item.technique();
                 case 4 -> item.severity();
-                case 5 -> item.confidence();
-                case 6 -> Math.round(item.entropy() * 100.0) / 100.0;
-                case 7 -> item.sourceType();
-                case 8 -> item.sourceLocation();
-                case 9 -> item.line();
-                case 10 -> item.classification();
+                case 5 -> item.sourceType();
+                case 6 -> item.sourceLocation();
+                case 7 -> item.line();
                 default -> null;
             };
         }

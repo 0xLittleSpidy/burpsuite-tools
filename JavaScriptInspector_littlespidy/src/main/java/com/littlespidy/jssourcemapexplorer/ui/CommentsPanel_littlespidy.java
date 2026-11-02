@@ -118,8 +118,12 @@ public class CommentsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         }
 
         tableModel.updateData(filtered);
-        statsLabel.setText(String.format("Comments: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-            allComments.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        if (allComments.isEmpty()) {
+            statsLabel.setText("Comments: 0 (No findings found)");
+        } else {
+            statsLabel.setText(String.format("Comments: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
+                allComments.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        }
     }
 
     @Override
@@ -150,20 +154,12 @@ public class CommentsPanel_littlespidy extends BaseFindingPanel_littlespidy {
     private void syncClassificationToStore(DiscoveredComment oldComm, DiscoveredComment newComm) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            List<DiscoveredComment> jsComms = entry.getJsComments();
-            for (int i = 0; i < jsComms.size(); i++) {
-                if (jsComms.get(i) == oldComm || (Objects.equals(jsComms.get(i).commentText(), oldComm.commentText()) && Objects.equals(jsComms.get(i).sourceLocation(), oldComm.sourceLocation()))) {
-                    jsComms.set(i, newComm);
-                    return;
-                }
+            if (entry.updateComment(oldComm, newComm)) {
+                return;
             }
             if (entry.getUnpackedProject() != null) {
-                List<DiscoveredComment> unpComms = entry.getUnpackedProject().getAllComments();
-                for (int i = 0; i < unpComms.size(); i++) {
-                    if (unpComms.get(i) == oldComm || (Objects.equals(unpComms.get(i).commentText(), oldComm.commentText()) && Objects.equals(unpComms.get(i).sourceLocation(), oldComm.sourceLocation()))) {
-                        unpComms.set(i, newComm);
-                        return;
-                    }
+                if (entry.getUnpackedProject().updateComment(oldComm, newComm)) {
+                    return;
                 }
             }
         }
@@ -223,7 +219,7 @@ public class CommentsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class CommentsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Type", "Category", "Comment Text", "Source Type", "Source Location", "Line", "Classification"
+            "#", "Type", "Category", "Comment Text", "Source Type", "Source Location", "Line"
         };
         private final List<DiscoveredComment> list = new ArrayList<>();
 
@@ -264,7 +260,6 @@ public class CommentsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                 case 4 -> item.sourceType();
                 case 5 -> item.sourceLocation();
                 case 6 -> item.line();
-                case 7 -> item.classification();
                 default -> null;
             };
         }

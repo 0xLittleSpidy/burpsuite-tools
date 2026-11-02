@@ -100,8 +100,12 @@ public class CloudUrlsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         }
 
         tableModel.updateData(filtered);
-        statsLabel.setText(String.format("Cloud URLs: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-            allCloudUrls.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        if (allCloudUrls.isEmpty()) {
+            statsLabel.setText("Cloud URLs: 0 (No findings found)");
+        } else {
+            statsLabel.setText(String.format("Cloud URLs: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
+                allCloudUrls.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        }
     }
 
     @Override
@@ -132,20 +136,12 @@ public class CloudUrlsPanel_littlespidy extends BaseFindingPanel_littlespidy {
     private void syncClassificationToStore(DiscoveredCloudUrl oldCu, DiscoveredCloudUrl newCu) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            List<DiscoveredCloudUrl> jsCus = entry.getJsCloudUrls();
-            for (int i = 0; i < jsCus.size(); i++) {
-                if (jsCus.get(i) == oldCu || (Objects.equals(jsCus.get(i).cloudUrl(), oldCu.cloudUrl()) && Objects.equals(jsCus.get(i).sourceLocation(), oldCu.sourceLocation()))) {
-                    jsCus.set(i, newCu);
-                    return;
-                }
+            if (entry.updateCloudUrl(oldCu, newCu)) {
+                return;
             }
             if (entry.getUnpackedProject() != null) {
-                List<DiscoveredCloudUrl> unpCus = entry.getUnpackedProject().getAllCloudUrls();
-                for (int i = 0; i < unpCus.size(); i++) {
-                    if (unpCus.get(i) == oldCu || (Objects.equals(unpCus.get(i).cloudUrl(), oldCu.cloudUrl()) && Objects.equals(unpCus.get(i).sourceLocation(), oldCu.sourceLocation()))) {
-                        unpCus.set(i, newCu);
-                        return;
-                    }
+                if (entry.getUnpackedProject().updateCloudUrl(oldCu, newCu)) {
+                    return;
                 }
             }
         }
@@ -205,7 +201,7 @@ public class CloudUrlsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class CloudUrlsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Cloud Provider", "Discovered Cloud URL", "Source Type", "Source Location", "Line", "Classification"
+            "#", "Cloud Provider", "Discovered Cloud URL", "Source Type", "Source Location", "Line"
         };
         private final List<DiscoveredCloudUrl> list = new ArrayList<>();
 
@@ -245,7 +241,6 @@ public class CloudUrlsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                 case 3 -> item.sourceType();
                 case 4 -> item.sourceLocation();
                 case 5 -> item.line();
-                case 6 -> item.classification();
                 default -> null;
             };
         }

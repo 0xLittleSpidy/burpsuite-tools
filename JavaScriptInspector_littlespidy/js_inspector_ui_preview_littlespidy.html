@@ -241,6 +241,33 @@
       min-height: 0;
     }
 
+    .suite-panel {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      gap: 6px;
+    }
+    .suite-panel.active {
+      display: flex;
+    }
+    tr.row-tp {
+      background-color: rgba(40, 167, 69, 0.18) !important;
+      color: #28a745 !important;
+    }
+    tr.row-fp {
+      background-color: rgba(220, 53, 69, 0.18) !important;
+      color: #dc3545 !important;
+    }
+    body.light-theme tr.row-tp {
+      background-color: #d4edda !important;
+      color: #155724 !important;
+    }
+    body.light-theme tr.row-fp {
+      background-color: #f8d7da !important;
+      color: #721c24 !important;
+    }
+
     /* Scripts Table */
     .table-container {
       flex: 0 0 38%;
@@ -528,14 +555,22 @@
 
   <!-- Extension Main Suite Tabs -->
   <div class="suite-tabs">
-    <div class="suite-tab active">JS and Source Map</div>
-    <div class="suite-tab">Recon and Secret Mining</div>
-    <div class="suite-tab">GraphQL</div>
-    <div class="suite-tab">AI Security Analyst</div>
+    <div class="suite-tab active" onclick="switchSuiteTab('js', this)">JS and Source Map</div>
+    <div class="suite-tab" onclick="switchSuiteTab('paths', this)">Paths</div>
+    <div class="suite-tab" onclick="switchSuiteTab('secrets', this)">Secrets</div>
+    <div class="suite-tab" onclick="switchSuiteTab('comments', this)">Comments</div>
+    <div class="suite-tab" onclick="switchSuiteTab('bypasses', this)">Security Bypasses</div>
+    <div class="suite-tab" onclick="switchSuiteTab('cloud', this)">Cloud URLs</div>
+    <div class="suite-tab" onclick="switchSuiteTab('deps', this)">Dependencies</div>
+    <div class="suite-tab" onclick="switchSuiteTab('graphql', this)">GraphQL</div>
+    <div class="suite-tab" onclick="switchSuiteTab('ai', this)">AI Security Analyst</div>
   </div>
 
   <!-- Extension Workspace Area -->
   <div class="workspace">
+
+    <!-- JS and Source Map Suite Tab Panel -->
+    <div id="panel-js" class="suite-panel active">
 
     <!-- Top Action Toolbar -->
     <div class="toolbar-row">
@@ -815,6 +850,128 @@ Content-Length: 915660
       </div>
 
     </div>
+    <!-- End JS and Source Map Panel -->
+
+    <!-- Secrets Findings Tab Panel -->
+    <div id="panel-secrets" class="suite-panel">
+      <div class="toolbar-row">
+        <button id="runSecretsBtn" class="btn primary" onclick="runSecretsMining()">Run Secrets</button>
+        <div class="toolbar-sep"></div>
+        <span class="filter-label">Category:</span>
+        <button class="btn">Category [All]</button>
+        <span class="filter-label">Signature:</span>
+        <button class="btn">Signature [All]</button>
+        <button class="btn">Classification [All]</button>
+        <div class="toolbar-sep"></div>
+        <span class="filter-label">Search:</span>
+        <input type="text" id="secSearchInput" placeholder="Search secrets..." oninput="filterSecrets()">
+        <button class="btn" onclick="filterSecrets()">Filter</button>
+        <button class="btn" onclick="resetSecrets()">Reset</button>
+        <button class="btn" onclick="showToast('Exported TSV to clipboard')">Export TSV</button>
+        <div class="toolbar-sep"></div>
+        <button class="btn" onclick="markSelectedSecrets('True Positive')">Mark TP</button>
+        <button class="btn" onclick="markSelectedSecrets('False Positive')">Mark FP</button>
+        <button class="btn" onclick="markSelectedSecrets('Not Classified')">Reset Classification</button>
+        <button class="btn" onclick="toggleSimulateZeroFindings()">Toggle 0 Findings</button>
+        <div style="flex: 1;"></div>
+        <span id="secretsStatsLabel" class="filter-label" style="color: var(--accent);">Secrets: 3 (Visible: 3 | TP: 1 | FP: 1 | Unclassified: 1)</span>
+      </div>
+
+      <div class="split-container">
+        <!-- Findings Table: Confidence, Entropy, and Classification Columns Removed -->
+        <div class="table-container" style="flex: 0.55;">
+          <div class="section-title">Secrets Findings (8 Columns: #, Category, Secret Value / Match, Signature, Severity, Source Type, Source Location, Line)</div>
+          <table id="secretsTable">
+            <thead>
+              <tr>
+                <th style="width: 35px;"><input type="checkbox" id="selectAllSecCb" onchange="toggleSelectAllSecrets(this)"></th>
+                <th style="width: 35px;">#</th>
+                <th style="width: 140px;">Category</th>
+                <th>Secret Value / Match</th>
+                <th style="width: 150px;">Signature</th>
+                <th style="width: 80px;">Severity</th>
+                <th style="width: 100px;">Source Type</th>
+                <th style="width: 220px;">Source Location</th>
+                <th style="width: 50px;">Line</th>
+              </tr>
+            </thead>
+            <tbody id="secretsTableBody">
+              <tr class="row-tp" onclick="toggleSecretRowSelection(this, event)">
+                <td><input type="checkbox" class="sec-row-cb"></td>
+                <td>1</td>
+                <td>Cloud Credentials</td>
+                <td>EXAMPLE_AWS_KEY_SAMPLE</td>
+                <td>AWS Access Key</td>
+                <td><span class="status-fail-badge" style="background:#dc3545;">High</span></td>
+                <td>JS File</td>
+                <td>https://app.target.com/_next/static/chunks/main-app.js</td>
+                <td>142</td>
+              </tr>
+              <tr class="row-fp" onclick="toggleSecretRowSelection(this, event)">
+                <td><input type="checkbox" class="sec-row-cb"></td>
+                <td>2</td>
+                <td>OAuth / Bearer Token</td>
+                <td>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</td>
+                <td>JWT Token Pattern</td>
+                <td><span class="status-pass-badge" style="background:#e56b1f;">Medium</span></td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/bundle.min.js</td>
+                <td>89</td>
+              </tr>
+              <tr onclick="toggleSecretRowSelection(this, event)">
+                <td><input type="checkbox" class="sec-row-cb"></td>
+                <td>3</td>
+                <td>Payment Gateway</td>
+                <td>example_mock_stripe_key_placeholder</td>
+                <td>Stripe Live Secret Key</td>
+                <td><span class="status-fail-badge" style="background:#dc3545;">Critical</span></td>
+                <td>Source Map</td>
+                <td>src/auth/stripeConfig.ts</td>
+                <td>24</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bottom Parallel HTTP Request & Response Viewer (50/50 Split) -->
+        <div class="parallel-viewer" style="flex: 0.45; border: 1px solid var(--border); border-radius: 3px;">
+          <div class="editor-pane">
+            <div class="editor-pane-header">HTTP Request</div>
+            <pre class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">GET /_next/static/chunks/main-app.js HTTP/1.1
+Host: app.target.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Accept: */*
+Referer: https://app.target.com/
+Connection: close</pre>
+          </div>
+          <div class="editor-pane">
+            <div class="editor-pane-header">HTTP Response (Parallel Viewer)</div>
+            <pre class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">HTTP/1.1 200 OK
+Content-Type: application/javascript; charset=UTF-8
+Content-Length: 145920
+Server: cloudflare
+
+// Discovered match highlighted in source
+const AWS_KEY = "<mark style="background:#e56b1f; color:#fff; padding:2px 4px; border-radius:2px;">EXAMPLE_AWS_KEY_SAMPLE</mark>";
+function initClient() { ... }</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Secrets Panel -->
+
+    <!-- Generic Other Suite Tabs Panel Placeholder -->
+    <div id="panel-other" class="suite-panel">
+      <div class="toolbar-row">
+        <button id="runOtherBtn" class="btn primary">Run Finding Mining</button>
+        <div class="toolbar-sep"></div>
+        <span id="otherStatusLabel" class="filter-label" style="color: var(--accent);">Findings: 0 (No findings found)</span>
+      </div>
+      <div class="table-container" style="flex: 1; padding: 20px; text-align: center; color: var(--text-muted);">
+        <p id="otherPanelTitle" style="font-size: 14px; font-weight: 600; color: var(--text-bright);">Tab View</p>
+        <p>No findings found. Click "Run" in the toolbar to execute discovery on all loaded JavaScript assets.</p>
+      </div>
+    </div>
 
   </div>
 
@@ -952,6 +1109,115 @@ export const useAuth = () => useContext(AuthContext);`;
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function switchSuiteTab(tabName, element) {
+      document.querySelectorAll('.suite-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.suite-panel').forEach(p => p.classList.remove('active'));
+
+      element.classList.add('active');
+      if (tabName === 'js') {
+        document.getElementById('panel-js').classList.add('active');
+      } else if (tabName === 'secrets') {
+        document.getElementById('panel-secrets').classList.add('active');
+      } else {
+        const other = document.getElementById('panel-other');
+        other.classList.add('active');
+        document.getElementById('otherPanelTitle').textContent = element.textContent + ' Findings';
+        document.getElementById('runOtherBtn').textContent = 'Run ' + element.textContent;
+        document.getElementById('otherStatusLabel').textContent = element.textContent + ': 0 (No findings found)';
+      }
+    }
+
+    function toggleSecretRowSelection(row, event) {
+      if (event.target && event.target.tagName === 'INPUT') return;
+      row.classList.toggle('selected');
+      const cb = row.querySelector('.sec-row-cb');
+      if (cb) cb.checked = row.classList.contains('selected');
+    }
+
+    function toggleSelectAllSecrets(masterCb) {
+      const rows = document.querySelectorAll('#secretsTableBody tr');
+      rows.forEach(r => {
+        if (masterCb.checked) r.classList.add('selected');
+        else r.classList.remove('selected');
+        const cb = r.querySelector('.sec-row-cb');
+        if (cb) cb.checked = masterCb.checked;
+      });
+      showToast(masterCb.checked ? 'Selected all secrets' : 'Deselected all secrets');
+    }
+
+    function markSelectedSecrets(classification) {
+      const selected = document.querySelectorAll('#secretsTableBody tr.selected');
+      if (selected.length === 0) {
+        showToast('Please select at least one row first');
+        return;
+      }
+
+      selected.forEach(r => {
+        r.classList.remove('row-tp', 'row-fp');
+        if (classification === 'True Positive') {
+          r.classList.add('row-tp');
+        } else if (classification === 'False Positive') {
+          r.classList.add('row-fp');
+        }
+      });
+
+      // Clear selection after applying classification as specified
+      document.querySelectorAll('#secretsTableBody tr').forEach(r => {
+        r.classList.remove('selected');
+        const cb = r.querySelector('.sec-row-cb');
+        if (cb) cb.checked = false;
+      });
+      const masterCb = document.getElementById('selectAllSecCb');
+      if (masterCb) masterCb.checked = false;
+
+      updateSecretsStats();
+      showToast('Marked ' + selected.length + ' secret(s) as ' + classification);
+    }
+
+    function updateSecretsStats() {
+      const rows = document.querySelectorAll('#secretsTableBody tr');
+      let tp = 0, fp = 0, unclass = 0;
+      rows.forEach(r => {
+        if (r.classList.contains('row-tp')) tp++;
+        else if (r.classList.contains('row-fp')) fp++;
+        else unclass++;
+      });
+      const lbl = document.getElementById('secretsStatsLabel');
+      if (rows.length === 0) {
+        lbl.textContent = 'Secrets: 0 (No findings found)';
+      } else {
+        lbl.textContent = `Secrets: ${rows.length} (Visible: ${rows.length} | TP: ${tp} | FP: ${fp} | Unclassified: ${unclass})`;
+      }
+    }
+
+    let zeroFindingsMode = false;
+    function toggleSimulateZeroFindings() {
+      zeroFindingsMode = !zeroFindingsMode;
+      const tbody = document.getElementById('secretsTableBody');
+      const lbl = document.getElementById('secretsStatsLabel');
+      if (zeroFindingsMode) {
+        tbody.style.display = 'none';
+        lbl.textContent = 'Secrets: 0 (No findings found)';
+        showToast('Simulating run with 0 findings');
+      } else {
+        tbody.style.display = '';
+        updateSecretsStats();
+        showToast('Restored secrets findings');
+      }
+    }
+
+    function runSecretsMining() {
+      const btn = document.getElementById('runSecretsBtn');
+      btn.textContent = 'Running...';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = 'Run Secrets';
+        btn.disabled = false;
+        updateSecretsStats();
+        showToast('Secrets mining complete');
+      }, 700);
     }
 
     // Initialize

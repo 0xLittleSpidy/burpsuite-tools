@@ -101,6 +101,14 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         this.autoSaveCallback = callback;
     }
 
+    public JLabel getStatsLabel() {
+        return statsLabel;
+    }
+
+    public JTable getTable() {
+        return table;
+    }
+
     private void buildUi() {
         // ── Top Toolbar ──
         JPanel topToolbar = new JPanel(new BorderLayout(6, 4));
@@ -253,8 +261,21 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
 
     private void setupContextMenu() {
         table.addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) { handlePopup(e); }
-            @Override public void mouseReleased(MouseEvent e) { handlePopup(e); }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int clickedRow = table.rowAtPoint(e.getPoint());
+                    if (clickedRow >= 0 && table.isRowSelected(clickedRow)) {
+                        e.consume();
+                    }
+                }
+                handlePopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                handlePopup(e);
+            }
 
             private void handlePopup(MouseEvent e) {
                 if (e.isPopupTrigger()) {
@@ -323,16 +344,23 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         });
     }
 
-    private void markSelectedClassification(String classification) {
+    void markSelectedClassification(String classification) {
         int[] selectedRows = table.getSelectedRows();
         if (selectedRows.length == 0) return;
 
-        for (int r : selectedRows) {
-            int modelRow = table.convertRowIndexToModel(r);
-            updateClassification(modelRow, classification);
+        int[] modelRows = new int[selectedRows.length];
+        for (int i = 0; i < selectedRows.length; i++) {
+            modelRows[i] = table.convertRowIndexToModel(selectedRows[i]);
+        }
+
+        for (int modelRow : modelRows) {
+            if (modelRow >= 0) {
+                updateClassification(modelRow, classification);
+            }
         }
 
         applyFilter();
+        table.clearSelection();
         if (autoSaveCallback != null) {
             autoSaveCallback.run();
         }
@@ -362,15 +390,19 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         JsFileEntry entry = findEntryForLocation(sourceLoc);
 
         if (entry == null) {
-            requestEditor.setRequest(HttpRequest.httpRequest(""));
-            responseEditor.setResponse(HttpResponse.httpResponse(""));
+            try {
+                requestEditor.setRequest(HttpRequest.httpRequest(""));
+                responseEditor.setResponse(HttpResponse.httpResponse(""));
+            } catch (Exception ignored) {}
             return;
         }
 
         if (entry.getRequest() != null) {
             requestEditor.setRequest(entry.getRequest());
         } else {
-            requestEditor.setRequest(HttpRequest.httpRequest(""));
+            try {
+                requestEditor.setRequest(HttpRequest.httpRequest(""));
+            } catch (Exception ignored) {}
         }
 
         HttpResponse response = entry.getResponse();
@@ -415,7 +447,9 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
                 SwingUtilities.invokeLater(() -> scrollTextComponent(responseEditor.uiComponent(), targetCaret));
             }
         } else {
-            responseEditor.setResponse(HttpResponse.httpResponse(""));
+            try {
+                responseEditor.setResponse(HttpResponse.httpResponse(""));
+            } catch (Exception ignored) {}
         }
     }
 

@@ -118,8 +118,12 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         }
 
         tableModel.updateData(filtered);
-        statsLabel.setText(String.format("Paths: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-            allEndpoints.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        if (allEndpoints.isEmpty()) {
+            statsLabel.setText("Paths: 0 (No findings found)");
+        } else {
+            statsLabel.setText(String.format("Paths: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
+                allEndpoints.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        }
     }
 
     @Override
@@ -152,20 +156,12 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
     private void syncClassificationToStore(DiscoveredEndpoint oldEp, DiscoveredEndpoint newEp) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            List<DiscoveredEndpoint> jsEps = entry.getJsEndpoints();
-            for (int i = 0; i < jsEps.size(); i++) {
-                if (jsEps.get(i) == oldEp || (Objects.equals(jsEps.get(i).endpoint(), oldEp.endpoint()) && Objects.equals(jsEps.get(i).sourceLocation(), oldEp.sourceLocation()))) {
-                    jsEps.set(i, newEp);
-                    return;
-                }
+            if (entry.updateEndpoint(oldEp, newEp)) {
+                return;
             }
             if (entry.getUnpackedProject() != null) {
-                List<DiscoveredEndpoint> unpEps = entry.getUnpackedProject().getAllEndpoints();
-                for (int i = 0; i < unpEps.size(); i++) {
-                    if (unpEps.get(i) == oldEp || (Objects.equals(unpEps.get(i).endpoint(), oldEp.endpoint()) && Objects.equals(unpEps.get(i).sourceLocation(), oldEp.sourceLocation()))) {
-                        unpEps.set(i, newEp);
-                        return;
-                    }
+                if (entry.getUnpackedProject().updateEndpoint(oldEp, newEp)) {
+                    return;
                 }
             }
         }
@@ -225,7 +221,7 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class EndpointsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Method", "Endpoint / Route", "Technique", "Source Type", "Source Location", "Line", "Classification"
+            "#", "Method", "Endpoint / Route", "Technique", "Source Type", "Source Location", "Line"
         };
         private final List<DiscoveredEndpoint> list = new ArrayList<>();
 
@@ -266,7 +262,6 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                 case 4 -> item.sourceType();
                 case 5 -> item.sourceLocation();
                 case 6 -> item.line();
-                case 7 -> item.classification();
                 default -> null;
             };
         }

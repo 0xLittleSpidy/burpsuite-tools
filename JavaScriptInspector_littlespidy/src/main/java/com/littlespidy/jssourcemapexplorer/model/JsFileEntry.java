@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a discovered JavaScript script candidate along with its
@@ -220,6 +221,61 @@ public class JsFileEntry {
     public synchronized void setJsGraphQLOperations(List<DiscoveredGraphQLOperation> ops) {
         jsGraphQLOperations.clear();
         if (ops != null) jsGraphQLOperations.addAll(ops);
+    }
+
+    public synchronized boolean updateSecret(DiscoveredSecret oldSec, DiscoveredSecret newSec) {
+        for (int i = 0; i < jsSecrets.size(); i++) {
+            DiscoveredSecret s = jsSecrets.get(i);
+            if (s == oldSec || (Objects.equals(s.secretValue(), oldSec.secretValue()) && Objects.equals(s.sourceLocation(), oldSec.sourceLocation()))) {
+                jsSecrets.set(i, newSec);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateEndpoint(DiscoveredEndpoint oldEp, DiscoveredEndpoint newEp) {
+        for (int i = 0; i < jsEndpoints.size(); i++) {
+            DiscoveredEndpoint e = jsEndpoints.get(i);
+            if (e == oldEp || (Objects.equals(e.endpoint(), oldEp.endpoint()) && Objects.equals(e.sourceLocation(), oldEp.sourceLocation()))) {
+                jsEndpoints.set(i, newEp);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateComment(DiscoveredComment oldComm, DiscoveredComment newComm) {
+        for (int i = 0; i < jsComments.size(); i++) {
+            DiscoveredComment c = jsComments.get(i);
+            if (c == oldComm || (Objects.equals(c.commentText(), oldComm.commentText()) && Objects.equals(c.sourceLocation(), oldComm.sourceLocation()))) {
+                jsComments.set(i, newComm);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateSecurityBypass(DiscoveredSecurityBypass oldBypass, DiscoveredSecurityBypass newBypass) {
+        for (int i = 0; i < jsSecurityBypasses.size(); i++) {
+            DiscoveredSecurityBypass b = jsSecurityBypasses.get(i);
+            if (b == oldBypass || (Objects.equals(b.method(), oldBypass.method()) && Objects.equals(b.sourceLocation(), oldBypass.sourceLocation()))) {
+                jsSecurityBypasses.set(i, newBypass);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized boolean updateCloudUrl(DiscoveredCloudUrl oldCu, DiscoveredCloudUrl newCu) {
+        for (int i = 0; i < jsCloudUrls.size(); i++) {
+            DiscoveredCloudUrl u = jsCloudUrls.get(i);
+            if (u == oldCu || (Objects.equals(u.cloudUrl(), oldCu.cloudUrl()) && Objects.equals(u.sourceLocation(), oldCu.sourceLocation()))) {
+                jsCloudUrls.set(i, newCu);
+                return true;
+            }
+        }
+        return false;
     }
 
     public synchronized String getJsReconSummary() {

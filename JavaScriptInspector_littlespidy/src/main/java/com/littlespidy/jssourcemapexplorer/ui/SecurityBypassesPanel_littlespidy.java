@@ -118,8 +118,12 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
         }
 
         tableModel.updateData(filtered);
-        statsLabel.setText(String.format("Security Bypasses: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-            allBypasses.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        if (allBypasses.isEmpty()) {
+            statsLabel.setText("Security Bypasses: 0 (No findings found)");
+        } else {
+            statsLabel.setText(String.format("Security Bypasses: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
+                allBypasses.size(), filtered.size(), tpCount, fpCount, unclassCount));
+        }
     }
 
     @Override
@@ -150,20 +154,12 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
     private void syncClassificationToStore(DiscoveredSecurityBypass oldBypass, DiscoveredSecurityBypass newBypass) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            List<DiscoveredSecurityBypass> jsBypasses = entry.getJsSecurityBypasses();
-            for (int i = 0; i < jsBypasses.size(); i++) {
-                if (jsBypasses.get(i) == oldBypass || (Objects.equals(jsBypasses.get(i).method(), oldBypass.method()) && Objects.equals(jsBypasses.get(i).sourceLocation(), oldBypass.sourceLocation()))) {
-                    jsBypasses.set(i, newBypass);
-                    return;
-                }
+            if (entry.updateSecurityBypass(oldBypass, newBypass)) {
+                return;
             }
             if (entry.getUnpackedProject() != null) {
-                List<DiscoveredSecurityBypass> unpBypasses = entry.getUnpackedProject().getAllSecurityBypasses();
-                for (int i = 0; i < unpBypasses.size(); i++) {
-                    if (unpBypasses.get(i) == oldBypass || (Objects.equals(unpBypasses.get(i).method(), oldBypass.method()) && Objects.equals(unpBypasses.get(i).sourceLocation(), oldBypass.sourceLocation()))) {
-                        unpBypasses.set(i, newBypass);
-                        return;
-                    }
+                if (entry.getUnpackedProject().updateSecurityBypass(oldBypass, newBypass)) {
+                    return;
                 }
             }
         }
@@ -223,7 +219,7 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
 
     private static class SecurityBypassesTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Framework", "Bypass Method / Sink", "Risk", "Confidence", "Description", "Source Type", "Source Location", "Line", "Classification"
+            "#", "Framework", "Bypass Method / Sink", "Risk", "Confidence", "Description", "Source Type", "Source Location", "Line"
         };
         private final List<DiscoveredSecurityBypass> list = new ArrayList<>();
 
@@ -266,7 +262,6 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
                 case 6 -> item.sourceType();
                 case 7 -> item.sourceLocation();
                 case 8 -> item.line();
-                case 9 -> item.classification();
                 default -> null;
             };
         }
