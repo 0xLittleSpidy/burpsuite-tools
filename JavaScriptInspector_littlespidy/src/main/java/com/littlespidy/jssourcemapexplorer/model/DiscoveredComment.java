@@ -19,8 +19,29 @@ public record DiscoveredComment(
     int line,
     int startOffset,
     int endOffset,
-    String contextSnippet
+    String contextSnippet,
+    String classification
 ) {
+    public DiscoveredComment {
+        if (classification == null || classification.isBlank()) {
+            classification = "Not Classified";
+        }
+    }
+
+    public DiscoveredComment(
+        String sourceLocation,
+        String sourceType,
+        String commentType,
+        String category,
+        String commentText,
+        int line,
+        int startOffset,
+        int endOffset,
+        String contextSnippet
+    ) {
+        this(sourceLocation, sourceType, commentType, category, commentText, line, startOffset, endOffset, contextSnippet, "Not Classified");
+    }
+
     public DiscoveredComment(
         String sourceLocation,
         String sourceType,
@@ -30,6 +51,21 @@ public record DiscoveredComment(
         int line,
         String contextSnippet
     ) {
-        this(sourceLocation, sourceType, commentType, category, commentText, line, 0, 0, contextSnippet);
+        this(sourceLocation, sourceType, commentType, category, commentText, line, 0, 0, contextSnippet, "Not Classified");
+    }
+
+    public DiscoveredComment withClassification(String newClassification) {
+        return new DiscoveredComment(
+            sourceLocation,
+            sourceType,
+            commentType,
+            category,
+            commentText,
+            line,
+            startOffset,
+            endOffset,
+            contextSnippet,
+            newClassification
+        );
     }
 }

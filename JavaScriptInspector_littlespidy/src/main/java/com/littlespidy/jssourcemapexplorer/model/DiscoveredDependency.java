@@ -20,6 +20,35 @@ public class DiscoveredDependency {
     private final int startOffset;
     private final int endOffset;
     private final String contextSnippet;
+    private volatile String classification = "Not Classified";
+
+    public DiscoveredDependency(
+        String sourceLocation,
+        String sourceType,
+        String packageName,
+        String version,
+        String dependencyType,
+        String status,
+        String verificationDetail,
+        int line,
+        int startOffset,
+        int endOffset,
+        String contextSnippet,
+        String classification
+    ) {
+        this.sourceLocation = sourceLocation;
+        this.sourceType = sourceType;
+        this.packageName = packageName;
+        this.version = (version != null && !version.trim().isEmpty()) ? version : "-";
+        this.dependencyType = dependencyType;
+        this.status = (status != null) ? status : "Unverified";
+        this.verificationDetail = (verificationDetail != null) ? verificationDetail : "-";
+        this.line = line;
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
+        this.contextSnippet = contextSnippet;
+        this.classification = (classification != null && !classification.isBlank()) ? classification : "Not Classified";
+    }
 
     public DiscoveredDependency(
         String sourceLocation,
@@ -34,17 +63,7 @@ public class DiscoveredDependency {
         int endOffset,
         String contextSnippet
     ) {
-        this.sourceLocation = sourceLocation;
-        this.sourceType = sourceType;
-        this.packageName = packageName;
-        this.version = (version != null && !version.trim().isEmpty()) ? version : "-";
-        this.dependencyType = dependencyType;
-        this.status = (status != null) ? status : "Unverified";
-        this.verificationDetail = (verificationDetail != null) ? verificationDetail : "-";
-        this.line = line;
-        this.startOffset = startOffset;
-        this.endOffset = endOffset;
-        this.contextSnippet = contextSnippet;
+        this(sourceLocation, sourceType, packageName, version, dependencyType, status, verificationDetail, line, startOffset, endOffset, contextSnippet, "Not Classified");
     }
 
     public DiscoveredDependency(
@@ -72,6 +91,12 @@ public class DiscoveredDependency {
     public int startOffset() { return startOffset; }
     public int endOffset() { return endOffset; }
     public String contextSnippet() { return contextSnippet; }
+    public String getClassification() {
+        return (classification != null && !classification.isBlank()) ? classification : "Not Classified";
+    }
+    public void setClassification(String classification) {
+        this.classification = (classification != null && !classification.isBlank()) ? classification : "Not Classified";
+    }
 
     public void setStatus(String status, String detail) {
         this.status = status;

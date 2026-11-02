@@ -25,8 +25,31 @@ public record DiscoveredSecurityBypass(
     int startOffset,
     int endOffset,
     String contextSnippet,
-    String description
+    String description,
+    String classification
 ) {
+    public DiscoveredSecurityBypass {
+        if (classification == null || classification.isBlank()) {
+            classification = "Not Classified";
+        }
+    }
+
+    public DiscoveredSecurityBypass(
+        String sourceLocation,
+        String sourceType,
+        String framework,
+        String method,
+        String risk,
+        String confidence,
+        int line,
+        int startOffset,
+        int endOffset,
+        String contextSnippet,
+        String description
+    ) {
+        this(sourceLocation, sourceType, framework, method, risk, confidence, line, startOffset, endOffset, contextSnippet, description, "Not Classified");
+    }
+
     public DiscoveredSecurityBypass(
         String sourceLocation,
         String sourceType,
@@ -38,6 +61,23 @@ public record DiscoveredSecurityBypass(
         String contextSnippet,
         String description
     ) {
-        this(sourceLocation, sourceType, framework, method, risk, confidence, line, 0, 0, contextSnippet, description);
+        this(sourceLocation, sourceType, framework, method, risk, confidence, line, 0, 0, contextSnippet, description, "Not Classified");
+    }
+
+    public DiscoveredSecurityBypass withClassification(String newClassification) {
+        return new DiscoveredSecurityBypass(
+            sourceLocation,
+            sourceType,
+            framework,
+            method,
+            risk,
+            confidence,
+            line,
+            startOffset,
+            endOffset,
+            contextSnippet,
+            description,
+            newClassification
+        );
     }
 }

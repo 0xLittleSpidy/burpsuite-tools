@@ -17,8 +17,28 @@ public record DiscoveredCloudUrl(
     int line,
     int startOffset,
     int endOffset,
-    String contextSnippet
+    String contextSnippet,
+    String classification
 ) {
+    public DiscoveredCloudUrl {
+        if (classification == null || classification.isBlank()) {
+            classification = "Not Classified";
+        }
+    }
+
+    public DiscoveredCloudUrl(
+        String sourceLocation,
+        String sourceType,
+        String cloudProvider,
+        String cloudUrl,
+        int line,
+        int startOffset,
+        int endOffset,
+        String contextSnippet
+    ) {
+        this(sourceLocation, sourceType, cloudProvider, cloudUrl, line, startOffset, endOffset, contextSnippet, "Not Classified");
+    }
+
     public DiscoveredCloudUrl(
         String sourceLocation,
         String sourceType,
@@ -27,6 +47,20 @@ public record DiscoveredCloudUrl(
         int line,
         String contextSnippet
     ) {
-        this(sourceLocation, sourceType, cloudProvider, cloudUrl, line, 0, 0, contextSnippet);
+        this(sourceLocation, sourceType, cloudProvider, cloudUrl, line, 0, 0, contextSnippet, "Not Classified");
+    }
+
+    public DiscoveredCloudUrl withClassification(String newClassification) {
+        return new DiscoveredCloudUrl(
+            sourceLocation,
+            sourceType,
+            cloudProvider,
+            cloudUrl,
+            line,
+            startOffset,
+            endOffset,
+            contextSnippet,
+            newClassification
+        );
     }
 }

@@ -18,8 +18,29 @@ public record DiscoveredEndpoint(
     int startOffset,
     int endOffset,
     String contextSnippet,
-    String technique
+    String technique,
+    String classification
 ) {
+    public DiscoveredEndpoint {
+        if (classification == null || classification.isBlank()) {
+            classification = "Not Classified";
+        }
+    }
+
+    public DiscoveredEndpoint(
+        String sourceLocation,
+        String sourceType,
+        String endpoint,
+        String methodGuess,
+        int line,
+        int startOffset,
+        int endOffset,
+        String contextSnippet,
+        String technique
+    ) {
+        this(sourceLocation, sourceType, endpoint, methodGuess, line, startOffset, endOffset, contextSnippet, technique, "Not Classified");
+    }
+
     public DiscoveredEndpoint(
         String sourceLocation,
         String sourceType,
@@ -29,7 +50,22 @@ public record DiscoveredEndpoint(
         String contextSnippet,
         String technique
     ) {
-        this(sourceLocation, sourceType, endpoint, methodGuess, line, 0, 0, contextSnippet, technique);
+        this(sourceLocation, sourceType, endpoint, methodGuess, line, 0, 0, contextSnippet, technique, "Not Classified");
+    }
+
+    public DiscoveredEndpoint withClassification(String newClassification) {
+        return new DiscoveredEndpoint(
+            sourceLocation,
+            sourceType,
+            endpoint,
+            methodGuess,
+            line,
+            startOffset,
+            endOffset,
+            contextSnippet,
+            technique,
+            newClassification
+        );
     }
 
     public String extractor() {

@@ -22,8 +22,32 @@ public record DiscoveredSecret(
     int line,
     int startOffset,
     int endOffset,
-    String contextSnippet
+    String contextSnippet,
+    String classification
 ) {
+    public DiscoveredSecret {
+        if (classification == null || classification.isBlank()) {
+            classification = "Not Classified";
+        }
+    }
+
+    public DiscoveredSecret(
+        String sourceLocation,
+        String sourceType,
+        String category,
+        String secretValue,
+        String severity,
+        double entropy,
+        String confidence,
+        String technique,
+        int line,
+        int startOffset,
+        int endOffset,
+        String contextSnippet
+    ) {
+        this(sourceLocation, sourceType, category, secretValue, severity, entropy, confidence, technique, line, startOffset, endOffset, contextSnippet, "Not Classified");
+    }
+
     public DiscoveredSecret(
         String sourceLocation,
         String sourceType,
@@ -35,6 +59,24 @@ public record DiscoveredSecret(
         int line,
         String contextSnippet
     ) {
-        this(sourceLocation, sourceType, category, secretValue, "High", entropy, confidence, technique, line, 0, 0, contextSnippet);
+        this(sourceLocation, sourceType, category, secretValue, "High", entropy, confidence, technique, line, 0, 0, contextSnippet, "Not Classified");
+    }
+
+    public DiscoveredSecret withClassification(String newClassification) {
+        return new DiscoveredSecret(
+            sourceLocation,
+            sourceType,
+            category,
+            secretValue,
+            severity,
+            entropy,
+            confidence,
+            technique,
+            line,
+            startOffset,
+            endOffset,
+            contextSnippet,
+            newClassification
+        );
     }
 }

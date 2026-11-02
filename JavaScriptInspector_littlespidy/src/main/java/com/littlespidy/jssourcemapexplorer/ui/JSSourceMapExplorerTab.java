@@ -54,8 +54,13 @@ public class JSSourceMapExplorerTab extends JPanel {
     private final SourceTreePanel sourceTreePanel;
     private final SourceCodeViewerPanel codeViewerPanel;
 
-    // Dedicated Top-Level Recon Mining Panel
-    private final ReconMiningPanel reconMiningPanel;
+    // Dedicated Top-Level Finding Panels
+    private final PathsPanel_littlespidy pathsPanel;
+    private final SecretsPanel_littlespidy secretsPanel;
+    private final CommentsPanel_littlespidy commentsPanel;
+    private final SecurityBypassesPanel_littlespidy securityBypassesPanel;
+    private final CloudUrlsPanel_littlespidy cloudUrlsPanel;
+    private final DependenciesPanel_littlespidy dependenciesPanel;
 
     // Dedicated Top-Level GraphQL Inspector Panel
     private final GraphQLInspectorPanel_littlespidy graphQLInspectorPanel;
@@ -126,20 +131,37 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         this.codeViewerPanel = new SourceCodeViewerPanel(api);
         this.sourceTreePanel = new SourceTreePanel(codeViewerPanel::displayFile);
-        this.reconMiningPanel = new ReconMiningPanel(api, dataStore);
-        this.reconMiningPanel.setHistoryLoader(this::loadProxyHistory);
-        this.reconMiningPanel.setInScopeChangeListener(s -> {
-            if (inScopeOnlyCheckBox.isSelected() != s) {
-                inScopeOnlyCheckBox.setSelected(s);
-                refreshView();
-            }
-        });
-        this.reconMiningPanel.setOnReconFinished(() -> {
+        this.pathsPanel = new PathsPanel_littlespidy(api, dataStore);
+        this.secretsPanel = new SecretsPanel_littlespidy(api, dataStore);
+        this.commentsPanel = new CommentsPanel_littlespidy(api, dataStore);
+        this.securityBypassesPanel = new SecurityBypassesPanel_littlespidy(api, dataStore);
+        this.cloudUrlsPanel = new CloudUrlsPanel_littlespidy(api, dataStore);
+        this.dependenciesPanel = new DependenciesPanel_littlespidy(api, dataStore);
+
+        Runnable refreshAndSave = () -> {
             refreshView();
             if (storageManager != null) {
                 storageManager.scheduleAutoSave();
             }
-        });
+        };
+
+        this.pathsPanel.setOnMiningFinished(refreshAndSave);
+        this.pathsPanel.setAutoSaveCallback(refreshAndSave);
+
+        this.secretsPanel.setOnMiningFinished(refreshAndSave);
+        this.secretsPanel.setAutoSaveCallback(refreshAndSave);
+
+        this.commentsPanel.setOnMiningFinished(refreshAndSave);
+        this.commentsPanel.setAutoSaveCallback(refreshAndSave);
+
+        this.securityBypassesPanel.setOnMiningFinished(refreshAndSave);
+        this.securityBypassesPanel.setAutoSaveCallback(refreshAndSave);
+
+        this.cloudUrlsPanel.setOnMiningFinished(refreshAndSave);
+        this.cloudUrlsPanel.setAutoSaveCallback(refreshAndSave);
+
+        this.dependenciesPanel.setOnMiningFinished(refreshAndSave);
+        this.dependenciesPanel.setAutoSaveCallback(refreshAndSave);
 
         this.graphQLInspectorPanel = new GraphQLInspectorPanel_littlespidy(api, dataStore);
         this.graphQLInspectorPanel.setHistoryLoader(this::loadProxyHistory);
@@ -158,8 +180,6 @@ public class JSSourceMapExplorerTab extends JPanel {
                 openAiAnalysisForFile(file.relativePath(), file.content());
             }
         });
-
-        this.reconMiningPanel.setAiAnalysisOpener((name, content) -> openAiAnalysisForFile(name, content));
 
         setLayout(new BorderLayout());
 
@@ -185,13 +205,28 @@ public class JSSourceMapExplorerTab extends JPanel {
         // Tab 1: JS and Source Map
         rootTabbedPane.addTab("JS and Source Map", createWorkspacePanel());
 
-        // Tab 2: Dedicated Recon and Secret Mining Tab
-        rootTabbedPane.addTab("Recon and Secret Mining", reconMiningPanel);
+        // Tab 2: Paths
+        rootTabbedPane.addTab("Paths", pathsPanel);
 
-        // Tab 3: Dedicated GraphQL Tab
+        // Tab 3: Secrets
+        rootTabbedPane.addTab("Secrets", secretsPanel);
+
+        // Tab 4: Comments
+        rootTabbedPane.addTab("Comments", commentsPanel);
+
+        // Tab 5: Security Bypasses
+        rootTabbedPane.addTab("Security Bypasses", securityBypassesPanel);
+
+        // Tab 6: Cloud URLs
+        rootTabbedPane.addTab("Cloud URLs", cloudUrlsPanel);
+
+        // Tab 7: Dependencies
+        rootTabbedPane.addTab("Dependencies", dependenciesPanel);
+
+        // Tab 8: Dedicated GraphQL Tab
         rootTabbedPane.addTab("GraphQL", graphQLInspectorPanel);
 
-        // Tab 4: AI Security Analyst (Local LLM / Antigravity CLI)
+        // Tab 9: AI Security Analyst (Local LLM / Antigravity CLI)
         rootTabbedPane.addTab("AI Security Analyst", aiSecurityPanel);
 
         add(rootTabbedPane, BorderLayout.CENTER);
@@ -371,9 +406,6 @@ public class JSSourceMapExplorerTab extends JPanel {
         inScopeOnlyCheckBox.setToolTipText("When checked, only in-scope JavaScript requests will be loaded from Proxy history and displayed");
         inScopeOnlyCheckBox.addActionListener(e -> {
             boolean s = inScopeOnlyCheckBox.isSelected();
-            if (reconMiningPanel != null) {
-                reconMiningPanel.setInScopeOnly(s);
-            }
             if (graphQLInspectorPanel != null) {
                 graphQLInspectorPanel.setInScopeOnly(s);
             }
@@ -436,7 +468,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                 dataStore.clear();
                 sourceTreePanel.setProject(null);
                 codeViewerPanel.displayFile(null);
-                reconMiningPanel.refreshFromDataStore();
+                refreshAllFindingPanels();
                 refreshView();
                 if (storageManager != null) {
                     storageManager.scheduleAutoSave();
@@ -616,7 +648,7 @@ public class JSSourceMapExplorerTab extends JPanel {
 
                 SwingUtilities.invokeLater(() -> {
                     refreshView();
-                    reconMiningPanel.refreshFromDataStore();
+                    refreshAllFindingPanels();
                     if (storageManager != null) {
                         storageManager.scheduleAutoSave();
                     }
@@ -687,7 +719,7 @@ public class JSSourceMapExplorerTab extends JPanel {
                         entry.setUnpackedProject(project);
                         entry.setSourceMapLocation(targetLocation);
                         sourceTreePanel.setProject(project);
-                        reconMiningPanel.refreshFromDataStore();
+                        refreshAllFindingPanels();
                         graphQLInspectorPanel.refreshFromDataStore();
                         handleScriptSelection(entry);
                         refreshView();
@@ -999,7 +1031,6 @@ public class JSSourceMapExplorerTab extends JPanel {
 
     private void loadProxyHistory() {
         if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(false);
-        if (reconMiningPanel != null) reconMiningPanel.setHistoryLoading(true);
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);
         liveStatusLabel.setText("Scanning Proxy history for JavaScript assets...");
@@ -1109,7 +1140,6 @@ public class JSSourceMapExplorerTab extends JPanel {
                 } finally {
                     progressBar.setVisible(false);
                     if (loadHistoryBtn != null) loadHistoryBtn.setEnabled(true);
-                    if (reconMiningPanel != null) reconMiningPanel.setHistoryLoading(false);
                 }
             }
         };
@@ -1119,9 +1149,25 @@ public class JSSourceMapExplorerTab extends JPanel {
 
     public synchronized void refreshAllTabs() {
         refreshView();
-        if (reconMiningPanel != null) reconMiningPanel.refreshFromDataStore();
+        refreshAllFindingPanels();
         if (graphQLInspectorPanel != null) graphQLInspectorPanel.refreshFromDataStore();
     }
+
+    public synchronized void refreshAllFindingPanels() {
+        if (pathsPanel != null) pathsPanel.refreshFromDataStore();
+        if (secretsPanel != null) secretsPanel.refreshFromDataStore();
+        if (commentsPanel != null) commentsPanel.refreshFromDataStore();
+        if (securityBypassesPanel != null) securityBypassesPanel.refreshFromDataStore();
+        if (cloudUrlsPanel != null) cloudUrlsPanel.refreshFromDataStore();
+        if (dependenciesPanel != null) dependenciesPanel.refreshFromDataStore();
+    }
+
+    public PathsPanel_littlespidy getPathsPanel() { return pathsPanel; }
+    public SecretsPanel_littlespidy getSecretsPanel() { return secretsPanel; }
+    public CommentsPanel_littlespidy getCommentsPanel() { return commentsPanel; }
+    public SecurityBypassesPanel_littlespidy getSecurityBypassesPanel() { return securityBypassesPanel; }
+    public CloudUrlsPanel_littlespidy getCloudUrlsPanel() { return cloudUrlsPanel; }
+    public DependenciesPanel_littlespidy getDependenciesPanel() { return dependenciesPanel; }
 
     public synchronized void refreshView() {
         SwingUtilities.invokeLater(() -> {
