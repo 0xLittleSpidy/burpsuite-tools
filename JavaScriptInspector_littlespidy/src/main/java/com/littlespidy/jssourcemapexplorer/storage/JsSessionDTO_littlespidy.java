@@ -69,5 +69,12 @@ public class JsSessionDTO_littlespidy {
     public static class UnpackedProjectDTO {
         public String sourceMapUrl;
         public List<UnpackedSourceFile> files = new ArrayList<>();
+        public List<DiscoveredSecret> secrets = new ArrayList<>();
+        public List<DiscoveredEndpoint> endpoints = new ArrayList<>();
+        public List<DiscoveredCloudUrl> cloudUrls = new ArrayList<>();
+        public List<DiscoveredDependency> dependencies = new ArrayList<>();
+        public List<DiscoveredComment> comments = new ArrayList<>();
+        public List<DiscoveredSecurityBypass> securityBypasses = new ArrayList<>();
+        public List<DiscoveredGraphQLOperation> graphQLOperations = new ArrayList<>();
     }
 }

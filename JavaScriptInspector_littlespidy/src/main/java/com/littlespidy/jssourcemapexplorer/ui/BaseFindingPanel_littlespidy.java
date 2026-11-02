@@ -11,10 +11,12 @@ import burp.api.montoya.ui.editor.HttpResponseEditor;
 import com.littlespidy.jssourcemapexplorer.engine.SecretAndEndpointMiner;
 import com.littlespidy.jssourcemapexplorer.engine.SourceMapProber;
 import com.littlespidy.jssourcemapexplorer.engine.SourceMapUnpacker;
+import com.littlespidy.jssourcemapexplorer.model.FindingOccurrence_littlespidy;
 import com.littlespidy.jssourcemapexplorer.model.JsDataStore;
 import com.littlespidy.jssourcemapexplorer.model.JsFileEntry;
 import com.littlespidy.jssourcemapexplorer.model.PassiveMapStatus;
 import com.littlespidy.jssourcemapexplorer.model.UnpackedProject;
+import com.littlespidy.jssourcemapexplorer.model.UnpackedSourceFile;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -59,6 +61,12 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
     // HTTP Editors
     protected final HttpRequestEditor requestEditor;
     protected final HttpResponseEditor responseEditor;
+
+    // Occurrence Navigation Controls (Right side of Request/Response viewer)
+    private final JLabel occurrenceInfoLabel = new JLabel("Select a finding row above to inspect Request and Response context.");
+    private final JPanel occurrenceButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 0));
+    private List<FindingOccurrence_littlespidy> currentOccurrences = Collections.emptyList();
+    private int currentOccurrenceIndex = 0;
 
     // Toolbar Controls
     protected final JButton runBtn;
@@ -186,7 +194,7 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
 
         JPanel respContainer = new JPanel(new BorderLayout());
         respContainer.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "HTTP Response",
+            BorderFactory.createEtchedBorder(), "HTTP Response / Source Code",
             TitledBorder.LEFT, TitledBorder.TOP, new Font(Font.SANS_SERIF, Font.BOLD, 11)
         ));
         respContainer.add(responseEditor.uiComponent(), BorderLayout.CENTER);
@@ -195,8 +203,22 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         parallelEditorsSplit.setResizeWeight(0.5);
         parallelEditorsSplit.setDividerLocation(0.5);
 
-        // Master Vertical Split: Table on Top, Parallel Editors on Bottom
-        JSplitPane masterSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tablePanel, parallelEditorsSplit);
+        // Occurrence Navigation Bar (Top of parallel editors)
+        JPanel occurrenceNavBar = new JPanel(new BorderLayout(6, 2));
+        occurrenceNavBar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, UIManager.getColor("Separator.foreground") != null ? UIManager.getColor("Separator.foreground") : Color.LIGHT_GRAY),
+            BorderFactory.createEmptyBorder(2, 6, 2, 6)
+        ));
+        occurrenceInfoLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        occurrenceNavBar.add(occurrenceInfoLabel, BorderLayout.WEST);
+        occurrenceNavBar.add(occurrenceButtonsPanel, BorderLayout.EAST);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout(0, 2));
+        bottomPanel.add(occurrenceNavBar, BorderLayout.NORTH);
+        bottomPanel.add(parallelEditorsSplit, BorderLayout.CENTER);
+
+        // Master Vertical Split: Table on Top, Parallel Editors with Occurrence Nav on Bottom
+        JSplitPane masterSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tablePanel, bottomPanel);
         masterSplit.setResizeWeight(0.48);
 
         add(topToolbar, BorderLayout.NORTH);
@@ -386,9 +408,77 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
     }
 
     private void handleFindingSelected(int modelRow) {
-        String sourceLoc = getSourceLocationAt(modelRow);
-        JsFileEntry entry = findEntryForLocation(sourceLoc);
+        List<FindingOccurrence_littlespidy> occList = getOccurrencesAt(modelRow);
+        if (occList == null || occList.isEmpty()) {
+            this.currentOccurrences = Collections.emptyList();
+            this.currentOccurrenceIndex = 0;
+            occurrenceInfoLabel.setText("No occurrences available.");
+            occurrenceButtonsPanel.removeAll();
+            occurrenceButtonsPanel.revalidate();
+            occurrenceButtonsPanel.repaint();
+            try {
+                requestEditor.setRequest(HttpRequest.httpRequest(""));
+                responseEditor.setResponse(HttpResponse.httpResponse(""));
+            } catch (Exception ignored) {}
+            return;
+        }
 
+        this.currentOccurrences = occList;
+        this.currentOccurrenceIndex = 0;
+        updateOccurrenceButtons(occList, 0);
+        displayOccurrence(occList.get(0), 0, occList.size());
+    }
+
+    private void updateOccurrenceButtons(List<FindingOccurrence_littlespidy> occList, int selectedIdx) {
+        occurrenceButtonsPanel.removeAll();
+        if (occList.size() > 1) {
+            JLabel occLbl = new JLabel("Occurrences (" + occList.size() + "):");
+            occLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+            occurrenceButtonsPanel.add(occLbl);
+
+            for (int i = 0; i < occList.size(); i++) {
+                final int idx = i;
+                FindingOccurrence_littlespidy occ = occList.get(i);
+                JButton btn = new JButton(String.valueOf(i + 1));
+                btn.setMargin(new Insets(1, 6, 1, 6));
+                btn.setFont(new Font(Font.SANS_SERIF, i == selectedIdx ? Font.BOLD : Font.PLAIN, 11));
+                if (i == selectedIdx) {
+                    btn.setForeground(new Color(0, 102, 204));
+                }
+                btn.setToolTipText(String.format("Occurrence %d of %d: %s%s",
+                    i + 1, occList.size(), occ.sourceLocation(), occ.line() > 0 ? " (Line " + occ.line() + ")" : ""));
+                btn.addActionListener(e -> {
+                    currentOccurrenceIndex = idx;
+                    updateOccurrenceButtons(occList, idx);
+                    displayOccurrence(occList.get(idx), idx, occList.size());
+                });
+                occurrenceButtonsPanel.add(btn);
+            }
+        } else if (occList.size() == 1) {
+            JLabel occLbl = new JLabel("Occurrences: 1");
+            occLbl.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+            occurrenceButtonsPanel.add(occLbl);
+
+            JButton btn = new JButton("1");
+            btn.setMargin(new Insets(1, 6, 1, 6));
+            btn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+            btn.setForeground(new Color(0, 102, 204));
+            FindingOccurrence_littlespidy occ = occList.get(0);
+            btn.setToolTipText(String.format("Occurrence 1: %s%s",
+                occ.sourceLocation(), occ.line() > 0 ? " (Line " + occ.line() + ")" : ""));
+            btn.addActionListener(e -> displayOccurrence(occ, 0, 1));
+            occurrenceButtonsPanel.add(btn);
+        }
+        occurrenceButtonsPanel.revalidate();
+        occurrenceButtonsPanel.repaint();
+    }
+
+    private void displayOccurrence(FindingOccurrence_littlespidy occ, int index, int total) {
+        if (occ == null) return;
+        occurrenceInfoLabel.setText(String.format("Occurrence %d of %d: %s%s",
+            index + 1, total, occ.sourceLocation(), occ.line() > 0 ? " (Line " + occ.line() + ")" : ""));
+
+        JsFileEntry entry = findEntryForLocation(occ.sourceLocation());
         if (entry == null) {
             try {
                 requestEditor.setRequest(HttpRequest.httpRequest(""));
@@ -397,44 +487,84 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
             return;
         }
 
+        // 1. Set HTTP Request
         if (entry.getRequest() != null) {
-            requestEditor.setRequest(entry.getRequest());
+            try {
+                requestEditor.setRequest(entry.getRequest());
+            } catch (Exception ignored) {}
         } else {
             try {
                 requestEditor.setRequest(HttpRequest.httpRequest(""));
             } catch (Exception ignored) {}
         }
 
-        HttpResponse response = entry.getResponse();
-        if (response != null) {
-            String findingText = getFindingTextAt(modelRow);
-            int startOffset = getStartOffsetAt(modelRow);
-            int endOffset = getEndOffsetAt(modelRow);
+        // 2. Set HTTP Response / Source Code
+        HttpResponse responseToDisplay = null;
+        String responseText = "";
+        int bodyOffset = 0;
 
-            int rawStart = startOffset;
-            int rawEnd = endOffset;
-            int bodyOffset = response.bodyOffset();
+        if (entry.getUnpackedProject() != null) {
+            UnpackedSourceFile sf = entry.getUnpackedProject().getFile(occ.sourceLocation());
+            if (sf == null) {
+                for (UnpackedSourceFile f : entry.getUnpackedProject().getFiles()) {
+                    if (f.relativePath().equalsIgnoreCase(occ.sourceLocation())
+                        || f.relativePath().endsWith("/" + occ.sourceLocation())
+                        || occ.sourceLocation().endsWith("/" + f.relativePath())) {
+                        sf = f;
+                        break;
+                    }
+                }
+            }
+            if (sf != null && sf.content() != null) {
+                String headers = "HTTP/1.1 200 OK\r\nContent-Type: text/javascript; charset=utf-8\r\nX-Source-File: "
+                    + sf.relativePath() + "\r\n\r\n";
+                try {
+                    responseToDisplay = HttpResponse.httpResponse(headers + sf.content());
+                    bodyOffset = responseToDisplay.bodyOffset();
+                } catch (Exception ignored) {}
+                responseText = sf.content();
+            }
+        }
 
-            if (rawStart >= 0 && rawEnd > rawStart) {
-                rawStart += bodyOffset;
-                rawEnd += bodyOffset;
+        if (responseToDisplay == null) {
+            responseToDisplay = entry.getResponse();
+            if (responseToDisplay != null) {
+                try {
+                    responseText = responseToDisplay.bodyToString();
+                    bodyOffset = responseToDisplay.bodyOffset();
+                } catch (Exception ignored) {}
+            }
+        }
+
+        if (responseToDisplay != null) {
+            String findingText = occ.findingText();
+            int startOffset = occ.startOffset();
+            int endOffset = occ.endOffset();
+
+            int rawStart = -1;
+            int rawEnd = -1;
+
+            if (startOffset >= 0 && endOffset > startOffset && (endOffset + bodyOffset <= responseToDisplay.toByteArray().length())) {
+                rawStart = startOffset + bodyOffset;
+                rawEnd = endOffset + bodyOffset;
             } else if (findingText != null && !findingText.isEmpty()) {
-                String rawStr = response.toString();
-                int idx = rawStr.indexOf(findingText);
+                int idx = responseText.indexOf(findingText);
                 if (idx >= 0) {
-                    rawStart = idx;
-                    rawEnd = idx + findingText.length();
+                    rawStart = idx + bodyOffset;
+                    rawEnd = idx + findingText.length() + bodyOffset;
                 }
             }
 
-            if (rawStart >= 0 && rawEnd > rawStart && rawEnd <= response.toByteArray().length()) {
+            if (rawStart >= 0 && rawEnd > rawStart && rawEnd <= responseToDisplay.toByteArray().length()) {
                 try {
                     Marker marker = Marker.marker(Range.range(rawStart, rawEnd));
-                    response = response.withMarkers(marker);
+                    responseToDisplay = responseToDisplay.withMarkers(marker);
                 } catch (Exception ignored) {}
             }
 
-            responseEditor.setResponse(response);
+            try {
+                responseEditor.setResponse(responseToDisplay);
+            } catch (Exception ignored) {}
 
             if (findingText != null && !findingText.isEmpty()) {
                 try {
@@ -465,6 +595,19 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
             if (e.getUnpackedProject() != null) {
                 if (e.getUnpackedProject().getSourceMapUrl() != null && sourceLocation.startsWith(e.getUnpackedProject().getSourceMapUrl())) {
                     return e;
+                }
+                if (e.getUnpackedProject().getFile(sourceLocation) != null
+                    || e.getUnpackedProject().getFilesByPath().containsKey(sourceLocation)) {
+                    return e;
+                }
+            }
+        }
+        for (JsFileEntry e : dataStore.getEntries()) {
+            if (e.getUnpackedProject() != null) {
+                for (String path : e.getUnpackedProject().getFilesByPath().keySet()) {
+                    if (path.equalsIgnoreCase(sourceLocation) || path.endsWith("/" + sourceLocation) || sourceLocation.endsWith("/" + path)) {
+                        return e;
+                    }
                 }
             }
         }
@@ -588,6 +731,8 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
     protected abstract void resetCategoryFilters();
     protected abstract String getClassificationAt(int modelRow);
     protected abstract void updateClassification(int modelRow, String classification);
+    protected abstract List<FindingOccurrence_littlespidy> getOccurrencesAt(int modelRow);
+    protected abstract int getOccurrenceCountAt(int modelRow);
     protected abstract String getFindingTextAt(int modelRow);
     protected abstract int getStartOffsetAt(int modelRow);
     protected abstract int getEndOffsetAt(int modelRow);

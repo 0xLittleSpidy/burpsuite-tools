@@ -95,8 +95,9 @@ class ModularFindingTabsTest_littlespidy {
 
         panel.refreshFromDataStore();
         assertEquals(1, panel.table.getRowCount());
-        assertEquals("POST", panel.table.getValueAt(0, 1));
-        assertEquals("/api/v1/auth", panel.table.getValueAt(0, 2));
+        assertEquals(1, panel.table.getValueAt(0, 1)); // Occurrences column
+        assertEquals("POST", panel.table.getValueAt(0, 2));
+        assertEquals("/api/v1/auth", panel.table.getValueAt(0, 3));
     }
 
     @Test
@@ -119,7 +120,8 @@ class ModularFindingTabsTest_littlespidy {
 
         panel.refreshFromDataStore();
         assertEquals(1, panel.table.getRowCount());
-        assertEquals("AWS Access Key", panel.table.getValueAt(0, 1));
+        assertEquals(1, panel.table.getValueAt(0, 1)); // Occurrences column
+        assertEquals("AWS Access Key", panel.table.getValueAt(0, 2));
     }
 
     @Test
@@ -182,7 +184,7 @@ class ModularFindingTabsTest_littlespidy {
 
         SecretsPanel_littlespidy secretsPanel = new SecretsPanel_littlespidy(api, store);
         JTable secTable = secretsPanel.getTable();
-        assertEquals(8, secTable.getColumnCount(), "Secrets table should have 8 columns");
+        assertEquals(9, secTable.getColumnCount(), "Secrets table should have 9 columns");
         for (int i = 0; i < secTable.getColumnCount(); i++) {
             String colName = secTable.getColumnName(i);
             assertNotEquals("Confidence", colName);
@@ -192,35 +194,35 @@ class ModularFindingTabsTest_littlespidy {
 
         PathsPanel_littlespidy pathsPanel = new PathsPanel_littlespidy(api, store);
         JTable pathsTable = pathsPanel.getTable();
-        assertEquals(7, pathsTable.getColumnCount(), "Paths table should have 7 columns");
+        assertEquals(8, pathsTable.getColumnCount(), "Paths table should have 8 columns");
         for (int i = 0; i < pathsTable.getColumnCount(); i++) {
             assertNotEquals("Classification", pathsTable.getColumnName(i));
         }
 
         CommentsPanel_littlespidy commentsPanel = new CommentsPanel_littlespidy(api, store);
         JTable commTable = commentsPanel.getTable();
-        assertEquals(7, commTable.getColumnCount(), "Comments table should have 7 columns");
+        assertEquals(8, commTable.getColumnCount(), "Comments table should have 8 columns");
         for (int i = 0; i < commTable.getColumnCount(); i++) {
             assertNotEquals("Classification", commTable.getColumnName(i));
         }
 
         SecurityBypassesPanel_littlespidy bypassPanel = new SecurityBypassesPanel_littlespidy(api, store);
         JTable bypassTable = bypassPanel.getTable();
-        assertEquals(9, bypassTable.getColumnCount(), "Security bypasses table should have 9 columns");
+        assertEquals(10, bypassTable.getColumnCount(), "Security bypasses table should have 10 columns");
         for (int i = 0; i < bypassTable.getColumnCount(); i++) {
             assertNotEquals("Classification", bypassTable.getColumnName(i));
         }
 
         CloudUrlsPanel_littlespidy cloudPanel = new CloudUrlsPanel_littlespidy(api, store);
         JTable cloudTable = cloudPanel.getTable();
-        assertEquals(6, cloudTable.getColumnCount(), "Cloud URLs table should have 6 columns");
+        assertEquals(7, cloudTable.getColumnCount(), "Cloud URLs table should have 7 columns");
         for (int i = 0; i < cloudTable.getColumnCount(); i++) {
             assertNotEquals("Classification", cloudTable.getColumnName(i));
         }
 
         DependenciesPanel_littlespidy depPanel = new DependenciesPanel_littlespidy(api, store);
         JTable depTable = depPanel.getTable();
-        assertEquals(8, depTable.getColumnCount(), "Dependencies table should have 8 columns");
+        assertEquals(9, depTable.getColumnCount(), "Dependencies table should have 9 columns");
         for (int i = 0; i < depTable.getColumnCount(); i++) {
             assertNotEquals("Classification", depTable.getColumnName(i));
         }
@@ -280,6 +282,78 @@ class ModularFindingTabsTest_littlespidy {
         assertEquals("True Positive", panel.getClassificationAt(0));
         assertEquals("Not Classified", panel.getClassificationAt(1));
         assertEquals("True Positive", panel.getClassificationAt(2));
+    }
+
+    @Test
+    @DisplayName("Verify duplicate findings grouping and occurrence navigation")
+    void testDuplicateGroupingAndOccurrenceNavigation() {
+        MontoyaApi api = createMockApi();
+        JsDataStore store = new JsDataStore();
+
+        DiscoveredComment c1 = new DiscoveredComment("https://target.com/app.js", "JS File", "Single-Line (//)", "TODO / FIXME", "TODO: remove debug flag", 10, 50, 75, "TODO: remove debug flag", "Not Classified");
+        DiscoveredComment c2 = new DiscoveredComment("src/auth/login.ts", "SourceMap", "Single-Line (//)", "TODO / FIXME", "TODO: remove debug flag", 42, 120, 145, "TODO: remove debug flag", "Not Classified");
+        DiscoveredComment c3 = new DiscoveredComment("src/admin/panel.ts", "SourceMap", "Single-Line (//)", "TODO / FIXME", "TODO: remove debug flag", 88, 300, 325, "TODO: remove debug flag", "Not Classified");
+
+        JsFileEntry entry = new JsFileEntry(1, "https://target.com/app.js", "target.com", "/app.js", 200, 100, true, "1st Party", PassiveMapStatus.NOT_FOUND, null, null, null, null);
+        entry.setJsReconFindings(List.of(), List.of(), List.of(), List.of(), List.of(c1), List.of());
+
+        UnpackedProject project = new UnpackedProject("https://target.com/app.js.map");
+        project.addFile(new UnpackedSourceFile("src/auth/login.ts", "login.ts", "console.log('hi');\n// TODO: remove debug flag", 2, 50, List.of(), List.of(), List.of(), List.of(), List.of(c2), List.of()));
+        project.addFile(new UnpackedSourceFile("src/admin/panel.ts", "panel.ts", "let x = 1;\n// TODO: remove debug flag", 2, 50, List.of(), List.of(), List.of(), List.of(), List.of(c3), List.of()));
+        entry.setUnpackedProject(project);
+        store.addEntry(entry);
+
+        CommentsPanel_littlespidy panel = new CommentsPanel_littlespidy(api, store);
+        panel.refreshFromDataStore();
+
+        // Must be grouped into exactly 1 row
+        assertEquals(1, panel.getTable().getRowCount());
+        // Occurrences column must be 3
+        assertEquals(3, panel.getTable().getValueAt(0, 1));
+        assertEquals("TODO: remove debug flag", panel.getTable().getValueAt(0, 4));
+
+        // Occurrences list must have all 3
+        List<FindingOccurrence_littlespidy> occurrences = panel.getOccurrencesAt(0);
+        assertEquals(3, occurrences.size());
+        assertEquals("https://target.com/app.js", occurrences.get(0).sourceLocation());
+        assertEquals("src/auth/login.ts", occurrences.get(1).sourceLocation());
+        assertEquals("src/admin/panel.ts", occurrences.get(2).sourceLocation());
+
+        // Select row 0 and batch mark as True Positive
+        panel.getTable().setRowSelectionInterval(0, 0);
+        panel.markSelectedClassification("True Positive");
+        assertEquals("True Positive", panel.getClassificationAt(0));
+        assertEquals("True Positive", entry.getJsComments().get(0).classification());
+        assertEquals("True Positive", entry.getUnpackedProject().getAllComments().get(0).classification());
+        assertEquals("True Positive", entry.getUnpackedProject().getAllComments().get(1).classification());
+    }
+
+    @Test
+    @DisplayName("Verify unpacked finding location resolves to parent entry and loads source code in viewer")
+    void testUnpackedFindingRequestResponseResolution() {
+        MontoyaApi api = createMockApi();
+        JsDataStore store = new JsDataStore();
+
+        JsFileEntry entry = new JsFileEntry(1, "https://target.com/static/js/main.js", "target.com", "/static/js/main.js", 200, 500, true, "1st Party", PassiveMapStatus.NOT_FOUND, null, null, null, null);
+        UnpackedProject project = new UnpackedProject("https://target.com/static/js/main.js.map");
+
+        String sourceCode = "import React from 'react';\n// TODO: replace mock token with real auth\nconst token = 'xyz';";
+        DiscoveredComment comm = new DiscoveredComment("src/auth/AuthProvider.tsx", "SourceMap", "Single-Line (//)", "TODO / FIXME", "TODO: replace mock token with real auth", 2, 28, 69, "// TODO: replace mock token with real auth", "Not Classified");
+
+        project.addFile(new UnpackedSourceFile("src/auth/AuthProvider.tsx", "AuthProvider.tsx", sourceCode, 3, sourceCode.length(), List.of(), List.of(), List.of(), List.of(), List.of(comm), List.of()));
+        entry.setUnpackedProject(project);
+        store.addEntry(entry);
+
+        CommentsPanel_littlespidy panel = new CommentsPanel_littlespidy(api, store);
+        panel.refreshFromDataStore();
+
+        assertEquals(1, panel.getTable().getRowCount());
+        panel.getTable().setRowSelectionInterval(0, 0);
+
+        List<FindingOccurrence_littlespidy> occList = panel.getOccurrencesAt(0);
+        assertEquals(1, occList.size());
+        assertEquals("src/auth/AuthProvider.tsx", occList.get(0).sourceLocation());
+        assertEquals("TODO: replace mock token with real auth", occList.get(0).findingText());
     }
 
     private JSplitPane findHorizontalSplitPane(Container root) {

@@ -45,7 +45,7 @@ public class JavaScriptInspectorExtension implements BurpExtension {
         this.mainTab = new JSSourceMapExplorerTab(api, dataStore, storageManager);
         SwingUtilities.invokeLater(() -> {
             api.userInterface().registerSuiteTab("JavaScript Inspector", mainTab);
-            storageManager.initializeSessionOnStartup(mainTab, mainTab::refreshView);
+            storageManager.initializeSessionOnStartup(mainTab, mainTab::refreshAllTabs);
         });
 
         // ── 2. Register Context Menu Provider ──

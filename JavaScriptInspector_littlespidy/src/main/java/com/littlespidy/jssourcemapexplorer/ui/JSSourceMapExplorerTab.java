@@ -192,7 +192,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         this.refreshTimer = new javax.swing.Timer(400, e -> {
             if (needsRefresh) {
                 needsRefresh = false;
-                refreshView();
+                refreshAllTabs();
             }
         });
         this.refreshTimer.setRepeats(true);
@@ -228,6 +228,15 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         // Tab 9: AI Security Analyst (Local LLM / Antigravity CLI)
         rootTabbedPane.addTab("AI Security Analyst", aiSecurityPanel);
+
+        rootTabbedPane.addChangeListener(e -> {
+            Component selected = rootTabbedPane.getSelectedComponent();
+            if (selected instanceof BaseFindingPanel_littlespidy panel) {
+                panel.refreshFromDataStore();
+            } else if (selected == graphQLInspectorPanel && graphQLInspectorPanel != null) {
+                graphQLInspectorPanel.refreshFromDataStore();
+            }
+        });
 
         add(rootTabbedPane, BorderLayout.CENTER);
     }

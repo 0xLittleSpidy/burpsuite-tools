@@ -76,6 +76,7 @@ public class JsPersistentStorageTest_littlespidy {
 
         // Add unpacked project
         UnpackedProject project = new UnpackedProject("https://target.com/static/js/main.chunk.js.map");
+        DiscoveredComment comm = new DiscoveredComment("src/App.tsx", "SourceMap", "Single-Line (//)", "TODO / FIXME", "TODO: review auth bypass", 1, 0, 25, "TODO: review auth bypass", "True Positive");
         UnpackedSourceFile srcFile = new UnpackedSourceFile(
                 "src/App.tsx",
                 "App.tsx",
@@ -86,7 +87,7 @@ public class JsPersistentStorageTest_littlespidy {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of(),
+                List.of(comm),
                 List.of(),
                 List.of()
         );
@@ -122,6 +123,9 @@ public class JsPersistentStorageTest_littlespidy {
         assertNotNull(restored.getUnpackedProject());
         assertEquals(1, restored.getUnpackedProject().getTotalFiles());
         assertNotNull(restored.getUnpackedProject().getFile("src/App.tsx"));
+        assertEquals(1, restored.getUnpackedProject().getAllComments().size());
+        assertEquals("TODO: review auth bypass", restored.getUnpackedProject().getAllComments().get(0).commentText());
+        assertEquals("True Positive", restored.getUnpackedProject().getAllComments().get(0).classification());
 
         // Test offboard
         manager2.offboardSession(null, null);

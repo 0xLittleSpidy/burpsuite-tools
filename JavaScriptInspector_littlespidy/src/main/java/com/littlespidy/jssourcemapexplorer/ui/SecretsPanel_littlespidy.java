@@ -3,9 +3,7 @@ package com.littlespidy.jssourcemapexplorer.ui;
 
 import burp.api.montoya.MontoyaApi;
 import com.littlespidy.jssourcemapexplorer.engine.SecretAndEndpointMiner;
-import com.littlespidy.jssourcemapexplorer.model.DiscoveredSecret;
-import com.littlespidy.jssourcemapexplorer.model.JsDataStore;
-import com.littlespidy.jssourcemapexplorer.model.JsFileEntry;
+import com.littlespidy.jssourcemapexplorer.model.*;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -16,6 +14,7 @@ import java.util.List;
 /**
  * Dedicated top-level tab panel for analyzing, filtering, and classifying discovered
  * secrets, tokens, API keys, and credentials from JavaScript assets and unpacked Source Maps.
+ * Groups duplicate secrets across files with an Occurrences column and occurrence navigation.
  *
  * @author littlespidy
  */
@@ -87,7 +86,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         Set<String> selectedSigs = signatureFilterBtn != null ? signatureFilterBtn.getSelected() : Collections.emptySet();
         String query = searchField.getText().trim().toLowerCase();
 
-        List<DiscoveredSecret> filtered = new ArrayList<>();
+        Map<String, GroupedFinding_littlespidy<DiscoveredSecret>> groupedMap = new LinkedHashMap<>();
         int tpCount = 0;
         int fpCount = 0;
         int unclassCount = 0;
@@ -115,81 +114,123 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                     || (sec.contextSnippet() != null && sec.contextSnippet().toLowerCase().contains(query));
                 if (!match) continue;
             }
-            filtered.add(sec);
+
+            String key = (sec.secretValue() != null ? sec.secretValue().trim() : "")
+                + "||" + (sec.category() != null ? sec.category().trim() : "")
+                + "||" + (sec.technique() != null ? sec.technique().trim() : "");
+
+            FindingOccurrence_littlespidy occ = new FindingOccurrence_littlespidy(
+                sec.sourceLocation(),
+                sec.sourceType(),
+                sec.secretValue(),
+                sec.line(),
+                sec.startOffset(),
+                sec.endOffset(),
+                sec.contextSnippet()
+            );
+
+            GroupedFinding_littlespidy<DiscoveredSecret> grp = groupedMap.get(key);
+            if (grp == null) {
+                grp = new GroupedFinding_littlespidy<>(sec, occ);
+                groupedMap.put(key, grp);
+            } else {
+                grp.addOccurrence(sec, occ);
+                if (!"Not Classified".equalsIgnoreCase(sec.classification())
+                    && "Not Classified".equalsIgnoreCase(grp.getPrimary().classification())) {
+                    grp.setPrimary(grp.getPrimary().withClassification(sec.classification()));
+                }
+            }
         }
 
-        tableModel.updateData(filtered);
+        List<GroupedFinding_littlespidy<DiscoveredSecret>> result = new ArrayList<>(groupedMap.values());
+        tableModel.updateData(result);
+
         if (allSecrets.isEmpty()) {
             statsLabel.setText("Secrets: 0 (No findings found)");
         } else {
-            statsLabel.setText(String.format("Secrets: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-                allSecrets.size(), filtered.size(), tpCount, fpCount, unclassCount));
+            statsLabel.setText(String.format("Secrets: %d unique (%d total) | Visible: %d | TP: %d | FP: %d | Unclassified: %d",
+                groupedMap.size(), allSecrets.size(), result.size(), tpCount, fpCount, unclassCount));
         }
+    }
+
+    @Override
+    protected List<FindingOccurrence_littlespidy> getOccurrencesAt(int modelRow) {
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getNavOccurrences() : Collections.emptyList();
+    }
+
+    @Override
+    protected int getOccurrenceCountAt(int modelRow) {
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getCount() : 0;
     }
 
     @Override
     protected String getClassificationAt(int modelRow) {
-        DiscoveredSecret sec = tableModel.getSecretAt(modelRow);
-        return sec != null ? sec.classification() : "Not Classified";
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().classification() : "Not Classified";
     }
 
     @Override
     protected void updateClassification(int modelRow, String classification) {
-        DiscoveredSecret sec = tableModel.getSecretAt(modelRow);
-        if (sec == null) return;
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        if (grp == null) return;
 
-        DiscoveredSecret updated = sec.withClassification(classification);
-        tableModel.setSecretAt(modelRow, updated);
+        DiscoveredSecret updatedPrimary = grp.getPrimary().withClassification(classification);
+        grp.setPrimary(updatedPrimary);
 
-        // Update in allSecrets list
-        for (int i = 0; i < allSecrets.size(); i++) {
-            DiscoveredSecret cur = allSecrets.get(i);
-            if (cur == sec || (Objects.equals(cur.secretValue(), sec.secretValue()) && Objects.equals(cur.sourceLocation(), sec.sourceLocation()))) {
-                allSecrets.set(i, updated);
-                break;
+        for (DiscoveredSecret oldSec : grp.getOccurrences()) {
+            DiscoveredSecret updated = oldSec.withClassification(classification);
+            syncClassificationToStore(oldSec, updated);
+
+            for (int i = 0; i < allSecrets.size(); i++) {
+                DiscoveredSecret cur = allSecrets.get(i);
+                if (cur == oldSec || (Objects.equals(cur.secretValue(), oldSec.secretValue())
+                        && Objects.equals(cur.sourceLocation(), oldSec.sourceLocation())
+                        && cur.line() == oldSec.line())) {
+                    allSecrets.set(i, updated);
+                }
             }
         }
 
-        // Synchronize back to parent JsFileEntry
-        syncClassificationToStore(sec, updated);
+        tableModel.fireTableRowsUpdated(modelRow, modelRow);
     }
 
     private void syncClassificationToStore(DiscoveredSecret oldSec, DiscoveredSecret newSec) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            if (entry.updateSecret(oldSec, newSec)) {
-                return;
-            }
+            boolean done = entry.updateSecret(oldSec, newSec);
             if (entry.getUnpackedProject() != null) {
                 if (entry.getUnpackedProject().updateSecret(oldSec, newSec)) {
-                    return;
+                    done = true;
                 }
             }
+            if (done) return;
         }
     }
 
     @Override
     protected String getFindingTextAt(int modelRow) {
-        DiscoveredSecret sec = tableModel.getSecretAt(modelRow);
-        return sec != null ? sec.secretValue() : "";
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().secretValue() : "";
     }
 
     @Override
     protected int getStartOffsetAt(int modelRow) {
-        DiscoveredSecret sec = tableModel.getSecretAt(modelRow);
-        return sec != null ? sec.startOffset() : -1;
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().startOffset() : -1;
     }
 
     @Override
     protected int getEndOffsetAt(int modelRow) {
-        DiscoveredSecret sec = tableModel.getSecretAt(modelRow);
-        return sec != null ? sec.endOffset() : -1;
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().endOffset() : -1;
     }
 
     @Override
     protected String getSourceLocationAt(int modelRow) {
-        DiscoveredSecret sec = tableModel.getSecretAt(modelRow);
-        return sec != null ? sec.sourceLocation() : "";
+        GroupedFinding_littlespidy<DiscoveredSecret> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().sourceLocation() : "";
     }
 
     @Override
@@ -222,48 +263,43 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class SecretsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Category", "Secret Value / Match", "Signature", "Severity", "Source Type", "Source Location", "Line"
+            "#", "Occurrences", "Category", "Secret Value / Match", "Signature", "Severity", "Source Type", "Source Location", "Line"
         };
-        private final List<DiscoveredSecret> list = new ArrayList<>();
+        private final List<GroupedFinding_littlespidy<DiscoveredSecret>> list = new ArrayList<>();
 
-        public synchronized void updateData(List<DiscoveredSecret> data) {
+        public synchronized void updateData(List<GroupedFinding_littlespidy<DiscoveredSecret>> data) {
             list.clear();
             if (data != null) list.addAll(data);
             fireTableDataChanged();
         }
 
-        public synchronized DiscoveredSecret getSecretAt(int row) {
+        public synchronized GroupedFinding_littlespidy<DiscoveredSecret> getGroupAt(int row) {
             if (row >= 0 && row < list.size()) return list.get(row);
             return null;
-        }
-
-        public synchronized void setSecretAt(int row, DiscoveredSecret sec) {
-            if (row >= 0 && row < list.size()) {
-                list.set(row, sec);
-                fireTableRowsUpdated(row, row);
-            }
         }
 
         @Override public int getRowCount() { return list.size(); }
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return (c == 0 || c == 7) ? Integer.class : String.class;
+            return (c == 0 || c == 1 || c == 8) ? Integer.class : String.class;
         }
 
         @Override
         public synchronized Object getValueAt(int r, int c) {
             if (r < 0 || r >= list.size()) return null;
-            DiscoveredSecret item = list.get(r);
+            GroupedFinding_littlespidy<DiscoveredSecret> item = list.get(r);
+            DiscoveredSecret primary = item.getPrimary();
             return switch (c) {
                 case 0 -> r + 1;
-                case 1 -> item.category();
-                case 2 -> item.secretValue();
-                case 3 -> item.technique();
-                case 4 -> item.severity();
-                case 5 -> item.sourceType();
-                case 6 -> item.sourceLocation();
-                case 7 -> item.line();
+                case 1 -> item.getCount();
+                case 2 -> primary.category();
+                case 3 -> primary.secretValue();
+                case 4 -> primary.technique();
+                case 5 -> primary.severity();
+                case 6 -> primary.sourceType();
+                case 7 -> primary.sourceLocation();
+                case 8 -> primary.line();
                 default -> null;
             };
         }

@@ -521,6 +521,21 @@
       color: var(--text);
     }
 
+    .nav-occ-btn {
+      padding: 1px 7px;
+      font-size: 11px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .nav-occ-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
     /* Toast notification */
     .toast {
       position: fixed;
@@ -878,14 +893,15 @@ Content-Length: 915660
       </div>
 
       <div class="split-container">
-        <!-- Findings Table: Confidence, Entropy, and Classification Columns Removed -->
+        <!-- Findings Table: Confidence, Entropy, and Classification Columns Removed; Occurrences Column Added -->
         <div class="table-container" style="flex: 0.55;">
-          <div class="section-title">Secrets Findings (8 Columns: #, Category, Secret Value / Match, Signature, Severity, Source Type, Source Location, Line)</div>
+          <div class="section-title">Secrets Findings (9 Columns: #, Occurrences, Category, Secret Value / Match, Signature, Severity, Source Type, Source Location, Line)</div>
           <table id="secretsTable">
             <thead>
               <tr>
                 <th style="width: 35px;"><input type="checkbox" id="selectAllSecCb" onchange="toggleSelectAllSecrets(this)"></th>
                 <th style="width: 35px;">#</th>
+                <th style="width: 80px;">Occurrences</th>
                 <th style="width: 140px;">Category</th>
                 <th>Secret Value / Match</th>
                 <th style="width: 150px;">Signature</th>
@@ -896,9 +912,10 @@ Content-Length: 915660
               </tr>
             </thead>
             <tbody id="secretsTableBody">
-              <tr class="row-tp" onclick="toggleSecretRowSelection(this, event)">
+              <tr class="row-tp" onclick="selectSecretRow(this, 0, event)">
                 <td><input type="checkbox" class="sec-row-cb"></td>
                 <td>1</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">3</span></td>
                 <td>Cloud Credentials</td>
                 <td>EXAMPLE_AWS_KEY_SAMPLE</td>
                 <td>AWS Access Key</td>
@@ -907,9 +924,10 @@ Content-Length: 915660
                 <td>https://app.target.com/_next/static/chunks/main-app.js</td>
                 <td>142</td>
               </tr>
-              <tr class="row-fp" onclick="toggleSecretRowSelection(this, event)">
+              <tr class="row-fp" onclick="selectSecretRow(this, 1, event)">
                 <td><input type="checkbox" class="sec-row-cb"></td>
                 <td>2</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">1</span></td>
                 <td>OAuth / Bearer Token</td>
                 <td>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</td>
                 <td>JWT Token Pattern</td>
@@ -918,9 +936,10 @@ Content-Length: 915660
                 <td>https://app.target.com/static/js/bundle.min.js</td>
                 <td>89</td>
               </tr>
-              <tr onclick="toggleSecretRowSelection(this, event)">
+              <tr onclick="selectSecretRow(this, 2, event)">
                 <td><input type="checkbox" class="sec-row-cb"></td>
                 <td>3</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">2</span></td>
                 <td>Payment Gateway</td>
                 <td>example_mock_stripe_key_placeholder</td>
                 <td>Stripe Live Secret Key</td>
@@ -933,20 +952,34 @@ Content-Length: 915660
           </table>
         </div>
 
-        <!-- Bottom Parallel HTTP Request & Response Viewer (50/50 Split) -->
-        <div class="parallel-viewer" style="flex: 0.45; border: 1px solid var(--border); border-radius: 3px;">
-          <div class="editor-pane">
-            <div class="editor-pane-header">HTTP Request</div>
-            <pre class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">GET /_next/static/chunks/main-app.js HTTP/1.1
+        <!-- Bottom Parallel HTTP Request & Response Viewer with Occurrence Navigation Bar -->
+        <div style="flex: 0.45; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); min-height: 0;">
+          <!-- Occurrence Navigation Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: var(--bg-darker); border-bottom: 1px solid var(--border);">
+            <div id="secOccurrenceInfo" style="font-size: 11px; color: var(--text-bright); font-weight: 500;">
+              Occurrence 1 of 3: https://app.target.com/_next/static/chunks/main-app.js (Line 142)
+            </div>
+            <div id="secOccurrenceNavButtons" style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-right: 4px;">Occurrences (3):</span>
+              <button class="btn nav-occ-btn active" onclick="switchSecretOccurrence(0)">1</button>
+              <button class="btn nav-occ-btn" onclick="switchSecretOccurrence(1)">2</button>
+              <button class="btn nav-occ-btn" onclick="switchSecretOccurrence(2)">3</button>
+            </div>
+          </div>
+
+          <div class="parallel-viewer" style="flex: 1; min-height: 0;">
+            <div class="editor-pane">
+              <div class="editor-pane-header">HTTP Request</div>
+              <pre id="secRequestView" class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">GET /_next/static/chunks/main-app.js HTTP/1.1
 Host: app.target.com
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
 Accept: */*
 Referer: https://app.target.com/
 Connection: close</pre>
-          </div>
-          <div class="editor-pane">
-            <div class="editor-pane-header">HTTP Response (Parallel Viewer)</div>
-            <pre class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">HTTP/1.1 200 OK
+            </div>
+            <div class="editor-pane">
+              <div class="editor-pane-header">HTTP Response / Source Code (Parallel Viewer)</div>
+              <pre id="secResponseView" class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">HTTP/1.1 200 OK
 Content-Type: application/javascript; charset=UTF-8
 Content-Length: 145920
 Server: cloudflare
@@ -954,11 +987,139 @@ Server: cloudflare
 // Discovered match highlighted in source
 const AWS_KEY = "<mark style="background:#e56b1f; color:#fff; padding:2px 4px; border-radius:2px;">EXAMPLE_AWS_KEY_SAMPLE</mark>";
 function initClient() { ... }</pre>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <!-- End Secrets Panel -->
+
+    <!-- Comments Findings Tab Panel (Interactive Duplicate Grouping & Occurrence Navigation Demo) -->
+    <div id="panel-comments" class="suite-panel">
+      <div class="toolbar-row">
+        <button id="runCommentsBtn" class="btn primary" onclick="runCommentsMining()">Run Comments</button>
+        <div class="toolbar-sep"></div>
+        <span class="filter-label">Type:</span>
+        <button class="btn">Type [All]</button>
+        <span class="filter-label">Category:</span>
+        <button class="btn">Category [All]</button>
+        <button class="btn">Classification [All]</button>
+        <div class="toolbar-sep"></div>
+        <span class="filter-label">Search:</span>
+        <input type="text" id="commSearchInput" placeholder="Search comments..." oninput="filterComments()">
+        <button class="btn" onclick="filterComments()">Filter</button>
+        <button class="btn" onclick="resetComments()">Reset</button>
+        <button class="btn" onclick="showToast('Exported TSV to clipboard')">Export TSV</button>
+        <div class="toolbar-sep"></div>
+        <button class="btn" onclick="markSelectedComments('True Positive')">Mark TP</button>
+        <button class="btn" onclick="markSelectedComments('False Positive')">Mark FP</button>
+        <button class="btn" onclick="markSelectedComments('Not Classified')">Reset Classification</button>
+        <div style="flex: 1;"></div>
+        <span id="commentsStatsLabel" class="filter-label" style="color: var(--accent);">Comments: 3 unique (6 total) | Visible: 3 | TP: 1 | FP: 0 | Unclassified: 2</span>
+      </div>
+
+      <div class="split-container">
+        <!-- Findings Table with Occurrences Column -->
+        <div class="table-container" style="flex: 0.55;">
+          <div class="section-title">Comments Findings (Grouped Duplicates with Occurrences Count)</div>
+          <table id="commentsTable">
+            <thead>
+              <tr>
+                <th style="width: 35px;"><input type="checkbox" id="selectAllCommCb" onchange="toggleSelectAllComments(this)"></th>
+                <th style="width: 35px;">#</th>
+                <th style="width: 80px;">Occurrences</th>
+                <th style="width: 110px;">Type</th>
+                <th style="width: 120px;">Category</th>
+                <th>Comment Text</th>
+                <th style="width: 90px;">Source Type</th>
+                <th style="width: 200px;">Source Location</th>
+                <th style="width: 50px;">Line</th>
+              </tr>
+            </thead>
+            <tbody id="commentsTableBody">
+              <tr class="row-tp selected" onclick="selectCommentRow(this, 0, event)">
+                <td><input type="checkbox" class="comm-row-cb" checked></td>
+                <td>1</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">3</span></td>
+                <td>Single-Line (//)</td>
+                <td>TODO / FIXME</td>
+                <td>TODO: remove debug flag before shipping to prod</td>
+                <td>SourceMap</td>
+                <td>src/auth/login.ts</td>
+                <td>42</td>
+              </tr>
+              <tr onclick="selectCommentRow(this, 1, event)">
+                <td><input type="checkbox" class="comm-row-cb"></td>
+                <td>2</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">2</span></td>
+                <td>Multi-Line (/* */)</td>
+                <td>Credentials / Auth</td>
+                <td>/* INTERNAL API SECRET - DO NOT COMMIT */</td>
+                <td>SourceMap</td>
+                <td>src/config/environment.ts</td>
+                <td>15</td>
+              </tr>
+              <tr onclick="selectCommentRow(this, 2, event)">
+                <td><input type="checkbox" class="comm-row-cb"></td>
+                <td>3</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">1</span></td>
+                <td>HTML (&lt;!-- --&gt;)</td>
+                <td>Debug / Config</td>
+                <td>&lt;!-- Admin Portal v2.4 debug enabled --&gt;</td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/bundle.min.js</td>
+                <td>88</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bottom Parallel HTTP Request & Response Viewer with Occurrence Navigation Bar -->
+        <div style="flex: 0.45; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); min-height: 0;">
+          <!-- Occurrence Navigation Bar with [1] [2] [3] buttons on the right side -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: var(--bg-darker); border-bottom: 1px solid var(--border);">
+            <div id="commOccurrenceInfo" style="font-size: 11px; color: var(--text-bright); font-weight: 500;">
+              Occurrence 1 of 3: src/auth/login.ts (Line 42)
+            </div>
+            <div id="commOccurrenceNavButtons" style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-right: 4px;">Occurrences (3):</span>
+              <button class="btn nav-occ-btn active" onclick="switchCommentOccurrence(0)">1</button>
+              <button class="btn nav-occ-btn" onclick="switchCommentOccurrence(1)">2</button>
+              <button class="btn nav-occ-btn" onclick="switchCommentOccurrence(2)">3</button>
+            </div>
+          </div>
+
+          <div class="parallel-viewer" style="flex: 1; min-height: 0;">
+            <div class="editor-pane">
+              <div class="editor-pane-header">HTTP Request (Parent JS Asset)</div>
+              <pre id="commRequestView" class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">GET /_next/static/chunks/main-app.js HTTP/1.1
+Host: app.target.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Accept: */*
+Referer: https://app.target.com/
+Connection: close</pre>
+            </div>
+            <div class="editor-pane">
+              <div class="editor-pane-header">HTTP Response / Unpacked Source Code (With Highlight)</div>
+              <pre id="commResponseView" class="editor-pane-body" style="font-size: 11px; padding: 8px; margin: 0; overflow: auto; background: var(--code-bg); color: var(--text);">HTTP/1.1 200 OK
+Content-Type: text/javascript; charset=utf-8
+X-Source-File: src/auth/login.ts
+
+import { useState } from 'react';
+import { authenticate } from './api';
+
+export function LoginForm() {
+  const [user, setUser] = useState('');
+  <mark style="background:#e56b1f; color:#fff; padding:2px 4px; border-radius:2px;">// TODO: remove debug flag before shipping to prod</mark>
+  const debugMode = true;
+  return &lt;div&gt;Login&lt;/div&gt;;
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Comments Panel -->
 
     <!-- Generic Other Suite Tabs Panel Placeholder -->
     <div id="panel-other" class="suite-panel">
@@ -1120,6 +1281,8 @@ export const useAuth = () => useContext(AuthContext);`;
         document.getElementById('panel-js').classList.add('active');
       } else if (tabName === 'secrets') {
         document.getElementById('panel-secrets').classList.add('active');
+      } else if (tabName === 'comments') {
+        document.getElementById('panel-comments').classList.add('active');
       } else {
         const other = document.getElementById('panel-other');
         other.classList.add('active');
@@ -1127,6 +1290,204 @@ export const useAuth = () => useContext(AuthContext);`;
         document.getElementById('runOtherBtn').textContent = 'Run ' + element.textContent;
         document.getElementById('otherStatusLabel').textContent = element.textContent + ': 0 (No findings found)';
       }
+    }
+
+    // Secrets occurrences data
+    const secretOccurrencesData = [
+      [
+        { loc: "https://app.target.com/_next/static/chunks/main-app.js", line: 142, match: "EXAMPLE_AWS_KEY_SAMPLE", isFile: false },
+        { loc: "src/auth/tokenService.ts", line: 55, match: "EXAMPLE_AWS_KEY_SAMPLE", isFile: true },
+        { loc: "src/config/environment.ts", line: 18, match: "EXAMPLE_AWS_KEY_SAMPLE", isFile: true }
+      ],
+      [
+        { loc: "https://app.target.com/static/js/bundle.min.js", line: 89, match: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", isFile: false }
+      ],
+      [
+        { loc: "src/auth/stripeConfig.ts", line: 24, match: "example_mock_stripe_key_placeholder", isFile: true },
+        { loc: "src/checkout/payment.ts", line: 81, match: "example_mock_stripe_key_placeholder", isFile: true }
+      ]
+    ];
+    let selectedSecretRowIndex = 0;
+    let selectedSecretOccIndex = 0;
+
+    function selectSecretRow(row, rowIndex, event) {
+      if (event.target && event.target.tagName === 'INPUT') return;
+      document.querySelectorAll('#secretsTableBody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      const cb = row.querySelector('.sec-row-cb');
+      if (cb) cb.checked = true;
+
+      selectedSecretRowIndex = rowIndex;
+      selectedSecretOccIndex = 0;
+      renderSecretOccurrenceNav(rowIndex, 0);
+    }
+
+    function renderSecretOccurrenceNav(rowIndex, occIndex) {
+      const occList = secretOccurrencesData[rowIndex] || [];
+      const info = document.getElementById('secOccurrenceInfo');
+      const nav = document.getElementById('secOccurrenceNavButtons');
+
+      if (occList.length === 0) {
+        info.textContent = "No occurrences available.";
+        nav.innerHTML = "";
+        return;
+      }
+
+      const activeOcc = occList[occIndex];
+      info.textContent = `Occurrence ${occIndex + 1} of ${occList.length}: ${activeOcc.loc} (Line ${activeOcc.line})`;
+
+      let btnHtml = `<span style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-right: 4px;">Occurrences (${occList.length}):</span>`;
+      for (let i = 0; i < occList.length; i++) {
+        const isActive = i === occIndex ? 'active' : '';
+        btnHtml += `<button class="btn nav-occ-btn ${isActive}" onclick="switchSecretOccurrence(${i})">${i + 1}</button>`;
+      }
+      nav.innerHTML = btnHtml;
+
+      // Update response view with highlighted match
+      const resp = document.getElementById('secResponseView');
+      if (activeOcc.isFile) {
+        resp.innerHTML = `HTTP/1.1 200 OK\nContent-Type: text/javascript; charset=utf-8\nX-Source-File: ${activeOcc.loc}\n\n// Unpacked source file from Source Map\nexport const config = {\n  secretKey: "<mark style="background:#e56b1f; color:#fff; padding:2px 4px; border-radius:2px;">${activeOcc.match}</mark>",\n  environment: "production"\n};`;
+      } else {
+        resp.innerHTML = `HTTP/1.1 200 OK\nContent-Type: application/javascript; charset=UTF-8\nContent-Length: 145920\nServer: cloudflare\n\n// Raw JS Asset Match\nconst AWS_KEY = "<mark style="background:#e56b1f; color:#fff; padding:2px 4px; border-radius:2px;">${activeOcc.match}</mark>";\nfunction initClient() { ... }`;
+      }
+    }
+
+    function switchSecretOccurrence(occIndex) {
+      selectedSecretOccIndex = occIndex;
+      renderSecretOccurrenceNav(selectedSecretRowIndex, occIndex);
+      showToast(`Navigated to occurrence ${occIndex + 1}`);
+    }
+
+    // Comments occurrences data
+    const commentOccurrencesData = [
+      [
+        { loc: "src/auth/login.ts", line: 42, match: "// TODO: remove debug flag before shipping to prod", isFile: true },
+        { loc: "src/admin/panel.ts", line: 88, match: "// TODO: remove debug flag before shipping to prod", isFile: true },
+        { loc: "src/header/Nav.tsx", line: 19, match: "// TODO: remove debug flag before shipping to prod", isFile: true }
+      ],
+      [
+        { loc: "src/config/environment.ts", line: 15, match: "/* INTERNAL API SECRET - DO NOT COMMIT */", isFile: true },
+        { loc: "src/api/auth.ts", line: 9, match: "/* INTERNAL API SECRET - DO NOT COMMIT */", isFile: true }
+      ],
+      [
+        { loc: "https://app.target.com/static/js/bundle.min.js", line: 88, match: "<!-- Admin Portal v2.4 debug enabled -->", isFile: false }
+      ]
+    ];
+    let selectedCommentRowIndex = 0;
+    let selectedCommentOccIndex = 0;
+
+    function selectCommentRow(row, rowIndex, event) {
+      if (event.target && event.target.tagName === 'INPUT') return;
+      document.querySelectorAll('#commentsTableBody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      const cb = row.querySelector('.comm-row-cb');
+      if (cb) cb.checked = true;
+
+      selectedCommentRowIndex = rowIndex;
+      selectedCommentOccIndex = 0;
+      renderCommentOccurrenceNav(rowIndex, 0);
+    }
+
+    function renderCommentOccurrenceNav(rowIndex, occIndex) {
+      const occList = commentOccurrencesData[rowIndex] || [];
+      const info = document.getElementById('commOccurrenceInfo');
+      const nav = document.getElementById('commOccurrenceNavButtons');
+
+      if (occList.length === 0) {
+        info.textContent = "No occurrences available.";
+        nav.innerHTML = "";
+        return;
+      }
+
+      const activeOcc = occList[occIndex];
+      info.textContent = `Occurrence ${occIndex + 1} of ${occList.length}: ${activeOcc.loc} (Line ${activeOcc.line})`;
+
+      let btnHtml = `<span style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-right: 4px;">Occurrences (${occList.length}):</span>`;
+      for (let i = 0; i < occList.length; i++) {
+        const isActive = i === occIndex ? 'active' : '';
+        btnHtml += `<button class="btn nav-occ-btn ${isActive}" onclick="switchCommentOccurrence(${i})">${i + 1}</button>`;
+      }
+      nav.innerHTML = btnHtml;
+
+      const resp = document.getElementById('commResponseView');
+      if (activeOcc.isFile) {
+        resp.innerHTML = `HTTP/1.1 200 OK\nContent-Type: text/javascript; charset=utf-8\nX-Source-File: ${activeOcc.loc}\n\nimport { useState } from 'react';\n\nexport function Component() {\n  <mark style="background:#e56b1f; color:#fff; padding:2px 4px; border-radius:2px;">${activeOcc.match}</mark>\n  const isEnabled = true;\n  return &lt;div&gt;Loaded&lt;/div&gt;;\n}`;
+      } else {
+        resp.innerHTML = `HTTP/1.1 200 OK\nContent-Type: application/javascript; charset=UTF-8\nContent-Length: 524288\n\n// Raw JS Response\n<mark style="background:#e56b1f; color:#fff; padding:2px 4px; border-radius:2px;">${activeOcc.match}</mark>\nwindow.__APP_BOOTSTRAP__();`;
+      }
+    }
+
+    function switchCommentOccurrence(occIndex) {
+      selectedCommentOccIndex = occIndex;
+      renderCommentOccurrenceNav(selectedCommentRowIndex, occIndex);
+      showToast(`Navigated to occurrence ${occIndex + 1}`);
+    }
+
+    function toggleSelectAllComments(masterCb) {
+      const rows = document.querySelectorAll('#commentsTableBody tr');
+      rows.forEach(r => {
+        if (masterCb.checked) r.classList.add('selected');
+        else r.classList.remove('selected');
+        const cb = r.querySelector('.comm-row-cb');
+        if (cb) cb.checked = masterCb.checked;
+      });
+      showToast(masterCb.checked ? 'Selected all comments' : 'Deselected all comments');
+    }
+
+    function markSelectedComments(classification) {
+      const selected = document.querySelectorAll('#commentsTableBody tr.selected');
+      if (selected.length === 0) {
+        showToast('Please select at least one row first');
+        return;
+      }
+
+      selected.forEach(r => {
+        r.classList.remove('row-tp', 'row-fp');
+        if (classification === 'True Positive') {
+          r.classList.add('row-tp');
+        } else if (classification === 'False Positive') {
+          r.classList.add('row-fp');
+        }
+      });
+
+      document.querySelectorAll('#commentsTableBody tr').forEach(r => {
+        r.classList.remove('selected');
+        const cb = r.querySelector('.comm-row-cb');
+        if (cb) cb.checked = false;
+      });
+      const masterCb = document.getElementById('selectAllCommCb');
+      if (masterCb) masterCb.checked = false;
+
+      updateCommentsStats();
+      showToast(`Marked ${selected.length} grouped comment(s) and all duplicate occurrences as ${classification}`);
+    }
+
+    function updateCommentsStats() {
+      const rows = document.querySelectorAll('#commentsTableBody tr');
+      let tp = 0, fp = 0, unclass = 0;
+      rows.forEach(r => {
+        if (r.classList.contains('row-tp')) tp++;
+        else if (r.classList.contains('row-fp')) fp++;
+        else unclass++;
+      });
+      const lbl = document.getElementById('commentsStatsLabel');
+      if (rows.length === 0) {
+        lbl.textContent = 'Comments: 0 (No findings found)';
+      } else {
+        lbl.textContent = `Comments: ${rows.length} unique (6 total) | Visible: ${rows.length} | TP: ${tp} | FP: ${fp} | Unclassified: ${unclass}`;
+      }
+    }
+
+    function runCommentsMining() {
+      const btn = document.getElementById('runCommentsBtn');
+      btn.textContent = 'Running...';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = 'Run Comments';
+        btn.disabled = false;
+        updateCommentsStats();
+        showToast('Comments mining complete');
+      }, 700);
     }
 
     function toggleSecretRowSelection(row, event) {

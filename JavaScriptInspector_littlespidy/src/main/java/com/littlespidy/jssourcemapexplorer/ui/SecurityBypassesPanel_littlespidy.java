@@ -2,9 +2,7 @@
 package com.littlespidy.jssourcemapexplorer.ui;
 
 import burp.api.montoya.MontoyaApi;
-import com.littlespidy.jssourcemapexplorer.model.DiscoveredSecurityBypass;
-import com.littlespidy.jssourcemapexplorer.model.JsDataStore;
-import com.littlespidy.jssourcemapexplorer.model.JsFileEntry;
+import com.littlespidy.jssourcemapexplorer.model.*;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -15,6 +13,7 @@ import java.util.List;
 /**
  * Dedicated top-level tab panel for analyzing, filtering, and classifying framework-specific
  * sanitization bypasses and dangerous DOM sinks from JavaScript assets and unpacked Source Maps.
+ * Groups duplicate security bypasses across files with an Occurrences column and occurrence navigation.
  *
  * @author littlespidy
  */
@@ -86,7 +85,7 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
         Set<String> selectedRisks = riskFilterBtn != null ? riskFilterBtn.getSelected() : Collections.emptySet();
         String query = searchField.getText().trim().toLowerCase();
 
-        List<DiscoveredSecurityBypass> filtered = new ArrayList<>();
+        Map<String, GroupedFinding_littlespidy<DiscoveredSecurityBypass>> groupedMap = new LinkedHashMap<>();
         int tpCount = 0;
         int fpCount = 0;
         int unclassCount = 0;
@@ -114,79 +113,123 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
                     || (bypass.contextSnippet() != null && bypass.contextSnippet().toLowerCase().contains(query));
                 if (!match) continue;
             }
-            filtered.add(bypass);
+
+            String key = (bypass.method() != null ? bypass.method().trim() : "")
+                + "||" + (bypass.framework() != null ? bypass.framework().trim() : "")
+                + "||" + (bypass.risk() != null ? bypass.risk().trim() : "");
+
+            FindingOccurrence_littlespidy occ = new FindingOccurrence_littlespidy(
+                bypass.sourceLocation(),
+                bypass.sourceType(),
+                bypass.method(),
+                bypass.line(),
+                bypass.startOffset(),
+                bypass.endOffset(),
+                bypass.contextSnippet()
+            );
+
+            GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = groupedMap.get(key);
+            if (grp == null) {
+                grp = new GroupedFinding_littlespidy<>(bypass, occ);
+                groupedMap.put(key, grp);
+            } else {
+                grp.addOccurrence(bypass, occ);
+                if (!"Not Classified".equalsIgnoreCase(bypass.classification())
+                    && "Not Classified".equalsIgnoreCase(grp.getPrimary().classification())) {
+                    grp.setPrimary(grp.getPrimary().withClassification(bypass.classification()));
+                }
+            }
         }
 
-        tableModel.updateData(filtered);
+        List<GroupedFinding_littlespidy<DiscoveredSecurityBypass>> result = new ArrayList<>(groupedMap.values());
+        tableModel.updateData(result);
+
         if (allBypasses.isEmpty()) {
             statsLabel.setText("Security Bypasses: 0 (No findings found)");
         } else {
-            statsLabel.setText(String.format("Security Bypasses: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-                allBypasses.size(), filtered.size(), tpCount, fpCount, unclassCount));
+            statsLabel.setText(String.format("Security Bypasses: %d unique (%d total) | Visible: %d | TP: %d | FP: %d | Unclassified: %d",
+                groupedMap.size(), allBypasses.size(), result.size(), tpCount, fpCount, unclassCount));
         }
+    }
+
+    @Override
+    protected List<FindingOccurrence_littlespidy> getOccurrencesAt(int modelRow) {
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getNavOccurrences() : Collections.emptyList();
+    }
+
+    @Override
+    protected int getOccurrenceCountAt(int modelRow) {
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getCount() : 0;
     }
 
     @Override
     protected String getClassificationAt(int modelRow) {
-        DiscoveredSecurityBypass bypass = tableModel.getBypassAt(modelRow);
-        return bypass != null ? bypass.classification() : "Not Classified";
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().classification() : "Not Classified";
     }
 
     @Override
     protected void updateClassification(int modelRow, String classification) {
-        DiscoveredSecurityBypass bypass = tableModel.getBypassAt(modelRow);
-        if (bypass == null) return;
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        if (grp == null) return;
 
-        DiscoveredSecurityBypass updated = bypass.withClassification(classification);
-        tableModel.setBypassAt(modelRow, updated);
+        DiscoveredSecurityBypass updatedPrimary = grp.getPrimary().withClassification(classification);
+        grp.setPrimary(updatedPrimary);
 
-        for (int i = 0; i < allBypasses.size(); i++) {
-            DiscoveredSecurityBypass cur = allBypasses.get(i);
-            if (cur == bypass || (Objects.equals(cur.method(), bypass.method()) && Objects.equals(cur.sourceLocation(), bypass.sourceLocation()))) {
-                allBypasses.set(i, updated);
-                break;
+        for (DiscoveredSecurityBypass oldBypass : grp.getOccurrences()) {
+            DiscoveredSecurityBypass updated = oldBypass.withClassification(classification);
+            syncClassificationToStore(oldBypass, updated);
+
+            for (int i = 0; i < allBypasses.size(); i++) {
+                DiscoveredSecurityBypass cur = allBypasses.get(i);
+                if (cur == oldBypass || (Objects.equals(cur.method(), oldBypass.method())
+                        && Objects.equals(cur.sourceLocation(), oldBypass.sourceLocation())
+                        && cur.line() == oldBypass.line())) {
+                    allBypasses.set(i, updated);
+                }
             }
         }
 
-        syncClassificationToStore(bypass, updated);
+        tableModel.fireTableRowsUpdated(modelRow, modelRow);
     }
 
     private void syncClassificationToStore(DiscoveredSecurityBypass oldBypass, DiscoveredSecurityBypass newBypass) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            if (entry.updateSecurityBypass(oldBypass, newBypass)) {
-                return;
-            }
+            boolean done = entry.updateSecurityBypass(oldBypass, newBypass);
             if (entry.getUnpackedProject() != null) {
                 if (entry.getUnpackedProject().updateSecurityBypass(oldBypass, newBypass)) {
-                    return;
+                    done = true;
                 }
             }
+            if (done) return;
         }
     }
 
     @Override
     protected String getFindingTextAt(int modelRow) {
-        DiscoveredSecurityBypass bypass = tableModel.getBypassAt(modelRow);
-        return bypass != null ? bypass.method() : "";
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().method() : "";
     }
 
     @Override
     protected int getStartOffsetAt(int modelRow) {
-        DiscoveredSecurityBypass bypass = tableModel.getBypassAt(modelRow);
-        return bypass != null ? bypass.startOffset() : -1;
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().startOffset() : -1;
     }
 
     @Override
     protected int getEndOffsetAt(int modelRow) {
-        DiscoveredSecurityBypass bypass = tableModel.getBypassAt(modelRow);
-        return bypass != null ? bypass.endOffset() : -1;
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().endOffset() : -1;
     }
 
     @Override
     protected String getSourceLocationAt(int modelRow) {
-        DiscoveredSecurityBypass bypass = tableModel.getBypassAt(modelRow);
-        return bypass != null ? bypass.sourceLocation() : "";
+        GroupedFinding_littlespidy<DiscoveredSecurityBypass> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().sourceLocation() : "";
     }
 
     @Override
@@ -219,49 +262,44 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
 
     private static class SecurityBypassesTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Framework", "Bypass Method / Sink", "Risk", "Confidence", "Description", "Source Type", "Source Location", "Line"
+            "#", "Occurrences", "Framework", "Bypass Method / Sink", "Risk", "Confidence", "Description", "Source Type", "Source Location", "Line"
         };
-        private final List<DiscoveredSecurityBypass> list = new ArrayList<>();
+        private final List<GroupedFinding_littlespidy<DiscoveredSecurityBypass>> list = new ArrayList<>();
 
-        public synchronized void updateData(List<DiscoveredSecurityBypass> data) {
+        public synchronized void updateData(List<GroupedFinding_littlespidy<DiscoveredSecurityBypass>> data) {
             list.clear();
             if (data != null) list.addAll(data);
             fireTableDataChanged();
         }
 
-        public synchronized DiscoveredSecurityBypass getBypassAt(int row) {
+        public synchronized GroupedFinding_littlespidy<DiscoveredSecurityBypass> getGroupAt(int row) {
             if (row >= 0 && row < list.size()) return list.get(row);
             return null;
-        }
-
-        public synchronized void setBypassAt(int row, DiscoveredSecurityBypass bypass) {
-            if (row >= 0 && row < list.size()) {
-                list.set(row, bypass);
-                fireTableRowsUpdated(row, row);
-            }
         }
 
         @Override public int getRowCount() { return list.size(); }
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return (c == 0 || c == 8) ? Integer.class : String.class;
+            return (c == 0 || c == 1 || c == 9) ? Integer.class : String.class;
         }
 
         @Override
         public synchronized Object getValueAt(int r, int c) {
             if (r < 0 || r >= list.size()) return null;
-            DiscoveredSecurityBypass item = list.get(r);
+            GroupedFinding_littlespidy<DiscoveredSecurityBypass> item = list.get(r);
+            DiscoveredSecurityBypass primary = item.getPrimary();
             return switch (c) {
                 case 0 -> r + 1;
-                case 1 -> item.framework();
-                case 2 -> item.method();
-                case 3 -> item.risk();
-                case 4 -> item.confidence();
-                case 5 -> item.description();
-                case 6 -> item.sourceType();
-                case 7 -> item.sourceLocation();
-                case 8 -> item.line();
+                case 1 -> item.getCount();
+                case 2 -> primary.framework();
+                case 3 -> primary.method();
+                case 4 -> primary.risk();
+                case 5 -> primary.confidence();
+                case 6 -> primary.description();
+                case 7 -> primary.sourceType();
+                case 8 -> primary.sourceLocation();
+                case 9 -> primary.line();
                 default -> null;
             };
         }

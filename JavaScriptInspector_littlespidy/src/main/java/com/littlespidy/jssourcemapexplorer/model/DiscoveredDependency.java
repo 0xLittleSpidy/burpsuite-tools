@@ -98,6 +98,12 @@ public class DiscoveredDependency {
         this.classification = (classification != null && !classification.isBlank()) ? classification : "Not Classified";
     }
 
+    public DiscoveredDependency withClassification(String newClass) {
+        return new DiscoveredDependency(
+            sourceLocation, sourceType, packageName, version, dependencyType, status, verificationDetail, line, startOffset, endOffset, contextSnippet, newClass
+        );
+    }
+
     public void setStatus(String status, String detail) {
         this.status = status;
         this.verificationDetail = detail;

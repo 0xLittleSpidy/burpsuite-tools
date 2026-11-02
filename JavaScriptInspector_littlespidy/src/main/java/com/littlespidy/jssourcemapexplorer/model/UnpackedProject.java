@@ -93,59 +93,106 @@ public class UnpackedProject {
         return Collections.unmodifiableList(allGraphQLOperations);
     }
 
+    public synchronized void setAllFindings(
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments,
+        List<DiscoveredSecurityBypass> securityBypasses,
+        List<DiscoveredGraphQLOperation> graphQLOperations
+    ) {
+        if (secrets != null) { allSecrets.clear(); allSecrets.addAll(secrets); }
+        if (endpoints != null) { allEndpoints.clear(); allEndpoints.addAll(endpoints); }
+        if (cloudUrls != null) { allCloudUrls.clear(); allCloudUrls.addAll(cloudUrls); }
+        if (dependencies != null) { allDependencies.clear(); allDependencies.addAll(dependencies); }
+        if (comments != null) { allComments.clear(); allComments.addAll(comments); }
+        if (securityBypasses != null) { allSecurityBypasses.clear(); allSecurityBypasses.addAll(securityBypasses); }
+        if (graphQLOperations != null) { allGraphQLOperations.clear(); allGraphQLOperations.addAll(graphQLOperations); }
+    }
+
     public synchronized boolean updateSecret(DiscoveredSecret oldSec, DiscoveredSecret newSec) {
+        boolean updated = false;
         for (int i = 0; i < allSecrets.size(); i++) {
             DiscoveredSecret s = allSecrets.get(i);
-            if (s == oldSec || (Objects.equals(s.secretValue(), oldSec.secretValue()) && Objects.equals(s.sourceLocation(), oldSec.sourceLocation()))) {
+            if (s == oldSec || (Objects.equals(s.secretValue(), oldSec.secretValue())
+                    && Objects.equals(s.sourceLocation(), oldSec.sourceLocation())
+                    && s.line() == oldSec.line())) {
                 allSecrets.set(i, newSec);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateEndpoint(DiscoveredEndpoint oldEp, DiscoveredEndpoint newEp) {
+        boolean updated = false;
         for (int i = 0; i < allEndpoints.size(); i++) {
             DiscoveredEndpoint e = allEndpoints.get(i);
-            if (e == oldEp || (Objects.equals(e.endpoint(), oldEp.endpoint()) && Objects.equals(e.sourceLocation(), oldEp.sourceLocation()))) {
+            if (e == oldEp || (Objects.equals(e.endpoint(), oldEp.endpoint())
+                    && Objects.equals(e.sourceLocation(), oldEp.sourceLocation())
+                    && e.line() == oldEp.line())) {
                 allEndpoints.set(i, newEp);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateComment(DiscoveredComment oldComm, DiscoveredComment newComm) {
+        boolean updated = false;
         for (int i = 0; i < allComments.size(); i++) {
             DiscoveredComment c = allComments.get(i);
-            if (c == oldComm || (Objects.equals(c.commentText(), oldComm.commentText()) && Objects.equals(c.sourceLocation(), oldComm.sourceLocation()))) {
+            if (c == oldComm || (Objects.equals(c.commentText(), oldComm.commentText())
+                    && Objects.equals(c.sourceLocation(), oldComm.sourceLocation())
+                    && c.line() == oldComm.line())) {
                 allComments.set(i, newComm);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateSecurityBypass(DiscoveredSecurityBypass oldBypass, DiscoveredSecurityBypass newBypass) {
+        boolean updated = false;
         for (int i = 0; i < allSecurityBypasses.size(); i++) {
             DiscoveredSecurityBypass b = allSecurityBypasses.get(i);
-            if (b == oldBypass || (Objects.equals(b.method(), oldBypass.method()) && Objects.equals(b.sourceLocation(), oldBypass.sourceLocation()))) {
+            if (b == oldBypass || (Objects.equals(b.method(), oldBypass.method())
+                    && Objects.equals(b.sourceLocation(), oldBypass.sourceLocation())
+                    && b.line() == oldBypass.line())) {
                 allSecurityBypasses.set(i, newBypass);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateCloudUrl(DiscoveredCloudUrl oldCu, DiscoveredCloudUrl newCu) {
+        boolean updated = false;
         for (int i = 0; i < allCloudUrls.size(); i++) {
             DiscoveredCloudUrl u = allCloudUrls.get(i);
-            if (u == oldCu || (Objects.equals(u.cloudUrl(), oldCu.cloudUrl()) && Objects.equals(u.sourceLocation(), oldCu.sourceLocation()))) {
+            if (u == oldCu || (Objects.equals(u.cloudUrl(), oldCu.cloudUrl())
+                    && Objects.equals(u.sourceLocation(), oldCu.sourceLocation())
+                    && u.line() == oldCu.line())) {
                 allCloudUrls.set(i, newCu);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
+    }
+
+    public synchronized boolean updateDependency(DiscoveredDependency oldDep, DiscoveredDependency newDep) {
+        boolean updated = false;
+        for (int i = 0; i < allDependencies.size(); i++) {
+            DiscoveredDependency d = allDependencies.get(i);
+            if (d == oldDep || (Objects.equals(d.packageName(), oldDep.packageName())
+                    && Objects.equals(d.sourceLocation(), oldDep.sourceLocation())
+                    && d.line() == oldDep.line())) {
+                allDependencies.set(i, newDep);
+                updated = true;
+            }
+        }
+        return updated;
     }
 
     public synchronized int getTotalFiles() {

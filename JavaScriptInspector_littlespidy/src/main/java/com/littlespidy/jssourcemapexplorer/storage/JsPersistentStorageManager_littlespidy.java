@@ -198,7 +198,25 @@ public class JsPersistentStorageManager_littlespidy {
                                     project.addFile(f);
                                 }
                             }
+                            if ((dto.unpackedProject.secrets != null && !dto.unpackedProject.secrets.isEmpty())
+                                    || (dto.unpackedProject.endpoints != null && !dto.unpackedProject.endpoints.isEmpty())
+                                    || (dto.unpackedProject.comments != null && !dto.unpackedProject.comments.isEmpty())
+                                    || (dto.unpackedProject.cloudUrls != null && !dto.unpackedProject.cloudUrls.isEmpty())
+                                    || (dto.unpackedProject.dependencies != null && !dto.unpackedProject.dependencies.isEmpty())
+                                    || (dto.unpackedProject.securityBypasses != null && !dto.unpackedProject.securityBypasses.isEmpty())
+                                    || (dto.unpackedProject.graphQLOperations != null && !dto.unpackedProject.graphQLOperations.isEmpty())) {
+                                project.setAllFindings(
+                                        dto.unpackedProject.secrets,
+                                        dto.unpackedProject.endpoints,
+                                        dto.unpackedProject.cloudUrls,
+                                        dto.unpackedProject.dependencies,
+                                        dto.unpackedProject.comments,
+                                        dto.unpackedProject.securityBypasses,
+                                        dto.unpackedProject.graphQLOperations
+                                );
+                            }
                             entry.setUnpackedProject(project);
+                            entry.setUnpacked(true);
                         }
 
                         restoredEntries.add(entry);
@@ -366,11 +384,18 @@ public class JsPersistentStorageManager_littlespidy {
                     dto.securityBypasses = new ArrayList<>(e.getJsSecurityBypasses());
                     dto.graphQLOperations = new ArrayList<>(e.getJsGraphQLOperations());
 
-                    // Unpacked project files
+                    // Unpacked project files and findings
                     if (e.isUnpacked() && e.getUnpackedProject() != null) {
                         UnpackedProjectDTO upDto = new UnpackedProjectDTO();
                         upDto.sourceMapUrl = e.getUnpackedProject().getSourceMapUrl();
                         upDto.files = new ArrayList<>(e.getUnpackedProject().getFiles());
+                        upDto.secrets = new ArrayList<>(e.getUnpackedProject().getAllSecrets());
+                        upDto.endpoints = new ArrayList<>(e.getUnpackedProject().getAllEndpoints());
+                        upDto.cloudUrls = new ArrayList<>(e.getUnpackedProject().getAllCloudUrls());
+                        upDto.dependencies = new ArrayList<>(e.getUnpackedProject().getAllDependencies());
+                        upDto.comments = new ArrayList<>(e.getUnpackedProject().getAllComments());
+                        upDto.securityBypasses = new ArrayList<>(e.getUnpackedProject().getAllSecurityBypasses());
+                        upDto.graphQLOperations = new ArrayList<>(e.getUnpackedProject().getAllGraphQLOperations());
                         dto.unpackedProject = upDto;
                     }
 

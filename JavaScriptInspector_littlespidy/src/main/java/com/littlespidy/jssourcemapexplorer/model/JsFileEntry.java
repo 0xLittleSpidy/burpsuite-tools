@@ -224,58 +224,87 @@ public class JsFileEntry {
     }
 
     public synchronized boolean updateSecret(DiscoveredSecret oldSec, DiscoveredSecret newSec) {
+        boolean updated = false;
         for (int i = 0; i < jsSecrets.size(); i++) {
             DiscoveredSecret s = jsSecrets.get(i);
-            if (s == oldSec || (Objects.equals(s.secretValue(), oldSec.secretValue()) && Objects.equals(s.sourceLocation(), oldSec.sourceLocation()))) {
+            if (s == oldSec || (Objects.equals(s.secretValue(), oldSec.secretValue())
+                    && Objects.equals(s.sourceLocation(), oldSec.sourceLocation())
+                    && s.line() == oldSec.line())) {
                 jsSecrets.set(i, newSec);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateEndpoint(DiscoveredEndpoint oldEp, DiscoveredEndpoint newEp) {
+        boolean updated = false;
         for (int i = 0; i < jsEndpoints.size(); i++) {
             DiscoveredEndpoint e = jsEndpoints.get(i);
-            if (e == oldEp || (Objects.equals(e.endpoint(), oldEp.endpoint()) && Objects.equals(e.sourceLocation(), oldEp.sourceLocation()))) {
+            if (e == oldEp || (Objects.equals(e.endpoint(), oldEp.endpoint())
+                    && Objects.equals(e.sourceLocation(), oldEp.sourceLocation())
+                    && e.line() == oldEp.line())) {
                 jsEndpoints.set(i, newEp);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateComment(DiscoveredComment oldComm, DiscoveredComment newComm) {
+        boolean updated = false;
         for (int i = 0; i < jsComments.size(); i++) {
             DiscoveredComment c = jsComments.get(i);
-            if (c == oldComm || (Objects.equals(c.commentText(), oldComm.commentText()) && Objects.equals(c.sourceLocation(), oldComm.sourceLocation()))) {
+            if (c == oldComm || (Objects.equals(c.commentText(), oldComm.commentText())
+                    && Objects.equals(c.sourceLocation(), oldComm.sourceLocation())
+                    && c.line() == oldComm.line())) {
                 jsComments.set(i, newComm);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateSecurityBypass(DiscoveredSecurityBypass oldBypass, DiscoveredSecurityBypass newBypass) {
+        boolean updated = false;
         for (int i = 0; i < jsSecurityBypasses.size(); i++) {
             DiscoveredSecurityBypass b = jsSecurityBypasses.get(i);
-            if (b == oldBypass || (Objects.equals(b.method(), oldBypass.method()) && Objects.equals(b.sourceLocation(), oldBypass.sourceLocation()))) {
+            if (b == oldBypass || (Objects.equals(b.method(), oldBypass.method())
+                    && Objects.equals(b.sourceLocation(), oldBypass.sourceLocation())
+                    && b.line() == oldBypass.line())) {
                 jsSecurityBypasses.set(i, newBypass);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
     }
 
     public synchronized boolean updateCloudUrl(DiscoveredCloudUrl oldCu, DiscoveredCloudUrl newCu) {
+        boolean updated = false;
         for (int i = 0; i < jsCloudUrls.size(); i++) {
             DiscoveredCloudUrl u = jsCloudUrls.get(i);
-            if (u == oldCu || (Objects.equals(u.cloudUrl(), oldCu.cloudUrl()) && Objects.equals(u.sourceLocation(), oldCu.sourceLocation()))) {
+            if (u == oldCu || (Objects.equals(u.cloudUrl(), oldCu.cloudUrl())
+                    && Objects.equals(u.sourceLocation(), oldCu.sourceLocation())
+                    && u.line() == oldCu.line())) {
                 jsCloudUrls.set(i, newCu);
-                return true;
+                updated = true;
             }
         }
-        return false;
+        return updated;
+    }
+
+    public synchronized boolean updateDependency(DiscoveredDependency oldDep, DiscoveredDependency newDep) {
+        boolean updated = false;
+        for (int i = 0; i < jsDependencies.size(); i++) {
+            DiscoveredDependency d = jsDependencies.get(i);
+            if (d == oldDep || (Objects.equals(d.packageName(), oldDep.packageName())
+                    && Objects.equals(d.sourceLocation(), oldDep.sourceLocation())
+                    && d.line() == oldDep.line())) {
+                jsDependencies.set(i, newDep);
+                updated = true;
+            }
+        }
+        return updated;
     }
 
     public synchronized String getJsReconSummary() {

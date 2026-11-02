@@ -2,9 +2,7 @@
 package com.littlespidy.jssourcemapexplorer.ui;
 
 import burp.api.montoya.MontoyaApi;
-import com.littlespidy.jssourcemapexplorer.model.DiscoveredEndpoint;
-import com.littlespidy.jssourcemapexplorer.model.JsDataStore;
-import com.littlespidy.jssourcemapexplorer.model.JsFileEntry;
+import com.littlespidy.jssourcemapexplorer.model.*;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -15,6 +13,7 @@ import java.util.List;
 /**
  * Dedicated top-level tab panel for analyzing, filtering, and classifying discovered
  * API routes, endpoints, and paths from JavaScript assets and unpacked Source Maps.
+ * Groups duplicate endpoints across files with an Occurrences column and occurrence navigation.
  *
  * @author littlespidy
  */
@@ -86,7 +85,7 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         Set<String> selectedTechs = techniqueFilterBtn != null ? techniqueFilterBtn.getSelected() : Collections.emptySet();
         String query = searchField.getText().trim().toLowerCase();
 
-        List<DiscoveredEndpoint> filtered = new ArrayList<>();
+        Map<String, GroupedFinding_littlespidy<DiscoveredEndpoint>> groupedMap = new LinkedHashMap<>();
         int tpCount = 0;
         int fpCount = 0;
         int unclassCount = 0;
@@ -114,81 +113,122 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                     || (ep.contextSnippet() != null && ep.contextSnippet().toLowerCase().contains(query));
                 if (!match) continue;
             }
-            filtered.add(ep);
+
+            String key = (ep.endpoint() != null ? ep.endpoint().trim() : "")
+                + "||" + (ep.methodGuess() != null ? ep.methodGuess().trim() : "");
+
+            FindingOccurrence_littlespidy occ = new FindingOccurrence_littlespidy(
+                ep.sourceLocation(),
+                ep.sourceType(),
+                ep.endpoint(),
+                ep.line(),
+                ep.startOffset(),
+                ep.endOffset(),
+                ep.contextSnippet()
+            );
+
+            GroupedFinding_littlespidy<DiscoveredEndpoint> grp = groupedMap.get(key);
+            if (grp == null) {
+                grp = new GroupedFinding_littlespidy<>(ep, occ);
+                groupedMap.put(key, grp);
+            } else {
+                grp.addOccurrence(ep, occ);
+                if (!"Not Classified".equalsIgnoreCase(ep.classification())
+                    && "Not Classified".equalsIgnoreCase(grp.getPrimary().classification())) {
+                    grp.setPrimary(grp.getPrimary().withClassification(ep.classification()));
+                }
+            }
         }
 
-        tableModel.updateData(filtered);
+        List<GroupedFinding_littlespidy<DiscoveredEndpoint>> result = new ArrayList<>(groupedMap.values());
+        tableModel.updateData(result);
+
         if (allEndpoints.isEmpty()) {
             statsLabel.setText("Paths: 0 (No findings found)");
         } else {
-            statsLabel.setText(String.format("Paths: %d (Visible: %d | TP: %d | FP: %d | Unclassified: %d)",
-                allEndpoints.size(), filtered.size(), tpCount, fpCount, unclassCount));
+            statsLabel.setText(String.format("Paths: %d unique (%d total) | Visible: %d | TP: %d | FP: %d | Unclassified: %d",
+                groupedMap.size(), allEndpoints.size(), result.size(), tpCount, fpCount, unclassCount));
         }
+    }
+
+    @Override
+    protected List<FindingOccurrence_littlespidy> getOccurrencesAt(int modelRow) {
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getNavOccurrences() : Collections.emptyList();
+    }
+
+    @Override
+    protected int getOccurrenceCountAt(int modelRow) {
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getCount() : 0;
     }
 
     @Override
     protected String getClassificationAt(int modelRow) {
-        DiscoveredEndpoint ep = tableModel.getEndpointAt(modelRow);
-        return ep != null ? ep.classification() : "Not Classified";
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().classification() : "Not Classified";
     }
 
     @Override
     protected void updateClassification(int modelRow, String classification) {
-        DiscoveredEndpoint ep = tableModel.getEndpointAt(modelRow);
-        if (ep == null) return;
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        if (grp == null) return;
 
-        DiscoveredEndpoint updated = ep.withClassification(classification);
-        tableModel.setEndpointAt(modelRow, updated);
+        DiscoveredEndpoint updatedPrimary = grp.getPrimary().withClassification(classification);
+        grp.setPrimary(updatedPrimary);
 
-        // Update in allEndpoints list as well
-        for (int i = 0; i < allEndpoints.size(); i++) {
-            DiscoveredEndpoint cur = allEndpoints.get(i);
-            if (cur == ep || (Objects.equals(cur.endpoint(), ep.endpoint()) && Objects.equals(cur.sourceLocation(), ep.sourceLocation()))) {
-                allEndpoints.set(i, updated);
-                break;
+        for (DiscoveredEndpoint oldEp : grp.getOccurrences()) {
+            DiscoveredEndpoint updated = oldEp.withClassification(classification);
+            syncClassificationToStore(oldEp, updated);
+
+            for (int i = 0; i < allEndpoints.size(); i++) {
+                DiscoveredEndpoint cur = allEndpoints.get(i);
+                if (cur == oldEp || (Objects.equals(cur.endpoint(), oldEp.endpoint())
+                        && Objects.equals(cur.sourceLocation(), oldEp.sourceLocation())
+                        && cur.line() == oldEp.line())) {
+                    allEndpoints.set(i, updated);
+                }
             }
         }
 
-        // Synchronize back to parent JsFileEntry
-        syncClassificationToStore(ep, updated);
+        tableModel.fireTableRowsUpdated(modelRow, modelRow);
     }
 
     private void syncClassificationToStore(DiscoveredEndpoint oldEp, DiscoveredEndpoint newEp) {
         if (dataStore == null) return;
         for (JsFileEntry entry : dataStore.getEntries()) {
-            if (entry.updateEndpoint(oldEp, newEp)) {
-                return;
-            }
+            boolean done = entry.updateEndpoint(oldEp, newEp);
             if (entry.getUnpackedProject() != null) {
                 if (entry.getUnpackedProject().updateEndpoint(oldEp, newEp)) {
-                    return;
+                    done = true;
                 }
             }
+            if (done) return;
         }
     }
 
     @Override
     protected String getFindingTextAt(int modelRow) {
-        DiscoveredEndpoint ep = tableModel.getEndpointAt(modelRow);
-        return ep != null ? ep.endpoint() : "";
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().endpoint() : "";
     }
 
     @Override
     protected int getStartOffsetAt(int modelRow) {
-        DiscoveredEndpoint ep = tableModel.getEndpointAt(modelRow);
-        return ep != null ? ep.startOffset() : -1;
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().startOffset() : -1;
     }
 
     @Override
     protected int getEndOffsetAt(int modelRow) {
-        DiscoveredEndpoint ep = tableModel.getEndpointAt(modelRow);
-        return ep != null ? ep.endOffset() : -1;
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().endOffset() : -1;
     }
 
     @Override
     protected String getSourceLocationAt(int modelRow) {
-        DiscoveredEndpoint ep = tableModel.getEndpointAt(modelRow);
-        return ep != null ? ep.sourceLocation() : "";
+        GroupedFinding_littlespidy<DiscoveredEndpoint> grp = tableModel.getGroupAt(modelRow);
+        return grp != null ? grp.getPrimary().sourceLocation() : "";
     }
 
     @Override
@@ -221,47 +261,42 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class EndpointsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Method", "Endpoint / Route", "Technique", "Source Type", "Source Location", "Line"
+            "#", "Occurrences", "Method", "Endpoint / Route", "Technique", "Source Type", "Source Location", "Line"
         };
-        private final List<DiscoveredEndpoint> list = new ArrayList<>();
+        private final List<GroupedFinding_littlespidy<DiscoveredEndpoint>> list = new ArrayList<>();
 
-        public synchronized void updateData(List<DiscoveredEndpoint> data) {
+        public synchronized void updateData(List<GroupedFinding_littlespidy<DiscoveredEndpoint>> data) {
             list.clear();
             if (data != null) list.addAll(data);
             fireTableDataChanged();
         }
 
-        public synchronized DiscoveredEndpoint getEndpointAt(int row) {
+        public synchronized GroupedFinding_littlespidy<DiscoveredEndpoint> getGroupAt(int row) {
             if (row >= 0 && row < list.size()) return list.get(row);
             return null;
-        }
-
-        public synchronized void setEndpointAt(int row, DiscoveredEndpoint ep) {
-            if (row >= 0 && row < list.size()) {
-                list.set(row, ep);
-                fireTableRowsUpdated(row, row);
-            }
         }
 
         @Override public int getRowCount() { return list.size(); }
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return (c == 0 || c == 6) ? Integer.class : String.class;
+            return (c == 0 || c == 1 || c == 7) ? Integer.class : String.class;
         }
 
         @Override
         public synchronized Object getValueAt(int r, int c) {
             if (r < 0 || r >= list.size()) return null;
-            DiscoveredEndpoint item = list.get(r);
+            GroupedFinding_littlespidy<DiscoveredEndpoint> item = list.get(r);
+            DiscoveredEndpoint primary = item.getPrimary();
             return switch (c) {
                 case 0 -> r + 1;
-                case 1 -> item.methodGuess();
-                case 2 -> item.endpoint();
-                case 3 -> item.technique();
-                case 4 -> item.sourceType();
-                case 5 -> item.sourceLocation();
-                case 6 -> item.line();
+                case 1 -> item.getCount();
+                case 2 -> primary.methodGuess();
+                case 3 -> primary.endpoint();
+                case 4 -> primary.technique();
+                case 5 -> primary.sourceType();
+                case 6 -> primary.sourceLocation();
+                case 7 -> primary.line();
                 default -> null;
             };
         }
