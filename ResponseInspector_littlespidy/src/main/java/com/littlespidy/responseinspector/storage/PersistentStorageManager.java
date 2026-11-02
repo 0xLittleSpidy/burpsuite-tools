@@ -421,13 +421,11 @@ public class PersistentStorageManager {
         updateStatusLabel();
     }
 
-    public JPanel createSessionToolbarComponent(Component parent, Runnable onRefresh, Runnable onAnalyzeFile) {
-        JPanel toolbar = new JPanel(new BorderLayout(8, 0));
-        toolbar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(4, 8, 4, 8)
-        ));
+    public JLabel getSessionStatusLabel() {
+        return sessionStatusLabel;
+    }
 
+    public JPanel createSessionLeftActions(Component parent, Runnable onRefresh, Runnable onAnalyzeFile) {
         JButton newBtn = new JButton("New Session");
         newBtn.setToolTipText("Create a new session file in a user-specified directory");
         newBtn.addActionListener(e -> {
@@ -518,6 +516,17 @@ public class PersistentStorageManager {
         leftActions.add(saveNowBtn);
         leftActions.add(new JSeparator(SwingConstants.VERTICAL));
         leftActions.add(analyzeFileBtn);
+        return leftActions;
+    }
+
+    public JPanel createSessionToolbarComponent(Component parent, Runnable onRefresh, Runnable onAnalyzeFile) {
+        JPanel toolbar = new JPanel(new BorderLayout(8, 0));
+        toolbar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+
+        JPanel leftActions = createSessionLeftActions(parent, onRefresh, onAnalyzeFile);
 
         JPanel rightStatus = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         rightStatus.add(sessionStatusLabel);

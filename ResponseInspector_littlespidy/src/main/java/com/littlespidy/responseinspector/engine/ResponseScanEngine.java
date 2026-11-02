@@ -70,6 +70,29 @@ public class ResponseScanEngine {
     }
 
     private final List<HttpRequestResponse> repeaterTraffic = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private final List<HttpRequestResponse> loadedTraffic = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    public void addLoadedTraffic(Collection<HttpRequestResponse> items) {
+        if (items != null) {
+            for (HttpRequestResponse item : items) {
+                if (item != null && item.hasResponse() && !loadedTraffic.contains(item)) {
+                    loadedTraffic.add(item);
+                }
+            }
+        }
+    }
+
+    public List<HttpRequestResponse> getLoadedTraffic() {
+        return new ArrayList<>(loadedTraffic);
+    }
+
+    public int getLoadedTrafficCount() {
+        return loadedTraffic.size();
+    }
+
+    public void clearLoadedTraffic() {
+        loadedTraffic.clear();
+    }
 
     public void addRepeaterItem(HttpRequestResponse item) {
         if (item != null && item.hasResponse()) {
@@ -96,6 +119,51 @@ public class ResponseScanEngine {
         var req = item.finalRequest() != null ? item.finalRequest() : item.request();
         HttpRequestResponse hrr = HttpRequestResponse.httpRequestResponse(req, item.response(), item.annotations());
         return scanItem(hrr);
+    }
+
+    /**
+     * Scans a single HTTP request/response for a specific category only.
+     *
+     * @param category category to scan for
+     * @param item HTTP request/response item
+     * @return count of new findings added
+     */
+    public int scanCategoryItem(FindingCategory category, HttpRequestResponse item) {
+        if (item == null || item.response() == null || category == null) {
+            return 0;
+        }
+
+        if (ScannerUtils.isResponseEmpty(item.response()) ||
+            ScannerUtils.isStaticResource(item.request(), item.response()) ||
+            ScannerUtils.isOversized(item.response())) {
+            return 0;
+        }
+
+        int newFindings = 0;
+        InspectorDataStore store = dataStores.get(category);
+        if (store == null) {
+            return 0;
+        }
+
+        List<FindingEntry> entries = switch (category) {
+            case PASSWORD -> passwordScanner.scan(item, store);
+            case PII_NETWORK_PATH -> piiScanner.scan(item, store);
+            case ERROR -> errorScanner.scan(item, store);
+            case SECRET -> secretScanner.scan(item, store);
+            case COMMENT -> commentScanner.scan(item, store);
+        };
+
+        for (FindingEntry entry : entries) {
+            if (store.addEntry(entry)) {
+                newFindings++;
+            }
+        }
+
+        if (newFindings > 0 && storageManager != null) {
+            storageManager.scheduleAutoSave();
+        }
+
+        return newFindings;
     }
 
     /**

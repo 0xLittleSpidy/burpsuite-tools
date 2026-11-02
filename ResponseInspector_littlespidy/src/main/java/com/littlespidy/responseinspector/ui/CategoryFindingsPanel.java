@@ -80,8 +80,7 @@ public class CategoryFindingsPanel extends JPanel {
     private final JLabel liveStatusLabel;
     private final JProgressBar progressBar;
     private final JTextField searchField;
-    private final JCheckBox inScopeCb;
-    private final JButton inScopeDomainsBtn;
+    private final java.util.function.BooleanSupplier inScopeSupplier;
     private final MultiSelectFilterButton methodFilterBtn;
     private final MultiSelectFilterButton statusFilterBtn;
     private final MultiSelectFilterButton contentTypeFilterBtn;
@@ -96,8 +95,7 @@ public class CategoryFindingsPanel extends JPanel {
     private final SecretClassificationManager classificationManager;
     private JComboBox<String> classificationFilterCombo;
 
-    private final JButton loadProxyBtn;
-    private final JButton loadRepeaterBtn;
+    private final JButton runBtn;
     private JButton configPasswordsBtn;
 
     public CategoryFindingsPanel(
@@ -106,6 +104,7 @@ public class CategoryFindingsPanel extends JPanel {
             InspectorDataStore dataStore,
             ResponseScanEngine scanEngine,
             InScopeDomainManager domainManager,
+            java.util.function.BooleanSupplier inScopeSupplier,
             Runnable refreshAllTabsCallback
     ) {
         this.api = api;
@@ -113,6 +112,7 @@ public class CategoryFindingsPanel extends JPanel {
         this.dataStore = dataStore;
         this.scanEngine = scanEngine;
         this.domainManager = domainManager;
+        this.inScopeSupplier = inScopeSupplier;
         this.refreshAllTabsCallback = refreshAllTabsCallback;
         this.classificationManager = scanEngine != null ? scanEngine.getSecretClassificationManager() : null;
 
@@ -214,17 +214,11 @@ public class CategoryFindingsPanel extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         toolbar.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
-        loadProxyBtn = new JButton("Load Proxy");
-        loadProxyBtn.setFont(loadProxyBtn.getFont().deriveFont(Font.BOLD));
-        loadProxyBtn.setToolTipText("Scan all HTTP responses currently in Burp Proxy history (static files excluded)");
-        loadProxyBtn.addActionListener(e -> runProxyHistoryScan());
-        toolbar.add(loadProxyBtn);
-
-        loadRepeaterBtn = new JButton("Load from Repeater");
-        loadRepeaterBtn.setFont(loadRepeaterBtn.getFont().deriveFont(Font.BOLD));
-        loadRepeaterBtn.setToolTipText("Scan all HTTP responses sent from Burp Repeater (static files excluded)");
-        loadRepeaterBtn.addActionListener(e -> runRepeaterScan());
-        toolbar.add(loadRepeaterBtn);
+        runBtn = new JButton("Run");
+        runBtn.setFont(runBtn.getFont().deriveFont(Font.BOLD));
+        runBtn.setToolTipText("Run " + category.getDisplayName() + " analysis on all loaded traffic");
+        runBtn.addActionListener(e -> runCategoryAnalysis());
+        toolbar.add(runBtn);
 
         // Prominent Password Configuration Button on Password tab
         if (category == FindingCategory.PASSWORD) {
@@ -257,21 +251,6 @@ public class CategoryFindingsPanel extends JPanel {
             markFpBtn.addActionListener(e -> markSelectedRequests(SecretClassification.FALSE_POSITIVE));
             toolbar.add(markFpBtn);
         }
-
-        toolbar.add(new JSeparator(JSeparator.VERTICAL));
-
-        inScopeDomainsBtn = new JButton(getDomainButtonLabel());
-        inScopeDomainsBtn.setToolTipText("Select specific in-scope target domains to include/exclude");
-        inScopeDomainsBtn.setEnabled(false);
-        inScopeDomainsBtn.addActionListener(e -> openInScopeDomainDialog());
-
-        inScopeCb = new JCheckBox("In-Scope Only");
-        inScopeCb.addActionListener(e -> {
-            inScopeDomainsBtn.setEnabled(inScopeCb.isSelected());
-            refreshView();
-        });
-        toolbar.add(inScopeCb);
-        toolbar.add(inScopeDomainsBtn);
 
         toolbar.add(new JSeparator(JSeparator.VERTICAL));
 
@@ -423,7 +402,7 @@ public class CategoryFindingsPanel extends JPanel {
     }
 
     public void refreshView() {
-        boolean inScope = inScopeCb.isSelected();
+        boolean inScope = inScopeSupplier != null && inScopeSupplier.getAsBoolean();
         String search = searchField.getText();
         Set<String> methods = methodFilterBtn.getSelected();
         Set<String> statuses = statusFilterBtn.getSelected();
@@ -465,9 +444,6 @@ public class CategoryFindingsPanel extends JPanel {
         tableModel.setEntries(filtered);
 
         statsLabel.setText("Total: " + dataStore.size() + " | Displayed: " + filtered.size());
-
-        inScopeDomainsBtn.setText(getDomainButtonLabel());
-        inScopeDomainsBtn.setEnabled(inScope);
 
         if (configPasswordsBtn != null) {
             configPasswordsBtn.setText(getPasswordButtonLabel());
@@ -797,28 +773,6 @@ public class CategoryFindingsPanel extends JPanel {
         return "Configure Passwords... (" + count + " active)";
     }
 
-    private String getDomainButtonLabel() {
-        if (domainManager == null || domainManager.getTotalDomainCount() == 0) {
-            return "In-Scope Domains...";
-        }
-        if (domainManager.isAllSelected()) {
-            return "In-Scope Domains (All " + domainManager.getTotalDomainCount() + ")";
-        }
-        return "In-Scope Domains (" + domainManager.getSelectedDomainCount() + "/" + domainManager.getTotalDomainCount() + ")";
-    }
-
-    private void openInScopeDomainDialog() {
-        Frame topFrame = (Frame) SwingUtilities.getWindowAncestor(this);
-        InScopeDomainDialog dialog = new InScopeDomainDialog(topFrame, domainManager, () -> {
-            if (refreshAllTabsCallback != null) {
-                refreshAllTabsCallback.run();
-            } else {
-                refreshView();
-            }
-        });
-        dialog.setVisible(true);
-    }
-
     private void openPasswordConfigDialog() {
         Frame topFrame = (Frame) SwingUtilities.getWindowAncestor(this);
         PasswordConfigDialog dialog = new PasswordConfigDialog(topFrame, scanEngine.getPasswordScanner(), () -> {
@@ -884,15 +838,15 @@ public class CategoryFindingsPanel extends JPanel {
         }
     }
 
-    // ─── Proxy History Scan with Live Progress Bar & Scope Architecture ──────────
+    // ─── Category Analysis on Loaded Traffic ──────────────────────────────────
 
     private record ProgressChunk(int processed, int total, int newFindings) {}
 
-    private void runProxyHistoryScan() {
+    private void runCategoryAnalysis() {
         if (category == FindingCategory.PASSWORD && scanEngine.getPasswordScanner().getPasswordCount() == 0) {
             int opt = JOptionPane.showConfirmDialog(
                     this,
-                    "No target passwords have been configured yet.\nWould you like to configure passwords before analyzing proxy history?",
+                    "No target passwords have been configured yet.\nWould you like to configure passwords before analyzing?",
                     "Configure Passwords",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE
@@ -902,235 +856,53 @@ public class CategoryFindingsPanel extends JPanel {
             }
         }
 
-        loadProxyBtn.setEnabled(false);
-        loadRepeaterBtn.setEnabled(false);
-        progressBar.setVisible(true);
-        progressBar.setIndeterminate(false);
-        progressBar.setValue(0);
-        liveStatusLabel.setText("Scanning Proxy history for traffic (static files excluded)...");
-
-        final boolean inScopeOnlyIngestion = inScopeCb.isSelected();
-
-        SwingWorker<Integer, ProgressChunk> worker = new SwingWorker<>() {
-            @Override
-            protected Integer doInBackground() {
-                List<ProxyHttpRequestResponse> history = api.proxy().history();
-                int total = history.size();
-                if (total == 0) return 0;
-
-                // Pre-discovery pass for in-scope domains (excluding static resources)
-                for (ProxyHttpRequestResponse item : history) {
-                    if (item.request() != null) {
-                        var req = item.finalRequest() != null ? item.finalRequest() : item.request();
-                        if (ScannerUtils.isStaticResource(req, item.response())) {
-                            continue;
-                        }
-                        String url = req.url();
-                        if (api.scope().isInScope(url)) {
-                            String host = req.httpService() != null ? req.httpService().host() : "";
-                            domainManager.addDomain(host);
-                        }
-                    }
-                }
-
-                int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
-                ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-                AtomicInteger processed = new AtomicInteger(0);
-                AtomicInteger newFindings = new AtomicInteger(0);
-
-                try {
-                    List<Future<?>> futures = new ArrayList<>(total);
-                    for (ProxyHttpRequestResponse item : history) {
-                        if (isCancelled()) break;
-                        futures.add(executor.submit(() -> {
-                            if (isCancelled()) return;
-                            var req = item.finalRequest() != null ? item.finalRequest() : item.request();
-
-                            // 1. Strict Static Resource Exclusion (JS, CSS, PNG, images, fonts, binaries)
-                            if (ScannerUtils.isStaticResource(req, item.response())) {
-                                int cur = processed.incrementAndGet();
-                                if (cur % 25 == 0 || cur == total) {
-                                    publish(new ProgressChunk(cur, total, newFindings.get()));
-                                }
-                                return;
-                            }
-
-                            // 2. Dual-stage Ingestion Pre-Filter (when in-scope only is selected)
-                            if (inScopeOnlyIngestion && (req == null || !api.scope().isInScope(req.url()))) {
-                                int cur = processed.incrementAndGet();
-                                if (cur % 25 == 0 || cur == total) {
-                                    publish(new ProgressChunk(cur, total, newFindings.get()));
-                                }
-                                return;
-                            }
-
-                            if (item.hasResponse()) {
-                                String host = (req != null && req.httpService() != null)
-                                        ? req.httpService().host() : "";
-                                int added = scanEngine.scanProxyItem(item);
-                                if (added > 0 && !host.isBlank()) {
-                                    domainManager.registerFinding(host);
-                                }
-                                newFindings.addAndGet(added);
-                            }
-                            int cur = processed.incrementAndGet();
-                            if (cur % 25 == 0 || cur == total) {
-                                publish(new ProgressChunk(cur, total, newFindings.get()));
-                            }
-                        }));
-                    }
-
-                    for (Future<?> f : futures) {
-                        if (isCancelled()) break;
-                        try { f.get(); } catch (Exception ignored) {}
-                    }
-                } finally {
-                    executor.shutdownNow();
-                }
-
-                return newFindings.get();
-            }
-
-            @Override
-            protected void process(List<ProgressChunk> chunks) {
-                if (!chunks.isEmpty()) {
-                    ProgressChunk latest = chunks.get(chunks.size() - 1);
-                    progressBar.setMaximum(latest.total());
-                    progressBar.setValue(latest.processed());
-                    liveStatusLabel.setText("Scanning Proxy history: " + latest.processed() + " / " + latest.total()
-                            + " items (" + latest.newFindings() + " findings)...");
-                }
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    int count = get();
-                    liveStatusLabel.setText("Analysis complete: scanned Proxy history | Discovered " + count + " new findings.");
-                    api.logging().logToOutput("Response Inspector: Proxy history analysis complete. New findings: " + count);
-                } catch (Exception ex) {
-                    liveStatusLabel.setText("Scan encountered an issue: " + ex.getMessage());
-                } finally {
-                    progressBar.setVisible(false);
-                    loadProxyBtn.setEnabled(true);
-                    loadRepeaterBtn.setEnabled(true);
-                    if (refreshAllTabsCallback != null) {
-                        refreshAllTabsCallback.run();
-                    } else {
-                        refreshView();
-                    }
-                }
-            }
-        };
-
-        worker.execute();
-    }
-
-    private void runRepeaterScan() {
-        if (category == FindingCategory.PASSWORD && scanEngine.getPasswordScanner().getPasswordCount() == 0) {
-            int opt = JOptionPane.showConfirmDialog(
-                    this,
-                    "No target passwords have been configured yet.\nWould you like to configure passwords before analyzing Repeater traffic?",
-                    "Configure Passwords",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE
-            );
-            if (opt == JOptionPane.YES_OPTION) {
-                openPasswordConfigDialog();
-            }
-        }
-
-        List<HttpRequestResponse> repeaterItems = scanEngine.getRepeaterTraffic();
-        if (repeaterItems.isEmpty()) {
-            liveStatusLabel.setText("No Repeater traffic recorded yet. Send requests in Repeater or right-click 'Send to Response Inspector'.");
+        List<HttpRequestResponse> traffic = scanEngine.getLoadedTraffic();
+        if (traffic.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
-                    "No Repeater traffic has been captured yet.\n\n"
-                    + "Requests sent from Burp Repeater while Response Inspector is active will appear here.\n"
-                    + "You can also right-click any request in Repeater or Proxy and choose 'Send to Response Inspector'.",
-                    "No Repeater Traffic",
+                    "No HTTP traffic has been loaded into Response Inspector yet.\n"
+                            + "Please click 'Load Proxy' or 'Load from Repeater' in the top-right toolbar first.",
+                    "No Traffic Loaded",
                     JOptionPane.INFORMATION_MESSAGE
             );
             return;
         }
 
-        loadProxyBtn.setEnabled(false);
-        loadRepeaterBtn.setEnabled(false);
+        // Clear previous findings for this tab
+        dataStore.clear();
+
+        runBtn.setEnabled(false);
         progressBar.setVisible(true);
         progressBar.setIndeterminate(false);
         progressBar.setValue(0);
-        liveStatusLabel.setText("Scanning Repeater traffic (static files excluded)...");
+        progressBar.setMaximum(traffic.size());
+        liveStatusLabel.setText("Analyzing " + traffic.size() + " loaded traffic items for " + category.getDisplayName() + "...");
 
-        final boolean inScopeOnlyIngestion = inScopeCb.isSelected();
+        int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        AtomicInteger processed = new AtomicInteger(0);
+        AtomicInteger newFindings = new AtomicInteger(0);
 
         SwingWorker<Integer, ProgressChunk> worker = new SwingWorker<>() {
             @Override
             protected Integer doInBackground() {
-                int total = repeaterItems.size();
-                if (total == 0) return 0;
-
-                // Pre-discovery pass for in-scope domains (excluding static resources)
-                for (HttpRequestResponse item : repeaterItems) {
-                    if (item.request() != null) {
-                        var req = item.request();
-                        if (ScannerUtils.isStaticResource(req, item.response())) {
-                            continue;
-                        }
-                        String url = req.url();
-                        if (api.scope().isInScope(url)) {
-                            String host = req.httpService() != null ? req.httpService().host() : "";
-                            domainManager.addDomain(host);
-                        }
-                    }
-                }
-
-                int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
-                ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-                AtomicInteger processed = new AtomicInteger(0);
-                AtomicInteger newFindings = new AtomicInteger(0);
-
                 try {
-                    List<Future<?>> futures = new ArrayList<>(total);
-                    for (HttpRequestResponse item : repeaterItems) {
+                    List<Future<?>> futures = new ArrayList<>(traffic.size());
+                    for (HttpRequestResponse item : traffic) {
                         if (isCancelled()) break;
                         futures.add(executor.submit(() -> {
                             if (isCancelled()) return;
-                            var req = item.request();
-
-                            // 1. Strict Static Resource Exclusion (JS, CSS, PNG, images, fonts, binaries)
-                            if (ScannerUtils.isStaticResource(req, item.response())) {
-                                int cur = processed.incrementAndGet();
-                                if (cur % 25 == 0 || cur == total) {
-                                    publish(new ProgressChunk(cur, total, newFindings.get()));
-                                }
-                                return;
+                            int added = scanEngine.scanCategoryItem(category, item);
+                            if (added > 0 && item.request() != null && item.request().httpService() != null) {
+                                domainManager.registerFinding(item.request().httpService().host());
                             }
-
-                            // 2. Dual-stage Ingestion Pre-Filter (when in-scope only is selected)
-                            if (inScopeOnlyIngestion && (req == null || !api.scope().isInScope(req.url()))) {
-                                int cur = processed.incrementAndGet();
-                                if (cur % 25 == 0 || cur == total) {
-                                    publish(new ProgressChunk(cur, total, newFindings.get()));
-                                }
-                                return;
-                            }
-
-                            if (item.hasResponse()) {
-                                String host = (req != null && req.httpService() != null)
-                                        ? req.httpService().host() : "";
-                                int added = scanEngine.scanItem(item);
-                                if (added > 0 && !host.isBlank()) {
-                                    domainManager.registerFinding(host);
-                                }
-                                newFindings.addAndGet(added);
-                            }
+                            newFindings.addAndGet(added);
                             int cur = processed.incrementAndGet();
-                            if (cur % 25 == 0 || cur == total) {
-                                publish(new ProgressChunk(cur, total, newFindings.get()));
+                            if (cur % 25 == 0 || cur == traffic.size()) {
+                                publish(new ProgressChunk(cur, traffic.size(), newFindings.get()));
                             }
                         }));
                     }
-
                     for (Future<?> f : futures) {
                         if (isCancelled()) break;
                         try { f.get(); } catch (Exception ignored) {}
@@ -1138,7 +910,6 @@ public class CategoryFindingsPanel extends JPanel {
                 } finally {
                     executor.shutdownNow();
                 }
-
                 return newFindings.get();
             }
 
@@ -1146,9 +917,8 @@ public class CategoryFindingsPanel extends JPanel {
             protected void process(List<ProgressChunk> chunks) {
                 if (!chunks.isEmpty()) {
                     ProgressChunk latest = chunks.get(chunks.size() - 1);
-                    progressBar.setMaximum(latest.total());
                     progressBar.setValue(latest.processed());
-                    liveStatusLabel.setText("Scanning Repeater traffic: " + latest.processed() + " / " + latest.total()
+                    liveStatusLabel.setText("Analyzing " + category.getDisplayName() + ": " + latest.processed() + " / " + latest.total()
                             + " items (" + latest.newFindings() + " findings)...");
                 }
             }
@@ -1157,14 +927,15 @@ public class CategoryFindingsPanel extends JPanel {
             protected void done() {
                 try {
                     int count = get();
-                    liveStatusLabel.setText("Analysis complete: scanned Repeater traffic | Discovered " + count + " new findings.");
-                    api.logging().logToOutput("Response Inspector: Repeater traffic analysis complete. New findings: " + count);
+                    liveStatusLabel.setText("Analysis complete: " + count + " findings discovered.");
+                    if (api != null && api.logging() != null) {
+                        api.logging().logToOutput("Response Inspector: " + category.getDisplayName() + " analysis complete. New findings: " + count);
+                    }
                 } catch (Exception ex) {
-                    liveStatusLabel.setText("Repeater scan encountered an issue: " + ex.getMessage());
+                    liveStatusLabel.setText("Analysis error: " + ex.getMessage());
                 } finally {
                     progressBar.setVisible(false);
-                    loadProxyBtn.setEnabled(true);
-                    loadRepeaterBtn.setEnabled(true);
+                    runBtn.setEnabled(true);
                     if (refreshAllTabsCallback != null) {
                         refreshAllTabsCallback.run();
                     } else {
@@ -1188,7 +959,7 @@ public class CategoryFindingsPanel extends JPanel {
                 contentTypeFilterBtn.getSelected(),
                 methodFilterBtn.getSelected(),
                 patternFilter,
-                inScopeCb.isSelected(),
+                inScopeSupplier != null && inScopeSupplier.getAsBoolean(),
                 url -> api.scope().isInScope(url),
                 domainManager
         );
