@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * Root Suite Tab for Response Inspector containing:
- * - Top Left: Global Session Management toolbar (New, Open, Offboard, Save As, Save Now, Analyze File)
+ * - Top Left: Global Session Management toolbar (New, Open, Offboard, Save As, Save Now)
  * - Top Right: Global Traffic Cache Controls (Traffic Count, Load Proxy, Load from Repeater, In-Scope Only, In-Scope Domains)
  * - Category Tabs: Passwords, PII & Paths, Errors, Secrets, Comments
  * - Parameter Collector Tab: Grouped parameter extraction & multi-occurrence switcher
@@ -63,7 +63,7 @@ public class ResponseInspectorTab extends JPanel {
 
         // Top Left: Session Management
         if (storageManager != null) {
-            JPanel leftSessionPanel = storageManager.createSessionLeftActions(this, this::refreshAllTabs, this::analyzeLocalFile);
+            JPanel leftSessionPanel = storageManager.createSessionLeftActions(this, this::refreshAllTabs);
             globalToolbar.add(leftSessionPanel, BorderLayout.WEST);
         }
 
@@ -309,67 +309,6 @@ public class ResponseInspectorTab extends JPanel {
             refreshAllTabs();
         });
         dialog.setVisible(true);
-    }
-
-    public void analyzeLocalFile() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Select File for Automatic Response Analysis");
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            if (file != null && file.exists()) {
-                try {
-                    byte[] fileBytes = Files.readAllBytes(file.toPath());
-                    String fileName = file.getName();
-                    String host = "localfile";
-                    String path = "/" + fileName;
-
-                    HttpService service = HttpService.httpService(host, 443, true);
-                    HttpRequest req = HttpRequest.httpRequest(service, ByteArray.byteArray("GET " + path + " HTTP/1.1\r\nHost: " + host + "\r\n\r\n".getBytes()));
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("HTTP/1.1 200 OK\r\n");
-                    sb.append("Server: LocalFile\r\n");
-                    sb.append("Content-Length: ").append(fileBytes.length).append("\r\n");
-                    sb.append("Content-Type: application/octet-stream\r\n\r\n");
-                    byte[] headerBytes = sb.toString().getBytes();
-
-                    byte[] fullRespBytes = new byte[headerBytes.length + fileBytes.length];
-                    System.arraycopy(headerBytes, 0, fullRespBytes, 0, headerBytes.length);
-                    System.arraycopy(fileBytes, 0, fullRespBytes, headerBytes.length, fileBytes.length);
-
-                    HttpResponse resp = HttpResponse.httpResponse(ByteArray.byteArray(fullRespBytes));
-                    HttpRequestResponse item = HttpRequestResponse.httpRequestResponse(req, resp);
-
-                    scanEngine.addRepeaterItem(item);
-                    scanEngine.addLoadedTraffic(List.of(item));
-                    int findings = scanEngine.scanItem(item);
-
-                    refreshAllTabs();
-                    if (storageManager != null) {
-                        storageManager.scheduleAutoSave();
-                    }
-
-                    if (api != null && api.logging() != null) {
-                        api.logging().logToOutput("[Response Inspector] Local file analyzed: " + file.getAbsolutePath() + " (" + findings + " new findings)");
-                    }
-
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "File Analysis Complete:\n"
-                                    + "File: " + file.getName() + " (" + fileBytes.length + " bytes)\n"
-                                    + "New Findings Discovered: " + findings,
-                            "Analysis Complete",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
-                } catch (Exception ex) {
-                    if (api != null && api.logging() != null) {
-                        api.logging().logToError("Failed to analyze file: " + ex.getMessage());
-                    }
-                    JOptionPane.showMessageDialog(this, "Failed to analyze file:\n" + ex.getMessage(), "Analysis Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        }
     }
 
     public void refreshAllTabs() {

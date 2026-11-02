@@ -69,13 +69,13 @@ public class ResponseInspectorExtension implements BurpExtension {
             }
         });
 
-        // 2. Suite-wide Context Menu: "Send to Response Inspector (Analyze File)"
+        // 2. Suite-wide Context Menu: "Send to Response Inspector"
         api.userInterface().registerContextMenuItemsProvider(new ContextMenuItemsProvider() {
             @Override
             public List<Component> provideMenuItems(ContextMenuEvent event) {
                 List<Component> menuItems = new ArrayList<>();
-                JMenuItem sendItem = new JMenuItem("Send to Response Inspector (Analyze File)");
-                sendItem.setToolTipText("Automatically inspect response body or file content for sensitive data");
+                JMenuItem sendItem = new JMenuItem("Send to Response Inspector");
+                sendItem.setToolTipText("Automatically inspect response body content for sensitive data");
                 sendItem.addActionListener(e -> {
                     List<HttpRequestResponse> items = new ArrayList<>();
                     if (event.messageEditorRequestResponse().isPresent()) {
@@ -89,6 +89,7 @@ public class ResponseInspectorExtension implements BurpExtension {
                         for (HttpRequestResponse item : items) {
                             if (item != null && item.hasResponse()) {
                                 scanEngine.addRepeaterItem(item);
+                                scanEngine.addLoadedTraffic(List.of(item));
                                 addedCount += scanEngine.scanItem(item);
                             }
                         }
@@ -112,9 +113,9 @@ public class ResponseInspectorExtension implements BurpExtension {
         api.logging().logToOutput("Response Inspector extension loaded successfully!");
         api.logging().logToOutput("Created with the help of an AI Agent and littlespidy.");
         api.logging().logToOutput("Session Storage: Interactive on startup. Offboarding enabled.");
-        api.logging().logToOutput("Tabs: Passwords | PII, Network & Paths | Errors | Secrets | Comments");
-        api.logging().logToOutput("Triggers: On-demand via 'Load Proxy', 'Load from Repeater', and 'Analyze File...'");
-        api.logging().logToOutput("Context Menu: 'Send to Response Inspector (Analyze File)' active.");
+        api.logging().logToOutput("Tabs: Passwords | PII, Network & Paths | Errors | Secrets | Comments | Parameters");
+        api.logging().logToOutput("Triggers: On-demand via 'Load Proxy' and 'Load from Repeater'");
+        api.logging().logToOutput("Context Menu: 'Send to Response Inspector' active.");
         api.logging().logToOutput("==================================================");
     }
 }

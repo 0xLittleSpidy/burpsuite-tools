@@ -502,21 +502,21 @@ public class PersistentStorageManager {
             }
         });
 
-        JButton analyzeFileBtn = new JButton("Analyze File...");
-        analyzeFileBtn.setToolTipText("Select and analyze a file from local disk with all Response Inspector scanners");
-        if (onAnalyzeFile != null) {
-            analyzeFileBtn.addActionListener(e -> onAnalyzeFile.run());
-        }
-
         JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         leftActions.add(newBtn);
         leftActions.add(openBtn);
         leftActions.add(offboardBtn);
         leftActions.add(saveAsBtn);
         leftActions.add(saveNowBtn);
-        leftActions.add(new JSeparator(SwingConstants.VERTICAL));
-        leftActions.add(analyzeFileBtn);
         return leftActions;
+    }
+
+    public JPanel createSessionLeftActions(Component parent, Runnable onRefresh) {
+        return createSessionLeftActions(parent, onRefresh, null);
+    }
+
+    public JPanel createSessionToolbarComponent(Component parent, Runnable onRefresh) {
+        return createSessionToolbarComponent(parent, onRefresh, null);
     }
 
     public JPanel createSessionToolbarComponent(Component parent, Runnable onRefresh, Runnable onAnalyzeFile) {
