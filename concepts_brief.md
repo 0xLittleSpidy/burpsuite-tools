@@ -1,67 +1,70 @@
-# Dedicated Internal IPs and SSNs Finding Tabs with Azure Insights URL Detection
+# Dedicated Internal IPs and SSNs Tabs with Two-Tier Cloud Engine
 
 * **Author:** 0xLittleSpidy
 * **Date:** 2026-11-04
 
 ## Overview
 
-This feature adds two dedicated finding tabs ("Internal IPs" and "SSNs") to JavaScriptInspector_littlespidy and expands Cloud URLs detection to capture Azure Application Insights and Azure Monitor telemetry ingestion endpoints. The goal is to provide direct, un-filtered triage of high-risk network topology and Personally Identifiable Information (PII) disclosures found within JavaScript source files and unpacked source maps during web security assessments.
+This feature introduces two dedicated finding tabs ("Internal IPs" and "SSNs") to JavaScriptInspector_littlespidy and upgrades the cloud resource mining pipeline to a comprehensive Two-Tier Cloud Engine. The engine captures 100% of cloud services across Amazon Web Services (AWS), Microsoft Azure, Google Cloud Platform (GCP), and Firebase without regex backtracking, and introduces a dedicated "Service" column and multi-select service filter dropdown in the Cloud URLs panel.
 
 ## Analysis
 
-### 1. UI Density and Tab Management
-JavaScriptInspector_littlespidy already hosts nine tabs: JS and Source Map, Paths, Secrets, Comments, Security Bypasses, Cloud URLs, Dependencies, GraphQL, and AI Security Analyst. Adding two more top-level tabs raises the total to eleven. In standard Swing JTabbedPane layouts, this causes tab header wrapping or horizontal compression on standard screen resolutions (such as 1080p split view). To maintain usability, the tab container must use JTabbedPane.SCROLL_TAB_LAYOUT to allow horizontal scrolling rather than multi-row vertical stacking. Finding counts must also be appended to tab titles (for example, "Internal IPs (4)") to avoid requiring manual tab switching when scanning empty categories.
+### 1. Dedicated Tabs and UI Density
+* **Tab Layout Management:** JavaScriptInspector_littlespidy currently contains nine tabs. Adding "Internal IPs" and "SSNs" expands the suite to 11 tabs. In standard Swing, multi-row wrapping consumes excessive vertical space. The tab container must be configured with `JTabbedPane.SCROLL_TAB_LAYOUT` to provide horizontal arrow navigation, and tab titles must include dynamic finding counters (e.g., `Internal IPs (4)`) to avoid blind tab switching.
+* **BaseFindingPanel Integration:** Both new panels (`InternalIpsPanel_littlespidy` and `SsnsPanel_littlespidy`) extend `BaseFindingPanel_littlespidy`, inheriting standard 50/50 split Montoya Request/Response viewers, occurrence navigators, TSV clipboard export, search filtering, and user classification marking ("Investigating", "False Positive", "Confirmed").
 
-### 2. Signal Quality vs. False Positives
-* **Internal IPv4:** Using RFC 1918 ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) with strict lookahead and lookbehind boundaries prevents matching within semantic version numbers (such as 1.10.1.2) or public IPs. Loopback (127.0.0.0/8) and link-local (169.254.0.0/16) are excluded. However, minified JavaScript files frequently contain network defaults, subnet masks (such as 255.255.255.0), or documentation boundaries (such as 10.0.0.0 or 192.168.1.255) that should be tagged or filtered to avoid false alarms.
-* **Structural SSNs:** Evaluating code against the raw structural format (AAA-GG-SSSS) without contextual keyword gates introduces false positive risks from product serial numbers, date formats, math ranges, or hyphenated component IDs. While SSA rules eliminate obvious invalid area numbers (000, 666, 900-999), group numbers (00), and serial numbers (0000), common sample fixtures (such as 078-05-1120 or 123-45-6789) occur frequently in frontend test suites and require classification as test fixtures rather than active leaks.
-* **Sensitive Data Exposure in UI:** Displaying raw SSNs unmasked in table views poses exposure hazards during live demonstrations, screen sharing, or client walkthroughs. An optional presentation mask toggle ("Mask Display") provides visual safety while preserving raw copying functionality.
+### 2. Mining Precision & Signal Quality
+* **RFC 1918 Internal IPv4:** Uses strict boundary matching `(?<![0-9.])(?:10\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){2}|172\.(?:1[6-9]|2\d|3[0-1])(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){2}|192\.168(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){2})(?![0-9.])`. Loopback addresses (`127.0.0.0/8`) and link-local addresses (`169.254.0.0/16`) are strictly excluded. Boundaries suppress partial matches inside public IPs and semantic version strings.
+* **Structural US SSN:** Evaluates hyphenated syntax `\b(?!000|666|9\d{2})(\d{3})-(?!00)(\d{2})-(?!0000)(\d{4})\b` enforcing SSA area, group, and serial rules. Unmasked display is standard in the table and persistent storage. An optional toolbar toggle (`[ ] Mask SSNs`) provides presentation safety during live demos or screen sharing without altering copied values.
+* **Confinement to Client-Side Assets:** Scanning is strictly confined to JavaScript source files and extracted source map files (`sourcesContent`). General HTML responses, backend API JSON endpoints, and CSS stylesheets are excluded.
 
-### 3. Confinement to JavaScript and Source Maps
-Scanning is strictly limited to JavaScript response bodies (application/javascript, text/javascript) and extracted source map contents (sourcesContent arrays). General HTML responses, backend API JSON responses, and CSS files are excluded from this mining pass to prevent excessive processing overhead and noise.
+### 3. Two-Tier Cloud Engine Architecture
+Capturing all services across AWS, Azure, and GCP requires moving away from single-pattern subdomain matching:
+* **Tier 1 (Root Domain Anchor Engine):** Fast root regex matching authoritative cloud zones without backtracking:
+  * AWS: `*.amazonaws.com`, `*.on.aws`, `*.amazoncognito.com`, `*.elasticbeanstalk.com`, `*.amplifyapp.com`, `*.cloudfront.net`
+  * Azure: `*.windows.net`, `*.azure.com`, `*.azurewebsites.net`, `*.azure-api.net`, `*.azurefd.net`, `*.azureedge.net`, `*.azurecontainerapps.io`, `*.applicationinsights.azure.com`, `*.monitor.azure.com`, `*.services.visualstudio.com`, `*.azurestaticapps.net`, `*.cloudapp.net`
+  * Google Cloud & Firebase: `*.googleapis.com`, `*.run.app`, `*.cloudfunctions.net`, `*.appspot.com`, `*.web.app`, `*.firebaseapp.com`, `*.firebaseio.com`, `*.firebasedatabase.app`
+* **Tier 2 (Dynamic Service Taxonomy Classifier):** In-memory domain parser that resolves the specific cloud service (e.g., S3, Lambda, API Gateway, CloudFront, Azure Blob Storage, Azure Functions, Cosmos DB, Application Insights, Azure Key Vault, Cloud Storage, BigQuery, Cloud Run, Firebase Realtime DB). Unlisted subdomains dynamically resolve to their prefix (e.g., `bedrock.us-east-1.amazonaws.com` -> "AWS Bedrock"), ensuring 100% service coverage.
+* **Cloud URLs Panel Upgrades:**
+  * Expanded 8-column table: `#`, `Occurrences`, `Cloud Provider`, `Service`, `Discovered Cloud URL`, `Source Type`, `Source Location`, `Line`.
+  * Dedicated multi-select filter dropdown for `Service` alongside `Provider`.
+  * Grouping key updated to `url + "||" + provider + "||" + service`.
 
-### 4. Azure Application Insights Endpoints
-Frontend monitoring agents send telemetry to Azure App Insights and Azure Monitor ingestion domains:
-* applicationinsights.azure.com (including dc.applicationinsights.azure.com and regional ingestion subdomains)
-* monitor.azure.com (Azure Monitor Data Collection Endpoints)
-* services.visualstudio.com (classic telemetry endpoints)
-Adding these domains to the cloud URL regex catalog enables detection of exposed instrumentation keys and monitoring topologies.
-
-### 5. Execution Performance and Thread Safety
-Mining multi-megabyte minified scripts with multiple complex regex passes cannot run on the Swing Event Dispatch Thread (EDT). Scanning must be dispatched asynchronously through the existing background worker pool with per-script result caps (such as 500 findings per category) to prevent UI freezes and memory exhaustion.
+### 4. Performance & Memory Ceilings
+* Mining operations execute exclusively in background worker threads off the Swing Event Dispatch Thread (EDT).
+* Scannable content is capped at 5MB per file with a strict 2.5-second execution budget deadline per script.
+* Stored discoveries are capped at 500 findings per category per script to protect the JVM heap.
 
 ## Goals vs. Non-Goals
 
 * **In-Scope Goals:**
-  * Implement two dedicated Swing finding tabs extending BaseFindingPanel_littlespidy: "Internal IPs" and "SSNs".
-  * Implement strict RFC 1918 IPv4 detection excluding loopback (127.0.0.0/8) and link-local (169.254.0.0/16).
-  * Implement structural US SSN matching adhering to SSA area, group, and serial rules, with support for unmasked display.
-  * Update Cloud URLs regex to detect Azure Application Insights and Azure Monitor endpoints.
-  * Restrict mining strictly to JavaScript scripts and unpacked source map sources.
-  * Integrate finding deep-linking into Burp message editors and the source map code viewer.
-  * Persist findings in session storage (JsSessionDTO_littlespidy).
-  * Provide an interactive HTML preview (js_inspector_ui_preview_littlespidy.html) prior to Java build.
+  * Create dedicated `InternalIpsPanel_littlespidy` and `SsnsPanel_littlespidy` extending `BaseFindingPanel_littlespidy`.
+  * Implement strict RFC 1918 regex excluding loopback and link-local.
+  * Implement structural US SSN matching adhering to SSA validation rules with unmasked default display.
+  * Implement the Two-Tier Cloud Engine covering all AWS, Azure, GCP, and Firebase services.
+  * Add the `Service` column and multi-select filter dropdown to `CloudUrlsPanel_littlespidy`.
+  * Confine mining strictly to JavaScript source files and unpacked source maps.
+  * Serialize new finding models (`DiscoveredInternalIp`, `DiscoveredSsn`, updated `DiscoveredCloudUrl`) in `JsSessionDTO_littlespidy` for persistent session management.
+  * Build interactive HTML preview (`js_inspector_ui_preview_littlespidy.html`) and verify with `xdg-open` prior to compilation.
 
 * **Out-of-Scope Non-Goals:**
   * Passive scanning of general HTTP responses, HTML documents, or API JSON endpoints.
-  * Support for unhyphenated (9-digit continuous) SSNs due to prohibitive false positive rates in minified code.
-  * IPv6 private address (ULA/link-local) detection in the initial release.
-  * Automated active network probing or ping sweeps against discovered internal IP addresses.
+  * Detection of unhyphenated (continuous 9-digit) SSNs due to prohibitive false positive rates.
+  * IPv6 private address (ULA/link-local) detection in this release.
+  * Active network port scanning or automated SSRF verification against discovered IP addresses.
 
 ## Alternatives Weighed
 
-* **Consolidating IPs and SSNs into the Existing Secrets Tab:** Rejected by author: The user requires separate, dedicated tabs to allow direct triage without needing category dropdown filters.
-* **Requiring Contextual Keywords for SSNs (e.g., "ssn", "tax_id"):** Rejected by author: The user requires raw structural matching to identify hardcoded SSNs in raw arrays or unkeyed tuples without requiring field names.
-* **Enforcing Default SSN UI Masking:** Rejected by author: The user requires unmasked display by default for immediate verification. A visual-only masking toggle can be provided as a non-intrusive presentation utility.
-* **Scanning Full Burp Proxy HTTP History Payloads:** Rejected by author: Confining mining strictly to JS and source maps matches the core mandate of JavaScriptInspector and avoids severe performance bottlenecks.
+* **Monolithic 300+ Service Regex:** Rejected by author: Compiling every individual service name into one regex introduces catastrophic backtracking (ReDoS) risks and maintenance overhead. The Two-Tier architecture guarantees O(N) linear performance while capturing all services.
+* **Combining Internal IPs and SSNs into the Secrets Tab:** Rejected by author: Dedicated tabs allow direct, single-click triage without requiring category filter manipulation.
+* **Requiring Contextual Keywords for SSNs:** Rejected by author: Structural matching is necessary to catch hardcoded array elements and raw mock objects that lack field name identifiers.
+* **Forced Default UI Masking of SSNs:** Rejected by author: Default unmasked display enables instant verification, with an optional toolbar toggle provided for presentation safety.
 
 ## Key Decisions & Staging for Next Steps
 
-1. **Tab Layout:** Create InternalIpsPanel_littlespidy and SsnsPanel_littlespidy extending BaseFindingPanel_littlespidy. Use JTabbedPane.SCROLL_TAB_LAYOUT on the root tabbed pane to prevent UI layout degradation.
-2. **Regex Implementation:**
-   * Internal IPv4: `(?<![0-9.])(?:10\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){2}|172\.(?:1[6-9]|2\d|3[0-1])(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){2}|192\.168(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){2})(?![0-9.])`
-   * Structural SSN: `\b(?!000|666|9\d{2})(\d{3})-(?!00)(\d{2})-(?!0000)(\d{4})\b`
-   * Azure Insights: Update CLOUD_URLS_REGEX to include `applicationinsights\.azure\.com|monitor\.azure\.com|services\.visualstudio\.com`.
-3. **Data Model & Storage:** Introduce DiscoveredInternalIp and DiscoveredSsn models, update MiningResult, JsDataStore, and JsSessionDTO_littlespidy to ensure persistent session save/restore.
-4. **Interactive HTML Mockup:** Update `js_inspector_ui_preview_littlespidy.html` to demonstrate the new tabs and sample data, verify with `xdg-open`.
-5. **Next Step:** Proceed to `/egm:egm-draft` to formalize the technical design document.
+1. **Tab Structure:** Add `InternalIpsPanel_littlespidy` and `SsnsPanel_littlespidy` to `JSSourceMapExplorerTab.java`. Switch root tabbed pane to `JTabbedPane.SCROLL_TAB_LAYOUT`.
+2. **Data Models:** Create `DiscoveredInternalIp` and `DiscoveredSsn` records. Add `service` field to `DiscoveredCloudUrl` with backward-compatible constructors.
+3. **Mining Engine:** Update `SecretAndEndpointMiner.java` with RFC 1918 pattern, SSA SSN pattern, Tier 1 root cloud anchor regex, and Tier 2 `classifyCloudService()` taxonomy method. Expand `MiningResult` to include `internalIps` and `ssns`.
+4. **Cloud URLs UI:** Update `CloudUrlsPanel_littlespidy.java` to support 8 columns, `Service` filter dropdown, and 3-part grouping key.
+5. **Session Persistence:** Update `JsSessionDTO_littlespidy` and `JsDataStore` to serialize and restore internal IPs and SSNs across Burp restarts.
+6. **GUI Mockup & Build:** Update `js_inspector_ui_preview_littlespidy.html`, verify with `xdg-open`, run Gradle tests, compile fat-JAR, stage, commit, and push.
