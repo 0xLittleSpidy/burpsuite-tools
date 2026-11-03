@@ -32,6 +32,8 @@ sqlipy/
 
 # EGM files and artifacts
 concepts_brief.md
+design_draft.md
 docs/designs/
 .egm/
+
 
