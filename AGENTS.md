@@ -41,3 +41,7 @@ Every time a Burp Suite extension user interface, suite tab, sub-tab, dialog, to
 4. The HTML file must adhere to all project directives (ASCII text only, no emojis, author markers).
 5. Always stage, commit, and push the HTML preview file to the remote repository.
 
+### 7. EGM Files Exclusion Rule
+Never stage, commit, or push any EGM files or artifacts (such as `concepts_brief.md`, design documents in `docs/designs/`, or intermediate EGM brainstorm/drafting files) to the remote repository. Keep all EGM artifacts local and ensure they are excluded via `.gitignore`.
+
+

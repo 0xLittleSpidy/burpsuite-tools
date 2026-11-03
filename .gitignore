@@ -29,3 +29,9 @@ sqlipy/
 /graphql-voyager/
 /inql/
 /BurpWpsScan/
+
+# EGM files and artifacts
+concepts_brief.md
+docs/designs/
+.egm/
+

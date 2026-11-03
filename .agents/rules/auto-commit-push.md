@@ -15,6 +15,7 @@ Whenever code, documentation, configuration, or any repository files are created
 - Do not leave dirty working directory states or uncommitted code changes behind at the end of a turn or task.
 - Commit messages must follow project guidelines: use plain ASCII text only, and strictly avoid emojis or decorative unicode symbols.
 - Verify git status and ensure remote push succeeds. If conflicts or errors occur during push, resolve them promptly.
+- Never commit any EGM files or artifacts (such as `concepts_brief.md`, `docs/designs/`, or intermediate EGM brainstorm and drafting files). Keep all EGM artifacts local or ignored in `.gitignore`.
 
 ## Extension JAR Artifact Requirement
 - Whenever an extension project is created, modified, or refactored:
