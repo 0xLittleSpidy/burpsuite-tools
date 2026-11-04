@@ -782,7 +782,7 @@
       <span class="suite-title">Endpoint Inspector (littlespidy) - Burp Suite Extension UI Preview</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="font-size: 11px; color: var(--text-muted);">Montoya API Standard | Plain ASCII Mode | reKover Engine Integrated</span>
+      <span style="font-size: 11px; color: var(--text-muted);">Montoya API Standard | Plain ASCII Mode | Dedicated Multi-Domain Tab Model</span>
       <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
     </div>
   </div>
@@ -831,7 +831,9 @@
       <button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('tab-dom-2', 'domain-panel-2')">x</button>
     </div>
 
-    <button class="btn-add-domain-tab" onclick="addNewDomainPrompt()">+ New Domain Scan</button>
+    <div class="parent-tab plus-tab" id="tab-plus" onclick="addNewDomainInstant()" title="Add new target domain tab">
+      <span class="parent-tab-title" style="font-weight: bold; font-size: 13px;">+</span>
+    </div>
   </div>
 
   <!-- GLOBAL CONFIGURATION PARENT TAB -->
@@ -941,24 +943,12 @@
             </label>
           </div>
 
-          <div class="input-group">
-            <label class="checkbox-label">
-              <input type="checkbox">
-              In-Scope Only
-            </label>
-          </div>
-
-          <div class="input-group">
-            <label class="checkbox-label">
-              <input type="checkbox" checked>
-              Add to Burp Site Map
-            </label>
-          </div>
-
           <div style="display: flex; align-items: center; gap: 8px;">
-            <button class="btn btn-primary" onclick="triggerToast('Scan started on testphp.vulnweb.com')">Start Scan</button>
-            <button class="btn btn-secondary" onclick="triggerToast('Scan paused')">Pause</button>
-            <button class="btn btn-danger" onclick="triggerToast('Scan stopped')">Stop</button>
+            <button class="btn btn-primary" onclick="simulateWaybackHarvest()">Wayback</button>
+            <button class="btn btn-primary" onclick="simulateRobotsHarvest()">Robots / Sitemap</button>
+            <button class="btn btn-accent" style="background-color: var(--accent); color: #fff; font-weight: bold;" onclick="simulateProbing()">Start Probing</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Probing paused')">Pause</button>
+            <button class="btn btn-danger" onclick="triggerToast('Probing stopped')">Stop</button>
             <button class="btn btn-secondary" onclick="triggerToast('Data cleared for this domain')">Clear</button>
             <button class="btn btn-secondary" onclick="triggerToast('Exported CSV for this domain')">Export CSV</button>
           </div>
@@ -1047,7 +1037,7 @@
                 <td>2</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/api/v1/users</td>
-                <td><span class="status-tag status-200">Pareto Wordlist</span></td>
+                <td><span class="status-tag status-200">Wayback Archive</span></td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-403">Normal Page</span></td>
               </tr>
@@ -1055,7 +1045,7 @@
                 <td>3</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/hidden/legacy-admin</td>
-                <td><span class="status-tag status-403">Delinked Archive</span></td>
+                <td><span class="status-tag status-403">Wayback Archive</span></td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-200">Open Listing</span></td>
               </tr>
@@ -1063,7 +1053,7 @@
                 <td>4</td>
                 <td>testphp.vulnweb.com</td>
                 <td>/internal/metrics</td>
-                <td><span class="status-tag status-301">JS Crawl</span></td>
+                <td><span class="status-tag status-301">Passive Recon</span></td>
                 <td><span class="status-tag status-200">Checked</span></td>
                 <td><span class="status-tag status-403">Normal Page</span></td>
               </tr>
@@ -1453,11 +1443,51 @@ Connection: close
 
     // Add new domain scan prompt
     let domainCounter = 3;
-    function addNewDomainPrompt() {
-      const domain = prompt('Enter target domain for new scan tab:', 'newtarget.com');
-      if (domain && domain.trim()) {
-        addSpecificDomainTab(domain.trim());
-      }
+    function addNewDomainInstant() {
+      addSpecificDomainTab('target.com');
+    }
+
+    function simulateWaybackHarvest() {
+      const p = document.getElementById('scanProgressBar');
+      const s = document.getElementById('scanProgressStatus');
+      p.style.width = '35%';
+      s.textContent = 'Querying Wayback CDX API for testphp.vulnweb.com...';
+      triggerToast('Wayback CDX API queried: 1,240 records found, 8 unique paths added.');
+      setTimeout(() => {
+        p.style.width = '100%';
+        s.textContent = 'Wayback complete: 8 paths added. Click Start Probing to scan.';
+      }, 700);
+    }
+
+    function simulateRobotsHarvest() {
+      const p = document.getElementById('scanProgressBar');
+      const s = document.getElementById('scanProgressStatus');
+      p.style.width = '40%';
+      s.textContent = 'Fetching robots.txt and sitemap.xml...';
+      triggerToast('Passive recon: 4 paths extracted from robots.txt & sitemap.xml.');
+      setTimeout(() => {
+        p.style.width = '100%';
+        s.textContent = 'Robots/Sitemap complete: 4 paths added. Click Start Probing to scan.';
+      }, 700);
+    }
+
+    function simulateProbing() {
+      const p = document.getElementById('scanProgressBar');
+      const s = document.getElementById('scanProgressStatus');
+      p.style.width = '0%';
+      s.textContent = 'Probing 12 paths for directory listings...';
+      triggerToast('Started directory listing probe on 12 paths.');
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 25;
+        p.style.width = progress + '%';
+        s.textContent = 'Probing ' + (progress * 12 / 100) + ' of 12 paths (' + progress + '%)...';
+        if (progress >= 100) {
+          clearInterval(interval);
+          s.textContent = 'Probing complete: 4 open directory listings discovered.';
+          triggerToast('Probing finished: 4 findings confirmed.');
+        }
+      }, 400);
     }
 
     function addSpecificDomainTab(domain) {
@@ -1471,8 +1501,8 @@ Connection: close
       tabElem.innerHTML = `<span class="parent-tab-title" ondblclick="editParentTabTitle(this)">#${id} ${domain}</span><button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('${tabId}', '${panelId}')">x</button>`;
       tabElem.onclick = () => switchParentTab(panelId, tabElem);
 
-      const addBtn = document.querySelector('.btn-add-domain-tab');
-      document.getElementById('parentTabsContainer').insertBefore(tabElem, addBtn);
+      const plusTab = document.getElementById('tab-plus');
+      document.getElementById('parentTabsContainer').insertBefore(tabElem, plusTab);
 
       const panelElem = document.createElement('div');
       panelElem.className = 'parent-tab-content';
@@ -1490,9 +1520,11 @@ Connection: close
                 <span class="input-label">Target Domain:</span>
                 <input type="text" class="text-input" value="${domain}">
               </div>
-              <button class="btn btn-primary" onclick="triggerToast('Starting scan on ${domain}')">Start Scan</button>
+              <button class="btn btn-primary" onclick="simulateWaybackHarvest()">Wayback</button>
+              <button class="btn btn-primary" onclick="simulateRobotsHarvest()">Robots / Sitemap</button>
+              <button class="btn btn-accent" style="background-color: var(--accent); color: #fff; font-weight: bold;" onclick="simulateProbing()">Start Probing</button>
             </div>
-            <p style="font-size: 11px; color: var(--text-muted); padding: 8px 0;">Ready to scan ${domain}. Click Start Scan to begin harvesting.</p>
+            <p style="font-size: 11px; color: var(--text-muted); padding: 8px 0;">Ready to harvest ${domain}. Click Wayback or Robots / Sitemap to populate paths.</p>
           </div>
         </div>
       `;

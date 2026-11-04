@@ -9,9 +9,6 @@ import com.littlespidy.endpointinspector.model.DiscoveredSubdomain_littlespidy;
 import com.littlespidy.endpointinspector.model.DomainScanConfig_littlespidy;
 import com.littlespidy.endpointinspector.service.DirectoryListingScanner_littlespidy;
 import com.littlespidy.endpointinspector.service.PassiveExtractor_littlespidy;
-import com.littlespidy.endpointinspector.service.RekoverWordlist_littlespidy;
-import com.littlespidy.endpointinspector.service.WaybackArchiveDiffer_littlespidy;
-import com.littlespidy.endpointinspector.service.WaybackArchiveDiffer_littlespidy.ArchiveDiffResult;
 import com.littlespidy.endpointinspector.service.WaybackCdxClient_littlespidy;
 import com.littlespidy.endpointinspector.service.WaybackUrlParser_littlespidy;
 import com.littlespidy.endpointinspector.session.SessionData_littlespidy.DomainSessionState_littlespidy;
@@ -36,13 +33,13 @@ public class DomainScanPanel_littlespidy extends JPanel {
 
     private final JTextField domainField;
     private final JCheckBox autoSubdomainsChk;
-    private final JCheckBox inScopeOnlyChk;
-    private final JCheckBox addToSiteMapChk;
     private final JSpinner threadsSpinner;
     private final JSpinner delaySpinner;
     private final JSpinner timeoutSpinner;
 
-    private final JButton startBtn = new JButton("Start Scan");
+    private final JButton waybackBtn = new JButton("Wayback");
+    private final JButton robotsSitemapBtn = new JButton("Robots / Sitemap");
+    private final JButton probeBtn = new JButton("Start Probing");
     private final JButton pauseBtn = new JButton("Pause");
     private final JButton stopBtn = new JButton("Stop");
     private final JButton clearBtn = new JButton("Clear");
@@ -77,8 +74,6 @@ public class DomainScanPanel_littlespidy extends JPanel {
 
         this.domainField = new JTextField(initialDomain, 18);
         this.autoSubdomainsChk = new JCheckBox("Auto-discover Subdomains (*.domain/*)", scanConfig.isAutoDiscoverSubdomains());
-        this.inScopeOnlyChk = new JCheckBox("In-Scope Only", scanConfig.isInScopeOnly());
-        this.addToSiteMapChk = new JCheckBox("Add to Burp Site Map", scanConfig.isAddToSiteMap());
         this.threadsSpinner = new JSpinner(new SpinnerNumberModel(scanConfig.getThreads(), 1, 50, 1));
         this.delaySpinner = new JSpinner(new SpinnerNumberModel(scanConfig.getDelayMs(), 0, 5000, 25));
         this.timeoutSpinner = new JSpinner(new SpinnerNumberModel(scanConfig.getTimeoutSec(), 2, 60, 1));
@@ -103,16 +98,24 @@ public class DomainScanPanel_littlespidy extends JPanel {
                 BorderFactory.createEmptyBorder(6, 8, 6, 8)
         ));
 
-        // Row 1: Target domain, Checkboxes, Action Buttons
+        // Row 1: Target domain, Auto-subdomain checkbox, Action Buttons
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
         row1.add(new JLabel("Target Domain:"));
         row1.add(domainField);
         row1.add(autoSubdomainsChk);
-        row1.add(inScopeOnlyChk);
-        row1.add(addToSiteMapChk);
 
-        startBtn.setFont(startBtn.getFont().deriveFont(Font.BOLD));
-        startBtn.addActionListener(e -> startScan());
+        waybackBtn.setFont(waybackBtn.getFont().deriveFont(Font.BOLD));
+        waybackBtn.setToolTipText("Fetch historical endpoints from Wayback CDX API and populate paths");
+        waybackBtn.addActionListener(e -> startWaybackFetch());
+
+        robotsSitemapBtn.setFont(robotsSitemapBtn.getFont().deriveFont(Font.BOLD));
+        robotsSitemapBtn.setToolTipText("Fetch endpoints from live robots.txt and sitemap.xml and populate paths");
+        robotsSitemapBtn.addActionListener(e -> startRobotsSitemapFetch());
+
+        probeBtn.setFont(probeBtn.getFont().deriveFont(Font.BOLD));
+        probeBtn.setToolTipText("Actively probe all collected paths for directory listings");
+        probeBtn.addActionListener(e -> startProbing());
+
         pauseBtn.setEnabled(false);
         pauseBtn.addActionListener(e -> togglePause());
         stopBtn.setEnabled(false);
@@ -120,7 +123,9 @@ public class DomainScanPanel_littlespidy extends JPanel {
         clearBtn.addActionListener(e -> clearData());
         exportBtn.addActionListener(e -> exportFindingsCsv());
 
-        row1.add(startBtn);
+        row1.add(waybackBtn);
+        row1.add(robotsSitemapBtn);
+        row1.add(probeBtn);
         row1.add(pauseBtn);
         row1.add(stopBtn);
         row1.add(clearBtn);
@@ -217,26 +222,24 @@ public class DomainScanPanel_littlespidy extends JPanel {
         }
     }
 
-    public void startScan() {
+    private void syncConfigFromUI() {
+        String domain = getTargetDomain();
+        scanConfig.setTargetDomain(domain);
+        scanConfig.setAutoDiscoverSubdomains(autoSubdomainsChk.isSelected());
+        scanConfig.setThreads((Integer) threadsSpinner.getValue());
+        scanConfig.setDelayMs((Integer) delaySpinner.getValue());
+        scanConfig.setTimeoutSec((Integer) timeoutSpinner.getValue());
+    }
+
+    public void startWaybackFetch() {
         String domain = getTargetDomain();
         if (domain.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a valid target domain.", "Missing Target", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        scanConfig.setTargetDomain(domain);
-        scanConfig.setAutoDiscoverSubdomains(autoSubdomainsChk.isSelected());
-        scanConfig.setInScopeOnly(inScopeOnlyChk.isSelected());
-        scanConfig.setAddToSiteMap(addToSiteMapChk.isSelected());
-        scanConfig.setThreads((Integer) threadsSpinner.getValue());
-        scanConfig.setDelayMs((Integer) delaySpinner.getValue());
-        scanConfig.setTimeoutSec((Integer) timeoutSpinner.getValue());
-
-        startBtn.setEnabled(false);
-        pauseBtn.setEnabled(true);
-        pauseBtn.setText("Pause");
-        stopBtn.setEnabled(true);
-
+        syncConfigFromUI();
+        waybackBtn.setEnabled(false);
         progressBar.setIndeterminate(true);
         progressBar.setString("Querying Wayback CDX API for " + domain + "...");
 
@@ -255,9 +258,7 @@ public class DomainScanPanel_littlespidy extends JPanel {
                     progressBar.setIndeterminate(false);
                     progressBar.setValue(0);
                     progressBar.setString("No Wayback records found for " + domain);
-                    startBtn.setEnabled(true);
-                    pauseBtn.setEnabled(false);
-                    stopBtn.setEnabled(false);
+                    waybackBtn.setEnabled(true);
                 });
                 return;
             }
@@ -272,93 +273,140 @@ public class DomainScanPanel_littlespidy extends JPanel {
                 subList.add(new DiscoveredSubdomain_littlespidy(sub, pathsCount));
             }
 
-            // 1. Extract paths from Wayback CDX
+            // Extract paths from Wayback CDX
             List<String> rawPaths = WaybackUrlParser_littlespidy.extractPathsForDomain(rawUrls, domain);
-            Set<String> seenPaths = new HashSet<>();
-            List<DiscoveredPath_littlespidy> pathObjects = new ArrayList<>();
+            List<DiscoveredPath_littlespidy> currentPaths = new ArrayList<>(pathsTab.getPaths());
+            Set<String> existingPathStrings = new HashSet<>();
+            for (DiscoveredPath_littlespidy dp : currentPaths) {
+                existingPathStrings.add(dp.getPath());
+            }
 
+            int addedCount = 0;
             for (String p : rawPaths) {
-                if (seenPaths.add(p)) {
-                    pathObjects.add(new DiscoveredPath_littlespidy(domain, p, "Wayback Archive"));
+                if (existingPathStrings.add(p)) {
+                    currentPaths.add(new DiscoveredPath_littlespidy(domain, p, "Wayback Archive"));
+                    addedCount++;
                 }
             }
 
-            // 2. Passive Reconnaissance: robots.txt and sitemap.xml (reKover Phase 1)
-            if (scanConfig.isEnablePassiveRecon()) {
-                try {
-                    String robotsUrl = "https://" + domain + "/robots.txt";
-                    String robotsBody = cdxClient.executeQuery(robotsUrl, commonConfig.getUserAgent());
-                    List<String> robotPaths = PassiveExtractor_littlespidy.parseRobotsTxt(robotsBody);
-                    for (String rp : robotPaths) {
-                        String norm = rp.startsWith("/") ? rp : "/" + rp;
-                        if (seenPaths.add(norm)) {
-                            pathObjects.add(new DiscoveredPath_littlespidy(domain, norm, "Passive Recon"));
-                        }
-                    }
-
-                    String sitemapUrl = "https://" + domain + "/sitemap.xml";
-                    String sitemapBody = cdxClient.executeQuery(sitemapUrl, commonConfig.getUserAgent());
-                    List<String> sitemapUrls = PassiveExtractor_littlespidy.parseSitemapXml(sitemapBody);
-                    for (String smUrl : sitemapUrls) {
-                        String smPath = smUrl;
-                        if (smUrl.startsWith("http://") || smUrl.startsWith("https://")) {
-                            int idx = smUrl.indexOf('/', smUrl.indexOf("://") + 3);
-                            smPath = idx != -1 ? smUrl.substring(idx) : "/";
-                        }
-                        if (seenPaths.add(smPath)) {
-                            pathObjects.add(new DiscoveredPath_littlespidy(domain, smPath, "Passive Recon"));
-                        }
-                    }
-                } catch (Exception ignored) {}
-            }
-
-            // 3. Pareto Probability Tree Wordlist (reKover Phase 2)
-            if (scanConfig.isEnableParetoWordlist()) {
-                List<String> paretoTree = RekoverWordlist_littlespidy.buildWordlist();
-                for (String w : paretoTree) {
-                    String norm = w.startsWith("/") ? w : "/" + w;
-                    if (seenPaths.add(norm)) {
-                        pathObjects.add(new DiscoveredPath_littlespidy(domain, norm, "Pareto Wordlist"));
-                    }
-                }
-            }
-
-            // 4. Archive Diffing (reKover Phase 4: surface delinked archive-only endpoints via Pareto cut)
-            if (scanConfig.isEnableArchiveDiffing() && !rawUrls.isEmpty()) {
-                ArchiveDiffResult diff = WaybackArchiveDiffer_littlespidy.diffArchive(rawUrls, domain, seenPaths, 50);
-                for (String survivor : diff.survivorUrls()) {
-                    String sPath = survivor;
-                    if (survivor.startsWith("http://") || survivor.startsWith("https://")) {
-                        int idx = survivor.indexOf('/', survivor.indexOf("://") + 3);
-                        sPath = idx != -1 ? survivor.substring(idx) : "/";
-                    }
-                    if (seenPaths.add(sPath)) {
-                        pathObjects.add(0, new DiscoveredPath_littlespidy(domain, sPath, "Delinked Archive"));
-                    }
-                }
-            }
-
+            final int finalAdded = addedCount;
             SwingUtilities.invokeLater(() -> {
-                kpiUniquePaths.setText(String.format("%,d", pathObjects.size()));
+                kpiUniquePaths.setText(String.format("%,d", currentPaths.size()));
                 kpiSubdomains.setText(String.format("%,d", subList.size()));
                 subdomainsTab.setSubdomains(subList);
-                pathsTab.setPaths(pathObjects);
+                pathsTab.setPaths(currentPaths);
                 progressBar.setIndeterminate(false);
+                progressBar.setValue(0);
+                progressBar.setString("Wayback complete: " + finalAdded + " new paths added (" + currentPaths.size() + " total). Click 'Start Probing' to scan.");
+                waybackBtn.setEnabled(true);
+                if (onStateChanged != null) onStateChanged.run();
             });
-
-            runScannerOnPaths(pathObjects);
-        }, "Endpoint-Inspector-Worker-" + domain);
+        }, "Endpoint-Inspector-Wayback-" + domain);
         worker.setDaemon(true);
         worker.start();
 
         if (onStateChanged != null) onStateChanged.run();
     }
 
+    public void startRobotsSitemapFetch() {
+        String domain = getTargetDomain();
+        if (domain.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid target domain.", "Missing Target", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        syncConfigFromUI();
+        robotsSitemapBtn.setEnabled(false);
+        progressBar.setIndeterminate(true);
+        progressBar.setString("Fetching robots.txt and sitemap.xml for " + domain + "...");
+
+        Thread worker = new Thread(() -> {
+            WaybackCdxClient_littlespidy client = new WaybackCdxClient_littlespidy(api, commonConfig);
+            List<DiscoveredPath_littlespidy> currentPaths = new ArrayList<>(pathsTab.getPaths());
+            Set<String> existingPathStrings = new HashSet<>();
+            for (DiscoveredPath_littlespidy dp : currentPaths) {
+                existingPathStrings.add(dp.getPath());
+            }
+
+            int addedCount = 0;
+            try {
+                String robotsUrl = "https://" + domain + "/robots.txt";
+                String robotsBody = client.executeQuery(robotsUrl, commonConfig.getUserAgent());
+                List<String> robotPaths = PassiveExtractor_littlespidy.parseRobotsTxt(robotsBody);
+                for (String rp : robotPaths) {
+                    String norm = rp.startsWith("/") ? rp : "/" + rp;
+                    if (existingPathStrings.add(norm)) {
+                        currentPaths.add(new DiscoveredPath_littlespidy(domain, norm, "Passive Recon"));
+                        addedCount++;
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            try {
+                String sitemapUrl = "https://" + domain + "/sitemap.xml";
+                String sitemapBody = client.executeQuery(sitemapUrl, commonConfig.getUserAgent());
+                List<String> sitemapUrls = PassiveExtractor_littlespidy.parseSitemapXml(sitemapBody);
+                for (String smUrl : sitemapUrls) {
+                    String smPath = smUrl;
+                    if (smUrl.startsWith("http://") || smUrl.startsWith("https://")) {
+                        int idx = smUrl.indexOf('/', smUrl.indexOf("://") + 3);
+                        smPath = idx != -1 ? smUrl.substring(idx) : "/";
+                    }
+                    if (existingPathStrings.add(smPath)) {
+                        currentPaths.add(new DiscoveredPath_littlespidy(domain, smPath, "Passive Recon"));
+                        addedCount++;
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            final int finalAdded = addedCount;
+            SwingUtilities.invokeLater(() -> {
+                kpiUniquePaths.setText(String.format("%,d", currentPaths.size()));
+                pathsTab.setPaths(currentPaths);
+                progressBar.setIndeterminate(false);
+                progressBar.setValue(0);
+                progressBar.setString("Robots/Sitemap complete: " + finalAdded + " new paths added (" + currentPaths.size() + " total). Click 'Start Probing' to scan.");
+                robotsSitemapBtn.setEnabled(true);
+                if (onStateChanged != null) onStateChanged.run();
+            });
+        }, "Endpoint-Inspector-Passive-" + domain);
+        worker.setDaemon(true);
+        worker.start();
+
+        if (onStateChanged != null) onStateChanged.run();
+    }
+
+    public void startProbing() {
+        String domain = getTargetDomain();
+        if (domain.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid target domain.", "Missing Target", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<DiscoveredPath_littlespidy> pathObjects = pathsTab.getPaths();
+        if (pathObjects == null || pathObjects.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No paths to probe. Please fetch paths using 'Wayback' or 'Robots / Sitemap' first.", "No Paths Available", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        syncConfigFromUI();
+        probeBtn.setEnabled(false);
+        waybackBtn.setEnabled(false);
+        robotsSitemapBtn.setEnabled(false);
+        pauseBtn.setEnabled(true);
+        pauseBtn.setText("Pause");
+        stopBtn.setEnabled(true);
+
+        runScannerOnPaths(pathObjects);
+    }
+
     private void runScannerOnPaths(List<DiscoveredPath_littlespidy> pathObjects) {
         if (pathObjects == null || pathObjects.isEmpty()) {
             SwingUtilities.invokeLater(() -> {
                 progressBar.setString("No paths to scan.");
-                startBtn.setEnabled(true);
+                probeBtn.setEnabled(true);
+                waybackBtn.setEnabled(true);
+                robotsSitemapBtn.setEnabled(true);
                 pauseBtn.setEnabled(false);
                 stopBtn.setEnabled(false);
             });
@@ -400,19 +448,13 @@ public class DomainScanPanel_littlespidy extends JPanel {
             }
 
             @Override
-            public void onNewEndpointDiscovered(DiscoveredPath_littlespidy newPath) {
-                SwingUtilities.invokeLater(() -> {
-                    pathsTab.addPath(newPath);
-                    kpiUniquePaths.setText(String.format("%,d", pathsTab.getPaths().size()));
-                });
-            }
-
-            @Override
             public void onScanCompleted() {
                 SwingUtilities.invokeLater(() -> {
                     progressBar.setValue(total);
                     progressBar.setString("Scan completed. " + directoryListingTab.getFindings().size() + " open directories identified.");
-                    startBtn.setEnabled(true);
+                    probeBtn.setEnabled(true);
+                    waybackBtn.setEnabled(true);
+                    robotsSitemapBtn.setEnabled(true);
                     pauseBtn.setEnabled(false);
                     stopBtn.setEnabled(false);
                     if (onStateChanged != null) onStateChanged.run();
@@ -438,7 +480,9 @@ public class DomainScanPanel_littlespidy extends JPanel {
         if (scanner != null) {
             scanner.stopScan();
         }
-        startBtn.setEnabled(true);
+        probeBtn.setEnabled(true);
+        waybackBtn.setEnabled(true);
+        robotsSitemapBtn.setEnabled(true);
         pauseBtn.setEnabled(false);
         stopBtn.setEnabled(false);
         progressBar.setString("Scan stopped.");
@@ -461,7 +505,9 @@ public class DomainScanPanel_littlespidy extends JPanel {
         kpiFindings.setText("0");
         progressBar.setValue(0);
         progressBar.setString("Ready");
-        startBtn.setEnabled(true);
+        probeBtn.setEnabled(true);
+        waybackBtn.setEnabled(true);
+        robotsSitemapBtn.setEnabled(true);
         pauseBtn.setEnabled(false);
         stopBtn.setEnabled(false);
         if (onStateChanged != null) onStateChanged.run();
@@ -507,8 +553,6 @@ public class DomainScanPanel_littlespidy extends JPanel {
         setTargetDomain(state.domain);
         if (state.scanConfig != null) {
             autoSubdomainsChk.setSelected(state.scanConfig.isAutoDiscoverSubdomains());
-            inScopeOnlyChk.setSelected(state.scanConfig.isInScopeOnly());
-            addToSiteMapChk.setSelected(state.scanConfig.isAddToSiteMap());
             threadsSpinner.setValue(state.scanConfig.getThreads());
             delaySpinner.setValue(state.scanConfig.getDelayMs());
             timeoutSpinner.setValue(state.scanConfig.getTimeoutSec());

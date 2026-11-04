@@ -176,28 +176,10 @@ public class DirectoryListingScanner_littlespidy {
                             if (callback != null) {
                                 callback.onFindingDiscovered(finding);
                             }
-
-                            if (api != null && scanConfig.isAddToSiteMap() && probe.httpRequestResponse != null) {
-                                try {
-                                    api.siteMap().add(probe.httpRequestResponse);
-                                } catch (Exception ignored) {
-                                }
-                            }
                             return;
                         } else {
                             pathItem.setResult("Normal Page");
                             pathItem.setStatus("Checked");
-                        }
-
-                        // Extract endpoints from response body if enabled (reKover crawl technique)
-                        if (scanConfig.isEnableJsMining() && probe.responseBody != null && !probe.responseBody.isBlank()) {
-                            boolean isJs = testPath.endsWith(".js") || (probe.rawResponse != null && probe.rawResponse.toLowerCase().contains("javascript"));
-                            java.util.Set<String> mined = JsEndpointExtractor_littlespidy.extractEndpoints(probe.responseBody, isJs);
-                            for (String mPath : mined) {
-                                if (callback != null && !mPath.equals(testPath) && !mPath.equals(rawPath)) {
-                                    callback.onNewEndpointDiscovered(new DiscoveredPath_littlespidy(host, mPath, "JS Mining"));
-                                }
-                            }
                         }
                     } else if (probe.statusCode == 429) {
                         pathItem.setResult("429 Too Many Requests");

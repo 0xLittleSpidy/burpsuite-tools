@@ -25,6 +25,9 @@ public class EndpointInspectorTab_littlespidy extends JPanel implements SessionM
     private final List<DomainScanPanel_littlespidy> domainPanels = new ArrayList<>();
     private final AtomicInteger domainTabCounter = new AtomicInteger(1);
 
+    private final JPanel plusTabPlaceholder = new JPanel();
+    private boolean isAddingTabFromPlus = false;
+
     public EndpointInspectorTab_littlespidy(MontoyaApi api) {
         super(new BorderLayout());
         this.api = api;
@@ -37,49 +40,62 @@ public class EndpointInspectorTab_littlespidy extends JPanel implements SessionM
     }
 
     private void initUI() {
-        // Top Toolbar: Session Management Controls
+        // Top Toolbar: Session Management Controls (without "+ New Domain Scan" button)
         JPanel topToolbar = sessionManager.createSessionToolbarComponent(this);
-
-        // Add "+ New Domain Scan" button into the top toolbar
-        JButton addDomainBtn = new JButton("+ New Domain Scan");
-        addDomainBtn.setFont(addDomainBtn.getFont().deriveFont(Font.BOLD));
-        addDomainBtn.addActionListener(e -> promptAddNewDomain());
-        topToolbar.add(addDomainBtn, BorderLayout.CENTER);
-
         add(topToolbar, BorderLayout.NORTH);
 
         // Root Tabbed Pane: First Tab is Configuration
         rootTabbedPane.addTab("Configuration", configTab);
 
-        add(rootTabbedPane, BorderLayout.CENTER);
-
         // Initial default domain tab
         addDomainTab("testphp.vulnweb.com");
+
+        // Add "+" placeholder tab at the end
+        rootTabbedPane.addTab("+", plusTabPlaceholder);
+        int plusIdx = rootTabbedPane.indexOfComponent(plusTabPlaceholder);
+        JLabel plusLabel = new JLabel("+");
+        plusLabel.setFont(plusLabel.getFont().deriveFont(Font.BOLD, 13f));
+        plusLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+        plusLabel.setToolTipText("Add new target domain tab");
+        rootTabbedPane.setTabComponentAt(plusIdx, plusLabel);
+
+        rootTabbedPane.addChangeListener(e -> {
+            if (isAddingTabFromPlus) return;
+            int selected = rootTabbedPane.getSelectedIndex();
+            int currentPlusIdx = rootTabbedPane.indexOfComponent(plusTabPlaceholder);
+            if (selected != -1 && selected == currentPlusIdx) {
+                isAddingTabFromPlus = true;
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        addDomainTab("target.com");
+                    } finally {
+                        isAddingTabFromPlus = false;
+                    }
+                });
+            }
+        });
+
+        add(rootTabbedPane, BorderLayout.CENTER);
     }
 
     public void initializeSessionStartup() {
         sessionManager.initializeOnStartup(this);
     }
 
-    public void promptAddNewDomain() {
-        String domain = JOptionPane.showInputDialog(this, "Enter target domain for new scan tab:", "example.com");
-        if (domain != null && !domain.trim().isEmpty()) {
-            addDomainTab(domain.trim());
-        }
-    }
-
     public synchronized DomainScanPanel_littlespidy addDomainTab(String domain) {
         if (domain == null || domain.isBlank()) domain = "target.com";
         String cleanDomain = domain.trim();
 
-        // Check if tab already exists for this domain
-        for (int i = 0; i < domainPanels.size(); i++) {
-            DomainScanPanel_littlespidy p = domainPanels.get(i);
-            if (p.getTargetDomain().equalsIgnoreCase(cleanDomain)) {
-                int tabIdx = rootTabbedPane.indexOfComponent(p);
-                if (tabIdx != -1) {
-                    rootTabbedPane.setSelectedIndex(tabIdx);
-                    return p;
+        // Check if tab already exists for this domain (unless it's default "target.com" when clicking "+")
+        if (!cleanDomain.equalsIgnoreCase("target.com")) {
+            for (int i = 0; i < domainPanels.size(); i++) {
+                DomainScanPanel_littlespidy p = domainPanels.get(i);
+                if (p.getTargetDomain().equalsIgnoreCase(cleanDomain)) {
+                    int tabIdx = rootTabbedPane.indexOfComponent(p);
+                    if (tabIdx != -1) {
+                        rootTabbedPane.setSelectedIndex(tabIdx);
+                        return p;
+                    }
                 }
             }
         }
@@ -91,14 +107,22 @@ public class EndpointInspectorTab_littlespidy extends JPanel implements SessionM
         panel.setOpenDomainInNewTabConsumer(this::addDomainTab);
 
         domainPanels.add(panel);
-        rootTabbedPane.addTab(defaultTitle, panel);
-        int newIdx = rootTabbedPane.indexOfComponent(panel);
+
+        int plusIdx = rootTabbedPane.indexOfComponent(plusTabPlaceholder);
+        int insertIdx;
+        if (plusIdx != -1) {
+            rootTabbedPane.insertTab(defaultTitle, null, panel, null, plusIdx);
+            insertIdx = plusIdx;
+        } else {
+            rootTabbedPane.addTab(defaultTitle, panel);
+            insertIdx = rootTabbedPane.indexOfComponent(panel);
+        }
 
         EditableTabHeader_littlespidy tabHeader = new EditableTabHeader_littlespidy(rootTabbedPane, panel, defaultTitle);
         tabHeader.setCloseCallback(comp -> closeDomainTab((DomainScanPanel_littlespidy) comp));
 
-        rootTabbedPane.setTabComponentAt(newIdx, tabHeader);
-        rootTabbedPane.setSelectedIndex(newIdx);
+        rootTabbedPane.setTabComponentAt(insertIdx, tabHeader);
+        rootTabbedPane.setSelectedIndex(insertIdx);
 
         sessionManager.markDirty();
         return panel;
