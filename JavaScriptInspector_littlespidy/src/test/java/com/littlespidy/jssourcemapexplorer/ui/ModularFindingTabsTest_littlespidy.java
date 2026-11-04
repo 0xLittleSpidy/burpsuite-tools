@@ -113,7 +113,7 @@ class ModularFindingTabsTest_littlespidy {
         assertNotNull(horizontalSplit, "Must contain horizontal JSplitPane for parallel editors");
         assertEquals(0.5, horizontalSplit.getResizeWeight(), 0.01);
 
-        DiscoveredSecret sec = new DiscoveredSecret("https://target.com/app.js", "JS File", "AWS Access Key", "AKIAIOSFODNN7EXAMPLE", 3.8, "High", "Regex", 15, "let key = 'AKIA...'");
+        DiscoveredSecret sec = new DiscoveredSecret("https://target.com/app.js", "JS File", "Cloud Secrets", "AKIAIOSFODNN7EXAMPLE", 3.8, "High", "AWS Access Key", 15, "let key = 'AKIA...'");
         JsFileEntry entry = new JsFileEntry(1, "https://target.com/app.js", "target.com", "/app.js", 200, 100, true, "1st Party", PassiveMapStatus.NOT_FOUND, null, null, null, null);
         entry.setJsReconFindings(List.of(sec), List.of());
         store.addEntry(entry);
@@ -121,7 +121,7 @@ class ModularFindingTabsTest_littlespidy {
         panel.refreshFromDataStore();
         assertEquals(1, panel.table.getRowCount());
         assertEquals(1, panel.table.getValueAt(0, 1)); // Occurrences column
-        assertEquals("AWS Access Key", panel.table.getValueAt(0, 2));
+        assertEquals("AWS Access Key", panel.table.getValueAt(0, 2)); // Token Type column
     }
 
     @Test
@@ -148,7 +148,7 @@ class ModularFindingTabsTest_littlespidy {
     }
 
     @Test
-    @DisplayName("Verify JSSourceMapExplorerTab registers all 9 top-level tabs")
+    @DisplayName("Verify JSSourceMapExplorerTab registers all 10 top-level tabs")
     void testTopLevelTabsRegistered() {
         MontoyaApi api = createMockApi();
         JsDataStore store = new JsDataStore();
@@ -160,10 +160,11 @@ class ModularFindingTabsTest_littlespidy {
         assertNotNull(mainTab.getSecurityBypassesPanel());
         assertNotNull(mainTab.getCloudUrlsPanel());
         assertNotNull(mainTab.getDependenciesPanel());
+        assertNotNull(mainTab.getInternalIpAndSsnPanel());
 
         JTabbedPane rootTabs = findRootTabbedPane(mainTab);
         assertNotNull(rootTabs, "Root tabbed pane must exist");
-        assertEquals(9, rootTabs.getTabCount(), "Must contain exactly 9 top-level tabs");
+        assertEquals(10, rootTabs.getTabCount(), "Must contain exactly 10 top-level tabs");
 
         assertEquals("JS and Source Map", rootTabs.getTitleAt(0));
         assertEquals("Paths", rootTabs.getTitleAt(1));
@@ -172,24 +173,27 @@ class ModularFindingTabsTest_littlespidy {
         assertEquals("Security Bypasses", rootTabs.getTitleAt(4));
         assertEquals("Cloud URLs", rootTabs.getTitleAt(5));
         assertEquals("Dependencies", rootTabs.getTitleAt(6));
-        assertEquals("GraphQL", rootTabs.getTitleAt(7));
-        assertEquals("AI Security Analyst", rootTabs.getTitleAt(8));
+        assertEquals("Internal IPs & SSNs", rootTabs.getTitleAt(7));
+        assertEquals("GraphQL", rootTabs.getTitleAt(8));
+        assertEquals("AI Security Analyst", rootTabs.getTitleAt(9));
     }
 
     @Test
-    @DisplayName("Verify Confidence, Entropy, and Classification columns removed from findings tables")
+    @DisplayName("Verify Confidence, Entropy, Severity, Category, and Classification columns removed from findings tables")
     void testColumnsRemovedFromFindingTables() {
         MontoyaApi api = createMockApi();
         JsDataStore store = new JsDataStore();
 
         SecretsPanel_littlespidy secretsPanel = new SecretsPanel_littlespidy(api, store);
         JTable secTable = secretsPanel.getTable();
-        assertEquals(9, secTable.getColumnCount(), "Secrets table should have 9 columns");
+        assertEquals(7, secTable.getColumnCount(), "Secrets table should have 7 columns");
         for (int i = 0; i < secTable.getColumnCount(); i++) {
             String colName = secTable.getColumnName(i);
             assertNotEquals("Confidence", colName);
             assertNotEquals("Entropy", colName);
             assertNotEquals("Classification", colName);
+            assertNotEquals("Severity", colName);
+            assertNotEquals("Category", colName);
         }
 
         PathsPanel_littlespidy pathsPanel = new PathsPanel_littlespidy(api, store);
@@ -208,9 +212,10 @@ class ModularFindingTabsTest_littlespidy {
 
         SecurityBypassesPanel_littlespidy bypassPanel = new SecurityBypassesPanel_littlespidy(api, store);
         JTable bypassTable = bypassPanel.getTable();
-        assertEquals(10, bypassTable.getColumnCount(), "Security bypasses table should have 10 columns");
+        assertEquals(9, bypassTable.getColumnCount(), "Security bypasses table should have 9 columns");
         for (int i = 0; i < bypassTable.getColumnCount(); i++) {
             assertNotEquals("Classification", bypassTable.getColumnName(i));
+            assertNotEquals("Confidence", bypassTable.getColumnName(i));
         }
 
         CloudUrlsPanel_littlespidy cloudPanel = new CloudUrlsPanel_littlespidy(api, store);
@@ -218,6 +223,13 @@ class ModularFindingTabsTest_littlespidy {
         assertEquals(7, cloudTable.getColumnCount(), "Cloud URLs table should have 7 columns");
         for (int i = 0; i < cloudTable.getColumnCount(); i++) {
             assertNotEquals("Classification", cloudTable.getColumnName(i));
+        }
+
+        InternalIpAndSsnPanel_littlespidy ipSsnPanel = new InternalIpAndSsnPanel_littlespidy(api, store);
+        JTable ipSsnTable = ipSsnPanel.getTable();
+        assertEquals(8, ipSsnTable.getColumnCount(), "Internal IPs & SSNs table should have 8 columns");
+        for (int i = 0; i < ipSsnTable.getColumnCount(); i++) {
+            assertNotEquals("Classification", ipSsnTable.getColumnName(i));
         }
 
         DependenciesPanel_littlespidy depPanel = new DependenciesPanel_littlespidy(api, store);

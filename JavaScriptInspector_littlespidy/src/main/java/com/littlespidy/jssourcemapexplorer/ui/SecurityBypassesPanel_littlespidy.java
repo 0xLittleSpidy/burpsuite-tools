@@ -262,7 +262,7 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
 
     private static class SecurityBypassesTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Occurrences", "Framework", "Bypass Method / Sink", "Risk", "Confidence", "Description", "Source Type", "Source Location", "Line"
+            "#", "Occurrences", "Framework", "Bypass Method / Sink", "Risk", "Description", "Source Type", "Source Location", "Line"
         };
         private final List<GroupedFinding_littlespidy<DiscoveredSecurityBypass>> list = new ArrayList<>();
 
@@ -281,7 +281,7 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return (c == 0 || c == 1 || c == 9) ? Integer.class : String.class;
+            return (c == 0 || c == 1 || c == 8) ? Integer.class : String.class;
         }
 
         @Override
@@ -295,11 +295,10 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
                 case 2 -> primary.framework();
                 case 3 -> primary.method();
                 case 4 -> primary.risk();
-                case 5 -> primary.confidence();
-                case 6 -> primary.description();
-                case 7 -> primary.sourceType();
-                case 8 -> primary.sourceLocation();
-                case 9 -> primary.line();
+                case 5 -> primary.description();
+                case 6 -> primary.sourceType();
+                case 7 -> primary.sourceLocation();
+                case 8 -> primary.line();
                 default -> null;
             };
         }

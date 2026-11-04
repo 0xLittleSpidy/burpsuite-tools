@@ -41,6 +41,7 @@ public class JsFileEntry {
     private final List<DiscoveredComment> jsComments = new ArrayList<>();
     private final List<DiscoveredSecurityBypass> jsSecurityBypasses = new ArrayList<>();
     private final List<DiscoveredGraphQLOperation> jsGraphQLOperations = new ArrayList<>();
+    private final List<DiscoveredInternalIpAndSsn_littlespidy> jsInternalIpsAndSsns = new ArrayList<>();
     // Raw HTTP messages
     private final HttpRequest request;
     private final HttpResponse response;
@@ -127,7 +128,8 @@ public class JsFileEntry {
         List<DiscoveredDependency> dependencies,
         List<DiscoveredComment> comments,
         List<DiscoveredSecurityBypass> securityBypasses,
-        List<DiscoveredGraphQLOperation> graphQLOperations
+        List<DiscoveredGraphQLOperation> graphQLOperations,
+        List<DiscoveredInternalIpAndSsn_littlespidy> internalIpsAndSsns
     ) {
         jsSecrets.clear();
         if (secrets != null) jsSecrets.addAll(secrets);
@@ -143,6 +145,20 @@ public class JsFileEntry {
         if (securityBypasses != null) jsSecurityBypasses.addAll(securityBypasses);
         jsGraphQLOperations.clear();
         if (graphQLOperations != null) jsGraphQLOperations.addAll(graphQLOperations);
+        jsInternalIpsAndSsns.clear();
+        if (internalIpsAndSsns != null) jsInternalIpsAndSsns.addAll(internalIpsAndSsns);
+    }
+
+    public synchronized void setJsReconFindings(
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments,
+        List<DiscoveredSecurityBypass> securityBypasses,
+        List<DiscoveredGraphQLOperation> graphQLOperations
+    ) {
+        setJsReconFindings(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, graphQLOperations, Collections.emptyList());
     }
 
     public synchronized void setJsReconFindings(
@@ -216,6 +232,25 @@ public class JsFileEntry {
 
     public synchronized List<DiscoveredGraphQLOperation> getJsGraphQLOperations() {
         return Collections.unmodifiableList(jsGraphQLOperations);
+    }
+
+    public synchronized List<DiscoveredInternalIpAndSsn_littlespidy> getJsInternalIpsAndSsns() {
+        return Collections.unmodifiableList(jsInternalIpsAndSsns);
+    }
+
+    public synchronized boolean updateInternalIpAndSsn(DiscoveredInternalIpAndSsn_littlespidy oldItem, DiscoveredInternalIpAndSsn_littlespidy newItem) {
+        if (oldItem == null || newItem == null) return false;
+        boolean updated = false;
+        for (int i = 0; i < jsInternalIpsAndSsns.size(); i++) {
+            DiscoveredInternalIpAndSsn_littlespidy item = jsInternalIpsAndSsns.get(i);
+            if (item == oldItem || (Objects.equals(item.matchValue(), oldItem.matchValue())
+                    && Objects.equals(item.sourceLocation(), oldItem.sourceLocation())
+                    && item.line() == oldItem.line())) {
+                jsInternalIpsAndSsns.set(i, newItem);
+                updated = true;
+            }
+        }
+        return updated;
     }
 
     public synchronized void setJsGraphQLOperations(List<DiscoveredGraphQLOperation> ops) {

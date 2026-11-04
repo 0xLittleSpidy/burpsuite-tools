@@ -21,8 +21,25 @@ public record UnpackedSourceFile(
     List<DiscoveredDependency> dependencies,
     List<DiscoveredComment> comments,
     List<DiscoveredSecurityBypass> securityBypasses,
-    List<DiscoveredGraphQLOperation> graphQLOperations
+    List<DiscoveredGraphQLOperation> graphQLOperations,
+    List<DiscoveredInternalIpAndSsn_littlespidy> internalIpsAndSsns
 ) {
+    public UnpackedSourceFile(
+        String relativePath,
+        String fileName,
+        String content,
+        int lineCount,
+        int sizeBytes,
+        List<DiscoveredSecret> secrets,
+        List<DiscoveredEndpoint> endpoints,
+        List<DiscoveredCloudUrl> cloudUrls,
+        List<DiscoveredDependency> dependencies,
+        List<DiscoveredComment> comments,
+        List<DiscoveredSecurityBypass> securityBypasses,
+        List<DiscoveredGraphQLOperation> graphQLOperations
+    ) {
+        this(relativePath, fileName, content, lineCount, sizeBytes, secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, graphQLOperations, Collections.emptyList());
+    }
     public UnpackedSourceFile(
         String relativePath,
         String fileName,

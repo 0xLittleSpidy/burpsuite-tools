@@ -61,6 +61,7 @@ public class JsSessionDTO_littlespidy {
         public List<DiscoveredComment> comments = new ArrayList<>();
         public List<DiscoveredSecurityBypass> securityBypasses = new ArrayList<>();
         public List<DiscoveredGraphQLOperation> graphQLOperations = new ArrayList<>();
+        public List<DiscoveredInternalIpAndSsn_littlespidy> internalIpsAndSsns = new ArrayList<>();
 
         // Unpacked Project data
         public UnpackedProjectDTO unpackedProject;
@@ -76,5 +77,6 @@ public class JsSessionDTO_littlespidy {
         public List<DiscoveredComment> comments = new ArrayList<>();
         public List<DiscoveredSecurityBypass> securityBypasses = new ArrayList<>();
         public List<DiscoveredGraphQLOperation> graphQLOperations = new ArrayList<>();
+        public List<DiscoveredInternalIpAndSsn_littlespidy> internalIpsAndSsns = new ArrayList<>();
     }
 }

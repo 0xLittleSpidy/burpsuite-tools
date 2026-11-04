@@ -685,7 +685,9 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
                                         jsMining.cloudUrls(),
                                         jsMining.dependencies(),
                                         jsMining.comments(),
-                                        jsMining.securityBypasses()
+                                        jsMining.securityBypasses(),
+                                        jsMining.graphQLOperations(),
+                                        jsMining.internalIpsAndSsns()
                                     );
                                 }
                             } catch (Exception ignored) {}

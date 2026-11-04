@@ -41,7 +41,9 @@ public class CloudUrlsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
         cloudProviderFilterBtn = new MultiSelectFilterButton(
             "Provider",
-            List.of("All Providers", "AWS", "Google Cloud", "Azure", "Firebase", "DigitalOcean", "Other Cloud"),
+            List.of("All Providers", "AWS", "Azure", "Google Cloud", "Firebase", "Cloudflare",
+                    "DigitalOcean", "Supabase", "PaaS / Serverless", "Oracle Cloud",
+                    "Alibaba Cloud", "Object Storage", "Rackspace", "DreamHost", "Cloud Resource"),
             sel -> applyFilter()
         );
         toolbar.add(cloudProviderFilterBtn);

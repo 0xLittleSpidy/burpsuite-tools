@@ -21,8 +21,7 @@ import java.util.List;
 public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private final SecretsTableModel tableModel;
-    private MultiSelectFilterButton categoryFilterBtn;
-    private MultiSelectFilterButton signatureFilterBtn;
+    private MultiSelectFilterButton tokenTypeFilterBtn;
 
     private final List<DiscoveredSecret> allSecrets = new ArrayList<>();
 
@@ -37,33 +36,21 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     @Override
     protected void addCategoryFiltersToToolbar(JPanel toolbar) {
-        JLabel catLbl = new JLabel("Category:");
-        catLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        toolbar.add(catLbl);
-
-        categoryFilterBtn = new MultiSelectFilterButton(
-            "Category",
-            SecretAndEndpointMiner.getAllCategories(),
-            sel -> applyFilter()
-        );
-        toolbar.add(categoryFilterBtn);
-
-        JLabel sigLbl = new JLabel("Signature:");
+        JLabel sigLbl = new JLabel("Token Type:");
         sigLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
         toolbar.add(sigLbl);
 
-        signatureFilterBtn = new MultiSelectFilterButton(
-            "Signature",
+        tokenTypeFilterBtn = new MultiSelectFilterButton(
+            "Token Type",
             SecretAndEndpointMiner.getAllSignatureNames(),
             sel -> applyFilter()
         );
-        toolbar.add(signatureFilterBtn);
+        toolbar.add(tokenTypeFilterBtn);
     }
 
     @Override
     protected void resetCategoryFilters() {
-        if (categoryFilterBtn != null) categoryFilterBtn.clearSelection();
-        if (signatureFilterBtn != null) signatureFilterBtn.clearSelection();
+        if (tokenTypeFilterBtn != null) tokenTypeFilterBtn.clearSelection();
     }
 
     @Override
@@ -82,8 +69,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     @Override
     public synchronized void applyFilter() {
-        Set<String> selectedCategories = categoryFilterBtn != null ? categoryFilterBtn.getSelected() : Collections.emptySet();
-        Set<String> selectedSigs = signatureFilterBtn != null ? signatureFilterBtn.getSelected() : Collections.emptySet();
+        Set<String> selectedTypes = tokenTypeFilterBtn != null ? tokenTypeFilterBtn.getSelected() : Collections.emptySet();
         String query = searchField.getText().trim().toLowerCase();
 
         Map<String, GroupedFinding_littlespidy<DiscoveredSecret>> groupedMap = new LinkedHashMap<>();
@@ -97,10 +83,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
             else if ("False Positive".equalsIgnoreCase(cls)) fpCount++;
             else unclassCount++;
 
-            if (!selectedCategories.isEmpty() && !selectedCategories.contains(sec.category())) {
-                continue;
-            }
-            if (!selectedSigs.isEmpty() && !selectedSigs.contains(sec.technique())) {
+            if (!selectedTypes.isEmpty() && !selectedTypes.contains(sec.technique())) {
                 continue;
             }
             if (!matchesClassification(sec.classification())) {
@@ -108,7 +91,6 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
             }
             if (!query.isEmpty()) {
                 boolean match = (sec.secretValue() != null && sec.secretValue().toLowerCase().contains(query))
-                    || (sec.category() != null && sec.category().toLowerCase().contains(query))
                     || (sec.technique() != null && sec.technique().toLowerCase().contains(query))
                     || (sec.sourceLocation() != null && sec.sourceLocation().toLowerCase().contains(query))
                     || (sec.contextSnippet() != null && sec.contextSnippet().toLowerCase().contains(query));
@@ -116,7 +98,6 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
             }
 
             String key = (sec.secretValue() != null ? sec.secretValue().trim() : "")
-                + "||" + (sec.category() != null ? sec.category().trim() : "")
                 + "||" + (sec.technique() != null ? sec.technique().trim() : "");
 
             FindingOccurrence_littlespidy occ = new FindingOccurrence_littlespidy(
@@ -263,7 +244,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class SecretsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Occurrences", "Category", "Secret Value / Match", "Signature", "Severity", "Source Type", "Source Location", "Line"
+            "#", "Occurrences", "Token Type", "Secret Value / Match", "Source Type", "Source Location", "Line"
         };
         private final List<GroupedFinding_littlespidy<DiscoveredSecret>> list = new ArrayList<>();
 
@@ -282,7 +263,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return (c == 0 || c == 1 || c == 8) ? Integer.class : String.class;
+            return (c == 0 || c == 1 || c == 6) ? Integer.class : String.class;
         }
 
         @Override
@@ -293,13 +274,11 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
             return switch (c) {
                 case 0 -> r + 1;
                 case 1 -> item.getCount();
-                case 2 -> primary.category();
+                case 2 -> primary.technique(); // Token Type
                 case 3 -> primary.secretValue();
-                case 4 -> primary.technique();
-                case 5 -> primary.severity();
-                case 6 -> primary.sourceType();
-                case 7 -> primary.sourceLocation();
-                case 8 -> primary.line();
+                case 4 -> primary.sourceType();
+                case 5 -> primary.sourceLocation();
+                case 6 -> primary.line();
                 default -> null;
             };
         }

@@ -188,7 +188,8 @@ public class JsPersistentStorageManager_littlespidy {
                                 dto.dependencies,
                                 dto.comments,
                                 dto.securityBypasses,
-                                dto.graphQLOperations
+                                dto.graphQLOperations,
+                                dto.internalIpsAndSsns
                         );
 
                         if (dto.unpacked && dto.unpackedProject != null) {
@@ -383,6 +384,7 @@ public class JsPersistentStorageManager_littlespidy {
                     dto.comments = new ArrayList<>(e.getJsComments());
                     dto.securityBypasses = new ArrayList<>(e.getJsSecurityBypasses());
                     dto.graphQLOperations = new ArrayList<>(e.getJsGraphQLOperations());
+                    dto.internalIpsAndSsns = new ArrayList<>(e.getJsInternalIpsAndSsns());
 
                     // Unpacked project files and findings
                     if (e.isUnpacked() && e.getUnpackedProject() != null) {
@@ -396,6 +398,7 @@ public class JsPersistentStorageManager_littlespidy {
                         upDto.comments = new ArrayList<>(e.getUnpackedProject().getAllComments());
                         upDto.securityBypasses = new ArrayList<>(e.getUnpackedProject().getAllSecurityBypasses());
                         upDto.graphQLOperations = new ArrayList<>(e.getUnpackedProject().getAllGraphQLOperations());
+                        upDto.internalIpsAndSsns = new ArrayList<>(e.getUnpackedProject().getAllInternalIpsAndSsns());
                         dto.unpackedProject = upDto;
                     }
 

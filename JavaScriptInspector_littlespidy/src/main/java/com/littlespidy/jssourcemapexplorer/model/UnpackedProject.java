@@ -19,6 +19,7 @@ public class UnpackedProject {
     private final List<DiscoveredDependency> allDependencies = new ArrayList<>();
     private final List<DiscoveredSecurityBypass> allSecurityBypasses = new ArrayList<>();
     private final List<DiscoveredGraphQLOperation> allGraphQLOperations = new ArrayList<>();
+    private final List<DiscoveredInternalIpAndSsn_littlespidy> allInternalIpsAndSsns = new ArrayList<>();
 
     public UnpackedProject(String sourceMapUrl) {
         this.sourceMapUrl = sourceMapUrl;
@@ -50,6 +51,9 @@ public class UnpackedProject {
         }
         if (file.graphQLOperations() != null) {
             allGraphQLOperations.addAll(file.graphQLOperations());
+        }
+        if (file.internalIpsAndSsns() != null) {
+            allInternalIpsAndSsns.addAll(file.internalIpsAndSsns());
         }
     }
 
@@ -91,6 +95,25 @@ public class UnpackedProject {
 
     public synchronized List<DiscoveredGraphQLOperation> getAllGraphQLOperations() {
         return Collections.unmodifiableList(allGraphQLOperations);
+    }
+
+    public synchronized List<DiscoveredInternalIpAndSsn_littlespidy> getAllInternalIpsAndSsns() {
+        return Collections.unmodifiableList(allInternalIpsAndSsns);
+    }
+
+    public synchronized boolean updateInternalIpAndSsn(DiscoveredInternalIpAndSsn_littlespidy oldItem, DiscoveredInternalIpAndSsn_littlespidy newItem) {
+        if (oldItem == null || newItem == null) return false;
+        boolean updated = false;
+        for (int i = 0; i < allInternalIpsAndSsns.size(); i++) {
+            DiscoveredInternalIpAndSsn_littlespidy item = allInternalIpsAndSsns.get(i);
+            if (item == oldItem || (Objects.equals(item.matchValue(), oldItem.matchValue())
+                    && Objects.equals(item.sourceLocation(), oldItem.sourceLocation())
+                    && item.line() == oldItem.line())) {
+                allInternalIpsAndSsns.set(i, newItem);
+                updated = true;
+            }
+        }
+        return updated;
     }
 
     public synchronized void setAllFindings(

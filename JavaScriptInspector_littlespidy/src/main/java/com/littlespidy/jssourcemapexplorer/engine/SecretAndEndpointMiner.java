@@ -52,126 +52,39 @@ public class SecretAndEndpointMiner {
         }
     }
 
-    private static CuratedSecret curated(String name, String category, String severity, int confidence, Pattern pattern, boolean needsEntropy, String... keywords) {
-        List<String> kwList = keywords.length > 0 ? List.of(keywords) : List.of();
-        return new CuratedSecret(name, category, severity, confidence, pattern, needsEntropy, kwList);
+    private static class JsonSecretPattern {
+        String name;
+        String category;
+        String severity;
+        int confidence;
+        String pattern;
+        boolean needsEntropy;
+        List<String> keywords;
     }
-
-    private static final List<CuratedSecret> CURATED_PATTERNS = List.of(
-        // ── Cloud Secrets ──
-        curated("AWS Access Key", "Cloud Secrets", "Critical", 95,
-            Pattern.compile("(?<![A-Za-z0-9/+=])(AKIA[0-9A-Z]{16})(?![A-Za-z0-9/+=])"), false),
-        new CuratedSecret("AWS Secret Access Key", "Cloud Secrets", "Critical", 80,
-            Pattern.compile("(?i)(?:aws[_-]?secret[_-]?(?:access[_-]?)?key|secret[_-]?access[_-]?key)\\s*[=:\"']\\s*[\"']?([A-Za-z0-9/+]{38,40}={0,2})[\"']?"), true),
-        new CuratedSecret("AWS Session Token", "Cloud Secrets", "Critical", 95,
-            Pattern.compile("(?<![A-Za-z0-9/+=])(ASIA[0-9A-Z]{16})(?![A-Za-z0-9/+=])"), false),
-        new CuratedSecret("Google API Key", "Cloud Secrets", "Low", 90,
-            Pattern.compile("AIza[0-9A-Za-z-_]{35}"), false),
-        new CuratedSecret("Google OAuth Client Secret", "Cloud Secrets", "Critical", 95,
-            Pattern.compile("GOCSPX-[A-Za-z0-9_-]{28}"), false),
-        new CuratedSecret("Firebase API Key", "Cloud Secrets", "Medium", 85,
-            Pattern.compile("(?i)['\"](?:apiKey|appId)['\"]\\s*[:=]\\s*['\"]([A-Za-z0-9_-]{20,})['\"]"), false),
-        new CuratedSecret("Firebase Configuration Block", "Cloud Secrets", "Medium", 85,
-            Pattern.compile("(?i)apiKey[\\s]*[=:]\\s*[\"']([A-Za-z0-9_-]{20,})[\"'][\\s\\S]{0,400}?(?:authDomain|databaseURL|projectId|storageBucket)"), false),
-        new CuratedSecret("Azure Storage Connection String", "Cloud Secrets", "Critical", 95,
-            Pattern.compile("(?i)DefaultEndpointsProtocol\\s*=\\s*https?[\\s\\S]{0,300}?AccountKey\\s*=\\s*([A-Za-z0-9+/]{86,88}={1,2})"), false),
-        new CuratedSecret("Azure SharedAccessKey", "Cloud Secrets", "Critical", 90,
-            Pattern.compile("(?i)SharedAccessKey\\s*=\\s*([A-Za-z0-9+/]{40,}={1,2})"), false),
-        new CuratedSecret("DigitalOcean Token", "Cloud Secrets", "Critical", 98,
-            Pattern.compile("dop_v1_[a-f0-9]{64}"), false),
-        new CuratedSecret("Cloudflare API Token", "Cloud Secrets", "Critical", 75,
-            Pattern.compile("(?i)(?:cloudflare|cf)[_\\s-]*(?:api|token|key)[\\s:=\"']*([A-Za-z0-9_-]{40,})"), true),
-        new CuratedSecret("Heroku API Key", "Cloud Secrets", "Critical", 85,
-            Pattern.compile("(?i)(?:heroku)[_\\s-]*(?:api|key)[\\s:=\"']*[\"']?([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})[\"']?"), false),
-
-        // ── Financial & Payment Secrets ──
-        new CuratedSecret("Stripe Live Secret Key", "Payment & Financial Secrets", "Critical", 98,
-            Pattern.compile("sk_live_[A-Za-z0-9]{20,}"), false),
-        new CuratedSecret("Stripe Restricted Key", "Payment & Financial Secrets", "Critical", 98,
-            Pattern.compile("rk_live_[A-Za-z0-9]{20,}"), false),
-        new CuratedSecret("PayPal Secret", "Payment & Financial Secrets", "Critical", 75,
-            Pattern.compile("(?i)(?:paypal)[_\\s-]*(?:secret|key)[\\s:=\"']*([A-Za-z0-9_-]{20,})"), true),
-        new CuratedSecret("Square Access Token", "Payment & Financial Secrets", "Critical", 90,
-            Pattern.compile("sq0atp-[0-9A-Za-z_-]{22}"), false),
-        new CuratedSecret("Square OAuth Secret", "Payment & Financial Secrets", "Critical", 90,
-            Pattern.compile("sq0csp-[0-9A-Za-z_-]{43}"), false),
-
-        // ── Source Control & CI/CD ──
-        new CuratedSecret("GitHub Personal Access Token", "Source Control Tokens", "Critical", 98,
-            Pattern.compile("ghp_[A-Za-z0-9]{36}"), false),
-        new CuratedSecret("GitHub Fine-Grained PAT", "Source Control Tokens", "Critical", 98,
-            Pattern.compile("github_pat_[A-Za-z0-9_]{82}"), false),
-        new CuratedSecret("GitLab Personal Access Token", "Source Control Tokens", "Critical", 98,
-            Pattern.compile("glpat-[A-Za-z0-9-_]{20,}"), false),
-        new CuratedSecret("Bitbucket Token", "Source Control Tokens", "High", 70,
-            Pattern.compile("(?i)(?:bitbucket)[_\\s-]*(?:token|secret)[\\s:=\"']*([A-Za-z0-9_-]{20,})"), true),
-        new CuratedSecret("Vercel Token", "CI/CD & DevOps Secrets", "High", 75,
-            Pattern.compile("(?i)(?:vercel)[_\\s-]*(?:token|key)[\\s:=\"']*([A-Za-z0-9_-]{24,})"), true),
-        new CuratedSecret("Netlify Token", "CI/CD & DevOps Secrets", "High", 75,
-            Pattern.compile("(?i)(?:netlify)[_\\s-]*(?:token|key|auth)[\\s:=\"']*([A-Za-z0-9_-]{40,})"), true),
-        new CuratedSecret("npm Access Token", "Package Registry Secrets", "Critical", 98,
-            Pattern.compile("npm_[A-Za-z0-9]{36}"), false),
-
-        // ── API & Auth Secrets ──
-        new CuratedSecret("JSON Web Token (JWT)", "API & Auth Secrets", "Medium", 80,
-            Pattern.compile("eyJ[A-Za-z0-9-_]{10,}\\.eyJ[A-Za-z0-9-_]{10,}\\.[A-Za-z0-9-_]{10,}"), false),
-        new CuratedSecret("Hardcoded Bearer Token", "API & Auth Secrets", "High", 85,
-            Pattern.compile("[\"']Bearer\\s+([A-Za-z0-9._~+/-]{20,})[\"']"), true),
-        new CuratedSecret("Hardcoded Authorization Header", "API & Auth Secrets", "High", 90,
-            Pattern.compile("(?i)[\"'](?:Authorization)[\"']\\s*:\\s*[\"'](?:Bearer|Basic|Token)\\s+([A-Za-z0-9._~+/-]{10,})[\"']"), false),
-        new CuratedSecret("Generic API Secret Key", "API & Auth Secrets", "High", 75,
-            Pattern.compile("(?i)['\"](?:api[_-]?key|auth[_-]?token|access[_-]?token|secret[_-]?key|client[_-]?secret)['\"]\\s*[:=]\\s*['\"]([a-zA-Z0-9_\\-]{16,})['\"]"), true),
-        new CuratedSecret("OAuth Refresh Token", "API & Auth Secrets", "Critical", 80,
-            Pattern.compile("(?i)(?:refresh_token)[\\s]*[=:]\\s*[\"']([A-Za-z0-9._~+/-]{20,})[\"']"), true),
-
-        // ── AI & ML Secrets ──
-        new CuratedSecret("OpenAI Project Key", "AI & ML Secrets", "Critical", 98,
-            Pattern.compile("sk-proj-[A-Za-z0-9_-]{40,}"), false),
-        new CuratedSecret("OpenAI Classic Key", "AI & ML Secrets", "Critical", 98,
-            Pattern.compile("sk-[A-Za-z0-9]{20,}T3BlbkFJ[A-Za-z0-9]{20,}"), false),
-        new CuratedSecret("Anthropic API Key", "AI & ML Secrets", "Critical", 98,
-            Pattern.compile("sk-ant-[A-Za-z0-9_-]{80,}"), false),
-        new CuratedSecret("HuggingFace Token", "AI & ML Secrets", "High", 95,
-            Pattern.compile("hf_[A-Za-z0-9]{34,}"), false),
-        new CuratedSecret("Cohere API Key", "AI & ML Secrets", "High", 75,
-            Pattern.compile("(?i)(?:cohere)[_\\s-]*(?:api|key)[\\s:=\"']*[\"']?([A-Za-z0-9]{40})[\"']?"), false),
-
-        // ── Messaging & Email ──
-        new CuratedSecret("SendGrid API Key", "Email & Messaging Secrets", "Critical", 98,
-            Pattern.compile("SG\\.[A-Za-z0-9_-]{22,}\\.[A-Za-z0-9_-]{22,}"), false),
-        new CuratedSecret("Mailgun Private Key", "Email & Messaging Secrets", "High", 90,
-            Pattern.compile("key-[A-Za-z0-9]{32}"), false),
-        new CuratedSecret("Twilio Auth Token", "Email & Messaging Secrets", "Critical", 85,
-            Pattern.compile("(?i)(?:twilio)[_\\s-]*(?:auth)?[_\\s-]*(?:token)[\\s:=\"']*([a-f0-9]{32})"), false),
-        new CuratedSecret("Slack Token", "SaaS Tokens", "Critical", 95,
-            Pattern.compile("xox[baprs]-[A-Za-z0-9-]{10,}"), false),
-        new CuratedSecret("Discord Bot Token", "SaaS Tokens", "High", 85,
-            Pattern.compile("[MN][A-Za-z\\d]{23,}\\.[\\w-]{6}\\.[\\w-]{27,}"), false),
-        new CuratedSecret("Algolia Admin API Key", "SaaS Tokens", "Critical", 80,
-            Pattern.compile("(?i)(?:algolia)[_\\s-]*(?:admin)?[_\\s-]*(?:api[_-]?key|key)[\\s:=\"']*([a-f0-9]{32})"), false),
-
-        // ── Database Credentials ──
-        new CuratedSecret("MongoDB Connection String", "Database Credentials", "Critical", 90,
-            Pattern.compile("mongodb(?:\\+srv)?:\\/\\/[^\\s\"'<>]{10,}"), false),
-        new CuratedSecret("PostgreSQL Connection String", "Database Credentials", "Critical", 90,
-            Pattern.compile("postgres(?:ql)?:\\/\\/[^\\s\"'<>]{10,}"), false),
-        new CuratedSecret("Database URL (MySQL/MSSQL)", "Database Credentials", "Critical", 90,
-            Pattern.compile("(?i)[\"']((?:mysql|mariadb|mssql|sqlserver):\\/\\/[^\\s\"'<>]{10,})[\"']"), false),
-        new CuratedSecret("Redis URI with Auth", "Database Credentials", "High", 85,
-            Pattern.compile("redis:\\/\\/[^\\s\"'<>]{10,}"), false),
-
-        // ── Private Keys ──
-        new CuratedSecret("PEM Private Key", "Private Keys", "Critical", 98,
-            Pattern.compile("-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"), false),
-        new CuratedSecret("Encrypted Private Key", "Private Keys", "High", 90,
-            Pattern.compile("-----BEGIN ENCRYPTED PRIVATE KEY-----"), false)
-    );
 
     private static final List<CuratedSecret> ALL_PATTERNS = new ArrayList<>();
 
     static {
-        ALL_PATTERNS.addAll(CURATED_PATTERNS);
+        loadJsonPatterns();
         loadResourceSignatures();
+    }
+
+    private static void loadJsonPatterns() {
+        try (InputStream is = SecretAndEndpointMiner.class.getResourceAsStream("/com/littlespidy/jssourcemapexplorer/secrets_patterns_littlespidy.json")) {
+            if (is != null) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+                JsonSecretPattern[] patterns = new com.google.gson.Gson().fromJson(reader, JsonSecretPattern[].class);
+                if (patterns != null) {
+                    for (JsonSecretPattern p : patterns) {
+                        try {
+                            Pattern compiled = Pattern.compile(p.pattern);
+                            List<String> kwList = p.keywords != null ? p.keywords : List.of();
+                            ALL_PATTERNS.add(new CuratedSecret(p.name, p.category, p.severity, p.confidence, compiled, p.needsEntropy, kwList));
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     private static void loadResourceSignatures() {
@@ -249,18 +162,69 @@ public class SecretAndEndpointMiner {
         return names;
     }
 
-    // ── Cloud Services Regex ──
+    // ── Cloud Services Regex (All major cloud providers) ──
     private static final Pattern CLOUD_URLS_REGEX = Pattern.compile(
-        "([\\w.-]+[.])" +
-        "(s3\\.amazonaws\\.com|rds\\.amazonaws\\.com|cache\\.amazonaws\\.com|" +
-        "blob\\.core\\.windows\\.net|onedrive\\.live\\.com|1drv\\.com|" +
-        "storage\\.googleapis\\.com|storage\\.cloud\\.google\\.com|" +
-        "cloudfront\\.net|digitaloceanspaces\\.com|oraclecloud\\.com|" +
-        "aliyuncs\\.com|firebaseio\\.com|rackcdn\\.com|dream\\.io)",
+        "(?:https?://)?(?:[\\w.-]+[.])?" +
+        "(" +
+        // AWS
+        "s3(?:\\.[a-z0-9-]+|-accelerate)?\\.amazonaws\\.com|execute-api\\.[a-z0-9-]+\\.amazonaws\\.com|" +
+        "lambda\\.[a-z0-9-]+\\.amazonaws\\.com|appsync-api\\.[a-z0-9-]+\\.amazonaws\\.com|" +
+        "cognito-idp\\.[a-z0-9-]+\\.amazonaws\\.com|elasticbeanstalk\\.com|cloudfront\\.net|" +
+        "rds\\.amazonaws\\.com|cache\\.amazonaws\\.com|" +
+        // Azure
+        "blob\\.core\\.windows\\.net|file\\.core\\.windows\\.net|queue\\.core\\.windows\\.net|" +
+        "table\\.core\\.windows\\.net|azurewebsites\\.net|azureedge\\.net|azure-api\\.net|" +
+        "database\\.windows\\.net|vault\\.azure\\.net|cloudapp\\.azure\\.com|azurecontainer\\.io|" +
+        "onedrive\\.live\\.com|1drv\\.com|" +
+        // Google Cloud / Firebase
+        "storage\\.googleapis\\.com|storage\\.cloud\\.google\\.com|appspot\\.com|" +
+        "cloudfunctions\\.net|run\\.app|firestore\\.googleapis\\.com|" +
+        "firebaseio\\.com|firebaseapp\\.com|web\\.app|" +
+        // Cloudflare
+        "workers\\.dev|pages\\.dev|r2\\.cloudflarestorage\\.com|" +
+        // DigitalOcean
+        "digitaloceanspaces\\.com|ondigitalocean\\.app|" +
+        // Supabase
+        "supabase\\.co|supabase\\.in|" +
+        // PaaS / Serverless
+        "vercel\\.app|netlify\\.app|herokuapp\\.com|onrender\\.com|fly\\.dev|" +
+        // Object Storage / Other
+        "oraclecloud\\.com|aliyuncs\\.com|oss-[a-z0-9-]+\\.aliyuncs\\.com|" +
+        "cloud-object-storage\\.appdomain\\.cloud|linodeobjects\\.com|wasabisys\\.com|" +
+        "backblazeb2\\.com|b2\\.fslb\\.net|rackcdn\\.com|dream\\.io" +
+        ")",
         Pattern.CASE_INSENSITIVE
     );
 
-    // ── Dependencies ──
+    // ── Internal IP Addresses (RFC 1918, Loopback, Link-Local, IPv6 Unique Local) ──
+    private static final Pattern IPV4_RFC1918_10 = Pattern.compile(
+        "\\b10\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b"
+    );
+    private static final Pattern IPV4_RFC1918_172 = Pattern.compile(
+        "\\b172\\.(?:1[6-9]|2\\d|3[01])\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b"
+    );
+    private static final Pattern IPV4_RFC1918_192 = Pattern.compile(
+        "\\b192\\.168\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b"
+    );
+    private static final Pattern IPV4_LOOPBACK = Pattern.compile(
+        "\\b127\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b"
+    );
+    private static final Pattern IPV4_LINK_LOCAL = Pattern.compile(
+        "\\b(?:169\\.254|100\\.(?:6[4-9]|[7-9]\\d|1[01]\\d|12[0-7]))\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b"
+    );
+    private static final Pattern IPV6_ULA = Pattern.compile(
+        "\\b[fF][cCdD][0-9a-fA-F]{2}(?::[0-9a-fA-F]{1,4}){3,7}\\b"
+    );
+
+    // ── Social Security Number (SSN) ──
+    private static final Pattern SSN_STANDARD = Pattern.compile(
+        "\\b(?!000|666|9\\d{2})([0-8]\\d{2})-(?!00)(\\d{2})-(?!0000)(\\d{4})\\b"
+    );
+    private static final Pattern SSN_KEY_VALUE = Pattern.compile(
+        "(?i)[\"']?\\b(?:ssn|social[-_ ]?security(?:[-_ ]?number)?)\\b[\"']?\\s*[:=]\\s*[\"']?((?!000|666|9\\d{2})[0-8]\\d{2}[- ]?(?!00)\\d{2}[- ]?(?!0000)\\d{4})[\"']?"
+    );
+
+    // ── Dependencies & License Banners ──
     private static final Pattern DEPENDENCIES_BLOCK_REGEX = Pattern.compile(
         "\"dependencies[a-zA-Z0-9_-]*\"\\s*:\\s*\\{([^}]+)\\}", Pattern.CASE_INSENSITIVE
     );
@@ -270,16 +234,19 @@ public class SecretAndEndpointMiner {
     private static final Pattern DEPENDENCY_KEY_VALUE_REGEX = Pattern.compile(
         "\"([@a-zA-Z0-9._-]+)\"\\s*:\\s*\"([^\"]+)\""
     );
+    private static final Pattern LICENSE_BANNER_REGEX = Pattern.compile(
+        "(?i)@licen[sc]e\\s+([A-Za-z0-9_.-]+(?:\\s+[A-Za-z0-9_.-]+)?)\\s+v?([0-9]+(?:\\.[0-9]+)+(?:-[a-zA-Z0-9.]+)?)"
+    );
 
     // ── Method-Specific HTTP Client Calls ──
     private static final Pattern METHOD_CALL_REGEX = Pattern.compile(
         "\\.[$]?(get|post|put|delete|patch)\\(['\"`]([^'\"`\\r\\n]+)['\"`]"
     );
 
-    // ── LinkFinder 5-Arm Pattern ──
+    // ── LinkFinder 5-Arm Pattern (Absolute URLs strictly require https?://) ──
     private static final Pattern LINKFINDER_PATTERN = Pattern.compile(
         "(?:\"|')(" +
-        "(?:[a-zA-Z]{1,10}://|//)[^\"'/]{1,}\\.[a-zA-Z]{2,}[^\"']{0,}" +
+        "https?://[^\"'/]{1,}\\.[a-zA-Z]{2,}(?::[0-9]+)?(?:/[^\"']*)?" +
         "|(?:/|\\.\\./|\\./)+[^\"'><,;| *()(%%$^/\\\\\\[\\]][^\"'><,;|()]{1,}" +
         "|[a-zA-Z0-9_\\-/]{1,}/[a-zA-Z0-9_\\-/.]{1,}\\.(?:[a-zA-Z]{1,4}|action)(?:[?#][^\"']{0,}|)" +
         "|[a-zA-Z0-9_\\-/]{1,}/[a-zA-Z0-9_\\-/]{3,}(?:[?#][^\"']{0,}|)" +
@@ -297,7 +264,11 @@ public class SecretAndEndpointMiner {
         Pattern.compile("(?i)^[a-z]{1,2}\\.[a-z]{1,4}$"),
         Pattern.compile("(?i)\\.(?:png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|css|map)(?:[?#].*)?$"),
         Pattern.compile("(?i)^(?:e\\.g|i\\.e|etc|null|undefined|true|false)\\."),
-        Pattern.compile("^//[\\s*#]")
+        Pattern.compile("^//:?\\d*$"), // Suppress invalid protocol or //:0
+        Pattern.compile("^//[\\s*#]"),
+        Pattern.compile("(?i)(?:^|\\s)(?:from\\s+[\"']\\./|import\\s+.*\\s+from\\s+[\"']\\./)"), // from "./<>" or import <> from "./<>"
+        Pattern.compile("(?i)^application/json(?:;.*)?$"), // Application/json
+        Pattern.compile("^(?:\\d{1,2}/\\d{1,2}/\\d{2,4}|\\d{4}/\\d{1,2}/\\d{1,2})$") // m/d/y, mm/dd/yy, yyyy/mm/dd
     );
 
     private static final Pattern COMMENT_SCAN_PATTERN = Pattern.compile(
@@ -457,8 +428,21 @@ public class SecretAndEndpointMiner {
         List<DiscoveredDependency> dependencies,
         List<DiscoveredComment> comments,
         List<DiscoveredSecurityBypass> securityBypasses,
-        List<DiscoveredGraphQLOperation> graphQLOperations
+        List<DiscoveredGraphQLOperation> graphQLOperations,
+        List<DiscoveredInternalIpAndSsn_littlespidy> internalIpsAndSsns
     ) {
+        public MiningResult(
+            List<DiscoveredSecret> secrets,
+            List<DiscoveredEndpoint> endpoints,
+            List<DiscoveredCloudUrl> cloudUrls,
+            List<DiscoveredDependency> dependencies,
+            List<DiscoveredComment> comments,
+            List<DiscoveredSecurityBypass> securityBypasses,
+            List<DiscoveredGraphQLOperation> graphQLOperations
+        ) {
+            this(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, graphQLOperations, Collections.emptyList());
+        }
+
         public MiningResult(
             List<DiscoveredSecret> secrets,
             List<DiscoveredEndpoint> endpoints,
@@ -467,7 +451,7 @@ public class SecretAndEndpointMiner {
             List<DiscoveredComment> comments,
             List<DiscoveredSecurityBypass> securityBypasses
         ) {
-            this(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, Collections.emptyList());
+            this(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, Collections.emptyList(), Collections.emptyList());
         }
 
         public MiningResult(
@@ -477,7 +461,7 @@ public class SecretAndEndpointMiner {
             List<DiscoveredDependency> dependencies,
             List<DiscoveredComment> comments
         ) {
-            this(secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList(), Collections.emptyList());
+            this(secrets, endpoints, cloudUrls, dependencies, comments, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
 
         public MiningResult(
@@ -486,7 +470,7 @@ public class SecretAndEndpointMiner {
             List<DiscoveredCloudUrl> cloudUrls,
             List<DiscoveredDependency> dependencies
         ) {
-            this(secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+            this(secrets, endpoints, cloudUrls, dependencies, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
     }
 
@@ -495,7 +479,7 @@ public class SecretAndEndpointMiner {
      */
     public static MiningResult mine(String sourceLocation, String sourceType, String sourceCode) {
         if (sourceCode == null || sourceCode.trim().isEmpty()) {
-            return new MiningResult(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+            return new MiningResult(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
 
         // Cap analysis to 5MB to prevent memory exhaustion / OOM
@@ -509,6 +493,7 @@ public class SecretAndEndpointMiner {
         List<DiscoveredComment> comments = new ArrayList<>();
         List<DiscoveredSecurityBypass> securityBypasses = new ArrayList<>();
         List<DiscoveredGraphQLOperation> graphQLOperations = new ArrayList<>();
+        List<DiscoveredInternalIpAndSsn_littlespidy> internalIpsAndSsns = new ArrayList<>();
 
         Set<String> seenEndpoints = new HashSet<>();
         Set<String> seenSecrets = new HashSet<>();
@@ -516,6 +501,7 @@ public class SecretAndEndpointMiner {
         Set<String> seenDependencies = new HashSet<>();
         Set<String> seenComments = new HashSet<>();
         Set<String> seenBypasses = new HashSet<>();
+        Set<String> seenInternalIpsAndSsns = new HashSet<>();
 
         // 1. Dependency Confusion Blocks
         Matcher depBlockMatcher = DEPENDENCIES_BLOCK_REGEX.matcher(scannable);
@@ -552,6 +538,24 @@ public class SecretAndEndpointMiner {
                     "node_modules path", "Unverified", "-",
                     getLineNumber(scannable, start), start, end,
                     getSnippet(scannable, start, end)
+                ));
+            }
+        }
+
+        // 2b. License Banner Extraction (e.g. @license Angular v20.2.30, @licence, React, Vue, jQuery)
+        Matcher licMatcher = LICENSE_BANNER_REGEX.matcher(scannable);
+        while (licMatcher.find()) {
+            if (System.nanoTime() > deadline) break;
+            String pkgName = licMatcher.group(1).trim();
+            String version = licMatcher.group(2).trim();
+            if (isValidPackageName(pkgName) && seenDependencies.add(pkgName + "@" + version)) {
+                int start = licMatcher.start();
+                int end = licMatcher.end();
+                dependencies.add(new DiscoveredDependency(
+                    sourceLocation, sourceType, pkgName, version,
+                    "@license banner", "Unverified", "-",
+                    getLineNumber(scannable, start), start, end,
+                    licMatcher.group(0)
                 ));
             }
         }
@@ -811,25 +815,139 @@ public class SecretAndEndpointMiner {
             } catch (Exception ignored) {}
         }
 
-        return new MiningResult(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, graphQLOperations);
+        // 14. Internal IP Address Mining (RFC 1918, Loopback, Link-Local, IPv6 Unique Local)
+        if (System.nanoTime() <= deadline) {
+            mineInternalIps(scannable, sourceLocation, sourceType, deadline, internalIpsAndSsns, seenInternalIpsAndSsns);
+        }
+
+        // 15. Social Security Number (SSN) Mining
+        if (System.nanoTime() <= deadline) {
+            mineSsns(scannable, sourceLocation, sourceType, deadline, internalIpsAndSsns, seenInternalIpsAndSsns);
+        }
+
+        return new MiningResult(secrets, endpoints, cloudUrls, dependencies, comments, securityBypasses, graphQLOperations, internalIpsAndSsns);
+    }
+
+    private static void mineInternalIps(
+        String scannable, String sourceLocation, String sourceType, long deadline,
+        List<DiscoveredInternalIpAndSsn_littlespidy> results, Set<String> seen
+    ) {
+        checkIpPattern(scannable, sourceLocation, sourceType, IPV4_RFC1918_10, "RFC 1918 (10.x)", deadline, results, seen);
+        checkIpPattern(scannable, sourceLocation, sourceType, IPV4_RFC1918_172, "RFC 1918 (172.16-31.x)", deadline, results, seen);
+        checkIpPattern(scannable, sourceLocation, sourceType, IPV4_RFC1918_192, "RFC 1918 (192.168.x)", deadline, results, seen);
+        checkIpPattern(scannable, sourceLocation, sourceType, IPV4_LOOPBACK, "Loopback (127.x)", deadline, results, seen);
+        checkIpPattern(scannable, sourceLocation, sourceType, IPV4_LINK_LOCAL, "Link-Local / Carrier NAT", deadline, results, seen);
+        checkIpPattern(scannable, sourceLocation, sourceType, IPV6_ULA, "IPv6 Unique Local", deadline, results, seen);
+    }
+
+    private static void checkIpPattern(
+        String text, String sourceLoc, String srcType, Pattern pattern, String subtype,
+        long deadline, List<DiscoveredInternalIpAndSsn_littlespidy> results, Set<String> seen
+    ) {
+        if (System.nanoTime() > deadline || results.size() >= 1500) return;
+        Matcher m = pattern.matcher(text);
+        while (m.find()) {
+            if (System.nanoTime() > deadline || results.size() >= 1500) break;
+            String ip = m.group();
+            int start = m.start();
+            int end = m.end();
+
+            // Guard against version numbers like "v10.0.1.2" or "version 10.0.0.1" or decimal fractions
+            if (start > 0) {
+                char prev = text.charAt(start - 1);
+                if (prev == 'v' || prev == 'V' || prev == '.' || prev == '-' || prev == '_') continue;
+            }
+            if (end < text.length()) {
+                char next = text.charAt(end);
+                if (next == '.' || next == '-' || next == '_') continue;
+            }
+
+            if (seen.add("IP:" + ip)) {
+                results.add(new DiscoveredInternalIpAndSsn_littlespidy(
+                    sourceLoc, srcType, "Internal IP Address", ip, subtype,
+                    getLineNumber(text, start), start, end, getSnippet(text, start, end)
+                ));
+            }
+        }
+    }
+
+    private static void mineSsns(
+        String scannable, String sourceLocation, String sourceType, long deadline,
+        List<DiscoveredInternalIpAndSsn_littlespidy> results, Set<String> seen
+    ) {
+        if (System.nanoTime() > deadline || results.size() >= 1500) return;
+
+        // 1. Standard formatted XXX-XX-XXXX
+        Matcher mStd = SSN_STANDARD.matcher(scannable);
+        while (mStd.find()) {
+            if (System.nanoTime() > deadline || results.size() >= 1500) break;
+            String ssn = mStd.group();
+            int start = mStd.start();
+            int end = mStd.end();
+
+            if (isFalsePositiveSsn(ssn)) continue;
+
+            if (seen.add("SSN:" + ssn)) {
+                results.add(new DiscoveredInternalIpAndSsn_littlespidy(
+                    sourceLocation, sourceType, "Social Security Number (SSN)", ssn, "SSN (Standard Formatted)",
+                    getLineNumber(scannable, start), start, end, getSnippet(scannable, start, end)
+                ));
+            }
+        }
+
+        // 2. Key-value SSN declarations (e.g. ssn: "123456789")
+        Matcher mKv = SSN_KEY_VALUE.matcher(scannable);
+        while (mKv.find()) {
+            if (System.nanoTime() > deadline || results.size() >= 1500) break;
+            String raw = mKv.group(1);
+            if (raw == null) continue;
+            String ssn = raw.trim();
+            int start = mKv.start(1);
+            int end = mKv.end(1);
+
+            if (isFalsePositiveSsn(ssn)) continue;
+
+            if (seen.add("SSN:" + ssn)) {
+                results.add(new DiscoveredInternalIpAndSsn_littlespidy(
+                    sourceLocation, sourceType, "Social Security Number (SSN)", ssn, "SSN (Key-Value)",
+                    getLineNumber(scannable, start), start, end, getSnippet(scannable, start, end)
+                ));
+            }
+        }
+    }
+
+    private static boolean isFalsePositiveSsn(String ssn) {
+        String digits = ssn.replaceAll("[^0-9]", "");
+        if (digits.length() != 9) return true;
+        // All same digit e.g. 111111111
+        if (digits.chars().distinct().count() <= 1) return true;
+        // Sequential numbers
+        if ("123456789".equals(digits) || "987654321".equals(digits) || "012345678".equals(digits)) return true;
+        // Common mock SSN prefixes
+        if (digits.startsWith("000") || digits.startsWith("666") || digits.startsWith("9")) return true;
+        return false;
     }
 
     private static String classifyCloudProvider(String url) {
         String lower = url.toLowerCase();
-        if (lower.contains("amazonaws.com") || lower.contains("cloudfront.net")) return "AWS";
-        if (lower.contains("windows.net") || lower.contains("live.com") || lower.contains("1drv.com")) return "Azure";
-        if (lower.contains("googleapis.com")) return "Google Cloud";
-        if (lower.contains("firebaseio.com")) return "Firebase";
-        if (lower.contains("digitaloceanspaces.com")) return "DigitalOcean";
+        if (lower.contains("amazonaws.com") || lower.contains("cloudfront.net") || lower.contains("elasticbeanstalk.com")) return "AWS";
+        if (lower.contains("windows.net") || lower.contains("azurewebsites.net") || lower.contains("azureedge.net") || lower.contains("azure-api.net") || lower.contains("vault.azure.net") || lower.contains("cloudapp.azure.com") || lower.contains("azurecontainer.io") || lower.contains("live.com") || lower.contains("1drv.com")) return "Azure";
+        if (lower.contains("firebaseio.com") || lower.contains("firebaseapp.com") || lower.contains("web.app")) return "Firebase";
+        if (lower.contains("googleapis.com") || lower.contains("appspot.com") || lower.contains("cloudfunctions.net") || lower.contains("run.app")) return "Google Cloud";
+        if (lower.contains("workers.dev") || lower.contains("pages.dev") || lower.contains("r2.cloudflarestorage.com")) return "Cloudflare";
+        if (lower.contains("digitaloceanspaces.com") || lower.contains("ondigitalocean.app")) return "DigitalOcean";
+        if (lower.contains("supabase.co") || lower.contains("supabase.in")) return "Supabase";
+        if (lower.contains("vercel.app") || lower.contains("netlify.app") || lower.contains("herokuapp.com") || lower.contains("onrender.com") || lower.contains("fly.dev")) return "PaaS / Serverless";
         if (lower.contains("oraclecloud.com")) return "Oracle Cloud";
         if (lower.contains("aliyuncs.com")) return "Alibaba Cloud";
+        if (lower.contains("cloud-object-storage.appdomain.cloud") || lower.contains("linodeobjects.com") || lower.contains("wasabisys.com") || lower.contains("backblazeb2.com") || lower.contains("b2.fslb.net")) return "Object Storage";
         if (lower.contains("rackcdn.com")) return "Rackspace";
         if (lower.contains("dream.io")) return "DreamHost";
         return "Cloud Resource";
     }
 
     private static String classifyLinkFinderArm(String path) {
-        if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("//")) return "Absolute URL";
+        if (path.startsWith("http://") || path.startsWith("https://")) return "Absolute URL";
         if (path.startsWith("/") || path.startsWith("./") || path.startsWith("../")) return "Relative Path";
         if (path.contains("/") && !path.contains("?")) return "REST Endpoint";
         if (path.contains(".")) return "File Extension";

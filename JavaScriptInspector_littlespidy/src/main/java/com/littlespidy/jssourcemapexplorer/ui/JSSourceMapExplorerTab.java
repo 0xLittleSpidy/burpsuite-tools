@@ -61,6 +61,7 @@ public class JSSourceMapExplorerTab extends JPanel {
     private final SecurityBypassesPanel_littlespidy securityBypassesPanel;
     private final CloudUrlsPanel_littlespidy cloudUrlsPanel;
     private final DependenciesPanel_littlespidy dependenciesPanel;
+    private final InternalIpAndSsnPanel_littlespidy internalIpAndSsnPanel;
 
     // Dedicated Top-Level GraphQL Inspector Panel
     private final GraphQLInspectorPanel_littlespidy graphQLInspectorPanel;
@@ -137,6 +138,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         this.securityBypassesPanel = new SecurityBypassesPanel_littlespidy(api, dataStore);
         this.cloudUrlsPanel = new CloudUrlsPanel_littlespidy(api, dataStore);
         this.dependenciesPanel = new DependenciesPanel_littlespidy(api, dataStore);
+        this.internalIpAndSsnPanel = new InternalIpAndSsnPanel_littlespidy(api, dataStore);
 
         Runnable refreshAndSave = () -> {
             refreshView();
@@ -162,6 +164,9 @@ public class JSSourceMapExplorerTab extends JPanel {
 
         this.dependenciesPanel.setOnMiningFinished(refreshAndSave);
         this.dependenciesPanel.setAutoSaveCallback(refreshAndSave);
+
+        this.internalIpAndSsnPanel.setOnMiningFinished(refreshAndSave);
+        this.internalIpAndSsnPanel.setAutoSaveCallback(refreshAndSave);
 
         this.graphQLInspectorPanel = new GraphQLInspectorPanel_littlespidy(api, dataStore);
         this.graphQLInspectorPanel.setHistoryLoader(this::loadProxyHistory);
@@ -223,10 +228,13 @@ public class JSSourceMapExplorerTab extends JPanel {
         // Tab 7: Dependencies
         rootTabbedPane.addTab("Dependencies", dependenciesPanel);
 
-        // Tab 8: Dedicated GraphQL Tab
+        // Tab 8: Internal IPs & SSNs
+        rootTabbedPane.addTab("Internal IPs & SSNs", internalIpAndSsnPanel);
+
+        // Tab 9: Dedicated GraphQL Tab
         rootTabbedPane.addTab("GraphQL", graphQLInspectorPanel);
 
-        // Tab 9: AI Security Analyst (Local LLM / Antigravity CLI)
+        // Tab 10: AI Security Analyst (Local LLM / Antigravity CLI)
         rootTabbedPane.addTab("AI Security Analyst", aiSecurityPanel);
 
         rootTabbedPane.addChangeListener(e -> {
@@ -1169,6 +1177,7 @@ public class JSSourceMapExplorerTab extends JPanel {
         if (securityBypassesPanel != null) securityBypassesPanel.refreshFromDataStore();
         if (cloudUrlsPanel != null) cloudUrlsPanel.refreshFromDataStore();
         if (dependenciesPanel != null) dependenciesPanel.refreshFromDataStore();
+        if (internalIpAndSsnPanel != null) internalIpAndSsnPanel.refreshFromDataStore();
     }
 
     public PathsPanel_littlespidy getPathsPanel() { return pathsPanel; }
@@ -1177,6 +1186,7 @@ public class JSSourceMapExplorerTab extends JPanel {
     public SecurityBypassesPanel_littlespidy getSecurityBypassesPanel() { return securityBypassesPanel; }
     public CloudUrlsPanel_littlespidy getCloudUrlsPanel() { return cloudUrlsPanel; }
     public DependenciesPanel_littlespidy getDependenciesPanel() { return dependenciesPanel; }
+    public InternalIpAndSsnPanel_littlespidy getInternalIpAndSsnPanel() { return internalIpAndSsnPanel; }
 
     public synchronized void refreshView() {
         SwingUtilities.invokeLater(() -> {

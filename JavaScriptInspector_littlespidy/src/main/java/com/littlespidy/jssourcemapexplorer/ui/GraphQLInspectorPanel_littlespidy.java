@@ -55,7 +55,6 @@ public class GraphQLInspectorPanel_littlespidy extends JPanel {
     private final JTable opsTable = new JTable(opsTableModel);
 
     // Filter Controls
-    private final JButton loadHistoryBtn = new JButton("Load Proxy History");
     private final JButton runGraphQLBtn = new JButton("Run");
     private final AtomicBoolean isDiscovering = new AtomicBoolean(false);
     private Runnable onGraphQLFinished;
@@ -113,8 +112,7 @@ public class GraphQLInspectorPanel_littlespidy extends JPanel {
     }
 
     public void setHistoryLoading(boolean loading) {
-        loadHistoryBtn.setEnabled(!loading);
-        loadHistoryBtn.setText(loading ? "Loading Proxy..." : "Load Proxy History");
+        // No-op: Load from proxy history button removed
     }
 
     public void setInScopeOnly(boolean inScope) {
@@ -129,11 +127,6 @@ public class GraphQLInspectorPanel_littlespidy extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-
-        loadHistoryBtn.addActionListener(e -> {
-            if (historyLoader != null) historyLoader.run();
-        });
-        leftPanel.add(loadHistoryBtn);
 
         inScopeOnlyCheckBox.addActionListener(e -> applyFilters());
         leftPanel.add(inScopeOnlyCheckBox);

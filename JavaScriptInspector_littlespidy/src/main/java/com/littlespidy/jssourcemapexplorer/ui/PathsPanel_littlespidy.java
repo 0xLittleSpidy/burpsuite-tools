@@ -57,6 +57,16 @@ public class PathsPanel_littlespidy extends BaseFindingPanel_littlespidy {
             sel -> applyFilter()
         );
         toolbar.add(techniqueFilterBtn);
+
+        JButton pathRegexBtn = new JButton("Path Regex");
+        pathRegexBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        pathRegexBtn.setToolTipText("View active path regex whitelist patterns and blacklist rules");
+        pathRegexBtn.addActionListener(e -> {
+            Window owner = SwingUtilities.getWindowAncestor(this);
+            PathRegexDialog_littlespidy dlg = new PathRegexDialog_littlespidy(owner);
+            dlg.setVisible(true);
+        });
+        toolbar.add(pathRegexBtn);
     }
 
     @Override

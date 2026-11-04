@@ -568,7 +568,7 @@
     <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme (Dark / Light)</button>
   </div>
 
-  <!-- Extension Main Suite Tabs -->
+  <!-- Extension Main Suite Tabs (10 Tabs) -->
   <div class="suite-tabs">
     <div class="suite-tab active" onclick="switchSuiteTab('js', this)">JS and Source Map</div>
     <div class="suite-tab" onclick="switchSuiteTab('paths', this)">Paths</div>
@@ -577,6 +577,7 @@
     <div class="suite-tab" onclick="switchSuiteTab('bypasses', this)">Security Bypasses</div>
     <div class="suite-tab" onclick="switchSuiteTab('cloud', this)">Cloud URLs</div>
     <div class="suite-tab" onclick="switchSuiteTab('deps', this)">Dependencies</div>
+    <div class="suite-tab" onclick="switchSuiteTab('internal-ip-ssn', this)">Internal IPs & SSNs</div>
     <div class="suite-tab" onclick="switchSuiteTab('graphql', this)">GraphQL</div>
     <div class="suite-tab" onclick="switchSuiteTab('ai', this)">AI Security Analyst</div>
   </div>
@@ -872,10 +873,8 @@ Content-Length: 915660
       <div class="toolbar-row">
         <button id="runSecretsBtn" class="btn primary" onclick="runSecretsMining()">Run Secrets</button>
         <div class="toolbar-sep"></div>
-        <span class="filter-label">Category:</span>
-        <button class="btn">Category [All]</button>
-        <span class="filter-label">Signature:</span>
-        <button class="btn">Signature [All]</button>
+        <span class="filter-label">Token Type:</span>
+        <button class="btn">Token Type [All]</button>
         <button class="btn">Classification [All]</button>
         <div class="toolbar-sep"></div>
         <span class="filter-label">Search:</span>
@@ -893,21 +892,19 @@ Content-Length: 915660
       </div>
 
       <div class="split-container">
-        <!-- Findings Table: Confidence, Entropy, and Classification Columns Removed; Occurrences Column Added -->
+        <!-- Findings Table: Category and Severity Columns Removed per specification; Only Token Type kept -->
         <div class="table-container" style="flex: 0.55;">
-          <div class="section-title">Secrets Findings (9 Columns: #, Occurrences, Category, Secret Value / Match, Signature, Severity, Source Type, Source Location, Line)</div>
+          <div class="section-title">Secrets Findings (7 Columns: #, Occurrences, Token Type, Secret Value / Match, Source Type, Source Location, Line)</div>
           <table id="secretsTable">
             <thead>
               <tr>
                 <th style="width: 35px;"><input type="checkbox" id="selectAllSecCb" onchange="toggleSelectAllSecrets(this)"></th>
                 <th style="width: 35px;">#</th>
                 <th style="width: 80px;">Occurrences</th>
-                <th style="width: 140px;">Category</th>
+                <th style="width: 170px;">Token Type</th>
                 <th>Secret Value / Match</th>
-                <th style="width: 150px;">Signature</th>
-                <th style="width: 80px;">Severity</th>
                 <th style="width: 100px;">Source Type</th>
-                <th style="width: 220px;">Source Location</th>
+                <th style="width: 240px;">Source Location</th>
                 <th style="width: 50px;">Line</th>
               </tr>
             </thead>
@@ -916,10 +913,8 @@ Content-Length: 915660
                 <td><input type="checkbox" class="sec-row-cb"></td>
                 <td>1</td>
                 <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">3</span></td>
-                <td>Cloud Credentials</td>
-                <td>EXAMPLE_AWS_KEY_SAMPLE</td>
                 <td>AWS Access Key</td>
-                <td><span class="status-fail-badge" style="background:#dc3545;">High</span></td>
+                <td>EXAMPLE_AWS_KEY_SAMPLE</td>
                 <td>JS File</td>
                 <td>https://app.target.com/_next/static/chunks/main-app.js</td>
                 <td>142</td>
@@ -928,10 +923,8 @@ Content-Length: 915660
                 <td><input type="checkbox" class="sec-row-cb"></td>
                 <td>2</td>
                 <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">1</span></td>
-                <td>OAuth / Bearer Token</td>
-                <td>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</td>
                 <td>JWT Token Pattern</td>
-                <td><span class="status-pass-badge" style="background:#e56b1f;">Medium</span></td>
+                <td>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</td>
                 <td>JS File</td>
                 <td>https://app.target.com/static/js/bundle.min.js</td>
                 <td>89</td>
@@ -940,10 +933,8 @@ Content-Length: 915660
                 <td><input type="checkbox" class="sec-row-cb"></td>
                 <td>3</td>
                 <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">2</span></td>
-                <td>Payment Gateway</td>
-                <td>example_mock_stripe_key_placeholder</td>
                 <td>Stripe Live Secret Key</td>
-                <td><span class="status-fail-badge" style="background:#dc3545;">Critical</span></td>
+                <td>example_mock_stripe_key_placeholder</td>
                 <td>Source Map</td>
                 <td>src/auth/stripeConfig.ts</td>
                 <td>24</td>
@@ -1121,6 +1112,219 @@ export function LoginForm() {
     </div>
     <!-- End Comments Panel -->
 
+    <!-- Paths Findings Tab Panel -->
+    <div id="panel-paths" class="suite-panel">
+      <div class="toolbar-row">
+        <button class="btn primary">Run Paths Mining</button>
+        <div class="toolbar-sep"></div>
+        <button class="btn">Type [All]</button>
+        <button class="btn">Classification [All]</button>
+        <div class="toolbar-sep"></div>
+        <span class="filter-label">Search:</span>
+        <input type="text" placeholder="Search paths...">
+        <button class="btn">Filter</button>
+        <button class="btn">Reset</button>
+        <button class="btn" style="background: var(--accent); color: #fff; font-weight: bold;" onclick="openPathRegexModal()">Path Regex</button>
+        <button class="btn" onclick="showToast('Exported TSV to clipboard')">Export TSV</button>
+        <div class="toolbar-sep"></div>
+        <button class="btn">Mark TP</button>
+        <button class="btn">Mark FP</button>
+        <button class="btn">Reset Classification</button>
+        <div style="flex: 1;"></div>
+        <span class="filter-label" style="color: var(--accent);">Paths: 2 (Visible: 2 | TP: 1 | FP: 0 | Unclassified: 1)</span>
+      </div>
+      <div class="split-container">
+        <div class="table-container" style="flex: 0.55;">
+          <div class="section-title">Discovered Endpoints & Paths (Anchored HTTP/HTTPS URLs & Relative Paths, Noise & Imports Filtered)</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 35px;"><input type="checkbox"></th>
+                <th style="width: 35px;">#</th>
+                <th style="width: 80px;">Occurrences</th>
+                <th>Endpoint / Path</th>
+                <th style="width: 80px;">Method</th>
+                <th style="width: 140px;">Technique</th>
+                <th style="width: 100px;">Source Type</th>
+                <th style="width: 200px;">Source Location</th>
+                <th style="width: 50px;">Line</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>1</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">4</span></td>
+                <td>/api/v1/users/profile</td>
+                <td>GET</td>
+                <td>Relative Path Pattern</td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/main.js</td>
+                <td>34</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>2</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">2</span></td>
+                <td>https://api.target.com/v2/orders</td>
+                <td>POST</td>
+                <td>Absolute URL Pattern</td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/bundle.js</td>
+                <td>112</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="flex: 0.45; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); padding: 10px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-bright); margin-bottom: 8px;">Path Details & Active Regex Filters</div>
+          <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+            Absolute URLs require strict http:// or https:// prefixes. Malformed URLs like //:0 and import statements (from "./...", import ... from "./...") are blacklisted and suppressed automatically.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Internal IPs and SSNs Tab Panel -->
+    <div id="panel-internal-ip-ssn" class="suite-panel">
+      <div class="toolbar-row">
+        <button class="btn primary">Run Internal IPs & SSNs</button>
+        <div class="toolbar-sep"></div>
+        <span class="filter-label">Type:</span>
+        <select class="btn" style="padding: 2px 6px;">
+          <option>All Types</option>
+          <option>Internal IP Address</option>
+          <option>Social Security Number (SSN)</option>
+        </select>
+        <span class="filter-label">Subtype:</span>
+        <select class="btn" style="padding: 2px 6px;">
+          <option>All Subtypes</option>
+          <option>RFC 1918 (10.x)</option>
+          <option>RFC 1918 (172.16-31.x)</option>
+          <option>RFC 1918 (192.168.x)</option>
+          <option>Loopback (127.x)</option>
+          <option>Link-Local / Carrier NAT</option>
+          <option>IPv6 Unique Local</option>
+          <option>SSN (Standard Formatted)</option>
+          <option>SSN (Key-Value)</option>
+        </select>
+        <button class="btn">Classification [All]</button>
+        <div class="toolbar-sep"></div>
+        <span class="filter-label">Search:</span>
+        <input type="text" placeholder="Search IP or SSN...">
+        <button class="btn">Filter</button>
+        <button class="btn">Reset</button>
+        <button class="btn" onclick="showToast('Exported TSV to clipboard')">Export TSV</button>
+        <div class="toolbar-sep"></div>
+        <button class="btn">Mark TP</button>
+        <button class="btn">Mark FP</button>
+        <button class="btn">Reset Classification</button>
+        <div style="flex: 1;"></div>
+        <span class="filter-label" style="color: var(--accent);">Findings: 6 (Visible: 6 | TP: 2 | FP: 0 | Unclassified: 4)</span>
+      </div>
+
+      <div class="split-container">
+        <div class="table-container" style="flex: 0.55;">
+          <div class="section-title">Internal IP Addresses & SSNs (8 Columns: #, Occurrences, Finding Type, Subtype, Match Value, Source Type, Source Location, Line)</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 35px;"><input type="checkbox"></th>
+                <th style="width: 35px;">#</th>
+                <th style="width: 80px;">Occurrences</th>
+                <th style="width: 140px;">Finding Type</th>
+                <th style="width: 160px;">Subtype</th>
+                <th>Match Value</th>
+                <th style="width: 90px;">Source Type</th>
+                <th style="width: 200px;">Source Location</th>
+                <th style="width: 50px;">Line</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>1</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">2</span></td>
+                <td>Internal IP Address</td>
+                <td>RFC 1918 (10.x)</td>
+                <td>10.0.4.15</td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/main.js</td>
+                <td>48</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>2</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">1</span></td>
+                <td>Internal IP Address</td>
+                <td>RFC 1918 (172.16-31.x)</td>
+                <td>172.16.50.12</td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/config.js</td>
+                <td>15</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>3</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">3</span></td>
+                <td>Internal IP Address</td>
+                <td>RFC 1918 (192.168.x)</td>
+                <td>192.168.1.1</td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/app.js</td>
+                <td>72</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>4</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">1</span></td>
+                <td>Internal IP Address</td>
+                <td>Loopback (127.x)</td>
+                <td>127.0.0.1</td>
+                <td>JS File</td>
+                <td>https://app.target.com/static/js/app.js</td>
+                <td>75</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>5</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">1</span></td>
+                <td>Social Security Number (SSN)</td>
+                <td>SSN (Standard Formatted)</td>
+                <td>219-45-7821</td>
+                <td>Source Map</td>
+                <td>src/components/tax/TaxForm.tsx</td>
+                <td>104</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>6</td>
+                <td><span class="badge-occ" style="background:var(--accent); color:#fff; padding:1px 6px; border-radius:10px; font-weight:bold;">1</span></td>
+                <td>Social Security Number (SSN)</td>
+                <td>SSN (Key-Value)</td>
+                <td>456781234</td>
+                <td>Source Map</td>
+                <td>src/components/tax/UserPayload.ts</td>
+                <td>28</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="flex: 0.45; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); display: flex; flex-direction: column;">
+          <div style="padding: 6px 10px; background: var(--bg-darker); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: bold; color: var(--text-bright);">
+            Occurrence Context & Code Viewer
+          </div>
+          <div style="padding: 10px; font-family: monospace; font-size: 11px; color: var(--text); background: var(--code-bg); flex: 1; overflow: auto; white-space: pre;">
+const internalDbCluster = "10.0.4.15";
+const redisGateway = "172.16.50.12";
+const localHost = "127.0.0.1";
+// User tax record preview:
+const sampleUserSsn = "219-45-7821";
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Generic Other Suite Tabs Panel Placeholder -->
     <div id="panel-other" class="suite-panel">
       <div class="toolbar-row">
@@ -1279,10 +1483,14 @@ export const useAuth = () => useContext(AuthContext);`;
       element.classList.add('active');
       if (tabName === 'js') {
         document.getElementById('panel-js').classList.add('active');
+      } else if (tabName === 'paths') {
+        document.getElementById('panel-paths').classList.add('active');
       } else if (tabName === 'secrets') {
         document.getElementById('panel-secrets').classList.add('active');
       } else if (tabName === 'comments') {
         document.getElementById('panel-comments').classList.add('active');
+      } else if (tabName === 'internal-ip-ssn') {
+        document.getElementById('panel-internal-ip-ssn').classList.add('active');
       } else {
         const other = document.getElementById('panel-other');
         other.classList.add('active');
@@ -1581,8 +1789,57 @@ export const useAuth = () => useContext(AuthContext);`;
       }, 700);
     }
 
+    // Path Regex Modal handlers
+    function openPathRegexModal() {
+      document.getElementById('pathRegexModal').style.display = 'flex';
+    }
+    function closePathRegexModal() {
+      document.getElementById('pathRegexModal').style.display = 'none';
+    }
+
     // Initialize
     renderCode();
   </script>
+
+  <!-- Path Regex Modal Dialog -->
+  <div id="pathRegexModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; width: 680px; max-width: 90%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+      <div style="padding: 10px 14px; background: var(--bg-darker); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: bold; font-size: 13px; color: var(--accent);">Path Regex & Whitelist / Blacklist Configuration</span>
+        <button class="btn" style="padding: 2px 8px;" onclick="closePathRegexModal()">Close</button>
+      </div>
+      <div style="padding: 14px; overflow-y: auto; font-size: 12px; line-height: 1.5; color: var(--text);">
+        <div style="font-weight: bold; color: var(--text-bright); margin-bottom: 6px;">Path Whitelist Patterns (Anchored Endpoints)</div>
+        <pre style="background: var(--code-bg); padding: 8px; border: 1px solid var(--border); border-radius: 3px; font-family: monospace; font-size: 11px; color: var(--text);">
+1. Absolute HTTP/HTTPS URLs:
+   (?i)\bhttps?://[a-zA-Z0-9.-]+(?::[0-9]{1,5})?(?:/[^\s"'`<>{}|\\^]+)?
+
+2. Relative API Routes & Paths:
+   (?i)/(?:api|v[0-9]+|rest|graphql|oauth|auth|user|admin|service|ws)/[a-zA-Z0-9_./-]+
+        </pre>
+
+        <div style="font-weight: bold; color: var(--text-bright); margin-top: 12px; margin-bottom: 6px;">Path Blacklist Patterns (Noise & Malformed Rejections)</div>
+        <pre style="background: var(--code-bg); padding: 8px; border: 1px solid var(--border); border-radius: 3px; font-family: monospace; font-size: 11px; color: var(--status-fail);">
+1. from "./<>" imports:
+   ^from\s*["'].+["']$
+
+2. import <> from "./<>" statements:
+   ^import\s+.+\s+from\s+["'].+["']$
+
+3. Application/json MIME types:
+   (?i)^application/json$
+
+4. Dates (m/d/y and mm/dd/yy):
+   ^\d{1,2}/\d{1,2}/\d{2,4}$
+
+5. Malformed scheme-relative origins (e.g. //:0):
+   ^//:?\d*$
+        </pre>
+      </div>
+      <div style="padding: 8px 14px; background: var(--bg-darker); border-top: 1px solid var(--border); display: flex; justify-content: flex-end;">
+        <button class="btn primary" onclick="closePathRegexModal()">OK</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
