@@ -7,12 +7,17 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -23,6 +28,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -36,9 +42,13 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.AbstractTableModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -63,17 +73,18 @@ import com.protect7.authanalyzer.filter.QueryFilter;
 import com.protect7.authanalyzer.filter.RequestFilter;
 import com.protect7.authanalyzer.filter.StatusCodeFilter;
 import com.protect7.authanalyzer.gui.cors.CorsTechniquesDialog_littlespidy;
-import com.protect7.authanalyzer.gui.inputvalidation.InputValidationPayloadsDialog_littlespidy;
-import com.protect7.authanalyzer.inputvalidation.InputValidationConfig_littlespidy;
+import com.protect7.authanalyzer.gui.dialog.SessionProfileDialog_littlespidy;
 import com.protect7.authanalyzer.gui.dialog.SettingsDialog;
 import com.protect7.authanalyzer.gui.entity.SessionPanel;
 import com.protect7.authanalyzer.gui.entity.TokenPanel;
+import com.protect7.authanalyzer.gui.inputvalidation.InputValidationPayloadsDialog_littlespidy;
 import com.protect7.authanalyzer.gui.listener.CloneSessionListener;
 import com.protect7.authanalyzer.gui.listener.DeleteSessionListener;
 import com.protect7.authanalyzer.gui.listener.NewSessionListener;
 import com.protect7.authanalyzer.gui.listener.RenameSessionListener;
 import com.protect7.authanalyzer.gui.util.HintCheckBox;
 import com.protect7.authanalyzer.gui.util.SessionTabbedPane;
+import com.protect7.authanalyzer.inputvalidation.InputValidationConfig_littlespidy;
 import com.protect7.authanalyzer.util.CurrentConfig;
 import com.protect7.authanalyzer.util.DataStorageProvider;
 import com.protect7.authanalyzer.util.GenericHelper;
@@ -113,6 +124,16 @@ public class ConfigurationPanel extends JPanel {
 	private final JPanel filterPanel;
 	private final LinkedHashMap<String, SessionPanel> sessionPanelMap = new LinkedHashMap<>();
 	private final SessionTabbedPane sessionTabbedPane = new SessionTabbedPane();
+	private final Set<String> activeSessionNames = new HashSet<>();
+	private ProfileTableModel profileTableModel;
+	private JTable profileTable;
+	private JPanel profilesPanel;
+	private JButton addProfBtn;
+	private JButton editProfBtn;
+	private JButton dupProfBtn;
+	private JButton delProfBtn;
+	private JButton moveUpBtn;
+	private JButton moveDownBtn;
 	boolean sessionListChanged = true;
 	private final MainPanel mainPanel;
 
@@ -339,8 +360,8 @@ public class ConfigurationPanel extends JPanel {
 		c.weightx = 1.0;
 		c.weighty = 0.55;
 		c.insets = new Insets(5, 10, 10, 15);
-		sessionTabbedPane.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Sessions (Drag tabs to reorder columns)"), new EmptyBorder(3, 3, 3, 3)));
-		add(sessionTabbedPane, c);
+		profilesPanel = createProfilesPanel();
+		add(profilesPanel, c);
 
 		c.gridx = 0;
 		c.gridy = 1;
@@ -492,7 +513,7 @@ public class ConfigurationPanel extends JPanel {
 		} catch (Exception e) {
 			BurpExtender.callbacks.printOutput("Can not restore saved Data. Error Message: " + e.getMessage());
 		}
-		if (sessionTabbedPane.getTabCount() == 1) {
+		if (sessionPanelMap.isEmpty()) {
 			createSession("user1");
 		}
 		sessionTabbedPane.setSelectedIndex(0);
@@ -591,9 +612,13 @@ public class ConfigurationPanel extends JPanel {
 	public SessionPanel createSession(String sessionName) {
 		SessionPanel sessionPanel = new SessionPanel(sessionName, mainPanel);
 		sessionPanelMap.put(sessionName, sessionPanel);
+		activeSessionNames.add(sessionName);
 		sessionTabbedPane.addTab(sessionName, sessionPanel);
 		setSelectedSession(sessionName);
 		sessionListChanged = true;
+		if (profileTableModel != null) {
+			profileTableModel.fireTableDataChanged();
+		}
 		return sessionPanel;
 	}
 
@@ -647,9 +672,13 @@ public class ConfigurationPanel extends JPanel {
 			newTokenPanel.setUrlEncoded(tokenPanelToClone.isUrlEncoded());
 		}
 		sessionPanelMap.put(newSessionName, sessionPanel);
+		activeSessionNames.add(newSessionName);
 		sessionTabbedPane.addTab(newSessionName, sessionPanel);
 		setSelectedSession(newSessionName);
 		sessionListChanged = true;
+		if (profileTableModel != null) {
+			profileTableModel.fireTableDataChanged();
+		}
 	}
 
 	public SessionPanel getSessionPanelByName(String name) {
@@ -670,11 +699,7 @@ public class ConfigurationPanel extends JPanel {
 	}
 
 	public ArrayList<String> getSessionNames() {
-		ArrayList<String> sessionNames = new ArrayList<String>();
-		for (int i = 0; i < sessionTabbedPane.getTabCount() - 1; i++) {
-			sessionNames.add(sessionTabbedPane.getTitleAt(i));
-		}
-		return sessionNames;
+		return new ArrayList<String>(sessionPanelMap.keySet());
 	}
 
 	public void startStopButtonPressed() {
@@ -686,6 +711,7 @@ public class ConfigurationPanel extends JPanel {
 					sessionPanelMap.get(session).setStopped();
 				}
 				sessionTabbedPane.setModifEnabled(true);
+				setProfileButtonsEnabled(true);
 				dropOriginalButton.setEnabled(false);
 				setDropOriginalRequest(false);
 				config.setRunning(false);
@@ -693,6 +719,7 @@ public class ConfigurationPanel extends JPanel {
 			} else {
 				boolean success = true;
 				for (String session : sessionPanelMap.keySet()) {
+					if (!activeSessionNames.contains(session)) continue;
 					SessionPanel sessionPanel = sessionPanelMap.get(session);
 					if (!sessionPanel.tokensValid() || !sessionPanel.isHeaderValid() || !sessionPanel.isScopeValid()) {
 						success = false;
@@ -716,6 +743,7 @@ public class ConfigurationPanel extends JPanel {
 						mainPanel.getCenterPanel().initCenterPanel();
 					}
 					sessionTabbedPane.setModifEnabled(false);
+					setProfileButtonsEnabled(false);
 					dropOriginalButton.setEnabled(true);
 					config.setRunning(true);
 					startStopButton.setText(ANALYZER_STARTED_TEXT);
@@ -726,12 +754,21 @@ public class ConfigurationPanel extends JPanel {
 		}
 	}
 
+	private void setProfileButtonsEnabled(boolean enabled) {
+		if (addProfBtn != null) addProfBtn.setEnabled(enabled);
+		if (editProfBtn != null) editProfBtn.setEnabled(enabled);
+		if (dupProfBtn != null) dupProfBtn.setEnabled(enabled);
+		if (delProfBtn != null) delProfBtn.setEnabled(enabled);
+		if (moveUpBtn != null) moveUpBtn.setEnabled(enabled);
+		if (moveDownBtn != null) moveDownBtn.setEnabled(enabled);
+	}
+
 	public void createSessionObjects(boolean setRunning) {
 		if (sessionPanelMap.size() != config.getSessions().size()) {
 			sessionListChanged = true;
 		}
 		for (String session : sessionPanelMap.keySet()) {
-			if (config.getSessionByName(session) == null) {
+			if (activeSessionNames.contains(session) && config.getSessionByName(session) == null) {
 				sessionListChanged = true;
 				break;
 			}
@@ -739,8 +776,10 @@ public class ConfigurationPanel extends JPanel {
 		if (sessionListChanged) {
 			config.clearSessionList();
 		}
-		for (int i = 0; i < sessionTabbedPane.getTabCount() - 1; i++) {
-			String session = sessionTabbedPane.getTitleAt(i);
+		for (String session : sessionPanelMap.keySet()) {
+			if (!activeSessionNames.contains(session)) {
+				continue;
+			}
 			SessionPanel sessionPanel = sessionPanelMap.get(session);
 			if (sessionPanel == null) continue;
 			ArrayList<Token> tokenList = new ArrayList<Token>();
@@ -910,7 +949,11 @@ public class ConfigurationPanel extends JPanel {
 				}
 			}
 			sessionPanelMap.put(sessionName, sessionPanel);
+			activeSessionNames.add(sessionName);
 			sessionTabbedPane.addTab(sessionName, sessionPanel);
+		}
+		if (profileTableModel != null) {
+			profileTableModel.fireTableDataChanged();
 		}
 
 		// Load Filters
@@ -1025,5 +1068,302 @@ public class ConfigurationPanel extends JPanel {
 			return false;
 		}
 		return true;
+	}
+
+	private JPanel createProfilesPanel() {
+		JPanel panel = new JPanel(new BorderLayout(4, 4));
+		panel.setBorder(new CompoundBorder(BorderFactory.createTitledBorder("Authentication Profiles"), new EmptyBorder(4, 4, 4, 4)));
+
+		profileTableModel = new ProfileTableModel();
+		profileTable = new JTable(profileTableModel);
+		profileTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		profileTable.getColumnModel().getColumn(0).setMaxWidth(50);
+		profileTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+		profileTable.getColumnModel().getColumn(1).setPreferredWidth(120);
+		profileTable.getColumnModel().getColumn(2).setPreferredWidth(350);
+
+		profileTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2 && profileTable.getSelectedRow() != -1) {
+					onEditProfile();
+				}
+			}
+		});
+
+		profileTable.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+					int[] rows = profileTable.getSelectedRows();
+					if (rows.length > 0) {
+						int first = profileTable.convertRowIndexToModel(rows[0]);
+						String firstKey = getSessionKeyAt(first);
+						boolean newState = !activeSessionNames.contains(firstKey);
+						for (int r : rows) {
+							int modelRow = profileTable.convertRowIndexToModel(r);
+							String k = getSessionKeyAt(modelRow);
+							if (k != null) {
+								if (newState) activeSessionNames.add(k);
+								else activeSessionNames.remove(k);
+							}
+						}
+						profileTableModel.fireTableDataChanged();
+						e.consume();
+					}
+				}
+			}
+		});
+
+		JScrollPane scrollPane = new JScrollPane(profileTable);
+		scrollPane.setPreferredSize(new Dimension(500, 160));
+		panel.add(scrollPane, BorderLayout.CENTER);
+
+		JPanel profileActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+		addProfBtn = new JButton("New Profile");
+		addProfBtn.addActionListener(e -> onNewProfile());
+		editProfBtn = new JButton("Edit Profile");
+		editProfBtn.addActionListener(e -> onEditProfile());
+		dupProfBtn = new JButton("Duplicate");
+		dupProfBtn.addActionListener(e -> onDuplicateProfile());
+		delProfBtn = new JButton("Delete");
+		delProfBtn.addActionListener(e -> onDeleteProfile());
+		moveUpBtn = new JButton("Move Up");
+		moveUpBtn.setToolTipText("Move selected profile up");
+		moveUpBtn.addActionListener(e -> onMoveProfileUp());
+		moveDownBtn = new JButton("Move Down");
+		moveDownBtn.setToolTipText("Move selected profile down");
+		moveDownBtn.addActionListener(e -> onMoveProfileDown());
+
+		profileActions.add(addProfBtn);
+		profileActions.add(editProfBtn);
+		profileActions.add(dupProfBtn);
+		profileActions.add(delProfBtn);
+		profileActions.add(moveUpBtn);
+		profileActions.add(moveDownBtn);
+		panel.add(profileActions, BorderLayout.SOUTH);
+
+		return panel;
+	}
+
+	public String getSessionKeyAt(int row) {
+		if (row < 0 || row >= sessionPanelMap.size()) return null;
+		int i = 0;
+		for (String k : sessionPanelMap.keySet()) {
+			if (i == row) return k;
+			i++;
+		}
+		return null;
+	}
+
+	private String getUniqueSessionName(String base) {
+		String candidate = base;
+		int counter = 1;
+		while (sessionPanelMap.containsKey(candidate)) {
+			candidate = base + "_" + counter++;
+		}
+		return candidate;
+	}
+
+	private void onNewProfile() {
+		if (!doModify()) return;
+		SessionPanel newPanel = new SessionPanel("New Profile", mainPanel);
+		SessionProfileDialog_littlespidy dialog = new SessionProfileDialog_littlespidy(
+				SwingUtilities.getWindowAncestor(this), "New Authentication Profile", newPanel, savedPanel -> {
+			String name = savedPanel.getSessionName();
+			if (sessionPanelMap.containsKey(name)) {
+				name = getUniqueSessionName(name);
+				savedPanel.setSessionName(name);
+			}
+			sessionPanelMap.put(name, savedPanel);
+			activeSessionNames.add(name);
+			sessionTabbedPane.addTab(name, savedPanel);
+			sessionListChanged = true;
+			if (profileTableModel != null) {
+				profileTableModel.fireTableDataChanged();
+				int newIdx = sessionPanelMap.size() - 1;
+				profileTable.setRowSelectionInterval(newIdx, newIdx);
+			}
+		});
+		if (!GraphicsEnvironment.isHeadless()) {
+			dialog.setVisible(true);
+		}
+	}
+
+	private void onEditProfile() {
+		if (!doModify()) return;
+		int row = profileTable.getSelectedRow();
+		if (row < 0 || row >= sessionPanelMap.size()) {
+			JOptionPane.showMessageDialog(this, "Please select a profile to edit.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		int modelRow = profileTable.convertRowIndexToModel(row);
+		String currentKey = getSessionKeyAt(modelRow);
+		SessionPanel sp = sessionPanelMap.get(currentKey);
+		if (sp == null) return;
+
+		SessionProfileDialog_littlespidy dialog = new SessionProfileDialog_littlespidy(
+				SwingUtilities.getWindowAncestor(this), "Edit Authentication Profile", sp, savedPanel -> {
+			String newName = savedPanel.getSessionName();
+			if (!newName.equals(currentKey)) {
+				LinkedHashMap<String, SessionPanel> newMap = new LinkedHashMap<>();
+				for (Map.Entry<String, SessionPanel> entry : sessionPanelMap.entrySet()) {
+					if (entry.getKey().equals(currentKey)) {
+						newMap.put(newName, savedPanel);
+					} else {
+						newMap.put(entry.getKey(), entry.getValue());
+					}
+				}
+				sessionPanelMap.clear();
+				sessionPanelMap.putAll(newMap);
+				if (activeSessionNames.remove(currentKey)) {
+					activeSessionNames.add(newName);
+				}
+				int tabIdx = getTabbedPaneIndexForTitle(currentKey);
+				if (tabIdx >= 0) {
+					sessionTabbedPane.setTitleAt(tabIdx, newName);
+				}
+			}
+			sessionListChanged = true;
+			if (profileTableModel != null) {
+				profileTableModel.fireTableDataChanged();
+			}
+		});
+		if (!GraphicsEnvironment.isHeadless()) {
+			dialog.setVisible(true);
+		}
+	}
+
+	private void onDuplicateProfile() {
+		if (!doModify()) return;
+		int row = profileTable.getSelectedRow();
+		if (row < 0 || row >= sessionPanelMap.size()) return;
+		int modelRow = profileTable.convertRowIndexToModel(row);
+		String currentKey = getSessionKeyAt(modelRow);
+		SessionPanel sp = sessionPanelMap.get(currentKey);
+		if (sp == null) return;
+
+		String cloneName = getUniqueSessionName(currentKey + "_copy");
+		doCloneSession(cloneName, sp);
+		activeSessionNames.add(cloneName);
+		if (profileTableModel != null) {
+			profileTableModel.fireTableDataChanged();
+		}
+	}
+
+	private void onDeleteProfile() {
+		if (!doModify()) return;
+		int row = profileTable.getSelectedRow();
+		if (row < 0 || row >= sessionPanelMap.size()) return;
+		int modelRow = profileTable.convertRowIndexToModel(row);
+		String currentKey = getSessionKeyAt(modelRow);
+		int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete profile '" + currentKey + "'?",
+				"Confirm Delete", JOptionPane.YES_NO_OPTION);
+		if (confirm == JOptionPane.YES_OPTION) {
+			sessionPanelMap.remove(currentKey);
+			activeSessionNames.remove(currentKey);
+			int tabIdx = getTabbedPaneIndexForTitle(currentKey);
+			if (tabIdx >= 0) {
+				sessionTabbedPane.remove(tabIdx);
+			}
+			sessionListChanged = true;
+			if (profileTableModel != null) {
+				profileTableModel.fireTableDataChanged();
+			}
+		}
+	}
+
+	private void onMoveProfileUp() {
+		if (!doModify()) return;
+		int row = profileTable.getSelectedRow();
+		if (row <= 0 || row >= sessionPanelMap.size()) return;
+		int modelRow = profileTable.convertRowIndexToModel(row);
+		List<String> keys = new ArrayList<>(sessionPanelMap.keySet());
+		String key = keys.get(modelRow);
+		String prevKey = keys.get(modelRow - 1);
+		keys.set(modelRow - 1, key);
+		keys.set(modelRow, prevKey);
+
+		LinkedHashMap<String, SessionPanel> newMap = new LinkedHashMap<>();
+		for (String k : keys) {
+			newMap.put(k, sessionPanelMap.get(k));
+		}
+		sessionPanelMap.clear();
+		sessionPanelMap.putAll(newMap);
+		sessionListChanged = true;
+		if (profileTableModel != null) {
+			profileTableModel.fireTableDataChanged();
+		}
+		profileTable.setRowSelectionInterval(row - 1, row - 1);
+	}
+
+	private void onMoveProfileDown() {
+		if (!doModify()) return;
+		int row = profileTable.getSelectedRow();
+		if (row < 0 || row >= sessionPanelMap.size() - 1) return;
+		int modelRow = profileTable.convertRowIndexToModel(row);
+		List<String> keys = new ArrayList<>(sessionPanelMap.keySet());
+		String key = keys.get(modelRow);
+		String nextKey = keys.get(modelRow + 1);
+		keys.set(modelRow, nextKey);
+		keys.set(modelRow + 1, key);
+
+		LinkedHashMap<String, SessionPanel> newMap = new LinkedHashMap<>();
+		for (String k : keys) {
+			newMap.put(k, sessionPanelMap.get(k));
+		}
+		sessionPanelMap.clear();
+		sessionPanelMap.putAll(newMap);
+		sessionListChanged = true;
+		if (profileTableModel != null) {
+			profileTableModel.fireTableDataChanged();
+		}
+		profileTable.setRowSelectionInterval(row + 1, row + 1);
+	}
+
+	public class ProfileTableModel extends AbstractTableModel {
+		private final String[] columns = {"Test", "Profile Name", "Credentials / Details"};
+
+		@Override public int getRowCount() { return sessionPanelMap.size(); }
+		@Override public int getColumnCount() { return columns.length; }
+		@Override public String getColumnName(int col) { return columns[col]; }
+		@Override public Class<?> getColumnClass(int col) { return col == 0 ? Boolean.class : String.class; }
+		@Override public boolean isCellEditable(int row, int col) { return col == 0; }
+
+		@Override
+		public void setValueAt(Object aValue, int row, int col) {
+			if (col == 0 && aValue instanceof Boolean) {
+				String key = getSessionKeyAt(row);
+				if (key != null) {
+					if ((Boolean) aValue) {
+						activeSessionNames.add(key);
+					} else {
+						activeSessionNames.remove(key);
+					}
+					fireTableCellUpdated(row, col);
+				}
+			}
+		}
+
+		@Override
+		public Object getValueAt(int row, int col) {
+			String key = getSessionKeyAt(row);
+			if (key == null) return "";
+			SessionPanel sp = sessionPanelMap.get(key);
+			if (sp == null) return "";
+			switch (col) {
+				case 0: return activeSessionNames.contains(key);
+				case 1: return sp.getSessionName();
+				case 2:
+					if (sp.isRemoveHeaders()) {
+						String rem = sp.getHeadersToRemoveText();
+						return "[Remove Headers" + (rem == null || rem.isEmpty() ? "]" : ": " + rem.replace('\n', ' ') + "]");
+					} else {
+						String h = sp.getHeadersToReplaceText();
+						return (h != null && !h.isEmpty()) ? h.replace('\n', ' ') : "[No Headers]";
+					}
+				default: return "";
+			}
+		}
 	}
 }

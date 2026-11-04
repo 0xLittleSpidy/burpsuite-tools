@@ -149,21 +149,16 @@ public class ConvertPostToGetPanel_littlespidy extends JPanel {
 		JPanel viewerContainer = new JPanel(new BorderLayout());
 		viewerContainer.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-		JPanel headerPanel = new JPanel(new BorderLayout(5, 2));
-		headerPanel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-		headerPanel.add(liveViewerInfoLabel, BorderLayout.WEST);
+		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+		headerPanel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
 
-		JPanel rightSwitchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-		JLabel switchLabel = new JLabel("View:");
 		ButtonGroup viewGroup = new ButtonGroup();
 		viewGroup.add(requestToggleButton);
 		viewGroup.add(responseToggleButton);
 		requestToggleButton.addActionListener(e -> setViewMode(0));
 		responseToggleButton.addActionListener(e -> setViewMode(1));
-		rightSwitchPanel.add(switchLabel);
-		rightSwitchPanel.add(requestToggleButton);
-		rightSwitchPanel.add(responseToggleButton);
-		headerPanel.add(rightSwitchPanel, BorderLayout.EAST);
+		headerPanel.add(requestToggleButton);
+		headerPanel.add(responseToggleButton);
 
 		viewerContainer.add(headerPanel, BorderLayout.NORTH);
 

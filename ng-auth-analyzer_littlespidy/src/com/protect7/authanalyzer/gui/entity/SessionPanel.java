@@ -177,7 +177,9 @@ public class SessionPanel extends JPanel {
 		attackerUrlLabel.setVisible(false);
 		attackerUrlText.setVisible(false);
 		revalidate();
-		mainPanel.updateDividerLocation();
+		if (mainPanel != null) {
+			mainPanel.updateDividerLocation();
+		}
 	}
 	
 	public void updateMatchAndReplaceButtonText() {
@@ -199,7 +201,7 @@ public class SessionPanel extends JPanel {
 		sessionPanel.setVisible(true);
 	}
 
-	private TokenPanel addToken() {
+	public TokenPanel addToken() {
 		TokenPanel tokenPanel = new TokenPanel();
 		if(tokenPanels.size() > 0) {
 			tokenPanel.setHeaderVisible(false);
