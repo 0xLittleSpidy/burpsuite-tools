@@ -5,7 +5,6 @@ import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
 import com.littlespidy.ssoinspector.context.SSOContextMenuProvider;
 import com.littlespidy.ssoinspector.engine.OAuthActiveScanEngine;
-import com.littlespidy.ssoinspector.engine.SSOScanCheck;
 import com.littlespidy.ssoinspector.model.OAuthDataStore;
 import com.littlespidy.ssoinspector.storage.SSOPersistentStorageManager_littlespidy;
 import com.littlespidy.ssoinspector.ui.SSOMainSuiteTab;
@@ -46,8 +45,7 @@ public class SSOInspectorExtension implements BurpExtension {
                 new SSOContextMenuProvider(api, dataStore, mainSuiteTab)
         );
 
-        // 5. Register Scanner Check (Passive & Active)
-        api.scanner().registerScanCheck(new SSOScanCheck(api, activeScanEngine));
+        // 5. Unhooked from global Burp Scanner - isolated on-demand scanner execution only
 
         // 6. Register Unloading Handler
         api.extension().registerUnloadingHandler(() -> {

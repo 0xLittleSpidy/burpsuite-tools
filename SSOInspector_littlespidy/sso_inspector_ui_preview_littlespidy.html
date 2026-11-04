@@ -1,0 +1,424 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSO Inspector (littlespidy) - Burp Suite Extension UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Orange */
+      --accent-hover: #ff7f32;
+      --badge-high: #dc3545;
+      --badge-med: #e56b1f;
+      --badge-low: #cca700;
+      --badge-info: #0e639c;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --input-bg: #2d2d2d;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #b8d6fb;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --badge-high: #dc3545;
+      --badge-med: #e56b1f;
+      --badge-low: #cca700;
+      --badge-info: #0e639c;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --input-bg: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      background-color: var(--bg-dark);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .title-area { display: flex; align-items: center; gap: 8px; }
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+    .suite-title { font-size: 12px; font-weight: 600; color: var(--text-bright); }
+    .theme-toggle-btn {
+      background-color: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 10px;
+    }
+
+    .burp-tabs-bar {
+      background-color: var(--bg-darker);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding-left: 8px;
+    }
+    .burp-tab {
+      padding: 6px 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+    }
+    .burp-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      font-weight: bold;
+      border-top: 2px solid var(--accent);
+    }
+
+    .sub-tabs-bar {
+      background-color: var(--bg-card);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding-left: 8px;
+    }
+    .sub-tab {
+      padding: 4px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .sub-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--accent);
+      font-weight: bold;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 6px;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+    }
+    .btn {
+      background-color: var(--btn-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 3px 8px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 500;
+    }
+    .btn:hover { background-color: var(--btn-hover); }
+    .btn.primary { background-color: var(--accent); border-color: var(--accent); color: #fff; }
+    .input-box {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 3px 6px;
+      border-radius: 2px;
+      font-size: 10px;
+    }
+
+    .split-vertical {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 0;
+    }
+    .split-horizontal {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      min-height: 0;
+    }
+
+    .panel-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 4px 8px;
+      font-weight: bold;
+      font-size: 11px;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-container {
+      flex: 1;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    th {
+      background-color: var(--bg-darker);
+      color: var(--text-bright);
+      text-align: left;
+      padding: 4px 6px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+    }
+    td {
+      padding: 4px 6px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tr.odd { background-color: var(--row-odd); }
+    tr.even { background-color: var(--row-even); }
+    tr.selected { background-color: var(--bg-selected); color: #fff; }
+    tr:hover:not(.selected) { background-color: var(--bg-hover); cursor: pointer; }
+
+    .tag-severity {
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-size: 9px;
+      font-weight: bold;
+      color: #fff;
+      display: inline-block;
+    }
+    .sev-high { background-color: var(--badge-high); }
+    .sev-med { background-color: var(--badge-med); }
+    .sev-low { background-color: var(--badge-low); }
+    .sev-info { background-color: var(--badge-info); }
+
+    .code-viewer {
+      flex: 1;
+      background-color: var(--code-bg);
+      color: var(--text);
+      font-family: monospace;
+      font-size: 10.5px;
+      padding: 6px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Suite Header Mockup -->
+  <div class="burp-header">
+    <div class="title-area">
+      <span class="burp-logo-badge">BURP SUITE</span>
+      <span class="suite-title">SSO Inspector (littlespidy) - Burp Suite Extension UI Preview</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 10px; color: var(--text-muted);">Montoya API Standard | Isolated On-Demand Scanner</span>
+      <button class="theme-toggle-btn" onclick="document.body.classList.toggle('light-theme')">Toggle Theme (Dark/Light)</button>
+    </div>
+  </div>
+
+  <!-- Suite Tabs Bar -->
+  <div class="burp-tabs-bar">
+    <div class="burp-tab">Dashboard</div>
+    <div class="burp-tab">Target</div>
+    <div class="burp-tab">Proxy</div>
+    <div class="burp-tab">Repeater</div>
+    <div class="burp-tab active">SSO Inspector</div>
+  </div>
+
+  <!-- Sub Tabs Bar -->
+  <div class="sub-tabs-bar">
+    <div class="sub-tab active">OAuth</div>
+  </div>
+
+  <!-- Main Workspace -->
+  <div class="main-workspace">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="btn primary">Scan Active Attack (Isolated)</button>
+      <button class="btn">Clear History</button>
+      <button class="btn">Export HTML Report</button>
+      <div style="height: 14px; width: 1px; background: var(--border);"></div>
+      <span style="font-size: 10px; color: var(--text-muted);">Filter Host:</span>
+      <input type="text" class="input-box" placeholder="e.g. auth.target.com" style="width: 140px;">
+      <button class="btn">Apply</button>
+      <div style="flex: 1;"></div>
+      <span style="font-size: 10px; color: var(--accent); font-weight: bold;">Burp Scan Hook: Decoupled / Isolated</span>
+    </div>
+
+    <div class="split-vertical">
+      <!-- Upper: OAuth Flow Requests Table -->
+      <div class="panel-box" style="flex: 0.45;">
+        <div class="panel-header">
+          <span>Captured OAuth / OIDC Requests (4 Columns: #, Host, Flow Type, Target Endpoint)</span>
+          <span style="font-size: 10px; color: var(--text-muted);">Total: 3 requests</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th style="width: 200px;">Host</th>
+                <th style="width: 180px;">Flow Type</th>
+                <th>Target Endpoint / URI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected" onclick="selectRow(this, 1)">
+                <td>1</td>
+                <td>auth.target.com</td>
+                <td>Authorization Code Flow</td>
+                <td>/oauth2/v1/authorize?response_type=code&client_id=target_app&redirect_uri=https://app.target.com/callback&state=xyz123</td>
+              </tr>
+              <tr class="even" onclick="selectRow(this, 2)">
+                <td>2</td>
+                <td>auth.target.com</td>
+                <td>Token Exchange Flow</td>
+                <td>/oauth2/v1/token</td>
+              </tr>
+              <tr class="odd" onclick="selectRow(this, 3)">
+                <td>3</td>
+                <td>sso.partner.org</td>
+                <td>Implicit Grant Flow</td>
+                <td>/authorize?response_type=token&client_id=partner_web&redirect_uri=https://partner.org/oauth</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Lower: 3-column split: Parameters, Audit Issues, HTTP Inspector -->
+      <div class="split-horizontal" style="flex: 0.55;">
+        <!-- Parameters Table -->
+        <div class="panel-box" style="flex: 0.3;">
+          <div class="panel-header">
+            <span>OAuth Parameters</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr><th>Parameter</th><th>Value</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>response_type</td><td>code</td></tr>
+                <tr><td>client_id</td><td>target_app</td></tr>
+                <tr><td>redirect_uri</td><td>https://app.target.com/callback</td></tr>
+                <tr><td>state</td><td>xyz123</td></tr>
+                <tr><td>scope</td><td>openid profile email</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Audit Issues Table -->
+        <div class="panel-box" style="flex: 0.35;">
+          <div class="panel-header">
+            <span>Security Audit Findings</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 55px;">Severity</th>
+                  <th>Issue Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tag-severity sev-high">High</span></td>
+                  <td>Redirect URI Allows Open Redirect Subdomain</td>
+                </tr>
+                <tr>
+                  <td><span class="tag-severity sev-med">Medium</span></td>
+                  <td>Missing PKCE code_challenge in Public Client</td>
+                </tr>
+                <tr>
+                  <td><span class="tag-severity sev-low">Low</span></td>
+                  <td>Static State Parameter without CSRF Nonce</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- HTTP Message Inspector -->
+        <div class="panel-box" style="flex: 0.35;">
+          <div class="panel-header">
+            <span>HTTP Request Preview</span>
+          </div>
+          <div class="code-viewer">GET /oauth2/v1/authorize?response_type=code&client_id=target_app&redirect_uri=https://app.target.com/callback&state=xyz123 HTTP/1.1
+Host: auth.target.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9
+Referer: https://app.target.com/login
+Connection: close</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectRow(element, index) {
+      document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('selected'));
+      element.classList.add('selected');
+    }
+  </script>
+</body>
+</html>
