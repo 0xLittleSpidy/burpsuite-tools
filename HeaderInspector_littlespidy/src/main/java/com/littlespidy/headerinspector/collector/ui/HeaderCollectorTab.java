@@ -27,9 +27,8 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created with the help of an AI Agent and littlespidy.
@@ -59,6 +58,7 @@ public class HeaderCollectorTab extends JPanel {
     private final HttpResponseEditor responseEditor;
     private final HeaderDocPanel headerDocPanel = new HeaderDocPanel();
     private final JTabbedPane editorTabs = new JTabbedPane();
+    private JSplitPane reqRespSplit;
 
     // Quick-Info Banner above value table
     private final JPanel quickInfoPanel = new JPanel(new BorderLayout(6, 2));
@@ -73,6 +73,11 @@ public class HeaderCollectorTab extends JPanel {
             buildCategoryOptions(),
             sel -> refreshView()
     );
+    private final MultiSelectFilterButton inScopeDomainFilterBtn = new MultiSelectFilterButton(
+            "In-Scope Domains",
+            List.of("All In-Scope Domains"),
+            sel -> refreshView()
+    );
     private final JTextField domainFilterField = new JTextField(14);
     private final JTextField searchFilterField = new JTextField(14);
     private final JButton resetFiltersBtn = new JButton("Reset Filters");
@@ -84,7 +89,7 @@ public class HeaderCollectorTab extends JPanel {
     private final JProgressBar progressBar = new JProgressBar();
 
     // Debounce Timer for text filtering
-    private final Timer debounceTimer;
+    private final javax.swing.Timer debounceTimer;
     private HeaderNameGroup selectedGroup = null;
 
     public HeaderCollectorTab(MontoyaApi api, HeaderCollectorDataStore dataStore) {
@@ -95,7 +100,7 @@ public class HeaderCollectorTab extends JPanel {
         this.requestEditor = api.userInterface().createHttpRequestEditor();
         this.responseEditor = api.userInterface().createHttpResponseEditor();
 
-        this.debounceTimer = new Timer(300, e -> refreshView());
+        this.debounceTimer = new javax.swing.Timer(300, e -> refreshView());
         this.debounceTimer.setRepeats(false);
 
         initComponents();
@@ -127,6 +132,7 @@ public class HeaderCollectorTab extends JPanel {
         toolbar.add(new JLabel("Type:"));
         toolbar.add(typeFilterCombo);
         toolbar.add(categoryFilterBtn);
+        toolbar.add(inScopeDomainFilterBtn);
         toolbar.add(new JLabel("Domain:"));
         toolbar.add(domainFilterField);
         toolbar.add(new JLabel("Search:"));
@@ -180,9 +186,12 @@ public class HeaderCollectorTab extends JPanel {
         JSplitPane tablesSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, groupScroll, valueContainer);
         tablesSplit.setResizeWeight(0.40);
 
-        // Editors Tabbed Pane
-        editorTabs.addTab("Request", requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
+        // Editors Tabbed Pane with 50/50 parallel split
+        this.reqRespSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestEditor.uiComponent(), responseEditor.uiComponent());
+        this.reqRespSplit.setResizeWeight(0.5);
+        this.reqRespSplit.setDividerLocation(0.5);
+
+        editorTabs.addTab("Request & Response", reqRespSplit);
         editorTabs.addTab("Header Explained (http.dev)", headerDocPanel);
 
         // Vertical Split: Tables on Top, Request/Response Editors on Bottom
@@ -208,6 +217,7 @@ public class HeaderCollectorTab extends JPanel {
         resetFiltersBtn.addActionListener(e -> {
             typeFilterCombo.setSelectedIndex(0);
             categoryFilterBtn.clearSelection();
+            inScopeDomainFilterBtn.clearSelection();
             domainFilterField.setText("");
             searchFilterField.setText("");
             refreshView();
@@ -421,6 +431,13 @@ public class HeaderCollectorTab extends JPanel {
                     .filter(g -> selectedCategories.contains(HttpDevKnowledgeBase.getCategory(g.headerName())))
                     .toList();
         }
+        if (!inScopeDomainFilterBtn.isAllSelected()) {
+            Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            filtered = filtered.stream()
+                    .filter(g -> g.allDomains().stream().anyMatch(d -> selectedDomains.contains(d)
+                            || selectedDomains.stream().anyMatch(sd -> sd.equalsIgnoreCase(d))))
+                    .toList();
+        }
         groupTableModel.setGroups(filtered);
 
         if (selectedGroup != null && filtered.contains(selectedGroup)) {
@@ -451,6 +468,13 @@ public class HeaderCollectorTab extends JPanel {
         String domainFilter = domainFilterField.getText();
         String searchFilter = searchFilterField.getText();
         List<HeaderValueRecord> values = selectedGroup.getValuesFiltered(domainFilter, searchFilter);
+        if (!inScopeDomainFilterBtn.isAllSelected()) {
+            Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            values = values.stream()
+                    .filter(v -> v.domains().stream().anyMatch(d -> selectedDomains.contains(d)
+                            || selectedDomains.stream().anyMatch(sd -> sd.equalsIgnoreCase(d))))
+                    .toList();
+        }
         valueTableModel.setRecords(values);
 
         if (!values.isEmpty()) {
@@ -470,7 +494,7 @@ public class HeaderCollectorTab extends JPanel {
             HttpRequest request = message.request();
             if (request == null) return;
 
-            editorTabs.setSelectedComponent(requestEditor.uiComponent());
+            if (reqRespSplit != null) editorTabs.setSelectedComponent(reqRespSplit);
 
             String rawStr = request.toString();
             String searchPattern = headerName + ":";
@@ -495,7 +519,7 @@ public class HeaderCollectorTab extends JPanel {
             HttpResponse response = message.response();
             if (response == null) return;
 
-            editorTabs.setSelectedComponent(responseEditor.uiComponent());
+            if (reqRespSplit != null) editorTabs.setSelectedComponent(reqRespSplit);
 
             String rawStr = response.toString();
             String searchPattern = headerName + ":";
@@ -590,6 +614,17 @@ public class HeaderCollectorTab extends JPanel {
         }
         quickInfoPanel.revalidate();
         quickInfoPanel.repaint();
+    }
+
+    public void updateInScopeDomains(Collection<String> domains) {
+        List<String> options = new ArrayList<>();
+        options.add("All In-Scope Domains");
+        if (domains != null) {
+            Set<String> sorted = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            sorted.addAll(domains);
+            options.addAll(sorted);
+        }
+        inScopeDomainFilterBtn.updateOptions(options);
     }
 
     private static List<String> buildCategoryOptions() {

@@ -82,7 +82,7 @@ public class GoogleCspScratchpadDialog extends JDialog {
         inputScroll.setPreferredSize(new Dimension(800, 90));
 
         JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        JButton evalBtn = new JButton("▶ Evaluate with Google Engine");
+        JButton evalBtn = new JButton("Evaluate with Google Engine");
         evalBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         evalBtn.addActionListener(e -> evaluate());
 

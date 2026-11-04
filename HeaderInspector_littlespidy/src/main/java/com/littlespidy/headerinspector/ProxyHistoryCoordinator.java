@@ -273,11 +273,58 @@ public class ProxyHistoryCoordinator {
     }
 
     private void refreshAllTabs() {
+        syncInScopeDomains();
         if (headerCollectorTab != null) headerCollectorTab.refreshView();
         if (methodCollectorTab != null) methodCollectorTab.refreshView();
         if (statusCollectorTab != null) statusCollectorTab.refreshView();
         if (cacheInspectorTab != null) cacheInspectorTab.refreshView();
         if (cspInspectorTab != null) cspInspectorTab.refreshView();
         if (hstsInspectorTab != null) hstsInspectorTab.refreshView();
+    }
+
+    public Set<String> collectInScopeDomains() {
+        Set<String> allDomains = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (var group : headerCollectorDataStore.getFilteredGroups(null, null, null)) {
+            allDomains.addAll(group.allDomains());
+        }
+        for (var group : methodCollectorDataStore.getFilteredGroups(null, null, null, null)) {
+            allDomains.addAll(group.allDomains());
+        }
+        for (var group : statusCollectorDataStore.getFilteredGroups(null, null, null)) {
+            allDomains.addAll(group.allDomains());
+        }
+        for (var entry : cacheDataStore.getEntries()) {
+            if (entry.host() != null && !entry.host().isBlank()) allDomains.add(entry.host());
+        }
+        for (var entry : cspDataStore.getEntries()) {
+            if (entry.host() != null && !entry.host().isBlank()) allDomains.add(entry.host());
+        }
+        for (var entry : hstsDataStore.getEntries()) {
+            if (entry.host() != null && !entry.host().isBlank()) allDomains.add(entry.host());
+        }
+
+        Set<String> inScope = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (String d : allDomains) {
+            if (api != null && api.scope() != null) {
+                if (api.scope().isInScope("https://" + d) || api.scope().isInScope("http://" + d)) {
+                    inScope.add(d);
+                }
+            }
+        }
+        return inScope.isEmpty() ? allDomains : inScope;
+    }
+
+    public void syncInScopeDomains() {
+        Set<String> domains = collectInScopeDomains();
+        updateAllTabsInScopeDomains(domains);
+    }
+
+    public void updateAllTabsInScopeDomains(Collection<String> domains) {
+        if (headerCollectorTab != null) headerCollectorTab.updateInScopeDomains(domains);
+        if (methodCollectorTab != null) methodCollectorTab.updateInScopeDomains(domains);
+        if (statusCollectorTab != null) statusCollectorTab.updateInScopeDomains(domains);
+        if (cacheInspectorTab != null) cacheInspectorTab.updateInScopeDomains(domains);
+        if (cspInspectorTab != null) cspInspectorTab.updateInScopeDomains(domains);
+        if (hstsInspectorTab != null) hstsInspectorTab.updateInScopeDomains(domains);
     }
 }

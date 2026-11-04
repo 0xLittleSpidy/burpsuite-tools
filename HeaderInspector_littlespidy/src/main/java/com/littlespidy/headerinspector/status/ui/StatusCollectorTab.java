@@ -15,6 +15,7 @@ import com.littlespidy.headerinspector.status.knowledge.HttpDevStatusKnowledgeBa
 import com.littlespidy.headerinspector.status.model.StatusCollectorDataStore;
 import com.littlespidy.headerinspector.status.model.StatusEndpointRecord;
 import com.littlespidy.headerinspector.status.model.StatusGroup;
+import com.littlespidy.headerinspector.ui.common.MultiSelectFilterButton;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -24,6 +25,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.net.URI;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -66,6 +68,11 @@ public class StatusCollectorTab extends JPanel {
             "All Status Codes", "1xx Informational", "2xx Success", "3xx Redirection",
             "4xx Client Error", "5xx Server Error", "Vendor / Extended"
     });
+    private final MultiSelectFilterButton inScopeDomainFilterBtn = new MultiSelectFilterButton(
+            "In-Scope Domains",
+            List.of("All In-Scope Domains"),
+            sel -> refreshView()
+    );
     private final JTextField domainFilterField = new JTextField(12);
     private final JTextField searchFilterField = new JTextField(12);
     private final JButton resetFiltersBtn = new JButton("Reset Filters");
@@ -77,7 +84,7 @@ public class StatusCollectorTab extends JPanel {
     private final JProgressBar progressBar = new JProgressBar();
 
     // Debounce Timer for text filtering
-    private final Timer debounceTimer;
+    private final javax.swing.Timer debounceTimer;
     private StatusGroup selectedGroup = null;
 
     public StatusCollectorTab(MontoyaApi api, StatusCollectorDataStore dataStore) {
@@ -88,7 +95,7 @@ public class StatusCollectorTab extends JPanel {
         this.requestEditor = api.userInterface().createHttpRequestEditor();
         this.responseEditor = api.userInterface().createHttpResponseEditor();
 
-        this.debounceTimer = new Timer(300, e -> refreshView());
+        this.debounceTimer = new javax.swing.Timer(300, e -> refreshView());
         this.debounceTimer.setRepeats(false);
 
         initComponents();
@@ -116,6 +123,7 @@ public class StatusCollectorTab extends JPanel {
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(new JLabel("Class:"));
         toolbar.add(classFilterCombo);
+        toolbar.add(inScopeDomainFilterBtn);
         toolbar.add(new JLabel("Domain:"));
         toolbar.add(domainFilterField);
         toolbar.add(new JLabel("Search:"));
@@ -191,9 +199,12 @@ public class StatusCollectorTab extends JPanel {
         tablesSplit.setResizeWeight(0.42);
         tablesSplit.setDividerLocation(480);
 
-        // Editors Tabbed Pane
-        editorTabs.addTab("Request", requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
+        // Editors Tabbed Pane with 50/50 parallel split
+        JSplitPane reqRespSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestEditor.uiComponent(), responseEditor.uiComponent());
+        reqRespSplit.setResizeWeight(0.5);
+        reqRespSplit.setDividerLocation(0.5);
+
+        editorTabs.addTab("Request & Response", reqRespSplit);
         editorTabs.addTab("Status Explained (http.dev)", statusDocPanel);
 
         // Vertical Split: Tables on Top, Request/Response Editors on Bottom
@@ -220,6 +231,7 @@ public class StatusCollectorTab extends JPanel {
 
         resetFiltersBtn.addActionListener(e -> {
             classFilterCombo.setSelectedIndex(0);
+            inScopeDomainFilterBtn.clearSelection();
             domainFilterField.setText("");
             searchFilterField.setText("");
             refreshView();
@@ -297,7 +309,15 @@ public class StatusCollectorTab extends JPanel {
             return;
         }
 
-        endpointTableModel.setRecords(group.getEndpoints());
+        List<StatusEndpointRecord> endpoints = group.getEndpoints();
+        if (!inScopeDomainFilterBtn.isAllSelected()) {
+            Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            endpoints = endpoints.stream()
+                    .filter(e -> selectedDomains.contains(e.domain())
+                            || selectedDomains.stream().anyMatch(sd -> sd.equalsIgnoreCase(e.domain())))
+                    .toList();
+        }
+        endpointTableModel.setRecords(endpoints);
         statusDocPanel.setStatus(group.statusCode());
 
         HttpDevStatusDoc doc = HttpDevStatusKnowledgeBase.get(group.statusCode());
@@ -345,8 +365,8 @@ public class StatusCollectorTab extends JPanel {
             responseEditor.setResponse(null);
         }
 
-        if (editorTabs.getSelectedIndex() != 2) {
-            editorTabs.setSelectedIndex(1); // Default to response editor for status inspection
+        if (editorTabs.getSelectedIndex() != 1) {
+            editorTabs.setSelectedIndex(0);
         }
     }
 
@@ -360,6 +380,14 @@ public class StatusCollectorTab extends JPanel {
                 searchFilter,
                 classFilter
         );
+
+        if (!inScopeDomainFilterBtn.isAllSelected()) {
+            Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            filtered = filtered.stream()
+                    .filter(g -> g.allDomains().stream().anyMatch(d -> selectedDomains.contains(d)
+                            || selectedDomains.stream().anyMatch(sd -> sd.equalsIgnoreCase(d))))
+                    .toList();
+        }
 
         groupTableModel.setGroups(filtered);
 
@@ -467,6 +495,17 @@ public class StatusCollectorTab extends JPanel {
         }
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(sb.toString()), null);
         JOptionPane.showMessageDialog(this, "Exported " + selectedGroup.uniqueEndpointsCount() + " endpoints for status " + selectedGroup.statusCode() + " to clipboard (TSV format).", "TSV Exported", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void updateInScopeDomains(Collection<String> domains) {
+        List<String> options = new ArrayList<>();
+        options.add("All In-Scope Domains");
+        if (domains != null) {
+            Set<String> sorted = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            sorted.addAll(domains);
+            options.addAll(sorted);
+        }
+        inScopeDomainFilterBtn.updateOptions(options);
     }
 
     private String escapeHtml(String text) {

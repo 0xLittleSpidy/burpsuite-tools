@@ -107,6 +107,15 @@ public class CSPInspectorTab extends JPanel {
 
     // Google CSP Evaluator Panel
     private final GoogleCspEvaluatorPanel googleEvaluatorPanel = new GoogleCspEvaluatorPanel();
+    // CSPBypass Panel (renniepak/CSPBypass)
+    private final CSPBypassPanel_littlespidy cspBypassPanel = new CSPBypassPanel_littlespidy();
+
+    // Multi-Select In-Scope Domain Filter
+    private final MultiSelectFilterButton inScopeDomainFilterBtn = new MultiSelectFilterButton(
+        "In-Scope Domains",
+        List.of("All In-Scope Domains"),
+        sel -> refreshView()
+    );
 
     // UI Debounce Timer
     private final javax.swing.Timer refreshTimer;
@@ -204,16 +213,21 @@ public class CSPInspectorTab extends JPanel {
                         if (entry.request() != null) requestEditor.setRequest(entry.request());
                         if (entry.response() != null) responseEditor.setResponse(entry.response());
                         googleEvaluatorPanel.setPolicy(entry.getPrimaryCsp());
+                        cspBypassPanel.evaluatePolicy(entry.getPrimaryCsp());
                     }
                 }
             }
         });
         setupTableKeyboardCopy(entryTable);
 
+        JSplitPane reqRespSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestEditor.uiComponent(), responseEditor.uiComponent());
+        reqRespSplit.setResizeWeight(0.5);
+        reqRespSplit.setDividerLocation(0.5);
+
         JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("Request", requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
+        editorTabs.addTab("Request & Response", reqRespSplit);
         editorTabs.addTab("Google CSP Evaluator", googleEvaluatorPanel);
+        editorTabs.addTab("CSPBypass Techniques", cspBypassPanel);
 
         JSplitPane masterDetailSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
             new JScrollPane(entryTable), editorTabs);
@@ -254,6 +268,7 @@ public class CSPInspectorTab extends JPanel {
         JButton resetBtn = new JButton("Reset Filters");
         resetBtn.addActionListener(e -> {
             valueFilterField.setText("");
+            inScopeDomainFilterBtn.clearSelection();
             statusFilterBtn.clearSelection();
             contentTypeFilterBtn.clearSelection();
             methodFilterBtn.resetToDefault();
@@ -295,6 +310,7 @@ public class CSPInspectorTab extends JPanel {
         toolbar.add(filterLbl);
         toolbar.add(valueFilterField);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        toolbar.add(inScopeDomainFilterBtn);
         toolbar.add(methodFilterBtn);
         toolbar.add(statusFilterBtn);
         toolbar.add(contentTypeFilterBtn);
@@ -499,6 +515,14 @@ public class CSPInspectorTab extends JPanel {
                 entriesToShow = new ArrayList<>(merged.values());
             }
 
+            final Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            if (!selectedDomains.isEmpty()) {
+                entriesToShow = entriesToShow.stream()
+                        .filter(e -> selectedDomains.contains(e.host())
+                                || selectedDomains.stream().anyMatch(d -> e.host().equalsIgnoreCase(d)))
+                        .toList();
+            }
+
             this.currentFilteredEntries = entriesToShow;
             summaryTableModel.updateData(entriesToShow, selectedMode);
             updateEntryTableForSelection();
@@ -520,5 +544,16 @@ public class CSPInspectorTab extends JPanel {
         } else {
             entryTableModel.updateData(currentFilteredEntries != null ? currentFilteredEntries : Collections.emptyList());
         }
+    }
+
+    public void updateInScopeDomains(Collection<String> domains) {
+        List<String> options = new ArrayList<>();
+        options.add("All In-Scope Domains");
+        if (domains != null) {
+            Set<String> sorted = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            sorted.addAll(domains);
+            options.addAll(sorted);
+        }
+        inScopeDomainFilterBtn.updateOptions(options);
     }
 }

@@ -15,6 +15,7 @@ import com.littlespidy.headerinspector.method.knowledge.HttpDevMethodKnowledgeBa
 import com.littlespidy.headerinspector.method.model.MethodCollectorDataStore;
 import com.littlespidy.headerinspector.method.model.MethodEndpointRecord;
 import com.littlespidy.headerinspector.method.model.MethodGroup;
+import com.littlespidy.headerinspector.ui.common.MultiSelectFilterButton;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -25,6 +26,7 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.net.URI;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -65,6 +67,11 @@ public class MethodCollectorTab extends JPanel {
     private final JCheckBox inScopeOnlyCheck = new JCheckBox("In-Scope Only", true);
     private final JComboBox<String> safetyFilterCombo = new JComboBox<>(new String[]{"All Safety", "Safe Methods", "Unsafe Methods"});
     private final JComboBox<String> cacheableFilterCombo = new JComboBox<>(new String[]{"All Cacheability", "Cacheable", "Non-Cacheable"});
+    private final MultiSelectFilterButton inScopeDomainFilterBtn = new MultiSelectFilterButton(
+            "In-Scope Domains",
+            List.of("All In-Scope Domains"),
+            sel -> refreshView()
+    );
     private final JTextField domainFilterField = new JTextField(12);
     private final JTextField searchFilterField = new JTextField(12);
     private final JButton resetFiltersBtn = new JButton("Reset Filters");
@@ -76,7 +83,7 @@ public class MethodCollectorTab extends JPanel {
     private final JProgressBar progressBar = new JProgressBar();
 
     // Debounce Timer for text filtering
-    private final Timer debounceTimer;
+    private final javax.swing.Timer debounceTimer;
     private MethodGroup selectedGroup = null;
 
     public MethodCollectorTab(MontoyaApi api, MethodCollectorDataStore dataStore) {
@@ -87,7 +94,7 @@ public class MethodCollectorTab extends JPanel {
         this.requestEditor = api.userInterface().createHttpRequestEditor();
         this.responseEditor = api.userInterface().createHttpResponseEditor();
 
-        this.debounceTimer = new Timer(300, e -> refreshView());
+        this.debounceTimer = new javax.swing.Timer(300, e -> refreshView());
         this.debounceTimer.setRepeats(false);
 
         initComponents();
@@ -117,6 +124,7 @@ public class MethodCollectorTab extends JPanel {
         toolbar.add(safetyFilterCombo);
         toolbar.add(new JLabel("Cache:"));
         toolbar.add(cacheableFilterCombo);
+        toolbar.add(inScopeDomainFilterBtn);
         toolbar.add(new JLabel("Domain:"));
         toolbar.add(domainFilterField);
         toolbar.add(new JLabel("Search:"));
@@ -193,9 +201,12 @@ public class MethodCollectorTab extends JPanel {
         tablesSplit.setResizeWeight(0.42);
         tablesSplit.setDividerLocation(470);
 
-        // Editors Tabbed Pane
-        editorTabs.addTab("Request", requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
+        // Editors Tabbed Pane with 50/50 parallel split
+        JSplitPane reqRespSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestEditor.uiComponent(), responseEditor.uiComponent());
+        reqRespSplit.setResizeWeight(0.5);
+        reqRespSplit.setDividerLocation(0.5);
+
+        editorTabs.addTab("Request & Response", reqRespSplit);
         editorTabs.addTab("Method Explained (http.dev)", methodDocPanel);
 
         // Vertical Split: Tables on Top, Request/Response Editors on Bottom
@@ -224,6 +235,7 @@ public class MethodCollectorTab extends JPanel {
         resetFiltersBtn.addActionListener(e -> {
             safetyFilterCombo.setSelectedIndex(0);
             cacheableFilterCombo.setSelectedIndex(0);
+            inScopeDomainFilterBtn.clearSelection();
             domainFilterField.setText("");
             searchFilterField.setText("");
             refreshView();
@@ -301,7 +313,15 @@ public class MethodCollectorTab extends JPanel {
             return;
         }
 
-        endpointTableModel.setRecords(group.getEndpoints());
+        List<MethodEndpointRecord> endpoints = group.getEndpoints();
+        if (!inScopeDomainFilterBtn.isAllSelected()) {
+            Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            endpoints = endpoints.stream()
+                    .filter(e -> selectedDomains.contains(e.domain())
+                            || selectedDomains.stream().anyMatch(sd -> sd.equalsIgnoreCase(e.domain())))
+                    .toList();
+        }
+        endpointTableModel.setRecords(endpoints);
         methodDocPanel.setMethod(group.method());
 
         HttpDevMethodDoc doc = HttpDevMethodKnowledgeBase.get(group.method());
@@ -351,7 +371,7 @@ public class MethodCollectorTab extends JPanel {
             responseEditor.setResponse(null);
         }
 
-        if (editorTabs.getSelectedIndex() != 2) {
+        if (editorTabs.getSelectedIndex() != 1) {
             editorTabs.setSelectedIndex(0);
         }
     }
@@ -371,6 +391,14 @@ public class MethodCollectorTab extends JPanel {
                 safetyFilter,
                 cacheableFilter
         );
+
+        if (!inScopeDomainFilterBtn.isAllSelected()) {
+            Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            filtered = filtered.stream()
+                    .filter(g -> g.allDomains().stream().anyMatch(d -> selectedDomains.contains(d)
+                            || selectedDomains.stream().anyMatch(sd -> sd.equalsIgnoreCase(d))))
+                    .toList();
+        }
 
         groupTableModel.setGroups(filtered);
 
@@ -478,6 +506,17 @@ public class MethodCollectorTab extends JPanel {
         }
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(sb.toString()), null);
         JOptionPane.showMessageDialog(this, "Exported " + selectedGroup.uniqueEndpointsCount() + " endpoints for " + selectedGroup.method() + " to clipboard (TSV format).", "TSV Exported", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void updateInScopeDomains(Collection<String> domains) {
+        List<String> options = new ArrayList<>();
+        options.add("All In-Scope Domains");
+        if (domains != null) {
+            Set<String> sorted = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            sorted.addAll(domains);
+            options.addAll(sorted);
+        }
+        inScopeDomainFilterBtn.updateOptions(options);
     }
 
     private String escapeHtml(String text) {

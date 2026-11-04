@@ -88,6 +88,18 @@ public class MultiSelectFilterButton extends JButton {
         }
     }
 
+    public void updateOptions(Collection<String> newOptions) {
+        Set<String> currentSelected = getSelected();
+        this.options.clear();
+        if (newOptions != null) {
+            this.options.addAll(newOptions);
+        }
+        this.checkBoxMap.clear();
+        buildCheckBoxes();
+        setSelected(currentSelected);
+        updateButtonText();
+    }
+
     private void buildCheckBoxes() {
         for (String opt : options) {
             JCheckBox cb = new JCheckBox(opt);

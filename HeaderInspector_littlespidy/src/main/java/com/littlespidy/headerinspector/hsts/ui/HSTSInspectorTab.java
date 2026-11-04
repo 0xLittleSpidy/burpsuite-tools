@@ -84,6 +84,13 @@ public class HSTSInspectorTab extends JPanel {
         sel -> refreshView()
     );
 
+    // Multi-Select In-Scope Domain Filter
+    private final MultiSelectFilterButton inScopeDomainFilterBtn = new MultiSelectFilterButton(
+        "In-Scope Domains",
+        List.of("All In-Scope Domains"),
+        sel -> refreshView()
+    );
+
     // Other filter controls
     private final JComboBox<String> inspectModeComboBox = new JComboBox<>(INSPECT_MODES);
     private final JTextField valueFilterField          = new JTextField(14);
@@ -181,9 +188,12 @@ public class HSTSInspectorTab extends JPanel {
         });
         setupTableKeyboardCopy(entryTable);
 
+        JSplitPane reqRespSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestEditor.uiComponent(), responseEditor.uiComponent());
+        reqRespSplit.setResizeWeight(0.5);
+        reqRespSplit.setDividerLocation(0.5);
+
         JTabbedPane editorTabs = new JTabbedPane();
-        editorTabs.addTab("Request",  requestEditor.uiComponent());
-        editorTabs.addTab("Response", responseEditor.uiComponent());
+        editorTabs.addTab("Request & Response", reqRespSplit);
 
         JSplitPane masterDetail = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
             new JScrollPane(entryTable), editorTabs);
@@ -221,6 +231,7 @@ public class HSTSInspectorTab extends JPanel {
         JButton resetBtn = new JButton("Reset Filters");
         resetBtn.addActionListener(e -> {
             valueFilterField.setText("");
+            inScopeDomainFilterBtn.clearSelection();
             methodFilterBtn.resetToDefault();
             statusFilterBtn.clearSelection();
             contentTypeFilterBtn.clearSelection();
@@ -253,6 +264,7 @@ public class HSTSInspectorTab extends JPanel {
         toolbar.add(filterLbl);
         toolbar.add(valueFilterField);
         toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        toolbar.add(inScopeDomainFilterBtn);
         toolbar.add(methodFilterBtn);
         toolbar.add(statusFilterBtn);
         toolbar.add(contentTypeFilterBtn);
@@ -439,6 +451,14 @@ public class HSTSInspectorTab extends JPanel {
                 entries = new ArrayList<>(merged.values());
             }
 
+            final Set<String> selectedDomains = inScopeDomainFilterBtn.getSelected();
+            if (!selectedDomains.isEmpty()) {
+                entries = entries.stream()
+                        .filter(e -> selectedDomains.contains(e.host())
+                                || selectedDomains.stream().anyMatch(d -> e.host().equalsIgnoreCase(d)))
+                        .toList();
+            }
+
             this.currentFilteredEntries = entries;
             summaryTableModel.updateData(entries, mode);
             updateEntryTable();
@@ -457,6 +477,17 @@ public class HSTSInspectorTab extends JPanel {
         } else {
             entryTableModel.updateData(currentFilteredEntries != null ? currentFilteredEntries : Collections.emptyList());
         }
+    }
+
+    public void updateInScopeDomains(Collection<String> domains) {
+        List<String> options = new ArrayList<>();
+        options.add("All In-Scope Domains");
+        if (domains != null) {
+            Set<String> sorted = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            sorted.addAll(domains);
+            options.addAll(sorted);
+        }
+        inScopeDomainFilterBtn.updateOptions(options);
     }
 
     private String selectedMode() {
