@@ -1,0 +1,1669 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Endpoint Inspector (littlespidy) - Burp Suite Extension UI Preview</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #141414;
+      --bg-card: #252526;
+      --bg-hover: #2a2d2e;
+      --bg-selected: #094771;
+      --border: #3c3c3c;
+      --text: #cccccc;
+      --text-bright: #ffffff;
+      --text-muted: #8e8e8e;
+      --accent: #e56b1f; /* Burp Suite Orange */
+      --accent-hover: #ff7f32;
+      --accent-disabled: #8a481e;
+      --badge-found: #e56b1f;
+      --badge-success: #388a34;
+      --badge-info: #0e639c;
+      --badge-warn: #cca700;
+      --badge-error: #f14c4c;
+      --code-bg: #111111;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --row-even: #1e1e1e;
+      --row-odd: #252526;
+      --input-bg: #2d2d2d;
+    }
+
+    body.light-theme {
+      --bg-dark: #f3f3f3;
+      --bg-darker: #e5e5e5;
+      --bg-card: #ffffff;
+      --bg-hover: #e8e8e8;
+      --bg-selected: #007acc;
+      --border: #cccccc;
+      --text: #333333;
+      --text-bright: #111111;
+      --text-muted: #666666;
+      --code-bg: #f8f8f8;
+      --btn-bg: #e1e1e1;
+      --btn-hover: #d0d0d0;
+      --row-even: #ffffff;
+      --row-odd: #f9f9f9;
+      --input-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Burp Top Banner */
+    .burp-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .burp-header .title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .burp-logo-badge {
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 2px;
+      letter-spacing: 0.5px;
+    }
+    .suite-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .theme-toggle-btn {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .theme-toggle-btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    /* Burp Navigation Tabs Bar */
+    .burp-tabs-bar {
+      background-color: var(--bg-darker);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px;
+      overflow-x: auto;
+    }
+    .burp-tab {
+      padding: 5px 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-top: 2px solid transparent;
+      font-size: 11px;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .burp-tab:hover {
+      color: var(--text-bright);
+    }
+    .burp-tab.active {
+      color: var(--text-bright);
+      background-color: var(--bg-dark);
+      border-top: 2px solid var(--accent);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--bg-dark);
+      margin-bottom: -1px;
+      font-weight: 600;
+    }
+
+    /* Persistent Session Management Toolbar */
+    .session-toolbar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .session-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .session-status-text {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .session-status-text strong {
+      color: var(--text-bright);
+    }
+
+    /* Parent Tabs Bar (Configuration + Dedicated Domain Tabs) */
+    .parent-tabs-bar {
+      background-color: var(--bg-darker);
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+      gap: 2px;
+      overflow-x: auto;
+    }
+    .parent-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      border-top: 2px solid transparent;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      font-size: 11px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .parent-tab:hover {
+      color: var(--text-bright);
+    }
+    .parent-tab.active {
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      border-top: 2px solid var(--accent);
+      border-bottom: 1px solid var(--bg-dark);
+      margin-bottom: -1px;
+      font-weight: 600;
+    }
+    .parent-tab-title {
+      cursor: pointer;
+    }
+    .parent-tab-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .parent-tab-close:hover {
+      color: var(--badge-error);
+    }
+    .btn-add-domain-tab {
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-left: 4px;
+    }
+    .btn-add-domain-tab:hover {
+      color: var(--text-bright);
+      border-color: var(--accent);
+    }
+
+    /* Child Sub-tabs Bar (inside active domain): Path, Subdomain, Directory Listing */
+    .child-tabs-bar {
+      background-color: var(--bg-card);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 10px;
+    }
+    .child-tab {
+      padding: 6px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-size: 11px;
+      font-weight: 500;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .child-tab:hover {
+      color: var(--text-bright);
+    }
+    .child-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      font-weight: 600;
+    }
+    .badge-count {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      padding: 1px 5px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .badge-count.found {
+      background-color: var(--badge-found);
+      color: #ffffff;
+    }
+
+    /* Parent Tab Content Panels */
+    .parent-tab-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .parent-tab-content.active {
+      display: flex;
+    }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 8px 10px;
+      gap: 8px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .panel-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .input-label {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .text-input {
+      background-color: var(--input-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-size: 11px;
+      outline: none;
+      min-width: 240px;
+    }
+    .text-input:focus {
+      border-color: var(--accent);
+    }
+    .number-input {
+      background-color: var(--input-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      padding: 4px 6px;
+      border-radius: 2px;
+      font-size: 11px;
+      width: 55px;
+      outline: none;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 2px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      user-select: none;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+    .btn-secondary {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--btn-hover);
+    }
+    .btn-danger {
+      background-color: var(--badge-error);
+      color: #ffffff;
+    }
+    .btn-danger:hover {
+      background-color: #d13434;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Metric Summary Bar */
+    .metric-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 6px;
+    }
+    .metric-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .metric-title {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .metric-value {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--text-bright);
+    }
+    .metric-value.highlight {
+      color: var(--accent);
+    }
+    .metric-value.success {
+      color: #4ec9b0;
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+      background-color: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      height: 14px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .progress-bar-fill {
+      background-color: var(--accent);
+      height: 100%;
+      width: 66%;
+      transition: width 0.3s ease;
+    }
+    .progress-bar-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      font-size: 9px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 0 2px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+    }
+
+    /* Child Tab Content */
+    .child-tab-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      gap: 6px;
+    }
+    .child-tab-content.active {
+      display: flex;
+    }
+
+    .table-container {
+      flex: 1;
+      min-height: 140px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    th {
+      background-color: var(--bg-darker);
+      color: var(--text-bright);
+      text-align: left;
+      padding: 5px 8px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+    }
+    th:last-child {
+      border-right: none;
+    }
+    td {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td:last-child {
+      border-right: none;
+    }
+    tr.even {
+      background-color: var(--row-even);
+    }
+    tr.odd {
+      background-color: var(--row-odd);
+    }
+    tr:hover {
+      background-color: var(--bg-hover) !important;
+      cursor: pointer;
+    }
+    tr.selected {
+      background-color: var(--bg-selected) !important;
+      color: #ffffff;
+    }
+    tr.selected td {
+      color: #ffffff;
+    }
+
+    .status-tag {
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: bold;
+      display: inline-block;
+    }
+    .status-200 {
+      background-color: rgba(56, 138, 52, 0.25);
+      color: #6ed36a;
+      border: 1px solid rgba(56, 138, 52, 0.5);
+    }
+    .status-403 {
+      background-color: rgba(241, 76, 76, 0.25);
+      color: #f14c4c;
+      border: 1px solid rgba(241, 76, 76, 0.5);
+    }
+    .status-301 {
+      background-color: rgba(14, 99, 156, 0.25);
+      color: #4fc1ff;
+      border: 1px solid rgba(14, 99, 156, 0.5);
+    }
+
+    .signature-badge {
+      background-color: rgba(229, 107, 31, 0.2);
+      color: var(--accent);
+      border: 1px solid rgba(229, 107, 31, 0.4);
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-family: monospace;
+      font-size: 10px;
+    }
+
+    /* PARALLEL SIDE-BY-SIDE REQUEST & RESPONSE INSPECTOR */
+    .parallel-inspector-pane {
+      height: 250px;
+      display: flex;
+      gap: 6px;
+      overflow: hidden;
+    }
+    .parallel-viewer-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .parallel-viewer-header {
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid var(--border);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 11px;
+    }
+    .viewer-submodes {
+      display: flex;
+      gap: 4px;
+    }
+    .viewer-submode-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .viewer-submode-btn.active {
+      background-color: var(--btn-bg);
+      color: var(--text-bright);
+      border-color: var(--border);
+    }
+    .parallel-viewer-body {
+      flex: 1;
+      padding: 6px 10px;
+      background-color: var(--code-bg);
+      color: #d4d4d4;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 5px 10px;
+    }
+    .search-input {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 3px 6px;
+      border-radius: 2px;
+      font-size: 11px;
+      min-width: 180px;
+    }
+
+    /* Configuration Parent Tab Styling */
+    .config-workspace {
+      flex: 1;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .config-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .config-card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-bright);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 5px;
+    }
+    .signature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      padding: 6px;
+      border-radius: 2px;
+      background-color: var(--input-bg);
+    }
+    .signature-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .btn-icon-del {
+      background: none;
+      border: none;
+      color: var(--badge-error);
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    /* Custom Right-Click Context Menu Mockup */
+    .context-menu-popup {
+      position: absolute;
+      display: none;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      border-radius: 3px;
+      padding: 4px 0;
+      z-index: 2000;
+      min-width: 170px;
+    }
+    .context-menu-item {
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-bright);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .context-menu-item:hover {
+      background-color: var(--bg-selected);
+      color: #ffffff;
+    }
+    .context-menu-separator {
+      height: 1px;
+      background-color: var(--border);
+      margin: 3px 0;
+    }
+
+    /* Toast Notification */
+    .toast-notice {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      background-color: var(--bg-darker);
+      border: 1px solid var(--accent);
+      color: var(--text-bright);
+      padding: 6px 14px;
+      border-radius: 3px;
+      font-size: 11px;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 3000;
+    }
+
+    /* Footer Status Bar */
+    .footer-bar {
+      background-color: var(--bg-darker);
+      border-top: 1px solid var(--border);
+      padding: 4px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--badge-success);
+      margin-right: 6px;
+    }
+    .status-indicator.scanning {
+      background-color: var(--accent);
+      box-shadow: 0 0 5px var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Burp Suite Header Mockup -->
+  <div class="burp-header">
+    <div class="title-area">
+      <span class="burp-logo-badge">BURP SUITE</span>
+      <span class="suite-title">Endpoint Inspector (littlespidy) - Burp Suite Extension UI Preview</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 11px; color: var(--text-muted);">Montoya API Standard | Plain ASCII Mode | reKover Engine Integrated</span>
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+    </div>
+  </div>
+
+  <!-- Burp Navigation Tabs -->
+  <div class="burp-tabs-bar">
+    <div class="burp-tab">Dashboard</div>
+    <div class="burp-tab">Target</div>
+    <div class="burp-tab">Proxy</div>
+    <div class="burp-tab">Intruder</div>
+    <div class="burp-tab">Repeater</div>
+    <div class="burp-tab">Extensions</div>
+    <div class="burp-tab active">Endpoint Inspector</div>
+  </div>
+
+  <!-- Persistent Session Management Toolbar -->
+  <div class="session-toolbar">
+    <div class="session-actions">
+      <button class="btn btn-secondary" onclick="sessionNewPrompt()">New Session</button>
+      <button class="btn btn-secondary" onclick="sessionOpenPrompt()">Open Session</button>
+      <button class="btn btn-secondary" onclick="sessionSaveAction()">Save</button>
+      <button class="btn btn-secondary" onclick="sessionSaveAsAction()">Save As...</button>
+      <button class="btn btn-secondary" onclick="sessionOffboardAction()">Offboard Session</button>
+    </div>
+    <div>
+      <span class="session-status-text" id="sessionStatusLabel">
+        Session: <strong>session_vulnweb_recon.json</strong> (/home/littlespidy/recon/)
+      </span>
+    </div>
+  </div>
+
+  <!-- Parent Tabs Bar: Global Configuration + Dedicated Domain Tabs -->
+  <div class="parent-tabs-bar" id="parentTabsContainer">
+    <!-- Common Configuration Tab (Global, Persistent) -->
+    <div class="parent-tab" id="tab-config" onclick="switchParentTab('panel-config', this)">
+      <span class="parent-tab-title">Configuration</span>
+    </div>
+
+    <!-- Domain Scan Tabs -->
+    <div class="parent-tab active" id="tab-dom-1" onclick="switchParentTab('domain-panel-1', this)">
+      <span class="parent-tab-title" ondblclick="editParentTabTitle(this)">#1 testphp.vulnweb.com</span>
+      <button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('tab-dom-1', 'domain-panel-1')">x</button>
+    </div>
+    <div class="parent-tab" id="tab-dom-2" onclick="switchParentTab('domain-panel-2', this)">
+      <span class="parent-tab-title" ondblclick="editParentTabTitle(this)">#2 api.vulnweb.com</span>
+      <button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('tab-dom-2', 'domain-panel-2')">x</button>
+    </div>
+
+    <button class="btn-add-domain-tab" onclick="addNewDomainPrompt()">+ New Domain Scan</button>
+  </div>
+
+  <!-- GLOBAL CONFIGURATION PARENT TAB -->
+  <div class="parent-tab-content" id="panel-config">
+    <div class="config-workspace">
+      <div class="config-grid">
+        <!-- Detection Signatures Card -->
+        <div class="config-card">
+          <div class="config-card-title">Directory Listing Detection Signatures (Common)</div>
+          <p style="font-size: 11px; color: var(--text-muted);">Responses containing any of these substrings when returning HTTP 200 will be flagged as open directory listings across all domains.</p>
+          <div class="signature-list" id="signatureListContainer">
+            <div class="signature-item"><span>Index of /</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Directory Listing for</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>&lt;title&gt;Index of</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Parent Directory&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Last modified&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Name&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Size&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+            <div class="signature-item"><span>Description&lt;/a&gt;</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button></div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="newSigInput" class="text-input" style="min-width: 140px; flex: 1;" placeholder="New signature substring">
+            <button class="btn btn-secondary" onclick="addSignature()">Add</button>
+            <button class="btn btn-secondary" onclick="resetSignatures()">Reset Defaults</button>
+          </div>
+        </div>
+
+        <!-- Global Engine & Network Settings Card -->
+        <div class="config-card">
+          <div class="config-card-title">Wayback CDX &amp; HTTP Settings (Common)</div>
+          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span class="input-label">Wayback Machine CDX API URL Template:</span>
+            <input type="text" class="text-input" style="width: 100%;" value="https://web.archive.org/cdx/search/cdx?url={DOMAIN}&amp;output=txt&amp;fl=original&amp;collapse=urlkey">
+          </div>
+          <div class="input-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span class="input-label">Standard Browser User-Agent:</span>
+            <input type="text" class="text-input" style="width: 100%;" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36">
+            <span style="font-size: 10px; color: var(--text-muted);">Standard realistic browser User-Agent header (no custom tool signature).</span>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <div class="input-group">
+              <span class="input-label">CDX Retries:</span>
+              <input type="number" class="number-input" value="3" min="1" max="10">
+            </div>
+            <div class="input-group">
+              <span class="input-label">Retry Backoff (s):</span>
+              <input type="number" class="number-input" value="5" min="1" max="30">
+            </div>
+          </div>
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Test both HTTP and HTTPS protocols for each path
+            </label>
+          </div>
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Honor Burp Suite upstream proxies and SOCKS settings
+            </label>
+          </div>
+          <div style="margin-top: auto;">
+            <button class="btn btn-primary" onclick="triggerToast('Configuration saved successfully')">Save Configuration</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOMAIN PANEL 1: testphp.vulnweb.com (Active Parent Tab) -->
+  <div class="parent-tab-content active" id="domain-panel-1">
+    
+    <!-- Child Sub-tabs Bar inside testphp.vulnweb.com: 1. Path, 2. Subdomain, 3. Directory Listing -->
+    <div class="child-tabs-bar">
+      <!-- 1st Child Tab: Path -->
+      <div class="child-tab active" onclick="switchChildTab('panel1-tab-paths', this, 'domain-panel-1')">
+        Path
+        <span class="badge-count">186</span>
+      </div>
+      <!-- 2nd Child Tab: Subdomain -->
+      <div class="child-tab" onclick="switchChildTab('panel1-tab-subdomains', this, 'domain-panel-1')">
+        Subdomain
+        <span class="badge-count">7</span>
+      </div>
+      <!-- 3rd Child Tab: Directory Listing -->
+      <div class="child-tab" onclick="switchChildTab('panel1-tab-findings', this, 'domain-panel-1')">
+        Directory Listing
+        <span class="badge-count found" id="panel1-findingsCount">4</span>
+      </div>
+    </div>
+
+    <!-- Main Workspace for Domain 1 -->
+    <div class="main-workspace">
+
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <div class="panel-row">
+          <div class="input-group">
+            <span class="input-label">Target Domain:</span>
+            <input type="text" class="text-input" value="testphp.vulnweb.com" placeholder="e.g. example.com">
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Auto-discover Subdomains (*.domain/*)
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox">
+              In-Scope Only
+            </label>
+          </div>
+
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Add to Burp Site Map
+            </label>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-primary" onclick="triggerToast('Scan started on testphp.vulnweb.com')">Start Scan</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Scan paused')">Pause</button>
+            <button class="btn btn-danger" onclick="triggerToast('Scan stopped')">Stop</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Data cleared for this domain')">Clear</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Exported CSV for this domain')">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="panel-row">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="input-group">
+              <span class="input-label">Threads:</span>
+              <input type="number" class="number-input" value="10" min="1" max="50">
+            </div>
+            <div class="input-group">
+              <span class="input-label">Delay (ms):</span>
+              <input type="number" class="number-input" value="50" min="0" max="5000">
+            </div>
+            <div class="input-group">
+              <span class="input-label">Timeout (s):</span>
+              <input type="number" class="number-input" value="10" min="2" max="60">
+            </div>
+          </div>
+
+          <!-- Live Metric Summary Cards -->
+          <div class="metric-cards" style="flex: 1; max-width: 650px;">
+            <div class="metric-card">
+              <span class="metric-title">CDX Harvested</span>
+              <span class="metric-value">1,428</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Unique Paths</span>
+              <span class="metric-value">186</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Subdomains</span>
+              <span class="metric-value">7</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Probed</span>
+              <span class="metric-value">124 / 186</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Open Listings</span>
+              <span class="metric-value highlight">4</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: 66%;"></div>
+          <span class="progress-bar-text">Scanning path 124 of 186 (66%) - http://testphp.vulnweb.com/pictures/</span>
+        </div>
+      </div>
+
+      <!-- CHILD TAB 1: Path (First Tab) -->
+      <div id="panel1-tab-paths" class="child-tab-content active">
+        <div class="filter-bar">
+          <span class="input-label">Filter Harvested Paths:</span>
+          <input type="text" class="search-input" placeholder="Filter paths e.g. /api, .php, /admin..." onkeyup="filterTable(this, 'panel1-pathsTable')">
+          <button class="btn btn-secondary" onclick="triggerToast('Exported paths for testphp.vulnweb.com')">Export Paths</button>
+          <button class="btn btn-secondary" onclick="triggerToast('Submitted 186 paths to Burp Site Map')">Send All to Site Map</button>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click row to Re-test, Send to Repeater, or Add to Site Map</span>
+        </div>
+
+        <div class="table-container">
+          <table id="panel1-pathsTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;">#</th>
+                <th style="width: 180px;">Target Host</th>
+                <th>Discovered Endpoint / Path</th>
+                <th style="width: 140px;">Discovery Source</th>
+                <th style="width: 120px;">Probe Status</th>
+                <th style="width: 130px;">Directory Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/admin/')">
+                <td>1</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/admin/</td>
+                <td><span class="status-tag status-301">Passive Recon</span></td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+              </tr>
+              <tr class="even" oncontextmenu="showPathsContextMenu(event, '/api/v1/users')">
+                <td>2</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/api/v1/users</td>
+                <td><span class="status-tag status-200">Pareto Wordlist</span></td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Normal Page</span></td>
+              </tr>
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/hidden/legacy-admin')">
+                <td>3</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/hidden/legacy-admin</td>
+                <td><span class="status-tag status-403">Delinked Archive</span></td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+              </tr>
+              <tr class="even" oncontextmenu="showPathsContextMenu(event, '/internal/metrics')">
+                <td>4</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/internal/metrics</td>
+                <td><span class="status-tag status-301">JS Crawl</span></td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Normal Page</span></td>
+              </tr>
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/secured/')">
+                <td>5</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/secured/</td>
+                <td><span class="status-tag status-200">Wayback Archive</span></td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+              </tr>
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/images/')">
+                <td>3</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/images/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+              </tr>
+              <tr class="even" oncontextmenu="showPathsContextMenu(event, '/backup/')">
+                <td>4</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/backup/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-200">Open Listing</span></td>
+              </tr>
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/cart/')">
+                <td>5</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/cart/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Normal Page</span></td>
+              </tr>
+              <tr class="even" oncontextmenu="showPathsContextMenu(event, '/categories/')">
+                <td>6</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/categories/</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Normal Page</span></td>
+              </tr>
+              <tr class="odd" oncontextmenu="showPathsContextMenu(event, '/login.php')">
+                <td>7</td>
+                <td>testphp.vulnweb.com</td>
+                <td>/login.php</td>
+                <td><span class="status-tag status-200">Checked</span></td>
+                <td><span class="status-tag status-403">Not Directory</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHILD TAB 2: Subdomain (Second Tab) -->
+      <div id="panel1-tab-subdomains" class="child-tab-content">
+        <div class="filter-bar">
+          <span class="input-label">Discovered Subdomains (Wayback CDX):</span>
+          <button class="btn btn-secondary" onclick="triggerToast('Added all subdomains to Burp Target Scope')">Add All to Burp Scope</button>
+          <button class="btn btn-secondary" onclick="triggerToast('Exported subdomain list')">Export Subdomains</button>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click row to Scan in Dedicated Tab or Add to Scope</span>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 45px;">#</th>
+                <th>Discovered Subdomain</th>
+                <th style="width: 160px;">Archived Paths Found</th>
+                <th style="width: 160px;">Scan Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd" oncontextmenu="showSubdomainsContextMenu(event, 'testphp.vulnweb.com')">
+                <td>1</td>
+                <td>testphp.vulnweb.com</td>
+                <td>186 paths</td>
+                <td><span class="status-tag status-301">Scanning (66%)</span></td>
+              </tr>
+              <tr class="even" oncontextmenu="showSubdomainsContextMenu(event, 'api.vulnweb.com')">
+                <td>2</td>
+                <td>api.vulnweb.com</td>
+                <td>42 paths</td>
+                <td><span class="status-tag status-200">Completed (1 Listing)</span></td>
+              </tr>
+              <tr class="odd" oncontextmenu="showSubdomainsContextMenu(event, 'admin.vulnweb.com')">
+                <td>3</td>
+                <td>admin.vulnweb.com</td>
+                <td>18 paths</td>
+                <td><span class="status-tag status-403">Queued</span></td>
+              </tr>
+              <tr class="even" oncontextmenu="showSubdomainsContextMenu(event, 'dev.vulnweb.com')">
+                <td>4</td>
+                <td>dev.vulnweb.com</td>
+                <td>29 paths</td>
+                <td><span class="status-tag status-403">Queued</span></td>
+              </tr>
+              <tr class="odd" oncontextmenu="showSubdomainsContextMenu(event, 'staging.vulnweb.com')">
+                <td>5</td>
+                <td>staging.vulnweb.com</td>
+                <td>15 paths</td>
+                <td><span class="status-tag status-403">Queued</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHILD TAB 3: Directory Listing (Third Tab) -->
+      <div id="panel1-tab-findings" class="child-tab-content">
+        <div class="filter-bar">
+          <span class="input-label">Filter Directory Listings:</span>
+          <input type="text" class="search-input" placeholder="Filter by host, path, signature..." onkeyup="filterTable(this, 'panel1-findingsTable')">
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">Tip: Right-click any row for context menu (Send to Repeater, Intruder, etc.)</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+          <!-- Table: NO Action Column! Right-click triggers context menu -->
+          <div class="table-container">
+            <table id="panel1-findingsTable">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th style="width: 65px;">Protocol</th>
+                  <th style="width: 180px;">Host</th>
+                  <th>Exposed Directory Path</th>
+                  <th style="width: 75px;">Status</th>
+                  <th style="width: 170px;">Matched Signature</th>
+                  <th style="width: 90px;">Length</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="odd selected" onclick="selectFindingRow(this, 1)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/admin/')">
+                  <td>1</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/admin/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Index of /admin</span></td>
+                  <td>4,218 B</td>
+                </tr>
+                <tr class="even" onclick="selectFindingRow(this, 2)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/secured/')">
+                  <td>2</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/secured/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">&lt;title&gt;Index of</span></td>
+                  <td>1,842 B</td>
+                </tr>
+                <tr class="odd" onclick="selectFindingRow(this, 3)" oncontextmenu="showFindingsContextMenu(event, 'https://testphp.vulnweb.com/images/')">
+                  <td>3</td>
+                  <td>HTTPS</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/images/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Parent Directory&lt;/a&gt;</span></td>
+                  <td>6,712 B</td>
+                </tr>
+                <tr class="even" onclick="selectFindingRow(this, 4)" oncontextmenu="showFindingsContextMenu(event, 'http://testphp.vulnweb.com/backup/')">
+                  <td>4</td>
+                  <td>HTTP</td>
+                  <td>testphp.vulnweb.com</td>
+                  <td>/backup/</td>
+                  <td><span class="status-tag status-200">200 OK</span></td>
+                  <td><span class="signature-badge">Last modified&lt;/a&gt;</span></td>
+                  <td>3,105 B</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PARALLEL SIDE-BY-SIDE HTTP REQUEST & RESPONSE VIEWERS -->
+          <div class="parallel-inspector-pane">
+            <!-- Left: HTTP Request -->
+            <div class="parallel-viewer-box">
+              <div class="parallel-viewer-header">
+                <span>HTTP Request</span>
+                <div class="viewer-submodes">
+                  <button class="viewer-submode-btn active">Raw</button>
+                  <button class="viewer-submode-btn">Headers</button>
+                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Request to clipboard')">Copy</button>
+                </div>
+              </div>
+              <div class="parallel-viewer-body" id="reqViewerText">GET /admin/ HTTP/1.1
+Host: testphp.vulnweb.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Connection: close</div>
+            </div>
+
+            <!-- Right: HTTP Response -->
+            <div class="parallel-viewer-box">
+              <div class="parallel-viewer-header">
+                <span>HTTP Response (Status: 200 OK)</span>
+                <div class="viewer-submodes">
+                  <button class="viewer-submode-btn active">Raw</button>
+                  <button class="viewer-submode-btn">Headers</button>
+                  <button class="viewer-submode-btn">Render</button>
+                  <button class="viewer-submode-btn" onclick="triggerToast('Copied Response to clipboard')">Copy</button>
+                </div>
+              </div>
+              <div class="parallel-viewer-body" id="respViewerText">HTTP/1.1 200 OK
+Date: Sat, 24 Oct 2026 05:22:10 GMT
+Server: Apache/2.4.41 (Ubuntu)
+Content-Type: text/html;charset=UTF-8
+Content-Length: 4218
+Connection: close
+
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;
+&lt;html&gt;
+ &lt;head&gt;
+  &lt;title&gt;Index of /admin&lt;/title&gt;
+ &lt;/head&gt;
+ &lt;body&gt;
+&lt;h1&gt;Index of /admin&lt;/h1&gt;
+  &lt;table&gt;
+   &lt;tr&gt;&lt;th&gt;&lt;a href="?C=N;O=D"&gt;Name&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=M;O=A"&gt;Last modified&lt;/a&gt;&lt;/th&gt;&lt;th&gt;&lt;a href="?C=S;O=A"&gt;Size&lt;/a&gt;&lt;/th&gt;&lt;/tr&gt;
+   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="/"&gt;Parent Directory&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;&lt;td align="right"&gt;  - &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="config.php.bak"&gt;config.php.bak&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2024-03-12 11:42&lt;/td&gt;&lt;td align="right"&gt;2.4K&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="db_dump.sql.gz"&gt;db_dump.sql.gz&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-01-08 09:15&lt;/td&gt;&lt;td align="right"&gt;1.8M&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href="secret_keys.txt"&gt;secret_keys.txt&lt;/a&gt;&lt;/td&gt;&lt;td align="right"&gt;2025-06-19 14:02&lt;/td&gt;&lt;td align="right"&gt;512 &lt;/td&gt;&lt;/tr&gt;
+   &lt;tr&gt;&lt;th colspan="5"&gt;&lt;hr&gt;&lt;/th&gt;&lt;/tr&gt;
+&lt;/table&gt;
+&lt;address&gt;Apache/2.4.41 (Ubuntu) Server at testphp.vulnweb.com Port 80&lt;/address&gt;
+&lt;/body&gt;&lt;/html&gt;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DOMAIN PANEL 2: api.vulnweb.com (Simulated Second Parent Tab) -->
+  <div class="parent-tab-content" id="domain-panel-2">
+    <div class="child-tabs-bar">
+      <div class="child-tab active">Path <span class="badge-count">42</span></div>
+      <div class="child-tab">Subdomain <span class="badge-count">0</span></div>
+      <div class="child-tab">Directory Listing <span class="badge-count found">1</span></div>
+    </div>
+    <div class="main-workspace">
+      <div class="control-panel">
+        <div class="panel-row">
+          <div class="input-group">
+            <span class="input-label">Target Domain:</span>
+            <input type="text" class="text-input" value="api.vulnweb.com" readonly>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" disabled>Scan Finished</button>
+            <button class="btn btn-primary" onclick="triggerToast('Rescanning api.vulnweb.com')">Re-Scan</button>
+            <button class="btn btn-secondary" onclick="triggerToast('Exported CSV for api.vulnweb.com')">Export CSV</button>
+          </div>
+        </div>
+        <div class="metric-cards">
+          <div class="metric-card"><span class="metric-title">CDX Harvested</span><span class="metric-value">312</span></div>
+          <div class="metric-card"><span class="metric-title">Unique Paths</span><span class="metric-value">42</span></div>
+          <div class="metric-card"><span class="metric-title">Probed</span><span class="metric-value">42 / 42</span></div>
+          <div class="metric-card"><span class="metric-title">Open Listings</span><span class="metric-value highlight">1</span></div>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Protocol</th><th>Host</th><th>Exposed Directory Path</th><th>Status</th><th>Matched Signature</th><th>Length</th></tr>
+          </thead>
+          <tbody>
+            <tr class="odd selected" oncontextmenu="showFindingsContextMenu(event, 'https://api.vulnweb.com/v1/docs/')">
+              <td>1</td><td>HTTPS</td><td>api.vulnweb.com</td><td>/v1/docs/</td><td><span class="status-tag status-200">200 OK</span></td>
+              <td><span class="signature-badge">Index of /v1/docs</span></td><td>1,240 B</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT CLICK CONTEXT MENUS -->
+  <div class="context-menu-popup" id="findingsContextMenu">
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Repeater')">Send to Repeater</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Intruder')">Send to Intruder</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" onclick="triggerContextAction('Copy URL')">Copy URL</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Open in Browser')">Open in Browser</div>
+  </div>
+
+  <div class="context-menu-popup" id="pathsContextMenu">
+    <div class="context-menu-item" onclick="triggerContextAction('Re-test Path')">Re-test Path</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Repeater')">Send to Repeater</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" onclick="triggerContextAction('Send to Burp Site Map')">Add to Site Map</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Copy Path')">Copy Path</div>
+  </div>
+
+  <div class="context-menu-popup" id="subdomainsContextMenu">
+    <div class="context-menu-item" onclick="contextScanSubdomainInNewTab()">Scan in Dedicated Tab</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" onclick="triggerContextAction('Added to Burp Target Scope')">Add to Target Scope</div>
+    <div class="context-menu-item" onclick="triggerContextAction('Copied Subdomain')">Copy Subdomain</div>
+  </div>
+
+  <!-- Footer Status Bar -->
+  <div class="footer-bar">
+    <div style="display: flex; align-items: center;">
+      <span class="status-indicator scanning"></span>
+      <span>Active Session: session_vulnweb_recon.json | Active Tab: #1 testphp.vulnweb.com</span>
+    </div>
+    <div>
+      <span>wayback v2.0 for Burp Suite (Montoya API) | Dedicated Domain Multi-Session Model | Plain ASCII</span>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notice" id="toastNotice">Notification</div>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-theme');
+      const btn = document.getElementById('themeToggleBtn');
+      btn.textContent = isLight ? 'Theme: Light' : 'Theme: Dark';
+    }
+
+    // Parent Tabs Switching (Configuration + Domain Tabs)
+    function switchParentTab(panelId, tabElem) {
+      document.querySelectorAll('.parent-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.parent-tab-content').forEach(p => p.classList.remove('active'));
+      tabElem.classList.add('active');
+      const targetPanel = document.getElementById(panelId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+      hideContextMenus();
+    }
+
+    // Double-click inline in-place tab header renaming (Zero modal popups)
+    function editParentTabTitle(titleSpan) {
+      const currentTitle = titleSpan.textContent;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentTitle;
+      input.style.fontSize = '11px';
+      input.style.padding = '1px 4px';
+      input.style.border = '1px solid var(--accent)';
+      input.style.backgroundColor = 'var(--input-bg)';
+      input.style.color = 'var(--text-bright)';
+      input.style.outline = 'none';
+      input.style.width = Math.max(120, currentTitle.length * 8) + 'px';
+
+      function commit() {
+        const val = input.value.trim();
+        titleSpan.textContent = val ? val : currentTitle;
+        input.replaceWith(titleSpan);
+      }
+
+      function cancel() {
+        input.replaceWith(titleSpan);
+      }
+
+      input.onkeydown = function(e) {
+        if (e.key === 'Enter') commit();
+        else if (e.key === 'Escape') cancel();
+      };
+      input.onblur = commit;
+
+      titleSpan.replaceWith(input);
+      input.focus();
+      input.select();
+    }
+
+    // Close parent domain tab
+    function closeParentTab(tabId, panelId) {
+      if (confirm('Close this domain tab and abort any active scan on this target?')) {
+        const tab = document.getElementById(tabId);
+        const panel = document.getElementById(panelId);
+        if (tab) tab.remove();
+        if (panel) panel.remove();
+        const firstDomainTab = document.querySelector('.parent-tab:not(#tab-config)');
+        if (firstDomainTab) {
+          firstDomainTab.click();
+        } else {
+          document.getElementById('tab-config').click();
+        }
+        triggerToast('Domain tab closed');
+      }
+    }
+
+    // Add new domain scan prompt
+    let domainCounter = 3;
+    function addNewDomainPrompt() {
+      const domain = prompt('Enter target domain for new scan tab:', 'newtarget.com');
+      if (domain && domain.trim()) {
+        addSpecificDomainTab(domain.trim());
+      }
+    }
+
+    function addSpecificDomainTab(domain) {
+      const id = domainCounter++;
+      const tabId = `tab-dom-${id}`;
+      const panelId = `domain-panel-${id}`;
+
+      const tabElem = document.createElement('div');
+      tabElem.className = 'parent-tab';
+      tabElem.id = tabId;
+      tabElem.innerHTML = `<span class="parent-tab-title" ondblclick="editParentTabTitle(this)">#${id} ${domain}</span><button class="parent-tab-close" onclick="event.stopPropagation(); closeParentTab('${tabId}', '${panelId}')">x</button>`;
+      tabElem.onclick = () => switchParentTab(panelId, tabElem);
+
+      const addBtn = document.querySelector('.btn-add-domain-tab');
+      document.getElementById('parentTabsContainer').insertBefore(tabElem, addBtn);
+
+      const panelElem = document.createElement('div');
+      panelElem.className = 'parent-tab-content';
+      panelElem.id = panelId;
+      panelElem.innerHTML = `
+        <div class="child-tabs-bar">
+          <div class="child-tab active">Path <span class="badge-count">0</span></div>
+          <div class="child-tab">Subdomain <span class="badge-count">0</span></div>
+          <div class="child-tab">Directory Listing <span class="badge-count found">0</span></div>
+        </div>
+        <div class="main-workspace">
+          <div class="control-panel">
+            <div class="panel-row">
+              <div class="input-group">
+                <span class="input-label">Target Domain:</span>
+                <input type="text" class="text-input" value="${domain}">
+              </div>
+              <button class="btn btn-primary" onclick="triggerToast('Starting scan on ${domain}')">Start Scan</button>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); padding: 8px 0;">Ready to scan ${domain}. Click Start Scan to begin harvesting.</p>
+          </div>
+        </div>
+      `;
+      document.body.insertBefore(panelElem, document.querySelector('.footer-bar'));
+
+      switchParentTab(panelId, tabElem);
+      triggerToast(`Created dedicated tab for ${domain}`);
+    }
+
+    // Child Sub-tabs switching
+    function switchChildTab(contentId, tabElem, domainPanelId) {
+      const container = document.getElementById(domainPanelId);
+      container.querySelectorAll('.child-tab').forEach(t => t.classList.remove('active'));
+      container.querySelectorAll('.child-tab-content').forEach(c => c.classList.remove('active'));
+      tabElem.classList.add('active');
+      const targetContent = document.getElementById(contentId);
+      if (targetContent) targetContent.classList.add('active');
+      hideContextMenus();
+    }
+
+    // Select row in findings table to update parallel viewers
+    function selectFindingRow(row, id) {
+      document.querySelectorAll('#panel1-findingsTable tbody tr').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+
+      const reqBox = document.getElementById('reqViewerText');
+      const respBox = document.getElementById('respViewerText');
+
+      if (id === 1) {
+        reqBox.textContent = `GET /admin/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nDate: Sat, 24 Oct 2026 05:22:10 GMT\nServer: Apache/2.4.41 (Ubuntu)\nContent-Type: text/html;charset=UTF-8\nContent-Length: 4218\nConnection: close\n\n<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<html>\n <head>\n  <title>Index of /admin</title>\n </head>\n <body>\n<h1>Index of /admin</h1>\n  <table>\n   <tr><th><a href="?C=N;O=D">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th></tr>\n   <tr><th colspan="5"><hr></th></tr>\n<tr><td><a href="/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td></tr>\n<tr><td><a href="config.php.bak">config.php.bak</a></td><td align="right">2024-03-12 11:42</td><td align="right">2.4K</td></tr>\n<tr><td><a href="db_dump.sql.gz">db_dump.sql.gz</a></td><td align="right">2025-01-08 09:15</td><td align="right">1.8M</td></tr>\n<tr><td><a href="secret_keys.txt">secret_keys.txt</a></td><td align="right">2025-06-19 14:02</td><td align="right">512 </td></tr>\n</table>\n</body></html>`;
+      } else if (id === 2) {
+        reqBox.textContent = `GET /secured/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache/2.4.41\nContent-Length: 1842\n\n<html><head><title>Index of /secured</title></head><body><h1>Index of /secured</h1><p><a href="passwords.kdbx">passwords.kdbx</a></p></body></html>`;
+      } else if (id === 3) {
+        reqBox.textContent = `GET /images/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nServer: nginx/1.18.0\nContent-Length: 6712\n\n<html><body><h1>Directory listing for /images/</h1><a href="../">Parent Directory</a><br><a href="logo.png">logo.png</a></body></html>`;
+      } else if (id === 4) {
+        reqBox.textContent = `GET /backup/ HTTP/1.1\nHost: testphp.vulnweb.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\nConnection: close`;
+        respBox.textContent = `HTTP/1.1 200 OK\nServer: Apache\nContent-Length: 3105\n\n<html><head><title>Index of /backup</title></head><body><a href="archive_2025.tar.gz">archive_2025.tar.gz</a> Last modified: 2025-08-10</body></html>`;
+      }
+    }
+
+    // Filter tables
+    function filterTable(input, tableId) {
+      const q = input.value.toLowerCase();
+      const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+      rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    // Session Management Actions
+    function sessionNewPrompt() {
+      const filename = prompt('Enter filename for new session JSON:', 'new_recon_session.json');
+      if (filename) {
+        document.getElementById('sessionStatusLabel').innerHTML = `Session: <strong>${filename}</strong> (/home/littlespidy/recon/)`;
+        triggerToast(`New session bound to ${filename}`);
+      }
+    }
+
+    function sessionOpenPrompt() {
+      triggerToast('Opened file dialog: Selected session_vulnweb_recon.json');
+    }
+
+    function sessionSaveAction() {
+      triggerToast('Session data saved successfully (atomic flush)');
+    }
+
+    function sessionSaveAsAction() {
+      const filename = prompt('Save Session As:', 'session_backup.json');
+      if (filename) {
+        document.getElementById('sessionStatusLabel').innerHTML = `Session: <strong>${filename}</strong> (/home/littlespidy/recon/)`;
+        triggerToast(`Session exported as ${filename}`);
+      }
+    }
+
+    function sessionOffboardAction() {
+      if (confirm('Offboard current session? Unsaved changes will be committed and workspace reset.')) {
+        document.getElementById('sessionStatusLabel').innerHTML = `Session: <strong>[Temporary / In-Memory]</strong>`;
+        triggerToast('Session offboarded. Clean in-memory workspace.');
+      }
+    }
+
+    // Context Menu Handling
+    let activeContextTarget = '';
+
+    function showFindingsContextMenu(e, targetUrl) {
+      e.preventDefault();
+      activeContextTarget = targetUrl;
+      hideContextMenus();
+      const menu = document.getElementById('findingsContextMenu');
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.style.display = 'block';
+    }
+
+    function showPathsContextMenu(e, path) {
+      e.preventDefault();
+      activeContextTarget = path;
+      hideContextMenus();
+      const menu = document.getElementById('pathsContextMenu');
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.style.display = 'block';
+    }
+
+    function showSubdomainsContextMenu(e, sub) {
+      e.preventDefault();
+      activeContextTarget = sub;
+      hideContextMenus();
+      const menu = document.getElementById('subdomainsContextMenu');
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.style.display = 'block';
+    }
+
+    function hideContextMenus() {
+      document.querySelectorAll('.context-menu-popup').forEach(m => m.style.display = 'none');
+    }
+
+    document.addEventListener('click', hideContextMenus);
+
+    function triggerContextAction(actionName) {
+      hideContextMenus();
+      triggerToast(`${actionName}: ${activeContextTarget}`);
+    }
+
+    function contextScanSubdomainInNewTab() {
+      hideContextMenus();
+      if (activeContextTarget) {
+        addSpecificDomainTab(activeContextTarget);
+      }
+    }
+
+    // Toast Notice
+    function triggerToast(msg) {
+      const toast = document.getElementById('toastNotice');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+
+    // Signatures in Configuration Tab
+    function addSignature() {
+      const input = document.getElementById('newSigInput');
+      const val = input.value.trim();
+      if (!val) return;
+      const list = document.getElementById('signatureListContainer');
+      const item = document.createElement('div');
+      item.className = 'signature-item';
+      item.innerHTML = `<span>${val.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button>`;
+      list.appendChild(item);
+      input.value = '';
+      triggerToast(`Added signature: "${val}"`);
+    }
+
+    function resetSignatures() {
+      const defaults = ["Index of /", "Directory Listing for", "<title>Index of", "Parent Directory</a>", "Last modified</a>", "Name</a>", "Size</a>", "Description</a>"];
+      const list = document.getElementById('signatureListContainer');
+      list.innerHTML = '';
+      defaults.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'signature-item';
+        item.innerHTML = `<span>${d.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span><button class="btn-icon-del" onclick="this.parentElement.remove()">Remove</button>`;
+        list.appendChild(item);
+      });
+      triggerToast('Reset signatures to defaults');
+    }
+  </script>
+</body>
+</html>
