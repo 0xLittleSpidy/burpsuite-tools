@@ -252,7 +252,14 @@ public class AuthProfile_littlespidy {
             return "Unauth (Strip Auth Headers)";
         }
         if (rawHeaders != null && !rawHeaders.isBlank()) {
+            com.littlespidy.apiinspector.util.JwtTokenHelper_littlespidy.JwtExpirationInfo jwtInfo =
+                    com.littlespidy.apiinspector.util.JwtTokenHelper_littlespidy.parse(rawHeaders);
             String[] lines = rawHeaders.split("[\\r\\n]+");
+            String firstLine = lines[0].trim();
+            if (jwtInfo.hasToken()) {
+                String extra = lines.length > 1 ? " (+" + (lines.length - 1) + " more)" : "";
+                return maskHeaderLine(firstLine) + " [" + jwtInfo.summaryText() + "]" + extra;
+            }
             if (lines.length == 1) {
                 return lines[0].trim();
             }
@@ -260,7 +267,9 @@ public class AuthProfile_littlespidy {
         }
         switch (getAuthType()) {
             case BEARER_TOKEN:
-                return "Bearer " + maskSecret(bearerToken);
+                com.littlespidy.apiinspector.util.JwtTokenHelper_littlespidy.JwtExpirationInfo bInfo =
+                        com.littlespidy.apiinspector.util.JwtTokenHelper_littlespidy.parse("Authorization: Bearer " + bearerToken);
+                return "Bearer " + maskSecret(bearerToken) + (bInfo.hasToken() ? " [" + bInfo.summaryText() + "]" : "");
             case API_KEY:
                 return apiKeyName + " (" + (apiKeyLocation != null ? apiKeyLocation.getDisplayName() : "Header") + "): " + maskSecret(apiKeyValue);
             case BASIC_AUTH:
@@ -272,6 +281,21 @@ public class AuthProfile_littlespidy {
             default:
                 return "Configured";
         }
+    }
+
+    private String maskHeaderLine(String headerLine) {
+        if (headerLine == null) return "";
+        int colon = headerLine.indexOf(':');
+        if (colon > 0) {
+            String name = headerLine.substring(0, colon).trim();
+            String val = headerLine.substring(colon + 1).trim();
+            if ("Authorization".equalsIgnoreCase(name) && val.toLowerCase().startsWith("bearer ")) {
+                String token = val.substring(7).trim();
+                return "Authorization: Bearer " + maskSecret(token);
+            }
+            return name + ": " + maskSecret(val);
+        }
+        return maskSecret(headerLine);
     }
 
     private String maskSecret(String secret) {

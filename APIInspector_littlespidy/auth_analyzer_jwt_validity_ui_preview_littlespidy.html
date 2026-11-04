@@ -1,0 +1,493 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Inspector - Auth Analyzer JWT Validity and Length Preview - littlespidy</title>
+  <style>
+    :root {
+      --bg-primary: #2b2b2b;
+      --bg-secondary: #3c3f41;
+      --bg-tertiary: #1e1e1e;
+      --text-primary: #bbbbbb;
+      --text-highlight: #ffffff;
+      --text-muted: #888888;
+      --border-color: #555555;
+      --accent: #ff6633;
+      --accent-hover: #e65522;
+      --btn-bg: #4c5052;
+      --btn-hover: #5c6164;
+      --table-stripe: #313335;
+      --table-select: #2d5a88;
+      --code-bg: #1e1e1e;
+      --status-valid: #499c54;
+      --status-expiring: #e59866;
+      --status-expired: #c75450;
+    }
+
+    body.light-theme {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #fafafa;
+      --text-primary: #333333;
+      --text-highlight: #000000;
+      --text-muted: #666666;
+      --border-color: #d0d0d0;
+      --accent: #e05510;
+      --accent-hover: #c9490b;
+      --btn-bg: #e4e4e4;
+      --btn-hover: #d5d5d5;
+      --table-stripe: #f0f0f0;
+      --table-select: #b0d7ff;
+      --code-bg: #f9f9f9;
+      --status-valid: #2e7d32;
+      --status-expiring: #e65100;
+      --status-expired: #c62828;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 16px; font-weight: bold; color: var(--text-highlight); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      background-color: var(--btn-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-highlight);
+    }
+    .theme-toggle-btn {
+      padding: 4px 10px;
+      background: var(--btn-bg);
+      color: var(--text-highlight);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .theme-toggle-btn:hover { background: var(--btn-hover); }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 12px;
+    }
+    .panel-header {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--text-highlight);
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Dialog Mockup */
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: var(--text-highlight);
+    }
+    .help-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 6px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-highlight);
+      font-family: monospace;
+      font-size: 11px;
+      border-radius: 3px;
+    }
+    textarea {
+      resize: vertical;
+      height: 110px;
+    }
+
+    /* Live Token Card */
+    .token-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent);
+      border-radius: 3px;
+      padding: 8px 10px;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .token-card.valid { border-left-color: var(--status-valid); }
+    .token-card.expiring { border-left-color: var(--status-expiring); }
+    .token-card.expired { border-left-color: var(--status-expired); }
+
+    .token-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+    .token-label { font-weight: bold; color: var(--text-muted); }
+    .token-val { font-family: monospace; color: var(--text-highlight); }
+    .status-pill {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .status-pill.valid { background-color: var(--status-valid); }
+    .status-pill.expiring { background-color: var(--status-expiring); }
+    .status-pill.expired { background-color: var(--status-expired); }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    th, td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background: var(--bg-tertiary);
+      color: var(--text-highlight);
+      font-weight: bold;
+    }
+    tr:nth-child(even) { background-color: var(--table-stripe); }
+    tr:hover { background-color: var(--table-select); color: #ffffff; }
+
+    .btn-bar {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    button {
+      padding: 5px 12px;
+      background: var(--btn-bg);
+      color: var(--text-highlight);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    button:hover { background: var(--btn-hover); }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      font-weight: bold;
+    }
+    button.primary:hover { background: var(--accent-hover); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>API Inspector: Auth Analyzer - JWT Validity &amp; Token Length</h1>
+      <span class="help-text">Live Mockup Preview: Offline JWT exp decoding, remaining validity countdown, and length indicator</span>
+    </div>
+    <div>
+      <span class="badge">Author: littlespidy</span>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Dark/Light Theme</button>
+    </div>
+  </header>
+
+  <div class="layout-grid">
+    <!-- Panel 1: Profile Edit Dialog Mockup -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>Edit Profile Dialog (AuthProfileDialog_littlespidy)</span>
+        <span class="badge">Live Interactive Form</span>
+      </div>
+
+      <div class="form-group">
+        <label for="profName">Profile Name:</label>
+        <input type="text" id="profName" value="Admin Role (JWT)">
+      </div>
+
+      <div class="form-group">
+        <label>Profile Type:</label>
+        <label style="font-weight: normal; margin-right: 12px;"><input type="radio" name="ptype" checked> Authenticated (auth)</label>
+        <label style="font-weight: normal;"><input type="radio" name="ptype"> Unauthenticated (unauth)</label>
+      </div>
+
+      <div class="form-group">
+        <label for="rawHeaders">Session Headers (Complete Headers):</label>
+        <div class="help-text">Type or paste an Authorization header below. The info card beneath calculates length and remaining validity immediately.</div>
+        <textarea id="rawHeaders" oninput="updateLiveCard()">Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIFVzZXIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MzA3MTA4MDAsImV4cCI6MTczMDcyNTIwMH0.dummysignaturevalue1234567890abcdefghijklmnopqrstuvwxyz
+Cookie: session_id=sess_987654321</textarea>
+      </div>
+
+      <!-- Live Token Info Card -->
+      <div id="tokenCard" class="token-card valid">
+        <div class="token-row">
+          <span class="token-label">Token Format:</span>
+          <span class="token-val" id="tokenType">JSON Web Token (JWT)</span>
+        </div>
+        <div class="token-row">
+          <span class="token-label">Token Length:</span>
+          <span class="token-val" id="tokenLen">171 characters (Header value: 178 chars)</span>
+        </div>
+        <div class="token-row">
+          <span class="token-label">Expiration Claim (exp):</span>
+          <span class="token-val" id="tokenExp">1730725200 (2024-11-04 13:00:00 UTC)</span>
+        </div>
+        <div class="token-row">
+          <span class="token-label">Validity Status:</span>
+          <span id="tokenStatusPill" class="status-pill valid">Active - Expires in 4h 0m</span>
+        </div>
+      </div>
+
+      <div class="btn-bar" style="justify-content: flex-end; margin-top: 14px;">
+        <button onclick="presetValid()">Preset: Valid JWT (4h remaining)</button>
+        <button onclick="presetExpiring()">Preset: Expiring Soon (10m)</button>
+        <button onclick="presetExpired()">Preset: Expired (-1h)</button>
+        <button class="primary">Save Profile</button>
+      </div>
+    </div>
+
+    <!-- Panel 2: Auth Analyzer Configuration Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>Authentication Profiles Table (AuthAnalyzerConfigTab_littlespidy)</span>
+        <span class="badge">Synchronized Table Model</span>
+      </div>
+
+      <div class="help-text" style="margin-bottom: 8px;">
+        Profiles list shows character count and remaining validity status directly in the Credentials / Details column.
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px;">Test</th>
+            <th style="width: 140px;">Profile Name</th>
+            <th>Credentials / Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td><strong>Admin Role (JWT)</strong></td>
+            <td>Bearer eyJhbGci... [Len: 171 chars | Expires in: 4h 0m]</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td><strong>Staff User (JWT)</strong></td>
+            <td>Bearer eyJhbGci... [Len: 168 chars | <span style="color: var(--status-expiring); font-weight: bold;">Expiring in: 9m 45s</span>]</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td><strong>Revoked / Expired</strong></td>
+            <td>Bearer eyJhbGci... [Len: 165 chars | <span style="color: var(--status-expired); font-weight: bold;">Expired: 1h 12m ago</span>]</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td><strong>API Key Profile</strong></td>
+            <td>X-API-Key (Header): ak_l...99 [Len: 32 chars]</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td><strong>Unauthenticated</strong></td>
+            <td>Unauth (Strip: Authorization, Cookie)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="btn-bar" style="margin-top: 14px;">
+        <button>New Profile</button>
+        <button>Edit Profile</button>
+        <button>Duplicate</button>
+        <button>Delete</button>
+        <button>Move Up</button>
+        <button>Move Down</button>
+      </div>
+
+      <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+        <div style="font-weight: bold; margin-bottom: 6px; color: var(--text-highlight);">Execution Invariant Check:</div>
+        <ul style="padding-left: 18px; color: var(--text-muted); font-size: 11px;">
+          <li>Offline execution: Zero remote network validation calls.</li>
+          <li>Lightweight: Pure Base64URL and Gson JSON claim decoding.</li>
+          <li>Real-time responsiveness: Recalculates on every keystroke without lag.</li>
+          <li>Clean UI: Visual color indicators (Green for Valid, Amber for Expiring Soon, Red for Expired).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    function createJwt(expEpoch) {
+      const header = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+      const payloadObj = {
+        sub: "user_12345",
+        name: "Security Tester",
+        role: "admin",
+        iat: Math.floor(Date.now() / 1000) - 3600,
+        exp: expEpoch
+      };
+      const payloadBase64 = btoa(JSON.stringify(payloadObj))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+      const sig = "dummysignaturevalue1234567890abcdefghijklmnopqrstuvwxyz";
+      return header + "." + payloadBase64 + "." + sig;
+    }
+
+    function presetValid() {
+      const exp = Math.floor(Date.now() / 1000) + 14400; // +4 hours
+      document.getElementById('rawHeaders').value = "Authorization: Bearer " + createJwt(exp) + "\nCookie: session_id=sess_valid";
+      updateLiveCard();
+    }
+
+    function presetExpiring() {
+      const exp = Math.floor(Date.now() / 1000) + 600; // +10 mins
+      document.getElementById('rawHeaders').value = "Authorization: Bearer " + createJwt(exp) + "\nCookie: session_id=sess_expiring";
+      updateLiveCard();
+    }
+
+    function presetExpired() {
+      const exp = Math.floor(Date.now() / 1000) - 3600; // -1 hour
+      document.getElementById('rawHeaders').value = "Authorization: Bearer " + createJwt(exp) + "\nCookie: session_id=sess_expired";
+      updateLiveCard();
+    }
+
+    function updateLiveCard() {
+      const text = document.getElementById('rawHeaders').value;
+      const card = document.getElementById('tokenCard');
+      const tokenType = document.getElementById('tokenType');
+      const tokenLen = document.getElementById('tokenLen');
+      const tokenExp = document.getElementById('tokenExp');
+      const tokenStatusPill = document.getElementById('tokenStatusPill');
+
+      const lines = text.split(/\r?\n/);
+      let authLine = null;
+      for (const line of lines) {
+        if (line.toLowerCase().startsWith('authorization:')) {
+          authLine = line.substring(line.indexOf(':') + 1).trim();
+          break;
+        }
+      }
+
+      if (!authLine) {
+        card.className = "token-card";
+        tokenType.innerText = "No Authorization Header Present";
+        tokenLen.innerText = "0 characters";
+        tokenExp.innerText = "N/A";
+        tokenStatusPill.className = "status-pill";
+        tokenStatusPill.style.backgroundColor = "var(--btn-bg)";
+        tokenStatusPill.innerText = "Inactive";
+        return;
+      }
+
+      let token = authLine;
+      if (token.toLowerCase().startsWith('bearer ')) {
+        token = token.substring(7).trim();
+      }
+
+      tokenLen.innerText = token.length + " characters (Header value: " + authLine.length + " chars)";
+
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        tokenType.innerText = "JSON Web Token (JWT)";
+        try {
+          let b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          while (b64.length % 4) b64 += '=';
+          const payload = JSON.parse(atob(b64));
+          if (payload.exp) {
+            const expSec = Number(payload.exp);
+            const nowSec = Math.floor(Date.now() / 1000);
+            const diff = expSec - nowSec;
+            const expDate = new Date(expSec * 1000).toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            tokenExp.innerText = expSec + " (" + expDate + ")";
+
+            if (diff > 900) {
+              card.className = "token-card valid";
+              tokenStatusPill.className = "status-pill valid";
+              const hours = Math.floor(diff / 3600);
+              const mins = Math.floor((diff % 3600) / 60);
+              tokenStatusPill.innerText = "Active - Expires in " + (hours > 0 ? hours + "h " : "") + mins + "m";
+            } else if (diff > 0) {
+              card.className = "token-card expiring";
+              tokenStatusPill.className = "status-pill expiring";
+              const mins = Math.floor(diff / 60);
+              const secs = diff % 60;
+              tokenStatusPill.innerText = "Expiring Soon - " + mins + "m " + secs + "s remaining";
+            } else {
+              card.className = "token-card expired";
+              tokenStatusPill.className = "status-pill expired";
+              const agoSec = Math.abs(diff);
+              const hours = Math.floor(agoSec / 3600);
+              const mins = Math.floor((agoSec % 3600) / 60);
+              tokenStatusPill.innerText = "Expired - " + (hours > 0 ? hours + "h " : "") + mins + "m ago";
+            }
+            return;
+          } else {
+            tokenExp.innerText = "No exp claim found in payload";
+            card.className = "token-card";
+            tokenStatusPill.className = "status-pill";
+            tokenStatusPill.style.backgroundColor = "var(--btn-bg)";
+            tokenStatusPill.innerText = "No exp claim";
+            return;
+          }
+        } catch (e) {
+          // fall through
+        }
+      }
+
+      tokenType.innerText = "Non-JWT Bearer / Custom Token";
+      tokenExp.innerText = "N/A";
+      card.className = "token-card";
+      tokenStatusPill.className = "status-pill";
+      tokenStatusPill.style.backgroundColor = "var(--btn-bg)";
+      tokenStatusPill.innerText = "Standard Token";
+    }
+
+    // Initialize
+    updateLiveCard();
+  </script>
+</body>
+</html>

@@ -3,10 +3,13 @@ package com.littlespidy.apiinspector.ui;
 
 import com.littlespidy.apiinspector.model.AuthProfile_littlespidy;
 import com.littlespidy.apiinspector.model.AuthType_littlespidy;
+import com.littlespidy.apiinspector.util.JwtTokenHelper_littlespidy;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.function.Consumer;
 
@@ -27,6 +30,9 @@ public class AuthProfileDialog_littlespidy extends JDialog {
     private JLabel headersLabel;
     private JLabel headersHelpLabel;
     private JTextArea headersArea;
+    private JPanel tokenInfoCard;
+    private JLabel tokenLengthLabel;
+    private JLabel tokenValidityLabel;
 
     public AuthProfileDialog_littlespidy(Window parent, String title, AuthProfile_littlespidy initialProfile) {
         this(parent, title, initialProfile, null);
@@ -40,7 +46,7 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         initComponents();
         populateFields();
         pack();
-        setMinimumSize(new Dimension(480, 480));
+        setMinimumSize(new Dimension(500, 520));
         setResizable(true);
         setLocationRelativeTo(parent);
     }
@@ -103,13 +109,33 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         JPanel headersContainer = new JPanel(new BorderLayout(4, 4));
         headersContainer.add(headersHelpLabel, BorderLayout.NORTH);
 
-        headersArea = new JTextArea(12, 34);
+        headersArea = new JTextArea(10, 34);
         headersArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         headersArea.setLineWrap(true);
         headersArea.setWrapStyleWord(true);
+        headersArea.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { updateTokenInfo(); }
+            @Override public void removeUpdate(DocumentEvent e) { updateTokenInfo(); }
+            @Override public void changedUpdate(DocumentEvent e) { updateTokenInfo(); }
+        });
+
         JScrollPane headersScroll = new JScrollPane(headersArea);
-        headersScroll.setPreferredSize(new Dimension(440, 220));
+        headersScroll.setPreferredSize(new Dimension(440, 180));
         headersContainer.add(headersScroll, BorderLayout.CENTER);
+
+        // Token Info Card (Length and JWT Expiration display)
+        tokenInfoCard = new JPanel(new GridLayout(2, 1, 2, 2));
+        tokenInfoCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Authorization & JWT Token Info"),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
+        tokenLengthLabel = new JLabel("Token Length: -");
+        tokenLengthLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+        tokenValidityLabel = new JLabel("Validity Status: -");
+        tokenValidityLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 11));
+        tokenInfoCard.add(tokenLengthLabel);
+        tokenInfoCard.add(tokenValidityLabel);
+        headersContainer.add(tokenInfoCard, BorderLayout.SOUTH);
 
         headersBlock.add(headersContainer, BorderLayout.CENTER);
         formPanel.add(headersBlock);
@@ -131,6 +157,52 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         setContentPane(contentPane);
     }
 
+    private void updateTokenInfo() {
+        if (unauthRadio != null && unauthRadio.isSelected()) {
+            if (tokenInfoCard != null) tokenInfoCard.setVisible(false);
+            return;
+        }
+        if (tokenInfoCard != null) tokenInfoCard.setVisible(true);
+
+        String text = headersArea != null ? headersArea.getText() : "";
+        JwtTokenHelper_littlespidy.JwtExpirationInfo info = JwtTokenHelper_littlespidy.parse(text);
+
+        if (!info.hasToken()) {
+            if (tokenLengthLabel != null) {
+                tokenLengthLabel.setText("Token Length: No Authorization token configured");
+            }
+            if (tokenValidityLabel != null) {
+                tokenValidityLabel.setText("Status: Inactive");
+                tokenValidityLabel.setForeground(Color.GRAY);
+            }
+            return;
+        }
+
+        if (tokenLengthLabel != null) {
+            tokenLengthLabel.setText("Token Length: " + info.tokenLength() + " chars (Header Value: " + info.headerLength() + " chars)");
+        }
+
+        if (tokenValidityLabel != null) {
+            if (info.isJwt()) {
+                if (info.expEpochSecond() != null) {
+                    if (info.isExpired()) {
+                        tokenValidityLabel.setText("Validity: Expired (" + info.formattedRemainingTime() + " ago | " + info.formattedUtcTime() + ")");
+                        tokenValidityLabel.setForeground(new Color(199, 84, 80));
+                    } else {
+                        tokenValidityLabel.setText("Validity: Active (" + info.formattedRemainingTime() + " remaining | " + info.formattedUtcTime() + ")");
+                        tokenValidityLabel.setForeground(new Color(73, 156, 84));
+                    }
+                } else {
+                    tokenValidityLabel.setText("Validity: Active JWT (No exp claim in payload)");
+                    tokenValidityLabel.setForeground(new Color(73, 156, 84));
+                }
+            } else {
+                tokenValidityLabel.setText("Validity: Non-JWT Bearer / Custom Token");
+                tokenValidityLabel.setForeground(Color.GRAY);
+            }
+        }
+    }
+
     private void updateHeadersMode(boolean isUnauth) {
         if (isUnauth) {
             headersLabel.setText("Headers to Remove (Header Names):");
@@ -139,6 +211,7 @@ public class AuthProfileDialog_littlespidy extends JDialog {
             headersLabel.setText("Session Headers (Complete Headers):");
             headersHelpLabel.setText("Enter complete headers (e.g. 'Authorization: Bearer <token>', 'Cookie: session=<id>'), one per line.");
         }
+        updateTokenInfo();
     }
 
     private void populateFields() {
@@ -166,6 +239,7 @@ public class AuthProfileDialog_littlespidy extends JDialog {
         } else {
             headersArea.setText("Authorization:\nCookie:");
         }
+        updateTokenInfo();
     }
 
     private void onSave() {
