@@ -856,13 +856,17 @@ public class CategoryFindingsPanel extends JPanel {
             }
         }
 
-        List<HttpRequestResponse> traffic = scanEngine.getLoadedTraffic();
-        if (traffic.isEmpty()) {
+        List<burp.api.montoya.proxy.ProxyHttpRequestResponse> proxyHistory =
+                (api != null && api.proxy() != null) ? api.proxy().history() : java.util.Collections.emptyList();
+        List<HttpRequestResponse> repeater = scanEngine.getRepeaterTraffic();
+
+        int totalItems = (proxyHistory != null ? proxyHistory.size() : 0) + repeater.size();
+        if (totalItems == 0) {
             JOptionPane.showMessageDialog(
                     this,
-                    "No HTTP traffic has been loaded into Response Inspector yet.\n"
-                            + "Please click 'Load Proxy' or 'Load from Repeater' in the top-right toolbar first.",
-                    "No Traffic Loaded",
+                    "No HTTP traffic found in Burp Proxy history or Repeater to analyze.\n"
+                            + "Please capture traffic in Proxy or Repeater first.",
+                    "No Traffic to Analyze",
                     JOptionPane.INFORMATION_MESSAGE
             );
             return;
@@ -875,41 +879,68 @@ public class CategoryFindingsPanel extends JPanel {
         progressBar.setVisible(true);
         progressBar.setIndeterminate(false);
         progressBar.setValue(0);
-        progressBar.setMaximum(traffic.size());
-        liveStatusLabel.setText("Analyzing " + traffic.size() + " loaded traffic items for " + category.getDisplayName() + "...");
+        progressBar.setMaximum(totalItems);
+        liveStatusLabel.setText("Analyzing " + totalItems + " traffic items for " + category.getDisplayName() + "...");
 
-        int numThreads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         AtomicInteger processed = new AtomicInteger(0);
         AtomicInteger newFindings = new AtomicInteger(0);
 
         SwingWorker<Integer, ProgressChunk> worker = new SwingWorker<>() {
             @Override
             protected Integer doInBackground() {
-                try {
-                    List<Future<?>> futures = new ArrayList<>(traffic.size());
-                    for (HttpRequestResponse item : traffic) {
+                if (proxyHistory != null) {
+                    for (burp.api.montoya.proxy.ProxyHttpRequestResponse pItem : proxyHistory) {
                         if (isCancelled()) break;
-                        futures.add(executor.submit(() -> {
-                            if (isCancelled()) return;
-                            int added = scanEngine.scanCategoryItem(category, item);
-                            if (added > 0 && item.request() != null && item.request().httpService() != null) {
-                                domainManager.registerFinding(item.request().httpService().host());
+                        int cur = processed.incrementAndGet();
+                        if (pItem == null || !pItem.hasResponse()) continue;
+                        var req = pItem.finalRequest() != null ? pItem.finalRequest() : pItem.request();
+                        if (req == null) continue;
+                        if (ScannerUtils.isStaticResource(req, pItem.response()) || ScannerUtils.isOversized(pItem.response())) continue;
+                        String url = req.url() != null ? req.url() : "";
+                        String host = req.httpService() != null ? req.httpService().host() : "";
+                        if (inScopeSupplier != null && inScopeSupplier.getAsBoolean()) {
+                            if (!api.scope().isInScope(url) || (domainManager != null && !domainManager.matchesDomain(host))) {
+                                continue;
                             }
+                        }
+                        HttpRequestResponse hrr = HttpRequestResponse.httpRequestResponse(req, pItem.response(), pItem.annotations());
+                        int added = scanEngine.scanCategoryItem(category, hrr);
+                        if (added > 0) {
                             newFindings.addAndGet(added);
-                            int cur = processed.incrementAndGet();
-                            if (cur % 25 == 0 || cur == traffic.size()) {
-                                publish(new ProgressChunk(cur, traffic.size(), newFindings.get()));
+                            if (domainManager != null) {
+                                domainManager.registerFinding(host);
                             }
-                        }));
+                        }
+                        if (cur % 50 == 0 || cur == totalItems) {
+                            publish(new ProgressChunk(cur, totalItems, newFindings.get()));
+                        }
                     }
-                    for (Future<?> f : futures) {
-                        if (isCancelled()) break;
-                        try { f.get(); } catch (Exception ignored) {}
-                    }
-                } finally {
-                    executor.shutdownNow();
                 }
+
+                for (HttpRequestResponse rItem : repeater) {
+                    if (isCancelled()) break;
+                    int cur = processed.incrementAndGet();
+                    if (rItem == null || !rItem.hasResponse() || rItem.request() == null) continue;
+                    if (ScannerUtils.isStaticResource(rItem.request(), rItem.response()) || ScannerUtils.isOversized(rItem.response())) continue;
+                    String url = rItem.request().url() != null ? rItem.request().url() : "";
+                    String host = rItem.request().httpService() != null ? rItem.request().httpService().host() : "";
+                    if (inScopeSupplier != null && inScopeSupplier.getAsBoolean()) {
+                        if (!api.scope().isInScope(url) || (domainManager != null && !domainManager.matchesDomain(host))) {
+                            continue;
+                        }
+                    }
+                    int added = scanEngine.scanCategoryItem(category, rItem);
+                    if (added > 0) {
+                        newFindings.addAndGet(added);
+                        if (domainManager != null) {
+                            domainManager.registerFinding(host);
+                        }
+                    }
+                    if (cur % 25 == 0 || cur == totalItems) {
+                        publish(new ProgressChunk(cur, totalItems, newFindings.get()));
+                    }
+                }
+
                 return newFindings.get();
             }
 

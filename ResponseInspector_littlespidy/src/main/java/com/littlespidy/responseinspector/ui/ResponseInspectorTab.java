@@ -75,15 +75,15 @@ public class ResponseInspectorTab extends JPanel {
         trafficCountLabel.setForeground(new Color(40, 100, 170));
         rightControls.add(trafficCountLabel);
 
-        loadProxyBtn = new JButton("Load Proxy");
+        loadProxyBtn = new JButton("Scan Proxy");
         loadProxyBtn.setFont(loadProxyBtn.getFont().deriveFont(Font.BOLD));
-        loadProxyBtn.setToolTipText("Load HTTP traffic from Burp Proxy history into extension cache without analyzing");
+        loadProxyBtn.setToolTipText("Scan HTTP traffic from Burp Proxy history on the fly and populate findings");
         loadProxyBtn.addActionListener(e -> loadProxyTraffic());
         rightControls.add(loadProxyBtn);
 
-        loadRepeaterBtn = new JButton("Load from Repeater");
+        loadRepeaterBtn = new JButton("Scan Repeater");
         loadRepeaterBtn.setFont(loadRepeaterBtn.getFont().deriveFont(Font.BOLD));
-        loadRepeaterBtn.setToolTipText("Load recorded Repeater traffic into extension cache without analyzing");
+        loadRepeaterBtn.setToolTipText("Scan recorded Repeater traffic on the fly and populate findings");
         loadRepeaterBtn.addActionListener(e -> loadRepeaterTraffic());
         rightControls.add(loadRepeaterBtn);
 
@@ -143,11 +143,11 @@ public class ResponseInspectorTab extends JPanel {
 
         loadProxyBtn.setEnabled(false);
         loadRepeaterBtn.setEnabled(false);
-        trafficCountLabel.setText("Loading Proxy history...");
+        trafficCountLabel.setText("Scanning Proxy history...");
 
         final boolean inScopeOnly = inScopeOnlyCb.isSelected();
 
-        SwingWorker<Integer, Void> worker = new SwingWorker<>() {
+        SwingWorker<Integer, String> worker = new SwingWorker<>() {
             @Override
             protected Integer doInBackground() {
                 List<ProxyHttpRequestResponse> history = api.proxy().history();
@@ -155,8 +155,13 @@ public class ResponseInspectorTab extends JPanel {
                     return 0;
                 }
 
-                List<HttpRequestResponse> toAdd = new ArrayList<>();
+                int total = history.size();
+                int scanned = 0;
+                int newFindings = 0;
+
                 for (ProxyHttpRequestResponse item : history) {
+                    if (isCancelled()) break;
+                    scanned++;
                     if (item == null || !item.hasResponse()) {
                         continue;
                     }
@@ -165,7 +170,7 @@ public class ResponseInspectorTab extends JPanel {
                         continue;
                     }
 
-                    if (ScannerUtils.isStaticResource(req, item.response())) {
+                    if (ScannerUtils.isStaticResource(req, item.response()) || ScannerUtils.isOversized(item.response())) {
                         continue;
                     }
 
@@ -183,11 +188,25 @@ public class ResponseInspectorTab extends JPanel {
                     }
 
                     HttpRequestResponse hrr = HttpRequestResponse.httpRequestResponse(req, item.response(), item.annotations());
-                    toAdd.add(hrr);
+                    int added = scanEngine.scanItem(hrr);
+                    if (added > 0) {
+                        newFindings += added;
+                        domainManager.registerFinding(host);
+                    }
+
+                    if (scanned % 50 == 0 || scanned == total) {
+                        publish("Scanning Proxy: " + scanned + " / " + total + " items (" + newFindings + " findings)...");
+                    }
                 }
 
-                scanEngine.addLoadedTraffic(toAdd);
-                return toAdd.size();
+                return newFindings;
+            }
+
+            @Override
+            protected void process(List<String> chunks) {
+                if (!chunks.isEmpty()) {
+                    trafficCountLabel.setText(chunks.get(chunks.size() - 1));
+                }
             }
 
             @Override
@@ -196,11 +215,12 @@ public class ResponseInspectorTab extends JPanel {
                     int added = get();
                     updateTrafficStatus();
                     updateDomainButtonLabel();
+                    refreshAllTabs();
                     if (api.logging() != null) {
-                        api.logging().logToOutput("[Response Inspector] Loaded " + added + " items from Proxy history. Total traffic cache: " + scanEngine.getLoadedTrafficCount());
+                        api.logging().logToOutput("[Response Inspector] Scanned Proxy history. Discovered " + added + " new findings.");
                     }
                 } catch (Exception ex) {
-                    trafficCountLabel.setText("Error loading: " + ex.getMessage());
+                    trafficCountLabel.setText("Error scanning: " + ex.getMessage());
                 } finally {
                     loadProxyBtn.setEnabled(true);
                     loadRepeaterBtn.setEnabled(true);
@@ -227,20 +247,25 @@ public class ResponseInspectorTab extends JPanel {
 
         loadProxyBtn.setEnabled(false);
         loadRepeaterBtn.setEnabled(false);
-        trafficCountLabel.setText("Loading Repeater traffic...");
+        trafficCountLabel.setText("Scanning Repeater traffic...");
 
         final boolean inScopeOnly = inScopeOnlyCb.isSelected();
 
-        SwingWorker<Integer, Void> worker = new SwingWorker<>() {
+        SwingWorker<Integer, String> worker = new SwingWorker<>() {
             @Override
             protected Integer doInBackground() {
-                List<HttpRequestResponse> toAdd = new ArrayList<>();
+                int total = repeaterItems.size();
+                int scanned = 0;
+                int newFindings = 0;
+
                 for (HttpRequestResponse item : repeaterItems) {
+                    if (isCancelled()) break;
+                    scanned++;
                     if (item == null || !item.hasResponse() || item.request() == null) {
                         continue;
                     }
                     var req = item.request();
-                    if (ScannerUtils.isStaticResource(req, item.response())) {
+                    if (ScannerUtils.isStaticResource(req, item.response()) || ScannerUtils.isOversized(item.response())) {
                         continue;
                     }
 
@@ -257,11 +282,25 @@ public class ResponseInspectorTab extends JPanel {
                         }
                     }
 
-                    toAdd.add(item);
+                    int added = scanEngine.scanItem(item);
+                    if (added > 0) {
+                        newFindings += added;
+                        domainManager.registerFinding(host);
+                    }
+
+                    if (scanned % 25 == 0 || scanned == total) {
+                        publish("Scanning Repeater: " + scanned + " / " + total + " items (" + newFindings + " findings)...");
+                    }
                 }
 
-                scanEngine.addLoadedTraffic(toAdd);
-                return toAdd.size();
+                return newFindings;
+            }
+
+            @Override
+            protected void process(List<String> chunks) {
+                if (!chunks.isEmpty()) {
+                    trafficCountLabel.setText(chunks.get(chunks.size() - 1));
+                }
             }
 
             @Override
@@ -270,11 +309,12 @@ public class ResponseInspectorTab extends JPanel {
                     int added = get();
                     updateTrafficStatus();
                     updateDomainButtonLabel();
+                    refreshAllTabs();
                     if (api.logging() != null) {
-                        api.logging().logToOutput("[Response Inspector] Loaded " + added + " items from Repeater. Total traffic cache: " + scanEngine.getLoadedTrafficCount());
+                        api.logging().logToOutput("[Response Inspector] Scanned Repeater traffic. Discovered " + added + " new findings.");
                     }
                 } catch (Exception ex) {
-                    trafficCountLabel.setText("Error loading: " + ex.getMessage());
+                    trafficCountLabel.setText("Error scanning: " + ex.getMessage());
                 } finally {
                     loadProxyBtn.setEnabled(true);
                     loadRepeaterBtn.setEnabled(true);
@@ -286,8 +326,8 @@ public class ResponseInspectorTab extends JPanel {
     }
 
     private void updateTrafficStatus() {
-        int count = scanEngine.getLoadedTrafficCount();
-        trafficCountLabel.setText("Traffic Cache: " + count + " items");
+        int count = scanEngine.getTotalFindingsCount();
+        trafficCountLabel.setText("Findings: " + count + " total issues discovered");
     }
 
     private void updateDomainButtonLabel() {

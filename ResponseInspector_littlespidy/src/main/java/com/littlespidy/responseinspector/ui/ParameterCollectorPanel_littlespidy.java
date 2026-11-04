@@ -7,6 +7,7 @@ import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
 import com.littlespidy.responseinspector.engine.ParameterScanner_littlespidy;
 import com.littlespidy.responseinspector.engine.ResponseScanEngine;
+import com.littlespidy.responseinspector.engine.ScannerUtils;
 import com.littlespidy.responseinspector.model.ParameterEntry_littlespidy;
 import com.littlespidy.responseinspector.model.ParameterOccurrence_littlespidy;
 import com.littlespidy.responseinspector.model.ParameterSource_littlespidy;
@@ -319,13 +320,17 @@ public class ParameterCollectorPanel_littlespidy extends JPanel {
     }
 
     public void runAnalysis() {
-        List<HttpRequestResponse> traffic = scanEngine.getLoadedTraffic();
-        if (traffic.isEmpty()) {
+        List<burp.api.montoya.proxy.ProxyHttpRequestResponse> proxyHistory =
+                (api != null && api.proxy() != null) ? api.proxy().history() : java.util.Collections.emptyList();
+        List<HttpRequestResponse> repeater = scanEngine.getRepeaterTraffic();
+
+        int totalItems = (proxyHistory != null ? proxyHistory.size() : 0) + repeater.size();
+        if (totalItems == 0) {
             JOptionPane.showMessageDialog(
                     this,
-                    "No HTTP traffic has been loaded into Response Inspector yet.\n"
-                            + "Please click 'Load Proxy' or 'Load from Repeater' in the top-right toolbar first.",
-                    "No Traffic Loaded",
+                    "No HTTP traffic found in Burp Proxy history or Repeater to collect parameters from.\n"
+                            + "Please capture traffic in Proxy or Repeater first.",
+                    "No Traffic to Analyze",
                     JOptionPane.INFORMATION_MESSAGE
             );
             return;
@@ -336,14 +341,45 @@ public class ParameterCollectorPanel_littlespidy extends JPanel {
         progressBar.setVisible(true);
         progressBar.setIndeterminate(false);
         progressBar.setValue(0);
-        progressBar.setMaximum(traffic.size());
-        liveStatusLabel.setText("Collecting parameters from " + traffic.size() + " items...");
+        progressBar.setMaximum(totalItems);
+        liveStatusLabel.setText("Collecting parameters from " + totalItems + " items...");
 
         parameterMap.clear();
 
         executor.submit(() -> {
             int processed = 0;
-            for (HttpRequestResponse item : traffic) {
+            if (proxyHistory != null) {
+                for (burp.api.montoya.proxy.ProxyHttpRequestResponse pItem : proxyHistory) {
+                    processed++;
+                    if (pItem == null || !pItem.hasResponse()) continue;
+                    var req = pItem.finalRequest() != null ? pItem.finalRequest() : pItem.request();
+                    if (req == null) continue;
+                    if (ScannerUtils.isStaticResource(req, pItem.response()) || ScannerUtils.isOversized(pItem.response())) continue;
+
+                    try {
+                        HttpRequestResponse hrr = HttpRequestResponse.httpRequestResponse(req, pItem.response(), pItem.annotations());
+                        parameterScanner.scanItem(hrr, parameterMap);
+                    } catch (Exception ex) {
+                        if (api != null && api.logging() != null) {
+                            api.logging().logToError("Error collecting parameters: " + ex.getMessage());
+                        }
+                    }
+
+                    if (processed % 50 == 0 || processed == totalItems) {
+                        final int current = processed;
+                        SwingUtilities.invokeLater(() -> {
+                            progressBar.setValue(current);
+                            liveStatusLabel.setText("Processed " + current + " / " + totalItems + " items...");
+                        });
+                    }
+                }
+            }
+
+            for (HttpRequestResponse item : repeater) {
+                processed++;
+                if (item == null || !item.hasResponse() || item.request() == null) continue;
+                if (ScannerUtils.isStaticResource(item.request(), item.response()) || ScannerUtils.isOversized(item.response())) continue;
+
                 try {
                     parameterScanner.scanItem(item, parameterMap);
                 } catch (Exception ex) {
@@ -351,12 +387,12 @@ public class ParameterCollectorPanel_littlespidy extends JPanel {
                         api.logging().logToError("Error collecting parameters: " + ex.getMessage());
                     }
                 }
-                processed++;
-                if (processed % 25 == 0 || processed == traffic.size()) {
+
+                if (processed % 25 == 0 || processed == totalItems) {
                     final int current = processed;
                     SwingUtilities.invokeLater(() -> {
                         progressBar.setValue(current);
-                        liveStatusLabel.setText("Processed " + current + " / " + traffic.size() + " items...");
+                        liveStatusLabel.setText("Processed " + current + " / " + totalItems + " items...");
                     });
                 }
             }

@@ -69,43 +69,67 @@ public class ResponseScanEngine {
         this.storageManager = storageManager;
     }
 
-    private final List<HttpRequestResponse> repeaterTraffic = new java.util.concurrent.CopyOnWriteArrayList<>();
-    private final List<HttpRequestResponse> loadedTraffic = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private static final int MAX_REPEATER_ITEMS = 500;
+    private final List<HttpRequestResponse> repeaterTraffic = java.util.Collections.synchronizedList(new ArrayList<>());
+    private final java.util.concurrent.atomic.AtomicInteger totalScannedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+    public int getTotalScannedCount() {
+        return totalScannedCount.get();
+    }
+
+    public void incrementScannedCount() {
+        totalScannedCount.incrementAndGet();
+    }
+
+    public void resetScannedCount() {
+        totalScannedCount.set(0);
+    }
+
+    public int getTotalFindingsCount() {
+        int count = 0;
+        for (InspectorDataStore store : dataStores.values()) {
+            count += store.size();
+        }
+        return count;
+    }
 
     public void addLoadedTraffic(Collection<HttpRequestResponse> items) {
-        if (items != null) {
-            for (HttpRequestResponse item : items) {
-                if (item != null && item.hasResponse() && !loadedTraffic.contains(item)) {
-                    loadedTraffic.add(item);
-                }
-            }
-        }
+        // No-op for memory safety: items are streamed directly without buffering
     }
 
     public List<HttpRequestResponse> getLoadedTraffic() {
-        return new ArrayList<>(loadedTraffic);
+        return Collections.emptyList();
     }
 
     public int getLoadedTrafficCount() {
-        return loadedTraffic.size();
+        return getTotalFindingsCount();
     }
 
     public void clearLoadedTraffic() {
-        loadedTraffic.clear();
+        // No-op
     }
 
     public void addRepeaterItem(HttpRequestResponse item) {
         if (item != null && item.hasResponse()) {
-            repeaterTraffic.add(item);
+            synchronized (repeaterTraffic) {
+                if (repeaterTraffic.size() >= MAX_REPEATER_ITEMS) {
+                    repeaterTraffic.remove(0);
+                }
+                repeaterTraffic.add(item);
+            }
         }
     }
 
     public List<HttpRequestResponse> getRepeaterTraffic() {
-        return new ArrayList<>(repeaterTraffic);
+        synchronized (repeaterTraffic) {
+            return new ArrayList<>(repeaterTraffic);
+        }
     }
 
     public int getRepeaterTrafficCount() {
-        return repeaterTraffic.size();
+        synchronized (repeaterTraffic) {
+            return repeaterTraffic.size();
+        }
     }
 
     public void clearRepeaterTraffic() {
@@ -233,6 +257,7 @@ public class ResponseScanEngine {
     }
 
     public void clearAll() {
+        totalScannedCount.set(0);
         for (InspectorDataStore store : dataStores.values()) {
             store.clear();
         }

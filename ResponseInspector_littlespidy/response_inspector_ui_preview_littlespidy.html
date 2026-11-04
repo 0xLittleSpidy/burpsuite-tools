@@ -204,6 +204,9 @@
   <!-- 1. Session Management Bar (At root, above all parent tabs) -->
   <div class="session-bar">
     <div class="session-actions">
+      <button class="btn" onclick="alert('Scan Proxy History (Streaming Mode - Direct Pipeline, 0MB buffer)')">Scan Proxy Traffic (Stream)</button>
+      <button class="btn" onclick="alert('Scan Repeater Traffic')">Scan Repeater</button>
+      <div class="separator"></div>
       <button class="btn" onclick="alert('Creating session: response_inspector_session.json')">New Session</button>
       <button class="btn" onclick="alert('Open Session Dialog')">Open Session</button>
       <button class="btn" onclick="alert('Offboard Session')">Offboard Session</button>
@@ -213,7 +216,7 @@
       <button class="btn" onclick="alert('Analyze File Dialog')">Analyze File...</button>
     </div>
     <div class="session-status" id="sessionStatus">
-      Session: response_inspector_session.json (/home/user/burp-sessions)
+      Streaming Mode Active: 0MB intermediate buffer | Max Size: 5MB | Session: response_inspector_session.json
     </div>
   </div>
 
@@ -224,6 +227,7 @@
     <div class="parent-tab" onclick="switchTab(this, 'Errors & Exceptions (7)')">Errors & Exceptions (7)</div>
     <div class="parent-tab" onclick="switchTab(this, 'Secrets (3)')">Secrets (3)</div>
     <div class="parent-tab" onclick="switchTab(this, 'Comments (18)')">Comments (18)</div>
+    <div class="parent-tab" onclick="switchTab(this, 'Parameter Collector (42)')">Parameter Collector (42)</div>
     <button class="btn theme-toggle" onclick="toggleTheme()">Toggle Dark/Light</button>
   </div>
 

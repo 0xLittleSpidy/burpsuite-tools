@@ -293,6 +293,7 @@ public class SecretScanner {
             List<FindingEntry> findings
     ) {
         Set<String> seenInThisSection = new HashSet<>();
+        String lowerContent = content.toLowerCase(Locale.ROOT);
 
         // 1. Two-Stage Refiner Rules
         for (RefinerRule rule : refinerRules) {
@@ -319,6 +320,19 @@ public class SecretScanner {
 
         // 2. Curated Secret Patterns
         for (CuratedSecret pat : allPatterns) {
+            if (!pat.keywords().isEmpty()) {
+                boolean hasKeyword = false;
+                for (String kw : pat.keywords()) {
+                    if (lowerContent.contains(kw)) {
+                        hasKeyword = true;
+                        break;
+                    }
+                }
+                if (!hasKeyword) {
+                    continue;
+                }
+            }
+
             Matcher m = pat.pattern().matcher(content);
             while (m.find()) {
                 String matchVal = (m.groupCount() >= 1 && m.group(1) != null) ? m.group(1) : m.group();

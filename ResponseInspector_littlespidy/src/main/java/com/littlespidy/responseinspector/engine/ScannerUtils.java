@@ -17,9 +17,9 @@ import java.util.Objects;
 public final class ScannerUtils {
 
     /**
-     * Maximum response size in bytes (10 MB) to protect against memory exhaustion.
+     * Maximum response size in bytes (5 MB) to protect against memory exhaustion.
      */
-    public static final int MAX_RESPONSE_SIZE = 10 * 1024 * 1024;
+    public static final int MAX_RESPONSE_SIZE = 5 * 1024 * 1024;
 
     /**
      * Set of static, media, and binary MIME types that should be skipped to avoid unnecessary

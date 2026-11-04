@@ -89,7 +89,6 @@ public class ResponseInspectorExtension implements BurpExtension {
                         for (HttpRequestResponse item : items) {
                             if (item != null && item.hasResponse()) {
                                 scanEngine.addRepeaterItem(item);
-                                scanEngine.addLoadedTraffic(List.of(item));
                                 addedCount += scanEngine.scanItem(item);
                             }
                         }
