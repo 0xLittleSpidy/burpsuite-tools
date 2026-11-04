@@ -1,0 +1,5 @@
+customer_id,username,email,full_name,billing_address,ssn_last4
+501,admin,admin@target.local,System Administrator,"100 Enterprise Way, Suite 400, New York, NY",1234
+502,jsmith,jsmith@target.local,John Smith,"742 Evergreen Terrace, Springfield, OR",9876
+503,bwayne,bwayne@wayneenterprises.local,Bruce Wayne,"1007 Mountain Drive, Gotham City, NJ",0001
+504,dprince,diana@themyscira.local,Diana Prince,"Gateway City Marina, Slip 4, Gateway City, CA",4321

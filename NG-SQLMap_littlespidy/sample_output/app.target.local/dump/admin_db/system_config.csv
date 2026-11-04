@@ -1,0 +1,5 @@
+config_key,config_value,description,is_encrypted
+jwt_signing_key,k8F#vL9@mP2$xQ5*wZ1!sD7&hK4^jN0,Master HMAC-SHA256 secret for authentication tokens,1
+database_url,jdbc:postgresql://db.target.internal:5432/production,Internal cluster primary endpoint,0
+backup_s3_bucket,s3://target-corp-backups-secure-2026/,Nightly database dump bucket,0
+max_failed_logins,5,Account lockout threshold,0

@@ -1,0 +1,3 @@
+admin_id,username,email,password_hash,is_admin,mfa_secret,role
+1,admin,admin@target.local,$2a$12$e80yq9O8rZ7q4kS1L3PXe.y49pDq8Jm5x/G7uUeL1wRzQ.AdminHash,1,JBSWY3DPEHPK3PXP,SUPER_ADMIN
+2,bwayne,bwayne@wayneenterprises.local,$2a$12$L9p1bC8r7y.v6wX2tD4kKe.y71lMp8No4qR3sTuV1wXyP.WayneHash,1,KZXW6YTBOI6Q2M3X,SECURITY_AUDITOR

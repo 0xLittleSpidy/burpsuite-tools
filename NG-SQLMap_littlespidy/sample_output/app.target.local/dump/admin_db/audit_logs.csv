@@ -1,0 +1,7 @@
+log_id,username,action,target_resource,notes,timestamp
+90001,admin,LOGIN_SUCCESS,/auth/login,"Successful login from internal VPN gateway
+MFA challenge validated",2026-03-15 08:00:10
+90002,admin,CONFIG_UPDATE,/admin/config,"Rotated JWT signing key
+Old key marked deprecated",2026-03-15 08:30:45
+90003,jsmith,EXPORT_DATA,/billing/invoices,"Exported monthly invoice batch #4401",2026-03-15 10:14:22
+90004,bwayne,AUDIT_SCAN,/api/v2/users,"Triggered full security assessment crawl",2026-03-15 12:00:00
