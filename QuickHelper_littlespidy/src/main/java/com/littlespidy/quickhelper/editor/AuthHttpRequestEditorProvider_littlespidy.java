@@ -7,6 +7,7 @@ import burp.api.montoya.ui.editor.extension.ExtensionProvidedHttpRequestEditor;
 import burp.api.montoya.ui.editor.extension.HttpRequestEditorProvider;
 import com.littlespidy.quickhelper.service.AuthTokenExtractorService_littlespidy;
 import com.littlespidy.quickhelper.service.ClipboardService_littlespidy;
+import com.littlespidy.quickhelper.service.ProxyAuthHistoryService_littlespidy;
 
 /**
  * Provider registering the 'Auth & Tokens' Request Editor tab across Burp Suite tools.
@@ -16,17 +17,20 @@ public class AuthHttpRequestEditorProvider_littlespidy implements HttpRequestEdi
     private final MontoyaApi api;
     private final ClipboardService_littlespidy clipboardService;
     private final AuthTokenExtractorService_littlespidy extractorService;
+    private final ProxyAuthHistoryService_littlespidy proxyAuthHistoryService;
 
     public AuthHttpRequestEditorProvider_littlespidy(MontoyaApi api,
                                                      ClipboardService_littlespidy clipboardService,
-                                                     AuthTokenExtractorService_littlespidy extractorService) {
+                                                     AuthTokenExtractorService_littlespidy extractorService,
+                                                     ProxyAuthHistoryService_littlespidy proxyAuthHistoryService) {
         this.api = api;
         this.clipboardService = clipboardService;
         this.extractorService = extractorService;
+        this.proxyAuthHistoryService = proxyAuthHistoryService;
     }
 
     @Override
     public ExtensionProvidedHttpRequestEditor provideHttpRequestEditor(EditorCreationContext creationContext) {
-        return new AuthRequestEditorTab_littlespidy(api, creationContext, clipboardService, extractorService);
+        return new AuthRequestEditorTab_littlespidy(api, creationContext, clipboardService, extractorService, proxyAuthHistoryService);
     }
 }

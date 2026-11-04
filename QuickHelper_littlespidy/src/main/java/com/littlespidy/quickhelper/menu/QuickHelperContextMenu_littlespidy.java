@@ -1,10 +1,12 @@
 // Created with the help of an AI Agent and littlespidy.
 package com.littlespidy.quickhelper.menu;
 
+import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import com.littlespidy.quickhelper.model.ExtractionOptions_littlespidy;
 import com.littlespidy.quickhelper.service.DomainExtractorService_littlespidy;
+import com.littlespidy.quickhelper.service.ProxyAuthHistoryService_littlespidy;
 import com.littlespidy.quickhelper.ui.QuickHelperRootTab_littlespidy;
 
 import javax.swing.JMenu;
@@ -20,20 +22,59 @@ public class QuickHelperContextMenu_littlespidy implements ContextMenuItemsProvi
 
     private final DomainExtractorService_littlespidy extractorService;
     private final QuickHelperRootTab_littlespidy rootTab;
+    private final ProxyAuthHistoryService_littlespidy proxyAuthHistoryService;
 
     public QuickHelperContextMenu_littlespidy(DomainExtractorService_littlespidy extractorService) {
-        this(extractorService, null);
+        this(extractorService, null, null);
     }
 
     public QuickHelperContextMenu_littlespidy(DomainExtractorService_littlespidy extractorService,
                                              QuickHelperRootTab_littlespidy rootTab) {
+        this(extractorService, rootTab, null);
+    }
+
+    public QuickHelperContextMenu_littlespidy(DomainExtractorService_littlespidy extractorService,
+                                             QuickHelperRootTab_littlespidy rootTab,
+                                             ProxyAuthHistoryService_littlespidy proxyAuthHistoryService) {
         this.extractorService = extractorService;
         this.rootTab = rootTab;
+        this.proxyAuthHistoryService = proxyAuthHistoryService;
     }
 
     @Override
     public List<Component> provideMenuItems(ContextMenuEvent event) {
         JMenu menu = new JMenu("Quick Helper");
+
+        // Repeater Request Editor Context Actions: Replace Recent JWT / Cookie without popup
+        if (event.messageEditorRequestResponse().isPresent() && proxyAuthHistoryService != null) {
+            var editorOpt = event.messageEditorRequestResponse();
+            var editor = editorOpt.get();
+            var reqResp = editor.requestResponse();
+            if (reqResp != null && reqResp.request() != null) {
+                HttpRequest currentReq = reqResp.request();
+
+                JMenuItem replaceJwtItem = new JMenuItem("Replace Recent JWT");
+                replaceJwtItem.addActionListener(e -> {
+                    String recentJwt = proxyAuthHistoryService.findRecentJwtHeader(currentReq);
+                    if (recentJwt != null && !recentJwt.trim().isEmpty()) {
+                        HttpRequest updated = proxyAuthHistoryService.replaceJwt(currentReq, recentJwt);
+                        editor.setRequest(updated);
+                    }
+                });
+                menu.add(replaceJwtItem);
+
+                JMenuItem replaceCookieItem = new JMenuItem("Replace Recent Session Cookie");
+                replaceCookieItem.addActionListener(e -> {
+                    String recentCookie = proxyAuthHistoryService.findRecentCookieHeader(currentReq);
+                    if (recentCookie != null && !recentCookie.trim().isEmpty()) {
+                        HttpRequest updated = proxyAuthHistoryService.replaceCookie(currentReq, recentCookie);
+                        editor.setRequest(updated);
+                    }
+                });
+                menu.add(replaceCookieItem);
+                menu.addSeparator();
+            }
+        }
 
         if (rootTab != null) {
             JMenuItem downloadAllItem = new JMenuItem("Download All Extensions (Single Click)");

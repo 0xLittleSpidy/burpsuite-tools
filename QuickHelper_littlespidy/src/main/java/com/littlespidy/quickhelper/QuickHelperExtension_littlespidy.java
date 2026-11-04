@@ -34,12 +34,15 @@ public class QuickHelperExtension_littlespidy implements BurpExtension {
         ExtensionDownloaderService_littlespidy downloaderService = new ExtensionDownloaderService_littlespidy(api);
         AuthTokenExtractorService_littlespidy authExtractorService = new AuthTokenExtractorService_littlespidy();
         JsonTableService_littlespidy jsonService = new JsonTableService_littlespidy();
+        com.littlespidy.quickhelper.service.ProxyAuthHistoryService_littlespidy proxyAuthService =
+                new com.littlespidy.quickhelper.service.ProxyAuthHistoryService_littlespidy(api);
 
         // Register Request Editor Tab: Copy
         AuthHttpRequestEditorProvider_littlespidy authEditorProvider = new AuthHttpRequestEditorProvider_littlespidy(
                 api,
                 clipboardService,
-                authExtractorService
+                authExtractorService,
+                proxyAuthService
         );
         api.userInterface().registerHttpRequestEditorProvider(authEditorProvider);
 
@@ -67,7 +70,7 @@ public class QuickHelperExtension_littlespidy implements BurpExtension {
         api.userInterface().menuBar().registerMenu(topMenu);
 
         // Register Context Menu Provider (SiteMap, Proxy, Repeater, etc.)
-        QuickHelperContextMenu_littlespidy contextMenu = new QuickHelperContextMenu_littlespidy(extractorService, rootTab);
+        QuickHelperContextMenu_littlespidy contextMenu = new QuickHelperContextMenu_littlespidy(extractorService, rootTab, proxyAuthService);
         api.userInterface().registerContextMenuItemsProvider(contextMenu);
 
         // Register clean shutdown handler

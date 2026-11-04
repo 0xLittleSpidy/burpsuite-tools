@@ -10,6 +10,7 @@ import burp.api.montoya.ui.editor.extension.ExtensionProvidedHttpRequestEditor;
 import com.littlespidy.quickhelper.model.AuthItem_littlespidy;
 import com.littlespidy.quickhelper.service.AuthTokenExtractorService_littlespidy;
 import com.littlespidy.quickhelper.service.ClipboardService_littlespidy;
+import com.littlespidy.quickhelper.service.ProxyAuthHistoryService_littlespidy;
 import com.littlespidy.quickhelper.ui.AuthItemTableModel_littlespidy;
 
 import javax.swing.BorderFactory;
@@ -46,12 +47,15 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
     private final EditorCreationContext creationContext;
     private final ClipboardService_littlespidy clipboardService;
     private final AuthTokenExtractorService_littlespidy extractorService;
+    private final ProxyAuthHistoryService_littlespidy proxyAuthHistoryService;
 
     private final JPanel mainPanel;
     private final JButton btnCopyBearer;
     private final JButton btnCopyAuthHeader;
     private final JButton btnCopyCookieHeader;
     private final JButton btnCopyAllCookies;
+    private final JButton btnReplaceRecentJwt;
+    private final JButton btnReplaceRecentCookie;
     private final JLabel statusLabel;
 
     private final AuthItemTableModel_littlespidy tableModel;
@@ -60,16 +64,20 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
     private final JLabel detailTitleLabel;
 
     private HttpRequest originalRequest;
+    private HttpRequest modifiedRequest;
+    private boolean isModified = false;
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     public AuthRequestEditorTab_littlespidy(MontoyaApi api,
                                            EditorCreationContext creationContext,
                                            ClipboardService_littlespidy clipboardService,
-                                           AuthTokenExtractorService_littlespidy extractorService) {
+                                           AuthTokenExtractorService_littlespidy extractorService,
+                                           ProxyAuthHistoryService_littlespidy proxyAuthHistoryService) {
         this.api = api;
         this.creationContext = creationContext;
         this.clipboardService = clipboardService;
         this.extractorService = extractorService;
+        this.proxyAuthHistoryService = proxyAuthHistoryService;
 
         this.mainPanel = new JPanel(new BorderLayout(0, 6));
         this.mainPanel.setBorder(new EmptyBorder(6, 6, 6, 6));
@@ -96,6 +104,18 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
         buttonBar.add(btnCopyAuthHeader);
         buttonBar.add(btnCopyCookieHeader);
         buttonBar.add(btnCopyAllCookies);
+
+        JLabel replaceLabel = new JLabel("Repeater Injection:");
+        replaceLabel.setFont(replaceLabel.getFont().deriveFont(Font.BOLD));
+        buttonBar.add(replaceLabel);
+
+        btnReplaceRecentJwt = new JButton("Replace Recent JWT");
+        btnReplaceRecentCookie = new JButton("Replace Recent Session Cookie");
+        btnReplaceRecentJwt.setEnabled(false);
+        btnReplaceRecentCookie.setEnabled(false);
+
+        buttonBar.add(btnReplaceRecentJwt);
+        buttonBar.add(btnReplaceRecentCookie);
 
         // Status Strip
         JPanel statusPanel = new JPanel(new BorderLayout());
@@ -191,11 +211,49 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
         });
 
         btnCopyAllCookies.addActionListener(e -> {
-            String cookie = extractorService.extractCookieHeader(originalRequest);
+            String cookie = extractorService.extractCookieHeader(currentRequest());
             if (cookie != null && !cookie.isEmpty()) {
                 clipboardService.copyToClipboard(cookie);
                 updateStatus("Copied All Cookies to clipboard (" + cookie.length() + " chars)");
             }
+        });
+
+        btnReplaceRecentJwt.addActionListener(e -> {
+            HttpRequest current = currentRequest();
+            if (current == null) {
+                updateStatus("No request loaded in editor");
+                return;
+            }
+            if (proxyAuthHistoryService == null) {
+                updateStatus("Proxy history service unavailable");
+                return;
+            }
+            String recentAuth = proxyAuthHistoryService.findRecentJwtHeader(current);
+            if (recentAuth == null || recentAuth.trim().isEmpty()) {
+                updateStatus("No recent JWT found in Proxy history");
+                return;
+            }
+            HttpRequest updated = proxyAuthHistoryService.replaceJwt(current, recentAuth);
+            applyUpdatedRequest(updated, "Replaced Authorization header with recent JWT from Proxy history (" + recentAuth.length() + " chars)");
+        });
+
+        btnReplaceRecentCookie.addActionListener(e -> {
+            HttpRequest current = currentRequest();
+            if (current == null) {
+                updateStatus("No request loaded in editor");
+                return;
+            }
+            if (proxyAuthHistoryService == null) {
+                updateStatus("Proxy history service unavailable");
+                return;
+            }
+            String recentCookie = proxyAuthHistoryService.findRecentCookieHeader(current);
+            if (recentCookie == null || recentCookie.trim().isEmpty()) {
+                updateStatus("No recent session cookie found in Proxy history");
+                return;
+            }
+            HttpRequest updated = proxyAuthHistoryService.replaceCookie(current, recentCookie);
+            applyUpdatedRequest(updated, "Replaced Cookie header with recent session cookie from Proxy history (" + recentCookie.length() + " chars)");
         });
 
         // Table Selection Listener
@@ -288,19 +346,50 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
 
     @Override
     public HttpRequest getRequest() {
-        return originalRequest;
+        return modifiedRequest != null ? modifiedRequest : originalRequest;
+    }
+
+    public HttpRequest currentRequest() {
+        return modifiedRequest != null ? modifiedRequest : originalRequest;
+    }
+
+    private void applyUpdatedRequest(HttpRequest updated, String statusMessage) {
+        this.modifiedRequest = updated;
+        this.isModified = true;
+        List<AuthItem_littlespidy> items = extractorService.extractAll(this.modifiedRequest);
+        tableModel.setItems(items);
+        String bearer = extractorService.extractBearerToken(this.modifiedRequest);
+        String authHeader = extractorService.extractAuthHeader(this.modifiedRequest);
+        String cookieHeader = extractorService.extractCookieHeader(this.modifiedRequest);
+        btnCopyBearer.setEnabled(bearer != null && !bearer.isEmpty());
+        btnCopyAuthHeader.setEnabled(authHeader != null && !authHeader.isEmpty());
+        btnCopyCookieHeader.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
+        btnCopyAllCookies.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
+        if (items.isEmpty()) {
+            detailTitleLabel.setText("Selected Item: (None)");
+            detailTextArea.setText("");
+        } else {
+            if (authTable.getRowCount() > 0) {
+                authTable.setRowSelectionInterval(0, 0);
+            }
+        }
+        updateStatus(statusMessage);
     }
 
     @Override
     public void setRequestResponse(HttpRequestResponse requestResponse) {
         if (requestResponse == null || requestResponse.request() == null) {
             this.originalRequest = null;
+            this.modifiedRequest = null;
+            this.isModified = false;
             Runnable clearUi = () -> {
                 tableModel.clear();
                 btnCopyBearer.setEnabled(false);
                 btnCopyAuthHeader.setEnabled(false);
                 btnCopyCookieHeader.setEnabled(false);
                 btnCopyAllCookies.setEnabled(false);
+                btnReplaceRecentJwt.setEnabled(false);
+                btnReplaceRecentCookie.setEnabled(false);
                 detailTitleLabel.setText("Selected Item: (None)");
                 detailTextArea.setText("");
                 statusLabel.setText("No request loaded");
@@ -314,6 +403,8 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
         }
 
         this.originalRequest = requestResponse.request();
+        this.modifiedRequest = null;
+        this.isModified = false;
         List<AuthItem_littlespidy> items = extractorService.extractAll(this.originalRequest);
 
         String bearer = extractorService.extractBearerToken(this.originalRequest);
@@ -326,6 +417,8 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
             btnCopyAuthHeader.setEnabled(authHeader != null && !authHeader.isEmpty());
             btnCopyCookieHeader.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
             btnCopyAllCookies.setEnabled(cookieHeader != null && !cookieHeader.isEmpty());
+            btnReplaceRecentJwt.setEnabled(true);
+            btnReplaceRecentCookie.setEnabled(true);
 
             if (items.isEmpty()) {
                 detailTitleLabel.setText("Selected Item: (None)");
@@ -371,6 +464,6 @@ public class AuthRequestEditorTab_littlespidy implements ExtensionProvidedHttpRe
 
     @Override
     public boolean isModified() {
-        return false;
+        return isModified;
     }
 }
