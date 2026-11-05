@@ -30,14 +30,10 @@ public class MarkerRequestEditor_littlespidy extends JPanel {
         JButton clearMarkersBtn = new JButton("Clear Markers (§)");
         clearMarkersBtn.addActionListener(e -> clearMarkers());
 
-        JButton autoDetectBtn = new JButton("Auto-Detect Marker");
-        autoDetectBtn.addActionListener(e -> autoDetectMarker());
-
         markerStatusLabel = new JLabel("No markers defined (§...§)");
 
         toolbar.add(addMarkerBtn);
         toolbar.add(clearMarkersBtn);
-        toolbar.add(autoDetectBtn);
         toolbar.add(markerStatusLabel);
 
         requestArea = new JTextArea();
@@ -123,17 +119,6 @@ public class MarkerRequestEditor_littlespidy extends JPanel {
     public void clearMarkers() {
         String text = requestArea.getText();
         requestArea.setText(text.replace("§", ""));
-        updateMarkerStatus();
-    }
-
-    public void autoDetectMarker() {
-        String text = requestArea.getText().replace("§", "");
-        Pattern pattern = Pattern.compile("(?i)(url|dest|redirect|path|uri|target|endpoint|link|webhook|callback)=([^&\\s]+)");
-        Matcher matcher = pattern.matcher(text);
-        if (matcher.find()) {
-            String newText = text.substring(0, matcher.start(2)) + "§" + matcher.group(2) + "§" + text.substring(matcher.end(2));
-            requestArea.setText(newText);
-        }
         updateMarkerStatus();
     }
 

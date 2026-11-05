@@ -19,35 +19,25 @@ A high-performance, native Java Burp Suite extension converting the SSRFmap CLI 
    - Highlight any candidate parameter value in the raw HTTP request editor.
    - Click **Add Section Marker (§)** to wrap the target value in `§...§`.
    - Click **Clear Markers (§)** to strip marker symbols while preserving original text.
-   - Click **Auto-Detect Marker** to automatically identify potential SSRF parameters (e.g. `url=`, `redirect=`, `path=`, `dest=`, `webhook=`).
 
-4. **Comprehensive Test Modules**:
-   - **7 Core Protocol Schemes**:
-     - `file://`: Local file disclosure (`/etc/passwd`, `/etc/hosts`, `/proc/self/environ`, `c:/windows/win.ini`).
-     - `dict://`: In-memory service probing (Memcached `stat`, Redis `info`, FTP `quit`).
-     - `sftp://`: Out-of-band SSH/SFTP callbacks and internal port probes.
-     - `tftp://`: UDP TFTP interactions and file extraction probes.
-     - `ldap://`: Out-of-band directory queries and internal root DSE queries.
-     - `smtp://`: Mail injection and local MTA probes.
-     - `gopher://`: Raw TCP protocol tunneling for Redis commands, FastCGI PHP-FPM, and Memcached.
-   - **Cloud Metadata Services**:
-     - AWS EC2 IMDSv1 and IAM security credentials.
-     - Google Cloud Compute Metadata (`computeMetadata/v1`).
-     - Alibaba Cloud ECS Metadata (`100.100.100.200`).
-     - DigitalOcean Droplet Metadata JSON.
-     - Azure Instance Metadata Service.
-   - **Service Exploits & Scanning**:
-     - Redis INFO and command execution.
-     - Docker Remote API container inspection.
-     - FastCGI PHP-FPM handshake tunnel.
-     - ReadFiles Linux/Windows file diffing.
-     - Port Scanner for common internal TCP ports.
+4. **HTTP 400 Bad Request Fix & Normalization**:
+   - Automatically normalizes all request line breaks to RFC-compliant `\r\n` (CRLF).
+   - Automatically recalculates and updates the `Content-Length` header whenever payload substitution modifies the body byte size, preventing server-side body parsing and truncation errors.
 
-5. **Hybrid Verification & Traffic Inspector**:
-   - **Automated Baseline**: Sends an initial request with the original marked value to capture baseline response size, status code, and content.
-   - **Diff Analyzer**: Real-time line-by-line diffing and regex indicator detection (`root:x:0:0:`, `redis_version:`, `ami-id`, etc.).
-   - **Burp Collaborator Integration**: Generates unique subdomains and automatically polls for out-of-band DNS, HTTP, and SMTP callbacks.
-   - **Split Traffic Viewer**: Interactive table paired with synchronized Burp Montoya Request/Response editors, Response Diff analysis tab, and Collaborator detail logs.
+5. **Button-Driven Test Execution**:
+   - **Protocol Schemes**: Single **Run All Protocols** button testing `file://`, `dict://`, `sftp://`, `tftp://`, `ldap://`, `smtp://`, `gopher://`, `http://`, and `https://`.
+   - **Cloud Metadata Attacks**: Individual buttons for **AWS**, **GCP**, **Azure**, **Alibaba**, **DigitalOcean**, plus **Run All Clouds**.
+   - **SSRF Service Exploits**: Individual buttons for **Redis**, **Docker**, **FastCGI**, **ReadFiles**, **Memcached**, **PortScan**, plus **Run All Services**.
+   - **Collaborator Dedicated Probe**: Generates a unique Burp Collaborator URL, injects it into the marked parameter, sends the request immediately, and polls for DNS, HTTP, and SMTP callbacks.
+   - **View Payloads**: Displays a searchable, categorized library of all loaded payloads and raw JSON source.
+
+6. **JSON-Based Payload Storage**:
+   - All payload definitions are stored in `src/main/resources/payloads_littlespidy.json`.
+   - Includes extensive cloud metadata endpoints for AWS (16 URLs including IAM, user-data, instance-identity), Google Cloud (6 URLs), and Azure (3 URLs).
+
+7. **History Retention & Multi-Select Attack Filter**:
+   - Log history is preserved across attack runs (results append continuously).
+   - Multi-select dropdown in the results toolbar allows filtering visible log rows by attack types (`file`, `aws`, `redis`, `collaborator`, etc.).
 
 ---
 
@@ -72,14 +62,3 @@ The compiled fat-JAR will be generated at:
    - Extension type: **Java**
    - Extension file: Select `build/libs/ssrfmap-littlespidy-1.0.0.jar`
 4. Click **Next** and verify the extension tab **SSRFmap** appears in the top menu bar.
-
----
-
-## Interactive HTML Mockup Preview
-A standalone HTML5 UI preview is available at:
-`ssrfmap_ui_preview_littlespidy.html`
-
-To launch:
-```bash
-xdg-open ssrfmap_ui_preview_littlespidy.html
-```

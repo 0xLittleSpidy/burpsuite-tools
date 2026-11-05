@@ -10,20 +10,21 @@ import burp.api.montoya.ui.editor.HttpRequestEditor;
 import burp.api.montoya.ui.editor.HttpResponseEditor;
 import burp.ssrfmap.engine.CollaboratorManager_littlespidy;
 import burp.ssrfmap.engine.SSRFScanEngine_littlespidy;
+import burp.ssrfmap.model.SSRFModuleCategory_littlespidy;
 import burp.ssrfmap.model.SSRFResultEntry_littlespidy;
-import burp.ssrfmap.modules.CloudMetadataModules_littlespidy;
-import burp.ssrfmap.modules.ProtocolModules_littlespidy;
 import burp.ssrfmap.modules.SSRFPayloadItem_littlespidy;
-import burp.ssrfmap.modules.ServiceExploitModules_littlespidy;
+import burp.ssrfmap.modules.SSRFPayloadManager_littlespidy;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -31,8 +32,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -60,23 +63,20 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
 
     private final HttpRequestEditor requestViewer;
     private final HttpResponseEditor responseViewer;
-    private final JTextArea diffViewer;
     private final JTextArea collabViewer;
-
-    private final Map<String, JCheckBox> protocolCheckboxes = new HashMap<>();
-    private final Map<String, JCheckBox> cloudCheckboxes = new HashMap<>();
-    private final Map<String, JCheckBox> serviceCheckboxes = new HashMap<>();
 
     private final JTextField concurrencyField;
     private final JTextField delayField;
     private final JCheckBox useCollaboratorCheck;
-    private final JCheckBox useDiffCheck;
 
-    private final JButton startAttackBtn;
     private final JButton pauseAttackBtn;
     private final JButton stopAttackBtn;
     private final JProgressBar progressBar;
     private final JLabel progressStatusLabel;
+
+    private final JButton filterDropdownBtn;
+    private final Set<String> activeFilterTypes = new HashSet<>();
+    private final List<JCheckBox> filterCheckboxes = new ArrayList<>();
 
     private SSRFScanEngine_littlespidy currentEngine;
 
@@ -88,7 +88,7 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         this.api = api;
         this.collaboratorManager = collaboratorManager;
 
-        // --- 1. Left Side: Target, Request, Modules, Settings, Action controls ---
+        // --- 1. Left Side: Target, Request, Action Buttons, Settings ---
         JPanel leftPanel = new JPanel(new BorderLayout(0, 4));
         leftPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
@@ -107,7 +107,6 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         protocolCombo = new JComboBox<>(new String[]{"HTTPS", "HTTP"});
         targetPanel.add(protocolCombo);
 
-        // Populate initial target info
         if (initialReqResp != null && initialReqResp.request() != null && initialReqResp.request().httpService() != null) {
             HttpService svc = initialReqResp.request().httpService();
             hostField.setText(svc.host());
@@ -130,46 +129,107 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         topConfigPanel.add(targetPanel, BorderLayout.NORTH);
         topConfigPanel.add(requestEditor, BorderLayout.CENTER);
 
-        // Scrollable Options: Modules & Settings
-        JPanel optionsContainer = new JPanel();
-        optionsContainer.setLayout(new BoxLayout(optionsContainer, BoxLayout.Y_AXIS));
+        // Scrollable Options: Categorized Attack Buttons
+        JPanel actionPanelsContainer = new JPanel();
+        actionPanelsContainer.setLayout(new BoxLayout(actionPanelsContainer, BoxLayout.Y_AXIS));
 
-        // Protocols Group (7 Requested Protocols)
-        JPanel protocolsGroup = new JPanel(new GridLayout(4, 2, 4, 2));
-        protocolsGroup.setBorder(BorderFactory.createTitledBorder("Protocol Schemes (7 Core Vectors)"));
-        String[] protocols = new String[]{"file", "dict", "sftp", "tftp", "ldap", "smtp", "gopher"};
-        for (String p : protocols) {
-            JCheckBox cb = new JCheckBox(p + "://", true);
-            protocolCheckboxes.put(p, cb);
-            protocolsGroup.add(cb);
-        }
-        optionsContainer.add(protocolsGroup);
+        // 1. Protocol Schemes (Only [All Protocols] button)
+        JPanel protocolsGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        protocolsGroup.setBorder(BorderFactory.createTitledBorder("Protocol Schemes (file, dict, sftp, tftp, ldap, smtp, gopher, http, https)"));
+        JButton allProtocolsBtn = new JButton("Run All Protocols");
+        allProtocolsBtn.setFont(allProtocolsBtn.getFont().deriveFont(Font.BOLD));
+        allProtocolsBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getAllProtocolPayloads(), "All Protocols"));
+        protocolsGroup.add(allProtocolsBtn);
+        actionPanelsContainer.add(protocolsGroup);
 
-        // Cloud Metadata Group
-        JPanel cloudGroup = new JPanel(new GridLayout(3, 2, 4, 2));
-        cloudGroup.setBorder(BorderFactory.createTitledBorder("Cloud Metadata Services"));
-        String[] clouds = new String[]{"aws", "gcp", "alibaba", "digitalocean", "azure"};
-        for (String c : clouds) {
-            JCheckBox cb = new JCheckBox(c.toUpperCase() + " Metadata", true);
-            cloudCheckboxes.put(c, cb);
-            cloudGroup.add(cb);
-        }
-        optionsContainer.add(cloudGroup);
+        // 2. Cloud Metadata Group (Individual buttons + All Clouds)
+        JPanel cloudGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        cloudGroup.setBorder(BorderFactory.createTitledBorder("Cloud Metadata Attacks"));
 
-        // Service Exploits Group
-        JPanel servicesGroup = new JPanel(new GridLayout(3, 2, 4, 2));
-        servicesGroup.setBorder(BorderFactory.createTitledBorder("SSRFmap Service Exploits"));
-        String[] services = new String[]{"redis", "docker", "fastcgi", "readfiles", "memcached", "portscan"};
-        for (String s : services) {
-            JCheckBox cb = new JCheckBox(s.substring(0, 1).toUpperCase() + s.substring(1), !s.equals("portscan"));
-            serviceCheckboxes.put(s, cb);
-            servicesGroup.add(cb);
-        }
-        optionsContainer.add(servicesGroup);
+        JButton awsBtn = new JButton("AWS");
+        awsBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getCloudPayloads("aws"), "AWS Metadata"));
+        cloudGroup.add(awsBtn);
 
-        // Attack Settings Group
+        JButton gcpBtn = new JButton("GCP");
+        gcpBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getCloudPayloads("gcp"), "Google Cloud Metadata"));
+        cloudGroup.add(gcpBtn);
+
+        JButton azureBtn = new JButton("Azure");
+        azureBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getCloudPayloads("azure"), "Azure Metadata"));
+        cloudGroup.add(azureBtn);
+
+        JButton alibabaBtn = new JButton("Alibaba");
+        alibabaBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getCloudPayloads("alibaba"), "Alibaba Metadata"));
+        cloudGroup.add(alibabaBtn);
+
+        JButton doBtn = new JButton("DigitalOcean");
+        doBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getCloudPayloads("digitalocean"), "DigitalOcean Metadata"));
+        cloudGroup.add(doBtn);
+
+        JButton allCloudsBtn = new JButton("Run All Clouds");
+        allCloudsBtn.setFont(allCloudsBtn.getFont().deriveFont(Font.BOLD));
+        allCloudsBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getAllCloudPayloads(), "All Cloud Metadata"));
+        cloudGroup.add(allCloudsBtn);
+
+        actionPanelsContainer.add(cloudGroup);
+
+        // 3. SSRF Service Exploits Group (Individual buttons + All Services)
+        JPanel servicesGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        servicesGroup.setBorder(BorderFactory.createTitledBorder("SSRF Service Exploits & Probes"));
+
+        JButton redisBtn = new JButton("Redis");
+        redisBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getServicePayloads("redis"), "Redis Exploit"));
+        servicesGroup.add(redisBtn);
+
+        JButton dockerBtn = new JButton("Docker");
+        dockerBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getServicePayloads("docker"), "Docker API"));
+        servicesGroup.add(dockerBtn);
+
+        JButton fastcgiBtn = new JButton("FastCGI");
+        fastcgiBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getServicePayloads("fastcgi"), "FastCGI Handshake"));
+        servicesGroup.add(fastcgiBtn);
+
+        JButton readfilesBtn = new JButton("ReadFiles");
+        readfilesBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getServicePayloads("readfiles"), "ReadFiles"));
+        servicesGroup.add(readfilesBtn);
+
+        JButton memcachedBtn = new JButton("Memcached");
+        memcachedBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getServicePayloads("memcached"), "Memcached"));
+        servicesGroup.add(memcachedBtn);
+
+        JButton portscanBtn = new JButton("PortScan");
+        portscanBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getServicePayloads("portscan"), "Port Scanner"));
+        servicesGroup.add(portscanBtn);
+
+        JButton allServicesBtn = new JButton("Run All Services");
+        allServicesBtn.setFont(allServicesBtn.getFont().deriveFont(Font.BOLD));
+        allServicesBtn.addActionListener(e -> launchAttack(SSRFPayloadManager_littlespidy.getInstance().getAllServicePayloads(), "All Service Exploits"));
+        servicesGroup.add(allServicesBtn);
+
+        actionPanelsContainer.add(servicesGroup);
+
+        // 4. Dedicated Tools & Collaborator Group
+        JPanel toolsGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        toolsGroup.setBorder(BorderFactory.createTitledBorder("Collaborator & Utilities"));
+
+        JButton collabCheckBtn = new JButton("Collaborator Probe");
+        collabCheckBtn.setFont(collabCheckBtn.getFont().deriveFont(Font.BOLD));
+        collabCheckBtn.addActionListener(e -> runCollaboratorProbe());
+        toolsGroup.add(collabCheckBtn);
+
+        JButton viewPayloadsBtn = new JButton("View Payloads");
+        viewPayloadsBtn.addActionListener(e -> {
+            Frame topFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+            PayloadViewerDialog_littlespidy dialog = new PayloadViewerDialog_littlespidy(topFrame);
+            dialog.setVisible(true);
+        });
+        toolsGroup.add(viewPayloadsBtn);
+
+        actionPanelsContainer.add(toolsGroup);
+
+        // 5. Execution Settings
         JPanel settingsGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        settingsGroup.setBorder(BorderFactory.createTitledBorder("Attack Settings"));
+        settingsGroup.setBorder(BorderFactory.createTitledBorder("Execution Settings"));
         settingsGroup.add(new JLabel("Threads:"));
         concurrencyField = new JTextField("5", 3);
         settingsGroup.add(concurrencyField);
@@ -181,22 +241,16 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         useCollaboratorCheck = new JCheckBox("Burp Collaborator", collaboratorManager.isAvailable());
         useCollaboratorCheck.setEnabled(collaboratorManager.isAvailable());
         settingsGroup.add(useCollaboratorCheck);
+        actionPanelsContainer.add(settingsGroup);
 
-        useDiffCheck = new JCheckBox("Baseline Diffing", true);
-        settingsGroup.add(useDiffCheck);
-        optionsContainer.add(settingsGroup);
+        JScrollPane optionsScroll = new JScrollPane(actionPanelsContainer);
+        optionsScroll.setPreferredSize(new Dimension(380, 240));
 
-        JScrollPane optionsScroll = new JScrollPane(optionsContainer);
-        optionsScroll.setPreferredSize(new Dimension(380, 200));
-
-        // Action Buttons & Progress Bar
+        // Progress & Execution Controls
         JPanel actionPanel = new JPanel(new BorderLayout(4, 4));
         actionPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        startAttackBtn = new JButton("Start Attack");
-        startAttackBtn.addActionListener(e -> startAttack());
-
+        JPanel controlButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
         pauseAttackBtn = new JButton("Pause");
         pauseAttackBtn.setEnabled(false);
         pauseAttackBtn.addActionListener(e -> togglePause());
@@ -205,9 +259,8 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         stopAttackBtn.setEnabled(false);
         stopAttackBtn.addActionListener(e -> stopAttack());
 
-        buttonsPanel.add(startAttackBtn);
-        buttonsPanel.add(pauseAttackBtn);
-        buttonsPanel.add(stopAttackBtn);
+        controlButtonsPanel.add(pauseAttackBtn);
+        controlButtonsPanel.add(stopAttackBtn);
 
         JPanel progressStatusPanel = new JPanel(new BorderLayout(4, 2));
         progressBar = new JProgressBar(0, 100);
@@ -218,11 +271,11 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         progressStatusPanel.add(progressBar, BorderLayout.CENTER);
         progressStatusPanel.add(progressStatusLabel, BorderLayout.SOUTH);
 
-        actionPanel.add(buttonsPanel, BorderLayout.NORTH);
+        actionPanel.add(controlButtonsPanel, BorderLayout.NORTH);
         actionPanel.add(progressStatusPanel, BorderLayout.CENTER);
 
         JSplitPane leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topConfigPanel, optionsScroll);
-        leftSplit.setResizeWeight(0.55);
+        leftSplit.setResizeWeight(0.5);
 
         leftPanel.add(leftSplit, BorderLayout.CENTER);
         leftPanel.add(actionPanel, BorderLayout.SOUTH);
@@ -231,11 +284,15 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         JPanel rightPanel = new JPanel(new BorderLayout(0, 4));
         rightPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        // Filter Bar
+        // Filter Bar with Multi-Select Dropdown
         JPanel filterBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        filterBar.add(new JLabel("Filter:"));
-        JTextField filterInput = new JTextField(24);
+        filterBar.add(new JLabel("Search:"));
+        JTextField filterInput = new JTextField(16);
         filterBar.add(filterInput);
+
+        filterDropdownBtn = new JButton("Attack Filter (All Types)");
+        setupMultiSelectFilterPopup();
+        filterBar.add(filterDropdownBtn);
 
         JButton clearTableBtn = new JButton("Clear Results");
         filterBar.add(clearTableBtn);
@@ -247,20 +304,9 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         resultsTable.setRowSorter(tableSorter);
 
         filterInput.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            private void updateFilter() {
-                String text = filterInput.getText();
-                if (text.trim().isEmpty()) {
-                    tableSorter.setRowFilter(null);
-                } else {
-                    tableSorter.setRowFilter(RowFilter.regexFilter("(?i)" + PatternQuote(text)));
-                }
-            }
-            @Override
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateFilter(); }
-            @Override
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateFilter(); }
-            @Override
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateFilter(); }
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilters(filterInput.getText()); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilters(filterInput.getText()); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilters(filterInput.getText()); }
         });
 
         clearTableBtn.addActionListener(e -> {
@@ -269,21 +315,17 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         });
 
         JScrollPane tableScroll = new JScrollPane(resultsTable);
-        tableScroll.setPreferredSize(new Dimension(500, 220));
+        tableScroll.setPreferredSize(new Dimension(500, 240));
 
         JPanel topTablePanel = new JPanel(new BorderLayout(0, 4));
         topTablePanel.add(filterBar, BorderLayout.NORTH);
         topTablePanel.add(tableScroll, BorderLayout.CENTER);
 
-        // Lower Tabbed Pane: Raw Request, Raw Response, Diff, Collaborator
+        // Lower Tabbed Pane: Raw Request & Response, Collaborator Details (DIFF REMOVED)
         JTabbedPane viewerTabs = new JTabbedPane();
 
         requestViewer = api.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
         responseViewer = api.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
-
-        diffViewer = new JTextArea();
-        diffViewer.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        diffViewer.setEditable(false);
 
         collabViewer = new JTextArea();
         collabViewer.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
@@ -297,7 +339,6 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         reqRespSplit.setResizeWeight(0.5);
 
         viewerTabs.addTab("Raw Request & Response", reqRespSplit);
-        viewerTabs.addTab("Response Diff Analysis", new JScrollPane(diffViewer));
         viewerTabs.addTab("Collaborator Details", new JScrollPane(collabViewer));
 
         resultsTable.getSelectionModel().addListSelectionListener(e -> {
@@ -318,6 +359,110 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
         mainSplit.setResizeWeight(0.42);
         add(mainSplit, BorderLayout.CENTER);
+    }
+
+    private void setupMultiSelectFilterPopup() {
+        String[] types = new String[]{
+            "baseline", "file", "dict", "sftp", "tftp", "ldap", "smtp", "gopher", "http", "https",
+            "aws", "gcp", "azure", "alibaba", "digitalocean",
+            "redis", "docker", "fastcgi", "readfiles", "memcached", "portscan", "collaborator"
+        };
+
+        for (String t : types) {
+            activeFilterTypes.add(t);
+        }
+
+        JPopupMenu popup = new JPopupMenu();
+
+        JPanel checkAllPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        JButton selectAllBtn = new JButton("Select All");
+        JButton deselectAllBtn = new JButton("Clear All");
+
+        selectAllBtn.addActionListener(e -> {
+            for (JCheckBox cb : filterCheckboxes) {
+                cb.setSelected(true);
+                activeFilterTypes.add(cb.getText());
+            }
+            updateFilterButtonText();
+            applyFilters("");
+        });
+
+        deselectAllBtn.addActionListener(e -> {
+            for (JCheckBox cb : filterCheckboxes) {
+                cb.setSelected(false);
+                activeFilterTypes.remove(cb.getText());
+            }
+            updateFilterButtonText();
+            applyFilters("");
+        });
+
+        checkAllPanel.add(selectAllBtn);
+        checkAllPanel.add(deselectAllBtn);
+        popup.add(checkAllPanel);
+        popup.addSeparator();
+
+        JPanel itemsGrid = new JPanel(new GridLayout(0, 2, 4, 2));
+        for (String type : types) {
+            JCheckBox cb = new JCheckBox(type, true);
+            filterCheckboxes.add(cb);
+            cb.addActionListener(e -> {
+                if (cb.isSelected()) {
+                    activeFilterTypes.add(type);
+                } else {
+                    activeFilterTypes.remove(type);
+                }
+                updateFilterButtonText();
+                applyFilters("");
+            });
+            itemsGrid.add(cb);
+        }
+
+        popup.add(itemsGrid);
+
+        filterDropdownBtn.addActionListener(e -> {
+            popup.show(filterDropdownBtn, 0, filterDropdownBtn.getHeight());
+        });
+    }
+
+    private void updateFilterButtonText() {
+        int total = filterCheckboxes.size();
+        int active = activeFilterTypes.size();
+        if (active == total) {
+            filterDropdownBtn.setText("Attack Filter (All Types)");
+        } else if (active == 0) {
+            filterDropdownBtn.setText("Attack Filter (None)");
+        } else {
+            filterDropdownBtn.setText("Attack Filter (" + active + "/" + total + ")");
+        }
+    }
+
+    private void applyFilters(String searchText) {
+        List<RowFilter<SSRFTableModel_littlespidy, Integer>> filters = new ArrayList<>();
+
+        if (!searchText.trim().isEmpty()) {
+            filters.add(RowFilter.regexFilter("(?i)" + java.util.regex.Pattern.quote(searchText.trim())));
+        }
+
+        if (activeFilterTypes.size() < filterCheckboxes.size()) {
+            RowFilter<SSRFTableModel_littlespidy, Integer> typeFilter = new RowFilter<SSRFTableModel_littlespidy, Integer>() {
+                @Override
+                public boolean include(Entry<? extends SSRFTableModel_littlespidy, ? extends Integer> entry) {
+                    Object moduleObj = entry.getValue(1);
+                    if (moduleObj == null) return false;
+                    String mod = moduleObj.toString().toLowerCase();
+                    return activeFilterTypes.contains(mod);
+                }
+            };
+            filters.add(typeFilter);
+        }
+
+        if (filters.isEmpty()) {
+            tableSorter.setRowFilter(null);
+        } else if (filters.size() == 1) {
+            tableSorter.setRowFilter(filters.get(0));
+        } else {
+            tableSorter.setRowFilter(RowFilter.andFilter(filters));
+        }
     }
 
     private void displayEntry(SSRFResultEntry_littlespidy entry) {
@@ -342,7 +487,6 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
             clearViewers();
         }
 
-        diffViewer.setText(entry.getBaselineDiff());
         String collabText = entry.getCollaboratorInteractionDetails();
         if (collabText == null || collabText.isEmpty()) {
             collabViewer.setText("Collaborator status: " + entry.getCollaboratorInfo());
@@ -354,11 +498,10 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
     private void clearViewers() {
         requestViewer.setRequest(HttpRequest.httpRequest(""));
         responseViewer.setResponse(burp.api.montoya.http.message.responses.HttpResponse.httpResponse(""));
-        diffViewer.setText("");
         collabViewer.setText("");
     }
 
-    private void startAttack() {
+    private void runCollaboratorProbe() {
         if (!requestEditor.hasMarker()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -366,6 +509,35 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
                     "Marker Required",
                     JOptionPane.WARNING_MESSAGE
             );
+            return;
+        }
+
+        SSRFPayloadItem_littlespidy collabItem = new SSRFPayloadItem_littlespidy(
+                SSRFModuleCategory_littlespidy.PROTOCOL,
+                "collaborator",
+                "http://",
+                "Collaborator Dedicated Out-Of-Band Probe",
+                "http://{COLLABORATOR_HOST}/",
+                Collections.emptyList(),
+                true
+        );
+
+        launchAttack(Collections.singletonList(collabItem), "Collaborator Dedicated Probe");
+    }
+
+    private void launchAttack(List<SSRFPayloadItem_littlespidy> payloads, String attackLabel) {
+        if (!requestEditor.hasMarker()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please highlight parameter value in the request editor and click 'Add Section Marker (§)' first.",
+                    "Marker Required",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        if (payloads == null || payloads.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No payloads found for this category.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -391,43 +563,14 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         } catch (NumberFormatException ignored) {}
 
         boolean useCollab = useCollaboratorCheck.isSelected();
-        boolean useDiff = useDiffCheck.isSelected();
 
-        // Build Payload Queue based on checked boxes
-        List<SSRFPayloadItem_littlespidy> queue = new ArrayList<>();
-
-        for (Map.Entry<String, JCheckBox> entry : protocolCheckboxes.entrySet()) {
-            if (entry.getValue().isSelected()) {
-                queue.addAll(ProtocolModules_littlespidy.getPayloads(entry.getKey()));
-            }
-        }
-
-        for (Map.Entry<String, JCheckBox> entry : cloudCheckboxes.entrySet()) {
-            if (entry.getValue().isSelected()) {
-                queue.addAll(CloudMetadataModules_littlespidy.getPayloads(entry.getKey()));
-            }
-        }
-
-        for (Map.Entry<String, JCheckBox> entry : serviceCheckboxes.entrySet()) {
-            if (entry.getValue().isSelected()) {
-                queue.addAll(ServiceExploitModules_littlespidy.getPayloads(entry.getKey()));
-            }
-        }
-
-        if (queue.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No test modules selected. Please check at least one scheme/module.", "Warning", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        tableModel.clear();
-        clearViewers();
-
-        startAttackBtn.setEnabled(false);
+        // Note: Do not clear tableModel, append results to existing history
         pauseAttackBtn.setEnabled(true);
         pauseAttackBtn.setText("Pause");
         stopAttackBtn.setEnabled(true);
         progressBar.setValue(0);
-        progressBar.setString("0 / " + queue.size());
+        progressBar.setString("0 / " + payloads.size());
+        progressStatusLabel.setText("Status: Launching " + attackLabel + " (" + payloads.size() + " payloads)...");
 
         currentEngine = new SSRFScanEngine_littlespidy(
                 api,
@@ -435,11 +578,10 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
                 requestEditor,
                 tableModel,
                 collaboratorManager,
-                queue,
+                payloads,
                 concurrency,
                 delay,
                 useCollab,
-                useDiff,
                 new SSRFScanEngine_littlespidy.ScanProgressListener() {
                     @Override
                     public void onProgress(int current, int total) {
@@ -458,7 +600,6 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
                     @Override
                     public void onFinished() {
                         SwingUtilities.invokeLater(() -> {
-                            startAttackBtn.setEnabled(true);
                             pauseAttackBtn.setEnabled(false);
                             stopAttackBtn.setEnabled(false);
                         });
@@ -484,9 +625,5 @@ public class SSRFmapSessionTab_littlespidy extends JPanel {
         if (currentEngine != null) {
             currentEngine.stop();
         }
-    }
-
-    private static String PatternQuote(String s) {
-        return java.util.regex.Pattern.quote(s);
     }
 }
