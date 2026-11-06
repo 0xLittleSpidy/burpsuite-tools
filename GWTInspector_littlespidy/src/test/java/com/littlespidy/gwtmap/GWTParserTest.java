@@ -269,6 +269,105 @@ public class GWTParserTest {
     }
 
     @Test
+    public void testMultiVariableCommaSeparatedIndexing() {
+        List<String> code = List.of(
+                "var aG='boolean',bG='number',jG='AuthService_Proxy',kG='com.apex.intranet.client.service.AuthService';",
+                "var lG='java.lang.String/2004016611',tG='EmployeeService_Proxy',uG='com.apex.intranet.client.service.EmployeeService';"
+        );
+
+        java.util.Map<String, String> varMap = GWTParser.buildVariableMap(code);
+        assertEquals("'AuthService_Proxy'", varMap.get("jG"));
+        assertEquals("'com.apex.intranet.client.service.AuthService'", varMap.get("kG"));
+        assertEquals("'java.lang.String/2004016611'", varMap.get("lG"));
+        assertEquals("'EmployeeService_Proxy'", varMap.get("tG"));
+        assertEquals("'com.apex.intranet.client.service.EmployeeService'", varMap.get("uG"));
+
+        assertEquals("AuthService_Proxy", GWTParser.parseParameter(varMap, "jG"));
+        assertEquals("com.apex.intranet.client.service.AuthService", GWTParser.parseParameter(varMap, "kG"));
+        assertEquals("java.lang.String/2004016611", GWTParser.parseParameter(varMap, "lG"));
+    }
+
+    @Test
+    public void testObfuscatedMultiServiceMethodResolution() {
+        List<String> lines = List.of(
+                "var jG='AuthService_Proxy',kG='com.apex.intranet.client.service.AuthService',tG='EmployeeService_Proxy',uG='com.apex.intranet.client.service.EmployeeService';",
+                "zc.call(this, ti(), 'authService', '9827AB53D292F4F2BABC31CA192991B6', Uc);",
+                "zc.call(this, ti(), 'employeeService', 'A30C97B80BD57F2E39BD65D52437FFDC', dd);",
+                "d=new Jv(b,jG,'login');",
+                "try {",
+                "h=Iv(d,kG,2);",
+                "yv(h,''+mv(h,'user'));",
+                "yv(h,''+mv(h,'pass'));",
+                "Hv(d,e,(Yv(),Uv));",
+                "}catch(a){}",
+                "f=new Jv(b,tG,'searchEmployees');",
+                "try {",
+                "h=Iv(f,uG,1);",
+                "yv(h,''+mv(h,'query'));",
+                "Hv(f,e,(Yv(),Uv));",
+                "}catch(a){}"
+        );
+
+        java.util.Map<String, String> varMap = GWTParser.buildVariableMap(lines);
+        List<com.littlespidy.gwtmap.model.GWTService> services = GWTParser.extractServiceInfo(lines, varMap);
+        assertEquals(2, services.size());
+
+        com.littlespidy.gwtmap.model.GWTModuleInfo moduleInfo = new com.littlespidy.gwtmap.model.GWTModuleInfo();
+        moduleInfo.setBaseUrl("http://localhost:8080/intranet/");
+        moduleInfo.setRpcVersion("7");
+        moduleInfo.setRpcFlags("0");
+
+        List<com.littlespidy.gwtmap.model.GWTMethod> methods = GWTParser.extractMethodInfo(lines, services, moduleInfo, varMap);
+        assertEquals(2, methods.size());
+
+        com.littlespidy.gwtmap.model.GWTMethod m1 = methods.stream().filter(m -> m.getMethodName().equals("login")).findFirst().orElseThrow();
+        assertEquals("AuthService_Proxy", m1.getServiceProxy());
+        assertEquals("com.apex.intranet.client.service.AuthService", m1.getRmtSvcIntName());
+        assertNotNull(m1.getService());
+        assertEquals("authService", m1.getService().getServicePath());
+        assertEquals("http://localhost:8080/intranet/authService", m1.getFullEndpointUrl());
+
+        com.littlespidy.gwtmap.model.GWTMethod m2 = methods.stream().filter(m -> m.getMethodName().equals("searchEmployees")).findFirst().orElseThrow();
+        assertEquals("EmployeeService_Proxy", m2.getServiceProxy());
+        assertEquals("com.apex.intranet.client.service.EmployeeService", m2.getRmtSvcIntName());
+        assertNotNull(m2.getService());
+        assertEquals("employeeService", m2.getService().getServicePath());
+        assertEquals("http://localhost:8080/intranet/employeeService", m2.getFullEndpointUrl());
+
+        // Both services must have 1 method count
+        assertEquals(1, services.get(0).getMethodCount());
+        assertEquals(1, services.get(1).getMethodCount());
+    }
+
+    @Test
+    public void testRealLabPermutationAndFragment() throws Exception {
+        java.io.File file = new java.io.File("/tmp/intranet_full.js");
+        if (!file.exists()) return;
+
+        String content = java.nio.file.Files.readString(file.toPath());
+        List<String> cleaned = com.littlespidy.gwtmap.parser.GWTCodeCleaner.cleanCode(
+                content, com.littlespidy.gwtmap.parser.GWTClassifier.CodeType.PERMUTATION_OBFUSCATED
+        );
+
+        java.util.Map<String, String> varMap = GWTParser.buildVariableMap(cleaned);
+        List<com.littlespidy.gwtmap.model.GWTService> services = GWTParser.extractServiceInfo(cleaned, varMap);
+        assertEquals(6, services.size());
+
+        com.littlespidy.gwtmap.model.GWTModuleInfo info = new com.littlespidy.gwtmap.model.GWTModuleInfo();
+        info.setBaseUrl("http://localhost:8080/intranet/");
+        info.setActivePermutation("1BCD1E256499F6BB0BA03C0BC74555EF");
+        info.setRpcVersion("7");
+        info.setRpcFlags("0");
+
+        List<com.littlespidy.gwtmap.model.GWTMethod> methods = GWTParser.extractMethodInfo(cleaned, services, info, varMap);
+        assertEquals(15, methods.size());
+
+        for (com.littlespidy.gwtmap.model.GWTService s : services) {
+            assertTrue(s.getMethodCount() > 0, "Service " + s.getServicePath() + " must have > 0 methods, had: " + s.getMethodCount());
+        }
+    }
+
+    @Test
     public void testZeroEmojisInCodebase() throws Exception {
         java.nio.file.Path srcDir = java.nio.file.Paths.get("src");
         java.util.regex.Pattern emojiPattern = java.util.regex.Pattern.compile("[\\x{1F300}-\\x{1F9FF}\\x{2600}-\\x{26FF}\\x{2700}-\\x{27BF}]");

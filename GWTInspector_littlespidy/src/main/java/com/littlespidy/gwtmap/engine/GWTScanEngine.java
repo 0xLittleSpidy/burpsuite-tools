@@ -329,7 +329,7 @@ public class GWTScanEngine {
         String perm = info.getActivePermutation();
         if (perm.equals("Unknown")) return;
 
-        while (misses < 2 && frag < 100) {
+        while (misses < 3 && frag < 100) {
             String fragUrl = info.getBaseUrl() + "deferredjs/" + perm + "/" + frag + ".cache.js";
             try {
                 long fStart = System.currentTimeMillis();

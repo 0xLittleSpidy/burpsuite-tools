@@ -61,6 +61,9 @@ public class GWTParser {
     private static final Pattern RMT_SVC_PATTERN_1 = Pattern.compile("^[ \\t]*(?:" + R_VAR + " ?= ?)?(" + R_VAR + ")\\(" + R_VAR + ", ?([^,]+), ?([^,]+)\\);");
     private static final Pattern RMT_SVC_PATTERN_2 = Pattern.compile(R_VAR + " ?= ?\\(.*\\(" + R_VAR + ", ?([^,]+)\\).*, ?.*\\(.*\\).*, ?([^,]+)\\), ?.*\\);");
     private static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("^[ \\t]*(?:var )?([a-zA-Z0-9_.\\$]+) ?= ?(?!=)([^;\\r\\n]+);?");
+    private static final Pattern VAR_ASSIGN_PATTERN = Pattern.compile(
+            "([a-zA-Z0-9_.\\$]+)\\s*=\\s*('([^'\\\\]*(\\\\.[^'\\\\]*)*)'|\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"|[0-9]+)"
+    );
 
     public static final int MAX_METHOD_LOOKAHEAD = 80;
 
@@ -168,12 +171,17 @@ public class GWTParser {
     }
 
     public static Map<String, String> buildVariableMap(List<String> code) {
-        Map<String, String> map = new HashMap<>(code != null ? code.size() / 4 : 16);
+        Map<String, String> map = new HashMap<>(code != null ? code.size() / 2 : 16);
         if (code == null) return map;
         for (String line : code) {
-            Matcher m = ASSIGNMENT_PATTERN.matcher(line);
-            if (m.find()) {
+            if (!line.contains("=")) continue;
+            Matcher m = VAR_ASSIGN_PATTERN.matcher(line);
+            while (m.find()) {
                 map.put(m.group(1).trim(), m.group(2).trim());
+            }
+            Matcher single = ASSIGNMENT_PATTERN.matcher(line);
+            if (single.find()) {
+                map.putIfAbsent(single.group(1).trim(), single.group(2).trim());
             }
         }
         return map;
@@ -203,20 +211,33 @@ public class GWTParser {
         if (param == null) return "";
         param = param.trim();
         if (param.equals("null")) return "null";
-        if (param.startsWith("'") && param.endsWith("'")) {
+        if (param.startsWith("'") && param.endsWith("'") && param.length() >= 2) {
             return param.substring(1, param.length() - 1);
         }
-        if (param.startsWith("\"") && param.endsWith("\"")) {
+        if (param.startsWith("\"") && param.endsWith("\"") && param.length() >= 2) {
             return param.substring(1, param.length() - 1);
-        }
-        if (param.startsWith("'")) {
-            return param.replace("'", "");
         }
         if (isNumber(param)) {
             return param;
         }
         String resolved = findValue(null, varMap, param);
-        return resolved.replace("'", "").replace("\"", "");
+        if (resolved.startsWith("'") && resolved.endsWith("'") && resolved.length() >= 2) {
+            resolved = resolved.substring(1, resolved.length() - 1);
+        } else if (resolved.startsWith("\"") && resolved.endsWith("\"") && resolved.length() >= 2) {
+            resolved = resolved.substring(1, resolved.length() - 1);
+        }
+        if (varMap != null && varMap.containsKey(resolved)) {
+            String step2 = varMap.get(resolved);
+            if (step2 != null && !step2.isBlank()) {
+                resolved = step2.trim();
+                if (resolved.startsWith("'") && resolved.endsWith("'") && resolved.length() >= 2) {
+                    resolved = resolved.substring(1, resolved.length() - 1);
+                } else if (resolved.startsWith("\"") && resolved.endsWith("\"") && resolved.length() >= 2) {
+                    resolved = resolved.substring(1, resolved.length() - 1);
+                }
+            }
+        }
+        return resolved.replace("'", "").replace("\"", "").trim();
     }
 
     public static String parseParameter(List<String> code, String param) {
