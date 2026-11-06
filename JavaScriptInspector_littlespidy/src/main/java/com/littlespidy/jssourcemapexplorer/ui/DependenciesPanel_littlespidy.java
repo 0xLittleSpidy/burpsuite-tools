@@ -98,6 +98,9 @@ public class DependenciesPanel_littlespidy extends BaseFindingPanel_littlespidy 
             if (!matchesClassification(dep.getClassification())) {
                 continue;
             }
+            if (!matchesSourceType(dep.sourceType())) {
+                continue;
+            }
             if (!query.isEmpty()) {
                 boolean match = (dep.packageName() != null && dep.packageName().toLowerCase().contains(query))
                     || (dep.version() != null && dep.version().toLowerCase().contains(query))

@@ -16,9 +16,9 @@ import java.awt.*;
 public class PathRegexDialog_littlespidy extends JDialog {
 
     public PathRegexDialog_littlespidy(Window owner) {
-        super(owner, "Path Regex - Whitelist and Blacklist Rules", ModalityType.APPLICATION_MODAL);
+        super(owner, "Whitelist / Blacklist Rules", ModalityType.APPLICATION_MODAL);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(780, 520);
+        setSize(820, 520);
         setLocationRelativeTo(owner);
 
         JPanel mainPanel = new JPanel(new BorderLayout(8, 8));
@@ -57,21 +57,20 @@ public class PathRegexDialog_littlespidy extends JDialog {
         DefaultTableModel blackModel = new DefaultTableModel(blackCols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        blackModel.addRow(new Object[]{1, "from \"./<>\"", "from \"./...\" or from './...'", "Suppresses ECMAScript local relative module imports"});
-        blackModel.addRow(new Object[]{2, "import <> from \"./<>\"", "import ... from \"./...\"", "Suppresses full ECMAScript import declarations"});
-        blackModel.addRow(new Object[]{3, "Application/json", "application/json (case-insensitive)", "Suppresses Content-Type / Accept header MIME types"});
-        blackModel.addRow(new Object[]{4, "m/d/y and mm/dd/yy", "^\\d{1,2}/\\d{1,2}/\\d{2,4}$", "Suppresses slash-separated date strings (e.g. 1/1/24, 12/31/2026)"});
-        blackModel.addRow(new Object[]{5, "yyyy/mm/dd", "^\\d{4}/\\d{1,2}/\\d{1,2}$", "Suppresses ISO slash date formats (e.g. 2026/11/04)"});
-        blackModel.addRow(new Object[]{6, "//:0 (Invalid Protocol)", "^//:?\\d*$", "Suppresses invalid protocol-relative strings without http/https"});
-        blackModel.addRow(new Object[]{7, "Media and Assets", "\\.(?:png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|css|map)", "Suppresses static fonts, images, stylesheets, and maps"});
-        blackModel.addRow(new Object[]{8, "Code Artifacts", "^(?:e\\.g|i\\.e|etc|null|undefined|true|false)\\.", "Suppresses literal programming identifiers and documentation artifacts"});
-        blackModel.addRow(new Object[]{9, "Numeric Sequences", "^[0-9./]+$", "Suppresses isolated numeric fractions and version strings"});
+        blackModel.addRow(new Object[]{1, "Module Imports/Exports", "import/export ... from '...', import('...'), require('...')", "Suppresses ES6 module imports, dynamic imports, re-exports, and CommonJS requires"});
+        blackModel.addRow(new Object[]{2, "All Content-Types", "^(application|text|image|audio|video|multipart|font|model)/.*", "Suppresses all MIME Content-Type and Accept header definitions"});
+        blackModel.addRow(new Object[]{3, "m/d/y and mm/dd/yy", "^\\d{1,2}/\\d{1,2}/\\d{2,4}$", "Suppresses slash-separated date strings (e.g. 1/1/24, 12/31/2026)"});
+        blackModel.addRow(new Object[]{4, "yyyy/mm/dd", "^\\d{4}/\\d{1,2}/\\d{1,2}$", "Suppresses ISO slash date formats (e.g. 2026/11/04)"});
+        blackModel.addRow(new Object[]{5, "//:0 (Invalid Protocol)", "^//:?\\d*$", "Suppresses invalid protocol-relative strings without http/https"});
+        blackModel.addRow(new Object[]{6, "Media and Assets", "\\.(?:png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|css|map)", "Suppresses static fonts, images, stylesheets, and maps"});
+        blackModel.addRow(new Object[]{7, "Code Artifacts", "^(?:e\\.g|i\\.e|etc|null|undefined|true|false)\\.", "Suppresses literal programming identifiers and documentation artifacts"});
+        blackModel.addRow(new Object[]{8, "Numeric Sequences", "^[0-9./]+$", "Suppresses isolated numeric fractions and version strings"});
 
         JTable blackTable = new JTable(blackModel);
         blackTable.setRowHeight(22);
         blackTable.getColumnModel().getColumn(0).setMaxWidth(40);
         blackTable.getColumnModel().getColumn(1).setPreferredWidth(170);
-        blackTable.getColumnModel().getColumn(2).setPreferredWidth(220);
+        blackTable.getColumnModel().getColumn(2).setPreferredWidth(230);
         blackTable.getColumnModel().getColumn(3).setPreferredWidth(280);
 
         JPanel blackPanel = new JPanel(new BorderLayout());

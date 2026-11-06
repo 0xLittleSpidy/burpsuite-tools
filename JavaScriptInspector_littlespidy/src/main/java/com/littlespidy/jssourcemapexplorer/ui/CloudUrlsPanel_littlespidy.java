@@ -90,6 +90,9 @@ public class CloudUrlsPanel_littlespidy extends BaseFindingPanel_littlespidy {
             if (!matchesClassification(cu.classification())) {
                 continue;
             }
+            if (!matchesSourceType(cu.sourceType())) {
+                continue;
+            }
             if (!query.isEmpty()) {
                 boolean match = (cu.cloudUrl() != null && cu.cloudUrl().toLowerCase().contains(query))
                     || (cu.cloudProvider() != null && cu.cloudProvider().toLowerCase().contains(query))

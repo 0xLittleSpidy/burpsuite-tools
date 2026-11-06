@@ -66,7 +66,6 @@ public class SecretAndEndpointMiner {
 
     static {
         loadJsonPatterns();
-        loadResourceSignatures();
     }
 
     private static void loadJsonPatterns() {
@@ -79,36 +78,9 @@ public class SecretAndEndpointMiner {
                         try {
                             Pattern compiled = Pattern.compile(p.pattern);
                             List<String> kwList = p.keywords != null ? p.keywords : List.of();
-                            ALL_PATTERNS.add(new CuratedSecret(p.name, p.category, p.severity, p.confidence, compiled, p.needsEntropy, kwList));
+                            ALL_PATTERNS.add(new CuratedSecret(p.name, p.category, p.severity != null ? p.severity : "High", p.confidence, compiled, p.needsEntropy, kwList));
                         } catch (Exception ignored) {}
                     }
-                }
-            }
-        } catch (Exception ignored) {}
-    }
-
-    private static void loadResourceSignatures() {
-        try (InputStream is = SecretAndEndpointMiner.class.getResourceAsStream("/com/littlespidy/jssourcemapexplorer/signatures.tsv")) {
-            if (is != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split("\t");
-                    if (parts.length < 6) continue;
-                    String name = parts[0].trim();
-                    String category = parts[1].trim();
-                    int confidence = Integer.parseInt(parts[2].trim());
-                    boolean needsEntropy = Boolean.parseBoolean(parts[3].trim());
-                    List<String> kws = Arrays.stream(parts[4].split(","))
-                        .map(String::trim)
-                        .map(s -> s.toLowerCase(Locale.ROOT))
-                        .filter(s -> !s.isEmpty())
-                        .toList();
-                    String regex = parts[5].trim();
-                    try {
-                        Pattern p = Pattern.compile(regex);
-                        ALL_PATTERNS.add(new CuratedSecret(name, category, "High", confidence, p, needsEntropy, kws));
-                    } catch (Exception ignored) {}
                 }
             }
         } catch (Exception ignored) {}
@@ -132,11 +104,19 @@ public class SecretAndEndpointMiner {
 
     public static List<SecretSignatureInfo> getCuratedSignatures() {
         List<SecretSignatureInfo> list = new ArrayList<>();
+        boolean hasVar = false;
+        boolean hasAuth = false;
         for (CuratedSecret cs : ALL_PATTERNS) {
+            if ("Variable Entropy Scan".equalsIgnoreCase(cs.name())) hasVar = true;
+            if ("HTTP Basic Auth".equalsIgnoreCase(cs.name())) hasAuth = true;
             list.add(new SecretSignatureInfo(cs.name(), cs.category(), cs.pattern().pattern(), cs.confidence(), cs.needsEntropy()));
         }
-        list.add(new SecretSignatureInfo("Variable Entropy Scan", "Variable Assignment", VARIABLE_SECRETS_REGEX.pattern(), 80, true));
-        list.add(new SecretSignatureInfo("HTTP Basic Auth", "HTTP Basic Auth", HTTP_BASIC_AUTH_REGEX.pattern(), 95, false));
+        if (!hasVar) {
+            list.add(new SecretSignatureInfo("Variable Entropy Scan", "Variable Assignment", VARIABLE_SECRETS_REGEX.pattern(), 80, true));
+        }
+        if (!hasAuth) {
+            list.add(new SecretSignatureInfo("HTTP Basic Auth", "HTTP Basic Auth", HTTP_BASIC_AUTH_REGEX.pattern(), 95, false));
+        }
         return Collections.unmodifiableList(list);
     }
 
@@ -146,8 +126,6 @@ public class SecretAndEndpointMiner {
         for (CuratedSecret cs : ALL_PATTERNS) {
             cats.add(cs.category());
         }
-        cats.add("Variable Assignment");
-        cats.add("HTTP Basic Auth");
         return new ArrayList<>(cats);
     }
 
@@ -157,8 +135,6 @@ public class SecretAndEndpointMiner {
         for (CuratedSecret cs : ALL_PATTERNS) {
             names.add(cs.name());
         }
-        names.add("Variable Entropy Scan");
-        names.add("HTTP Basic Auth");
         return names;
     }
 
@@ -266,10 +242,23 @@ public class SecretAndEndpointMiner {
         Pattern.compile("(?i)^(?:e\\.g|i\\.e|etc|null|undefined|true|false)\\."),
         Pattern.compile("^//:?\\d*$"), // Suppress invalid protocol or //:0
         Pattern.compile("^//[\\s*#]"),
-        Pattern.compile("(?i)(?:^|\\s)(?:from\\s+[\"']\\./|import\\s+.*\\s+from\\s+[\"']\\./)"), // from "./<>" or import <> from "./<>"
-        Pattern.compile("(?i)^application/json(?:;.*)?$"), // Application/json
+        Pattern.compile("(?i)^\\s*(?:import|export)\\s+"), // Direct import or export string
+        Pattern.compile("(?i)^\\s*require\\s*\\("), // Direct require invocation
+        Pattern.compile("(?i)^(?:application|text|image|audio|video|multipart|font|model)/[a-zA-Z0-9.+_-]+(?:;.*)?$"), // All MIME Content-Types
         Pattern.compile("^(?:\\d{1,2}/\\d{1,2}/\\d{2,4}|\\d{4}/\\d{1,2}/\\d{1,2})$") // m/d/y, mm/dd/yy, yyyy/mm/dd
     );
+
+    // Module import and export syntax detection for preceding code context
+    private static final Pattern MODULE_IMPORT_PRE_PATTERN = Pattern.compile(
+        "(?s)(?:\\b(?:import|export)\\b[^;()]*?\\bfrom\\s*|\\bimport\\s*\\(\\s*|\\bimport\\s+|\\brequire\\s*\\()\\s*$"
+    );
+
+    private static boolean isModuleImportContext(String text, int matchStart) {
+        if (text == null || matchStart <= 0) return false;
+        int s = Math.max(0, matchStart - 150);
+        String pre = text.substring(s, matchStart);
+        return MODULE_IMPORT_PRE_PATTERN.matcher(pre).find();
+    }
 
     private static final Pattern COMMENT_SCAN_PATTERN = Pattern.compile(
         "(/\\*[\\s\\S]*?\\*/)|(<!--[\\s\\S]*?-->)|((?<!:)\\/\\/(?![\\/\\*])[^\\r\\n]*)"
@@ -707,10 +696,11 @@ public class SecretAndEndpointMiner {
                 String path = lfMatcher.group(1);
                 if (path == null || path.length() < 3) continue;
                 if (isNoise(path)) continue;
-                if (!seenEndpoints.add(path)) continue;
-
                 int start = lfMatcher.start();
                 int end = lfMatcher.end();
+                if (isModuleImportContext(scannable, start)) continue;
+                if (!seenEndpoints.add(path)) continue;
+
                 endpoints.add(new DiscoveredEndpoint(
                     sourceLocation, sourceType, path, "GET",
                     getLineNumber(scannable, start), start, end,

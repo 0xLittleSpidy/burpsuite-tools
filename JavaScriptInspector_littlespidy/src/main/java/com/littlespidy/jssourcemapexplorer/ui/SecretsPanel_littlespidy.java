@@ -36,16 +36,22 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     @Override
     protected void addCategoryFiltersToToolbar(JPanel toolbar) {
-        JLabel sigLbl = new JLabel("Token Type:");
-        sigLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        toolbar.add(sigLbl);
-
         tokenTypeFilterBtn = new MultiSelectFilterButton(
             "Token Type",
             SecretAndEndpointMiner.getAllSignatureNames(),
             sel -> applyFilter()
         );
         toolbar.add(tokenTypeFilterBtn);
+
+        JButton secretRegexBtn = new JButton("Secret Regex");
+        secretRegexBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        secretRegexBtn.setToolTipText("View active secret and credential regex detection patterns");
+        secretRegexBtn.addActionListener(e -> {
+            Window owner = SwingUtilities.getWindowAncestor(this);
+            SecretRegexDialog_littlespidy dlg = new SecretRegexDialog_littlespidy(owner);
+            dlg.setVisible(true);
+        });
+        toolbar.add(secretRegexBtn);
     }
 
     @Override
@@ -87,6 +93,9 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                 continue;
             }
             if (!matchesClassification(sec.classification())) {
+                continue;
+            }
+            if (!matchesSourceType(sec.sourceType())) {
                 continue;
             }
             if (!query.isEmpty()) {
@@ -244,7 +253,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
 
     private static class SecretsTableModel extends AbstractTableModel {
         private static final String[] COLS = {
-            "#", "Occurrences", "Token Type", "Secret Value / Match", "Source Type", "Source Location", "Line"
+            "#", "Occurrences", "Token Type", "Secret Value / Match", "Length", "Source Type", "Source Location", "Line"
         };
         private final List<GroupedFinding_littlespidy<DiscoveredSecret>> list = new ArrayList<>();
 
@@ -263,7 +272,7 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
         @Override public int getColumnCount() { return COLS.length; }
         @Override public String getColumnName(int c) { return COLS[c]; }
         @Override public Class<?> getColumnClass(int c) {
-            return (c == 0 || c == 1 || c == 6) ? Integer.class : String.class;
+            return (c == 0 || c == 1 || c == 4 || c == 7) ? Integer.class : String.class;
         }
 
         @Override
@@ -276,9 +285,10 @@ public class SecretsPanel_littlespidy extends BaseFindingPanel_littlespidy {
                 case 1 -> item.getCount();
                 case 2 -> primary.technique(); // Token Type
                 case 3 -> primary.secretValue();
-                case 4 -> primary.sourceType();
-                case 5 -> primary.sourceLocation();
-                case 6 -> primary.line();
+                case 4 -> primary.secretValue() != null ? primary.secretValue().length() : 0;
+                case 5 -> primary.sourceType();
+                case 6 -> primary.sourceLocation();
+                case 7 -> primary.line();
                 default -> null;
             };
         }

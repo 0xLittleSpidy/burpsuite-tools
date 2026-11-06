@@ -105,6 +105,9 @@ public class CommentsPanel_littlespidy extends BaseFindingPanel_littlespidy {
             if (!matchesClassification(comm.classification())) {
                 continue;
             }
+            if (!matchesSourceType(comm.sourceType())) {
+                continue;
+            }
             if (!query.isEmpty()) {
                 boolean match = (comm.commentText() != null && comm.commentText().toLowerCase().contains(query))
                     || (comm.category() != null && comm.category().toLowerCase().contains(query))

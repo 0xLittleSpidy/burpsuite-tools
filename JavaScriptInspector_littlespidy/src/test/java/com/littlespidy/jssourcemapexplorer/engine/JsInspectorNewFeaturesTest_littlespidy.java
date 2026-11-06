@@ -146,4 +146,73 @@ public class JsInspectorNewFeaturesTest_littlespidy {
         assertTrue(foundSlack, "Should match Slack token using JSON patterns");
         assertTrue(foundAws, "Should match AWS Access Key using JSON patterns");
     }
+
+    @Test
+    @DisplayName("Verify ES6 and CommonJS module imports and exports are blacklisted from path mining")
+    void testModuleImportSuppression() {
+        String jsContent = "import desc from \"comp/asa/ad\";\n"
+                + "import descSingle from 'comp/asa/ad;';\n"
+                + "import { Button, Modal } from \"comp/asa/ad\";\n"
+                + "import \"comp/asa/ad\";\n"
+                + "const dynamicComp = import('comp/asa/ad');\n"
+                + "export * from 'comp/asa/ad';\n"
+                + "export { widget } from \"comp/asa/ad\";\n"
+                + "const compModule = require('comp/asa/ad');\n"
+                + "const realApi = '/api/v1/orders/track';\n"
+                + "const realRest = 'users/profile/settings';\n";
+
+        SecretAndEndpointMiner.MiningResult result = SecretAndEndpointMiner.mine("https://example.com/app.js", "Raw JS", jsContent);
+        List<DiscoveredEndpoint> endpoints = result.endpoints();
+
+        for (DiscoveredEndpoint ep : endpoints) {
+            String path = ep.endpoint();
+            assertFalse(path.contains("comp/asa/ad"), "Module import path 'comp/asa/ad' must be blacklisted: " + path);
+        }
+
+        boolean foundApi = endpoints.stream().anyMatch(e -> e.endpoint().contains("/api/v1/orders/track"));
+        boolean foundRest = endpoints.stream().anyMatch(e -> e.endpoint().contains("users/profile/settings"));
+        assertTrue(foundApi, "Should discover valid endpoint /api/v1/orders/track");
+        assertTrue(foundRest, "Should discover valid REST endpoint users/profile/settings");
+    }
+
+    @Test
+    @DisplayName("Verify all MIME Content-Types are blacklisted from path mining")
+    void testMimeContentTypeBlacklist() {
+        String jsContent = "const h1 = 'application/json';\n"
+                + "const h2 = 'application/xml';\n"
+                + "const h3 = 'application/x-www-form-urlencoded';\n"
+                + "const h4 = 'text/html; charset=UTF-8';\n"
+                + "const h5 = 'text/plain';\n"
+                + "const h6 = 'multipart/form-data';\n"
+                + "const h7 = 'image/png';\n"
+                + "const h8 = 'font/woff2';\n"
+                + "const validPath = 'admin/system/status';\n";
+
+        SecretAndEndpointMiner.MiningResult result = SecretAndEndpointMiner.mine("https://example.com/bundle.js", "Raw JS", jsContent);
+        List<DiscoveredEndpoint> endpoints = result.endpoints();
+
+        for (DiscoveredEndpoint ep : endpoints) {
+            String path = ep.endpoint();
+            assertFalse(path.startsWith("application/"), "MIME type must be blacklisted: " + path);
+            assertFalse(path.startsWith("text/"), "MIME type must be blacklisted: " + path);
+            assertFalse(path.startsWith("multipart/"), "MIME type must be blacklisted: " + path);
+            assertFalse(path.startsWith("image/"), "MIME type must be blacklisted: " + path);
+            assertFalse(path.startsWith("font/"), "MIME type must be blacklisted: " + path);
+        }
+
+        boolean foundValid = endpoints.stream().anyMatch(e -> e.endpoint().contains("admin/system/status"));
+        assertTrue(foundValid, "Should discover valid route admin/system/status");
+    }
+
+    @Test
+    @DisplayName("Verify consolidated JSON signatures loading and signature count")
+    void testConsolidatedJsonSignatures() {
+        List<SecretAndEndpointMiner.SecretSignatureInfo> sigs = SecretAndEndpointMiner.getCuratedSignatures();
+        assertTrue(sigs.size() > 1000, "Should have over 1000 consolidated secret signatures from JSON");
+
+        boolean hasVarEntropy = sigs.stream().anyMatch(s -> "Variable Entropy Scan".equalsIgnoreCase(s.name()));
+        boolean hasBasicAuth = sigs.stream().anyMatch(s -> "HTTP Basic Auth".equalsIgnoreCase(s.name()));
+        assertTrue(hasVarEntropy, "Should include Variable Entropy Scan in consolidated signatures");
+        assertTrue(hasBasicAuth, "Should include HTTP Basic Auth in consolidated signatures");
+    }
 }

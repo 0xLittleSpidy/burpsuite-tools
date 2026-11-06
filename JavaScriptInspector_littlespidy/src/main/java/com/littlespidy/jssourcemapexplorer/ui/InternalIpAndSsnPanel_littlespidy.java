@@ -107,6 +107,9 @@ public class InternalIpAndSsnPanel_littlespidy extends BaseFindingPanel_littlesp
             if (!matchesClassification(item.classification())) {
                 continue;
             }
+            if (!matchesSourceType(item.sourceType())) {
+                continue;
+            }
             if (!query.isEmpty()) {
                 boolean match = (item.matchValue() != null && item.matchValue().toLowerCase().contains(query))
                     || (item.findingType() != null && item.findingType().toLowerCase().contains(query))

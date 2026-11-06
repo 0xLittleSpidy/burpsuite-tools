@@ -64,7 +64,11 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
 
     // Occurrence Navigation Controls (Right side of Request/Response viewer)
     private final JLabel occurrenceInfoLabel = new JLabel("Select a finding row above to inspect Request and Response context.");
-    private final JPanel occurrenceButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 0));
+    private final JPanel occurrenceNavContainer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+    private final JPanel occurrenceButtonsBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+    private final JScrollPane occurrenceScrollPane = new JScrollPane(occurrenceButtonsBox);
+    private final JButton prevOccurrenceBtn = new JButton("<");
+    private final JButton nextOccurrenceBtn = new JButton(">");
     private List<FindingOccurrence_littlespidy> currentOccurrences = Collections.emptyList();
     private int currentOccurrenceIndex = 0;
 
@@ -72,6 +76,7 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
     protected final JButton runBtn;
     protected final AtomicBoolean isMining = new AtomicBoolean(false);
     protected MultiSelectFilterButton classificationFilterBtn;
+    protected MultiSelectFilterButton sourceTypeFilterBtn;
     protected final JTextField searchField = new JTextField(12);
     protected final JLabel statsLabel = new JLabel("Findings: 0");
     protected final JTable table;
@@ -137,6 +142,15 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         classificationFilterBtn.setToolTipText("Filter by triage classification (True Positive, False Positive, Not Classified)");
         leftToolbar.add(classificationFilterBtn);
 
+        // Source Type Filter
+        sourceTypeFilterBtn = new MultiSelectFilterButton(
+            "Source Type",
+            List.of("All Sources", "JS File", "Source Map"),
+            sel -> applyFilter()
+        );
+        sourceTypeFilterBtn.setToolTipText("Filter by source type (JS File, Source Map)");
+        leftToolbar.add(sourceTypeFilterBtn);
+
         leftToolbar.add(new JSeparator(SwingConstants.VERTICAL));
 
         JLabel searchLbl = new JLabel("Search:");
@@ -153,13 +167,10 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         });
         leftToolbar.add(searchField);
 
-        JButton filterBtn = new JButton("Filter");
-        filterBtn.addActionListener(e -> applyFilter());
-        leftToolbar.add(filterBtn);
-
         JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> {
             if (classificationFilterBtn != null) classificationFilterBtn.clearSelection();
+            if (sourceTypeFilterBtn != null) sourceTypeFilterBtn.clearSelection();
             searchField.setText("");
             resetCategoryFilters();
             applyFilter();
@@ -211,7 +222,27 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         ));
         occurrenceInfoLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         occurrenceNavBar.add(occurrenceInfoLabel, BorderLayout.WEST);
-        occurrenceNavBar.add(occurrenceButtonsPanel, BorderLayout.EAST);
+
+        occurrenceScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        occurrenceScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        occurrenceScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        occurrenceScrollPane.setPreferredSize(new Dimension(360, 28));
+
+        prevOccurrenceBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 10));
+        prevOccurrenceBtn.setMargin(new Insets(1, 4, 1, 4));
+        prevOccurrenceBtn.setToolTipText("Previous occurrence");
+        prevOccurrenceBtn.addActionListener(e -> stepOccurrence(-1));
+
+        nextOccurrenceBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 10));
+        nextOccurrenceBtn.setMargin(new Insets(1, 4, 1, 4));
+        nextOccurrenceBtn.setToolTipText("Next occurrence");
+        nextOccurrenceBtn.addActionListener(e -> stepOccurrence(1));
+
+        occurrenceNavContainer.add(prevOccurrenceBtn);
+        occurrenceNavContainer.add(occurrenceScrollPane);
+        occurrenceNavContainer.add(nextOccurrenceBtn);
+
+        occurrenceNavBar.add(occurrenceNavContainer, BorderLayout.EAST);
 
         JPanel bottomPanel = new JPanel(new BorderLayout(0, 2));
         bottomPanel.add(occurrenceNavBar, BorderLayout.NORTH);
@@ -413,9 +444,11 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
             this.currentOccurrences = Collections.emptyList();
             this.currentOccurrenceIndex = 0;
             occurrenceInfoLabel.setText("No occurrences available.");
-            occurrenceButtonsPanel.removeAll();
-            occurrenceButtonsPanel.revalidate();
-            occurrenceButtonsPanel.repaint();
+            prevOccurrenceBtn.setEnabled(false);
+            nextOccurrenceBtn.setEnabled(false);
+            occurrenceButtonsBox.removeAll();
+            occurrenceButtonsBox.revalidate();
+            occurrenceButtonsBox.repaint();
             try {
                 requestEditor.setRequest(HttpRequest.httpRequest(""));
                 responseEditor.setResponse(HttpResponse.httpResponse(""));
@@ -429,48 +462,50 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         displayOccurrence(occList.get(0), 0, occList.size());
     }
 
-    private void updateOccurrenceButtons(List<FindingOccurrence_littlespidy> occList, int selectedIdx) {
-        occurrenceButtonsPanel.removeAll();
-        if (occList.size() > 1) {
-            JLabel occLbl = new JLabel("Occurrences (" + occList.size() + "):");
-            occLbl.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-            occurrenceButtonsPanel.add(occLbl);
-
-            for (int i = 0; i < occList.size(); i++) {
-                final int idx = i;
-                FindingOccurrence_littlespidy occ = occList.get(i);
-                JButton btn = new JButton(String.valueOf(i + 1));
-                btn.setMargin(new Insets(1, 6, 1, 6));
-                btn.setFont(new Font(Font.SANS_SERIF, i == selectedIdx ? Font.BOLD : Font.PLAIN, 11));
-                if (i == selectedIdx) {
-                    btn.setForeground(new Color(0, 102, 204));
-                }
-                btn.setToolTipText(String.format("Occurrence %d of %d: %s%s",
-                    i + 1, occList.size(), occ.sourceLocation(), occ.line() > 0 ? " (Line " + occ.line() + ")" : ""));
-                btn.addActionListener(e -> {
-                    currentOccurrenceIndex = idx;
-                    updateOccurrenceButtons(occList, idx);
-                    displayOccurrence(occList.get(idx), idx, occList.size());
-                });
-                occurrenceButtonsPanel.add(btn);
-            }
-        } else if (occList.size() == 1) {
-            JLabel occLbl = new JLabel("Occurrences: 1");
-            occLbl.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-            occurrenceButtonsPanel.add(occLbl);
-
-            JButton btn = new JButton("1");
-            btn.setMargin(new Insets(1, 6, 1, 6));
-            btn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-            btn.setForeground(new Color(0, 102, 204));
-            FindingOccurrence_littlespidy occ = occList.get(0);
-            btn.setToolTipText(String.format("Occurrence 1: %s%s",
-                occ.sourceLocation(), occ.line() > 0 ? " (Line " + occ.line() + ")" : ""));
-            btn.addActionListener(e -> displayOccurrence(occ, 0, 1));
-            occurrenceButtonsPanel.add(btn);
+    private void stepOccurrence(int delta) {
+        if (currentOccurrences == null || currentOccurrences.isEmpty()) return;
+        int newIdx = currentOccurrenceIndex + delta;
+        if (newIdx >= 0 && newIdx < currentOccurrences.size()) {
+            selectOccurrence(newIdx);
         }
-        occurrenceButtonsPanel.revalidate();
-        occurrenceButtonsPanel.repaint();
+    }
+
+    private void selectOccurrence(int idx) {
+        if (currentOccurrences == null || idx < 0 || idx >= currentOccurrences.size()) return;
+        currentOccurrenceIndex = idx;
+        updateOccurrenceButtons(currentOccurrences, idx);
+        displayOccurrence(currentOccurrences.get(idx), idx, currentOccurrences.size());
+    }
+
+    private void updateOccurrenceButtons(List<FindingOccurrence_littlespidy> occList, int selectedIdx) {
+        occurrenceButtonsBox.removeAll();
+        prevOccurrenceBtn.setEnabled(selectedIdx > 0);
+        nextOccurrenceBtn.setEnabled(selectedIdx < occList.size() - 1);
+
+        JButton selectedBtn = null;
+        for (int i = 0; i < occList.size(); i++) {
+            final int idx = i;
+            FindingOccurrence_littlespidy occ = occList.get(i);
+            JButton btn = new JButton(String.valueOf(i + 1));
+            btn.setMargin(new Insets(1, 5, 1, 5));
+            btn.setFont(new Font(Font.SANS_SERIF, i == selectedIdx ? Font.BOLD : Font.PLAIN, 11));
+            if (i == selectedIdx) {
+                btn.setForeground(new Color(0, 102, 204));
+                selectedBtn = btn;
+            }
+            btn.setToolTipText(String.format("Occurrence %d of %d: %s%s",
+                i + 1, occList.size(), occ.sourceLocation(), occ.line() > 0 ? " (Line " + occ.line() + ")" : ""));
+            btn.addActionListener(e -> selectOccurrence(idx));
+            occurrenceButtonsBox.add(btn);
+        }
+
+        occurrenceButtonsBox.revalidate();
+        occurrenceButtonsBox.repaint();
+
+        if (selectedBtn != null) {
+            final JButton targetBtn = selectedBtn;
+            SwingUtilities.invokeLater(() -> targetBtn.scrollRectToVisible(targetBtn.getBounds()));
+        }
     }
 
     private void displayOccurrence(FindingOccurrence_littlespidy occ, int index, int total) {
@@ -751,6 +786,17 @@ public abstract class BaseFindingPanel_littlespidy extends JPanel {
         }
         String normalized = (itemClassification != null && !itemClassification.isBlank()) ? itemClassification : "Not Classified";
         return selected.contains(normalized);
+    }
+
+    protected boolean matchesSourceType(String itemSourceType) {
+        if (sourceTypeFilterBtn == null || sourceTypeFilterBtn.isAllSelected()) {
+            return true;
+        }
+        Set<String> selected = sourceTypeFilterBtn.getSelected();
+        if (selected == null || selected.isEmpty()) {
+            return true;
+        }
+        return selected.contains(itemSourceType != null ? itemSourceType : "");
     }
 
     protected void copyToClipboard(String text) {

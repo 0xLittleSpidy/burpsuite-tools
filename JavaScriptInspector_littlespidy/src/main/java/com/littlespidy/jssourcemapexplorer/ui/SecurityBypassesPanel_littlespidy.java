@@ -105,6 +105,9 @@ public class SecurityBypassesPanel_littlespidy extends BaseFindingPanel_littlesp
             if (!matchesClassification(bypass.classification())) {
                 continue;
             }
+            if (!matchesSourceType(bypass.sourceType())) {
+                continue;
+            }
             if (!query.isEmpty()) {
                 boolean match = (bypass.method() != null && bypass.method().toLowerCase().contains(query))
                     || (bypass.framework() != null && bypass.framework().toLowerCase().contains(query))

@@ -186,7 +186,8 @@ class ModularFindingTabsTest_littlespidy {
 
         SecretsPanel_littlespidy secretsPanel = new SecretsPanel_littlespidy(api, store);
         JTable secTable = secretsPanel.getTable();
-        assertEquals(7, secTable.getColumnCount(), "Secrets table should have 7 columns");
+        assertEquals(8, secTable.getColumnCount(), "Secrets table should have 8 columns including Length");
+        assertEquals("Length", secTable.getColumnName(4));
         for (int i = 0; i < secTable.getColumnCount(); i++) {
             String colName = secTable.getColumnName(i);
             assertNotEquals("Confidence", colName);
